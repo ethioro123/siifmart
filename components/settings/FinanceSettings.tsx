@@ -20,7 +20,7 @@ export default function FinanceSettings() {
     const mutation = useFinanceSettingsMutation();
 
     // ── ROLE GATING (RULES.md Zero-Trust §1) ──
-    const isAuthorized = ['super_admin', 'CEO', 'finance_manager'].includes(user?.role || '');
+    const isAuthorized = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_finance', 'finance_head', 'finance_manager'].includes(user?.role || '');
 
     // ── INVISIBLE TENANCY & COUNTRY ISOLATION (AGENTS.md Rule 7 & 8) ──
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;

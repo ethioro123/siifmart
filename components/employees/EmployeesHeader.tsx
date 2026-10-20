@@ -29,11 +29,16 @@ export const EmployeesHeader: React.FC<EmployeesHeaderProps> = ({
    onOpenSignOffQueue
 }) => {
    const isChecker = [
+      'head_of_hr',
+      'hr_head',
       'hr_manager', 
       'regional_hr_officer',
       'hr',
+      'head_of_operations',
+      'operations_head',
       'operations_manager', 
       'regional_manager', 
+      'country_managing_director',
       'admin',
       'super_admin', 
       'CEO',

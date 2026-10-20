@@ -42,7 +42,7 @@ export const ExpensesTab: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [inspectingExpense, setInspectingExpense] = useState<ExpenseRecord | null>(null);
 
-    const canApproveRole = ['finance_manager', 'super_admin', 'operations_manager', 'regional_manager', 'admin', 'CEO', 'ceo'].includes(user?.role);
+    const canApproveRole = ['head_of_finance', 'finance_head', 'finance_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role);
 
     // Summary metrics
     const stats = useMemo(() => {

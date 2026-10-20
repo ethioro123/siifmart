@@ -52,7 +52,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     const isExceedingAutonomous = Boolean(poRegionCode && po.totalAmount > autonomousLimit);
 
     const isCEO = user?.role === 'super_admin' || user?.role === 'CEO' || user?.role === 'ceo';
-    const isProcurementManager = user?.role === 'procurement_manager';
+    const isProcurementManager = ['head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '');
     const isHQExecutive = isCEO || user?.role === 'admin' || user?.role === 'finance_manager' || isProcurementManager;
     const isRegionalRole = ['regional_manager', 'regional_procurement_lead', 'regional_finance_officer'].includes(user?.role || '');
     const isOperationalDirector = isRegionalRole || user?.role === 'operations_manager';

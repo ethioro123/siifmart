@@ -235,7 +235,7 @@ export const InventoryZones: React.FC = () => {
                             <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
                             <span>Initialize Default Zones</span>
                         </button>
-                        {['super_admin', 'warehouse_manager', 'store_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '') && (
+                        {['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'store_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager'].includes(user?.role || '') && (
                             <button
                                 type="button"
                                 onClick={() => setIsCreateOpen(true)}

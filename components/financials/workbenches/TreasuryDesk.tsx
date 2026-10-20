@@ -24,7 +24,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
     effectiveCountry
 }) => {
     const { user, addNotification } = useFinance();
-    const isManager = Boolean(user?.role && ['finance_manager', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+    const isManager = Boolean(user?.role && ['head_of_finance', 'finance_head', 'finance_manager', 'treasury_officer', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
 
     const [transitStatus, setTransitStatus] = useState<'pending' | 'submitted' | 'authorized'>('pending');
     const [sweepBatchStatus, setSweepBatchStatus] = useState<'draft' | 'submitted' | 'authorized'>('draft');

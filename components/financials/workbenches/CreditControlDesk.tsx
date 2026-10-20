@@ -21,7 +21,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
     currencySymbol
 }) => {
     const { user, addNotification } = useFinance();
-    const isManager = Boolean(user?.role && ['finance_manager', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+    const isManager = Boolean(user?.role && ['head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
 
     const [holdReleaseStatus, setHoldReleaseStatus] = useState<'locked' | 'submitted' | 'unlocked'>('locked');
     const [remindersSent, setRemindersSent] = useState(false);

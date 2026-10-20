@@ -215,7 +215,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                     </button>
                                 )}
                                 {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') ||
-                                    (user?.role === 'procurement_manager' && po.status !== 'Received' && po.status !== 'Cancelled') ||
+                                    (['head_of_procurement', 'procurement_head', 'procurement_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '') && po.status !== 'Received' && po.status !== 'Cancelled') ||
                                     (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={(e) => handleDeletePO(e, po)}

@@ -98,7 +98,7 @@ export function DiscrepancyResolutionModal({
     const canDoAction = (action: ResolutionType) => {
         const actionConfig = RESOLUTION_ACTIONS.find(candidate => candidate.id === action);
         if (!actionConfig?.reqAuth) return true;
-        return ['store_manager', 'warehouse_manager', 'inventory_manager', 'super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager']
+        return ['store_manager', 'warehouse_manager', 'inventory_manager', 'super_admin', 'ceo', 'country_managing_director', 'admin', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager']
             .includes((currentUser?.role || '').toLowerCase());
     };
 
@@ -112,7 +112,7 @@ export function DiscrepancyResolutionModal({
                 throw new Error('Enter a claim amount greater than zero.');
             }
             let replacementJobId: string | undefined = undefined;
-            const isHqApprover = ['super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager'].includes((currentUser?.role || '').toLowerCase());
+            const isHqApprover = ['super_admin', 'ceo', 'country_managing_director', 'admin', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager'].includes((currentUser?.role || '').toLowerCase());
 
             const reasons = {
                 overage: `Resolution: Reject Overage (Trf: ${formatJobId(job)})`,

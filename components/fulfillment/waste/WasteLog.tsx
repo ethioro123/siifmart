@@ -22,7 +22,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
 }) => {
     const { settings, effectiveCountry } = useData();
     const isBlindMode = resolveReceivingPolicy(settings, effectiveCountry).blind;
-    const isManagerOrHQ = ['super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'store_manager', 'inventory_manager'].includes((user?.role || '').toLowerCase());
+    const isManagerOrHQ = ['super_admin', 'ceo', 'country_managing_director', 'admin', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'warehouse_manager', 'store_manager', 'inventory_manager'].includes((user?.role || '').toLowerCase());
     const hideSystemStock = isBlindMode && !isManagerOrHQ;
 
     const createRequestMutation = useCreateInventoryRequestMutation();

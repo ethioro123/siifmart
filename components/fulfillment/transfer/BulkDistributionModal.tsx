@@ -109,7 +109,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     const handleCreateDistribution = async () => {
         const actualSourceSite = bulkDistributionSourceSite || activeSite?.id;
 
-        const canOverrideZoning = ['super_admin', 'CEO', 'ceo', 'regional_manager', 'operations_manager'].includes(user?.role || '');
+        const canOverrideZoning = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager'].includes(user?.role || '');
         if (settings?.enforceRegionalZoning && !canOverrideZoning) {
             if (isCrossZone) {
                 addNotification('alert', 'Cross-zone distribution is restricted. Stores can only receive stock from warehouses in the same Logistics Zone.');
@@ -358,7 +358,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             </select>
                         </div>
 
-                        {isCrossZone && settings?.enforceRegionalZoning && ['super_admin', 'CEO', 'ceo', 'regional_manager', 'operations_manager'].includes(user?.role || '') && (
+                        {isCrossZone && settings?.enforceRegionalZoning && ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager'].includes(user?.role || '') && (
                              <div className="bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-4 rounded-xl flex items-start gap-3">
                                  <AlertTriangle className="shrink-0 mt-0.5 text-amber-500" size={18} />
                                  <div>

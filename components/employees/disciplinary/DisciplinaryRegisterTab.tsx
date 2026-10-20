@@ -13,7 +13,7 @@ import { AppealModal } from './AppealModal';
 import { DisciplinaryDetailModal } from './DisciplinaryDetailModal';
 
 const ADJUDICATION_ROLES = [
-    'super_admin', 'admin', 'CEO', 'ceo', 'hr_manager', 'hr', 'regional_manager'
+    'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_hr', 'hr_head', 'hr_manager', 'hr', 'regional_manager', 'regional_hr_officer'
 ];
 
 export default function DisciplinaryRegisterTab() {

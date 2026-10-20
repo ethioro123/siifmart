@@ -25,6 +25,96 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         managesRoles: ['regional_manager', 'finance_manager', 'operations_manager'],
         isManagerial: true
     },
+    country_managing_director: {
+        role: 'country_managing_director',
+        level: 1,
+        levelCategory: 'executive',
+        levelTag: 'L1 Executive',
+        reportsToRole: 'super_admin',
+        reportsToLabel: 'CEO',
+        managesRoles: ['regional_manager', 'head_of_finance', 'head_of_operations', 'finance_manager', 'operations_manager'],
+        isManagerial: true
+    },
+    head_of_operations: {
+        role: 'head_of_operations',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Operations Director',
+        reportsToRole: 'super_admin',
+        reportsToLabel: 'CEO / Executive Leadership',
+        managesRoles: ['regional_manager', 'head_of_supply_chain', 'supply_chain_manager', 'store_manager', 'warehouse_manager', 'security_manager', 'cs_manager', 'store_operations_auditor'],
+        isManagerial: true
+    },
+    head_of_finance: {
+        role: 'head_of_finance',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Finance Director',
+        reportsToRole: 'super_admin',
+        reportsToLabel: 'CEO',
+        managesRoles: ['auditor', 'accountant', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
+        isManagerial: true
+    },
+    head_of_hr: {
+        role: 'head_of_hr',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 HR Director',
+        reportsToRole: 'super_admin',
+        reportsToLabel: 'CEO',
+        managesRoles: ['hr', 'hr_generalist', 'training_coordinator', 'talent_recruiter', 'payroll_specialist'],
+        isManagerial: true
+    },
+    head_of_procurement: {
+        role: 'head_of_procurement',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Procurement Director',
+        reportsToRole: 'super_admin',
+        reportsToLabel: 'CEO',
+        managesRoles: ['buyer', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector'],
+        isManagerial: true
+    },
+    head_of_supply_chain: {
+        role: 'head_of_supply_chain',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Supply Chain Director',
+        reportsToRole: 'head_of_operations',
+        reportsToLabel: 'Head of Operations',
+        managesRoles: ['demand_planner', 'replenishment_planner', 'logistics_manager', 'inventory_manager'],
+        isManagerial: true
+    },
+    head_of_merchandising: {
+        role: 'head_of_merchandising',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Merchandising Director',
+        reportsToRole: 'super_admin',
+        reportsToLabel: 'CEO',
+        managesRoles: ['merchandiser'],
+        isManagerial: true
+    },
+    head_of_it: {
+        role: 'head_of_it',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 IT Director',
+        reportsToRole: 'super_admin',
+        reportsToLabel: 'CEO',
+        managesRoles: ['it_support'],
+        isManagerial: true
+    },
+    head_of_audit: {
+        role: 'head_of_audit',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Audit Director',
+        reportsToRole: 'super_admin',
+        reportsToLabel: 'CEO / Audit Committee',
+        managesRoles: ['auditor', 'store_operations_auditor'],
+        isManagerial: true
+    },
 
     // =========================================================================
     // LEVEL 2: CORPORATE & REGIONAL DIRECTORS

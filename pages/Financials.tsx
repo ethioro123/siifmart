@@ -123,7 +123,7 @@ export default function Finance() {
                   {(() => {
                      const pendingExpenses = (state.expenses || []).filter(e => e.status === 'Pending').length;
                      const userRole = state.user?.role;
-                     const isManager = Boolean(userRole && ['finance_manager', 'super_admin', 'CEO', 'ceo'].includes(userRole));
+                     const isManager = Boolean(userRole && ['head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(userRole));
 
                      if (pendingExpenses === 0) return null;
 

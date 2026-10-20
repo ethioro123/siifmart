@@ -235,9 +235,9 @@ export default function Employees() {
 
    // --- ACCESS CONTROL ---
    const canAccessDirectory = canViewAllEmployees(user?.role) || [
-      'super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager',
-      'supply_chain_manager', 'store_manager', 'warehouse_manager', 'assistant_manager',
-      'shift_lead', 'store_supervisor', 'logistics_manager', 'inventory_manager', 'security_manager', 'fleet_maintenance_supervisor'
+      'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_hr', 'hr_head', 'hr_manager', 'hr',
+      'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_manager',
+      'store_manager', 'warehouse_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'logistics_manager', 'inventory_manager', 'security_manager'
    ].includes(user?.role || '');
 
    if (!canAccessDirectory) {

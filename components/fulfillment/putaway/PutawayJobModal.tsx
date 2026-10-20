@@ -74,7 +74,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
     onDeleteJob,
 }) => {
     const [step, setStep] = useState<PutawayStep>('INTAKE');
-    const canDelete = ['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '');
+    const canDelete = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager'].includes(user?.role || '');
 
     const getProduct = (item: any) => {
         const targetSiteId = job?.siteId || (job as any)?.site_id;

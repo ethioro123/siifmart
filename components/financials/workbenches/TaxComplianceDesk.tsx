@@ -21,7 +21,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
     effectiveCountry
 }) => {
     const { user, addNotification } = useFinance();
-    const isManager = Boolean(user?.role && ['finance_manager', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+    const isManager = Boolean(user?.role && ['head_of_finance', 'finance_head', 'finance_manager', 'tax_compliance_officer', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
 
     const [returnStatus, setReturnStatus] = useState<'draft' | 'submitted' | 'certified'>('draft');
 

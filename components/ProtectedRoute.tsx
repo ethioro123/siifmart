@@ -33,7 +33,10 @@ export function ProtectedRoute({
   const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
   const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
   const normalizedRole = (user?.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-  const isExecutive = ['super_admin', 'ceo', 'regional_manager', 'operations_manager'].includes(normalizedRole);
+  const isExecutive = [
+    'super_admin', 'ceo', 'country_managing_director', 'admin',
+    'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager'
+  ].includes(normalizedRole);
 
   // 1. Check authentication
   if (!user) {
@@ -62,9 +65,9 @@ export function ProtectedRoute({
 
     const isSpecialistForModule = (mod: string): boolean => {
       if (isExecutive) return true;
-      if (mod === 'pricing') return ['merchandising_manager', 'merchandiser'].includes(normalizedRole);
-      if (mod === 'finance') return ['finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'auditor'].includes(normalizedRole);
-      if (mod === 'procurement') return ['procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist'].includes(normalizedRole);
+      if (mod === 'pricing') return ['head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandiser'].includes(normalizedRole);
+      if (mod === 'finance') return ['head_of_finance', 'finance_head', 'finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'head_of_audit', 'audit_head', 'auditor'].includes(normalizedRole);
+      if (mod === 'procurement') return ['head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist'].includes(normalizedRole);
       return false;
     };
 

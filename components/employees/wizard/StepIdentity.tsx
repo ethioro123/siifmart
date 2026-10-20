@@ -21,7 +21,12 @@ export default function StepIdentity({
     activeSite
 }: StepIdentityProps) {
     const [showPassword, setShowPassword] = useState(false);
-    const isHQ = ['super_admin', 'admin', 'CEO', 'hr_manager', 'hr', 'operations_manager', 'finance_manager'].includes(user?.role || '');
+    const isHQ = [
+        'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
+        'head_of_hr', 'hr_head', 'hr_manager', 'hr',
+        'head_of_operations', 'operations_head', 'operations_manager',
+        'head_of_finance', 'finance_head', 'finance_manager'
+    ].includes(user?.role || '');
     const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
     const effectiveRegion = user?.regionCode || (user as any)?.region_code || activeSite?.regionCode || (activeSite as any)?.region_code;
 

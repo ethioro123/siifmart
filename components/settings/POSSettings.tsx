@@ -23,8 +23,8 @@ export default function POSSettings() {
     // They could disable shift enforcement, enable guest checkout, or turn off
     // stock compliance — all of which undermine zero-trust controls.
     const POS_CONFIG_ROLES = [
-        'super_admin', 'CEO',
-        'operations_manager', 'store_manager', 'warehouse_manager',
+        'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
+        'head_of_operations', 'operations_head', 'operations_manager', 'store_manager', 'warehouse_manager',
         'regional_manager', 'assistant_manager',
     ];
     const canConfigurePOS = POS_CONFIG_ROLES.includes(user?.role || '');

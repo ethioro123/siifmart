@@ -33,7 +33,7 @@ export const InventoryProductModal: React.FC<InventoryProductModalProps> = ({
     const isCEO = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
     const isWarehouseManager = user?.role === 'warehouse_manager';
     const isStoreManager = user?.role === 'store_manager';
-    const isSeniorOperations = ['regional_manager', 'operations_manager'].includes(user?.role || '');
+    const isSeniorOperations = ['country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager'].includes(user?.role || '');
     const showDeleteButton = Boolean(editingProduct && (isCEO || isStoreManager || isWarehouseManager || isSeniorOperations));
 
     const handleDelete = async () => {

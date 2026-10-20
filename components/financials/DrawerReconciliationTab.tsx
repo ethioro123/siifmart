@@ -29,7 +29,7 @@ export const DrawerReconciliationTab: React.FC = () => {
     const [selectedShift, setSelectedShift] = useState<DrawerReconciliationRecord | null>(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
 
-    const canSignOff = ['finance_manager', 'super_admin', 'CEO', 'ceo', 'operations_manager', 'admin'].includes(user?.role);
+    const canSignOff = ['head_of_finance', 'finance_head', 'finance_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role);
 
     const loadQueue = async () => {
         setLoading(true);

@@ -11,7 +11,7 @@ interface CustomsImportTabProps {
 
 export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode }) => {
   const { user, showToast } = useStore();
-  const isManager = Boolean(user?.role && ['procurement_manager', 'regional_manager', 'operations_manager', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+  const isManager = Boolean(user?.role && ['head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
 
   const [declarations, setDeclarations] = useState<CustomsDeclaration[]>([]);
   const [clearedDeclarationIds, setClearedDeclarationIds] = useState<string[]>([]);

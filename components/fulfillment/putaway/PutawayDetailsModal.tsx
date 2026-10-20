@@ -29,7 +29,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
 }) => {
     const { user } = useStore();
     const { allProducts } = useFulfillment();
-    const canDelete = ['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '');
+    const canDelete = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager'].includes(user?.role || '');
 
     const handleDelete = () => {
         if (!window.confirm(t('warehouse.putaway.deleteJobConfirm') || 'Are you sure you want to delete this job?')) return;

@@ -20,7 +20,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
 }) => {
     const { user, addNotification } = useFinance();
     const isAuditor = user?.role === 'auditor';
-    const isManager = Boolean(user?.role && ['finance_manager', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+    const isManager = Boolean(user?.role && ['head_of_audit', 'audit_head', 'auditor', 'head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
 
     const [inquiryDispatched, setInquiryDispatched] = useState(false);
 

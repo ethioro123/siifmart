@@ -92,7 +92,7 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
                     >
                         Close
                     </button>
-                    {['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(userRole || '') && (
+                    {['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager'].includes(userRole || '') && (
                         <button
                             type="button"
                             onClick={() => {

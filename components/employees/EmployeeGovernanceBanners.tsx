@@ -137,7 +137,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                   >
                      Details in Financials
                   </button>
-                  {canViewAll && (userRole === 'hr' || userRole === 'hr_manager' || userRole === 'admin' || userRole === 'super_admin') && (
+                  {canViewAll && (userRole === 'head_of_hr' || userRole === 'hr_head' || userRole === 'hr' || userRole === 'hr_manager' || userRole === 'country_managing_director' || userRole === 'admin' || userRole === 'super_admin' || userRole === 'CEO') && (
                      <button
                         type="button"
                         onClick={onCertifyPayroll}

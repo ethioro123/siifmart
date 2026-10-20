@@ -66,12 +66,12 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
             return canApproveBelowFloor(role);
         }
         // Super admin, admin, warehouse_manager, procurement_manager, store_manager can approve changes
-        if (['super_admin', 'admin', 'warehouse_manager', 'procurement_manager', 'store_manager', 'operations_manager', 'regional_manager'].includes(role)) return true;
+        if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_procurement', 'procurement_head', 'procurement_manager', 'store_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager'].includes(role)) return true;
         const requiredRole = change.approvalRole || (change as any).approval_role;
         // No specific role required → use the existing canApprove
         if (!requiredRole) return true;
         // Check if user's role matches the required approval role
-        if (requiredRole === 'procurement_manager' && (role === 'procurement_manager' || role === 'procurement')) return true;
+        if ((requiredRole === 'procurement_manager' || requiredRole === 'head_of_procurement') && (role === 'head_of_procurement' || role === 'procurement_head' || role === 'procurement_manager' || role === 'procurement')) return true;
         if (requiredRole === 'warehouse_manager' && (role === 'warehouse_manager' || role === 'manager' || role === 'warehouse')) return true;
         if (requiredRole === 'store_manager' && (role === 'store_manager' || role === 'manager')) return true;
         return false;
@@ -80,7 +80,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
     const getAwaitingLabel = (change: PendingInventoryChange): string => {
         if (requiresFinanceCoApproval(change)) return 'Awaiting Finance Co-Approval (< 15% Margin)';
         const requiredRole = change.approvalRole || (change as any).approval_role;
-        if (requiredRole === 'procurement_manager') return 'Awaiting Procurement Manager';
+        if (requiredRole === 'procurement_manager' || requiredRole === 'head_of_procurement') return 'Awaiting Head of Procurement';
         if (requiredRole === 'warehouse_manager') return 'Awaiting Warehouse Manager';
         if (requiredRole === 'store_manager') return 'Awaiting Store Manager';
         return 'Awaiting Manager Approval';

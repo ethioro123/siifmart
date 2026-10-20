@@ -234,7 +234,7 @@ export default function Procurement() {
                 <div className="flex items-center gap-3">
                     {/* Maker-Checker Sign-off Hub Badge */}
                     {(() => {
-                        const isApproverRole = Boolean(user?.role && ['procurement_manager', 'regional_procurement_lead', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+                        const isApproverRole = Boolean(user?.role && ['head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
                         if (pendingSignOffsCount === 0) return null;
 
                         return isApproverRole ? (
@@ -362,7 +362,7 @@ export default function Procurement() {
                             await fetchData();
                         }}
                         canVerify={Boolean(user?.role && ['super_admin', 'ceo', 'CEO', 'admin',
-                            'procurement_manager', 'regional_procurement_lead'].includes(user.role))}
+                            'head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead'].includes(user.role))}
                         viewerEmployeeId={user?.id}
                         onOpenCreatePO={handleCreatePOOpen}
                     />

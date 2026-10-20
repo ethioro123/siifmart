@@ -69,7 +69,7 @@ export default function Inventory() {
     }, [activeTab]);
 
     // --- READ-ONLY & PERMISSIONS ---
-    const canApprove = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo' || user?.role === 'regional_manager' || user?.role === 'regional_procurement_lead' || user?.role === 'operations_manager';
+    const canApprove = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'regional_manager', 'regional_procurement_lead', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_procurement', 'procurement_head', 'procurement_manager'].includes(user?.role || '');
     const isReadOnly = useMemo(() => {
         if (!activeSite) return true; // HQ View is Read-Only
         const type = activeSite.type;

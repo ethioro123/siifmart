@@ -25,8 +25,10 @@ export default function WMSSettings() {
     // Only L1–L2 central operations and warehouse managers may configure WMS engine policies.
     // Store-level staff (store_manager, cashier, picker) are unconditionally blocked.
     const WMS_ALLOWED_ROLES = [
-        'super_admin', 'CEO', 'ceo',
-        'operations_manager', 'regional_manager', 'warehouse_manager',
+        'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
+        'head_of_operations', 'operations_head', 'operations_manager',
+        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+        'regional_manager', 'warehouse_manager',
     ];
     const canConfigureWMS = WMS_ALLOWED_ROLES.includes(user?.role || '');
     const isHQAdmin = isAdmin(user?.role as Parameters<typeof isAdmin>[0]);
