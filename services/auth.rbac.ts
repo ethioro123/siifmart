@@ -37,31 +37,31 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     head_of_finance: [
-        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'pricing', 'profile'
+        'dashboard', 'finance', 'sales', 'pricing', 'profile'
     ],
     finance_head: [
-        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'pricing', 'profile'
+        'dashboard', 'finance', 'sales', 'pricing', 'profile'
     ],
     finance_manager: [
-        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'pricing', 'profile'
+        'dashboard', 'finance', 'sales', 'pricing', 'profile'
     ],
     head_of_hr: [
-        'dashboard', 'employees', 'finance', 'profile'
+        'dashboard', 'employees', 'profile'
     ],
     hr_head: [
-        'dashboard', 'employees', 'finance', 'profile'
+        'dashboard', 'employees', 'profile'
     ],
     hr_manager: [
-        'dashboard', 'employees', 'finance', 'profile'
+        'dashboard', 'employees', 'profile'
     ],
     head_of_procurement: [
-        'dashboard', 'procurement', 'inventory', 'warehouse', 'finance', 'profile'
+        'dashboard', 'procurement', 'warehouse', 'profile'
     ],
     procurement_head: [
-        'dashboard', 'procurement', 'inventory', 'warehouse', 'finance', 'profile'
+        'dashboard', 'procurement', 'warehouse', 'profile'
     ],
     procurement_manager: [
-        'dashboard', 'procurement', 'inventory', 'warehouse', 'finance', 'profile'
+        'dashboard', 'procurement', 'warehouse', 'profile'
     ],
     head_of_supply_chain: [
         'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
@@ -191,7 +191,18 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
  */
 export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
     const basePermissions = ROLE_PERMISSIONS[userRole] || [];
-    if (basePermissions.includes('*') || ['admin', 'regional_manager', 'operations_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(userRole)) return basePermissions;
+    if (basePermissions.includes('*') || [
+        'admin', 'country_managing_director',
+        'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor',
+        'head_of_operations', 'operations_head', 'operations_manager',
+        'head_of_finance', 'finance_head', 'finance_manager',
+        'head_of_hr', 'hr_head', 'hr_manager',
+        'head_of_procurement', 'procurement_head', 'procurement_manager',
+        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+        'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
+        'head_of_it', 'it_head',
+        'head_of_audit', 'audit_head'
+    ].includes(userRole)) return basePermissions;
     if (!siteType) return basePermissions;
 
     if (siteType === 'Store' || siteType === 'Dark Store') {

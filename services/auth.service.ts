@@ -269,10 +269,16 @@ export const authService = {
 
     isAdmin(userRole: UserRole): boolean {
         const adminRoles: UserRole[] = [
-            'super_admin',
-            'regional_manager', 'operations_manager', 'finance_manager',
-            'hr_manager', 'procurement_manager', 'supply_chain_manager',
-            'admin', 'hr'
+            'super_admin', 'country_managing_director', 'admin',
+            'regional_manager',
+            'head_of_operations', 'operations_head', 'operations_manager',
+            'head_of_finance', 'finance_head', 'finance_manager',
+            'head_of_hr', 'hr_head', 'hr_manager', 'hr',
+            'head_of_procurement', 'procurement_head', 'procurement_manager',
+            'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+            'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
+            'head_of_it', 'it_head',
+            'head_of_audit', 'audit_head'
         ];
         return adminRoles.includes(userRole);
     },

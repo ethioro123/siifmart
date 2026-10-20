@@ -138,7 +138,7 @@ export default function SettingsPage() {
                                 <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
                             </Protected>
 
-                            {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor' || (user?.role || '').toLowerCase() === 'ceo' || canSwitchCountry(user)) && (
+                            {(['super_admin', 'admin', 'country_managing_director', 'head_of_it', 'it_head', 'it_support', 'head_of_audit', 'audit_head', 'auditor', 'security_manager', 'head_of_operations', 'operations_head', 'operations_manager'].includes(user?.role || '') || (user?.role || '').toLowerCase() === 'ceo' || canSwitchCountry(user)) && (
                                 <>
                                     <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mt-4 mb-2 px-2">Enterprise Security</p>
                                     <Protected permission="MANAGE_ROLES">
