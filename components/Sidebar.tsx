@@ -81,7 +81,7 @@ export default function Sidebar() {
   const getNavItems = (userRole: UserRole) => {
     const allItems = [
       // WMS DASHBOARD - Overview (Managers Only)
-      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'operations_manager', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'fleet_maintenance_supervisor'] },
+      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'operations_manager', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'fleet_maintenance_supervisor'] },
 
       // NETWORK INVENTORY - Executive & Supply Chain Leadership
       { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'admin', 'supply_chain_manager', 'operations_manager', 'auditor', 'regional_manager', 'replenishment_planner'] },
@@ -121,19 +121,19 @@ export default function Sidebar() {
       { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
 
       // POS COMMAND CENTER - Store management & regional operations
-      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'operations_manager', 'regional_manager', 'auditor', 'store_operations_auditor'] },
+      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'operations_manager', 'regional_manager', 'auditor', 'store_operations_auditor'] },
 
       // SALES - Management & Auditing (Cashiers blocked from historical revenue)
-      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'demand_planner', 'replenishment_planner', 'store_operations_auditor'] },
+      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'demand_planner', 'replenishment_planner', 'store_operations_auditor'] },
 
       // MERCHANDISING
-      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'merchandising_manager', 'merchandiser', 'finance_manager', 'regional_manager', 'operations_manager', 'store_operations_auditor'] },
+      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'admin', 'merchandising_manager', 'merchandiser', 'finance_manager', 'regional_manager', 'operations_manager', 'store_operations_auditor'] },
 
       // FINANCE
-      { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'auditor', 'finance_manager', 'regional_manager', 'operations_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },
+      { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'admin', 'auditor', 'finance_manager', 'regional_manager', 'operations_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },
 
       // CUSTOMERS
-      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'credit_control_officer'] },
+      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'credit_control_officer'] },
 
       // EMPLOYEES - Corporate HR & Operations Executive Suite only (Site managers onboard via POS Command & WMS Dashboard)
       { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'hr_manager', 'operations_manager', 'regional_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'hr_generalist'] },
@@ -144,8 +144,8 @@ export default function Sidebar() {
 
     // Filter by role AND site-type context
     let filteredItems = allItems.filter(item => {
-      const isSuperAdminOrCeo = userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo';
-      const hasRole = item.roles.includes(userRole) || isSuperAdminOrCeo;
+      const isExecutive = userRole === 'super_admin' || userRole === 'admin' || (userRole as string)?.toLowerCase() === 'ceo';
+      const hasRole = item.roles.includes(userRole) || isExecutive;
 
       const siteType = activeSite?.type || '';
       const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
