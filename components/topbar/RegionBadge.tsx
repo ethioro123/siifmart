@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { getCountryProfile, Country } from '../../utils/localization';
+import { isSharedHqRegionalRole } from '../../utils/roleSegregation';
 
 export function RegionBadge() {
     const { user } = useStore();
@@ -12,6 +13,7 @@ export function RegionBadge() {
         activeRegionCode,
         setActiveRegionCode,
         canSwitchRegion,
+        isRegionalUser,
         effectiveCountry = 'ET',
         sites = [],
         activeSite,
@@ -42,12 +44,13 @@ export function RegionBadge() {
     const cleanRegionName = activeRegion ? activeRegion.name.replace(/\s*(Region|Territory)$/i, '') : 'All Regions';
 
     // Role-based authority:
-    // Only HQ Executives (who can switch regions) or dedicated Regional Directors see RegionBadge.
-    // Frontline branch workers (cashiers, store staff, warehouse pickers) have their region cleanly
-    // unified inside LocationBadge without a duplicate static pill in the top bar.
+    // Only HQ Executives (who can switch regions), dedicated Regional Directors, or Regional Administration
+    // shared specialists see RegionBadge. Frontline branch workers (cashiers, store staff, warehouse pickers)
+    // have their region cleanly unified inside LocationBadge without a duplicate static pill in the top bar.
     const isRegionalOfficer = Boolean(user && (
         user.role === 'regional_manager' ||
-        (typeof user.role === 'string' && user.role.startsWith('regional_'))
+        (typeof user.role === 'string' && user.role.startsWith('regional_')) ||
+        (isRegionalUser && isSharedHqRegionalRole(user.role))
     ));
 
     if (!canSwitchRegion && !isRegionalOfficer) {

@@ -21,14 +21,19 @@ export default function StepIdentity({
     activeSite
 }: StepIdentityProps) {
     const [showPassword, setShowPassword] = useState(false);
-    const isHQ = [
+    const effectiveRegion = user?.regionCode || (user as any)?.region_code || activeSite?.regionCode || (activeSite as any)?.region_code;
+    const isRegional = Boolean(
+        user?.scopeLevel === 'REGIONAL' ||
+        (user as any)?.scope_level === 'REGIONAL' ||
+        ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '') ||
+        (['hr', 'talent_recruiter', 'hr_generalist', 'training_coordinator'].includes(user?.role || '') && Boolean(effectiveRegion))
+    );
+    const isHQ = !isRegional && [
         'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
-        'head_of_hr', 'hr_head', 'hr_manager', 'hr',
+        'head_of_hr', 'hr_head', 'hr_manager', 'hr', 'talent_recruiter', 'hr_generalist',
         'head_of_operations', 'operations_head', 'operations_manager',
         'head_of_finance', 'finance_head', 'finance_manager'
     ].includes(user?.role || '');
-    const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
-    const effectiveRegion = user?.regionCode || (user as any)?.region_code || activeSite?.regionCode || (activeSite as any)?.region_code;
 
     const selectableSites = React.useMemo(() => {
         if (isHQ) return sites;

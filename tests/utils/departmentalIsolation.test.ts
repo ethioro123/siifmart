@@ -29,7 +29,7 @@ describe('Departmental Sovereignty & Segregation of Duties (Zero-Trust Inter-Dep
     });
 
     describe('2. Finance & Accounting Department Isolation (Segregation of Duties)', () => {
-        const financeRoles = ['finance_manager', 'accountant', 'credit_control_officer', 'treasury_officer', 'tax_compliance_officer'] as const;
+        const financeRoles = ['finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer'] as const;
 
         it('strictly blocks Finance staff from corporate Procurement operations (/procurement)', () => {
             financeRoles.forEach(role => {

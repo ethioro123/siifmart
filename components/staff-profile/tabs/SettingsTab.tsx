@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Save, Loader2, Check } from 'lucide-react';
 import { Employee, UserRole } from '../../../types';
 import { SYSTEM_ROLES, canEmployRole } from '../../../utils/roles';
-import { autoSelectSiteForRole, getRecommendedDepartment, canRoleBeAtSiteType } from '../../../utils/roleSegregation';
+import { autoSelectSiteForRole, getRecommendedDepartment, canRoleBeAtSiteType, resolveEmployeeScopeLevel } from '../../../utils/roleSegregation';
 import { logger } from '../../../utils/logger';
 import { isSovereignCEO, evaluateEmployeeProfileChanges } from '../../../utils/employeeGovernance';
 import { employeeChangesService } from '../../../services/employee-changes.service';
@@ -111,23 +111,33 @@ export default function SettingsTab({
     };
 
     // Proposed employee changes payload
-    const proposedChanges = useMemo((): Partial<Employee> => ({
-        name: editName.trim(),
-        age: editAge ? parseInt(editAge, 10) : undefined,
-        dateOfBirth: editDateOfBirth,
-        nationalIdNumber: editNationalIdNumber.trim(),
-        role: editRole,
-        jobTitle: editJobTitle.trim(),
-        department: editDepartment,
-        siteId: editSiteId,
-        salary: parseFloat(editSalary) || 0,
-        specialization: editSpecialization.trim(),
-        status: editStatus,
-        phone: editPhone.trim(),
-        address: editAddress.trim(),
-        emergencyContact: editEmergencyContact.trim()
-    }), [
-        editName, editAge, editDateOfBirth, editNationalIdNumber,
+    const proposedChanges = useMemo((): Partial<Employee> => {
+        const targetSite = sites.find(s => s.id === editSiteId);
+        const siteRegionCode = targetSite?.region_code || targetSite?.regionCode || undefined;
+        const resolvedScope = resolveEmployeeScopeLevel(editRole, siteRegionCode);
+        const resolvedRegionCode = resolvedScope === 'REGIONAL' ? siteRegionCode : undefined;
+
+        return {
+            name: editName.trim(),
+            age: editAge ? parseInt(editAge, 10) : undefined,
+            dateOfBirth: editDateOfBirth,
+            nationalIdNumber: editNationalIdNumber.trim(),
+            role: editRole,
+            jobTitle: editJobTitle.trim(),
+            department: editDepartment,
+            siteId: editSiteId,
+            scopeLevel: resolvedScope,
+            regionCode: resolvedRegionCode,
+            region_code: resolvedRegionCode,
+            salary: parseFloat(editSalary) || 0,
+            specialization: editSpecialization.trim(),
+            status: editStatus,
+            phone: editPhone.trim(),
+            address: editAddress.trim(),
+            emergencyContact: editEmergencyContact.trim()
+        };
+    }, [
+        sites, editName, editAge, editDateOfBirth, editNationalIdNumber,
         editRole, editJobTitle, editDepartment, editSiteId, editSalary, editSpecialization, editStatus,
         editPhone, editAddress, editEmergencyContact
     ]);

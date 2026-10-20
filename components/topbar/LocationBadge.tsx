@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { canSwitchCountry } from '../../utils/permissions';
 import { formatDisplaySiteId } from '../../utils/siteIdGenerator';
 import { useData } from '../../contexts/DataContext';
+import { isSharedHqRegionalRole } from '../../utils/roleSegregation';
 
 interface LocationBadgeProps {
    user: any;
@@ -23,7 +24,8 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
       regions = [],
       activeRegionCode,
       setActiveRegionCode,
-      canSwitchRegion
+      canSwitchRegion,
+      isRegionalUser
    } = useData();
 
    // Close dropdown on click outside
@@ -68,7 +70,8 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
    // Role check for regional authority
    const isRegionalOfficer = Boolean(user && (
       user.role === 'regional_manager' ||
-      (typeof user.role === 'string' && user.role.startsWith('regional_'))
+      (typeof user.role === 'string' && user.role.startsWith('regional_')) ||
+      (isRegionalUser && isSharedHqRegionalRole(user.role))
    ));
    const isRegionBadgeVisible = canSwitchRegion || isRegionalOfficer;
 

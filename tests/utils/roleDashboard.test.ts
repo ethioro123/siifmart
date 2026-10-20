@@ -20,20 +20,30 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
   });
 
   it('routes Specialized Level 2 Directors to their sovereign domain', () => {
+    expect(getRoleDashboardRoute('head_of_finance', 'Administration')).toBe('/finance');
     expect(getRoleDashboardRoute('finance_manager', 'Administration')).toBe('/finance');
+    expect(getRoleDashboardRoute('head_of_hr', 'Administration')).toBe('/employees');
     expect(getRoleDashboardRoute('hr_manager', 'Administration')).toBe('/employees');
     expect(getRoleDashboardRoute('hr', 'Administration')).toBe('/employees');
+    expect(getRoleDashboardRoute('head_of_merchandising', 'Administration')).toBe('/pricing');
     expect(getRoleDashboardRoute('merchandising_manager', 'Administration')).toBe('/pricing');
+    expect(getRoleDashboardRoute('head_of_it', 'Administration')).toBe('/settings');
     expect(getRoleDashboardRoute('it_support', 'Administration')).toBe('/settings');
     expect(getRoleDashboardRoute('security_manager', 'Administration')).toBe('/settings');
+    expect(getRoleDashboardRoute('head_of_supply_chain', 'Administration')).toBe('/procurement');
     expect(getRoleDashboardRoute('supply_chain_manager', 'Administration')).toBe('/procurement');
+    expect(getRoleDashboardRoute('head_of_procurement', 'Administration')).toBe('/procurement');
     expect(getRoleDashboardRoute('buyer', 'Administration')).toBe('/procurement');
+    expect(getRoleDashboardRoute('head_of_audit', 'Administration')).toBe('/finance');
     expect(getRoleDashboardRoute('auditor', 'Administration')).toBe('/finance');
   });
 
   it('routes Executive Leadership to Central Operations (/admin) unless scoped to a physical site', () => {
     expect(getRoleDashboardRoute('super_admin', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('CEO', 'Administration')).toBe('/admin');
+    expect(getRoleDashboardRoute('country_managing_director', 'Administration')).toBe('/admin');
+    expect(getRoleDashboardRoute('admin', 'Administration')).toBe('/admin');
+    expect(getRoleDashboardRoute('head_of_operations', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('regional_manager', 'Administration')).toBe('/regional-ops');
     expect(getRoleDashboardRoute('operations_manager', 'Administration')).toBe('/admin');
 

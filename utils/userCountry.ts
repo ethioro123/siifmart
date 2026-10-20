@@ -1,4 +1,5 @@
 import { Country } from '../types';
+import { isCorporateHqDirectorateRole, isSharedHqRegionalRole } from './roleSegregation';
 
 /**
  * Check if user is CEO / Super Admin who can access and switch between both country instances.
@@ -63,48 +64,51 @@ export function getUserCountry(
 
 /**
  * Check if user is an HQ Executive / Administrator who can switch regional lenses.
- * Regional managers and regional staff are locked to their own region.
+ * Regional managers, regional leads, and regional-scoped shared roles are locked to their own region.
  */
-export function canSwitchRegion(user: { role?: string; title?: string } | null | undefined): boolean {
+export function canSwitchRegion(
+    user: { role?: string; title?: string; regionCode?: string; region_code?: string; scopeLevel?: string; scope_level?: string; siteId?: string; id?: string; employeeId?: string } | null | undefined,
+    sites?: Array<{ id: string; regionCode?: string; region_code?: string; code?: string }>,
+    employees?: Array<{ id: string; regionCode?: string; region_code?: string; scopeLevel?: string; scope_level?: string; siteId?: string; site_id?: string; role?: string }>
+): boolean {
     if (!user) return false;
     const role = (user.role || '').toLowerCase();
     const title = (user.title || '').toLowerCase();
-    return (
-        role === 'ceo' ||
-        role === 'super_admin' ||
-        role === 'country_managing_director' ||
-        role === 'admin' ||
-        role === 'head_of_operations' ||
-        role === 'operations_head' ||
-        role === 'operations_manager' ||
-        role === 'head_of_finance' ||
-        role === 'finance_head' ||
-        role === 'finance_manager' ||
-        role === 'head_of_hr' ||
-        role === 'hr_head' ||
-        role === 'hr_manager' ||
-        role === 'hr' ||
-        role === 'head_of_procurement' ||
-        role === 'procurement_head' ||
-        role === 'procurement_manager' ||
-        role === 'head_of_supply_chain' ||
-        role === 'supply_chain_head' ||
-        role === 'supply_chain_manager' ||
-        role === 'head_of_merchandising' ||
-        role === 'merchandising_head' ||
-        role === 'merchandising_manager' ||
-        role === 'head_of_it' ||
-        role === 'it_head' ||
-        role === 'it_support' ||
-        role === 'head_of_audit' ||
-        role === 'audit_head' ||
-        role === 'auditor' ||
-        role === 'store_operations_auditor' ||
+
+    // 1. Level 1 & Level 2 Corporate HQ Directorate roles always have country-wide regional lens switching
+    if (
+        isCorporateHqDirectorateRole(role) ||
         title.includes('ceo') ||
         title.includes('chief executive') ||
         title.includes('managing director') ||
         title.includes('head of')
-    );
+    ) {
+        return true;
+    }
+
+    // 2. Shared general roles (Accountants, Buyers, HR, IT Support, Auditors, Planners, etc.)
+    // can switch regional lenses ONLY when assigned to Corporate HQ (no regional lock).
+    // When assigned to Regional Administration or a facility in a region, they are locked to that region.
+    if (isSharedHqRegionalRole(role)) {
+        const emp = employees?.find(e => e.id === user.employeeId || e.id === user.id);
+        const explicitScope = user.scopeLevel || user.scope_level || emp?.scopeLevel || emp?.scope_level;
+        if (explicitScope === 'REGIONAL') return false;
+
+        const hasDirectRegion = Boolean(
+            user.regionCode || user.region_code || emp?.regionCode || emp?.region_code
+        );
+        if (hasDirectRegion) return false;
+
+        const siteId = user.siteId || emp?.siteId || emp?.site_id;
+        if (siteId && sites && sites.length > 0) {
+            const site = sites.find(s => s.id === siteId || s.code === siteId);
+            if (site?.regionCode || site?.region_code) return false;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 /**
@@ -112,14 +116,14 @@ export function canSwitchRegion(user: { role?: string; title?: string } | null |
  * Regional and branch floor staff are locked to their region or site's region.
  */
 export function getUserRegion(
-    user: { role?: string; regionCode?: string; region_code?: string; scopeLevel?: string; siteId?: string; id?: string; employeeId?: string } | null | undefined,
+    user: { role?: string; title?: string; regionCode?: string; region_code?: string; scopeLevel?: string; scope_level?: string; siteId?: string; id?: string; employeeId?: string } | null | undefined,
     sites?: Array<{ id: string; regionCode?: string; region_code?: string; code?: string }>,
-    employees?: Array<{ id: string; regionCode?: string; region_code?: string; scopeLevel?: string; siteId?: string; site_id?: string; role?: string }>
+    employees?: Array<{ id: string; regionCode?: string; region_code?: string; scopeLevel?: string; scope_level?: string; siteId?: string; site_id?: string; role?: string }>
 ): string | null {
     if (!user) return null;
 
-    // HQ Executive roles have country-wide authority and are never locked to a single region
-    if (canSwitchRegion(user)) return null;
+    // HQ Executive & HQ-scoped shared roles have country-wide authority and are never locked to a single region
+    if (canSwitchRegion(user, sites, employees)) return null;
 
     const emp = employees?.find(e => e.id === user.employeeId || e.id === user.id);
 

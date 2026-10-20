@@ -13,9 +13,43 @@ export const REGIONAL_WORKFORCE_ROLES = [
     'regional_security_supervisor'
 ] as const;
 
+export const CORPORATE_HQ_DIRECTORATE_ROLES = [
+    'super_admin', 'ceo', 'country_managing_director', 'admin',
+    'head_of_operations', 'operations_head', 'operations_manager',
+    'head_of_finance', 'finance_head', 'finance_manager',
+    'head_of_hr', 'hr_head', 'hr_manager',
+    'head_of_procurement', 'procurement_head', 'procurement_manager',
+    'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+    'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
+    'head_of_it', 'it_head',
+    'head_of_audit', 'audit_head'
+] as const;
+
+export const SHARED_HQ_REGIONAL_ROLES = [
+    'hr', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator',
+    'it_support', 'auditor', 'store_operations_auditor', 'security_manager',
+    'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer',
+    'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager',
+    'customs_import_specialist', 'inbound_qc_inspector',
+    'logistics_manager', 'inventory_manager', 'merchandiser',
+    'data_analyst', 'cs_manager'
+] as const;
+
 export function isRegionalWorkforceRole(role?: string | null): boolean {
     return REGIONAL_WORKFORCE_ROLES.includes(
         (role || '').trim().toLowerCase() as typeof REGIONAL_WORKFORCE_ROLES[number]
+    );
+}
+
+export function isCorporateHqDirectorateRole(role?: string | null): boolean {
+    return CORPORATE_HQ_DIRECTORATE_ROLES.includes(
+        (role || '').trim().toLowerCase() as typeof CORPORATE_HQ_DIRECTORATE_ROLES[number]
+    );
+}
+
+export function isSharedHqRegionalRole(role?: string | null): boolean {
+    return SHARED_HQ_REGIONAL_ROLES.includes(
+        (role || '').trim().toLowerCase() as typeof SHARED_HQ_REGIONAL_ROLES[number]
     );
 }
 
@@ -24,28 +58,7 @@ export function resolveEmployeeScopeLevel(
     siteRegionCode?: string | null
 ): 'HQ' | 'REGIONAL' {
     if (isRegionalWorkforceRole(role)) return 'REGIONAL';
-
-    const normalizedRole = (role || '').trim().toLowerCase();
-    if ([
-        'super_admin', 'ceo', 'country_managing_director', 'admin',
-        'head_of_operations', 'operations_head', 'operations_manager',
-        'head_of_finance', 'finance_head', 'finance_manager',
-        'head_of_hr', 'hr_head', 'hr_manager', 'hr',
-        'head_of_procurement', 'procurement_head', 'procurement_manager',
-        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
-        'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
-        'head_of_it', 'it_head', 'it_support',
-        'head_of_audit', 'audit_head', 'auditor', 'store_operations_auditor',
-        'security_manager', 'logistics_manager', 'inventory_manager',
-        'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager',
-        'customs_import_specialist', 'inbound_qc_inspector', 'treasury_officer',
-        'tax_compliance_officer', 'credit_control_officer', 'accountant',
-        'data_analyst', 'payroll_specialist', 'talent_recruiter',
-        'training_coordinator', 'hr_generalist', 'cs_manager'
-    ].includes(normalizedRole)) {
-        return 'HQ';
-    }
-
+    if (isCorporateHqDirectorateRole(role)) return 'HQ';
     return siteRegionCode ? 'REGIONAL' : 'HQ';
 }
 
@@ -247,7 +260,7 @@ export function validateRegionalBoundary(
     targetSite: { regionCode?: string; region_code?: string } | undefined
 ): string | null {
     if (!creatorRole || !creatorRegionCode) return null;
-    const isRegional = isRegionalWorkforceRole(creatorRole);
+    const isRegional = isRegionalWorkforceRole(creatorRole) || isSharedHqRegionalRole(creatorRole);
     if (!isRegional) return null;
 
     if (!targetSite) {
@@ -255,8 +268,8 @@ export function validateRegionalBoundary(
     }
 
     const siteRegion = targetSite.regionCode || targetSite.region_code;
-    if (siteRegion && siteRegion !== creatorRegionCode) {
-        return `Regional Boundary Error: Unauthorized facility assignment. You are restricted to region "${creatorRegionCode}", but the chosen facility belongs to "${siteRegion}".`;
+    if (!siteRegion || siteRegion !== creatorRegionCode) {
+        return `Regional Boundary Error: Unauthorized facility assignment. You are restricted to region "${creatorRegionCode}", but the chosen facility belongs to "${siteRegion || 'National HQ'}".`;
     }
 
     return null;

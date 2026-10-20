@@ -39,7 +39,10 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     }
 
     // 1.5. Corporate HQ Executive Deck
-    const isHQExecutive = ['super_admin', 'CEO', 'ceo', 'operations_manager', 'admin'].includes(role);
+    const isHQExecutive = [
+        'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
+        'head_of_operations', 'operations_head', 'operations_manager'
+    ].includes(role);
     if (isHQExecutive) {
         if (isWarehouseSite) return '/wms-ops';
         if (isStoreSite) return '/pos-dashboard';
@@ -48,7 +51,11 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
 
     // 2. Level 2 - Specialized Directors & Department Heads
     switch (role) {
+        case 'head_of_procurement':
+        case 'procurement_head':
         case 'procurement_manager':
+        case 'head_of_supply_chain':
+        case 'supply_chain_head':
         case 'supply_chain_manager':
         case 'buyer':
         case 'demand_planner':
@@ -56,7 +63,11 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'customs_import_specialist':
             return '/procurement';
 
+        case 'head_of_finance':
+        case 'finance_head':
         case 'finance_manager':
+        case 'head_of_audit':
+        case 'audit_head':
         case 'auditor':
         case 'accountant':
         case 'payroll_specialist':
@@ -65,16 +76,23 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'credit_control_officer':
             return '/finance';
 
+        case 'head_of_hr':
+        case 'hr_head':
         case 'hr_manager':
         case 'hr':
+        case 'hr_generalist':
         case 'talent_recruiter':
         case 'training_coordinator':
             return '/employees';
 
+        case 'head_of_merchandising':
+        case 'merchandising_head':
         case 'merchandising_manager':
         case 'merchandiser':
             return '/pricing';
 
+        case 'head_of_it':
+        case 'it_head':
         case 'it_support':
         case 'security_manager':
             return '/settings';

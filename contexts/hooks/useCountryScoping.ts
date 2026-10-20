@@ -65,7 +65,9 @@ export function useCountryScoping({
   // Regular employees from another country CANNOT access a different country.
   // Their country is strictly pinned to their assigned site.
   const isCeo = canSwitchCountry(user);
-  const canSwitchRegionUser = canSwitchRegion(user);
+  const canSwitchRegionUser = useMemo(() => {
+    return canSwitchRegion(user, sites, employees);
+  }, [user, sites, employees]);
 
   const effectiveCountry: Country = useMemo(() => {
     // If no user context (e.g. system init/testing) or user is CEO/Super Admin, respect active country setting

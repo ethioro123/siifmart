@@ -440,7 +440,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     ],
 
     credit_control_officer: [
-        'dashboard.view',
+        'dashboard.view', 'procurement.view',
         'finance.view', 'finance.view_reports',
         'sales.view', 'sales.view_reports',
         'customers.view', 'customers.view_history'

@@ -23,7 +23,7 @@ import { useSupplierMutations } from '../hooks/useSupplierMutations';
 export default function Procurement() {
     const { user } = useStore();
     const { createSupplier, verifySupplier } = useSupplierMutations();
-    const { suppliers: allSuppliers, sites, settings, effectiveCountry, isRegionalUser } = useData(); // Global suppliers validation & sites
+    const { suppliers: allSuppliers, sites, settings, effectiveCountry, isRegionalUser, activeRegionCode } = useData(); // Global suppliers validation & sites
 
     const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
         'regional_manager',
@@ -35,12 +35,13 @@ export default function Procurement() {
     const activeCountry: Country = (effectiveCountry || (settings?.country as Country) || 'ET');
     const countryProfile = getCountryProfile(activeCountry);
     const currencySymbol = countryProfile.currencySymbol;
+    const targetRegionCode = activeRegionCode || user?.regionCode || (user as any)?.region_code;
     const countrySiteIds = useMemo(() => {
         return sites
             .filter(s => (s.country || 'ET') === activeCountry
-                && (!isRegionalStaff || (user?.regionCode && s.regionCode === user.regionCode)))
+                && (!isRegionalStaff || (targetRegionCode && (s.regionCode === targetRegionCode || (s as any).region_code === targetRegionCode))))
             .map(s => s.id);
-    }, [sites, activeCountry, isRegionalStaff, user?.regionCode]);
+    }, [sites, activeCountry, isRegionalStaff, targetRegionCode]);
     const countrySiteIdsKey = countrySiteIds.join(',');
 
     // UI State
