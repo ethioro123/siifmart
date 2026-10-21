@@ -1,143 +1,152 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePOS } from '../POSContext';
 import { useData } from '../../../contexts/DataContext';
+import { useStore } from '../../../contexts/CentralStore';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import Modal from '../../Modal';
 import Button from '../../shared/Button';
 import { CURRENCY_SYMBOL } from '../../../constants';
-import { getSellUnit } from '../../../utils/units';
+import { CheckCheck, RefreshCw } from 'lucide-react';
 import { native } from '../../../utils/native';
-import { CheckCircle, CheckCheck, Plus } from 'lucide-react';
-import { getEffectiveRetailPrice, getPriceUpdateTimestamp, getUnseenPriceUpdates } from '../utils/priceUpdates';
+
+const formatMoney = (amount: number) => `${CURRENCY_SYMBOL} ${Number(amount).toLocaleString()}`;
 
 export const PriceUpdatesModal: React.FC = () => {
     const { t } = useLanguage();
     const {
         isPriceUpdatesModalOpen,
         setIsPriceUpdatesModalOpen,
-        priceUpdatedProducts,
-        lastSeenPriceUpdate,
-        markPriceUpdatesAsRead,
-        addToCart
+        productPriceHistory,
+        unreviewedPriceUpdateCount,
+        isPriceHistoryLoading,
+        isLoadingMorePriceHistory,
+        hasMorePriceHistory,
+        priceHistoryError,
+        retryPriceHistory,
+        loadMorePriceHistory,
+        markPriceHistoryReviewed
     } = usePOS();
-
     const { addNotification } = useData();
+    const { user } = useStore();
+    const [isMarkingReviewed, setIsMarkingReviewed] = useState(false);
 
-    // Filter products with price changes that are unseen
-    const unseenPriceChanges = getUnseenPriceUpdates(priceUpdatedProducts, lastSeenPriceUpdate || 0);
+    const pendingIds = productPriceHistory.filter(entry => !entry.reviewed_by_me).map(entry => entry.id);
 
-    const handleAcknowledge = () => {
-        const count = unseenPriceChanges.length;
-        markPriceUpdatesAsRead();
-        setIsPriceUpdatesModalOpen(false);
-        native.haptic();
-        addNotification('success', count > 0 ? `Marked ${count} product price update${count !== 1 ? 's' : ''} as reviewed` : 'Price updates marked as reviewed');
+    const handleMarkReviewed = async () => {
+        if (!user?.id || pendingIds.length === 0 || isMarkingReviewed) return;
+        setIsMarkingReviewed(true);
+        try {
+            await markPriceHistoryReviewed(pendingIds);
+            native.haptic();
+            addNotification('success', `Marked ${pendingIds.length} price change${pendingIds.length === 1 ? '' : 's'} as reviewed`);
+        } catch {
+            addNotification('alert', 'Could not save the price review. Try again.');
+        } finally {
+            setIsMarkingReviewed(false);
+        }
     };
 
     return (
         <Modal
             isOpen={isPriceUpdatesModalOpen}
             onClose={() => setIsPriceUpdatesModalOpen(false)}
-            title="Recent Product Price Changes"
+            title="Product Price History"
             size="lg"
         >
             <div className="p-4 space-y-4">
-                <div className="flex justify-between items-center text-sm text-[var(--theme-text-secondary)] font-medium mb-2">
-                    <span>Changes from the last 7 days</span>
-                    <span className="text-amber-600 dark:text-amber-400 font-bold">{priceUpdatedProducts.length} changes found</span>
+                <div className="flex flex-wrap justify-between items-center gap-2 text-sm text-[var(--theme-text-secondary)]">
+                    <p>Full history for this store, newest first.</p>
+                    <span className="px-2.5 py-1 rounded-full bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-xs font-semibold">
+                        {unreviewedPriceUpdateCount} unreviewed in the last 7 days
+                    </span>
                 </div>
 
-                {priceUpdatedProducts.length === 0 ? (
+                {priceHistoryError && (
+                    <div role="alert" className="p-3 rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-between gap-3">
+                        <span className="text-sm">{priceHistoryError}</span>
+                        <button
+                            type="button"
+                            onClick={retryPriceHistory}
+                            className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                            aria-label="Retry loading product price history"
+                        >
+                            <RefreshCw size={16} />
+                        </button>
+                    </div>
+                )}
+
+                {productPriceHistory.length === 0 ? (
                     <div className="text-center py-10 text-[var(--theme-text-muted)] font-medium">
-                        <CheckCircle size={44} className="mx-auto mb-2 opacity-30 text-[var(--theme-primary)]" />
-                        <p className="text-xs">No price changes in the last 7 days.</p>
+                        <CheckCheck size={40} className="mx-auto mb-2 opacity-40 text-[var(--theme-primary)]" aria-hidden="true" />
+                        <p className="text-sm">{isPriceHistoryLoading ? 'Loading price history…' : 'No price changes have been recorded for this store yet.'}</p>
                     </div>
                 ) : (
                     <div className="max-h-[60vh] overflow-auto border border-[var(--theme-border)] rounded-xl">
-                        <table className="w-full min-w-[680px] text-left bg-transparent">
+                        <table className="w-full min-w-[760px] text-left bg-transparent">
                             <thead className="bg-[var(--theme-thead-bg)] text-xs uppercase text-[var(--theme-thead-text)] sticky top-0 font-bold border-b border-[var(--theme-border)]">
                                 <tr>
-                                    <th className="p-3 text-xs uppercase font-bold tracking-wider">Product</th>
-                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-center">Unit</th>
-                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">Old Price</th>
-                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">Current POS Price</th>
-                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">Update Time</th>
-                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-center">Action</th>
+                                    <th className="p-3 tracking-wider">Product</th>
+                                    <th className="p-3 text-right tracking-wider">Previous POS price</th>
+                                    <th className="p-3 text-right tracking-wider">New POS price</th>
+                                    <th className="p-3 tracking-wider">Changed</th>
+                                    <th className="p-3 tracking-wider">Changed by</th>
+                                    <th className="p-3 tracking-wider">Review</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[var(--theme-border)]">
-                                {priceUpdatedProducts.map((p: any) => {
-                                    const priceTime = getPriceUpdateTimestamp(p);
-                                    const isUnseen = priceTime !== null && priceTime > (lastSeenPriceUpdate || 0);
-                                    return (
-                                        <tr key={p.id} className="hover:bg-[var(--theme-table-row-hover)] transition-colors">
-                                            <td className="p-3">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="font-bold text-[var(--theme-text-primary)] text-xs">{p.name}</div>
-                                                    {isUnseen && (
-                                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/30 uppercase">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                                            New Price
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="text-xs text-[var(--theme-text-secondary)] font-mono font-semibold">{p.sku}</div>
-                                            </td>
-                                            <td className="p-3 text-center">
-                                                <span className="text-xs font-bold text-[var(--theme-text-secondary)] bg-[var(--theme-pill-bg)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded uppercase">
-                                                    {getSellUnit(p.unit).shortLabel}
-                                                </span>
-                                            </td>
-                                            <td className="p-3 text-right text-[var(--theme-text-muted)] font-mono text-xs">
-                                                {p.oldPrice !== undefined && p.oldPrice !== null ? `${Number(p.oldPrice).toLocaleString()} ${CURRENCY_SYMBOL}` : p.old_price !== undefined && p.old_price !== null ? `${Number(p.old_price).toLocaleString()} ${CURRENCY_SYMBOL}` : '-'}
-                                            </td>
-                                            <td className="p-3 text-right text-amber-600 dark:text-amber-400 font-bold font-mono text-xs">
-                                                {getEffectiveRetailPrice(p).toLocaleString()} {CURRENCY_SYMBOL}{getSellUnit(p.unit).code !== 'UNIT' ? `/${getSellUnit(p.unit).shortLabel}` : ''}
-                                            </td>
-                                            <td className="p-3 text-right text-xs text-[var(--theme-text-secondary)] font-medium font-mono tabular-nums">
-                                                {priceTime !== null ? new Date(priceTime).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
-                                            </td>
-                                            <td className="p-3 text-center">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        addToCart(p);
-                                                        native.haptic();
-                                                        addNotification('info', `Added ${p.name} at updated price ${CURRENCY_SYMBOL} ${getEffectiveRetailPrice(p)}`);
-                                                    }}
-                                                    className="px-2.5 py-1 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-primary)] text-[var(--theme-text-primary)] hover:text-[var(--theme-primary-text)] border border-[var(--theme-border)] rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1 cursor-pointer shadow-xs"
-                                                    title="Add to cart at new price"
-                                                >
-                                                    <Plus size={12} />
-                                                    <span>Add</span>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                {productPriceHistory.map(entry => (
+                                    <tr key={entry.id} className="hover:bg-[var(--theme-table-row-hover)]">
+                                        <td className="p-3">
+                                            <div className="font-bold text-[var(--theme-text-primary)] text-xs">{entry.product_name}</div>
+                                            <div className="mt-0.5 text-xs text-[var(--theme-text-secondary)] font-mono">{entry.sku}</div>
+                                        </td>
+                                        <td className="p-3 text-right text-[var(--theme-text-secondary)] font-mono text-xs tabular-nums">
+                                            {formatMoney(entry.old_effective_price)}
+                                        </td>
+                                        <td className="p-3 text-right text-[var(--theme-text-primary)] font-bold font-mono text-xs tabular-nums">
+                                            {formatMoney(entry.new_effective_price)}
+                                        </td>
+                                        <td className="p-3 text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums whitespace-nowrap">
+                                            {new Date(entry.changed_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                                        </td>
+                                        <td className="p-3 text-xs text-[var(--theme-text-secondary)]">
+                                            {entry.actor_name || 'System update'}
+                                        </td>
+                                        <td className="p-3">
+                                            <span className={`inline-flex px-2 py-1 rounded-full border text-[10px] font-bold uppercase whitespace-nowrap ${entry.reviewed_by_me
+                                                ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]'
+                                                : 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]'}`}>
+                                                {entry.reviewed_by_me ? 'Reviewed' : 'New'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
                 )}
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-[var(--theme-border)]">
-                    <Button
-                        variant="secondary"
-                        onClick={() => {
-                            setIsPriceUpdatesModalOpen(false);
-                        }}
-                    >
-                        {t('common.close')}
-                    </Button>
-                    {unseenPriceChanges.length > 0 && (
-                        <Button variant="primary" onClick={handleAcknowledge}>
-                            <CheckCheck size={16} />
-                            Mark reviewed
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[var(--theme-border)]">
+                    {hasMorePriceHistory ? (
+                        <Button variant="secondary" onClick={loadMorePriceHistory} disabled={isLoadingMorePriceHistory}>
+                            {isLoadingMorePriceHistory ? 'Loading…' : 'Load older changes'}
                         </Button>
-                    )}
+                    ) : <span className="text-xs text-[var(--theme-text-muted)]">End of price history</span>}
+                    <div className="flex gap-3 ml-auto">
+                        <Button variant="secondary" onClick={() => setIsPriceUpdatesModalOpen(false)}>
+                            {t('common.close')}
+                        </Button>
+                        {pendingIds.length > 0 && (
+                            <Button variant="primary" onClick={handleMarkReviewed} disabled={isMarkingReviewed}>
+                                <CheckCheck size={16} />
+                                {isMarkingReviewed ? 'Saving…' : 'Mark this page reviewed'}
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </Modal>
     );
 };
+
 export default PriceUpdatesModal;

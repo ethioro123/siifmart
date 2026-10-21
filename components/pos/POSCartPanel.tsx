@@ -17,7 +17,6 @@ import { CashDropModal } from './modals/CashDropModal';
 import { NoSaleKickModal } from './modals/NoSaleKickModal';
 import { VoidAuthorizationModal } from './modals/VoidAuthorizationModal';
 import { POSCartActionsMenu } from './components/POSCartActionsMenu';
-import { getUnseenPriceUpdates } from './utils/priceUpdates';
 
 export const POSCartPanel: React.FC = () => {
     const { t } = useLanguage();
@@ -29,6 +28,7 @@ export const POSCartPanel: React.FC = () => {
         cart,
         updateQuantity,
         setCartItemQuantity,
+        updateCartItemPrice,
         removeFromCart,
         weightPromptProduct,
         setWeightPromptProduct,
@@ -52,8 +52,8 @@ export const POSCartPanel: React.FC = () => {
         handleCloseShift,
         handleReprintLast,
         setIsPriceUpdatesModalOpen,
-        priceUpdatedProducts,
-        lastSeenPriceUpdate,
+        unreviewedPriceUpdateCount,
+        staleCartPriceChanges,
         handleInitiatePayment,
         setIsMiscItemModalOpen,
     } = usePOS();
@@ -64,8 +64,6 @@ export const POSCartPanel: React.FC = () => {
     const [isNoSaleKickModalOpen, setIsNoSaleKickModalOpen] = useState(false);
     const [isCashDropModalOpen, setIsCashDropModalOpen] = useState(false);
     const [isVoidAuthModalOpen, setIsVoidAuthModalOpen] = useState(false);
-
-    const unseenPriceUpdatesCount = getUnseenPriceUpdates(priceUpdatedProducts, lastSeenPriceUpdate || 0).length;
 
     const totalItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -126,10 +124,11 @@ export const POSCartPanel: React.FC = () => {
                     ) : (
                         cart.map(item => {
                             const unit = getSellUnit(item.unit);
+                            const stalePrice = staleCartPriceChanges.find(change => change.itemId === item.id);
                             return (
                                 <div
                                     key={item.id}
-                                    className="bg-[var(--theme-bg-subtle)] p-3.5 rounded-2xl border border-[var(--theme-border)] flex items-center justify-between gap-3 animate-in fade-in duration-200 hover:bg-[var(--theme-bg-card-hover)] transition-colors"
+                                    className={`bg-[var(--theme-bg-subtle)] p-3.5 rounded-2xl border ${stalePrice ? 'border-[var(--theme-status-warning-border)]' : 'border-[var(--theme-border)]'} flex items-center justify-between gap-3 animate-in fade-in duration-200 hover:bg-[var(--theme-bg-card-hover)] transition-colors`}
                                 >
                                     <div className="flex-1 min-w-0">
                                         <h4 className="text-[var(--theme-text-primary)] text-xs font-bold truncate leading-snug">
@@ -138,6 +137,18 @@ export const POSCartPanel: React.FC = () => {
                                         <p className="text-[var(--theme-text-secondary)] font-mono font-bold text-[11px] mt-0.5">
                                             {CURRENCY_SYMBOL} {formatPriceValue(item.price)}{unit.code !== 'UNIT' ? `/${unit.shortLabel}` : ''}
                                         </p>
+                                        {stalePrice && (
+                                            <div role="status" className="mt-2 p-2 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]">
+                                                <p className="text-[11px] font-semibold">Catalog price changed to {CURRENCY_SYMBOL} {formatPriceValue(stalePrice.currentPrice)}.</p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => updateCartItemPrice(item.id, stalePrice.currentPrice)}
+                                                    className="mt-1 min-h-11 px-2.5 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] text-xs font-bold hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                >
+                                                    Use current price
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Stepper / Quantity Controls */}
@@ -341,7 +352,7 @@ export const POSCartPanel: React.FC = () => {
                                     <Settings size={13} />
                                 </div>
                                 <span>More</span>
-                                {unseenPriceUpdatesCount > 0 && (
+                                {unreviewedPriceUpdateCount > 0 && (
                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                                 )}
                             </button>
@@ -349,7 +360,7 @@ export const POSCartPanel: React.FC = () => {
                             <POSCartActionsMenu
                                 showActions={showActions}
                                 setShowActions={setShowActions}
-                                unseenPriceUpdatesCount={unseenPriceUpdatesCount}
+                                unseenPriceUpdatesCount={unreviewedPriceUpdateCount}
                                 heldOrdersCount={heldOrders.length}
                                 onOpenPriceUpdates={() => setIsPriceUpdatesModalOpen(true)}
                                 onOpenRecall={() => setIsRecallModalOpen(true)}

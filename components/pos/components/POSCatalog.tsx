@@ -28,7 +28,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
 }) => {
     const { t } = useLanguage();
     const navigate = useNavigate();
-    const { filteredProducts, addToCart, lastSeenPriceUpdate, cart } = usePOS();
+    const { filteredProducts, addToCart, cart } = usePOS();
 
     return (
         <div className="flex-1 overflow-y-auto p-4">
@@ -119,7 +119,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         const priceTime = getPriceUpdateTimestamp(product);
                                         const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
                                         if (priceTime !== null) {
-                                            if (priceTime > cutoff && priceTime > (lastSeenPriceUpdate || 0)) {
+                                            if (priceTime > cutoff) {
                                                 return (
                                                     <span className="absolute top-1.5 left-1.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1 z-10">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info)]" aria-hidden="true" />
@@ -151,21 +151,6 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     })()}
                                     <div className="mt-auto pt-1.5 flex items-center justify-between border-t border-[var(--theme-border-subtle)]">
                                         <div className="flex flex-col min-w-0 pr-1">
-                                            {(() => {
-                                                const priceTime = getPriceUpdateTimestamp(product);
-                                                const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                                                if (priceTime !== null) {
-                                                    if (priceTime > cutoff && priceTime > (lastSeenPriceUpdate || 0)) {
-                                                        return (
-                                                            <span className="inline-flex items-center gap-1 text-[10px] font-black text-[var(--theme-status-info-text)] uppercase mb-0.5 tracking-wider" aria-label="Price updated recently">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info)]" aria-hidden="true" />
-                                                                Updated
-                                                            </span>
-                                                        );
-                                                    }
-                                                }
-                                                return null;
-                                            })()}
                                             <div className="flex items-baseline gap-1 flex-wrap">
                                                 {product.isOnSale && product.salePrice ? (
                                                     <>

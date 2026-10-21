@@ -22,7 +22,8 @@ import { usePOSProductFilters } from './hooks/usePOSProductFilters';
 import { usePOSScanActions } from './hooks/usePOSScanActions';
 import { POSContextType } from './types';
 import { getParentCategory } from './utils/posUtils';
-import { getRecentPriceUpdates } from './utils/priceUpdates';
+import { getEffectiveRetailPrice, getPriceUpdateTimestamp, getStaleCartPriceChanges } from './utils/priceUpdates';
+import { usePOSPriceHistory } from './hooks/usePOSPriceHistory';
 
 import { logger } from '../../utils/logger';
 
@@ -88,24 +89,6 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     ) || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
     const [shiftStartTime, setShiftStartTime] = useState(activeShift?.startTime || new Date().toISOString());
     const [hasDismissedStartShiftModal, setHasDismissedStartShiftModal] = useState(false);
-
-    // Keep review state separate for each cashier and active store.
-    const priceUpdateSeenStorageKey = `siifmart_pos_terminal_price_seen:${user?.id || 'anonymous'}:${activeSite?.id || 'no-site'}`;
-    const [lastSeenPriceUpdate, setLastSeenPriceUpdate] = useState<number>(() => {
-        const stored = localStorage.getItem(priceUpdateSeenStorageKey);
-        return stored ? Number(stored) || 0 : 0;
-    });
-
-    useEffect(() => {
-        const stored = localStorage.getItem(priceUpdateSeenStorageKey);
-        setLastSeenPriceUpdate(stored ? Number(stored) || 0 : 0);
-    }, [priceUpdateSeenStorageKey]);
-
-    const markPriceUpdatesAsRead = useCallback(() => {
-        const now = Date.now();
-        setLastSeenPriceUpdate(now);
-        localStorage.setItem(priceUpdateSeenStorageKey, String(now));
-    }, [priceUpdateSeenStorageKey]);
 
     const [isReceivingModalOpen, setIsReceivingModalOpen] = useState(false), [scannedBarcode, setScannedBarcode] = useState('');
     const [receivedItems, setReceivedItems] = useState<Array<{ product: Product; qty: number; timestamp: string }>>([]), [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
@@ -235,11 +218,31 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const changeDue = amountTendered ? Math.max(0, parseFloat(amountTendered) - total) : 0;
     const isPaymentValid = selectedPaymentMethod === 'Cash' ? parseFloat(amountTendered || '0') >= total : true;
 
-    const priceUpdatedProducts = useMemo(() => {
-        return getRecentPriceUpdates(products, activeSite?.id);
-    }, [products, activeSite]);
-
     const [isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen] = useState(false);
+    const latestProductPriceUpdateKey = useMemo(() => {
+        if (!activeSite?.id) return '';
+        const siteProducts = products.filter(product => (product.siteId || product.site_id) === activeSite.id);
+        const latestTimestamp = siteProducts.reduce((latest, product) => Math.max(latest, getPriceUpdateTimestamp(product) || 0), 0);
+        if (latestTimestamp === 0) return '';
+        const latestProducts = siteProducts
+            .filter(product => getPriceUpdateTimestamp(product) === latestTimestamp)
+            .map(product => `${product.id}:${getEffectiveRetailPrice(product)}`)
+            .sort();
+        return `${latestTimestamp}:${latestProducts.join('|')}`;
+    }, [products, activeSite?.id]);
+    const {
+        entries: productPriceHistory,
+        unreviewedCount: unreviewedPriceUpdateCount,
+        isLoading: isPriceHistoryLoading,
+        isLoadingMore: isLoadingMorePriceHistory,
+        hasMore: hasMorePriceHistory,
+        error: priceHistoryError,
+        retry: retryPriceHistory,
+        loadMore: loadMorePriceHistory,
+        markReviewed: markPriceHistoryReviewed
+    } = usePOSPriceHistory(activeSite?.id, user?.id, latestProductPriceUpdateKey);
+
+    const staleCartPriceChanges = useMemo(() => getStaleCartPriceChanges(cart, products), [cart, products]);
 
     const activeSiteType = activeSite?.type || 'Administrative';
     const isMultiSiteRole = user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor' || user?.role === 'regional_manager' || user?.role === 'operations_manager';
@@ -248,7 +251,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // --- Hook Initializations ---
     const {
         addToCart, confirmWeightEntry, addMiscItem, updateQuantity,
-        setCartItemQuantity, removeFromCart, clearCart
+        setCartItemQuantity, updateCartItemPrice, removeFromCart, clearCart
     } = usePOSCartActions({
         cart, setCart, weightPromptProduct, setWeightPromptProduct,
         miscItem, setMiscItem, setIsMiscItemModalOpen, activeSite, addNotification,
@@ -272,7 +275,8 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         processSale, clearCart, setShowCart, addNotification, sales, activeShift,
         cartDiscount, setCartDiscount, appliedDiscountCode, setAppliedDiscountCode, setAppliedDiscountCodeDetails,
         setIsDiscountModalOpen, discountCodeInput, setDiscountCodeInput, setDiscountCodeError,
-        setIsValidatingCode, validateDiscountCode, useDiscountCode
+        setIsValidatingCode, validateDiscountCode, useDiscountCode,
+        hasStaleCartPriceChanges: staleCartPriceChanges.length > 0
     });
 
     const {
@@ -351,11 +355,13 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         miscItem, setMiscItem, isRoundingEnabled, setIsRoundingEnabled, roundingAdjustment,
         isReturnModalOpen, setIsReturnModalOpen,
         returnSearchId, setReturnSearchId, foundSaleForReturn, setFoundSaleForReturn, returnConfig,
-        setReturnConfig, priceUpdatedProducts, isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen,
+        setReturnConfig, productPriceHistory, unreviewedPriceUpdateCount,
+        isPriceHistoryLoading, isLoadingMorePriceHistory, hasMorePriceHistory, priceHistoryError,
+        retryPriceHistory, loadMorePriceHistory, markPriceHistoryReviewed,
+        staleCartPriceChanges, isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen,
         isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift, dismissStartShiftModal,
         isShiftModalOpen, setIsShiftModalOpen, closingStep, setClosingStep, cashDenominations, setCashDenominations,
         discrepancyReason, setDiscrepancyReason, countedCash, setCountedCash, shiftNotes, setShiftNotes,
-        lastSeenPriceUpdate, markPriceUpdatesAsRead,
         activeShift, shiftStartTime, isReceivingModalOpen, setIsReceivingModalOpen, scannedBarcode, setScannedBarcode,
         receivedItems, setReceivedItems, isQRScannerOpen, setIsQRScannerOpen, receivingMode, setReceivingMode,
         selectedTransferForReceiving, setSelectedTransferForReceiving, transferReceivingItems, setTransferReceivingItems,
@@ -369,7 +375,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         unknownBarcode, setUnknownBarcode, capturedBarcodeForModal, setCapturedBarcodeForModal, searchInputRef,
         filteredProducts, categories, currentStorePoints, storeBonus, userBonusShare, subtotal, tax, taxBreakdown,
         rawTotal, total, changeDue, isPaymentValid, filteredCustomers, needsStoreSelection,
-        addToCart, handleScanProduct, addMiscItem, updateQuantity, setCartItemQuantity, removeFromCart, clearCart,
+        addToCart, handleScanProduct, addMiscItem, updateQuantity, setCartItemQuantity, updateCartItemPrice, removeFromCart, clearCart,
         weightPromptProduct, setWeightPromptProduct, confirmWeightEntry,
         handleHoldOrder, handleConfirmHoldOrder, handleRecallOrder, handleConfirmOverwriteCart,
         applyDiscountFromCode, handleValidateDiscountCode, handleRemoveDiscount, handleInitiatePayment,
@@ -387,8 +393,10 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         earnedPointsData, isRecallModalOpen, cartDiscount, appliedDiscountCode,
         appliedDiscountCodeDetails, isDiscountModalOpen, discountCodeInput, discountCodeError,
         isValidatingCode, isMiscItemModalOpen, miscItem, isRoundingEnabled, roundingAdjustment,
-        isReturnModalOpen, returnSearchId, foundSaleForReturn, returnConfig, priceUpdatedProducts,
-        isPriceUpdatesModalOpen, lastSeenPriceUpdate, isStartShiftModalOpen, isShiftModalOpen, closingStep, cashDenominations,
+        isReturnModalOpen, returnSearchId, foundSaleForReturn, returnConfig,
+        productPriceHistory, unreviewedPriceUpdateCount, isPriceHistoryLoading, isLoadingMorePriceHistory,
+        hasMorePriceHistory, priceHistoryError, staleCartPriceChanges, isPriceUpdatesModalOpen,
+        isStartShiftModalOpen, isShiftModalOpen, closingStep, cashDenominations,
         discrepancyReason, countedCash, shiftNotes, activeShift, shiftStartTime,
         isReceivingModalOpen, scannedBarcode, receivedItems, isQRScannerOpen, receivingMode,
         selectedTransferForReceiving, transferReceivingItems, isConfirmingReceive,
@@ -399,7 +407,8 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         // Computed values
         filteredProducts, categories, currentStorePoints, storeBonus, userBonusShare,
         subtotal, tax, taxBreakdown, rawTotal, total, changeDue, isPaymentValid,
-        filteredCustomers, needsStoreSelection, weightPromptProduct, isNativeApp,
+        filteredCustomers, needsStoreSelection, weightPromptProduct, isNativeApp, updateCartItemPrice,
+        retryPriceHistory, loadMorePriceHistory, markPriceHistoryReviewed,
         // Callbacks (stable via useCallback)
         addToCart, handleScanProduct, confirmWeightEntry, handleStartShift, dismissStartShiftModal
     ]);

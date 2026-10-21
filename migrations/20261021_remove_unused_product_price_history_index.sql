@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS public.idx_product_price_history_product_changed;

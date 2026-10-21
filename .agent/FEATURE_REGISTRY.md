@@ -5,6 +5,13 @@
 
 ## Active Features
 
+### POS Effective Price History and Cart Revalidation (2026-10-21)
+- POS records each effective selling-price change with the previous/current price, product snapshot, site/country, timestamp, and authenticated actor. Site-scoped RLS protects history; review receipts are stored per authenticated cashier.
+- Catalog updates that change a cart line surface the old and current prices. Checkout stays blocked until the cashier explicitly applies the current price.
+- The terminal header opens a paginated, responsive history view; review acknowledgements persist across terminals for that cashier.
+- Files: `components/pos/hooks/usePOSPriceHistory.ts`, `components/pos/modals/PriceUpdatesModal.tsx`, `components/pos/POSCartPanel.tsx`, `services/product-price-history.service.ts`, `migrations/20261021_product_price_history.sql`, `tests/components/pos/utils/priceUpdates.test.ts`.
+- Database: `product_price_history`, `product_price_history_reviews`, effective-price trigger functions, scoped RLS policies, and `count_unreviewed_product_price_history` on the linked SIIFMART project.
+
 ### HQ and Regional Merchandising Proposals (2026-10-21)
 - Added Merchandising Specialist and Regional Merchandising Lead to the role hierarchy and administration assignment flow.
 - Scoped product, price, planogram, and campaign preparation to assigned countries or regions. Merchandising leads approve product and price proposals; Finance independently signs off below-floor prices.

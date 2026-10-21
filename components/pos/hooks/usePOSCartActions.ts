@@ -139,6 +139,10 @@ export const usePOSCartActions = ({
         }));
     }, [addNotification, setCart]);
 
+    const updateCartItemPrice = React.useCallback((id: string, price: number) => {
+        setCart(prev => prev.map(item => item.id === id ? { ...item, price } : item));
+    }, [setCart]);
+
     const removeFromCart = React.useCallback((id: string) => {
         setCart(prev => prev.filter(item => item.id !== id));
     }, [setCart]);
@@ -179,6 +183,7 @@ export const usePOSCartActions = ({
         addMiscItem,
         updateQuantity,
         setCartItemQuantity,
+        updateCartItemPrice,
         removeFromCart,
         clearCart
     };

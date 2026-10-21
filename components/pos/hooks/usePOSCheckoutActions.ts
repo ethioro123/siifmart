@@ -48,6 +48,7 @@ interface UsePOSCheckoutActionsProps {
     addNotification: (type: 'alert' | 'success' | 'info', message: string, userId?: string, isGlobal?: boolean) => void;
     sales: SaleRecord[];
     activeShift?: any;
+    hasStaleCartPriceChanges: boolean;
     
     // Discount code props
     cartDiscount: number;
@@ -107,6 +108,7 @@ export const usePOSCheckoutActions = ({
     addNotification,
     sales,
     activeShift,
+    hasStaleCartPriceChanges,
     cartDiscount,
     setCartDiscount,
     appliedDiscountCode,
@@ -165,12 +167,21 @@ export const usePOSCheckoutActions = ({
             addNotification('info', "Cart is empty. Add items to proceed to payment.");
             return;
         }
+        if (hasStaleCartPriceChanges) {
+            addNotification('alert', 'A product price changed while in the cart. Update the cart line before charging.');
+            return;
+        }
         setAmountTendered(Math.ceil(total).toString());
         setSelectedPaymentMethod('Cash');
         setIsPaymentModalOpen(true);
-    }, [cart, total, addNotification, setAmountTendered, setSelectedPaymentMethod, setIsPaymentModalOpen]);
+    }, [cart, total, hasStaleCartPriceChanges, addNotification, setAmountTendered, setSelectedPaymentMethod, setIsPaymentModalOpen]);
 
     const handleProcessPayment = React.useCallback(async (mobileDetails?: { channel?: string; ref?: string; phone?: string }) => {
+        if (hasStaleCartPriceChanges) {
+            addNotification('alert', 'A product price changed while in the cart. Update the cart line before charging.');
+            setIsPaymentModalOpen(false);
+            return;
+        }
         if (!activeShift) {
             addNotification('alert', 'Zero-Trust Security: Cannot process sales without an active, verified shift. Please start your shift first.');
             setIsPaymentModalOpen(false);
@@ -247,7 +258,8 @@ export const usePOSCheckoutActions = ({
     }, [
         isPaymentValid, selectedPaymentMethod, amountTendered, total, changeDue, activeSite, cart, user,
         taxBreakdown, processSale, clearCart, setShowCart, setSelectedCustomer, setLastSale, setEarnedPointsData,
-        setShowPointsPopup, setIsPaymentModalOpen, setIsReceiptModalOpen, addNotification, setIsProcessing, activeShift
+        setShowPointsPopup, setIsPaymentModalOpen, setIsReceiptModalOpen, addNotification, setIsProcessing, activeShift,
+        hasStaleCartPriceChanges
     ]);
 
     const handlePrintReceipt = React.useCallback(() => {

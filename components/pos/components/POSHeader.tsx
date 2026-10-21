@@ -14,7 +14,6 @@ import { native } from '../../../utils/native';
 
 import { CyberClock } from '../../dashboard/widgets/CyberClock';
 import type { Country } from '../../../utils/localization';
-import { getUnseenPriceUpdates } from '../utils/priceUpdates';
 
 interface POSHeaderProps {
     setIsFilterPanelOpen: (open: boolean) => void;
@@ -37,16 +36,12 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
         currentStorePoints,
         storeBonus,
         userBonusShare,
-        priceUpdatedProducts,
-        lastSeenPriceUpdate,
-        markPriceUpdatesAsRead,
+        unreviewedPriceUpdateCount,
         setIsPriceUpdatesModalOpen
     } = usePOS();
 
     const { triggerSync, posSyncStatus, posPendingSyncCount, posLatencyMs, settings, activeSite, effectiveCountry } = useData();
     const activeCountry = (activeSite?.country || effectiveCountry || settings?.country || 'ET') as Country;
-
-    const unseenPriceChanges = getUnseenPriceUpdates(priceUpdatedProducts, lastSeenPriceUpdate || 0);
 
     // Helper to check for Neutralino (native app mode)
     const isNativeApp = typeof window !== 'undefined' && (window as any).Neutralino;
@@ -103,33 +98,24 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                             </div>
                         </div>
                     )}
-                    {unseenPriceChanges.length > 0 && (
-                        <div className="flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 ml-2 flex-shrink-0">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsPriceUpdatesModalOpen(true);
-                                    native.haptic();
-                                }}
-                                className="min-h-11 flex items-center gap-1.5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] rounded-lg"
-                                title="Review and confirm product price updates"
-                            >
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                <span className="text-[11px] font-semibold tracking-tight">
-                                    {unseenPriceChanges.length} Price {unseenPriceChanges.length === 1 ? 'Change' : 'Changes'}
-                                </span>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={markPriceUpdatesAsRead}
-                                className="ml-1 min-h-11 px-2 text-[10px] font-bold rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:bg-[var(--theme-primary-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                                title="Dismiss price notifications"
-                            >
-                                Dismiss
-                            </button>
-                        </div>
-                    )}
                 </div>
+
+                {unreviewedPriceUpdateCount > 0 && (
+                    <div className="mt-2 flex justify-end">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsPriceUpdatesModalOpen(true);
+                                native.haptic();
+                            }}
+                            className="min-h-11 max-w-full px-3 flex items-center gap-2 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-xs font-semibold hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                            aria-label={`Review ${unreviewedPriceUpdateCount} unreviewed product price changes`}
+                        >
+                            <span className="w-2 h-2 rounded-full bg-[var(--theme-status-info)] shrink-0" aria-hidden="true" />
+                            <span className="truncate">{unreviewedPriceUpdateCount} unreviewed price {unreviewedPriceUpdateCount === 1 ? 'change' : 'changes'} · Review history</span>
+                        </button>
+                    </div>
+                )}
 
                 {/* Unknown Barcode Alert */}
                 {unknownBarcode && (

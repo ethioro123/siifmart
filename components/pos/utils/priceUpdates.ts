@@ -1,4 +1,4 @@
-import type { Product } from '../../../types';
+import type { CartItem, Product } from '../../../types';
 
 const PRICE_UPDATE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -25,9 +25,20 @@ export function getRecentPriceUpdates(products: Product[], siteId?: string, now 
     });
 }
 
-export function getUnseenPriceUpdates(products: Product[], lastSeenAt: number): Product[] {
-    return products.filter(product => {
-        const timestamp = getPriceUpdateTimestamp(product);
-        return timestamp !== null && timestamp > lastSeenAt;
+export interface StaleCartPriceChange {
+    itemId: string;
+    productName: string;
+    oldPrice: number;
+    currentPrice: number;
+}
+
+export function getStaleCartPriceChanges(cart: CartItem[], products: Product[]): StaleCartPriceChange[] {
+    return cart.flatMap(item => {
+        const currentProduct = products.find(product => product.id === item.id);
+        if (!currentProduct) return [];
+        const currentPrice = getEffectiveRetailPrice(currentProduct);
+        return Math.abs(currentPrice - item.price) > 0.0001
+            ? [{ itemId: item.id, productName: item.name, oldPrice: item.price, currentPrice }]
+            : [];
     });
 }

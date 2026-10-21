@@ -1,5 +1,6 @@
 import React from 'react';
 import { Product, CartItem, PaymentMethod, SaleRecord, ReturnCondition, ReturnReason, Customer, ShiftRecord } from '../../types';
+import type { ProductPriceHistoryEntry } from '../../services/product-price-history.service';
 
 export interface POSContextType {
     // State
@@ -28,9 +29,17 @@ export interface POSContextType {
     competitorMatchedOnly: boolean;
     setCompetitorMatchedOnly: React.Dispatch<React.SetStateAction<boolean>>;
     resetAllFilters: () => void;
-    // Price Update Notification State
-    lastSeenPriceUpdate: number;
-    markPriceUpdatesAsRead: () => void;
+    // Product price history and cart price changes
+    productPriceHistory: ProductPriceHistoryEntry[];
+    unreviewedPriceUpdateCount: number;
+    isPriceHistoryLoading: boolean;
+    isLoadingMorePriceHistory: boolean;
+    hasMorePriceHistory: boolean;
+    priceHistoryError: string | null;
+    retryPriceHistory: () => void;
+    loadMorePriceHistory: () => Promise<void>;
+    markPriceHistoryReviewed: (historyIds: string[]) => Promise<void>;
+    staleCartPriceChanges: Array<{ itemId: string; productName: string; oldPrice: number; currentPrice: number }>;
 
     serverSearchResults: Product[];
     isSearchingServer: boolean;
@@ -87,8 +96,6 @@ export interface POSContextType {
     setFoundSaleForReturn: React.Dispatch<React.SetStateAction<SaleRecord | null>>;
     returnConfig: Record<string, { qty: number, condition: ReturnCondition, reason: ReturnReason }>;
     setReturnConfig: React.Dispatch<React.SetStateAction<Record<string, { qty: number, condition: ReturnCondition, reason: ReturnReason }>>>;
-    priceUpdatedProducts: Product[];
-
     isPriceUpdatesModalOpen: boolean;
     setIsPriceUpdatesModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -191,6 +198,7 @@ export interface POSContextType {
     addMiscItem: () => void;
     updateQuantity: (id: string, delta: number) => void;
     setCartItemQuantity: (id: string, qty: number) => void;
+    updateCartItemPrice: (id: string, price: number) => void;
     removeFromCart: (id: string) => void;
     weightPromptProduct: Product | null;
     setWeightPromptProduct: React.Dispatch<React.SetStateAction<Product | null>>;
