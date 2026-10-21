@@ -34,7 +34,7 @@ export const PERMISSIONS = {
     VIEW_POS_DASHBOARD: ['super_admin', 'admin', 'country_managing_director', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'cs_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'regional_manager', 'regional_finance_officer', 'regional_security_supervisor', 'finance_manager', 'head_of_finance', 'finance_head', 'auditor', 'head_of_audit', 'audit_head', 'treasury_officer', 'store_operations_auditor'],
 
     // POS
-    ACCESS_POS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'store_operations_auditor', 'treasury_officer', 'regional_finance_officer', 'regional_security_supervisor'],
+    ACCESS_POS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'store_operations_auditor', 'treasury_officer', 'regional_finance_officer', 'regional_security_supervisor', 'head_of_audit', 'audit_head', 'auditor'],
     PROCESS_SALE: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'],
     VOID_SALE: ['super_admin', 'store_manager', 'store_supervisor'],
     REFUND_SALE: ['super_admin', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'store_manager', 'assistant_manager', 'store_supervisor', 'cs_manager'],

@@ -229,9 +229,9 @@ export default function App() {
               </ProtectedRoute>
             } />
 
-            {/* POS - Cashiers, Managers, Admins */}
+            {/* POS - Cashiers, Store Managers, Shift Leads (Till checkout locked to authorized checkout roles) */}
             <Route path="/pos" element={
-              <ProtectedRoute module="pos">
+              <ProtectedRoute module="pos" permission="PROCESS_SALE">
                 <ModuleErrorBoundary moduleName="POS">
                   <POSTerminal />
                 </ModuleErrorBoundary>
