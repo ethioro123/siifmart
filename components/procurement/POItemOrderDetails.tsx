@@ -2,6 +2,7 @@ import React from 'react';
 import { ShoppingBag, Sparkles } from 'lucide-react';
 import { getCategorySpecGroup } from './categoryAttributes';
 import { getCategoryProcurementMetrics } from './categoryLogistics';
+import { computeCostPerSellUnit } from './createPOHelpers';
 
 export interface POItemOrderDetailsProps {
     currentQty: number;
@@ -44,7 +45,15 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
     selectedMainCategory = '',
     customAttributes
 }) => {
-    const costPerSellUnit = unitsPerOrderUnit > 1 ? currentCost / unitsPerOrderUnit : currentCost;
+    const convertedCost = computeCostPerSellUnit(
+        currentCost,
+        customAttributes?.physical?.netWeight || '',
+        customAttributes?.physical?.sizeType || '',
+        sellUnit,
+        parseInt(customAttributes?.packaging?.packQty) || unitsPerOrderUnit,
+        parseInt(customAttributes?.packaging?.caseSize) || 0
+    );
+    const costPerSellUnit = convertedCost ?? (unitsPerOrderUnit > 1 ? currentCost / unitsPerOrderUnit : currentCost);
     const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes?.identity?.subcategory);
     const domainId = specGroup.id;
     const procurementMetrics = getCategoryProcurementMetrics(domainId, currentQty, unitsPerOrderUnit, customAttributes);
@@ -141,13 +150,15 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                                 })()}
                                 <input
                                     type="number"
+                                    step="any"
+                                    min="0"
                                     className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.retail ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums ${currentRetailPrice > 0 && currentCost > 0 ? 'pl-16 pr-2' : 'px-4'}`}
                                     value={currentRetailPrice || ''}
                                     onChange={e => {
-                                        setCurrentRetailPrice(Math.round(parseFloat(e.target.value) || 0));
+                                        setCurrentRetailPrice(Math.round((parseFloat(e.target.value) || 0) * 100) / 100);
                                         if (errors.retail) setErrors(prev => ({ ...prev, retail: '' }));
                                     }}
-                                    placeholder="0"
+                                    placeholder="0.00"
                                 />
                             </div>
                             {errors.retail && <span className="text-[9px] text-rose-500 block text-center font-semibold">{errors.retail}</span>}

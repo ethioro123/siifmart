@@ -16,7 +16,7 @@ export async function getAll(siteId?: string, limit: number = 25, offset: number
     // Line items and product joins are loaded on-demand via getById().
     const selectFields = filters?.includeItems
         ? '*, po_items(*, products(sku))'
-        : 'id, po_number, site_id, supplier_id, supplier_name, status, total_amount, items_count, order_date, expected_delivery, shipping_cost, tax_amount, discount, payment_terms, requested_by, created_by, approved_by, approver_role, approved_at, notes, currency, country_code, created_at, updated_at, region_code, requires_hq_approval, hq_approved_by, hq_approved_at';
+        : 'id, po_number, site_id, supplier_id, supplier_name, status, priority, total_amount, items_count, order_date, expected_delivery, shipping_cost, tax_amount, discount, payment_terms, incoterms, temp_req, shelf_life, dock_slot, destination, requested_by, created_by, approved_by, approver_role, approved_at, notes, currency, country_code, created_at, updated_at, region_code, requires_hq_approval, hq_approved_by, hq_approved_at';
 
     let query = supabase
         .from('purchase_orders')

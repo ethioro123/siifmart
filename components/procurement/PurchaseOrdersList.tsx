@@ -386,10 +386,8 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                     </span>
                                                 );
                                             })()}
-                                            {((isCEO && po.status !== 'Received') || 
-                                              (isOperationalDirector && po.status !== 'Received') ||
-                                              (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
-                                              (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
+                                            {(po.status === 'Draft' || po.status === 'Pending') &&
+                                              (isCEO || isOperationalDirector || isProcurementManager || po.createdBy === user?.name || po.requestedBy === user?.name) && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onEdit(po); }}
                                                     className="w-8 h-8 rounded-full flex items-center justify-center border border-transparent hover:border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all active:scale-[0.95]"

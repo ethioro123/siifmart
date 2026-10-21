@@ -8,12 +8,16 @@ export interface DynamicStorageHandlingSectionProps {
     selectedMainCategory: string;
     customAttributes: any;
     setCustomAttributes: React.Dispatch<React.SetStateAction<any>>;
+    errors?: Record<string, string>;
+    setErrors?: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
 export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSectionProps> = ({
     selectedMainCategory,
     customAttributes,
     setCustomAttributes,
+    errors = {},
+    setErrors
 }) => {
     const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes.identity?.subcategory);
     const domainId = specGroup.id;
@@ -101,18 +105,24 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                     <input
                         type="number"
                         min="0"
-                        className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
+                        className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.shelfLifeDays ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                         placeholder={storageConfig.defaultShelfLife ? `e.g. ${storageConfig.defaultShelfLife}` : 'Leave blank if durable'}
                         value={customAttributes.storage?.shelfLifeDays || ''}
-                        onChange={e => setCustomAttributes((p: any) => ({
-                            ...p,
-                            storage: {
-                                ...p.storage,
-                                shelfLifeDays: e.target.value,
-                                isPerishable: Boolean(e.target.value && parseInt(e.target.value) > 0)
+                        onChange={e => {
+                            if (errors.shelfLifeDays && setErrors) {
+                                setErrors(prev => ({ ...prev, shelfLifeDays: '' }));
                             }
-                        }))}
+                            setCustomAttributes((p: any) => ({
+                                ...p,
+                                storage: {
+                                    ...p.storage,
+                                    shelfLifeDays: e.target.value,
+                                    isPerishable: Boolean(e.target.value && parseInt(e.target.value) > 0)
+                                }
+                            }));
+                        }}
                     />
+                    {errors.shelfLifeDays && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.shelfLifeDays}</span>}
                 </div>
 
                 {/* Max Stack Limit */}

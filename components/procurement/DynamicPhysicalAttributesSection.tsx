@@ -107,6 +107,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                                 value={customAttributes.identity?.variant || customAttributes.categorySpecific?.apparelSize || ''}
                                 onChange={e => {
                                     const val = e.target.value;
+                                    setCustomItemSize(val);
                                     setCustomAttributes((p: any) => ({
                                         ...p,
                                         identity: { ...p.identity, variant: val },

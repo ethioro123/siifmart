@@ -85,9 +85,9 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                                             setCurrentProductToAdd(p.id);
                                             setSearchTerm(formatProductDisplayName(p) || p.name);
                                             setIsSearchOpen(false);
-                                            if (p.costPrice) setCurrentCost(p.costPrice);
-                                            if (p.price) setCurrentRetailPrice(p.price);
-                                            if (p.unit) setCustomItemUnit(p.unit);
+                                            setCurrentCost(p.costPrice || 0);
+                                            setCurrentRetailPrice(p.price || 0);
+                                            setCustomItemUnit(p.unit || '');
                                             onSelectProduct?.(p);
                                         }}
                                         className="px-3.5 py-2.5 hover:bg-[var(--theme-bg-subtle)] rounded-xl cursor-pointer flex justify-between items-start gap-3 group transition-colors"

@@ -18,7 +18,7 @@ interface SupplierManagementProps {
     onVerifySupplier: (supplier: Supplier) => Promise<unknown>;
     canVerify: boolean;
     viewerEmployeeId?: string;
-    onOpenCreatePO: (product?: Product) => void;
+    onOpenCreatePO: (product?: Product, supplierId?: string) => void;
 }
 
 export const SupplierManagement: React.FC<SupplierManagementProps> = ({
@@ -397,7 +397,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                 supplier={selectedSupplier}
                 onAddToPO={(product) => {
                     setIsProductCatalogOpen(false);
-                    onOpenCreatePO(product);
+                    onOpenCreatePO(product, selectedSupplier?.id);
                 }}
             />
         </div>

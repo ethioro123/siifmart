@@ -1,10 +1,12 @@
-import React from 'react';
-import { Tag, ChevronDown, Lock, Package } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Tag, ChevronDown, ChevronUp, Lock, Package, Thermometer } from 'lucide-react';
 import { PRODUCT_CATEGORIES } from './utils';
 import { CategorySpecificAttributes } from './CategorySpecificAttributes';
 import { PackagingHierarchySection } from './PackagingHierarchySection';
 import { DynamicPhysicalAttributesSection } from './DynamicPhysicalAttributesSection';
 import { DynamicStorageHandlingSection } from './DynamicStorageHandlingSection';
+import { getCategorySpecGroup } from './categoryAttributes';
+import { getCategoryStorageDefaults } from './categoryLogistics';
 
 export interface BuyingAttributesProps {
     customItemBrand: string;
@@ -91,6 +93,16 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
     const packQtyNum = parseInt(customAttributes.packaging?.packQty) || 1;
     const caseSizeNum = parseInt(customAttributes.packaging?.caseSize) || 0;
     const multiplier = packagingLevel === 'two_tier' ? (packQtyNum * (caseSizeNum || 1)) : packagingLevel === 'single' ? 1 : packQtyNum;
+
+    const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes.identity?.subcategory);
+    const storageDefaults = getCategoryStorageDefaults(specGroup.id);
+    const [showStorageSection, setShowStorageSection] = useState(false);
+
+    useEffect(() => {
+        if (storageDefaults.defaultPerishable || errors.shelfLifeDays) {
+            setShowStorageSection(true);
+        }
+    }, [storageDefaults.defaultPerishable, errors.shelfLifeDays]);
 
     return (
         <div className="space-y-4">
@@ -189,6 +201,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     customAttributes={customAttributes}
                     setCustomAttributes={setCustomAttributes}
                     errors={errors}
+                    setErrors={setErrors}
                 />
 
                 {/* ── 3. PHYSICAL PRODUCT SPECIFICATIONS (DYNAMIC PER CATEGORY) ── */}
@@ -215,12 +228,39 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     selectedMainCategory={selectedMainCategory}
                 />
 
-                {/* ── 5. STORAGE, INBOUND QC & HANDLING COMPLIANCE (DYNAMIC) ── */}
-                <DynamicStorageHandlingSection
-                    selectedMainCategory={selectedMainCategory}
-                    customAttributes={customAttributes}
-                    setCustomAttributes={setCustomAttributes}
-                />
+                {/* ── 5. STORAGE, INBOUND QC & HANDLING COMPLIANCE (COLLAPSIBLE) ── */}
+                <div className="pt-2 border-t border-[var(--theme-border-subtle)]">
+                    <button
+                        type="button"
+                        onClick={() => setShowStorageSection(prev => !prev)}
+                        className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-left transition-all cursor-pointer"
+                    >
+                        <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">
+                            <Thermometer size={12} className="text-purple-500" />
+                            <span>5. Storage, Inbound QC & Handling Directives</span>
+                            {storageDefaults.defaultPerishable && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-semibold">
+                                    Required for Perishables
+                                </span>
+                            )}
+                        </span>
+                        <span className="flex items-center gap-1 text-[10px] font-semibold text-[var(--theme-text-secondary)]">
+                            {showStorageSection ? 'Hide' : 'Configure'}
+                            {showStorageSection ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                        </span>
+                    </button>
+                    {showStorageSection && (
+                        <div className="mt-2">
+                            <DynamicStorageHandlingSection
+                                selectedMainCategory={selectedMainCategory}
+                                customAttributes={customAttributes}
+                                setCustomAttributes={setCustomAttributes}
+                                errors={errors}
+                                setErrors={setErrors}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

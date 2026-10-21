@@ -1,98 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DollarSign, ChevronDown, Percent, TrendingUp, Sparkles } from 'lucide-react';
 import { getGroupedUnits, getSellUnit } from '../../utils/units';
-import { logger } from '../../utils/logger';
 import { getCategorySpecGroup } from './categoryAttributes';
 import { getCategoryMarginBenchmark } from './categoryLogistics';
-
-/* ─────────── UNIT CONVERSION (size type → sell unit) ────────── */
-
-/**
- * Converts the bulk purchase cost into a cost-per-sell-unit.
- * 
- * Example: Buy a 10kg bag for 14,000 ETB, sell by KG
- *   → costPerSellUnit = 14,000 / 10 = 1,400/kg
- * 
- * Example: Buy a 10kg bag for 14,000 ETB, sell by G
- *   → 10kg = 10,000g → costPerSellUnit = 14,000 / 10,000 = 1.4/g
- * 
- * Example: Buy a 20L container for 26,000 ETB, sell by L
- *   → costPerSellUnit = 26,000 / 20 = 1,300/L
- */
-const computeCostPerSellUnit = (
-    unitCost: number,
-    sizeValue: string,
-    sizeType: string,
-    sellUnitCode: string,
-    packQty: number,
-    caseSize: number
-): number | null => {
-    if (!unitCost || unitCost <= 0 || !sellUnitCode) return null;
-
-    const su = sellUnitCode.toUpperCase().trim();
-
-    // Map sellUnit to base units and category
-    let sellCategory = '';
-    let sellInBase = 1;
-
-    if (su === 'KG') { sellInBase = 1000; sellCategory = 'weight'; }
-    else if (su === 'G') { sellInBase = 1; sellCategory = 'weight'; }
-    else if (su === 'L') { sellInBase = 1000; sellCategory = 'volume'; }
-    else if (su === 'ML') { sellInBase = 1; sellCategory = 'volume'; }
-    else if (['UNIT', 'PACK', 'DOZEN'].includes(su)) { sellInBase = 1; sellCategory = 'count'; }
-
-    if (!sellCategory) return null;
-
-    // Handle count-based selling units: bypass physical size.
-    // Mirrors the formula in POItemForm and useReceiving:
-    //   hasCases = caseSize >= 1 (any explicit case layer, even 1 pack/case)
-    //   hasPacks = packQty > 1 and no case layer
-    if (sellCategory === 'count') {
-        const hasCases = caseSize >= 1;
-        const hasPacks = packQty > 1 && !hasCases;
-        const packagingUnits = hasCases ? (caseSize * packQty) : (hasPacks ? packQty : 1);
-        let sellUnitsInPackage = packagingUnits;
-        if (su === 'DOZEN') {
-            sellUnitsInPackage = packagingUnits / 12;
-        }
-        if (sellUnitsInPackage <= 0) return null;
-        return unitCost / sellUnitsInPackage;
-    }
-
-    // For weight/volume-based selling: physical size is required for conversion
-    const size = parseFloat(sizeValue);
-    if (!size || size <= 0 || !sizeType) return null;
-
-    const st = sizeType.trim().toLowerCase();
-
-    // Map sizeType to a base unit category + value in base units
-    let sizeInBase = size;
-    let sizeCategory = '';
-
-    // Weight
-    if (['kg', 'kilogram', 'kilograms', 'kgs'].includes(st)) { sizeInBase = size * 1000; sizeCategory = 'weight'; }
-    else if (['g', 'gram', 'grams', 'gr'].includes(st)) { sizeInBase = size; sizeCategory = 'weight'; }
-    // Volume
-    else if (['l', 'litre', 'liter', 'litres', 'liters', 'lt'].includes(st)) { sizeInBase = size * 1000; sizeCategory = 'volume'; }
-    else if (['ml', 'millilitre', 'milliliter', 'millilitres', 'milliliters'].includes(st)) { sizeInBase = size; sizeCategory = 'volume'; }
-
-    // Can only convert within same category
-    if (!sizeCategory || sizeCategory !== sellCategory) {
-        logger.warn('SellingAttributes', `Category mismatch or unknown: "${sizeCategory}" vs "${sellCategory}". Cannot compute cost per sell unit.`);
-        return null;
-    }
-
-    // Calculate how many items are in the package (weight/volume path)
-    const hasCases = caseSize >= 1;
-    const hasPacks = packQty > 1 && !hasCases;
-    const itemsPerPurchaseUnit = hasCases ? (caseSize * packQty) : (hasPacks ? packQty : 1);
-    const totalPhysicalInBase = sizeInBase * itemsPerPurchaseUnit;
-
-    const sellUnitsInPackage = totalPhysicalInBase / sellInBase;
-    if (sellUnitsInPackage <= 0) return null;
-
-    return unitCost / sellUnitsInPackage;
-};
+import { computeCostPerSellUnit } from './createPOHelpers';
 
 /* ─────────────────────── TYPES ─────────────────────── */
 
@@ -160,20 +71,20 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
         caseSize
     );
 
-    // When margin changes, auto-calculate retail price (rounded to nearest integer)
+    // When margin changes, auto-calculate retail price (rounded to 2 decimal places)
     const handleMarginChange = useCallback((marginStr: string) => {
         setMarginPercent(marginStr);
         const margin = parseFloat(marginStr);
         if (!margin || margin <= 0 || margin >= 100 || !costPerSellUnit) return;
         // Margin formula: retail = cost / (1 - margin/100)
-        const retail = Math.round(costPerSellUnit / (1 - margin / 100));
+        const retail = Math.round((costPerSellUnit / (1 - margin / 100)) * 100) / 100;
         setCurrentRetailPrice(retail);
         if (errors.retail) setErrors(prev => ({ ...prev, retail: '' }));
     }, [costPerSellUnit, setCurrentRetailPrice, errors.retail, setErrors]);
 
-    // When retail price changes, round to nearest integer and recalculate margin with decimals
+    // When retail price changes, round to 2 decimal places and recalculate margin
     const handleRetailChange = useCallback((val: number) => {
-        const roundedVal = Math.round(val);
+        const roundedVal = Math.round(val * 100) / 100;
         setCurrentRetailPrice(roundedVal);
         if (errors.retail) setErrors(prev => ({ ...prev, retail: '' }));
         if (costPerSellUnit && roundedVal > 0) {
@@ -186,12 +97,12 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
         }
     }, [costPerSellUnit, setCurrentRetailPrice, errors.retail, setErrors]);
 
-    // Recalculate retail when cost/size/unit changes and margin is set (rounded to nearest integer)
+    // Recalculate retail when cost/size/unit changes and margin is set
     useEffect(() => {
         if (marginPercent && costPerSellUnit) {
             const margin = parseFloat(marginPercent);
             if (margin > 0 && margin < 100) {
-                const retail = Math.round(costPerSellUnit / (1 - margin / 100));
+                const retail = Math.round((costPerSellUnit / (1 - margin / 100)) * 100) / 100;
                 setCurrentRetailPrice(retail);
             }
         }

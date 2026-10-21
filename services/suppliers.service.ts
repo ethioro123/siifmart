@@ -4,7 +4,7 @@ import type { Supplier } from '../types';
 export type SupplierDraft = Pick<Supplier, 'name' | 'type' | 'contact' | 'category'> &
   Partial<Pick<Supplier, 'email' | 'phone' | 'taxId' | 'nationalId' | 'location' |
     'leadTime' | 'bankName' | 'bankAccountName' | 'bankAccountNumber' |
-    'status' | 'rating'>> & {
+    'status' | 'rating' | 'regionCode'>> & {
     countryCode: string;
   };
 
@@ -66,6 +66,7 @@ export const suppliersService = {
       national_id: supplier.nationalId?.trim() || null,
       location: supplier.location?.trim() || null,
       country_code: supplier.countryCode,
+      region_code: supplier.regionCode || null,
       verification_status: 'pending',
       bank_name: supplier.bankName?.trim() || null,
       bank_account_name: supplier.bankAccountName?.trim() || null,

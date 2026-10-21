@@ -89,6 +89,7 @@ export default function Procurement() {
     const [isCreatePOOpen, setIsCreatePOOpen] = useState(false);
     const [editingPO, setEditingPO] = useState<PurchaseOrder | null>(null);
     const [initialSupplierId, setInitialSupplierId] = useState<string | undefined>(undefined);
+    const [initialProduct, setInitialProduct] = useState<Product | null>(null);
 
     // Fetch Data
     const fetchData = useCallback(async () => {
@@ -208,14 +209,16 @@ export default function Procurement() {
         };
     }, [fetchData]);
 
-    const handleCreatePOOpen = (product?: Product) => {
+    const handleCreatePOOpen = (product?: Product, supplierId?: string) => {
         setEditingPO(null);
-        setInitialSupplierId(product?.preferredSupplierId || undefined);
+        setInitialProduct(product || null);
+        setInitialSupplierId(supplierId || product?.preferredSupplierId || (product as any)?.supplier_id || undefined);
         setIsCreatePOOpen(true);
     };
 
     const handleEditPO = (po: PurchaseOrder) => {
         setEditingPO(po);
+        setInitialProduct(null);
         setInitialSupplierId(undefined);
         setIsCreatePOOpen(true);
     };
@@ -399,12 +402,17 @@ export default function Procurement() {
             {/* Create/Edit PO Modal */}
             <CreatePOModal
                 isOpen={isCreatePOOpen}
-                onClose={() => setIsCreatePOOpen(false)}
+                onClose={() => {
+                    setIsCreatePOOpen(false);
+                    setInitialProduct(null);
+                }}
                 editingPO={editingPO}
                 initialSupplierId={initialSupplierId}
+                initialProduct={initialProduct}
                 onSuccess={() => {
                     fetchData();
                     setIsCreatePOOpen(false);
+                    setInitialProduct(null);
                 }}
             />
             </div>

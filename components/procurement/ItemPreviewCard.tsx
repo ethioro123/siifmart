@@ -5,6 +5,7 @@ import { formatPackBadge, formatPOItemDescription } from './utils';
 import { getSellUnit } from '../../utils/units';
 import { getCategorySpecGroup } from './categoryAttributes';
 import { resolveSmartProductAttributes } from '../../utils/groceryAttributes';
+import { computeCostPerSellUnit } from './createPOHelpers';
 
 interface ItemPreviewCardProps {
     name: string;
@@ -45,7 +46,15 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
     const effectiveRetail = retailPrice !== undefined ? retailPrice : 0;
     const unitsPerOrder = unitsPerOrderUnit > 1 ? unitsPerOrderUnit : 1;
     const isBulkOrder = unitsPerOrder > 1;
-    const costPerSellUnit = effectiveCost > 0 ? effectiveCost / unitsPerOrder : 0;
+    const convertedCostPerSellUnit = computeCostPerSellUnit(
+        effectiveCost,
+        customAttributes?.physical?.netWeight || size || '',
+        customAttributes?.physical?.sizeType || '',
+        unit || '',
+        parseInt(customAttributes?.packaging?.packQty) || unitsPerOrder,
+        parseInt(customAttributes?.packaging?.caseSize) || 0
+    );
+    const costPerSellUnit = convertedCostPerSellUnit ?? (effectiveCost > 0 ? effectiveCost / unitsPerOrder : 0);
     const sellUnitDef = getSellUnit(unit);
     const sellUnitLabel = sellUnitDef.shortLabel || 'ea';
 

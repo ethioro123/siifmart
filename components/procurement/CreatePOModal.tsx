@@ -1,87 +1,52 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Modal from '../../components/Modal';
-import { PurchaseOrder, POItem, Supplier, Product } from '../../types';
+import { PurchaseOrder, POItem, Product } from '../../types';
 import { getCountryProfile, type Country } from '../../utils/localization';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
-import { suppliersService, productsService } from '../../services/supabase.service';
+import { purchaseOrdersService } from '../../services/supabase.service';
 import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations';
 import { POItemForm } from './POItemForm';
 import { POSupplierLogistics } from './POSupplierLogistics';
 import { POItemsTable } from './POItemsTable';
 import { POTotalsSummary } from './POTotalsSummary';
 import { usePODraft } from './hooks/usePODraft';
+import { useCreatePOData } from './hooks/useCreatePOData';
 import { PODraftBanner } from './PODraftBanner';
 import { buildPurchaseOrders, resolvePOVendor } from './createPOHelpers';
 import { CreatePOFooter } from './CreatePOFooter';
 import { logger } from '../../utils/logger';
-
 
 interface CreatePOModalProps {
     isOpen: boolean;
     onClose: () => void;
     editingPO?: PurchaseOrder | null;
     initialSupplierId?: string;
+    initialProduct?: Product | null;
+    initialDraft?: Partial<PurchaseOrder> | null;
     onSuccess: () => void;
 }
 
 export const CreatePOModal: React.FC<CreatePOModalProps> = ({
-    isOpen, onClose, editingPO, initialSupplierId, onSuccess
+    isOpen, onClose, editingPO, initialSupplierId, initialProduct = null, initialDraft = null, onSuccess
 }) => {
     const { user, showToast } = useStore();
     const { createPOMutation, updatePOMutation } = usePurchaseOrderMutations();
-    const {
-        allProducts,
-        suppliers: contextSuppliers,
-        sites,
-        countrySites,
-        addProduct,
-        settings,
-        effectiveCountry
-    } = useData();
-
+    const { allProducts, suppliers: contextSuppliers, sites, countrySites, settings, effectiveCountry } = useData();
     const activeCountry: Country = (effectiveCountry || (settings?.country as Country) || 'ET');
     const countryProfile = getCountryProfile(activeCountry);
     const currencySymbol = countryProfile.currencySymbol;
-
-    // Direct supplier fetch fallback — if DataContext suppliers are empty, fetch directly
-    const [localSuppliers, setLocalSuppliers] = useState<Supplier[]>([]);
-    useEffect(() => {
-        if (isOpen && contextSuppliers.length === 0 && localSuppliers.length === 0) {
-            logger.debug('CreatePOModal', 'Suppliers empty from context, fetching directly...');
-            suppliersService.getAll(50, 0, activeCountry, false).then(res => {
-                logger.debug('CreatePOModal', 'Direct supplier fetch returned:');
-                setLocalSuppliers(res.data);
-            }).catch(err => logger.error('CreatePOModal', 'Direct supplier fetch failed', err as Error));
-        }
-    }, [isOpen, contextSuppliers.length, activeCountry]);
-
-    const [localProducts, setLocalProducts] = useState<Product[]>([]);
-    useEffect(() => {
-        if (isOpen && (!allProducts || allProducts.length === 0) && localProducts.length === 0) {
-            productsService.getAll(undefined, 50, 0, undefined, undefined, false).then(res => {
-                setLocalProducts((res.data || []) as Product[]);
-            }).catch(err => logger.error('CreatePOModal', 'Direct products fetch failed', err as Error));
-        }
-    }, [isOpen, allProducts?.length, localProducts.length]);
-
-    const allSuppliers = contextSuppliers.length > 0 ? contextSuppliers : localSuppliers;
-    const effectiveProducts = (allProducts && allProducts.length > 0) ? allProducts : localProducts;
-
-    const countryWarehouses = useMemo(() => {
-        const pool = countrySites?.length ? countrySites : sites;
-        return pool.filter(s => (s.country || 'ET') === activeCountry && (s.type === 'Warehouse' || s.type === 'Distribution Center') && s.status !== 'Closed');
-    }, [countrySites, sites, activeCountry]);
+    const isRegionalUser = Boolean(user?.role?.startsWith('regional_') || user?.regionCode);
+    const activeRegionCode = user?.regionCode || null;
 
     const isPurchasingTaxEnabled = Boolean(settings?.countryConfigs?.[activeCountry]?.taxOnPurchasing ?? settings?.taxOnPurchasing);
     const defaultTaxRate = isPurchasingTaxEnabled ? (countryProfile.taxRate ?? (activeCountry === 'KE' ? 16 : 15)) : 0;
+    const regionalAutonomousPoLimit = Number((settings?.countryConfigs?.[activeCountry] as any)?.regionalAutonomousPoLimit ?? (settings as any)?.regionalAutonomousPoLimit ?? 0);
     const isEditMode = Boolean(editingPO?.id);
-    const enableAutoSave = (settings?.enablePoDraftAutoSave ?? true);
+    const enableAutoSave = (settings?.enablePoDraftAutoSave ?? true) && !initialDraft;
 
-    // Form State
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Vendor & Logistics
+    const [hasUnsavedItemDraft, setHasUnsavedItemDraft] = useState(false);
     const [isManualVendor, setIsManualVendor] = useState(false);
     const [manualVendorName, setManualVendorName] = useState('');
     const [newPOSupplier, setNewPOSupplier] = useState('');
@@ -91,8 +56,6 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const [poPriority, setPoPriority] = useState<'Normal' | 'High' | 'Urgent' | 'Low'>('Normal');
     const [quantityDistribution, setQuantityDistribution] = useState('per-store');
     const [poDelivery, setPoDelivery] = useState<{ tempReq: 'Ambient' | 'Chilled' | 'Frozen'; shelfLife: string; dockSlot: string }>({ tempReq: 'Ambient', shelfLife: '', dockSlot: '' });
-
-    // Totals & Notes
     const [poNotes, setPoNotes] = useState('');
     const [paymentTerms, setPaymentTerms] = useState('');
     const [incoterms, setIncoterms] = useState('');
@@ -100,51 +63,39 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const [discountRate, setDiscountRate] = useState(0);
     const [taxRate, setTaxRate] = useState<number>(defaultTaxRate);
     const [poRequestedBy, setPoRequestedBy] = useState('');
-
-    // Items
     const [newPOItems, setNewPOItems] = useState<POItem[]>([]);
     const [fullEditingIndex, setFullEditingIndex] = useState<number | null>(null);
-
-    // Draft Management Hook
-    const {
-        hasDraft,
-        draftMeta,
-        isRestoredBannerVisible,
-        dismissBanner,
-        saveDraft,
-        readStoredDraft,
-        discardDraft
-    } = usePODraft({
-        countryCode: activeCountry,
-        userId: user?.id,
-        enabled: enableAutoSave,
-        isEditMode,
-        isOpen
+    const hydratedKeyRef = useRef<string | null>(null);
+    const { countryWarehouses, allSuppliers, effectiveProducts } = useCreatePOData({
+        isOpen, activeCountry, allProducts: allProducts || [], contextSuppliers,
+        sites, countrySites: countrySites || [], destinationSiteIds, isRegionalUser, activeRegionCode
     });
 
-    // Computed Totals
-    const poSubtotal = newPOItems.reduce((sum, item) => sum + item.totalCost, 0);
-    const poTax = poSubtotal * (taxRate / 100);
-    const poDiscount = poSubtotal * (discountRate / 100);
-    const poTotal = poSubtotal + poTax + shippingCost - poDiscount;
+    const { draftMeta, isRestoredBannerVisible, dismissBanner, saveDraft, readStoredDraft, discardDraft } = usePODraft({
+        countryCode: activeCountry, userId: user?.id, enabled: enableAutoSave, isEditMode, isOpen
+    });
+
+    // Computed Totals (accounting for multi-hub per-store multiplication)
+    const hubCount = !isEditMode && destinationSiteIds.length > 1 ? destinationSiteIds.length : 1;
+    const perStoreMultiplier = hubCount > 1 && quantityDistribution === 'per-store' ? hubCount : 1;
+    const singleHubSubtotal = newPOItems.reduce((sum, item) => sum + item.totalCost, 0);
+    const singleHubTax = Math.round(singleHubSubtotal * (taxRate / 100) * 100) / 100;
+    const singleHubDiscount = Math.round(singleHubSubtotal * (discountRate / 100) * 100) / 100;
+    const singleHubTotal = Math.round((singleHubSubtotal + singleHubTax + shippingCost - singleHubDiscount) * 100) / 100;
+
+    const poSubtotal = Math.round(singleHubSubtotal * perStoreMultiplier * 100) / 100;
+    const poTax = Math.round(singleHubTax * perStoreMultiplier * 100) / 100;
+    const poDiscount = Math.round(singleHubDiscount * perStoreMultiplier * 100) / 100;
+    const poTotal = Math.round(singleHubTotal * perStoreMultiplier * 100) / 100;
+    const exceedsRegionalCap = Boolean(isRegionalUser && regionalAutonomousPoLimit > 0 && singleHubTotal > regionalAutonomousPoLimit);
 
     const resetPOForm = () => {
-        setNewPOSupplier('');
-        setIsManualVendor(false);
-        setManualVendorName('');
-        setNewPOItems([]);
-        setShippingCost(0);
-        setPoNotes('');
-        setDiscountRate(0);
-        setTaxRate(defaultTaxRate);
-        setPaymentTerms('');
-        setIncoterms('');
-        setDestinationSiteIds([]);
-        setIsSiteDropdownOpen(false);
-        setExpectedDate('');
+        setNewPOSupplier(''); setIsManualVendor(false); setManualVendorName('');
+        setNewPOItems([]); setShippingCost(0); setPoNotes(''); setDiscountRate(0);
+        setTaxRate(defaultTaxRate); setPaymentTerms(''); setIncoterms('');
+        setDestinationSiteIds([]); setIsSiteDropdownOpen(false); setExpectedDate('');
         setPoDelivery({ tempReq: 'Ambient', shelfLife: '', dockSlot: '' });
-        setQuantityDistribution('per-store');
-        setFullEditingIndex(null);
+        setQuantityDistribution('per-store'); setFullEditingIndex(null); setHasUnsavedItemDraft(false);
     };
 
     const handleDiscardDraft = () => {
@@ -157,112 +108,118 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         showToast("Saved PO draft deleted", "info");
     };
 
-    // Initialize & Hydrate Form State
+    // Hydrate Form State Once Per Open Session
     useEffect(() => {
-        if (isOpen) {
-            setPoRequestedBy(user?.name || '');
-
-            if (editingPO) {
-                // Populate from existing PO
-                const knownSupplier = allSuppliers.find(s => s.id === editingPO.supplierId);
-                if (!knownSupplier) {
-                    setIsManualVendor(true);
-                    setManualVendorName(editingPO.supplierName);
-                } else {
-                    setIsManualVendor(false);
-                    setNewPOSupplier(editingPO.supplierId);
-                }
-
-                setNewPOItems(editingPO.lineItems || []);
-                setPoNotes(editingPO.notes || '');
-                const validWh = countryWarehouses.find(s => s.id === editingPO.siteId);
-                setDestinationSiteIds(validWh ? [editingPO.siteId] : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
-                setExpectedDate(editingPO.expectedDelivery || '');
-                setPoDelivery({ tempReq: editingPO.tempReq || 'Ambient', shelfLife: editingPO.shelfLife || '', dockSlot: editingPO.dockSlot || '' });
-                setPoPriority(editingPO.priority as any || 'Normal');
-                setPaymentTerms(editingPO.paymentTerms || '');
-                setShippingCost(editingPO.shippingCost || 0);
-
-                const poItemsSubtotal = (editingPO.lineItems || []).reduce((sum, item) => sum + (item.totalCost || item.quantity * item.unitCost), 0);
-                if (editingPO.taxAmount !== undefined && poItemsSubtotal > 0) {
-                    setTaxRate(Math.round((editingPO.taxAmount / poItemsSubtotal) * 100));
-                } else {
-                    setTaxRate(defaultTaxRate);
-                }
-                if (editingPO.discount !== undefined && poItemsSubtotal > 0) {
-                    setDiscountRate(Math.round((editingPO.discount / poItemsSubtotal) * 100));
-                } else {
-                    setDiscountRate(0);
-                }
-            } else {
-                // Check if a saved draft exists for this country and user
-                const storedDraft = readStoredDraft();
-                if (storedDraft?.data) {
-                    const d = storedDraft.data;
-                    setIsManualVendor(Boolean(d.isManualVendor));
-                    setManualVendorName(d.manualVendorName || '');
-                    setNewPOSupplier(d.newPOSupplier || initialSupplierId || '');
-                    const validSites = (d.destinationSiteIds || []).filter(id => countryWarehouses.some(w => w.id === id));
-                    setDestinationSiteIds(validSites.length > 0 ? validSites : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
-                    setExpectedDate(d.expectedDate || '');
-                    setPoDelivery({ tempReq: d.tempReq || 'Ambient', shelfLife: d.shelfLife || '', dockSlot: d.dockSlot || '' });
-                    setPoPriority(d.poPriority || 'Normal');
-                    setQuantityDistribution(d.quantityDistribution || 'per-store');
-                    setNewPOItems(d.newPOItems || []);
-                    setPoNotes(d.poNotes || '');
-                    setPaymentTerms(d.paymentTerms || '');
-                    setIncoterms(d.incoterms || '');
-                    setShippingCost(d.shippingCost || 0);
-                    setDiscountRate(d.discountRate || 0);
-                    setTaxRate(d.taxRate !== undefined ? d.taxRate : defaultTaxRate);
-                } else {
-                    let defaultSiteId = '';
-                    if (user?.siteId && countryWarehouses.find(w => w.id === user.siteId)) {
-                        defaultSiteId = user.siteId;
-                    } else {
-                        defaultSiteId = countryWarehouses.length > 0 ? countryWarehouses[0].id : '';
-                    }
-
-                    setDestinationSiteIds(defaultSiteId ? [defaultSiteId] : []);
-                    setTaxRate(defaultTaxRate);
-                    setDiscountRate(0);
-                    if (initialSupplierId) {
-                        setNewPOSupplier(initialSupplierId);
-                    }
-                }
-            }
-        } else {
+        if (!isOpen) {
+            hydratedKeyRef.current = null;
             resetPOForm();
+            return;
         }
-    }, [isOpen, editingPO, user, countryWarehouses, activeCountry, defaultTaxRate, readStoredDraft, initialSupplierId]);
 
-    // Debounced auto-save draft whenever user makes edits
+        const sessionKey = `${editingPO?.id || 'create'}-${initialSupplierId || ''}-${initialProduct?.id || ''}-${Boolean(initialDraft)}-${activeCountry}`;
+        if (hydratedKeyRef.current === sessionKey) {
+            if (destinationSiteIds.length === 0 && countryWarehouses.length > 0) {
+                const defaultSiteId = (user?.siteId && countryWarehouses.find(w => w.id === user.siteId)?.id) || countryWarehouses[0].id;
+                setDestinationSiteIds([defaultSiteId]);
+            }
+            return;
+        }
+        hydratedKeyRef.current = sessionKey;
+        setPoRequestedBy(user?.name || '');
+
+        const applyPOState = (sourcePO: Partial<PurchaseOrder>) => {
+            const knownSupplier = sourcePO.supplierId ? allSuppliers.find(s => s.id === sourcePO.supplierId) : undefined;
+            if (knownSupplier) {
+                setIsManualVendor(false);
+                setNewPOSupplier(knownSupplier.id);
+                setManualVendorName('');
+            } else if (sourcePO.supplierId && allSuppliers.length === 0) {
+                setIsManualVendor(false);
+                setNewPOSupplier(sourcePO.supplierId);
+            } else if (sourcePO.supplierName && sourcePO.supplierName !== 'Preferred Supplier') {
+                setIsManualVendor(true);
+                setManualVendorName(sourcePO.supplierName);
+            } else {
+                setIsManualVendor(false);
+                setNewPOSupplier('');
+            }
+
+            const items = sourcePO.lineItems || [];
+            setNewPOItems(items);
+            setPoNotes(sourcePO.notes || '');
+            const validWh = sourcePO.siteId ? countryWarehouses.find(s => s.id === sourcePO.siteId) : undefined;
+            setDestinationSiteIds(validWh ? [validWh.id] : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
+            setExpectedDate(sourcePO.expectedDelivery ? String(sourcePO.expectedDelivery).split('T')[0] : '');
+            setPoDelivery({ tempReq: sourcePO.tempReq || 'Ambient', shelfLife: sourcePO.shelfLife || '', dockSlot: sourcePO.dockSlot || '' });
+            setPoPriority((sourcePO.priority as any) || 'Normal');
+            setPaymentTerms(sourcePO.paymentTerms || '');
+            setIncoterms(sourcePO.incoterms || '');
+            setShippingCost(sourcePO.shippingCost || 0);
+
+            const poItemsSubtotal = items.reduce((sum, item) => sum + (item.totalCost || item.quantity * item.unitCost), 0);
+            setTaxRate(sourcePO.taxAmount !== undefined && poItemsSubtotal > 0 ? Math.round((sourcePO.taxAmount / poItemsSubtotal) * 10000) / 100 : defaultTaxRate);
+            setDiscountRate(sourcePO.discount !== undefined && poItemsSubtotal > 0 ? Math.round((sourcePO.discount / poItemsSubtotal) * 10000) / 100 : 0);
+        };
+
+        if (editingPO) {
+            applyPOState(editingPO);
+            if (editingPO.id && (!editingPO.lineItems || editingPO.lineItems.length === 0)) {
+                purchaseOrdersService.getById(editingPO.id).then(fullPO => {
+                    if (fullPO) applyPOState(fullPO);
+                }).catch(err => logger.error('CreatePOModal', 'Failed to load full PO details for edit', err as Error));
+            }
+        } else if (initialDraft) {
+            applyPOState(initialDraft);
+        } else {
+            const storedDraft = readStoredDraft();
+            if (storedDraft?.data) {
+                const d = storedDraft.data;
+                setIsManualVendor(Boolean(d.isManualVendor));
+                setManualVendorName(d.manualVendorName || '');
+                setNewPOSupplier(initialSupplierId || d.newPOSupplier || '');
+                const validSites = (d.destinationSiteIds || []).filter(id => countryWarehouses.some(w => w.id === id));
+                setDestinationSiteIds(validSites.length > 0 ? validSites : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
+                setExpectedDate(d.expectedDate || '');
+                setPoDelivery({ tempReq: d.tempReq || 'Ambient', shelfLife: d.shelfLife || '', dockSlot: d.dockSlot || '' });
+                setPoPriority(d.poPriority || 'Normal');
+                setQuantityDistribution(d.quantityDistribution || 'per-store');
+                setNewPOItems(d.newPOItems || []);
+                setPoNotes(d.poNotes || '');
+                setPaymentTerms(d.paymentTerms || '');
+                setIncoterms(d.incoterms || '');
+                setShippingCost(d.shippingCost || 0);
+                setDiscountRate(d.discountRate || 0);
+                setTaxRate(d.taxRate !== undefined ? d.taxRate : defaultTaxRate);
+            } else {
+                const defaultSiteId = (user?.siteId && countryWarehouses.find(w => w.id === user.siteId)?.id) || countryWarehouses[0]?.id || '';
+                setDestinationSiteIds(defaultSiteId ? [defaultSiteId] : []);
+                setTaxRate(defaultTaxRate);
+                setDiscountRate(0);
+                if (initialSupplierId) setNewPOSupplier(initialSupplierId);
+            }
+        }
+    }, [isOpen, editingPO, initialDraft, initialSupplierId, initialProduct?.id, user, countryWarehouses, activeCountry, defaultTaxRate, readStoredDraft, allSuppliers]);
+
+    useEffect(() => {
+        if (!isOpen || allSuppliers.length === 0) return;
+        const targetSupplierId = editingPO?.supplierId || initialDraft?.supplierId || initialSupplierId;
+        if (targetSupplierId && allSuppliers.some(s => s.id === targetSupplierId)) {
+            setIsManualVendor(false);
+            setNewPOSupplier(targetSupplierId);
+        }
+    }, [isOpen, allSuppliers, editingPO?.supplierId, initialDraft?.supplierId, initialSupplierId]);
+
     useEffect(() => {
         if (!isOpen || isEditMode || !enableAutoSave) return;
-
         const timer = setTimeout(() => {
             const selectedSupplierObj = allSuppliers.find(s => s.id === newPOSupplier);
             const supplierDisplayName = isManualVendor ? manualVendorName : selectedSupplierObj?.name;
-
             saveDraft({
-                isManualVendor,
-                manualVendorName,
-                newPOSupplier,
-                destinationSiteIds,
-                expectedDate,
-                ...poDelivery,
-                poPriority,
-                quantityDistribution,
-                newPOItems,
-                poNotes,
-                paymentTerms,
-                incoterms,
-                shippingCost,
-                discountRate,
-                taxRate
+                isManualVendor, manualVendorName, newPOSupplier, destinationSiteIds,
+                expectedDate, ...poDelivery, poPriority, quantityDistribution,
+                newPOItems, poNotes, paymentTerms, incoterms, shippingCost, discountRate, taxRate
             }, supplierDisplayName);
         }, 350);
-
         return () => clearTimeout(timer);
     }, [
         isOpen, isEditMode, enableAutoSave, isManualVendor, manualVendorName,
@@ -271,16 +228,34 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         shippingCost, discountRate, taxRate, allSuppliers, saveDraft
     ]);
 
-    // --- Actions ---
-
     const handleAddItem = (item: POItem) => {
-        setNewPOItems(prev => [...prev, item]);
-        showToast(`Added: ${item.productName}`, 'success');
+        setNewPOItems(prev => {
+            if (item.identityType === 'known' && item.productId) {
+                const dupIdx = prev.findIndex(existing =>
+                    existing.identityType === 'known' &&
+                    (existing.productId === item.productId || (existing.sku && existing.sku === item.sku)) &&
+                    (existing.packQuantity || 1) === (item.packQuantity || 1) &&
+                    (existing.caseSize || 0) === (item.caseSize || 0)
+                );
+                if (dupIdx !== -1) {
+                    const existing = prev[dupIdx];
+                    const mergedQty = existing.quantity + item.quantity;
+                    const mergedItem: POItem = {
+                        ...existing, ...item,
+                        quantity: mergedQty,
+                        totalCost: Math.round(mergedQty * item.unitCost * 100) / 100
+                    };
+                    showToast(`Merged quantity for ${item.productName} (${mergedQty})`, 'info');
+                    return prev.map((row, idx) => idx === dupIdx ? mergedItem : row);
+                }
+            }
+            showToast(`Added: ${item.productName}`, 'success');
+            return [...prev, item];
+        });
     };
 
     const handleUpdateItem = (updatedItem: POItem) => {
         if (fullEditingIndex !== null) {
-            // Full update from form
             setNewPOItems(prev => prev.map((item, idx) => idx === fullEditingIndex ? updatedItem : item));
             showToast(`Updated: ${updatedItem.productName}`, 'success');
             setFullEditingIndex(null);
@@ -289,7 +264,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
     const handleInlineUpdate = (index: number, updatedItem: POItem) => {
         setNewPOItems(prev => prev.map((item, idx) => idx === index ? updatedItem : item));
-    }
+    };
 
     const handleRemoveItem = (index: number) => {
         if (fullEditingIndex === index) setFullEditingIndex(null);
@@ -298,17 +273,17 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
     const handleFullEdit = (index: number) => {
         setFullEditingIndex(index);
-        // POItemForm will read 'editingItem' (newPOItems[index]) and hydrate itself
-
-        // Scroll form into view
         const formElement = document.getElementById('po-item-form-container');
-        if (formElement) {
-            formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        if (formElement) formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
 
-
     const handleCreatePO = async () => {
+        if (hasUnsavedItemDraft) {
+            showToast('You have an un-added item in the form above. Click "Add Item to Order" or clear it before submitting.', 'warning');
+            const formElement = document.getElementById('po-item-form-container');
+            if (formElement) formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
         if (newPOItems.length === 0) {
             showToast("Please add items to the order.", 'warning');
             return;
@@ -335,35 +310,19 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
         setIsSubmitting(true);
         try {
+            const firstSite = sites.find(s => s.id === destinationSiteIds[0]);
+            const resolvedRegionCode = activeRegionCode || firstSite?.regionCode || (firstSite as any)?.region_code || null;
+
             const { vendorId, vendorName } = await resolvePOVendor({
-                isManualVendor,
-                manualVendorName,
-                newPOSupplier,
-                allSuppliers,
-                activeCountry
+                isManualVendor, manualVendorName, newPOSupplier, allSuppliers, activeCountry, regionCode: resolvedRegionCode
             });
 
-            const processedItems = [...newPOItems];
             const generatedPOs = buildPurchaseOrders({
-                destinationSiteIds,
-                processedItems,
-                quantityDistribution,
-                shippingCost,
-                discountRate,
-                taxRate,
-                editingPO,
-                sites,
-                currencySymbol,
-                vendorId,
-                vendorName,
-                expectedDate,
-                ...poDelivery,
-                poNotes,
-                paymentTerms,
-                incoterms,
-                poPriority,
-                userName: user?.name,
-                poRequestedBy
+                destinationSiteIds, processedItems: [...newPOItems], quantityDistribution,
+                shippingCost, discountRate, taxRate, editingPO, sites, currencySymbol,
+                vendorId, vendorName, expectedDate, ...poDelivery, poNotes, paymentTerms,
+                incoterms, poPriority, userName: user?.name, poRequestedBy,
+                isRegionalUser, regionalAutonomousPoLimit
             });
 
             let successCount = 0;
@@ -377,14 +336,12 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             }
 
             discardDraft();
-
             showToast(isEditMode ? 'PO Updated' : `Created ${successCount} PO(s)`, 'success');
             onSuccess();
             onClose();
-
         } catch (error) {
             logger.error('CreatePOModal', 'caught error', error as Error);
-            showToast("Failed to save Purchase Order.", 'error');
+            showToast(error instanceof Error ? error.message : 'Failed to save Purchase Order.', 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -392,37 +349,30 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
     const isPendingAction = isSubmitting || createPOMutation.isPending || updatePOMutation.isPending;
 
-    const createPOFooter = (
-        <CreatePOFooter
-            currencySymbol={currencySymbol}
-            poTotal={poTotal}
-            onClose={onClose}
-            onCreatePO={handleCreatePO}
-            isPendingAction={isPendingAction}
-            isEditMode={isEditMode}
-            itemsCount={newPOItems.length}
-        />
-    );
-
     return (
         <Modal
             isOpen={isOpen}
             onClose={onClose}
             title={isEditMode ? "Edit Purchase Order" : "Initiate Purchase Order"}
             size="4xl"
-            footer={createPOFooter}
+            footer={
+                <CreatePOFooter
+                    currencySymbol={currencySymbol}
+                    poTotal={poTotal}
+                    onClose={onClose}
+                    onCreatePO={handleCreatePO}
+                    isPendingAction={isPendingAction}
+                    isEditMode={isEditMode}
+                    itemsCount={newPOItems.length}
+                    hasUnsavedItemDraft={hasUnsavedItemDraft}
+                />
+            }
         >
             <div className="relative space-y-8 pb-4 overflow-x-hidden">
-                {/* Draft Restoration Banner */}
                 {isRestoredBannerVisible && draftMeta && (
-                    <PODraftBanner
-                        meta={draftMeta}
-                        onDismiss={dismissBanner}
-                        onDiscard={handleDiscardDraft}
-                    />
+                    <PODraftBanner meta={draftMeta} onDismiss={dismissBanner} onDiscard={handleDiscardDraft} />
                 )}
 
-                {/* 1. Supplier & Logistics */}
                 <POSupplierLogistics
                     isManualVendor={isManualVendor}
                     setIsManualVendor={setIsManualVendor}
@@ -444,22 +394,24 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     setPoDelivery={setPoDelivery}
                     poPriority={poPriority}
                     setPoPriority={setPoPriority}
+                    isEditMode={isEditMode}
                 />
 
                 <div className="h-[1px] w-full bg-[var(--theme-border-subtle)]" />
 
-                {/* 2. Add Item Form */}
                 <POItemForm
                     products={effectiveProducts}
+                    existingItems={newPOItems}
+                    initialProduct={initialProduct}
                     country={activeCountry}
                     currencySymbol={currencySymbol}
                     onAdd={handleAddItem}
                     onUpdate={handleUpdateItem}
                     onCancelEdit={() => setFullEditingIndex(null)}
                     editingItem={fullEditingIndex !== null ? newPOItems[fullEditingIndex] : null}
+                    onDirtyChange={setHasUnsavedItemDraft}
                 />
 
-                {/* 3. Items Table */}
                 <POItemsTable
                     items={newPOItems}
                     currencySymbol={currencySymbol}
@@ -470,7 +422,6 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
                 <div className="h-[1px] w-full bg-[var(--theme-border-subtle)]" />
 
-                {/* 4. Totals & Notes */}
                 <POTotalsSummary
                     poNotes={poNotes}
                     setPoNotes={setPoNotes}
@@ -489,6 +440,10 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     poDiscount={poDiscount}
                     poTotal={poTotal}
                     currencySymbol={currencySymbol}
+                    hubCount={hubCount}
+                    quantityDistribution={quantityDistribution}
+                    exceedsRegionalCap={exceedsRegionalCap}
+                    regionalCapAmount={regionalAutonomousPoLimit}
                 />
             </div>
         </Modal>

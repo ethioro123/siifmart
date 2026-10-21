@@ -83,7 +83,7 @@ export const purchaseOrdersService = {
             discount: po.discount,
             temp_req: po.tempReq,
             shelf_life: po.shelfLife,
-            dock_slot: po.dockSlot,
+            dock_slot: po.dockSlot || null,
             po_number: poNumber,
             requested_by: po.requestedBy,
             created_by: po.createdBy,
@@ -323,10 +323,11 @@ export const purchaseOrdersService = {
         }
 
         // Enforce enterprise procurement policy: Purchase orders can only be routed to Warehouse or Distribution Center
-        await validateWarehouseDestination(updates.siteId);
+        await validateWarehouseDestination(updates.siteId || currentPO?.siteId);
 
-        // Map camelCase to snake_case for scalar fields
-        if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; }
+        // Map camelCase to snake_case for scalar fields.
+        // Note: guard_procurement_order_decision forbids mutating (site_id, country_code, region_code, created_by) on existing POs.
+        if (!currentPO && updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; }
         if (updates.supplierId !== undefined) { dbUpdates.supplier_id = updates.supplierId === 'UNSPECIFIED' ? null : updates.supplierId; }
         if (updates.supplierName !== undefined) { dbUpdates.supplier_name = updates.supplierName; }
         if (updates.totalAmount !== undefined) { dbUpdates.total_amount = updates.totalAmount; }
@@ -337,8 +338,14 @@ export const purchaseOrdersService = {
         if (updates.paymentTerms !== undefined) { dbUpdates.payment_terms = updates.paymentTerms; }
         if (updates.tempReq !== undefined) { dbUpdates.temp_req = updates.tempReq; }
         if (updates.shelfLife !== undefined) { dbUpdates.shelf_life = updates.shelfLife; }
-        if (updates.dockSlot !== undefined) { dbUpdates.dock_slot = updates.dockSlot; }
-        if (updates.createdBy !== undefined) { dbUpdates.created_by = updates.createdBy; }
+        if (updates.dockSlot !== undefined) {
+            const nextDock = updates.dockSlot || null;
+            const canAssignDock = ['Approved', 'Ordered', 'Partially Received'].includes(effectiveStatus);
+            if (!nextDock || canAssignDock || nextDock === (currentPO?.dockSlot || null)) {
+                dbUpdates.dock_slot = nextDock;
+            }
+        }
+        if (!currentPO && updates.createdBy !== undefined) { dbUpdates.created_by = updates.createdBy; }
         if (updates.requestedBy !== undefined) { dbUpdates.requested_by = updates.requestedBy; }
         if (updates.receivedBy !== undefined) { dbUpdates.received_by = updates.receivedBy; }
         if (updates.poNumber !== undefined) { dbUpdates.po_number = updates.poNumber; }
@@ -349,10 +356,12 @@ export const purchaseOrdersService = {
         if (updates.incoterms !== undefined) { dbUpdates.incoterms = updates.incoterms; }
         if (updates.priority !== undefined) { dbUpdates.priority = updates.priority; }
         if (updates.currency !== undefined) { dbUpdates.currency = updates.currency; }
-        if (updates.countryCode !== undefined) { dbUpdates.country_code = updates.countryCode; }
-        if (updates.country_code !== undefined) { dbUpdates.country_code = updates.country_code; }
-        if (updates.regionCode !== undefined) { dbUpdates.region_code = updates.regionCode; }
-        if (updates.region_code !== undefined) { dbUpdates.region_code = updates.region_code; }
+        if (!currentPO) {
+            if (updates.countryCode !== undefined) { dbUpdates.country_code = updates.countryCode; }
+            if (updates.country_code !== undefined) { dbUpdates.country_code = updates.country_code; }
+            if (updates.regionCode !== undefined) { dbUpdates.region_code = updates.regionCode; }
+            if (updates.region_code !== undefined) { dbUpdates.region_code = updates.region_code; }
+        }
         if (updates.requiresHqApproval !== undefined) { dbUpdates.requires_hq_approval = updates.requiresHqApproval; }
         if (updates.requires_hq_approval !== undefined) { dbUpdates.requires_hq_approval = updates.requires_hq_approval; }
         if (updates.hqApprovedBy !== undefined) { dbUpdates.hq_approved_by = updates.hqApprovedBy; }

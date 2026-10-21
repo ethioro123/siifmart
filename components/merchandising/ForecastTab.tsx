@@ -84,7 +84,7 @@ export const ForecastTab: React.FC = () => {
       const { product, suggestedBuy } = rec;
       const unitCost = product.costPrice || (product.price ? product.price * 0.7 : 50);
       const supplierId = product.preferredSupplierId || (product as any).supplier_id || '';
-      const supplierName = (product as any).supplier || product.brand || 'Primary Supplier';
+      const supplierName = (product as any).supplier || '';
 
       const prefilledPO: Partial<PurchaseOrder> = {
          supplierId: supplierId,
@@ -100,9 +100,13 @@ export const ForecastTab: React.FC = () => {
                quantity: suggestedBuy,
                unitCost: unitCost,
                totalCost: Math.round(suggestedBuy * unitCost * 100) / 100,
-               retailPrice: product.price || Math.round(unitCost * 1.3),
+               retailPrice: product.price || Math.round(unitCost * 1.3 * 100) / 100,
                identityType: 'known',
-               category: product.category || 'General'
+               category: product.category || 'General',
+               brand: product.brand,
+               size: product.size,
+               unit: product.unit,
+               packQuantity: product.packQuantity || 1
             }
          ]
       };
@@ -307,7 +311,7 @@ export const ForecastTab: React.FC = () => {
                   setIsPOModalOpen(false);
                   setSelectedPOProduct(null);
                }}
-               editingPO={selectedPOProduct}
+               initialDraft={selectedPOProduct}
                onSuccess={() => {
                   addNotification('success', 'Purchase order created successfully from AI recommendation.');
                   refreshData();

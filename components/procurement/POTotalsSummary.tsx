@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatCompactNumber } from '../../utils/formatting';
-import { FileText, DollarSign, Percent, Calculator } from 'lucide-react';
+import { FileText, DollarSign, Percent, Calculator, AlertTriangle } from 'lucide-react';
 
 interface POTotalsSummaryProps {
     poNotes: string;
@@ -24,6 +24,10 @@ interface POTotalsSummaryProps {
     poDiscount: number;
     poTotal: number;
     currencySymbol?: string;
+    hubCount?: number;
+    quantityDistribution?: string;
+    exceedsRegionalCap?: boolean;
+    regionalCapAmount?: number;
 }
 
 export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
@@ -32,10 +36,16 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
     incoterms, setIncoterms,
     shippingCost, setShippingCost,
     discountRate, setDiscountRate,
-    taxRate, setTaxRate,
+    taxRate,
     poSubtotal, poTax, poDiscount, poTotal,
-    currencySymbol = 'ETB'
+    currencySymbol = 'ETB',
+    hubCount = 1,
+    quantityDistribution = 'per-store',
+    exceedsRegionalCap = false,
+    regionalCapAmount = 0
 }) => {
+    const isMultiHubPerStore = hubCount > 1 && quantityDistribution === 'per-store';
+    const singleHubTotal = isMultiHubPerStore ? poTotal / hubCount : poTotal;
     return (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left: Notes & Commercial Terms */}
@@ -108,7 +118,10 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                                 min="0" max="100"
                                 className="w-10 bg-transparent text-right text-[var(--theme-text-primary)] font-mono text-xs outline-none font-bold"
                                 value={discountRate || ''}
-                                onChange={(e) => setDiscountRate(parseFloat(e.target.value) || 0)}
+                                onChange={(e) => {
+                                    const raw = parseFloat(e.target.value) || 0;
+                                    setDiscountRate(Math.min(100, Math.max(0, raw)));
+                                }}
                                 placeholder="0"
                             />
                             <span className="text-[var(--theme-text-secondary)] text-xs ml-1 font-bold">%</span>
@@ -144,25 +157,39 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                             min="0"
                             className="w-16 bg-transparent text-right text-[var(--theme-text-primary)] font-mono text-xs outline-none font-bold"
                             value={shippingCost || ''}
-                            onChange={(e) => setShippingCost(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => setShippingCost(Math.max(0, parseFloat(e.target.value) || 0))}
                             placeholder="0"
                         />
                     </div>
                 </div>
 
                 {/* Total Section */}
-                <div className="pt-3 border-t border-[var(--theme-border-subtle)] flex justify-between items-end">
-                    <div>
-                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block">Grand Total</span>
-                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-0.5 block">
-                            {incoterms ? `Terms: ${incoterms}` : 'Ready for authorization'}
-                        </span>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-2xl font-bold text-[var(--theme-text-primary)] font-mono tracking-tight tabular-nums">
-                            {formatCompactNumber(poTotal, { currency: currencySymbol })}
+                <div className="pt-3 border-t border-[var(--theme-border-subtle)] space-y-2">
+                    <div className="flex justify-between items-end">
+                        <div>
+                            <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block">
+                                {isMultiHubPerStore ? `Combined Total (${hubCount} POs)` : 'Grand Total'}
+                            </span>
+                            <span className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-0.5 block">
+                                {isMultiHubPerStore
+                                    ? `${formatCompactNumber(singleHubTotal, { currency: currencySymbol })} per hub × ${hubCount} hubs`
+                                    : incoterms ? `Terms: ${incoterms}` : 'Ready for authorization'}
+                            </span>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-2xl font-bold text-[var(--theme-text-primary)] font-mono tracking-tight tabular-nums">
+                                {formatCompactNumber(poTotal, { currency: currencySymbol })}
+                            </div>
                         </div>
                     </div>
+                    {exceedsRegionalCap && (
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                            <AlertTriangle size={14} className="shrink-0" />
+                            <span>
+                                Order exceeds regional autonomous cap ({formatCompactNumber(regionalCapAmount, { currency: currencySymbol })}) — HQ co-approval will be required.
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

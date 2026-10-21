@@ -28,6 +28,7 @@ export interface CategorySpecificAttributesProps {
     customAttributes: any;
     setCustomAttributes: React.Dispatch<React.SetStateAction<any>>;
     errors?: Record<string, string>;
+    setErrors?: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
 const getDomainIcon = (iconType: string) => {
@@ -58,7 +59,8 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
     subcategory,
     customAttributes,
     setCustomAttributes,
-    errors = {}
+    errors = {},
+    setErrors
 }) => {
     if (!category) {
         return (
@@ -76,6 +78,9 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
     const categoryValues = customAttributes?.categorySpecific || {};
 
     const handleValueChange = (field: CategoryAttributeField, value: string) => {
+        if (errors[field.key] && setErrors) {
+            setErrors(prev => ({ ...prev, [field.key]: '' }));
+        }
         setCustomAttributes((prev: any) => {
             const nextCategorySpecific = {
                 ...(prev.categorySpecific || {}),
@@ -177,7 +182,7 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
                                 <div className="relative">
                                     <select
                                         title={field.label}
-                                        className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer"
+                                        className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors[field.key] ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer`}
                                         value={currentValue}
                                         onChange={e => handleValueChange(field, e.target.value)}
                                     >
@@ -195,7 +200,7 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
                             ) : (
                                 <input
                                     type={field.type === 'number' ? 'number' : 'text'}
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold"
+                                    className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors[field.key] ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold`}
                                     placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
                                     value={currentValue}
                                     onChange={e => handleValueChange(field, e.target.value)}

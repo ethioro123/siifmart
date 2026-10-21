@@ -41,13 +41,15 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
     const saveInlineEdit = () => {
         if (editingIndex === null || !editValues) return;
 
+        const safeQty = Math.max(1, Math.floor(editValues.qty || 1));
+        const safePrice = Math.max(0, Math.round((editValues.price || 0) * 100) / 100);
         const originalItem = items[editingIndex];
-        const newTotal = Math.round(editValues.qty * editValues.price * 100) / 100;
+        const newTotal = Math.round(safeQty * safePrice * 100) / 100;
 
         const updatedItem: POItem = {
             ...originalItem,
-            quantity: editValues.qty,
-            unitCost: editValues.price,
+            quantity: safeQty,
+            unitCost: safePrice,
             totalCost: newTotal
         };
 
@@ -124,15 +126,27 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                     </td>
                                     <td className="p-4 text-right font-mono">
                                         {editingIndex === i && editValues ? (
-                                            <div className="relative group/edit">
-                                                <input
-                                                    type="number"
-                                                    aria-label="Edit Quantity"
-                                                    className="w-20 bg-[var(--theme-bg-subtle)] border border-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl px-3 py-1.5 text-right text-xs outline-none font-bold font-mono tabular-nums"
-                                                    autoFocus
-                                                    value={editValues.qty}
-                                                    onChange={e => setEditValues({ ...editValues, qty: parseInt(e.target.value) || 0 })}
-                                                />
+                                            <div className="flex flex-col items-end gap-1">
+                                                <div className="flex items-center gap-1">
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        step="1"
+                                                        aria-label="Edit Order Quantity"
+                                                        className="w-20 bg-[var(--theme-bg-subtle)] border border-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl px-2.5 py-1.5 text-right text-xs outline-none font-bold font-mono tabular-nums"
+                                                        autoFocus
+                                                        value={editValues.qty}
+                                                        onChange={e => setEditValues({ ...editValues, qty: Math.max(0, parseInt(e.target.value) || 0) })}
+                                                    />
+                                                    <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold">
+                                                        {pkg.hasMultiplier ? pkg.manifestUnitName.toLowerCase() : pkg.sellUnitLabel}
+                                                    </span>
+                                                </div>
+                                                {pkg.hasMultiplier && (
+                                                    <span className="text-[10px] text-[var(--theme-accent)] font-mono font-semibold">
+                                                        = {(Math.max(1, editValues.qty) * pkg.unitsPerOrderUnit).toLocaleString()} {pkg.sellUnitLabel}
+                                                    </span>
+                                                )}
                                             </div>
                                         ) : (
                                             <div>
@@ -156,10 +170,12 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                             <div className="relative group/edit">
                                                 <input
                                                     type="number"
-                                                    aria-label="Edit Price"
+                                                    min="0"
+                                                    step="any"
+                                                    aria-label="Edit Order Unit Cost"
                                                     className="w-24 bg-[var(--theme-bg-subtle)] border border-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl px-3 py-1.5 text-right text-xs outline-none font-bold font-mono tabular-nums"
                                                     value={editValues.price}
-                                                    onChange={e => setEditValues({ ...editValues, price: parseFloat(e.target.value) || 0 })}
+                                                    onChange={e => setEditValues({ ...editValues, price: Math.max(0, parseFloat(e.target.value) || 0) })}
                                                 />
                                             </div>
                                         ) : (
