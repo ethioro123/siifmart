@@ -1,6 +1,8 @@
 -- Migration: Fix approve_expense RPC UUID cast, remove non-existent approved_by_name column, and enforce regional autonomous limit
 -- Applied to supabase-staging per Rule 9
 
+DROP FUNCTION IF EXISTS public.approve_expense(uuid, uuid, text, text, text);
+
 CREATE OR REPLACE FUNCTION public.approve_expense(
     p_expense_id UUID,
     p_approver_id TEXT,

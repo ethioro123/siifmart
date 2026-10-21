@@ -113,8 +113,7 @@ export const drawerReconciliationService = {
             reconciliation_status: action,
             finance_sign_off_by: financeUser.id,
             finance_sign_off_name: financeUser.name,
-            finance_sign_off_at: now,
-            updated_at: now
+            finance_sign_off_at: now
         };
 
         if (options?.hqNotes) {
@@ -129,6 +128,8 @@ export const drawerReconciliationService = {
             updates.variance_flagged = true;
             updates.status = 'Flagged';
         } else {
+            updates.reconciled_by = financeUser.name;
+            updates.reconciled_at = now;
             updates.status = 'Audited';
         }
 

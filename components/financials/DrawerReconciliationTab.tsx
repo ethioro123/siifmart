@@ -29,14 +29,27 @@ export const DrawerReconciliationTab: React.FC = () => {
     const [selectedShift, setSelectedShift] = useState<DrawerReconciliationRecord | null>(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
 
-    const canSignOff = ['head_of_finance', 'finance_head', 'finance_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role);
+    const userRole = user?.role?.toLowerCase() || '';
+    const canSignOff = [
+        'head_of_finance', 'finance_head', 'finance_manager',
+        'regional_finance_officer', 'regional_finance_manager',
+        'head_of_operations', 'operations_head', 'operations_manager',
+        'regional_manager', 'regional_operations_director',
+        'country_managing_director', 'managing_director',
+        'admin', 'super_admin', 'CEO', 'ceo'
+    ].includes(userRole);
+
+    const isRegionalStaff = Boolean(userRole && [
+        'regional_finance_officer', 'regional_finance_manager',
+        'regional_manager', 'regional_operations_director'
+    ].includes(userRole));
 
     const loadQueue = async () => {
         setLoading(true);
         try {
             const data = await drawerReconciliationService.getQueue({
                 countryCode: effectiveCountry,
-                siteId: activeSite?.id,
+                siteId: isRegionalStaff ? undefined : activeSite?.id,
                 status: statusFilter === 'All' ? undefined : statusFilter,
                 onlyFlaggedVariances: onlyFlagged
             });
