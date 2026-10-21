@@ -220,7 +220,7 @@ export const canViewLocation = (
     if (!userRole) return false;
 
     // Global CEO can see everyone
-    if (userRole === 'super_admin') return true;
+    if (userRole === 'super_admin' || userRole === 'ceo' || userRole === 'CEO') return true;
 
     // Country Managing Director and HR/Operations leadership can see anyone in their country except Global CEO
     if ([
@@ -281,8 +281,10 @@ export const canEmployRole = (
     if (!userRole) return false;
 
     // CEO / Super Admin can employ anyone below CEO
-    if (userRole === 'super_admin' || userRole === 'CEO') {
-        return candidateRole !== 'super_admin' && candidateRole !== 'CEO';
+    const normUserRole = (userRole || '').toLowerCase();
+    const normCandidateRole = (candidateRole || '').toLowerCase();
+    if (normUserRole === 'super_admin' || normUserRole === 'ceo') {
+        return normCandidateRole !== 'super_admin' && normCandidateRole !== 'ceo';
     }
 
     const userHierarchy = getRoleHierarchy(userRole);

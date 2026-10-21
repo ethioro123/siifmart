@@ -174,6 +174,11 @@ export default function Sidebar() {
         return mobileAllowed.includes(item.to);
       }
 
+      // Global CEO has 100% complete access and operation to all modules
+      if (isSuperAdminOrCeo) {
+        return true;
+      }
+
       let isAllowedForSite = true;
 
       if (isWarehouse) {

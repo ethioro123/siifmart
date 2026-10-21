@@ -224,7 +224,7 @@ export default function TopBar() {
             if (['warehouse', 'procurement', 'pricing', 'finance', 'settings'].includes(nav.module)) return false;
             if (nav.path === '/network-inventory' || nav.path === '/roadmap') return false;
             if (nav.module === 'admin' && nav.path === '/admin') return false;
-         } else if (isHQ) {
+         } else if (isHQ && !isCeo) {
             if (nav.path === '/pos' || (nav.path === '/wms-ops' && userRole !== 'regional_logistics_lead')) return false;
             if (nav.path === '/inventory' && !['regional_logistics_lead', 'regional_security_supervisor'].includes(userRole)) return false; // In HQ, local inventory is replaced by Network Inventory
          }

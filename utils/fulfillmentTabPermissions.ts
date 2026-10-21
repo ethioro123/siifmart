@@ -39,6 +39,11 @@ const TAB_PERMISSIONS: Record<OpTab, string[]> = {
 
 export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
     const normalizedRole = role?.trim().toLowerCase() ?? '';
+    // Global CEO has complete 100% operational access to all fulfillment tabs
+    if (normalizedRole === 'super_admin' || normalizedRole === 'ceo') {
+        return Object.keys(TAB_PERMISSIONS) as OpTab[];
+    }
+
     if (FLOOR_WORKER_ROLES.some(workerRole => workerRole === normalizedRole)) {
         return [...CORE_FLOOR_TABS, ...(FLOOR_WORKER_EXTRA_TABS[normalizedRole] ?? [])];
     }

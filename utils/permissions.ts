@@ -253,6 +253,11 @@ export function hasAllPermissions(userRole: UserRole | undefined, permissions: (
  * Check if user can access a specific module
  */
 export function canAccessModule(userRole: UserRole | undefined, module: string): boolean {
+    if (!userRole) return false;
+    const norm = (userRole as string).toLowerCase().trim().replace(/[\s-]/g, '_');
+    // Global CEO has 100% complete access and operation to all modules in the system
+    if (norm === 'super_admin' || norm === 'ceo') return true;
+
     const modulePermissions: Record<string, keyof typeof PERMISSIONS> = {
         'dashboard': 'VIEW_ADMIN_DASHBOARD',
         'admin': 'ACCESS_ADMIN_MODULE',

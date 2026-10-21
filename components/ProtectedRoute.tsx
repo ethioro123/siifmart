@@ -43,6 +43,11 @@ export function ProtectedRoute({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // 1.1 Global CEO has 100% complete access, control, and operation to every module and route
+  if (normalizedRole === 'super_admin' || normalizedRole === 'ceo') {
+    return <>{children}</>;
+  }
+
   // 1.5. Clean Mobile / Android Mode: Strictly limit to Fulfillment for WMS and POS for stores
   if (native.isCleanMobileMode()) {
     const mobileRoute = getRoleDashboardRoute(user.role, activeSite?.type);
