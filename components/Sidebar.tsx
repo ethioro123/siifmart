@@ -27,9 +27,9 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label, onClic
       to={to}
       onClick={onClick}
       className={({ isActive }) =>
-        `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-          ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-r-2 border-[#2C5E3B] dark:border-[#A9CBA2]'
-          : 'text-stone-500 dark:text-gray-400 hover:bg-stone-100 dark:hover:bg-white/5 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2]'
+        `flex min-h-11 items-center gap-3 border-l-2 px-4 py-3 rounded-xl transition-colors duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${isActive
+          ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] border-[var(--theme-accent)] font-semibold'
+          : 'border-transparent text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
         }`
       }
     >
@@ -249,26 +249,27 @@ export default function Sidebar() {
     <>
       {/* Mobile Overlay - Only visible on small screens to prevent "dark thing" effect on desktop */}
       <div
-        className={`fixed inset-0 bg-black/40 lg:bg-black/20 z-[1000] backdrop-blur-sm lg:backdrop-blur-none transition-opacity duration-500 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        aria-hidden="true"
+        className={`fixed inset-0 bg-black/40 z-[1000] transition-opacity duration-200 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={toggleSidebar}
       />
 
       <aside className={`
         fixed inset-y-0 left-0 z-[1001]
-        w-72 bg-white dark:bg-[#1E2822] border-r border-[#E2DCCE] dark:border-white/5
-        transform transition-transform duration-300 ease-in-out
+        w-72 bg-[var(--theme-bg-card)] border-r border-[var(--theme-border)]
+        transform transition-transform duration-200 ease-out
         flex flex-col
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="p-6 flex items-center justify-between border-b border-[#E2DCCE] dark:border-white/5">
+        <div className="p-4 sm:p-5 flex items-center justify-between border-b border-[var(--theme-border)]">
           <Logo size={32} />
-          <button onClick={toggleSidebar} className="text-stone-400 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] transition-colors" aria-label="Close Sidebar">
+          <button type="button" onClick={toggleSidebar} className="min-h-11 min-w-11 flex items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label="Close navigation">
             <X size={24} />
           </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar py-4">
-          <p className="px-4 text-xs font-bold text-stone-400 dark:text-gray-500 uppercase tracking-wider mb-3">Menu</p>
+        <nav aria-label="Main navigation" className="flex-1 px-3 sm:px-4 space-y-1 overflow-y-auto custom-scrollbar py-4">
+          <p className="px-4 text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-3">Menu</p>
           {navItems.map(item => {
             const Icon = item.icon;
             // "Central Operations" for multi-site leadership: switch to Admin site before navigating
@@ -278,7 +279,7 @@ export default function Sidebar() {
                   key={item.to}
                   type="button"
                   onClick={handleAdminClick}
-                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group text-stone-500 dark:text-gray-400 hover:bg-stone-100 dark:hover:bg-white/5 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2]"
+                  className="w-full min-h-11 flex items-center gap-3 border-l-2 border-transparent px-4 py-3 rounded-xl transition-colors duration-200 group text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium tracking-wide">Central Operations</span>
