@@ -86,11 +86,12 @@ export const POSCartPanel: React.FC = () => {
                 {/* Header */}
                 <div className="pt-4 pb-3 px-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] lg:rounded-t-3xl flex items-center justify-between shrink-0">
                     <button
+                        type="button"
                         onClick={() => {
                             setShowCart(false);
                             native.haptic();
                         }}
-                        className="p-2 -ml-2 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] active:scale-95 transition-colors lg:hidden flex items-center gap-1.5 font-bold text-sm cursor-pointer"
+                        className="min-h-11 min-w-11 px-2 -ml-2 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors lg:hidden flex items-center gap-1.5 font-bold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         aria-label={t('pos.backToProducts')}
                     >
                         <ArrowLeft size={18} />
@@ -104,11 +105,13 @@ export const POSCartPanel: React.FC = () => {
                     </div>
 
                     <button
+                        type="button"
                         onClick={() => setIsCustomerModalOpen(true)}
-                        className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] px-3 py-1.5 rounded-2xl transition-all active:scale-95 group cursor-pointer shadow-2xs"
+                        className="min-h-11 flex items-center gap-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] px-3 rounded-2xl transition-colors group shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        aria-label={`Customer: ${selectedCustomer ? selectedCustomer.name : 'Walk-in'}. Change customer`}
                     >
-                        <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                            <User size={13} />
+                            <div className="w-5 h-5 rounded-md bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
+                            <User size={13} aria-hidden="true" />
                         </div>
                         <span className="text-xs font-semibold text-[var(--theme-text-primary)] max-w-[110px] truncate tracking-tight">
                             {selectedCustomer ? selectedCustomer.name : 'Walk-in'}
@@ -149,7 +152,7 @@ export const POSCartPanel: React.FC = () => {
                                             <div className="flex items-center bg-[var(--theme-bg-card)] rounded-lg px-2 py-1 border border-[var(--theme-border)] gap-1">
                                                 <input
                                                     type="number"
-                                                    title="Quantity"
+                                                    aria-label={`Quantity of ${item.name} in ${unit.shortLabel}`}
                                                     step={unit.step}
                                                     min={unit.step}
                                                     value={item.quantity}
@@ -164,12 +167,13 @@ export const POSCartPanel: React.FC = () => {
                                         ) : (
                                             <div className="flex items-center bg-[var(--theme-bg-card)] rounded-lg p-0.5 border border-[var(--theme-border)]">
                                                 <button
+                                                    type="button"
                                                     onClick={() => {
                                                         updateQuantity(item.id, -1);
                                                         native.haptic();
                                                     }}
-                                                    className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors active:scale-90 cursor-pointer"
-                                                    title="Decrease quantity"
+                                                    className="min-h-11 min-w-11 rounded-md flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                    aria-label={`Decrease ${item.name} quantity`}
                                                 >
                                                     <Minus size={13} />
                                                 </button>
@@ -177,12 +181,13 @@ export const POSCartPanel: React.FC = () => {
                                                     {item.quantity}
                                                 </span>
                                                 <button
+                                                    type="button"
                                                     onClick={() => {
                                                         updateQuantity(item.id, 1);
                                                         native.haptic();
                                                     }}
-                                                    className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors active:scale-90 cursor-pointer"
-                                                    title="Increase quantity"
+                                                    className="min-h-11 min-w-11 rounded-md flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                    aria-label={`Increase ${item.name} quantity`}
                                                 >
                                                     <Plus size={13} />
                                                 </button>
@@ -194,12 +199,13 @@ export const POSCartPanel: React.FC = () => {
                                         </div>
 
                                         <button
+                                            type="button"
                                             onClick={() => {
                                                 removeFromCart(item.id);
                                                 native.haptic();
                                             }}
-                                            className="p-1.5 text-[var(--theme-text-muted)] hover:text-rose-500 rounded-lg active:scale-90 transition-colors cursor-pointer"
-                                            title="Remove item"
+                                            className="min-h-11 min-w-11 flex items-center justify-center text-[var(--theme-text-muted)] hover:text-[var(--theme-status-danger)] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
+                                            aria-label={`Remove ${item.name} from cart`}
                                         >
                                             <Trash2 size={14} />
                                         </button>
@@ -227,7 +233,8 @@ export const POSCartPanel: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowDetails(!showDetails)}
-                                className="text-[11px] font-semibold text-[var(--theme-text-primary)] flex items-center gap-1 hover:opacity-80 cursor-pointer tracking-tight"
+                                aria-expanded={showDetails}
+                                className="min-h-11 px-2 text-[11px] font-semibold text-[var(--theme-text-primary)] flex items-center gap-1 hover:bg-[var(--theme-bg-subtle)] rounded-lg tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
                                 <span>{showDetails ? 'Hide breakdown' : 'View breakdown'}</span>
                                 {showDetails ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
@@ -242,8 +249,9 @@ export const POSCartPanel: React.FC = () => {
                                         <span>Discount</span>
                                         <Protected permission="APPLY_DISCOUNT">
                                             <button
+                                                type="button"
                                                 onClick={() => setIsDiscountModalOpen(true)}
-                                                className="text-[11px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-2.5 py-1 rounded-xl font-semibold text-[var(--theme-text-primary)] cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-colors shadow-2xs"
+                                                className="min-h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-2.5 rounded-xl font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                             >
                                                 <Tag size={11} className="inline mr-1 text-pink-500" />
                                                 {appliedDiscountCodeDetails ? appliedDiscountCodeDetails.code : 'Apply Code'}
@@ -266,11 +274,15 @@ export const POSCartPanel: React.FC = () => {
                                     <div className="flex items-center gap-1.5">
                                         <span>Cash Rounding</span>
                                         <button
+                                            type="button"
+                                            role="switch"
+                                            aria-checked={isRoundingEnabled}
+                                            aria-label="Cash rounding"
                                             title="Toggle cash rounding"
                                             onClick={() => setIsRoundingEnabled(!isRoundingEnabled)}
-                                            className={`w-6 h-3.5 rounded-full transition-colors relative shrink-0 cursor-pointer ${isRoundingEnabled ? 'bg-[var(--theme-primary)]' : 'bg-[var(--theme-border)]'}`}
+                                            className={`min-h-11 min-w-11 rounded-xl transition-colors relative shrink-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${isRoundingEnabled ? 'bg-[var(--theme-accent-muted)]' : 'bg-[var(--theme-bg-subtle)]'}`}
                                         >
-                                            <div className={`w-2.5 h-2.5 bg-[var(--theme-primary-text)] rounded-full absolute top-0.5 transition-all shadow-xs ${isRoundingEnabled ? 'left-3' : 'left-0.5'}`} />
+                                            <div className={`w-5 h-5 rounded-full absolute top-1/2 -translate-y-1/2 transition-all shadow-xs ${isRoundingEnabled ? 'left-5 bg-[var(--theme-accent)]' : 'left-1 bg-[var(--theme-text-muted)]'}`} />
                                         </button>
                                     </div>
                                     <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">+{CURRENCY_SYMBOL} {roundingAdjustment.toFixed(2)}</span>
@@ -298,7 +310,7 @@ export const POSCartPanel: React.FC = () => {
                                 native.haptic();
                             }}
                             disabled={cart.length === 0}
-                            className="py-2.5 px-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl text-[11px] font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 disabled:opacity-40 transition-all active:scale-95 cursor-pointer shadow-2xs tracking-tight"
+                            className="min-h-11 py-2.5 px-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl text-[11px] font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 disabled:opacity-40 transition-colors shadow-2xs tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                             <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                                 <PauseCircle size={13} />
@@ -315,7 +327,7 @@ export const POSCartPanel: React.FC = () => {
                                 native.haptic();
                             }}
                             disabled={cart.length === 0}
-                            className="py-2.5 px-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 rounded-2xl text-[11px] font-semibold text-rose-500 flex items-center justify-center gap-1.5 disabled:opacity-40 transition-all active:scale-95 cursor-pointer tracking-tight"
+                            className="min-h-11 py-2.5 px-2 bg-[var(--theme-status-danger-bg)] hover:opacity-90 border border-[var(--theme-status-danger-border)] rounded-2xl text-[11px] font-semibold text-[var(--theme-status-danger-text)] flex items-center justify-center gap-1.5 disabled:opacity-40 transition-colors tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                             title="Zero-Trust Void (Supervisor Auth Required)"
                         >
                             <div className="w-5 h-5 rounded-md bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
@@ -328,7 +340,8 @@ export const POSCartPanel: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowActions(!showActions)}
-                                className="w-full py-2.5 px-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl text-[11px] font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-2xs tracking-tight"
+                                aria-expanded={showActions}
+                                className="w-full min-h-11 py-2.5 px-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl text-[11px] font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 transition-colors shadow-2xs tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
                                 <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                                     <Settings size={13} />
@@ -358,12 +371,13 @@ export const POSCartPanel: React.FC = () => {
 
                     {/* Big 1-Tap Initialize Payment Button */}
                     <button
+                        type="button"
                         onClick={() => {
                             handleInitiatePayment();
                             native.haptic();
                         }}
                         disabled={cart.length === 0}
-                        className="w-full py-4 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-30 text-[var(--theme-primary-text)] rounded-2xl flex items-center justify-center gap-2.5 transition-all shadow-sm active:scale-[0.98] font-semibold uppercase tracking-wider text-xs sm:text-sm select-none cursor-pointer border border-transparent"
+                        className="w-full min-h-14 py-4 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-sm font-semibold uppercase tracking-wider text-xs sm:text-sm select-none border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <CreditCard size={18} />
                         <span>Charge {CURRENCY_SYMBOL} {total.toLocaleString()}</span>
@@ -375,11 +389,12 @@ export const POSCartPanel: React.FC = () => {
             {!showCart && cart.length > 0 && (
                 <div className="lg:hidden fixed bottom-6 left-4 right-4 z-40 animate-in slide-in-from-bottom-4 duration-300">
                     <button
+                        type="button"
                         onClick={() => {
                             setShowCart(true);
                             native.haptic();
                         }}
-                        className="w-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] p-3.5 rounded-2xl shadow-xl border border-transparent flex items-center justify-between font-bold active:scale-95 transition-all cursor-pointer"
+                        className="w-full min-h-14 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] p-3.5 rounded-2xl shadow-xl border border-transparent flex items-center justify-between font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <div className="flex items-center gap-2.5">
                             <div className="bg-black/15 dark:bg-black/20 border border-black/10 dark:border-black/25 text-inherit px-2 py-0.5 rounded-lg text-xs font-bold">

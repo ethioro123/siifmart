@@ -65,7 +65,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 onClick={() => navigate('/')}
                 title={t('pos.exitDashboard')}
                 aria-label="Exit to Dashboard"
-                className="hidden lg:flex items-center justify-center p-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] active:scale-95 transition-all shadow-xs cursor-pointer group shrink-0"
+                className="hidden lg:flex min-h-11 min-w-11 items-center justify-center p-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors shadow-xs group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
             >
                 <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center transition-transform group-hover:-translate-x-0.5">
                     <ArrowLeft size={14} />
@@ -79,6 +79,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                     <input
                         ref={searchInputRef}
                         type="text"
+                        aria-label={t('pos.searchProducts') || 'Search or scan products'}
                         placeholder={t('pos.searchProducts') || 'Search products or scan barcode...'}
                         className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] font-medium text-[13px] min-w-0 tracking-tight"
                         value={searchTerm}
@@ -92,7 +93,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                 setSearchTerm('');
                                 if (searchInputRef.current) searchInputRef.current.value = '';
                             }}
-                            className="ml-1.5 w-6 h-6 rounded-full bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all flex items-center justify-center shrink-0 cursor-pointer active:scale-90"
+                            className="ml-1.5 min-h-11 min-w-11 rounded-full hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors flex items-center justify-center shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             aria-label="Clear Search"
                         >
                             <X size={12} />
@@ -117,7 +118,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                     setIsPriceUpdatesModalOpen(true);
                                     native.haptic();
                                 }}
-                                className="flex items-center gap-1.5 hover:underline cursor-pointer transition-transform active:scale-95"
+                                className="min-h-11 flex items-center gap-1.5 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] rounded-lg"
                                 title="Review and confirm product price updates"
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
@@ -128,7 +129,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                             <button
                                 type="button"
                                 onClick={markPriceUpdatesAsRead}
-                                className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors cursor-pointer"
+                                className="ml-1 min-h-11 px-2 text-[10px] font-bold rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:bg-[var(--theme-primary-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                 title="Dismiss price notifications"
                             >
                                 Dismiss
@@ -139,11 +140,12 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
 
                 {/* Unknown Barcode Alert */}
                 {unknownBarcode && (
-                    <div className="absolute left-0 right-0 top-full mt-2 z-50">
+                    <div role="alert" className="absolute left-0 right-0 top-full mt-2 z-50">
                         <div className="bg-[var(--theme-bg-card)] border border-amber-500/30 rounded-2xl p-4 shadow-lg animate-in fade-in slide-in-from-top-2">
                             <button
+                                type="button"
                                 onClick={() => setUnknownBarcode('')}
-                                className="absolute top-2 right-2 p-1.5 rounded-lg text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
+                                className="absolute top-2 right-2 min-h-11 min-w-11 flex items-center justify-center rounded-lg text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                 aria-label="Dismiss"
                             >
                                 <X size={16} />
@@ -155,17 +157,19 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
+                                        type="button"
                                         onClick={() => setUnknownBarcode('')}
-                                        className="px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl text-xs font-bold transition-all cursor-pointer"
+                                        className="min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                     >
                                         {t('pos.dismiss')}
                                     </button>
                                     <button
+                                        type="button"
                                         onClick={() => {
                                             setCapturedBarcodeForModal(unknownBarcode);
                                             setIsUnknownBarcodeModalOpen(true);
                                         }}
-                                        className="px-3.5 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                                        className="min-h-11 px-3.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:bg-[var(--theme-primary-hover)] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                     >
                                         <Link size={13} />
                                         {t('pos.linkBarcode')}
@@ -179,8 +183,10 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
 
             {/* Advanced Filter & Sort Button */}
             <button
+                type="button"
                 onClick={() => setIsFilterPanelOpen(true)}
-                className="relative bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all flex items-center gap-2 active:scale-95 shadow-xs cursor-pointer shrink-0 tracking-tight"
+                aria-label={`Filter and sort${activeFiltersCount ? `, ${activeFiltersCount} active` : ''}`}
+                className="relative min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors flex items-center gap-2 shadow-xs shrink-0 tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
             >
                 <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                     <SlidersHorizontal size={13} />
@@ -196,8 +202,10 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
             {/* Sync Status Badge */}
             <div className="hidden md:block shrink-0">
                 <button
+                    type="button"
                     onClick={() => triggerSync()}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-semibold border transition-all cursor-pointer tracking-tight shadow-xs active:scale-95 ${posSyncStatus === 'offline' ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' :
+                    aria-label={`Sync point of sale${posSyncStatus === 'offline' ? ', offline' : posSyncStatus === 'syncing' ? ', syncing' : (posPendingSyncCount || 0) > 0 ? `, ${posPendingSyncCount} pending` : ', online'}`}
+                    className={`min-h-11 flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-semibold border transition-colors tracking-tight shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${posSyncStatus === 'offline' ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)]' :
                         posSyncStatus === 'syncing' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
                             (posPendingSyncCount || 0) > 0 ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
                                 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'

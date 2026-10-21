@@ -27,7 +27,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
 }) => {
     const { t } = useLanguage();
     const navigate = useNavigate();
-    const { filteredProducts, addToCart, lastSeenPriceUpdate, cart, setIsPriceUpdatesModalOpen } = usePOS();
+    const { filteredProducts, addToCart, lastSeenPriceUpdate, cart } = usePOS();
 
     return (
         <div className="flex-1 overflow-y-auto p-4">
@@ -40,8 +40,9 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                         <br />
                         {!native.isCleanMobileMode() && (
                             <button
+                                type="button"
                                 onClick={() => navigate('/pos-dashboard')}
-                                className="text-[var(--theme-primary)] hover:underline mt-2 font-medium"
+                                className="min-h-11 mt-2 px-3 text-[var(--theme-accent)] hover:underline font-medium rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
                                 {t('pos.goToPOSCommand')}
                             </button>
@@ -55,13 +56,15 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                             const inCartItem = cart.find(i => i.id === product.id || (i as any).productId === product.id);
                             return (
                             <button
+                                type="button"
                                 key={product.id}
                                 onClick={() => {
                                     addToCart(product);
                                     native.haptic();
                                 }}
-                                disabled={product.stock === 0}
-                                className={`text-left bg-[var(--theme-bg-card)] border rounded-2xl p-3 hover:bg-[var(--theme-bg-card-hover)] transition-all duration-200 group relative overflow-hidden flex flex-col h-full active:scale-[0.97] hover:-translate-y-0.5 ${product.stock <= 0 ? 'border-rose-500/50 opacity-50 cursor-not-allowed' : inCartItem ? 'border-[var(--theme-border-focus)] ring-1 ring-[var(--theme-border-focus)] shadow-sm' : 'border-[var(--theme-border)] hover:border-[var(--theme-border-mocha)] shadow-xs hover:shadow-md'}`}
+                                disabled={product.stock <= 0}
+                                aria-label={`${product.name}, ${product.stock <= 0 ? t('common.outOfStock') : `${CURRENCY_SYMBOL} ${formatPriceValue(product.isOnSale && product.salePrice ? product.salePrice : product.price)}`}. Add to cart`}
+                                className={`text-left bg-[var(--theme-bg-card)] border rounded-2xl p-3 hover:bg-[var(--theme-bg-card-hover)] transition-colors group relative overflow-hidden flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${product.stock <= 0 ? 'border-[var(--theme-status-danger-border)] opacity-70 cursor-not-allowed' : inCartItem ? 'border-[var(--theme-border-focus)] ring-1 ring-[var(--theme-border-focus)] shadow-sm' : 'border-[var(--theme-border)] hover:border-[var(--theme-border-mocha)] shadow-xs'}`}
                             >
                                 <div className="aspect-square rounded-xl bg-[var(--theme-bg-panel)] mb-2.5 overflow-hidden relative border border-[var(--theme-border-subtle)] flex items-center justify-center">
                                     {product.image && !product.image.includes('placeholder.com') ? (
@@ -95,9 +98,9 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         
                                         let colorClasses = 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]';
                                         if (isOutOfStock) {
-                                            colorClasses = 'bg-rose-500/15 text-rose-500 border border-rose-500/30';
+                                            colorClasses = 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]';
                                         } else if (isLowStock) {
-                                            colorClasses = 'bg-amber-500/15 text-amber-500 border border-amber-500/30';
+                                            colorClasses = 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]';
                                         }
 
                                         return (
@@ -118,26 +121,8 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                             const ts = new Date(priceTime).getTime();
                                             if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
                                                 return (
-                                                    <span
-                                                        role="button"
-                                                        tabIndex={0}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setIsPriceUpdatesModalOpen(true);
-                                                            native.haptic();
-                                                        }}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter' || e.key === ' ') {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                setIsPriceUpdatesModalOpen(true);
-                                                                native.haptic();
-                                                            }
-                                                        }}
-                                                        className="absolute top-1.5 left-1.5 bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1 z-10 transition-colors cursor-pointer active:scale-95"
-                                                        title="Price updated recently - tap to confirm"
-                                                    >
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                                    <span className="absolute top-1.5 left-1.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1 z-10">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info)]" aria-hidden="true" />
                                                         Changed
                                                     </span>
                                                 );
@@ -173,26 +158,8 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                     const ts = new Date(priceTime).getTime();
                                                     if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
                                                         return (
-                                                            <span
-                                                                role="button"
-                                                                tabIndex={0}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setIsPriceUpdatesModalOpen(true);
-                                                                    native.haptic();
-                                                                }}
-                                                                onKeyDown={(e) => {
-                                                                    if (e.key === 'Enter' || e.key === ' ') {
-                                                                        e.preventDefault();
-                                                                        e.stopPropagation();
-                                                                        setIsPriceUpdatesModalOpen(true);
-                                                                        native.haptic();
-                                                                    }
-                                                                }}
-                                                                className="inline-flex items-center gap-1 text-[10px] font-black text-blue-600 dark:text-blue-400 hover:underline uppercase mb-0.5 tracking-wider cursor-pointer"
-                                                                title="Price updated recently - tap to confirm"
-                                                            >
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                                            <span className="inline-flex items-center gap-1 text-[10px] font-black text-[var(--theme-status-info-text)] uppercase mb-0.5 tracking-wider" aria-label="Price updated recently">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info)]" aria-hidden="true" />
                                                                 Updated
                                                             </span>
                                                         );
@@ -203,7 +170,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                             <div className="flex items-baseline gap-1 flex-wrap">
                                                 {product.isOnSale && product.salePrice ? (
                                                     <>
-                                                        <p className="text-rose-500 font-bold text-xs sm:text-sm font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-rose-500 font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                        <p className="text-[var(--theme-status-danger-text)] font-bold text-xs sm:text-sm font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-status-danger-text)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                                         <p className="text-[var(--theme-text-secondary)] text-xs line-through font-mono tabular-nums font-semibold">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
                                                     </>
                                                 ) : (
@@ -228,7 +195,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                     {/* Pagination Controls */}
                     {totalPages > 1 && (
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-28 lg:pb-8 border-t border-[var(--theme-border)] mt-6 px-1">
-                            <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                                    <span role="status" className="text-xs text-[var(--theme-text-secondary)] font-medium">
                                 Showing <span className="font-bold text-[var(--theme-text-primary)]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{' '}
                                 <span className="font-bold text-[var(--theme-text-primary)]">
                                     {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)}
@@ -245,7 +212,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         setCurrentPage(1);
                                         native.haptic();
                                     }}
-                                    className="hidden sm:flex min-w-[36px] min-h-[36px] h-9 w-9 rounded-xl items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-sm cursor-pointer active:scale-95"
+                                    className="hidden sm:flex min-w-11 min-h-11 rounded-xl items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                 >
                                     <ChevronsLeft size={16} />
                                 </button>
@@ -258,7 +225,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         setCurrentPage(prev => Math.max(prev - 1, 1));
                                         native.haptic();
                                     }}
-                                    className="min-w-[36px] min-h-[36px] h-9 w-9 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base cursor-pointer active:scale-95"
+                                    className="min-w-11 min-h-11 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                 >
                                     <ChevronLeft size={16} />
                                 </button>
@@ -284,7 +251,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                     setCurrentPage(p);
                                                     native.haptic();
                                                 }}
-                                                className={`min-w-[36px] min-h-[36px] h-9 w-9 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm border transition-colors cursor-pointer active:scale-95 ${currentPage === p
+                                                className={`min-w-11 min-h-11 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${currentPage === p
                                                     ? 'bg-[var(--theme-primary)] border-transparent text-[var(--theme-primary-text)] shadow-xs'
                                                     : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                                 }`}
@@ -304,7 +271,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         setCurrentPage(prev => Math.min(prev + 1, totalPages));
                                         native.haptic();
                                     }}
-                                    className="min-w-[36px] min-h-[36px] h-9 w-9 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base cursor-pointer active:scale-95"
+                                    className="min-w-11 min-h-11 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                 >
                                     <ChevronRight size={16} />
                                 </button>
@@ -317,7 +284,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         setCurrentPage(totalPages);
                                         native.haptic();
                                     }}
-                                    className="hidden sm:flex min-w-[36px] min-h-[36px] h-9 w-9 rounded-xl items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-sm cursor-pointer active:scale-95"
+                                    className="hidden sm:flex min-w-11 min-h-11 rounded-xl items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                 >
                                     <ChevronsRight size={16} />
                                 </button>
