@@ -196,8 +196,8 @@ export const expensesService = {
             throw new Error('Maker-Checker violation: Expense creator cannot approve their own expense (4-Eyes Principle).');
         }
 
-        // CEO Escalation Governance: Exceeds threshold requires CEO
-        if (existing.escalatedToCeo && !['CEO', 'ceo', 'super_admin'].includes(approver.role)) {
+        // CEO Escalation Governance: Exceeds threshold requires CEO or Country Managing Director
+        if (existing.escalatedToCeo && !['CEO', 'ceo', 'super_admin', 'country_managing_director'].includes(approver.role)) {
             throw new Error('Executive Authorization required: This expense exceeds the sovereign threshold and requires CEO approval.');
         }
 
