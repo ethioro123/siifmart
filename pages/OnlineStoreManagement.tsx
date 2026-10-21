@@ -15,6 +15,7 @@ export default function OnlineStoreManagement() {
   const role = user?.role?.toLowerCase() || '';
   const canManageOrders = ['warehouse_manager', 'operations_manager', 'logistics_manager', 'regional_logistics_lead', 'admin', 'super_admin', 'ceo'].includes(role);
   const [notice, setNotice] = useState('');
+  const [formError, setFormError] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
@@ -36,11 +37,19 @@ export default function OnlineStoreManagement() {
   const jobs = management.data?.jobs || [];
   const loading = management.isPending || management.isFetching;
   const error = management.error ? readableError(management.error) : '';
+  const incompleteDetails = [
+    customerName.trim().length < 2 && 'customer name (at least 2 characters)',
+    customerPhone.trim().length < 7 && 'customer phone (at least 7 characters)',
+    deliveryAddress.trim().length < 5 && 'delivery address (at least 5 characters)',
+    items.length === 0 && 'an item',
+  ].filter((detail): detail is string => Boolean(detail));
 
   useEffect(() => {
     setCustomerName(''); setCustomerPhone(''); setDeliveryAddress('');
-    setProductId(''); setQuantity(1); setItems([]); setNotice('');
+    setProductId(''); setQuantity(1); setItems([]); setNotice(''); setFormError('');
   }, [effectiveFacilitySiteId]);
+
+  useEffect(() => { setFormError(''); }, [customerName, customerPhone, deliveryAddress, items]);
 
   const addItem = () => {
     if (!productId || !Number.isInteger(quantity) || quantity < 1 || quantity > 20 || items.some((item) => item.productId === productId)) return;
@@ -51,11 +60,16 @@ export default function OnlineStoreManagement() {
 
   const saveOrder = async () => {
     setNotice('');
+    if (incompleteDetails.length) {
+      setFormError(`Complete ${incompleteDetails.join(', ')} before saving.`);
+      return;
+    }
+    setFormError('');
     try {
       const number = await management.intakeMutation.mutateAsync({ customerName, customerPhone, deliveryAddress, items });
       setCustomerName(''); setCustomerPhone(''); setDeliveryAddress(''); setItems([]);
       setNotice(`${number}: order saved for fulfillment review.`);
-    } catch { /* Mutation error is shown below. */ }
+    } catch (saveError) { setFormError(readableError(saveError)); }
   };
 
   const updateOrder = async (order: (typeof orders)[number], status: 'accepted' | 'rejected') => {
@@ -103,9 +117,9 @@ export default function OnlineStoreManagement() {
         </label>
       )}
 
-      {(error || management.intakeMutation.error || management.orderMutation.error) && (
+      {(error || management.orderMutation.error) && (
         <div className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-3 text-sm text-[var(--theme-status-danger-text)]" role="alert">
-          {error || readableError(management.intakeMutation.error || management.orderMutation.error)}
+          {error || readableError(management.orderMutation.error)}
         </div>
       )}
       {notice && (
@@ -120,15 +134,15 @@ export default function OnlineStoreManagement() {
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           <label className="grid gap-1 text-sm text-[var(--theme-text-primary)]">
             Customer name
-            <input value={customerName} onChange={(event) => setCustomerName(event.target.value)} maxLength={120} className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" />
+            <input value={customerName} onChange={(event) => setCustomerName(event.target.value)} minLength={2} maxLength={120} required className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" />
           </label>
           <label className="grid gap-1 text-sm text-[var(--theme-text-primary)]">
             Customer phone
-            <input value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} maxLength={32} type="tel" className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" />
+            <input value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} minLength={7} maxLength={32} required type="tel" className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" />
           </label>
           <label className="grid gap-1 text-sm text-[var(--theme-text-primary)] md:col-span-2">
             Delivery address
-            <textarea value={deliveryAddress} onChange={(event) => setDeliveryAddress(event.target.value)} maxLength={500} rows={2} className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 py-2 text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" />
+            <textarea value={deliveryAddress} onChange={(event) => setDeliveryAddress(event.target.value)} minLength={5} maxLength={500} rows={2} required className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 py-2 text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" />
           </label>
         </div>
 
@@ -163,10 +177,12 @@ export default function OnlineStoreManagement() {
         )}
 
         <div className="mt-4 flex justify-end">
-          <button type="button" onClick={() => void saveOrder()} disabled={!effectiveFacilitySiteId || !customerName.trim() || !customerPhone.trim() || !deliveryAddress.trim() || !items.length || management.intakeMutation.isPending} className="min-h-11 rounded-lg bg-[var(--theme-btn-primary-bg)] px-4 text-sm font-semibold text-[var(--theme-btn-primary-text)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
-            Save order for review
+          <button type="button" onClick={() => void saveOrder()} disabled={!effectiveFacilitySiteId || management.intakeMutation.isPending} className="min-h-11 rounded-lg bg-[var(--theme-btn-primary-bg)] px-4 text-sm font-semibold text-[var(--theme-btn-primary-text)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
+            {management.intakeMutation.isPending ? 'Saving order…' : 'Save order for review'}
           </button>
         </div>
+        {incompleteDetails.length > 0 && <p className="mt-2 text-sm text-[var(--theme-text-secondary)]">To save, complete: {incompleteDetails.join(', ')}.</p>}
+        {formError && <p className="mt-2 text-sm text-[var(--theme-status-danger-text)]" role="alert">{formError}</p>}
       </section>
 
       <section className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-5 sm:p-6">
