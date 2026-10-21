@@ -13,7 +13,7 @@ interface LogoProps {
 }
 
 /**
- * Pure Black & White Vector S-Cart & Twin Organic Leaves Emblem.
+ * Futuristic hex-frame emblem: a sprout rising from a market basket.
  * Faithfully renders SIIFMART's iconic ribbon-'S' grocery cart, twin wheels,
  * and asymmetric organic leaves in a crisp monochrome vector for light and dark mode.
  */
@@ -28,37 +28,21 @@ function SiifGroceryEmblem({ size }: { size: number }) {
       className="shrink-0 text-[#09090B] dark:text-[#FFFFFF] transition-colors duration-200"
       aria-hidden="true"
     >
-      {/* Left Organic Leaf (Tilting Up-Left) with Subtle Midrib Cutout */}
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M59.5 34.2C48.8 28.0 41.8 18.8 40.0 7.8C51.8 13.0 58.8 22.2 59.5 34.2ZM57.8 31.4C54.0 24.8 49.6 19.0 45.2 14.0C49.0 19.6 53.2 25.4 56.8 31.8L57.8 31.4Z"
-        fill="currentColor"
-      />
-
-      {/* Right Signature Leaf (Sweeping Up-Right) with Sculpted Vein Cutout */}
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M62.8 35.0C61.0 18.6 72.8 5.8 95.8 0.8C89.8 19.2 78.8 30.2 62.8 35.0ZM64.8 33.4C68.6 23.6 75.4 14.8 85.0 7.6C74.0 16.2 67.4 24.8 63.6 33.6L64.8 33.4Z"
-        fill="currentColor"
-      />
-
-      {/* Calligraphic Ribbon 'S' Forming the Upper & Inner Grocery Cart Body */}
-      <path
-        d="M57.0 34.0C44.2 23.0 24.2 19.8 11.4 25.8C3.2 29.8 3.0 40.8 14.2 46.2C26.4 52.0 48.0 58.0 56.2 64.0C63.0 69.0 61.2 76.8 52.0 80.0C65.8 79.0 72.8 70.2 71.0 60.0C69.2 50.0 50.2 44.0 31.0 37.8C19.0 33.8 16.2 27.8 26.2 25.0C36.0 22.2 48.0 26.8 57.0 34.0Z"
-        fill="currentColor"
-      />
-
-      {/* Grocery Cart Basket Frame, Angled Front Wall & Tapered Handlebar */}
-      <path
-        d="M11.0 53.8C6.2 69.2 12.2 83.2 29.0 83.2H65.0C72.0 83.2 76.2 80.2 79.2 74.0L98.2 38.0L52.0 39.0V40.4L82.0 42.0C86.0 42.3 87.0 44.5 85.4 48.2L71.0 76.0C68.6 79.6 64.0 80.4 58.0 80.4H33.0C19.2 80.4 12.2 70.0 11.0 53.8Z"
-        fill="currentColor"
-      />
-
-      {/* Twin Grocery Cart Wheels */}
-      <circle cx="30.0" cy="92.0" r="6.2" fill="currentColor" />
-      <circle cx="63.0" cy="92.0" r="6.2" fill="currentColor" />
+      {/* Hexagonal tech frame (cell / honeycomb) */}
+      <path d="M50 4L89.8 27V73L50 96L10.2 73V27Z" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" />
+      {/* Sprout: two leaves rising from the basket */}
+      <path d="M50 52C37 52 30.5 44 29.5 33C41 33 49 40 50 52Z" fill="currentColor" />
+      <path d="M50 46C50 31 58.5 22 71.5 20.5C71.5 33.5 62.5 43 50 46Z" fill="currentColor" />
+      <path d="M50 62V46" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      {/* Market basket / cart body */}
+      <path d="M24 56H76L69.5 75.5C69 77 67.8 78 66.2 78H33.8C32.2 78 31 77 30.5 75.5Z" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M40 66H60" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* Wheels */}
+      <circle cx="40" cy="85" r="2.8" fill="currentColor" />
+      <circle cx="60" cy="85" r="2.8" fill="currentColor" />
+      {/* Data nodes */}
+      <circle cx="89.8" cy="27" r="3" fill="currentColor" />
+      <circle cx="10.2" cy="73" r="3" fill="currentColor" />
     </svg>
   );
 }
