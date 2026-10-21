@@ -20,6 +20,7 @@ export default function Roadmap() {
 
   const [entries, setEntries] = useState<KnowledgeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUsingFallback, setIsUsingFallback] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterDepartment, setFilterDepartment] = useState<string>('all');
@@ -101,6 +102,7 @@ export default function Roadmap() {
       } catch (error) {
         logger.warn('Roadmap', 'Failed to load knowledge base from Supabase, loading default policies:');
         if (isMounted) {
+          setIsUsingFallback(true);
           setEntries(DEFAULT_ROADMAP_POLICIES);
         }
       } finally {
@@ -223,15 +225,15 @@ export default function Roadmap() {
     return (
       <div className="h-[calc(100vh-120px)] flex items-center justify-center">
         <div className="text-center max-w-md">
-          <div className="w-24 h-24 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6">
-            <Shield size={48} className="text-red-400" />
+          <div className="w-24 h-24 rounded-full bg-[var(--theme-status-danger-bg)] flex items-center justify-center mx-auto mb-6">
+            <Shield size={48} className="text-[var(--theme-status-danger)]" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-3">Access Restricted</h2>
-          <p className="text-gray-400 mb-6">
-            The Knowledge Base is exclusively available to <span className="text-cyber-primary font-bold">CEOs</span>.
+          <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] mb-3">Access restricted</h2>
+          <p className="text-[var(--theme-text-secondary)] mb-6">
+            The Knowledge Base is available to CEOs.
           </p>
-          <p className="text-sm text-gray-500">
-            Current role: <span className="text-white">{formatRole(user?.role) || 'Unknown'}</span>
+          <p className="text-sm text-[var(--theme-text-muted)]">
+            Current role: <span className="text-[var(--theme-text-primary)]">{formatRole(user?.role) || 'Unknown'}</span>
           </p>
         </div>
       </div>
@@ -243,8 +245,8 @@ export default function Roadmap() {
     return (
       <div className="h-[calc(100vh-120px)] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 size={48} className="text-cyber-primary animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading knowledge base...</p>
+          <Loader2 size={40} className="text-[var(--theme-accent)] animate-spin mx-auto mb-4" aria-hidden="true" />
+          <p className="text-[var(--theme-text-secondary)]" role="status">Loading knowledge base…</p>
         </div>
       </div>
     );
@@ -269,24 +271,26 @@ export default function Roadmap() {
 
   // List View
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col">
+    <div className="min-h-[calc(100vh-120px)] flex flex-col">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <BookOpen className="text-cyber-primary" />
+          <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] flex items-center gap-3">
+            <BookOpen className="text-[var(--theme-accent)]" />
             Knowledge Base
-            <span className="text-xs bg-cyber-primary/20 text-cyber-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-              <Database size={10} /> Synced
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 ${isUsingFallback ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning)]' : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success)]'}`}>
+              <Database size={12} aria-hidden="true" /> {isUsingFallback ? 'Default policies' : 'Connected'}
             </span>
           </h2>
-          <p className="text-gray-400 text-sm mt-1">
-            {entries.length} entries • Policies, Ideas, Workflows & Notes
+          <p className="text-[var(--theme-text-secondary)] text-sm mt-1">
+            {entries.length} {entries.length === 1 ? 'entry' : 'entries'} · Policies, ideas, workflows, and notes
           </p>
+          {isUsingFallback && <p className="mt-2 text-sm text-[var(--theme-status-warning)]" role="status">Showing default policies because the knowledge base service could not be reached.</p>}
         </div>
         <button
+          type="button"
           onClick={() => setIsCreating(true)}
-          className="bg-cyber-primary text-black px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-cyber-accent transition-all shadow-[0_0_20px_rgba(0,255,157,0.2)] flex items-center gap-2 self-start md:self-auto"
+          className="min-h-11 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[var(--theme-primary-hover)] transition-colors flex items-center gap-2 self-start md:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--theme-bg-app)]"
         >
           <Plus size={18} />
           New Entry
@@ -294,7 +298,7 @@ export default function Roadmap() {
       </div>
 
       {/* Search & Filters */}
-      <div className="flex flex-col md:flex-row gap-3 mb-6">
+      <div className="flex flex-col md:flex-row gap-3 mb-3">
         <div className="relative flex-1">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
@@ -302,7 +306,7 @@ export default function Roadmap() {
             placeholder="Search entries..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-cyber-gray border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white placeholder-gray-500 focus:border-cyber-primary/50 focus:outline-none"
+            className="w-full min-h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-11 pr-4 py-3 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
             aria-label="Search entries"
           />
         </div>
@@ -310,7 +314,7 @@ export default function Roadmap() {
           value={filterDepartment}
           onChange={(e) => setFilterDepartment(e.target.value)}
           aria-label="Filter by department"
-          className="bg-cyber-gray border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyber-primary/50 min-w-[150px]"
+          className="min-h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-2 text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] min-w-[150px]"
         >
           <option value="all">All Areas</option>
           {Object.entries(DEPARTMENTS).map(([key, d]) => (
@@ -321,7 +325,7 @@ export default function Roadmap() {
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
           aria-label="Filter by type"
-          className="bg-cyber-gray border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyber-primary/50 min-w-[150px]"
+          className="min-h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-2 text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] min-w-[150px]"
         >
           <option value="all">All Types</option>
           {Object.entries(ENTRY_TYPES).map(([key, t]) => (
@@ -331,12 +335,18 @@ export default function Roadmap() {
       </div>
 
       {/* Entries List */}
+      {(searchQuery || filterDepartment !== 'all' || filterType !== 'all') && (
+        <div className="flex items-center justify-between gap-3 mb-3 text-sm">
+          <p className="text-[var(--theme-text-secondary)]" role="status">Showing {filteredEntries.length} of {entries.length} entries</p>
+          <button type="button" onClick={() => { setSearchQuery(''); setFilterDepartment('all'); setFilterType('all'); }} className="min-h-11 px-3 text-[var(--theme-accent)] hover:bg-[var(--theme-accent-muted)] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Clear filters</button>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto space-y-3">
         {filteredEntries.length === 0 ? (
-          <div className="text-center py-20">
-            <BookOpen size={48} className="mx-auto mb-4 text-gray-600" />
-            <p className="text-gray-500 font-medium">No entries found</p>
-            <p className="text-gray-600 text-sm mt-1">Create your first entry to get started</p>
+          <div className="text-center py-16 px-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl">
+            <BookOpen size={40} className="mx-auto mb-4 text-[var(--theme-text-muted)]" aria-hidden="true" />
+            <p className="text-[var(--theme-text-primary)] font-semibold">{entries.length === 0 ? 'No entries yet' : 'No matching entries'}</p>
+            <p className="text-[var(--theme-text-secondary)] text-sm mt-1">{entries.length === 0 ? 'Create an entry to capture a policy, idea, workflow, or note.' : 'Try another search or clear your filters.'}</p>
           </div>
         ) : (
           filteredEntries.map(entry => {
@@ -346,8 +356,9 @@ export default function Roadmap() {
             return (
               <button
                 key={entry.id}
+                type="button"
                 onClick={() => setSelectedEntry(entry)}
-                className="w-full bg-cyber-gray hover:bg-cyber-gray/80 border border-white/10 hover:border-white/20 rounded-2xl p-5 text-left transition-all group"
+                className="w-full min-h-11 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 text-left transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
               >
                 <div className="flex items-start gap-4">
                   <div className={`w-12 h-12 rounded-xl ${dept.bgLight} flex items-center justify-center flex-shrink-0`}>
