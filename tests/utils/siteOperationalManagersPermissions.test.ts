@@ -76,16 +76,16 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
     });
 
     describe('Security & Loss Prevention Manager (SOP-MGT-030, Rank 75)', () => {
-        it('allows access to audit settings, inventory stock lists, and employee rosters', () => {
+        it('allows access to audit settings and employee rosters, blocking stock management (Departmental Isolation)', () => {
             expect(canAccessModule('security_manager', 'settings')).toBe(true);
-            expect(canAccessModule('security_manager', 'inventory')).toBe(true);
+            expect(canAccessModule('security_manager', 'inventory')).toBe(false);
             expect(canAccessModule('security_manager', 'employees')).toBe(true);
         });
 
-        it('grants audit logs inspection and inventory view while blocking write-offs', () => {
+        it('grants audit logs inspection while blocking stock adjustments and pos sales', () => {
             expect(authService.checkPermission('security_manager', 'settings.view_logs')).toBe(true);
             expect(authService.checkPermission('security_manager', 'settings.view')).toBe(true);
-            expect(authService.checkPermission('security_manager', 'inventory.view')).toBe(true);
+            expect(authService.checkPermission('security_manager', 'inventory.view')).toBe(false);
 
             // Prohibits unilateral stock adjustments (requires dual-control with Ops)
             expect(authService.checkPermission('security_manager', 'inventory.adjust')).toBe(false);
@@ -97,6 +97,38 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
             expect(canEmployRole('security_manager', 'super_admin')).toBe(false);
             expect(canEmployRole('security_manager', 'operations_manager')).toBe(false);
             expect(canEmployRole('security_manager', 'store_manager')).toBe(false);
+        });
+    });
+
+    describe('Dispatch Manager (SOP-MGT-031, Rank 75)', () => {
+        it('allows access to warehouse fulfillment, inventory, and employees modules', () => {
+            expect(canAccessModule('dispatch_manager', 'warehouse')).toBe(true);
+            expect(canAccessModule('dispatch_manager', 'inventory')).toBe(true);
+            expect(canAccessModule('dispatch_manager', 'employees')).toBe(true);
+        });
+
+        it('blocks access to POS till, central finance, and system settings modules', () => {
+            expect(canAccessModule('dispatch_manager', 'pos')).toBe(false);
+            expect(canAccessModule('dispatch_manager', 'finance')).toBe(false);
+            expect(canAccessModule('dispatch_manager', 'pricing')).toBe(false);
+            expect(canAccessModule('dispatch_manager', 'settings')).toBe(false);
+            expect(canAccessModule('dispatch_manager', 'admin')).toBe(false);
+        });
+
+        it('grants transit dispatch, transfer staging, and task assignment permissions', () => {
+            expect(authService.checkPermission('dispatch_manager', 'warehouse.dispatch')).toBe(true);
+            expect(authService.checkPermission('dispatch_manager', 'inventory.transfer')).toBe(true);
+            expect(authService.checkPermission('dispatch_manager', 'pos.create_sale')).toBe(false);
+        });
+
+        it('authorizes hiring of dispatchers and drivers strictly below Rank 75', () => {
+            expect(canEmployRole('dispatch_manager', 'driver')).toBe(true);
+            expect(canEmployRole('dispatch_manager', 'dispatcher')).toBe(true);
+
+            expect(canEmployRole('dispatch_manager', 'super_admin')).toBe(false);
+            expect(canEmployRole('dispatch_manager', 'operations_manager')).toBe(false);
+            expect(canEmployRole('dispatch_manager', 'logistics_manager')).toBe(false);
+            expect(canEmployRole('dispatch_manager', 'dispatch_manager')).toBe(false);
         });
     });
 
