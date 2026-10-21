@@ -29,6 +29,7 @@ export default function DateRangeSelector({
 }: DateRangeSelectorProps) {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -44,15 +45,28 @@ export default function DateRangeSelector({
         <div className={`relative ${className}`} ref={containerRef}>
             <button
                 type="button"
+                ref={triggerRef}
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2.5 px-3.5 py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl hover:border-[#0071E3]/40 dark:hover:border-[#2997FF]/40 transition-all cursor-pointer shadow-xs group h-9"
+                className="min-h-11 flex items-center gap-2.5 px-3.5 py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl hover:border-[var(--theme-accent)] transition-colors shadow-xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                aria-expanded={isOpen}
+                aria-controls="date-range-options"
+                aria-label={`Date range: ${value}`}
             >
-                <Calendar size={15} className={`${isOpen ? 'text-[#0071E3] dark:text-[#2997FF]' : 'text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)]'} transition-colors`} />
+                <Calendar size={15} aria-hidden="true" className={`${isOpen ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)]'} transition-colors`} />
                 <span className="text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight">{value}</span>
             </button>
 
             {isOpen && (
                 <div
+                    id="date-range-options"
+                    role="group"
+                    aria-label="Choose date range"
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape') {
+                            setIsOpen(false);
+                            triggerRef.current?.focus();
+                        }
+                    }}
                     className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-1.5 w-52 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-1 duration-150`}
                 >
                     <div className="p-1.5 space-y-0.5 max-h-[360px] overflow-y-auto custom-scrollbar">
@@ -64,13 +78,14 @@ export default function DateRangeSelector({
                                     onChange(option);
                                     setIsOpen(false);
                                 }}
-                                className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-xl transition-all cursor-pointer ${value === option
-                                    ? 'text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 dark:bg-[#2997FF]/10 font-semibold'
+                                aria-pressed={value === option}
+                                className={`w-full min-h-11 flex items-center justify-between px-3 py-2 text-xs font-medium rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--theme-accent)] ${value === option
+                                    ? 'text-[var(--theme-accent)] bg-[var(--theme-accent-muted)] font-semibold'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
                                     }`}
                             >
                                 <span>{option}</span>
-                                {value === option && <Check size={14} className="text-[#0071E3] dark:text-[#2997FF]" />}
+                                {value === option && <Check size={14} aria-hidden="true" className="text-[var(--theme-accent)]" />}
                             </button>
                         ))}
                     </div>
