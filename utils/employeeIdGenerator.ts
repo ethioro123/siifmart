@@ -99,8 +99,8 @@ export function parseEmployeeCode(code?: string | null, countryHint?: string | n
     if (!code || typeof code !== 'string') return null;
     const trimmed = code.trim().toUpperCase();
 
-    // 1. Sovereign Country-prefixed: KE-SIIF0044, ET-SIIF0020, UG-SIIF0100, KE-SIIF-0044
-    const countryPrefixedMatch = trimmed.match(/^([A-Z]{2})-SIIF-?(\d+)$/i);
+    // 1. Sovereign Country-prefixed: KE-SIIF0044, ET-SIIF0020, UG-SIIF0100, ET-STG-056
+    const countryPrefixedMatch = trimmed.match(/^([A-Z]{2})-(?:SIIF|STG)-?(\d+)$/i);
     if (countryPrefixedMatch) {
         return {
             country: normalizeCountryCode(countryPrefixedMatch[1]),
@@ -168,14 +168,14 @@ export function generateEmployeeEmail(code: string): string {
  */
 export function buildCodeFilterFromLoginEmail(email?: string | null): string | null {
     if (!email) return null;
-    const m = email.trim().toLowerCase().match(/^(?:([a-z]{2})-)?siif-?(\d+)(?:-[a-z0-9]+)?@siifmart\.com$/);
+    const m = email.trim().toLowerCase().match(/^(?:([a-z]{2})-)?(?:siif|stg)-?(\d+)(?:-[a-z0-9]+)?@siifmart\.com$/);
     if (!m) return null;
     const pad = m[2].padStart(4, '0');
     if (m[1]) {
         const cc = m[1].toUpperCase();
-        return `code.ilike.${cc}-SIIF${pad},code.ilike.SIIF-${pad},code.ilike.SIIF${pad}`;
+        return `code.ilike.${cc}-SIIF${pad},code.ilike.${cc}-STG-${pad},code.ilike.${cc}-STG${pad},code.ilike.SIIF-${pad},code.ilike.SIIF${pad}`;
     }
-    return `code.ilike.%SIIF${pad},code.ilike.%SIIF-${pad}`;
+    return `code.ilike.%SIIF${pad},code.ilike.%STG-${pad},code.ilike.%STG${pad},code.ilike.%SIIF-${pad}`;
 }
 
 /**

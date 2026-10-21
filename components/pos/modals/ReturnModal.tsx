@@ -8,6 +8,7 @@ import Button from '../../shared/Button';
 import PinPad from '../PinPad';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatCompactNumber } from '../../../utils/formatting';
+import { matchStaffPin } from '../../../utils/employeeIdGenerator';
 import { RotateCcw, Minus, Plus, AlertTriangle, Loader2, ShieldAlert, CheckCircle2, Lock } from 'lucide-react';
 
 export const ReturnModal: React.FC = () => {
@@ -58,7 +59,7 @@ export const ReturnModal: React.FC = () => {
         const customPin = settings?.managerSecurityPin?.trim();
 
         // 4-Eyes / Central HQ Dual Control: Manager cannot approve their own refund
-        if (user?.code && entered === user.code.trim()) {
+        if (user?.code && matchStaffPin(user.code, entered)) {
             setPinError('4-Eyes Violation: You cannot approve your own refund. A secondary supervisor or manager must authenticate.');
             setHqOtp('');
             return;
@@ -69,9 +70,9 @@ export const ReturnModal: React.FC = () => {
         const hqStaff = (employees || []).filter(e =>
             e.id !== user?.id &&
             (!user?.code || e.code !== user.code) &&
-            ['super_admin', 'admin', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'finance_manager', 'auditor', 'operations_manager', 'regional_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
+            ['super_admin', 'admin', 'country_managing_director', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_audit', 'audit_head', 'auditor', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'regional_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
         );
-        const matchesHqStaff = hqStaff.some(m => m.code?.trim() === entered);
+        const matchesHqStaff = hqStaff.some(m => m.code?.trim() && matchStaffPin(m.code.trim(), entered));
 
         if (matchesConfigured || matchesHqStaff) {
             setPinError('');

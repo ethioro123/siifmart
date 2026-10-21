@@ -130,7 +130,7 @@ export default function Sidebar() {
       ]),
 
       // POS
-      { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
+      { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cashier', 'sales_associate', 'store_supervisor'] },
 
       // POS COMMAND CENTER - Store management & regional operations
       { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'regional_manager', 'regional_finance_officer', 'regional_security_supervisor', 'head_of_audit', 'audit_head', 'auditor', 'store_operations_auditor'] },
@@ -145,7 +145,7 @@ export default function Sidebar() {
       { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_audit', 'audit_head', 'auditor', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'regional_finance_officer', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },
 
       // CUSTOMERS
-      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor', 'regional_manager', 'regional_procurement_lead', 'credit_control_officer'] },
+      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cashier', 'sales_associate', 'cs_manager', 'store_supervisor', 'regional_manager', 'regional_procurement_lead', 'credit_control_officer'] },
 
       // EMPLOYEES - Corporate HR & Operations Executive Suite only (Site managers onboard via POS Command & WMS Dashboard)
       { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_hr', 'hr_head', 'hr_manager', 'hr', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'hr_generalist'] },

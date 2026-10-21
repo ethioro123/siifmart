@@ -34,8 +34,8 @@ export const PERMISSIONS = {
     VIEW_POS_DASHBOARD: ['super_admin', 'admin', 'country_managing_director', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'cs_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'regional_manager', 'regional_finance_officer', 'regional_security_supervisor', 'finance_manager', 'head_of_finance', 'finance_head', 'auditor', 'head_of_audit', 'audit_head', 'treasury_officer', 'store_operations_auditor'],
 
     // POS
-    ACCESS_POS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'store_operations_auditor', 'treasury_officer', 'regional_finance_officer', 'regional_security_supervisor', 'head_of_audit', 'audit_head', 'auditor'],
-    PROCESS_SALE: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'],
+    ACCESS_POS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cashier', 'sales_associate', 'store_supervisor', 'store_operations_auditor', 'treasury_officer', 'regional_finance_officer', 'regional_security_supervisor', 'head_of_audit', 'audit_head', 'auditor'],
+    PROCESS_SALE: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cashier', 'sales_associate', 'store_supervisor'],
     VOID_SALE: ['super_admin', 'store_manager', 'store_supervisor'],
     REFUND_SALE: ['super_admin', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'store_manager', 'assistant_manager', 'store_supervisor', 'cs_manager'],
     APPLY_DISCOUNT: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'],
@@ -58,8 +58,8 @@ export const PERMISSIONS = {
     EDIT_SALE: ['super_admin'],
 
     // Customers
-    ACCESS_CUSTOMERS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_procurement_lead', 'operations_manager', 'head_of_operations', 'operations_head', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor', 'credit_control_officer'],
-    ADD_CUSTOMER: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'cs_manager', 'pos'],
+    ACCESS_CUSTOMERS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_procurement_lead', 'operations_manager', 'head_of_operations', 'operations_head', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cashier', 'sales_associate', 'cs_manager', 'store_supervisor', 'credit_control_officer'],
+    ADD_CUSTOMER: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'cs_manager', 'pos', 'cashier', 'sales_associate'],
     EDIT_CUSTOMER: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'cs_manager'],
     DELETE_CUSTOMER: ['super_admin'],
     VIEW_CUSTOMER_HISTORY: ['super_admin', 'regional_manager', 'regional_procurement_lead', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'head_of_audit', 'audit_head', 'cs_manager', 'credit_control_officer'],
@@ -142,7 +142,6 @@ const PERMISSION_MAP: Record<string, Permission> = {
     'PROCESS_SALE': 'pos.create_sale',
     'VOID_SALE': 'pos.void_sale',
     'REFUND_SALE': 'pos.refund',
-    'APPLY_DISCOUNT': 'pos.create_sale',
     'VIEW_ALL_TRANSACTIONS': 'sales.view',
     'ACCESS_INVENTORY': 'inventory.view',
     'ADD_PRODUCT': 'inventory.create',
@@ -154,8 +153,6 @@ const PERMISSION_MAP: Record<string, Permission> = {
     'ACCESS_SALES': 'sales.view',
     'VIEW_SALES_REPORTS': 'sales.view_reports',
     'EXPORT_SALES_DATA': 'sales.view_reports',
-    'DELETE_SALE': 'sales.view',
-    'EDIT_SALE': 'sales.view',
     'ACCESS_CUSTOMERS': 'customers.view',
     'ADD_CUSTOMER': 'customers.create',
     'EDIT_CUSTOMER': 'customers.edit',
@@ -237,7 +234,9 @@ export function hasPermission(userRole: UserRole | undefined, permission: keyof 
     // Map old permission to new
     const newPermission = PERMISSION_MAP[permission];
     if (!newPermission) {
-        console.warn(`Unknown permission: ${permission}`);
+        if (!(permission in PERMISSIONS)) {
+            console.warn(`Unknown permission: ${permission}`);
+        }
         return false;
     }
 
