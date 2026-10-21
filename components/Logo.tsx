@@ -12,160 +12,74 @@ interface LogoProps {
   showTagline?: boolean;
 }
 
+const SPEED_CART_PATH =
+  'M 30.5 15.5 H 74.5 Q 88.5 15.5 93.8 28.5 L 113.5 76.8 Q 117.0 85.5 126.5 85.5 H 370.5 A 19 19 0 0 1 370.5 123.5 H 148.5 A 8 8 0 0 0 148.5 139.5 H 341.5 A 19 19 0 0 1 341.5 177.5 H 168.0 A 6.5 6.5 0 0 0 168.0 190.5 H 313.5 A 18.5 18.5 0 0 1 313.5 227.5 H 142.5 Q 129.5 227.5 124.5 215.0 L 62.5 61.5 Q 59.5 55.5 52.5 55.5 H 30.5 A 20 20 0 0 1 30.5 15.5 Z';
+
 /**
- * SIIFMART Circular Farmer Seal Emblem — Pure Black & White.
- * Renders the woodcut-engraved farmer cultivating the soil inside a double
- * concentric geometric circular medallion that stays crisp across light and dark mode.
+ * SIIFMART Futuristic Speed-Bar Shopping Cart Emblem — Transparent Background,
+ * Dark (#09090B) in Light Mode and Pure White (#FFFFFF) in Dark Mode.
  */
 function SiifGroceryEmblem({ size }: { size: number }) {
+  const width = Math.round(size * 1.25);
   return (
     <svg
-      width={size}
+      width={width}
       height={size}
-      viewBox="0 0 100 100"
+      viewBox="0 0 400 320"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0 transition-transform duration-200"
+      className="shrink-0 text-[#09090B] dark:text-[#FFFFFF] transition-colors duration-200"
       aria-hidden="true"
     >
-      {/* Outer Geometric Medallion Ring (Dark Ink in Light Mode, Pure White in Dark Mode) */}
-      <circle
-        cx="50"
-        cy="50"
-        r="47.2"
-        className="stroke-[#09090B] dark:stroke-[#FFFFFF]"
-        strokeWidth="3.2"
-      />
-      {/* Inner Crisp White Medallion Disc & Delicate Inner Framing Ring */}
-      <circle
-        cx="50"
-        cy="50"
-        r="43.2"
-        fill="#FFFFFF"
-        stroke="#09090B"
-        strokeWidth="1.1"
-      />
-      {/* Circular Clip Path for the Engraved Farmer Illustration */}
-      <clipPath id="siif-farmer-emblem-clip">
-        <circle cx="50" cy="50" r="42.4" />
-      </clipPath>
-      {/* Woodcut Farmer Cultivating the Soil */}
-      <image
-        href="/brand/siifmart-farmer-cutout.png"
-        x="4"
-        y="4"
-        width="92"
-        height="92"
-        preserveAspectRatio="xMidYMid meet"
-        clipPath="url(#siif-farmer-emblem-clip)"
-      />
+      <path d={SPEED_CART_PATH} fill="currentColor" />
+      <circle cx="166.0" cy="278.5" r="26.5" fill="currentColor" />
+      <circle cx="297.5" cy="278.5" r="26.5" fill="currentColor" />
     </svg>
   );
 }
 
 /**
- * Bespoke SIIFMART Grocery Brand Wordmark — Pure Black & White.
- * - 'SIIF' is set in bold, commanding modern letterforms where the twin 'II' stems
- *   blossom with SIIFMART's signature pair of fresh organic grocery leaves.
- * - 'MART' is set in airy, elegant modern contrast and cradled by a sleek
- *   tapered market-basket smile arc.
+ * SIIFMART Brand Wordmark & SINCE 2026 Subtitle — Pure Dark (#09090B) & White (#FFFFFF)
+ * with no background fill.
  */
 function SiifWordmark({
   fontSize,
   storeName,
+  showSince = true,
+  centered = false,
 }: {
   fontSize: string;
   storeName: string;
+  showSince?: boolean;
+  centered?: boolean;
 }) {
-  const isDefaultBrand = storeName.trim().toUpperCase() === 'SIIFMART';
-
-  if (!isDefaultBrand) {
-    return (
+  return (
+    <span
+      aria-label={storeName}
+      className={`inline-flex flex-col ${centered ? 'items-center text-center' : 'items-start'} text-[#09090B] dark:text-[#FFFFFF] leading-none select-none`}
+    >
       <span
-        style={{ fontSize }}
-        className="brand-wordmark font-black uppercase tracking-[0.04em] text-[#09090B] dark:text-[#FFFFFF] leading-none"
+        style={{
+          fontSize,
+          fontFamily:
+            "'Nunito', 'Fredoka', 'Arial Rounded MT Bold', ui-rounded, -apple-system, BlinkMacSystemFont, sans-serif",
+        }}
+        className="brand-wordmark font-black uppercase tracking-[0.14em] leading-none"
       >
         {storeName}
       </span>
-    );
-  }
-
-  return (
-    <span
-      style={{ fontSize }}
-      aria-label="SIIFMART"
-      className="brand-wordmark leading-none inline-flex items-baseline text-[#09090B] dark:text-[#FFFFFF] select-none"
-    >
-      <span className="sr-only">SIIFMART</span>
-
-      {/* PART 1: SIIF — Bold Modern Core with Twin Organic Leaf-Crowned 'II' Stems */}
-      <span
-        aria-hidden="true"
-        className="inline-flex items-baseline font-black tracking-[-0.03em]"
-      >
-        <span>S</span>
-
-        {/* Custom Twin 'II' Pillars Crowned with Fresh Organic Grocery Leaves */}
-        <svg
-          viewBox="0 0 18 25"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="inline-block self-baseline mx-[0.025em] overflow-visible"
-          style={{ height: '0.95em', width: 'auto' }}
+      {showSince && (
+        <span
+          style={{
+            fontSize: `calc(${fontSize} * 0.36)`,
+            fontFamily: "'Quicksand', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif",
+            marginTop: `calc(${fontSize} * 0.22)`,
+          }}
+          className="font-medium uppercase tracking-[0.36em] leading-none opacity-90"
         >
-          {/* Left Sprouting Leaf above First 'I' */}
-          <path
-            d="M6.8 6.4C3.8 6.0 1.6 3.8 1.0 0.8C4.2 1.2 6.4 3.2 6.8 6.4Z"
-            fill="currentColor"
-          />
-          {/* Right Signature Leaf with Vein Cutout above Second 'I' */}
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M9.6 6.4C9.4 2.4 12.6 -0.2 17.6 0.2C16.6 4.2 13.6 6.2 9.6 6.4ZM10.6 5.2C12.2 3.4 14.0 2.0 15.8 1.0C13.6 2.0 11.8 3.4 10.2 5.0L10.6 5.2Z"
-            fill="currentColor"
-          />
-          {/* First 'I' Stem with Soft Organic Top Bevel */}
-          <path
-            d="M2.0 8.2C2.0 7.4 2.6 6.8 3.4 6.8H6.6V25H2.0V8.2Z"
-            fill="currentColor"
-          />
-          {/* Second 'I' Stem with Soft Organic Top Bevel */}
-          <path
-            d="M9.8 6.8H13.0C13.8 6.8 14.4 7.4 14.4 8.2V25H9.8V6.8Z"
-            fill="currentColor"
-          />
-        </svg>
-
-        <span>F</span>
-      </span>
-
-      {/* Refined Editorial Breath Space */}
-      <span aria-hidden="true" className="inline-block w-[0.11em]" />
-
-      {/* PART 2: MART — Elegant Modern Market Typography with Basket Smile Arc */}
-      <span
-        aria-hidden="true"
-        className="relative inline-flex items-baseline font-bold tracking-[0.14em] text-[0.88em]"
-      >
-        <span>M</span>
-        <span>A</span>
-        <span>R</span>
-        <span className="tracking-[0.02em]">T</span>
-
-        {/* Tapered Organic Market-Basket Cradle Arc beneath MART */}
-        <svg
-          viewBox="0 0 80 8"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="absolute -bottom-[0.22em] left-0 w-full h-[0.22em] overflow-visible"
-        >
-          <path
-            d="M2 1.8C22 6.8 58 6.8 78 1.8C58 4.8 22 4.8 2 1.8Z"
-            fill="currentColor"
-          />
-        </svg>
-      </span>
+          SINCE 2026
+        </span>
+      )}
     </span>
   );
 }
@@ -177,7 +91,7 @@ export default function Logo({
   logoUrl: propLogoUrl,
   storeName: propStoreName,
   variant = 'horizontal',
-  showTagline = false,
+  showTagline = true,
 }: LogoProps) {
   let settings: any = null;
   try {
@@ -194,16 +108,21 @@ export default function Logo({
   const effectiveStoreName = propStoreName || settings?.storeName || 'SIIFMART';
 
   const scale = size / 32;
-  const fontSize = `${Math.round(1.18 * scale * 16)}px`;
+  const fontSize = `${Math.round(1.12 * scale * 16)}px`;
 
   const hasDisplayOverride = /\b(hidden|block|inline-block|flex|inline-flex)\b/.test(className);
   const containerClass = `${hasDisplayOverride ? '' : 'inline-flex '}items-center select-none ${className}`.trim();
 
-  // Wordmark-only variant: brand name without the emblem (e.g. top bar)
+  // Wordmark-only variant: brand name without the emblem (e.g. compact top bar)
   if (variant === 'wordmark') {
     return (
       <div className={containerClass}>
-        <SiifWordmark fontSize={fontSize} storeName={effectiveStoreName} />
+        <SiifWordmark
+          fontSize={fontSize}
+          storeName={effectiveStoreName}
+          showSince={false}
+          centered={false}
+        />
       </div>
     );
   }
@@ -223,17 +142,18 @@ export default function Logo({
     );
   }
 
-  // Stacked variant: Centered Monochrome S-Cart Emblem + Botanical SIIFMART Wordmark
+  // Stacked variant: Exact match to the uploaded SIIFMART / SINCE 2026 centered layout
   if (variant === 'stacked') {
+    const stackedTitleSize = `${Math.round(1.22 * scale * 16)}px`;
     return (
-      <div className={`inline-flex flex-col items-center gap-2 select-none ${className}`.trim()}>
-        <SiifGroceryEmblem size={Math.round(size * 1.5)} />
-        <SiifWordmark fontSize={fontSize} storeName={effectiveStoreName} />
-        {showTagline && (
-          <span className="text-[9px] text-[#09090B]/65 dark:text-white/65 tracking-[0.28em] uppercase font-semibold mt-1">
-            Little Grocery • Big Care
-          </span>
-        )}
+      <div className={`inline-flex flex-col items-center gap-2.5 select-none ${className}`.trim()}>
+        <SiifGroceryEmblem size={Math.round(size * 1.65)} />
+        <SiifWordmark
+          fontSize={stackedTitleSize}
+          storeName={effectiveStoreName}
+          showSince={showTagline}
+          centered={true}
+        />
       </div>
     );
   }
@@ -247,16 +167,16 @@ export default function Logo({
     );
   }
 
-  // Standard horizontal lockup: Monochrome S-Cart & Leaves Emblem + Magical SIIFMART Brand Wordmark
+  // Standard lockup (Sidebar, ID cards): Speed-Bar Cart + SIIFMART / SINCE 2026
   return (
     <div className={`${containerClass} gap-2.5`}>
       <SiifGroceryEmblem size={size} />
-      <SiifWordmark fontSize={fontSize} storeName={effectiveStoreName} />
-      {showTagline && (
-        <span className="text-[10px] text-[#09090B]/65 dark:text-white/65 tracking-[0.24em] uppercase font-semibold ml-1.5">
-          Little Grocery • Big Care
-        </span>
-      )}
+      <SiifWordmark
+        fontSize={fontSize}
+        storeName={effectiveStoreName}
+        showSince={showTagline}
+        centered={false}
+      />
     </div>
   );
 }
