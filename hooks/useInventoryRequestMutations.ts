@@ -39,7 +39,14 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
             }
 
             // Regional Governance Scoping
-            const isNationalHq = user?.role === 'super_admin' || user?.role === 'CEO' || user?.role === 'ceo' || user?.role === 'admin' || user?.role === 'auditor';
+            const isNationalHq = [
+                'super_admin', 'CEO', 'ceo',
+                'country_managing_director', 'admin',
+                'head_of_operations', 'operations_head', 'operations_manager',
+                'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+                'head_of_finance', 'finance_head', 'finance_manager',
+                'auditor', 'head_of_audit', 'audit_head'
+            ].includes(user?.role || '');
             const userRegion = user?.regionCode || (user as any)?.region_code;
             const requestRegion = change.regionCode || (change as any)?.region_code;
 
