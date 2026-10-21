@@ -134,7 +134,7 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
 
     describe('Super Admin / CEO Context-Aware Site Navigation Scoping', () => {
         const simulateSiteNavFilter = (siteType: string, userRole: string = 'super_admin') => {
-            const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
+            const isStore = ['Store', 'Retail', 'POS'].includes(siteType);
             const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
             const isHQ = !isStore && !isWarehouse;
             const isSuperAdminOrCeo = userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo';

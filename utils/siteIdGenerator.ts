@@ -263,8 +263,7 @@ export function getFacilityTypeAbbreviation(type?: string | null): string {
     if (lower.includes('admin') || lower.includes('central') || lower.includes('hq')) return 'ADM';
     if (lower.includes('distribution') || lower === 'dc') return 'DC';
     if (lower.includes('warehouse') || lower.includes('storage') || lower.includes('hub')) return 'WH';
-    if (lower.includes('dark store') || lower.includes('online')) return 'ONL';
-    if (lower.includes('store') || lower.includes('retail') || lower.includes('market') || lower.includes('grocery')) return 'STR';
+    if (lower === 'store' || lower.includes('retail') || lower.includes('market') || lower.includes('grocery')) return 'STR';
     return 'LOC';
 }
 

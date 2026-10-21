@@ -75,6 +75,8 @@ export const sitesService = {
         const { data, error } = await supabase
             .from('sites')
             .select('*')
+            .neq('type', 'Dark Store')
+            .neq('type', 'Online Store')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -124,12 +126,18 @@ export const sitesService = {
             .single();
 
         if (error) throw error;
+        if (data.type === 'Dark Store' || data.type === 'Online Store') {
+            throw new Error('This legacy online store site is retired. Use a warehouse or distribution center.');
+        }
 
         const sourcesMap = await fetchReplenishmentSourceIds([id]);
         return mapSiteRow(data, sourcesMap[id] ?? []);
     },
 
     async create(site: Omit<Site, 'id' | 'created_at' | 'updated_at'>) {
+        if (!['Administration', 'Administrative', 'Central Operations', 'Warehouse', 'Store', 'Distribution Center', 'HQ', 'Headquarters'].includes(site.type)) {
+            throw new Error('Choose an administration, warehouse, distribution center, or retail store site.');
+        }
         const siteCountry = site.country || getEffectiveCountry({ country: site.country, currency: site.currency });
         const siteCurrency = site.currency || getCountryProfile(siteCountry).currency;
         const countryCode = (siteCountry || 'ET').toUpperCase();
@@ -218,6 +226,9 @@ export const sitesService = {
     },
 
     async update(id: string, updates: Partial<Site>) {
+        if (updates.type !== undefined && !['Administration', 'Administrative', 'Central Operations', 'Warehouse', 'Store', 'Distribution Center', 'HQ', 'Headquarters'].includes(updates.type)) {
+            throw new Error('Online sales use a warehouse or distribution center site.');
+        }
         // ALLOWLIST approach: only send known DB columns to Supabase.
         // Never spread the full Site object — camelCase-only fields cause 400 errors.
         const dbUpdates: Record<string, unknown> = {};

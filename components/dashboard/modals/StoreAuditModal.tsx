@@ -29,7 +29,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
 }) => {
     // Only retail stores
     const retailStores = useMemo(() => {
-        return sites.filter(s => s.type === 'Store' || s.type === 'Dark Store' || s.type === 'Online Store');
+        return sites.filter(s => s.type === 'Store');
     }, [sites]);
 
     const [selectedSiteId, setSelectedSiteId] = useState<string>(retailStores[0]?.id || '');

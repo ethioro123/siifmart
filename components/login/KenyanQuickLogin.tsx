@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Building2, Warehouse, Store, Truck, ShoppingBag, ChevronDown, ChevronUp, ShieldCheck, UserCheck, Search, X } from 'lucide-react';
+import { Building2, Warehouse, Store, Truck, ChevronDown, ChevronUp, ShieldCheck, UserCheck, Search, X } from 'lucide-react';
 import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
 import { isStagingQuickLoginAvailable, type StagingQuickAccount, type StagingSiteType } from '../../utils/stagingQuickLogin';
 import { getSiteTheme, POPULAR_ROLE_CHIPS } from './quickLoginTheme';
@@ -36,8 +36,6 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
         return <Truck size={13} className={`shrink-0 ${iconColor}`} />;
       case 'Warehouse':
         return <Warehouse size={13} className={`shrink-0 ${iconColor}`} />;
-      case 'Online Store':
-        return <ShoppingBag size={13} className={`shrink-0 ${iconColor}`} />;
       case 'Store':
       default:
         return <Store size={13} className={`shrink-0 ${iconColor}`} />;

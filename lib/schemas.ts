@@ -41,7 +41,7 @@ export const SiteSchema = z.object({
     id: z.string().uuid(),
     code: z.string(),
     name: z.string(),
-    type: z.enum(['Administration', 'Administrative', 'Central Operations', 'Warehouse', 'Store', 'Distribution Center', 'Dark Store', 'HQ', 'Headquarters']),
+    type: z.enum(['Administration', 'Administrative', 'Central Operations', 'Warehouse', 'Store', 'Distribution Center', 'HQ', 'Headquarters']),
     address: z.string(),
     contact: optionalString,
     status: z.enum(['Active', 'Maintenance', 'Closed']),

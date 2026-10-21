@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { OnlineOrderIntake, onlineStoreService } from '../services/online-store.service';
 
-export function useOnlineStoreManagement(siteId: string | undefined, includeOrders: boolean) {
+export function useOnlineStoreManagement(siteId: string | undefined, includeOrders: boolean, countryCode?: string, userId?: string) {
   const queryClient = useQueryClient();
-  const queryKey = ['online-store-management', siteId, includeOrders];
+  const queryKey = ['online-operations', userId, countryCode, siteId, includeOrders];
   const data = useQuery({
     queryKey,
     queryFn: () => onlineStoreService.getManagementData(siteId!, includeOrders),
-    enabled: Boolean(siteId),
+    enabled: Boolean(siteId && countryCode && userId && includeOrders),
     staleTime: 30_000,
   });
 

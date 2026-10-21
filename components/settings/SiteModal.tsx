@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Building, Box, Truck, Store, ShoppingCart, Loader2, Save, Lock, Globe, Hash, Briefcase, Package
+  Building, Box, Truck, Store, Loader2, Save, Lock, Globe, Hash, Briefcase, Package
 } from 'lucide-react';
 import Modal from '../Modal';
 import { Site, SiteType, LogisticsZone, Region } from '../../types';
@@ -62,7 +62,6 @@ export function SiteModal({
               { type: 'Warehouse', label: 'Warehouse', desc: 'Storage & Fulfillment', icon: Box },
               { type: 'Distribution Center', label: 'Distribution', desc: 'Regional Hub', icon: Truck },
               { type: 'Store', label: 'Retail Store', desc: 'Customer-facing', icon: Store },
-              { type: 'Dark Store', label: 'Online Store', desc: 'Online Fulfillment', icon: ShoppingCart },
             ].map(({ type, label, desc, icon: Icon }) => {
               const isSelected = newSite.type === type;
               return (
@@ -383,11 +382,6 @@ export function SiteModal({
               <>
                 <Package size={16} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                 <span><strong className="text-[var(--theme-text-primary)]">{newSite.type}s</strong> are inventory storage facilities handling inbound receiving, FEFO putaway, and stock replenishment.</span>
-              </>
-            ) : newSite.type === 'Dark Store' ? (
-              <>
-                <ShoppingCart size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
-                <span><strong className="text-[var(--theme-text-primary)]">Online Stores</strong> are dark fulfillment hubs reserved exclusively for online dispatch. No walk-in till registers.</span>
               </>
             ) : (
               <>

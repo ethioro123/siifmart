@@ -24,9 +24,9 @@ describe('live staging roster mapping', () => {
         expect(first.siteCode).not.toBe(second.siteCode);
         expect(kenya.country).toBe('KE');
     });
-    it('maps online-store staff and headquarters without relying on old fixed account counts', () => {
+    it('excludes retired online-store staff and maps headquarters', () => {
         const online = mapStagingEmployee({ ...row, site: { ...row.site!, type: 'Dark Store' } });
-        expect(online?.siteType).toBe('Online Store');
+        expect(online).toBeNull();
         const executive = mapStagingEmployee({ ...row, role: 'super_admin', site: null });
         expect(executive?.country).toBe('GLOBAL');
         expect(executive?.facilityTier).toBe('HQ');
@@ -45,20 +45,18 @@ describe('live staging roster mapping', () => {
             makeAccount('et-store-2', 'ET', 'ET-ADD-STORE-02', 'Store', 'ET-ADD'),
             makeAccount('et-wh', 'ET', 'ET-ADD-WH-01', 'Warehouse', 'ET-ADD'),
             makeAccount('et-dc', 'ET', 'ET-ADD-DC-01', 'Distribution Center', 'ET-ADD'),
-            makeAccount('et-online', 'ET', 'ET-ADD-ONLINE-01', 'Dark Store', 'ET-ADD'),
             makeAccount('ke-hq', 'KE', 'KE-HQ', 'Administration'),
             makeAccount('ke-region', 'KE', 'KE-NRB', 'Administration', 'KE-NRB', 'Regional Administration'),
             makeAccount('ke-store', 'KE', 'KE-NRB-STORE-01', 'Store', 'KE-NRB'),
             makeAccount('ke-wh', 'KE', 'KE-NRB-WH-01', 'Warehouse', 'KE-NRB'),
             makeAccount('ke-dc', 'KE', 'KE-NRB-DC-01', 'Distribution Center', 'KE-NRB'),
-            makeAccount('ke-online', 'KE', 'KE-NRB-ONLINE-01', 'Dark Store', 'KE-NRB'),
             mapStagingEmployee({ ...row, id: 'global-admin', role: 'super_admin', site: null })!
         ];
 
         const selected = selectRepresentativeStagingAccounts(roster);
         expect(selected.map(account => account.id)).toEqual([
-            'et-hq', 'et-region', 'et-store-1a', 'et-store-1b', 'et-wh', 'et-dc', 'et-online',
-            'ke-hq', 'ke-region', 'ke-store', 'ke-wh', 'ke-dc', 'ke-online', 'global-admin'
+            'et-hq', 'et-region', 'et-store-1a', 'et-store-1b', 'et-wh', 'et-dc',
+            'ke-hq', 'ke-region', 'ke-store', 'ke-wh', 'ke-dc', 'global-admin'
         ]);
     });
 });

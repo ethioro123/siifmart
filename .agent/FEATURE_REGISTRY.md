@@ -26,12 +26,14 @@
 - Staging includes one HQ specialist, one regional specialist, and one regional merchandising lead in each country for quick-login testing; these fixtures are excluded from production.
 - Files: `components/merchandising/`, `hooks/useSubmitMerchandisingChanges.ts`, `services/merchandising-campaigns.service.ts`, `services/inventory-requests.service.ts`, `migrations/20261021_merchandising_*.sql`.
 
-### Warehouse Online Operations (2026-10-21)
-- `/online-store` is an authenticated staff desk for entering delivery orders and reviewing each warehouse's queue in Ethiopia or Kenya. There is no customer-facing shop in the app build. Payment remains unpaid until collected; tax and delivery charges require manual confirmation.
+### Warehouse and DC Online Operations (2026-10-22)
+- Online sales are an operating channel of existing active warehouses and distribution centers. Removed the standalone Online Store/Dark Store facility option, quick-login category, employee directory filter, retail routing, regional counts, and site-code generation.
+- Legacy site IDs are closed and hidden from operational site reads; their staff, inventory, shift, and replenishment references are retained for history. A database trigger blocks creation or reopening of that facility type.
+- `/online-store` is an authenticated staff desk for entering delivery orders and reviewing each warehouse or DC queue in Ethiopia or Kenya. Facility changes clear the order draft, and query caches include the user, country, and facility. Payment remains unpaid until collected; tax and delivery charges require manual confirmation.
 - Warehouse leadership accepts an entered order through an authenticated database transition that checks available stock, reserves it, and creates a linked WMS PICK job atomically. Existing PICK → PACK → DISPATCH handles fulfillment. A completed online PICK debits stock, records its movement, and releases the reservation. Driver shipment details use the scoped address and phone.
 - Staging Quick Login already includes warehouse manager, picker, packer, dispatcher, and driver workers in both countries.
 - **Files**: `pages/OnlineStoreManagement.tsx`, `services/online-store.service.ts`, `components/fulfillment/useJobCompletion.ts`, `components/OutboundJobModal.tsx`, `migrations/20261021_warehouse_online_fulfillment.sql`, `migrations/20261021_internal_online_order_intake.sql`, `tests/security/warehouse-online-fulfillment.sql`.
-- **Database**: The storefront foundation remains in production and staging as historical schema. Warehouse fulfillment, checkout repair, and internal order intake are applied to SIIFMART Staging (`utykzifrblpyxlvlknsm`). The staging public storefront endpoint is closed. Automatic review rejected production warehouse migration and production endpoint shutdown; production still serves its earlier storefront API until an explicitly approved rollout.
+- **Database**: `20261022_retire_online_store_sites.sql`, `20261022_online_operations_fulfillment_foundation.sql`, and `20261022_online_operations_warehouse_dc.sql` are applied to staging (`utykzifrblpyxlvlknsm`) and production (`zdgzpxvorwinugjufkvb`). Guest checkout RPC privileges are revoked. The staging public endpoint is closed; automatic approval review blocked replacing the production endpoint with a staff-only 410 response because explicit production shutdown authorization is required.
 
 ### Regional Administration & Corporate HQ Role Access Harmonization (2026-10-20)
 - Unblocked all regional roles (`regional_manager`, `regional_procurement_lead`, `regional_finance_officer`, `regional_hr_officer`, `regional_logistics_lead`, `regional_security_supervisor`) across route guards, sidebar navigation, global Cmd+K search, and settings tabs regardless of whether their active facility is an Administration hub, Warehouse, or Store.
@@ -139,7 +141,7 @@
 - Desktop and mobile Quick Login now load all active staging test employees, including the 168 added role-coverage accounts, with live counts and search by role, employee or facility. Removed the obsolete fixed roster and frontend passwords. A loopback-only Vite bridge keeps the staging executive credential in ignored server configuration; a JWT-protected staging-only function verifies executive authority and returns the selected test employee's session using a one-time token. Country/site permissions remain those of the selected employee. Credential handover fields are unchanged.
 - **Files**: `components/LoginPage.tsx`, `components/login/`, `hooks/useStagingQuickLogin.ts`, `services/staging-quick-login.service.ts`, `utils/stagingQuickLogin.ts`, `dev/stagingQuickLoginPlugin.ts`, `dev/stagingQuickLoginPolicy.ts`, `supabase/functions/staging-quick-login/`, `docs/STAGING_QUICK_LOGIN.md`, related service/component/policy tests and `tests/e2e/staging-quick-login.spec.ts`
 - **Deployment**: `staging-quick-login` deployed to SIIFMART Staging only, with JWT verification enabled. Private local credentials are excluded from Git and the client bundle.
-- Local Quick Login now presents one representative HQ, regional administration, store, warehouse, distribution center, and online store per country while retaining every test account at each selected site. The underlying staging sites and employees remain available for broader testing.
+- Local Quick Login now presents one representative HQ, regional administration, store, warehouse, and distribution center per country while retaining every test account at each selected site. The underlying staging sites and employees remain available for broader testing.
 
 ### Recoverable Employee Onboarding Drafts (2026-10-19)
 - Shared HR, POS, and WMS onboarding now saves candidate progress automatically, flushes pending progress when the wizard closes or the page leaves, and provides a country-scoped saved-drafts drawer for resuming or deleting work. Drafts remain on the current device; candidate passwords are stripped when saving and cleared from legacy drafts on read, so they must be entered again after resuming.
@@ -249,7 +251,7 @@
 
 ### Quick Login Visual Theming & Role Filter Chips
 - **Status**: ✅ IMPLEMENTED (2026-10-20)
-- Visual distinction by facility site types (Stores in Emerald, Warehouses in Amber, Distribution Centers in Cyan, Online Stores in Rose, Regional Admin in Violet, HQ in Purple) with matching site header accents and badges.
+- Visual distinction by facility site types (Stores in Emerald, Warehouses in Amber, Distribution Centers in Cyan, Regional Admin in Violet, HQ in Purple) with matching site header accents and badges.
 - Uniform role color theming across all sites (Cashiers in Emerald, Pickers in Orange, Packers in Amber, Receivers in Cyan, Drivers in Blue, Inventory in Yellow, Managers in Indigo, Finance in Teal, etc.).
 - One-click popular role filter chips (`Cashier`, `Picker`, `Packer`, `WH Mgr`, `Store Mgr`, `Driver`, `Receiver`, `Inventory`, `Admin`) with live counts and active indicator lights.
 - Search with instant clear ("X") button, active filter counters, and unified mobile & desktop experience.
@@ -268,7 +270,7 @@
 
 ### Three-Level Facility Hierarchy & 55-Role Canonical Workforce Filtering
 - **Status**: ✅ IMPLEMENTED (2026-10-18)
-- Establishes 3 facility levels (`HQ`, `Regional Administration`, `Operation Sites` -> `Store`, `Warehouse`, `Distribution Center`, `Online Store`) and all 55 canonical `SYSTEM_ROLES` per country (`ET` and `KE`) across Staging Database, Quick Login panels, and Employee Directory filtering.
+- Establishes 3 facility levels (`HQ`, `Regional Administration`, `Operation Sites` -> `Store`, `Warehouse`, `Distribution Center`) and all 55 canonical `SYSTEM_ROLES` per country (`ET` and `KE`) across Staging Database, Quick Login panels, and Employee Directory filtering.
 - **Files Modified**:
   - `migrations/20261018_staging_three_tier_facilities_and_roles.sql`
   - `components/login/stagingAccounts.json`

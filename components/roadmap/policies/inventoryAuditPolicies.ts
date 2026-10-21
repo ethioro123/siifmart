@@ -39,7 +39,7 @@ TRACEABILITY: .agent/RULES.md (Zero-Trust Model, Blind Audits & Synaptic Mesh)
     - Traditional quarterly or monthly stock takes allow theft, collusion, and barcode-swapping to remain undetected for up to 90 days. By then, CCTV archives are wiped, shift rosters have cycled, and losses become untraceable.
     - This policy mandates a Weekly Cycle Count across all facilities to compress the theft discovery window down to a maximum of 7 days, localizing missing items to specific cashier shifts and delivery manifests.
 1.2 Scope of Accountability:
-    - Applies to all retail outlets, fulfillment warehouses, cold-chain hubs, and dark stores across all operating countries.
+    - Applies to all retail outlets, fulfillment warehouses and cold-chain hubs across all operating countries.
 
 2. THE 3-TIER PERPETUAL WEEKLY CYCLE COUNT MODEL
 --------------------------------------------------------------------------------

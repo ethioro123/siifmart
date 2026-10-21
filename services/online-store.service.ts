@@ -44,7 +44,7 @@ export type OnlineStoreManagementData = {
   jobs: StoreOrderJob[];
 };
 
-export function canPublishOnlineProduct(product: Product) {
+export function canSelectOnlineProduct(product: Product) {
   return product.status === 'active' &&
     (product.approvalStatus || product.approval_status) === 'approved' &&
     product.stock > 0;

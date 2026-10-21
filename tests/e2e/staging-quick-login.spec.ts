@@ -5,7 +5,7 @@ test.use({ viewport: { width: 1440, height: 1000 }, trace: 'off' });
 
 for (const scenario of [
     { country: 'ET', type: 'Distribution Center', role: 'picker', title: 'Ethiopia Staging Roles', route: '/wms-ops' },
-    { country: 'KE', type: 'Dark Store', role: 'cashier', title: 'Kenya Staging Roles', route: '/pos' }
+    { country: 'KE', type: 'Store', role: 'cashier', title: 'Kenya Staging Roles', route: '/pos' }
 ]) {
     test(`new ${scenario.country} ${scenario.role} signs in from the live roster`, async ({ page }, testInfo) => {
         test.setTimeout(90_000);

@@ -26,7 +26,7 @@ export const POSTab: React.FC = () => {
     const countryProfile = getCountryProfile(activeCountry);
     const currency = countryProfile.currencySymbol || countryProfile.currencyCode;
 
-    const stores = sites.filter(s => s.type === 'Store' || s.type === 'Dark Store');
+    const stores = sites.filter(s => s.type === 'Store');
     const totalRolePercentage = posRoleDistribution.reduce((sum, r) => sum + r.percentage, 0);
 
     const getRuleTypeIcon = (type: PointRuleType) => {

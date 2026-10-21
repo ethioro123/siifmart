@@ -3,7 +3,7 @@ import { isHqFacilitySite, isRegionalAdminFacilitySite } from './roleSegregation
 import { STAGING_PROJECT_REF } from '../supabase/functions/staging-quick-login/policy';
 
 export type FacilityTierType = 'HQ' | 'Regional Administration' | 'Operation Sites';
-export type StagingSiteType = 'HQ' | 'Regional Administration' | 'Store' | 'Warehouse' | 'Distribution Center' | 'Online Store';
+export type StagingSiteType = 'HQ' | 'Regional Administration' | 'Store' | 'Warehouse' | 'Distribution Center';
 export interface StagingQuickAccount {
     id: string; name: string; role: string; roleId: string; level: number; levelTag: string;
     code: string; email: string; country: 'ET' | 'KE' | 'GLOBAL';
@@ -35,8 +35,9 @@ export function mapStagingEmployee(row: StagingEmployeeRow): StagingQuickAccount
     const headquarters = global || isHqFacilitySite(facility);
     const regional = !headquarters && isRegionalAdminFacilitySite(facility);
     const facilityTier: FacilityTierType = headquarters ? 'HQ' : regional ? 'Regional Administration' : 'Operation Sites';
+    if (!headquarters && !regional && !['Store', 'Warehouse', 'Distribution Center'].includes(row.site?.type || '')) return null;
     const siteType = headquarters ? 'HQ' : regional ? 'Regional Administration'
-        : row.site?.type === 'Dark Store' ? 'Online Store' : row.site?.type as StagingSiteType;
+        : row.site?.type as StagingSiteType;
     return {
         id: row.id, name: row.name, role: row.job_title || role?.label || row.role,
         roleId: row.role, level: role?.level || (global ? 1 : 4),
@@ -47,7 +48,7 @@ export function mapStagingEmployee(row: StagingEmployeeRow): StagingQuickAccount
 }
 
 const QUICK_LOGIN_SITE_TYPES: StagingSiteType[] = [
-    'HQ', 'Regional Administration', 'Store', 'Warehouse', 'Distribution Center', 'Online Store'
+    'HQ', 'Regional Administration', 'Store', 'Warehouse', 'Distribution Center'
 ];
 
 /** Keep one representative site per country and facility type in the staging picker. */

@@ -38,13 +38,6 @@ const LOCATION_CATEGORIES: CategoryConfig[] = [
         desc: 'Customer-facing',
         dotColor: 'bg-emerald-600',
         shadowColor: 'shadow-[0_0_8px_rgba(44,94,59,0.3)]',
-    },
-    {
-        types: ['Dark Store', 'Online Store'],
-        label: 'Online Store',
-        desc: 'Online Fulfillment',
-        dotColor: 'bg-amber-600',
-        shadowColor: 'shadow-[0_0_8px_rgba(217,119,6,0.3)]',
     }
 ];
 
@@ -58,7 +51,7 @@ export const LocationCategoryView: React.FC<LocationCategoryViewProps> = ({
     renderSiteCard
 }) => {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
             {LOCATION_CATEGORIES.map(cat => {
                 const catSites = sites.filter((s: Site) => cat.types.includes(s.type));
 

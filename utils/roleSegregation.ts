@@ -92,7 +92,7 @@ export function isOperationFacilitySite(
     site?: { code?: string; name?: string; type?: string; regionCode?: string; region_code?: string } | null
 ): boolean {
     if (!site || isHqFacilitySite(site) || isRegionalAdminFacilitySite(site)) return false;
-    return ['Store', 'Warehouse', 'Distribution Center', 'Dark Store', 'Online Store'].includes(site.type || '');
+    return ['Store', 'Warehouse', 'Distribution Center'].includes(site.type || '');
 }
 
 export function isFacilityTierOrTypeFilter(filterSite?: string): boolean {
@@ -111,7 +111,6 @@ export function matchesFacilityFilter(
     if (filterSite === 'TYPE:Store') return site.type === 'Store';
     if (filterSite === 'TYPE:Warehouse') return site.type === 'Warehouse';
     if (filterSite === 'TYPE:Distribution Center') return site.type === 'Distribution Center';
-    if (filterSite === 'TYPE:Online Store') return site.type === 'Dark Store' || site.type === 'Online Store';
     return site.id === filterSite;
 }
 
@@ -175,7 +174,7 @@ function normalizeSiteType(siteType: string): 'Administration' | 'Warehouse' | '
         return 'Warehouse';
     }
 
-    if (lower.includes('store') || lower.includes('retail') || lower.includes('market') || lower.includes('grocery') || lower.includes('dark store')) {
+    if (lower === 'store' || lower.includes('retail') || lower.includes('market') || lower.includes('grocery')) {
         return 'Store';
     }
 

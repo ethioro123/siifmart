@@ -130,7 +130,7 @@ export default function WMSSettings() {
     };
 
     const fulfillmentSites = useMemo(() =>
-        sites.filter(s => s.type === 'Warehouse' || s.type === 'Store' || s.type === 'Distribution Center' || s.type === 'Dark Store'),
+        sites.filter(s => s.type === 'Warehouse' || s.type === 'Store' || s.type === 'Distribution Center'),
         [sites]
     );
 

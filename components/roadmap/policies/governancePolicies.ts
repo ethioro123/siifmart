@@ -276,7 +276,7 @@ TRACEABILITY: .agent/RULES.md (Rule 17 & Section 13: Non-Alcoholic Catalog Law)
     - SIIFMART operates strictly as an alcohol-free, halal-compliant enterprise.
     - We do NOT sell liquor, beer, wine, spirits, or alcoholic beverages under any circumstances in any operating country (ET, KE, UG, RW, TZ).
 1.2 Legal & Ethical Foundation:
-    - Our retail outlets, dark stores, and distribution hubs strictly exclude all alcoholic beverages from our supply chains, inventory, and point-of-sale registers.
+    - Our retail outlets, warehouses, and distribution hubs strictly exclude all alcoholic beverages from our supply chains, inventory, and point-of-sale registers.
 
 2. TAXONOMY & CATALOG LOCKDOWN
 --------------------------------------------------------------------------------

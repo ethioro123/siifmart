@@ -67,7 +67,6 @@ export default function ProductLocationDisplay({
             case 'Distribution Center':
                 return <Warehouse size={iconSize} />;
             case 'Store':
-            case 'Dark Store':
                 return <Store size={iconSize} />;
             case 'Headquarters':
             case 'Administration':

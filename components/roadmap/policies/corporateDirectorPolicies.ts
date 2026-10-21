@@ -35,7 +35,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 --------------------------------------------------------------------------------
 1.1 Position Summary:
     - The Regional Manager operates at Level 2 (Executive/Regional Directorate) with a Hierarchy Rank of 95, reporting directly to the CEO.
-    - Serves as the executive operational leader responsible for all Retail Stores, Distribution Centers, and Dark Stores within an assigned national geographic territory (e.g., Addis Ababa Regional Cluster, Oromia Cluster, or Nairobi Metro Cluster).
+    - Serves as the executive operational leader responsible for all Retail Stores, Warehouses, and Distribution Centers within an assigned national geographic territory (e.g., Addis Ababa Regional Cluster, Oromia Cluster, or Nairobi Metro Cluster).
 1.2 Core Mission:
     - Deliver enterprise profitability, zero stockouts of staple goods, strict adherence to national Halal / non-alcoholic catalog compliance, sub-0.3% shrinkage rates, and uncompromising Zero-Trust security across all regional nodes.
 

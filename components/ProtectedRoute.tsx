@@ -31,7 +31,7 @@ export function ProtectedRoute({
 
   const siteType = activeSite?.type || '';
   const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
-  const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
+  const isStore = ['Store', 'Retail', 'POS'].includes(siteType);
   const normalizedRole = (user?.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
   const isExecutive = [
     'super_admin', 'ceo', 'country_managing_director', 'admin',

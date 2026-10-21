@@ -51,7 +51,7 @@ export default function SiteRoster({
 
     const siteTypeLabel = activeSite.type === 'Warehouse' || activeSite.type === 'Distribution Center'
         ? 'Warehouse Facility'
-        : activeSite.type === 'Store' || activeSite.type === 'Dark Store'
+        : activeSite.type === 'Store'
             ? 'Store Location'
             : 'Operations Node';
 

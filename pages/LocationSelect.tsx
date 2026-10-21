@@ -35,7 +35,7 @@ export default function LocationSelect() {
         if (selectedSite) {
             native.toast(`Switched to ${selectedSite.name}`);
 
-            if (selectedSite.type === 'Store' || selectedSite.type === 'Dark Store') {
+            if (selectedSite.type === 'Store') {
                 navigate('/pos-dashboard');
             } else if (selectedSite.type === 'Warehouse' || selectedSite.type === 'Distribution Center') {
                 navigate('/wms-dashboard');
@@ -58,7 +58,7 @@ export default function LocationSelect() {
     );
 
     // Group sites by type
-    const stores = filteredSites.filter(s => s.type === 'Store' || s.type === 'Dark Store');
+    const stores = filteredSites.filter(s => s.type === 'Store');
     const warehouses = filteredSites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center');
 
     return (

@@ -211,7 +211,7 @@ export function getAvailableSections(userRole: UserRole, siteType?: string): str
     ].includes(userRole)) return basePermissions;
     if (!siteType) return basePermissions;
 
-    if (siteType === 'Store' || siteType === 'Dark Store') {
+    if (siteType === 'Store') {
         return basePermissions.filter(p => p !== 'warehouse' && p !== 'procurement');
     }
     if (siteType === 'Warehouse' || siteType === 'Distribution Center') {

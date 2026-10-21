@@ -104,7 +104,7 @@ describe('Central Operations Multi-Country Compliance & Isolation', () => {
   describe('Facility Scope & Domain View Integrity', () => {
     const mockSites: Array<{ id: string; name: string; type: SiteType; country: Country }> = [
       { id: 'site-1', name: 'Nairobi Flagship', type: 'Store', country: 'KE' },
-      { id: 'site-2', name: 'Mombasa Dark Store', type: 'Dark Store', country: 'KE' },
+      { id: 'site-2', name: 'Mombasa Retail Store', type: 'Store', country: 'KE' },
       { id: 'site-3', name: 'Eastleigh Hub', type: 'Warehouse', country: 'KE' },
       { id: 'site-4', name: 'Nairobi DC', type: 'Distribution Center', country: 'KE' },
       { id: 'site-hq', name: 'Kenya Admin HQ', type: 'Administration', country: 'KE' }
@@ -118,7 +118,7 @@ describe('Central Operations Multi-Country Compliance & Isolation', () => {
 
     it('filters retail store facilities accurately', () => {
       const baseSites = mockSites.filter(s => s.type !== 'Administration' && s.type !== 'HQ' && s.type !== 'Administrative');
-      const stores = baseSites.filter(s => s.type === 'Store' || s.type === 'Dark Store' || s.type === 'Online Store');
+      const stores = baseSites.filter(s => s.type === 'Store');
       expect(stores.length).toBe(2);
       expect(stores.map(s => s.id)).toEqual(['site-1', 'site-2']);
     });

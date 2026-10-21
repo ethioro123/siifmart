@@ -185,7 +185,7 @@ export const usePOSProductFilters = ({
             let hasBeenReceived = false;
             if (activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center') {
                 hasBeenReceived = !!p.location && p.location.trim() !== '' && p.location !== 'Receiving Dock' && /^[A-Z]-\d{2}-\d{2}$/.test(p.location.trim());
-            } else if (activeSite?.type === 'Store' || activeSite?.type === 'Dark Store') {
+            } else if (activeSite?.type === 'Store') {
                 hasBeenReceived = (p.siteId === activeSite?.id || p.site_id === activeSite?.id);
             } else {
                 hasBeenReceived = !!p.location && p.location.trim() !== '';

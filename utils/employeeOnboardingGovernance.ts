@@ -22,7 +22,7 @@ export const DIRECT_ONBOARDING_ROLES: readonly string[] = [
 
 /**
  * Checks whether the current user is authorized to perform direct staff onboarding.
- * Site & Facility Managers (Warehouse Managers, Store Managers, Online Store Managers, etc.)
+ * Site & Facility Managers (Warehouse Managers, Store Managers, etc.)
  * cannot directly onboard workers; they draft candidate proposals for HR authorization.
  */
 export const isDirectOnboardingAuthorized = (

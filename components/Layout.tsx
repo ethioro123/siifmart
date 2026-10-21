@@ -26,7 +26,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
       prevSiteIdRef.current = activeSite.id;
       const siteType = activeSite.type || '';
       const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
-      const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
+      const isStore = ['Store', 'Retail', 'POS'].includes(siteType);
 
       if (isWarehouse) {
         navigate('/wms-ops');

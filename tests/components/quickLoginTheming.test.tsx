@@ -62,12 +62,10 @@ describe('quick login theming and filtering', () => {
       const store = getSiteTheme('Store');
       const warehouse = getSiteTheme('Warehouse');
       const dc = getSiteTheme('Distribution Center');
-      const online = getSiteTheme('Online Store');
 
       expect(store.badge).toContain('emerald');
       expect(warehouse.badge).toContain('amber');
       expect(dc.badge).toContain('cyan');
-      expect(online.badge).toContain('rose');
 
       // Site themes have unique border and icon colors
       expect(store.iconColor).not.toEqual(warehouse.iconColor);

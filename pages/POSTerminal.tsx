@@ -36,7 +36,7 @@ const POSTerminalContent: React.FC = () => {
             To access POS, tap your store below or select from the dropdown in the top bar.
           </p>
           <div className="flex flex-wrap justify-center gap-2.5">
-            {sites.filter(s => s.type === 'Store' || s.type === 'Dark Store').map(site => (
+            {sites.filter(s => s.type === 'Store').map(site => (
               <button
                 key={site.id}
                 type="button"

@@ -207,7 +207,7 @@ export default function TopBar() {
 
       // 1. Navigation & Command Search
       const siteType = activeSite?.type || '';
-      const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
+      const isStore = ['Store', 'Retail', 'POS'].includes(siteType);
       const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
       const isHQ = !isStore && !isWarehouse;
       const isCeo = ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager'].includes(userRole) || (userRole as string)?.toLowerCase() === 'ceo';

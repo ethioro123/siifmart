@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Building2, Landmark, Warehouse, Store, Truck, ShoppingBag, UserCheck, Search, ShieldCheck, X } from 'lucide-react';
+import { Building2, Landmark, Warehouse, Store, Truck, UserCheck, Search, ShieldCheck, X } from 'lucide-react';
 import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
 import { isStagingQuickLoginAvailable, type FacilityTierType, type StagingSiteType, type StagingQuickAccount } from '../../utils/stagingQuickLogin';
 import { getSiteTheme, POPULAR_ROLE_CHIPS } from './quickLoginTheme';
@@ -13,7 +13,7 @@ interface CountryQuickLoginPanelProps {
 }
 
 type TierFilter = 'ALL' | 'HQ' | 'REGIONAL' | 'OPS';
-type OpsSiteFilter = 'ALL_OPS' | 'Store' | 'Warehouse' | 'Distribution Center' | 'Online Store';
+type OpsSiteFilter = 'ALL_OPS' | 'Store' | 'Warehouse' | 'Distribution Center';
 
 export function CountryQuickLoginPanel({
   country,
@@ -120,8 +120,6 @@ export function CountryQuickLoginPanel({
         return <Warehouse size={13} className={`shrink-0 ${iconColor}`} />;
       case 'Distribution Center':
         return <Truck size={13} className={`shrink-0 ${iconColor}`} />;
-      case 'Online Store':
-        return <ShoppingBag size={13} className={`shrink-0 ${iconColor}`} />;
       default:
         return <Building2 size={13} className="shrink-0 text-stone-500" />;
     }
@@ -255,15 +253,14 @@ export function CountryQuickLoginPanel({
         })}
       </div>
 
-      {/* Operation Site Sub-Filters (Store, Warehouse, DC, Online Store) with Site Colors */}
-      <div className="grid grid-cols-5 gap-1 mb-1.5">
+      {/* Operation Site Sub-Filters (Store, Warehouse, DC) with Site Colors */}
+      <div className="grid grid-cols-4 gap-1 mb-1.5">
         {(
           [
             { key: 'ALL_OPS' as const, label: 'All Ops', siteType: null },
             { key: 'Store' as const, label: `Store (${accounts.filter(a => a.siteType === 'Store').length})`, siteType: 'Store' as StagingSiteType },
             { key: 'Warehouse' as const, label: `WH (${accounts.filter(a => a.siteType === 'Warehouse').length})`, siteType: 'Warehouse' as StagingSiteType },
             { key: 'Distribution Center' as const, label: `DC (${accounts.filter(a => a.siteType === 'Distribution Center').length})`, siteType: 'Distribution Center' as StagingSiteType },
-            { key: 'Online Store' as const, label: `Online (${accounts.filter(a => a.siteType === 'Online Store').length})`, siteType: 'Online Store' as StagingSiteType },
           ] as const
         ).map(sub => {
           const active = tierFilter === 'OPS' && opsSiteFilter === sub.key;

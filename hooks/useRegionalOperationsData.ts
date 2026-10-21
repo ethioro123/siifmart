@@ -40,7 +40,6 @@ export interface RegionalOperationsData {
     total: number;
     stores: number;
     warehouses: number;
-    darkStores: number;
   };
   regionalEmployees: Employee[];
   regionalSales: SaleRecord[];
@@ -161,12 +160,10 @@ export function useRegionalOperationsData(): RegionalOperationsData {
   const siteCounts = useMemo(() => {
     let stores = 0;
     let warehouses = 0;
-    let darkStores = 0;
 
     regionalSites.forEach(s => {
       const type = (s.type || '').toLowerCase();
-      if (type.includes('dark')) darkStores++;
-      else if (type.includes('store') || type.includes('retail') || type.includes('pos')) stores++;
+      if (type.includes('store') || type.includes('retail') || type.includes('pos')) stores++;
       else if (type.includes('warehouse') || type.includes('distribution') || type.includes('wms') || type.includes('fulfillment')) warehouses++;
       else stores++;
     });
@@ -174,8 +171,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     return {
       total: regionalSites.length,
       stores,
-      warehouses,
-      darkStores
+      warehouses
     };
   }, [regionalSites]);
 

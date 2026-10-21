@@ -109,7 +109,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
             setActiveRegionCode(selectedRegion);
          }
          const isWh = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(selected.type || '');
-         const isSt = ['Store', 'Dark Store', 'Retail', 'POS'].includes(selected.type || '');
+         const isSt = ['Store', 'Retail', 'POS'].includes(selected.type || '');
          if (isWh) navigate('/wms-ops');
          else if (isSt) navigate('/pos');
          else navigate('/admin');
@@ -200,7 +200,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                <div className="max-h-64 overflow-y-auto space-y-1 custom-scrollbar">
                   {availableSites.map(site => {
                      const isSelected = displaySite?.id === site.id;
-                     const isStore = site.type === 'Store' || site.type === 'Dark Store';
+                     const isStore = site.type === 'Store';
                      const isWh = site.type === 'Warehouse' || site.type === 'Distribution Center';
                      const siteRegionName = regions.find(r => r.code === (site.region_code || site.regionCode))?.name?.replace(/\s*(Region|Territory)$/i, '');
                      return (

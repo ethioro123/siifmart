@@ -15,7 +15,7 @@ BEGIN
       'stock_clerk','inventory_specialist','customer_service','returns_clerk','merchandiser','loss_prevention'
     ] END) required(role)
     WHERE lower(s.status) = 'active'
-      AND s.type IN ('Warehouse','Distribution Center','Store','Dark Store','Online Store')
+      AND s.type IN ('Warehouse','Distribution Center','Store')
       AND NOT EXISTS (SELECT 1 FROM public.employees e
                       WHERE e.site_id = s.id AND e.role = required.role AND lower(e.status) = 'active')
   ) THEN RAISE EXCEPTION 'An operational site is missing an active employee for a required role'; END IF;
@@ -59,7 +59,7 @@ SELECT set_config('test.coverage_actors', (
     WHERE e.email LIKE '%@role-coverage.staging.siifmart.invalid'
       AND ((s.type = 'Distribution Center' AND e.role = 'picker')
         OR (s.type = 'Warehouse' AND e.role = 'driver')
-        OR (s.type = 'Dark Store' AND e.role = 'cashier'))
+        OR (s.type = 'Store' AND e.role = 'cashier'))
     ORDER BY s.country,s.type,e.id
   ) actor
 ), true);

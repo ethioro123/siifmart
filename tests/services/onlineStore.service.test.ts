@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Product } from '../../types';
-import { canPublishOnlineProduct, onlineStoreService } from '../../services/online-store.service';
+import { canSelectOnlineProduct, onlineStoreService } from '../../services/online-store.service';
 import { supabase } from '../../lib/supabase';
 
 vi.mock('../../lib/supabase', () => ({ supabase: { rpc: vi.fn() } }));
@@ -41,18 +41,18 @@ describe('online order warehouse handoff', () => {
   });
 });
 
-describe('canPublishOnlineProduct', () => {
+describe('canSelectOnlineProduct', () => {
   it('allows active, approved products that have stock', () => {
-    expect(canPublishOnlineProduct(product())).toBe(true);
+    expect(canSelectOnlineProduct(product())).toBe(true);
   });
 
-  it('keeps pending and rejected products out of the public catalog', () => {
-    expect(canPublishOnlineProduct(product({ approvalStatus: 'pending' }))).toBe(false);
-    expect(canPublishOnlineProduct(product({ approvalStatus: 'rejected' }))).toBe(false);
+  it('keeps pending and rejected products out of order intake', () => {
+    expect(canSelectOnlineProduct(product({ approvalStatus: 'pending' }))).toBe(false);
+    expect(canSelectOnlineProduct(product({ approvalStatus: 'rejected' }))).toBe(false);
   });
 
-  it('keeps inactive and out-of-stock products out of the public catalog', () => {
-    expect(canPublishOnlineProduct(product({ status: 'archived' }))).toBe(false);
-    expect(canPublishOnlineProduct(product({ stock: 0 }))).toBe(false);
+  it('keeps inactive and out-of-stock products out of order intake', () => {
+    expect(canSelectOnlineProduct(product({ status: 'archived' }))).toBe(false);
+    expect(canSelectOnlineProduct(product({ stock: 0 }))).toBe(false);
   });
 });

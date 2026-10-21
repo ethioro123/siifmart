@@ -15,7 +15,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     // Site hydration can lag authentication; never assume a missing site means POS.
     if (native.isCleanMobileMode()) {
         const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType || '');
-        const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType || '');
+        const isStore = ['Store', 'Retail', 'POS'].includes(siteType || '');
         if ((isWarehouse || !siteType) && canAccessModule(role as UserRole, 'warehouse')) {
             const defaultTab = getDefaultFulfillmentTab(role);
             return `/wms-ops?tab=${defaultTab}`;
@@ -25,7 +25,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     }
 
     const isWarehouseSite = siteType && ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
-    const isStoreSite = siteType && ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
+    const isStoreSite = siteType && ['Store', 'Retail', 'POS'].includes(siteType);
 
     // 1. Regional Command: Regional Managers & Functional Leads command from /regional-ops
     if (role === 'regional_manager' || [

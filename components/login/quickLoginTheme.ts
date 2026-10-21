@@ -50,18 +50,6 @@ export function getSiteTheme(type: StagingSiteType): SiteTheme {
         label: 'Distribution Center',
         shortLabel: 'DC',
       };
-    case 'Online Store':
-      return {
-        iconColor: 'text-rose-700 dark:text-rose-400',
-        nameColor: 'text-rose-800 dark:text-rose-300',
-        badge: 'bg-rose-500/15 dark:bg-rose-500/25 text-rose-800 dark:text-rose-300 border-rose-500/30',
-        countBadge: 'bg-rose-500/20 dark:bg-rose-500/30 text-rose-900 dark:text-rose-200 border-rose-500/40',
-        borderLeft: 'border-l-4 border-l-rose-500',
-        borderCard: 'hover:border-rose-500/50 dark:hover:border-rose-400/50',
-        bgLight: 'bg-rose-500/[0.04] dark:bg-rose-500/[0.05]',
-        label: 'Online Store',
-        shortLabel: 'Online',
-      };
     case 'Regional Administration':
       return {
         iconColor: 'text-violet-700 dark:text-violet-400',

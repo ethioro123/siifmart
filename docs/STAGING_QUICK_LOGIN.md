@@ -21,4 +21,4 @@ Deploy `supabase/functions/staging-quick-login` to project `utykzifrblpyxlvlknsm
 - The function refuses to run on another project and rejects non-executive callers. No anonymous roster query or login RPC is added.
 - The roster uses explicit fields and pages of 100, with a 30-second local cache. It is not included in offline business-data persistence.
 - Ordinary credential handover stays pending until completed through the employee workflow. Quick Login is a local development capability.
-- Run `PLAYWRIGHT_STAGING_QUICK_LOGIN=1 npx playwright test tests/e2e/staging-quick-login.spec.ts` to verify real DC-picker and online-store cashier sign-ins. These tests use fresh browser contexts and do not record session traces.
+- Run `PLAYWRIGHT_STAGING_QUICK_LOGIN=1 npx playwright test tests/e2e/staging-quick-login.spec.ts` to verify real DC-picker and retail cashier sign-ins. These tests use fresh browser contexts and do not record session traces.

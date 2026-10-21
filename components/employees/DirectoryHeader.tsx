@@ -186,7 +186,6 @@ export default function DirectoryHeader({
                   { value: 'TYPE:Store', label: 'Store' },
                   { value: 'TYPE:Warehouse', label: 'Warehouse' },
                   { value: 'TYPE:Distribution Center', label: 'Distribution Center' },
-                  { value: 'TYPE:Online Store', label: 'Online Store' },
                ].map((pill) => {
                   const isActive = filterSite === pill.value;
                   return (

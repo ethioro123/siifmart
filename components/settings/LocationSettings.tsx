@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    Building, Store, Plus, Globe, Lock, Truck, Box, ShoppingCart
+    Building, Store, Plus, Globe, Lock, Truck, Box
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
@@ -333,10 +333,6 @@ export default function LocationSettings() {
                             <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
                                 <Store size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Store').length} Stores</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
-                                <ShoppingCart size={14} />
-                                <span>{sites.filter((s: Site) => s.type === 'Online Store' || s.type === 'Dark Store').length} Online Stores</span>
                             </div>
                         </div>
 

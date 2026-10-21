@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RefreshCw, ShoppingBag } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { useOnlineStoreManagement } from '../hooks/useOnlineStoreManagement';
-import { canPublishOnlineProduct } from '../services/online-store.service';
+import { canSelectOnlineProduct } from '../services/online-store.service';
 
 function readableError(error: unknown) {
-  return error instanceof Error ? error.message : 'The online store could not be updated.';
+  return error instanceof Error ? error.message : 'Online operations could not be updated.';
 }
 
 export default function OnlineStoreManagement() {
@@ -21,18 +21,26 @@ export default function OnlineStoreManagement() {
   const [productId, setProductId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [items, setItems] = useState<{ productId: string; quantity: number }[]>([]);
-  const storeSites = useMemo(() => sites.filter((site) => site.type === 'Warehouse' && site.status === 'Active' && site.country === activeSite?.country), [sites, activeSite?.country]);
-  const initialStore = activeSite?.type === 'Warehouse' ? activeSite.id : storeSites[0]?.id || '';
-  const [storeSiteId, setStoreSiteId] = useState(initialStore);
-  const effectiveStoreSiteId = storeSites.some((site) => site.id === storeSiteId) ? storeSiteId : initialStore;
-  const selectedStore = storeSites.find((site) => site.id === effectiveStoreSiteId);
-  const management = useOnlineStoreManagement(effectiveStoreSiteId || undefined, canManageOrders);
+  const fulfillmentSites = useMemo(() => sites.filter((site) =>
+    (site.type === 'Warehouse' || site.type === 'Distribution Center') &&
+    site.status === 'Active' && site.country === activeSite?.country
+  ), [sites, activeSite?.country]);
+  const initialFacility = activeSite && fulfillmentSites.some((site) => site.id === activeSite.id) ? activeSite.id : fulfillmentSites[0]?.id || '';
+  const [facilitySiteId, setFacilitySiteId] = useState(initialFacility);
+  const effectiveFacilitySiteId = fulfillmentSites.some((site) => site.id === facilitySiteId) ? facilitySiteId : initialFacility;
+  const selectedFacility = fulfillmentSites.find((site) => site.id === effectiveFacilitySiteId);
+  const management = useOnlineStoreManagement(effectiveFacilitySiteId || undefined, canManageOrders, selectedFacility?.country, user?.id);
   const activeProducts = management.data?.products || [];
   const orders = management.data?.orders || [];
   const orderItems = management.data?.items || [];
   const jobs = management.data?.jobs || [];
   const loading = management.isPending || management.isFetching;
   const error = management.error ? readableError(management.error) : '';
+
+  useEffect(() => {
+    setCustomerName(''); setCustomerPhone(''); setDeliveryAddress('');
+    setProductId(''); setQuantity(1); setItems([]); setNotice('');
+  }, [effectiveFacilitySiteId]);
 
   const addItem = () => {
     if (!productId || !Number.isInteger(quantity) || quantity < 1 || quantity > 20 || items.some((item) => item.productId === productId)) return;
@@ -46,7 +54,7 @@ export default function OnlineStoreManagement() {
     try {
       const number = await management.intakeMutation.mutateAsync({ customerName, customerPhone, deliveryAddress, items });
       setCustomerName(''); setCustomerPhone(''); setDeliveryAddress(''); setItems([]);
-      setNotice(`${number}: order saved for warehouse review.`);
+      setNotice(`${number}: order saved for fulfillment review.`);
     } catch { /* Mutation error is shown below. */ }
   };
 
@@ -54,14 +62,15 @@ export default function OnlineStoreManagement() {
     setNotice('');
     try {
       await management.orderMutation.mutateAsync({ orderId: order.id, status });
-      setNotice(status === 'accepted' ? `${order.order_number}: stock reserved and a warehouse PICK job created.` : `${order.order_number}: request declined.`);
+      setNotice(status === 'accepted' ? `${order.order_number}: stock reserved and a PICK job created.` : `${order.order_number}: request declined.`);
     } catch { /* Query error is displayed from the mutation below. */ }
   };
 
   const formatAmount = (order: (typeof orders)[number]) => new Intl.NumberFormat(order.country_code === 'ET' ? 'en-ET' : 'en-KE', { style: 'currency', currency: order.currency }).format(Number(order.merchandise_subtotal));
 
-  if (!activeSite) return <div className="p-8 text-sm text-[var(--theme-text-secondary)]">Choose an authorized warehouse for online orders.</div>;
+  if (!activeSite) return <div className="p-8 text-sm text-[var(--theme-text-secondary)]">Choose an authorized warehouse or distribution center for online orders.</div>;
   if (!canManageOrders) return <div className="p-8 text-sm text-[var(--theme-text-secondary)]">This role cannot manage online orders.</div>;
+  if (!selectedFacility) return <div className="p-8 text-sm text-[var(--theme-text-secondary)]">No active warehouse or distribution center is available in this country.</div>;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-8">
@@ -69,10 +78,11 @@ export default function OnlineStoreManagement() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--theme-text-secondary)]">Commerce</p>
           <h1 className="mt-1 text-2xl sm:text-3xl font-semibold text-[var(--theme-text-primary)]">Online operations</h1>
-          <p className="mt-2 text-sm text-[var(--theme-text-secondary)]">Staff order intake and warehouse fulfillment · {selectedStore?.country || activeSite.country}</p>
+          <p className="mt-2 text-sm text-[var(--theme-text-secondary)]">Staff order intake and fulfillment · {selectedFacility?.country || activeSite.country}</p>
         </div>
         <button
           type="button"
+          disabled={loading}
           onClick={() => void management.refetch()}
           className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-4 text-sm font-medium text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
         >
@@ -80,15 +90,15 @@ export default function OnlineStoreManagement() {
         </button>
       </header>
 
-      {storeSites.length > 0 && (
+      {fulfillmentSites.length > 0 && (
         <label className="grid max-w-sm gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--theme-text-secondary)]">
-          Fulfillment warehouse
+          Fulfillment facility
           <select
-            value={effectiveStoreSiteId}
-            onChange={(event) => setStoreSiteId(event.target.value)}
+            value={effectiveFacilitySiteId}
+            onChange={(event) => setFacilitySiteId(event.target.value)}
             className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 text-sm font-medium normal-case tracking-normal text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
           >
-            {storeSites.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}
+            {fulfillmentSites.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}
           </select>
         </label>
       )}
@@ -106,7 +116,7 @@ export default function OnlineStoreManagement() {
 
       <section className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-5 sm:p-6">
         <h2 className="text-lg font-semibold text-[var(--theme-text-primary)]">Enter an order</h2>
-        <p className="mt-1 text-sm text-[var(--theme-text-secondary)]">Record an order received by staff. Warehouse leadership reviews stock before picking begins.</p>
+        <p className="mt-1 text-sm text-[var(--theme-text-secondary)]">Record an order received by staff. Fulfillment leadership reviews stock before picking begins.</p>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           <label className="grid gap-1 text-sm text-[var(--theme-text-primary)]">
             Customer name
@@ -124,10 +134,10 @@ export default function OnlineStoreManagement() {
 
         <div className="mt-4 flex flex-wrap items-end gap-3">
           <label className="grid min-w-48 flex-1 gap-1 text-sm text-[var(--theme-text-primary)]">
-            Warehouse product
+            Facility product
             <select value={productId} onChange={(event) => setProductId(event.target.value)} className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
               <option value="">Select a product</option>
-              {activeProducts.filter(canPublishOnlineProduct).map((product) => <option key={product.id} value={product.id}>{product.name} · {product.sku}</option>)}
+              {activeProducts.filter(canSelectOnlineProduct).map((product) => <option key={product.id} value={product.id}>{product.name} · {product.sku}</option>)}
             </select>
           </label>
           <label className="grid w-24 gap-1 text-sm text-[var(--theme-text-primary)]">
@@ -153,7 +163,7 @@ export default function OnlineStoreManagement() {
         )}
 
         <div className="mt-4 flex justify-end">
-          <button type="button" onClick={() => void saveOrder()} disabled={!effectiveStoreSiteId || !customerName.trim() || !customerPhone.trim() || !deliveryAddress.trim() || !items.length || management.intakeMutation.isPending} className="min-h-11 rounded-lg bg-[var(--theme-btn-primary-bg)] px-4 text-sm font-semibold text-[var(--theme-btn-primary-text)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
+          <button type="button" onClick={() => void saveOrder()} disabled={!effectiveFacilitySiteId || !customerName.trim() || !customerPhone.trim() || !deliveryAddress.trim() || !items.length || management.intakeMutation.isPending} className="min-h-11 rounded-lg bg-[var(--theme-btn-primary-bg)] px-4 text-sm font-semibold text-[var(--theme-btn-primary-text)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
             Save order for review
           </button>
         </div>
@@ -163,8 +173,8 @@ export default function OnlineStoreManagement() {
         <div className="mb-5 flex items-start gap-3">
           <div className="rounded-xl bg-[var(--theme-status-warning-bg)] p-2.5 text-[var(--theme-status-warning-text)]"><ShoppingBag size={20} /></div>
           <div>
-            <h2 className="text-lg font-semibold text-[var(--theme-text-primary)]">Warehouse order queue</h2>
-            <p className="mt-1 text-sm text-[var(--theme-text-secondary)]">Accepting reserves warehouse stock and queues a PICK job. Payment remains unpaid until collected.</p>
+            <h2 className="text-lg font-semibold text-[var(--theme-text-primary)]">Fulfillment order queue</h2>
+            <p className="mt-1 text-sm text-[var(--theme-text-secondary)]">Accepting reserves facility stock and queues a PICK job. Payment remains unpaid until collected.</p>
           </div>
         </div>
         {orders.length ? (
@@ -193,7 +203,7 @@ export default function OnlineStoreManagement() {
                       </li>
                     ))}
                   </ul>
-                  {orderJobs.length > 0 && <p className="mt-3 text-xs text-[var(--theme-text-secondary)]">Warehouse: {orderJobs.map((job) => `${job.type.toLowerCase()} ${job.transfer_status || job.status}`).join(' · ')}</p>}
+                  {orderJobs.length > 0 && <p className="mt-3 text-xs text-[var(--theme-text-secondary)]">Fulfillment: {orderJobs.map((job) => `${job.type.toLowerCase()} ${job.transfer_status || job.status}`).join(' · ')}</p>}
                   {order.status === 'awaiting_confirmation' && (
                     <div className="mt-4 flex flex-wrap justify-end gap-2">
                       <button type="button" disabled={management.orderMutation.isPending} onClick={() => void updateOrder(order, 'rejected')} className="min-h-11 rounded-lg border border-[var(--theme-border)] px-3 text-sm font-medium text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Decline</button>
@@ -204,7 +214,7 @@ export default function OnlineStoreManagement() {
               );
             })}
           </div>
-        ) : <p className="py-8 text-center text-sm text-[var(--theme-text-muted)]">No orders for this warehouse.</p>}
+        ) : <p className="py-8 text-center text-sm text-[var(--theme-text-muted)]">No orders for this facility.</p>}
       </section>
 
       <p className="text-xs text-[var(--theme-text-muted)]">Order totals show merchandise subtotal only. Confirm tax, delivery charges, and the final payment amount before dispatch.</p>

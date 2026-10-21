@@ -46,7 +46,7 @@ export default function NetworkInventory() {
     // Calculate inventory metrics per site (exclude Admin sites)
     const siteInventory = useMemo(() => {
         const inventorySites = sites.filter(s => {
-            const isOperationalType = ['Warehouse', 'Distribution Center', 'Store', 'Dark Store', 'Retail'].includes(s.type);
+            const isOperationalType = ['Warehouse', 'Distribution Center', 'Store', 'Retail'].includes(s.type);
             if (isOperationalType) return true;
 
             const isAdminByType = s.type === 'Administration' || s.type === 'Administrative';
@@ -86,7 +86,7 @@ export default function NetworkInventory() {
 
     // Total counts
     const totalWarehouses = siteInventory.filter(inv => inv.site.type === 'Warehouse' || inv.site.type === 'Distribution Center').length;
-    const totalStores = siteInventory.filter(inv => inv.site.type === 'Store' || inv.site.type === 'Dark Store').length;
+    const totalStores = siteInventory.filter(inv => inv.site.type === 'Store').length;
     const totalNetworkProducts = siteInventory.reduce((sum, inv) => sum + inv.metrics.uniqueProducts, 0);
     const totalNetworkAssetValue = siteInventory.reduce((sum, inv) => sum + inv.metrics.totalValue, 0);
     const totalPotentialRevenue = siteInventory.reduce((sum, inv) => sum + inv.metrics.totalValueRetail, 0);
@@ -109,7 +109,7 @@ export default function NetworkInventory() {
     const filteredInventory = useMemo(() => {
         return siteInventory.filter(inv => {
             const isWarehouse = inv.site.type === 'Warehouse' || inv.site.type === 'Distribution Center';
-            const isStore = inv.site.type === 'Store' || inv.site.type === 'Dark Store';
+            const isStore = inv.site.type === 'Store';
 
             if (typeFilter === 'WAREHOUSE' && !isWarehouse) return false;
             if (typeFilter === 'STORE' && !isStore) return false;

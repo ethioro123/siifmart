@@ -161,7 +161,7 @@ export default function Sidebar() {
       const hasRole = item.roles.includes(userRole) || isExecutive;
 
       const siteType = activeSite?.type || '';
-      const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
+      const isStore = ['Store', 'Retail', 'POS'].includes(siteType);
       const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
       const isHQ = !isStore && !isWarehouse;
 

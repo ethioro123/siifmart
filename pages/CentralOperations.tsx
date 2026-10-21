@@ -72,7 +72,7 @@ export default function CentralOperations() {
 
     const scopedSites = useMemo(() => {
         if (facilityScope === 'store') {
-            return baseSites.filter(s => s.type === 'Store' || s.type === 'Dark Store' || s.type === 'Online Store');
+            return baseSites.filter(s => s.type === 'Store');
         }
         if (facilityScope === 'warehouse') {
             return baseSites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center');
