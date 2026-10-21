@@ -153,10 +153,38 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
 };
 
+const fallbackLanguageContext: LanguageContextType = {
+    language: 'en',
+    setLanguage: () => {},
+    t: (path: string): string => {
+        const keys = path.split('.');
+        let current: any = TRANSLATIONS;
+        for (const key of keys) {
+            if (!current || current[key] === undefined) {
+                return path;
+            }
+            current = current[key];
+        }
+        if (typeof current === 'object' && current['en']) {
+            return current['en'];
+        }
+        return path;
+    },
+    country: 'ET',
+    countryProfile: getCountryProfile('ET'),
+    isKenya: false,
+    isEthiopia: true,
+    availableLanguages: getAllowedLanguages('ET'),
+    currency: 'ETB',
+    currencySymbol: 'ETB',
+    formatCurrency: (amount) => formatLocalizedPrice(amount || 0, 'ET')
+};
+
 export const useLanguage = () => {
     const context = useContext(LanguageContext);
     if (context === undefined) {
-        throw new Error('useLanguage must be used within a LanguageProvider');
+        logger.warn('LanguageContext', 'useLanguage called outside LanguageProvider; using safe fallback context');
+        return fallbackLanguageContext;
     }
     return context;
 };
