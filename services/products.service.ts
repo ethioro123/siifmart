@@ -234,17 +234,19 @@ export const productsService = {
     async updatePrice(id: string, newPrice: number) {
         const { data: current, error: fetchError } = await supabase
             .from('products')
-            .select('price')
+            .select('price, sale_price, is_on_sale')
             .eq('id', id)
             .single();
 
         if (fetchError) throw fetchError;
 
-        const updates: any = {
-            price: newPrice,
-            old_price: current.price,
-            price_updated_at: new Date().toISOString()
-        };
+        const oldEffectivePrice = current.is_on_sale && Number(current.sale_price) > 0 ? Number(current.sale_price) : Number(current.price);
+        const newEffectivePrice = current.is_on_sale && Number(current.sale_price) > 0 ? Number(current.sale_price) : newPrice;
+        const updates: Record<string, number | string> = { price: newPrice };
+        if (oldEffectivePrice !== newEffectivePrice) {
+            updates.old_price = oldEffectivePrice;
+            updates.price_updated_at = new Date().toISOString();
+        }
 
         const { data, error } = await supabase
             .from('products')

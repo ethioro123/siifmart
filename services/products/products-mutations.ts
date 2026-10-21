@@ -301,26 +301,25 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
         dbUpdates.custom_attributes = customAttrs;
     }
 
-    const isPriceUpdate =
-        updates.price !== undefined ||
-        updates.costPrice !== undefined;
-
-    if (isPriceUpdate) {
+    const hasRetailPriceUpdate = updates.price !== undefined || updates.salePrice !== undefined || updates.isOnSale !== undefined;
+    if (hasRetailPriceUpdate) {
         const { data: currentProduct } = await supabase
             .from('products')
-            .select('price, cost_price')
+            .select('price, sale_price, is_on_sale')
             .eq('id', id)
             .single();
 
         if (currentProduct) {
-            const priceChanged = updates.price !== undefined && updates.price !== currentProduct.price;
-            const costChanged = updates.costPrice !== undefined && updates.costPrice !== currentProduct.cost_price;
-
-            if (priceChanged || costChanged) {
+            const currentEffectivePrice = currentProduct.is_on_sale && Number(currentProduct.sale_price) > 0
+                ? Number(currentProduct.sale_price)
+                : Number(currentProduct.price);
+            const nextPrice = updates.price ?? Number(currentProduct.price);
+            const nextSalePrice = updates.salePrice ?? Number(currentProduct.sale_price);
+            const nextIsOnSale = updates.isOnSale ?? currentProduct.is_on_sale;
+            const nextEffectivePrice = nextIsOnSale && Number(nextSalePrice) > 0 ? Number(nextSalePrice) : Number(nextPrice);
+            if (nextEffectivePrice !== currentEffectivePrice) {
                 dbUpdates.price_updated_at = new Date().toISOString();
-                if (priceChanged) {
-                    dbUpdates.old_price = currentProduct.price;
-                }
+                dbUpdates.old_price = currentEffectivePrice;
             }
         }
     }
@@ -442,20 +441,39 @@ export async function updatePriceBySku(sku: string, siteId: string, newPrice: nu
     if (!sku || !newPrice || newPrice <= 0) return [];
     const nowStr = new Date().toISOString();
 
-    const { data, error } = await supabase
+    const { data: currentProducts, error: fetchError } = await supabase
         .from('products')
-        .update({
-            price: newPrice,
-            price_updated_at: nowStr
-        })
+        .select('id, price, sale_price, is_on_sale')
         .eq('sku', sku)
-        .eq('site_id', siteId)
-        .select('*');
+        .eq('site_id', siteId);
 
-    if (error) {
-        logger.warn('products-mutations', `Could not update price by SKU ${sku}`, { error: error.message });
+    if (fetchError) {
+        logger.warn('products-mutations', `Could not load current price by SKU ${sku}`, { error: fetchError.message });
         return [];
     }
 
-    return (data || []).map(_mapProduct);
+    const changedProducts = (currentProducts || []).filter(product => Number(product.price) !== newPrice);
+    try {
+        return await Promise.all(changedProducts.map(async product => {
+            const oldEffectivePrice = product.is_on_sale && Number(product.sale_price) > 0 ? Number(product.sale_price) : Number(product.price);
+            const newEffectivePrice = product.is_on_sale && Number(product.sale_price) > 0 ? Number(product.sale_price) : newPrice;
+            const updatePayload: Record<string, number | string> = { price: newPrice };
+            if (oldEffectivePrice !== newEffectivePrice) {
+                updatePayload.old_price = oldEffectivePrice;
+                updatePayload.price_updated_at = nowStr;
+            }
+            const { data, error } = await supabase
+                .from('products')
+                .update(updatePayload)
+                .eq('id', product.id)
+                .select('*')
+                .single();
+
+            if (error) throw error;
+            return _mapProduct(data);
+        }));
+    } catch (error: any) {
+        logger.warn('products-mutations', `Could not update price by SKU ${sku}`, { error: error.message });
+        return [];
+    }
 }

@@ -9,6 +9,7 @@ import { getSellUnit, formatStockDisplay } from '../../../utils/units';
 import { formatPackBadge } from '../../procurement/utils';
 import { Product } from '../../../types';
 import { native } from '../../../utils/native';
+import { getPriceUpdateTimestamp } from '../utils/priceUpdates';
 
 interface POSCatalogProps {
     currentPage: number;
@@ -115,11 +116,10 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     })()}
 
                                     {(() => {
-                                        const priceTime = (product as any).priceUpdatedAt || (product as any).price_updated_at || (product as any).updatedAt || (product as any).updated_at;
+                                        const priceTime = getPriceUpdateTimestamp(product);
                                         const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                                        if (priceTime) {
-                                            const ts = new Date(priceTime).getTime();
-                                            if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
+                                        if (priceTime !== null) {
+                                            if (priceTime > cutoff && priceTime > (lastSeenPriceUpdate || 0)) {
                                                 return (
                                                     <span className="absolute top-1.5 left-1.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1 z-10">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info)]" aria-hidden="true" />
@@ -152,11 +152,10 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     <div className="mt-auto pt-1.5 flex items-center justify-between border-t border-[var(--theme-border-subtle)]">
                                         <div className="flex flex-col min-w-0 pr-1">
                                             {(() => {
-                                                const priceTime = (product as any).priceUpdatedAt || (product as any).price_updated_at || (product as any).updatedAt || (product as any).updated_at;
+                                                const priceTime = getPriceUpdateTimestamp(product);
                                                 const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                                                if (priceTime) {
-                                                    const ts = new Date(priceTime).getTime();
-                                                    if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
+                                                if (priceTime !== null) {
+                                                    if (priceTime > cutoff && priceTime > (lastSeenPriceUpdate || 0)) {
                                                         return (
                                                             <span className="inline-flex items-center gap-1 text-[10px] font-black text-[var(--theme-status-info-text)] uppercase mb-0.5 tracking-wider" aria-label="Price updated recently">
                                                                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info)]" aria-hidden="true" />

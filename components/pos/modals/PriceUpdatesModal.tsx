@@ -8,6 +8,7 @@ import { CURRENCY_SYMBOL } from '../../../constants';
 import { getSellUnit } from '../../../utils/units';
 import { native } from '../../../utils/native';
 import { CheckCircle, CheckCheck, Plus } from 'lucide-react';
+import { getEffectiveRetailPrice, getPriceUpdateTimestamp, getUnseenPriceUpdates } from '../utils/priceUpdates';
 
 export const PriceUpdatesModal: React.FC = () => {
     const { t } = useLanguage();
@@ -20,55 +21,30 @@ export const PriceUpdatesModal: React.FC = () => {
         addToCart
     } = usePOS();
 
-    const { products, addNotification } = useData();
+    const { addNotification } = useData();
 
     // Filter products with price changes that are unseen
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const unseenPriceChanges = priceUpdatedProducts.filter((p: any) => {
-        const priceTime = p.priceUpdatedAt || p.price_updated_at || p.updatedAt || p.updated_at;
-        if (!priceTime) return true;
-        const ts = new Date(priceTime).getTime();
-        return ts > cutoff && ts > (lastSeenPriceUpdate || 0);
-    });
+    const unseenPriceChanges = getUnseenPriceUpdates(priceUpdatedProducts, lastSeenPriceUpdate || 0);
 
     const handleAcknowledge = () => {
-        const count = priceUpdatedProducts.length;
+        const count = unseenPriceChanges.length;
         markPriceUpdatesAsRead();
         setIsPriceUpdatesModalOpen(false);
         native.haptic();
-        addNotification('success', count > 0 ? `Confirmed ${count} product price update${count !== 1 ? 's' : ''}` : 'Price updates confirmed');
+        addNotification('success', count > 0 ? `Marked ${count} product price update${count !== 1 ? 's' : ''} as reviewed` : 'Price updates marked as reviewed');
     };
 
     return (
         <Modal
             isOpen={isPriceUpdatesModalOpen}
-            onClose={() => {
-                markPriceUpdatesAsRead();
-                setIsPriceUpdatesModalOpen(false);
-            }}
-            title="Product Price Updates & Confirmation"
+            onClose={() => setIsPriceUpdatesModalOpen(false)}
+            title="Recent Product Price Changes"
             size="lg"
         >
             <div className="p-4 space-y-4">
                 <div className="flex justify-between items-center text-sm text-[var(--theme-text-secondary)] font-medium mb-2">
-                    <span>Checking {products.length} products...</span>
-                    <div className="flex items-center gap-2">
-                        <span className="text-amber-600 dark:text-amber-400 font-bold">{priceUpdatedProducts.length} changes found</span>
-                        {unseenPriceChanges.length > 0 && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    markPriceUpdatesAsRead();
-                                    native.haptic();
-                                    addNotification('info', 'Marked price updates as read');
-                                }}
-                                className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center gap-1 shadow-xs cursor-pointer"
-                            >
-                                <CheckCheck size={13} />
-                                <span>Mark read</span>
-                            </button>
-                        )}
-                    </div>
+                    <span>Changes from the last 7 days</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">{priceUpdatedProducts.length} changes found</span>
                 </div>
 
                 {priceUpdatedProducts.length === 0 ? (
@@ -77,22 +53,22 @@ export const PriceUpdatesModal: React.FC = () => {
                         <p className="text-xs">No price changes in the last 7 days.</p>
                     </div>
                 ) : (
-                    <div className="max-h-[60vh] overflow-y-auto border border-[var(--theme-border)] rounded-xl">
-                        <table className="w-full text-left bg-transparent">
+                    <div className="max-h-[60vh] overflow-auto border border-[var(--theme-border)] rounded-xl">
+                        <table className="w-full min-w-[680px] text-left bg-transparent">
                             <thead className="bg-[var(--theme-thead-bg)] text-xs uppercase text-[var(--theme-thead-text)] sticky top-0 font-bold border-b border-[var(--theme-border)]">
                                 <tr>
                                     <th className="p-3 text-xs uppercase font-bold tracking-wider">Product</th>
                                     <th className="p-3 text-xs uppercase font-bold tracking-wider text-center">Unit</th>
                                     <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">Old Price</th>
-                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">New Price</th>
+                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">Current POS Price</th>
                                     <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">Update Time</th>
                                     <th className="p-3 text-xs uppercase font-bold tracking-wider text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[var(--theme-border)]">
                                 {priceUpdatedProducts.map((p: any) => {
-                                    const priceTime = p.priceUpdatedAt || p.price_updated_at || p.updatedAt || p.updated_at;
-                                    const isUnseen = priceTime && new Date(priceTime).getTime() > (lastSeenPriceUpdate || 0);
+                                    const priceTime = getPriceUpdateTimestamp(p);
+                                    const isUnseen = priceTime !== null && priceTime > (lastSeenPriceUpdate || 0);
                                     return (
                                         <tr key={p.id} className="hover:bg-[var(--theme-table-row-hover)] transition-colors">
                                             <td className="p-3">
@@ -113,13 +89,13 @@ export const PriceUpdatesModal: React.FC = () => {
                                                 </span>
                                             </td>
                                             <td className="p-3 text-right text-[var(--theme-text-muted)] font-mono text-xs">
-                                                {p.oldPrice !== undefined && p.oldPrice !== null ? `${Number(p.oldPrice).toLocaleString()} ${CURRENCY_SYMBOL}` : '-'}
+                                                {p.oldPrice !== undefined && p.oldPrice !== null ? `${Number(p.oldPrice).toLocaleString()} ${CURRENCY_SYMBOL}` : p.old_price !== undefined && p.old_price !== null ? `${Number(p.old_price).toLocaleString()} ${CURRENCY_SYMBOL}` : '-'}
                                             </td>
                                             <td className="p-3 text-right text-amber-600 dark:text-amber-400 font-bold font-mono text-xs">
-                                                {p.price.toLocaleString()} {CURRENCY_SYMBOL}{getSellUnit(p.unit).code !== 'UNIT' ? `/${getSellUnit(p.unit).shortLabel}` : ''}
+                                                {getEffectiveRetailPrice(p).toLocaleString()} {CURRENCY_SYMBOL}{getSellUnit(p.unit).code !== 'UNIT' ? `/${getSellUnit(p.unit).shortLabel}` : ''}
                                             </td>
                                             <td className="p-3 text-right text-xs text-[var(--theme-text-secondary)] font-medium font-mono tabular-nums">
-                                                {priceTime ? new Date(priceTime).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+                                                {priceTime !== null ? new Date(priceTime).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                                             </td>
                                             <td className="p-3 text-center">
                                                 <button
@@ -127,7 +103,7 @@ export const PriceUpdatesModal: React.FC = () => {
                                                     onClick={() => {
                                                         addToCart(p);
                                                         native.haptic();
-                                                        addNotification('info', `Added ${p.name} at updated price ${CURRENCY_SYMBOL} ${p.price}`);
+                                                        addNotification('info', `Added ${p.name} at updated price ${CURRENCY_SYMBOL} ${getEffectiveRetailPrice(p)}`);
                                                     }}
                                                     className="px-2.5 py-1 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-primary)] text-[var(--theme-text-primary)] hover:text-[var(--theme-primary-text)] border border-[var(--theme-border)] rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1 cursor-pointer shadow-xs"
                                                     title="Add to cart at new price"
@@ -148,18 +124,17 @@ export const PriceUpdatesModal: React.FC = () => {
                     <Button
                         variant="secondary"
                         onClick={() => {
-                            markPriceUpdatesAsRead();
                             setIsPriceUpdatesModalOpen(false);
                         }}
                     >
                         {t('common.close')}
                     </Button>
-                    <Button
-                        variant="primary"
-                        onClick={handleAcknowledge}
-                    >
-                        {t('pos.acknowledgeUpdates')}
-                    </Button>
+                    {unseenPriceChanges.length > 0 && (
+                        <Button variant="primary" onClick={handleAcknowledge}>
+                            <CheckCheck size={16} />
+                            Mark reviewed
+                        </Button>
+                    )}
                 </div>
             </div>
         </Modal>

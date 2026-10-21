@@ -17,6 +17,7 @@ import { CashDropModal } from './modals/CashDropModal';
 import { NoSaleKickModal } from './modals/NoSaleKickModal';
 import { VoidAuthorizationModal } from './modals/VoidAuthorizationModal';
 import { POSCartActionsMenu } from './components/POSCartActionsMenu';
+import { getUnseenPriceUpdates } from './utils/priceUpdates';
 
 export const POSCartPanel: React.FC = () => {
     const { t } = useLanguage();
@@ -64,14 +65,7 @@ export const POSCartPanel: React.FC = () => {
     const [isCashDropModalOpen, setIsCashDropModalOpen] = useState(false);
     const [isVoidAuthModalOpen, setIsVoidAuthModalOpen] = useState(false);
 
-    // Compute unseen price updates count
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const unseenPriceUpdatesCount = priceUpdatedProducts.filter((p: any) => {
-        const priceTime = p.priceUpdatedAt || p.price_updated_at || p.updatedAt || p.updated_at;
-        if (!priceTime) return true;
-        const ts = new Date(priceTime).getTime();
-        return ts > cutoff && ts > (lastSeenPriceUpdate || 0);
-    }).length;
+    const unseenPriceUpdatesCount = getUnseenPriceUpdates(priceUpdatedProducts, lastSeenPriceUpdate || 0).length;
 
     const totalItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 

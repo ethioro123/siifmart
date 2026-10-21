@@ -22,6 +22,7 @@ import { usePOSProductFilters } from './hooks/usePOSProductFilters';
 import { usePOSScanActions } from './hooks/usePOSScanActions';
 import { POSContextType } from './types';
 import { getParentCategory } from './utils/posUtils';
+import { getRecentPriceUpdates } from './utils/priceUpdates';
 
 import { logger } from '../../utils/logger';
 
@@ -88,17 +89,23 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [shiftStartTime, setShiftStartTime] = useState(activeShift?.startTime || new Date().toISOString());
     const [hasDismissedStartShiftModal, setHasDismissedStartShiftModal] = useState(false);
 
-    // Price Change Notification Read State
+    // Keep review state separate for each cashier and active store.
+    const priceUpdateSeenStorageKey = `siifmart_pos_terminal_price_seen:${user?.id || 'anonymous'}:${activeSite?.id || 'no-site'}`;
     const [lastSeenPriceUpdate, setLastSeenPriceUpdate] = useState<number>(() => {
-        const stored = localStorage.getItem('siifmart_pos_terminal_price_seen');
-        return stored ? parseInt(stored, 10) : 0;
+        const stored = localStorage.getItem(priceUpdateSeenStorageKey);
+        return stored ? Number(stored) || 0 : 0;
     });
 
-    const markPriceUpdatesAsRead = () => {
+    useEffect(() => {
+        const stored = localStorage.getItem(priceUpdateSeenStorageKey);
+        setLastSeenPriceUpdate(stored ? Number(stored) || 0 : 0);
+    }, [priceUpdateSeenStorageKey]);
+
+    const markPriceUpdatesAsRead = useCallback(() => {
         const now = Date.now();
         setLastSeenPriceUpdate(now);
-        localStorage.setItem('siifmart_pos_terminal_price_seen', String(now));
-    };
+        localStorage.setItem(priceUpdateSeenStorageKey, String(now));
+    }, [priceUpdateSeenStorageKey]);
 
     const [isReceivingModalOpen, setIsReceivingModalOpen] = useState(false), [scannedBarcode, setScannedBarcode] = useState('');
     const [receivedItems, setReceivedItems] = useState<Array<{ product: Product; qty: number; timestamp: string }>>([]), [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
@@ -229,15 +236,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const isPaymentValid = selectedPaymentMethod === 'Cash' ? parseFloat(amountTendered || '0') >= total : true;
 
     const priceUpdatedProducts = useMemo(() => {
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const siteId = activeSite?.id;
-        return products.filter((p: Product) => {
-            const matchesSite = !siteId || p.siteId === siteId || (p as any).site_id === siteId;
-            const timeStr = (p as any).priceUpdatedAt || (p as any).price_updated_at || (p as any).updatedAt || (p as any).updated_at;
-            if (!timeStr) return false;
-            const date = new Date(timeStr);
-            return matchesSite && date > sevenDaysAgo;
-        });
+        return getRecentPriceUpdates(products, activeSite?.id);
     }, [products, activeSite]);
 
     const [isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen] = useState(false);

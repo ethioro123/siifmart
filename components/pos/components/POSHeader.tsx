@@ -14,6 +14,7 @@ import { native } from '../../../utils/native';
 
 import { CyberClock } from '../../dashboard/widgets/CyberClock';
 import type { Country } from '../../../utils/localization';
+import { getUnseenPriceUpdates } from '../utils/priceUpdates';
 
 interface POSHeaderProps {
     setIsFilterPanelOpen: (open: boolean) => void;
@@ -36,24 +37,16 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
         currentStorePoints,
         storeBonus,
         userBonusShare,
+        priceUpdatedProducts,
         lastSeenPriceUpdate,
         markPriceUpdatesAsRead,
         setIsPriceUpdatesModalOpen
     } = usePOS();
 
-    const { triggerSync, posSyncStatus, posPendingSyncCount, posLatencyMs, settings, products, activeSite, effectiveCountry } = useData();
+    const { triggerSync, posSyncStatus, posPendingSyncCount, posLatencyMs, settings, activeSite, effectiveCountry } = useData();
     const activeCountry = (activeSite?.country || effectiveCountry || settings?.country || 'ET') as Country;
 
-    // Calculate unseen price changes in active site (last 7 days)
-    const siteId = activeSite?.id;
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const unseenPriceChanges = products.filter((p: any) => {
-        const matchesSite = !siteId || p.siteId === siteId || p.site_id === siteId;
-        const priceTime = p.priceUpdatedAt || p.price_updated_at || p.updatedAt || p.updated_at;
-        if (!priceTime) return false;
-        const ts = new Date(priceTime).getTime();
-        return matchesSite && ts > cutoff && ts > (lastSeenPriceUpdate || 0);
-    });
+    const unseenPriceChanges = getUnseenPriceUpdates(priceUpdatedProducts, lastSeenPriceUpdate || 0);
 
     // Helper to check for Neutralino (native app mode)
     const isNativeApp = typeof window !== 'undefined' && (window as any).Neutralino;

@@ -13,7 +13,7 @@ interface LogoProps {
 }
 
 /**
- * Futuristic hex-frame emblem: a sprout rising from a market basket.
+ * Elegant monochrome emblem: a wheat stalk inside a shopping bag.
  * Faithfully renders SIIFMART's iconic ribbon-'S' grocery cart, twin wheels,
  * and asymmetric organic leaves in a crisp monochrome vector for light and dark mode.
  */
@@ -28,21 +28,18 @@ function SiifGroceryEmblem({ size }: { size: number }) {
       className="shrink-0 text-[#09090B] dark:text-[#FFFFFF] transition-colors duration-200"
       aria-hidden="true"
     >
-      {/* Hexagonal tech frame (cell / honeycomb) */}
-      <path d="M50 4L89.8 27V73L50 96L10.2 73V27Z" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" />
-      {/* Sprout: two leaves rising from the basket */}
-      <path d="M50 52C37 52 30.5 44 29.5 33C41 33 49 40 50 52Z" fill="currentColor" />
-      <path d="M50 46C50 31 58.5 22 71.5 20.5C71.5 33.5 62.5 43 50 46Z" fill="currentColor" />
-      <path d="M50 62V46" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-      {/* Market basket / cart body */}
-      <path d="M24 56H76L69.5 75.5C69 77 67.8 78 66.2 78H33.8C32.2 78 31 77 30.5 75.5Z" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" />
-      <path d="M40 66H60" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      {/* Wheels */}
-      <circle cx="40" cy="85" r="2.8" fill="currentColor" />
-      <circle cx="60" cy="85" r="2.8" fill="currentColor" />
-      {/* Data nodes */}
-      <circle cx="89.8" cy="27" r="3" fill="currentColor" />
-      <circle cx="10.2" cy="73" r="3" fill="currentColor" />
+      {/* Shopping bag with handle */}
+      <path d="M24 34H76L81 84Q81.5 90 76 90H24Q18.5 90 19 84Z" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" />
+      <path d="M40 34V26A10 10 0 0 1 60 26V34" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      {/* Wheat stalk */}
+      <path d="M50 84V48" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <ellipse cx="50" cy="45" rx="2.6" ry="6" fill="currentColor" />
+      <ellipse cx="43" cy="56" rx="2.6" ry="6" transform="rotate(-40 43 56)" fill="currentColor" />
+      <ellipse cx="57" cy="56" rx="2.6" ry="6" transform="rotate(40 57 56)" fill="currentColor" />
+      <ellipse cx="43" cy="67" rx="2.6" ry="6" transform="rotate(-40 43 67)" fill="currentColor" />
+      <ellipse cx="57" cy="67" rx="2.6" ry="6" transform="rotate(40 57 67)" fill="currentColor" />
+      <ellipse cx="43" cy="78" rx="2.6" ry="6" transform="rotate(-40 43 78)" fill="currentColor" />
+      <ellipse cx="57" cy="78" rx="2.6" ry="6" transform="rotate(40 57 78)" fill="currentColor" />
     </svg>
   );
 }
