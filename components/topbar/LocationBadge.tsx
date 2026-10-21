@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Building, Store, ChevronDown, Check, MapPin, ExternalLink, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { canSwitchCountry } from '../../utils/permissions';
+import { getRoleDashboardRoute } from '../../utils/roleDashboard';
 import { formatDisplaySiteId } from '../../utils/siteIdGenerator';
 import { useData } from '../../contexts/DataContext';
 import { isSharedHqRegionalRole } from '../../utils/roleSegregation';
@@ -108,11 +109,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
             const selectedRegion = selected.region_code || selected.regionCode || null;
             setActiveRegionCode(selectedRegion);
          }
-         const isWh = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(selected.type || '');
-         const isSt = ['Store', 'Retail', 'POS'].includes(selected.type || '');
-         if (isWh) navigate('/wms-ops');
-         else if (isSt) navigate('/pos');
-         else navigate('/admin');
+         navigate(getRoleDashboardRoute(user?.role, selected.type));
       }
    };
 

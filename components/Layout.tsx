@@ -5,10 +5,13 @@ import TopBar from './TopBar';
 import NetworkStatusIndicator from './NetworkStatusIndicator';
 import { GhostModeBanner } from './GhostModeBanner';
 import { useData } from '../contexts/DataContext';
+import { useStore } from '../contexts/CentralStore';
+import { getRoleDashboardRoute } from '../utils/roleDashboard';
 import { native } from '../utils/native';
 
 export default function Layout({ children }: { children?: React.ReactNode }) {
   const { activeSite } = useData();
+  const { user } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   const hasMounted = useRef(false);
@@ -24,20 +27,10 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
     // Only redirect when switching from an existing site to a DIFFERENT site
     if (activeSite?.id && activeSite.id !== prevSiteIdRef.current) {
       prevSiteIdRef.current = activeSite.id;
-      const siteType = activeSite.type || '';
-      const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
-      const isStore = ['Store', 'Retail', 'POS'].includes(siteType);
-
-      if (isWarehouse) {
-        navigate('/wms-ops');
-      } else if (isStore) {
-        navigate(native.isCleanMobileMode() ? '/pos' : '/pos-dashboard');
-      } else {
-        // HQ / Administration site selected
-        navigate(native.isCleanMobileMode() ? '/wms-ops' : '/admin');
-      }
+      const targetRoute = getRoleDashboardRoute(user?.role, activeSite.type);
+      navigate(targetRoute);
     }
-  }, [activeSite, navigate]);
+  }, [activeSite, user?.role, navigate]);
 
 
   return (
