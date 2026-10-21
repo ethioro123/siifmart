@@ -209,7 +209,7 @@ export default function POSSettings() {
                 <button
                     onClick={() => setIsPreviewOpen(!isPreviewOpen)}
                     title="Toggle Receipt Preview"
-                    className="fixed bottom-8 right-8 h-10 px-4 rounded-xl z-[60] bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-lg flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer font-semibold text-xs"
+                    className="fixed bottom-8 right-8 h-10 px-4 rounded-xl z-[60] bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-lg flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer font-semibold text-xs"
                 >
                     <Receipt size={16} />
                     <span>{isPreviewOpen ? 'Hide Preview' : 'Live Receipt Preview'}</span>
@@ -273,7 +273,7 @@ export default function POSSettings() {
 
                     <div className="mb-6 text-center space-y-1">
                         <h2 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">Thermal Slip Preview</h2>
-                        <p className="text-xs text-[#0071E3] dark:text-[#2997FF] font-semibold">
+                        <p className="text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold">
                             {receiptBranding.posReceiptWidth} Standard ESC/POS
                         </p>
                     </div>

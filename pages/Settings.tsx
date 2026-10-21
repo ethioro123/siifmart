@@ -26,6 +26,15 @@ import HRSettings from '../components/settings/HRSettings';
 
 type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | 'hr' | 'roles' | 'locations' | 'regions' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'data' | 'audit' | 'gamification';
 
+const SETTINGS_TAB_LABELS: Record<SettingsTab, string> = {
+    general: 'General & Slogan', inventory: 'WMS & Inbound Rules', pos: 'POS & Retail Station',
+    discounts: 'Discount & Promo Codes', finance: 'Financial & Tax Policy', hr: 'HR & Workforce Policy',
+    roles: 'Roles & Zero-Trust', locations: 'Locations & Sites', regions: 'Regional Administration',
+    infrastructure: 'Infrastructure & Devices', integrations: 'API & Integrations', security: 'Loss Prevention & PIN',
+    notifications: 'Alert Notifications', data: 'Data Management', audit: 'System Audit Log',
+    gamification: 'Warehouse Gamification'
+};
+
 export default function SettingsPage() {
     const { user } = useStore();
     const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
@@ -47,12 +56,13 @@ export default function SettingsPage() {
                 setActiveTab(id);
                 setIsNavOpen(false);
             }}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-xs font-medium mb-1 cursor-pointer ${activeTab === id
-                ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+            aria-current={activeTab === id ? 'page' : undefined}
+            className={`w-full min-h-11 flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors text-sm font-medium mb-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${activeTab === id
+                ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] border border-[var(--theme-accent)] font-semibold'
                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
                 }`}
         >
-            <Icon size={16} className={activeTab === id ? 'text-white' : 'text-[var(--theme-text-secondary)]'} />
+            <Icon size={16} className={activeTab === id ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'} />
             <span>{label}</span>
         </button>
     );
@@ -62,22 +72,25 @@ export default function SettingsPage() {
             {/* Sidebar Overlay */}
             {isNavOpen && (
                 <div
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[40] animate-in fade-in duration-200"
+                    className="fixed inset-0 bg-black/40 z-[40] animate-in fade-in duration-200"
                     onClick={() => setIsNavOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
-            <div className={`
+            <nav aria-label="Settings sections" className={`
                 fixed inset-y-0 left-0 w-72 z-[50]
                 transition-all duration-300 ease-out transform
                 ${isNavOpen ? 'translate-x-0' : '-translate-x-full'}
                 lg:relative lg:translate-x-0 lg:flex-shrink-0 lg:z-0
             `}>
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3.5 h-full overflow-y-auto custom-scrollbar shadow-xs">
-                    <div className="flex items-center justify-between mb-4 px-2 lg:hidden">
-                        <p className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">Configuration</p>
-                        <button onClick={() => setIsNavOpen(false)} title="Close Menu" className="p-1 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] cursor-pointer">
+                    <div className="flex items-center justify-between mb-4 px-2">
+                        <div>
+                            <p className="text-base font-semibold text-[var(--theme-text-primary)]">Settings</p>
+                            <p className="mt-0.5 text-xs text-[var(--theme-text-secondary)]">Configuration for your authorized scope</p>
+                        </div>
+                        <button type="button" onClick={() => setIsNavOpen(false)} aria-label="Close settings navigation" className="p-2 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] cursor-pointer lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
                             <X size={18} />
                         </button>
                     </div>
@@ -167,22 +180,24 @@ export default function SettingsPage() {
                         </>
                     )}
                 </div>
-            </div>
+            </nav>
 
             {/* Main Content */}
             <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex flex-col relative overflow-hidden h-full shadow-xs">
                 {/* Toolbar */}
-                <div className="p-4 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-card)]/80 backdrop-blur-md z-10 sticky top-0">
+                <div className="p-4 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-card)] z-10 sticky top-0">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setIsNavOpen(true)}
-                            title="Open Configuration Menu"
-                            className="p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors lg:hidden cursor-pointer"
+                            title="Open Settings sections"
+                            aria-label="Open settings navigation"
+                            aria-expanded={isNavOpen}
+                            className="min-h-11 min-w-11 flex items-center justify-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors lg:hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                             <List size={18} />
                         </button>
                         <div className="text-xs text-[var(--theme-text-secondary)] font-medium">
-                            Configuration / <span className="text-[var(--theme-text-primary)] capitalize font-semibold">{activeTab === 'general' ? 'General & Slogan' : activeTab}</span>
+                            Settings <span aria-hidden="true" className="mx-1">/</span><span className="text-[var(--theme-text-primary)] font-semibold">{SETTINGS_TAB_LABELS[activeTab]}</span>
                         </div>
                     </div>
                 </div>

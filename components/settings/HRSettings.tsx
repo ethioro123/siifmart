@@ -104,7 +104,7 @@ export default function HRSettings() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
                         <Users size={18} />
                     </div>
                     <div>
@@ -120,7 +120,7 @@ export default function HRSettings() {
                 <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40 self-start sm:self-auto"
+                    className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40 self-start sm:self-auto"
                 >
                     <Save size={14} />
                     <span>{isSaving ? 'Saving...' : 'Save HR Policy'}</span>
@@ -130,7 +130,7 @@ export default function HRSettings() {
             {/* Statutory Leave Policies */}
             <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 border-b border-[var(--theme-border)] pb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
                         <Calendar size={14} />
                     </div>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
@@ -147,7 +147,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.annual_leave_days}
                             onChange={(e) => setPolicy({ ...policy, annual_leave_days: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
                             Statutory mandate ({activeCountry === 'KE' ? '21 days' : '16 days'})
@@ -162,7 +162,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.sick_leave_days}
                             onChange={(e) => setPolicy({ ...policy, sick_leave_days: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
                             Labor code statutory allowance
@@ -177,7 +177,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.carry_over_max_days}
                             onChange={(e) => setPolicy({ ...policy, carry_over_max_days: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
                             Maximum days rollable to next calendar year
@@ -186,12 +186,12 @@ export default function HRSettings() {
                 </div>
 
                 <div className="pt-1">
-                    <label className="flex items-center gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[#0071E3]/30 transition-colors cursor-pointer select-none">
+                    <label className="flex items-center gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer select-none">
                         <input
                             type="checkbox"
                             checked={policy.two_tier_leave_approval_required}
                             onChange={(e) => setPolicy({ ...policy, two_tier_leave_approval_required: e.target.checked })}
-                            className="w-4 h-4 rounded text-[#0071E3] focus:ring-0 accent-[#0071E3]"
+                            className="w-4 h-4 rounded text-[var(--theme-accent)] focus:ring-0 accent-[var(--theme-accent)]"
                         />
                         <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
                             Enforce Two-Tier Approval Chain (Manager Sign-Off → HR Central Concurrence)
@@ -203,7 +203,7 @@ export default function HRSettings() {
             {/* Attendance & Time-Tracking Rules */}
             <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 border-b border-[var(--theme-border)] pb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
                         <Clock size={14} />
                     </div>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
@@ -221,7 +221,7 @@ export default function HRSettings() {
                             step="0.5"
                             value={policy.standard_work_hours_per_day}
                             onChange={(e) => setPolicy({ ...policy, standard_work_hours_per_day: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">Full-time standard daily shift</span>
                     </div>
@@ -234,7 +234,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.late_grace_period_mins}
                             onChange={(e) => setPolicy({ ...policy, late_grace_period_mins: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">Allowed arrival threshold before 'Late' flag</span>
                     </div>
@@ -247,7 +247,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.geofence_radius_meters}
                             onChange={(e) => setPolicy({ ...policy, geofence_radius_meters: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">Perimeter tolerance for mobile clock-in</span>
                     </div>
@@ -274,7 +274,7 @@ export default function HRSettings() {
                             type="number"
                             value={policy.dormant_account_threshold_days}
                             onChange={(e) => setPolicy({ ...policy, dormant_account_threshold_days: Number(e.target.value) })}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                         />
                         <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
                             Accounts without login beyond this threshold are flagged in the HR Access Review
@@ -293,7 +293,7 @@ export default function HRSettings() {
             {/* Cross-Department Profile Governance & Segregation of Duties */}
             <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 border-b border-[var(--theme-border)] pb-3">
-                    <div className="w-7 h-7 rounded-lg bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
                         <ShieldCheck size={14} />
                     </div>
                     <div>
@@ -307,12 +307,12 @@ export default function HRSettings() {
                 </div>
 
                 <div className="space-y-2.5">
-                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[#0071E3]/30 transition-colors cursor-pointer">
+                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer">
                         <input
                             type="checkbox"
                             checked={policy.require_finance_approval_for_salary !== false}
                             onChange={(e) => setPolicy({ ...policy, require_finance_approval_for_salary: e.target.checked })}
-                            className="mt-0.5 w-4 h-4 rounded text-[#0071E3] focus:ring-0 accent-[#0071E3]"
+                            className="mt-0.5 w-4 h-4 rounded text-[var(--theme-accent)] focus:ring-0 accent-[var(--theme-accent)]"
                         />
                         <div>
                             <span className="text-xs font-semibold text-[var(--theme-text-primary)] block">
@@ -324,12 +324,12 @@ export default function HRSettings() {
                         </div>
                     </label>
 
-                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[#0071E3]/30 transition-colors cursor-pointer">
+                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer">
                         <input
                             type="checkbox"
                             checked={policy.require_dept_approval_for_transfers !== false}
                             onChange={(e) => setPolicy({ ...policy, require_dept_approval_for_transfers: e.target.checked })}
-                            className="mt-0.5 w-4 h-4 rounded text-[#0071E3] focus:ring-0 accent-[#0071E3]"
+                            className="mt-0.5 w-4 h-4 rounded text-[var(--theme-accent)] focus:ring-0 accent-[var(--theme-accent)]"
                         />
                         <div>
                             <span className="text-xs font-semibold text-[var(--theme-text-primary)] block">
@@ -341,12 +341,12 @@ export default function HRSettings() {
                         </div>
                     </label>
 
-                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[#0071E3]/30 transition-colors cursor-pointer">
+                    <label className="flex items-start gap-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer">
                         <input
                             type="checkbox"
                             checked={policy.require_compliance_approval_for_identity !== false}
                             onChange={(e) => setPolicy({ ...policy, require_compliance_approval_for_identity: e.target.checked })}
-                            className="mt-0.5 w-4 h-4 rounded text-[#0071E3] focus:ring-0 accent-[#0071E3]"
+                            className="mt-0.5 w-4 h-4 rounded text-[var(--theme-accent)] focus:ring-0 accent-[var(--theme-accent)]"
                         />
                         <div>
                             <span className="text-xs font-semibold text-[var(--theme-text-primary)] block">

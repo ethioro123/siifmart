@@ -26,7 +26,7 @@ export const LocationRegionView: React.FC<LocationRegionViewProps> = ({
                     >
                         <div className="flex flex-col gap-1 border-b border-[var(--theme-border)] pb-2.5">
                             <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-[#0071E3] dark:bg-[#2997FF] shrink-0" />
+                                <span className="w-2 h-2 rounded-full bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] shrink-0" />
                                 <h5 className="text-[var(--theme-text-primary)] font-semibold text-xs tracking-tight truncate" title={region.name}>
                                     {region.name}
                                 </h5>
@@ -35,7 +35,7 @@ export const LocationRegionView: React.FC<LocationRegionViewProps> = ({
                                 </span>
                             </div>
                             <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)]">
-                                <span className="font-mono font-semibold text-[#0071E3] dark:text-[#2997FF]">{region.code}</span>
+                                <span className="font-mono font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">{region.code}</span>
                                 {region.city && <span>&bull; {region.city}</span>}
                             </div>
                         </div>

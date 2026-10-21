@@ -44,7 +44,7 @@ export const POSTab: React.FC = () => {
         <div className="space-y-6 animate-in fade-in">
             {/* POS HEADER INFO */}
             <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
-                <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Store size={18} />
                 </div>
                 <div>
@@ -60,7 +60,7 @@ export const POSTab: React.FC = () => {
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                                 <ShoppingBag size={20} />
                             </div>
                             <div>
@@ -74,7 +74,7 @@ export const POSTab: React.FC = () => {
                             aria-checked={posBonusEnabled}
                             onClick={() => setPosBonusEnabled(!posBonusEnabled)}
                             aria-label="Toggle POS bonuses"
-                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${posBonusEnabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${posBonusEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                         >
                             <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${posBonusEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
@@ -83,7 +83,7 @@ export const POSTab: React.FC = () => {
 
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center gap-3 mb-2.5">
-                        <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                             <Calendar size={20} />
                         </div>
                         <div>
@@ -95,7 +95,7 @@ export const POSTab: React.FC = () => {
                         title="Select POS payout frequency"
                         value={posPayoutFrequency}
                         onChange={(e) => setPosPayoutFrequency(e.target.value as any)}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors cursor-pointer"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors cursor-pointer"
                     >
                         <option value="weekly">Weekly</option>
                         <option value="biweekly">Bi-Weekly</option>
@@ -105,7 +105,7 @@ export const POSTab: React.FC = () => {
 
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center gap-3 mb-2.5">
-                        <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                             <Percent size={20} />
                         </div>
                         <div>
@@ -124,7 +124,7 @@ export const POSTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <Store className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                            <Store className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                             Store Eligibility
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -145,11 +145,11 @@ export const POSTab: React.FC = () => {
                             return (
                                 <div
                                     key={store.id}
-                                    className={`bg-[var(--theme-bg-subtle)] border rounded-xl p-3.5 transition-all ${isEnabled ? 'border-[#0071E3]/30 hover:border-[#0071E3]/50' : 'border-transparent opacity-60'}`}
+                                    className={`bg-[var(--theme-bg-subtle)] border rounded-xl p-3.5 transition-all ${isEnabled ? 'border-[var(--theme-accent)]/30 hover:border-[var(--theme-accent)]/50' : 'border-transparent opacity-60'}`}
                                 >
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isEnabled ? 'bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/10 dark:text-[#2997FF]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)]'}`}>
+                                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isEnabled ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/10 dark:text-[var(--theme-accent)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)]'}`}>
                                                 <Store size={18} />
                                             </div>
                                             <div>
@@ -163,7 +163,7 @@ export const POSTab: React.FC = () => {
                                             aria-checked={isEnabled}
                                             onClick={() => toggleStoreBonusEligibility(store, 'bonusEnabled')}
                                             aria-label={`Toggle bonus for ${store.name}`}
-                                            className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${isEnabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                                            className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${isEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                                         >
                                             <div className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${isEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
                                         </button>
@@ -214,7 +214,7 @@ export const POSTab: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => openAddModal('pos')}
-                            className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                            className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                         >
                             <Plus size={14} /> Add Tier
                         </button>
@@ -234,7 +234,7 @@ export const POSTab: React.FC = () => {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                         <h4 className="font-semibold text-[var(--theme-text-primary)] text-xs">{tier.tierName}</h4>
-                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                             Tier {index + 1}
                                         </span>
                                     </div>
@@ -277,7 +277,7 @@ export const POSTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <Percent className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                            <Percent className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                             POS Role Bonus Distribution
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -287,7 +287,7 @@ export const POSTab: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => openRoleModal()}
-                        className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                        className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                         <Plus size={14} /> Add Role
                     </button>
@@ -306,7 +306,7 @@ export const POSTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <Zap className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                            <Zap className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                             Store Point Automation Rules
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -324,7 +324,7 @@ export const POSTab: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => openPointRuleModal()}
-                            className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                            className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                         >
                             <Plus size={14} /> Add Rule
                         </button>
@@ -343,7 +343,7 @@ export const POSTab: React.FC = () => {
                 {/* Point Calculation Preview */}
                 <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl space-y-3">
                     <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                        <Target className="text-[#0071E3] dark:text-[#2997FF]" size={15} />
+                        <Target className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={15} />
                         Example: Selling 5 Electronics + 10 Grocery items = {currency} 2,500
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -363,7 +363,7 @@ export const POSTab: React.FC = () => {
                             return items.map((item, idx) => (
                                 <div key={idx} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg p-2 text-center">
                                     <p className="text-[10px] text-[var(--theme-text-secondary)]">{item.label}</p>
-                                    <p className="text-sm font-semibold text-[#0071E3] dark:text-[#2997FF] mt-0.5">
+                                    <p className="text-sm font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mt-0.5">
                                         +{item.points}
                                     </p>
                                 </div>

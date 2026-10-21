@@ -49,7 +49,7 @@ export function ZoneManagerModal({
         <div className="flex items-start justify-between p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
           <div className="space-y-1 pr-4">
             <p className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-              <Shield className="text-[#0071E3] dark:text-[#2997FF]" size={16} /> Enforce Regional Replenishment
+              <Shield className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={16} /> Enforce Regional Replenishment
             </p>
             <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">
               Restrict stock transfer requests to stores and warehouses within the same Logistics Zone. Bypass authorization is reserved for the CEO.
@@ -70,7 +70,7 @@ export function ZoneManagerModal({
               }
             }}
             className={`w-11 h-6 rounded-full p-0.5 cursor-pointer transition-colors relative shrink-0 ${
-              settings.enforceRegionalZoning ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'
+              settings.enforceRegionalZoning ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
             }`}
           >
             <div className={`w-5 h-5 bg-white rounded-full shadow-xs transition-transform transform ${
@@ -81,14 +81,14 @@ export function ZoneManagerModal({
 
         <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 space-y-4 shadow-xs">
           <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
-            {editingZone ? <Edit2 size={13} className="text-[#0071E3] dark:text-[#2997FF]" /> : <Plus size={13} className="text-[#0071E3] dark:text-[#2997FF]" />}
+            {editingZone ? <Edit2 size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> : <Plus size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />}
             <span>{editingZone ? 'Edit Logistics Zone' : 'Create New Logistics Zone'}</span>
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1 block">Zone Name *</label>
               <input
-                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                 placeholder="e.g. South Hub Zone"
                 value={zoneNameInput}
                 onChange={(e) => setZoneNameInput(e.target.value)}
@@ -98,7 +98,7 @@ export function ZoneManagerModal({
             <div>
               <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1 block">Description</label>
               <input
-                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                 placeholder="e.g. Southern region stores and Warehouses"
                 value={zoneDescInput}
                 onChange={(e) => setZoneDescInput(e.target.value)}
@@ -124,7 +124,7 @@ export function ZoneManagerModal({
               type="button"
               onClick={handleSaveZone}
               disabled={isZoneSaving || !zoneNameInput.trim()}
-              className="h-9 px-5 bg-[#0071E3] dark:bg-[#2997FF] text-white rounded-xl text-xs font-semibold hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+              className="h-9 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white rounded-xl text-xs font-semibold hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
             >
               {isZoneSaving ? <Loader2 size={13} className="animate-spin" /> : editingZone ? <Save size={13} /> : <Plus size={13} />}
               <span>{editingZone ? 'Update Zone' : 'Create Zone'}</span>
@@ -166,7 +166,7 @@ export function ZoneManagerModal({
                       className="h-8 px-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-[0.98]"
                       title="Edit Zone"
                     >
-                      <Edit2 size={11} className="text-[#0071E3] dark:text-[#2997FF]" />
+                      <Edit2 size={11} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                       <span>Edit</span>
                     </button>
                     <button

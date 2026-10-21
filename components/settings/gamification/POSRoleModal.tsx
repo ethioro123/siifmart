@@ -41,7 +41,7 @@ export const POSRoleModal: React.FC = () => {
                         value={editedRole.role || ''}
                         onChange={(e) => setEditedRole({ ...editedRole, role: e.target.value })}
                         placeholder="e.g., Store Manager, Cashier"
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                     />
                 </div>
 
@@ -57,7 +57,7 @@ export const POSRoleModal: React.FC = () => {
                         aria-label="Pool Percentage"
                         value={editedRole.percentage || 0}
                         onChange={(e) => setEditedRole({ ...editedRole, percentage: parseInt(e.target.value) || 0 })}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                     />
                     <p className="text-[10px] text-[var(--theme-text-secondary)]">Share of the store's earned bonus pool</p>
                 </div>
@@ -75,7 +75,7 @@ export const POSRoleModal: React.FC = () => {
                                 onClick={() => setEditedRole({ ...editedRole, color: color.value })}
                                 className={`w-8 h-8 rounded-xl bg-gradient-to-br ${color.class} flex items-center justify-center transition-all cursor-pointer ${
                                     editedRole.color === color.value
-                                        ? 'ring-2 ring-[#0071E3] dark:ring-[#2997FF] scale-110 shadow-xs'
+                                        ? 'ring-2 ring-[var(--theme-accent)] dark:ring-[var(--theme-accent)] scale-110 shadow-xs'
                                         : 'opacity-70 hover:opacity-100'
                                 }`}
                                 title={color.label}
@@ -100,7 +100,7 @@ export const POSRoleModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={handleSaveRole}
-                        className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                         <Save size={14} />
                         {editingRole ? 'Update Role' : 'Add Role'}

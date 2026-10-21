@@ -80,8 +80,8 @@ export default function SmartRoutingConfig({ siteId }: Props) {
 
     return (
         <div className="space-y-6">
-            <div className="p-4 bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border border-[#0071E3]/20 dark:border-[#2997FF]/30 rounded-2xl flex items-start gap-3">
-                <MapPin className="text-[#0071E3] dark:text-[#2997FF] shrink-0 mt-0.5" size={20} />
+            <div className="p-4 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 border border-[var(--theme-accent)]/20 dark:border-[var(--theme-accent)]/30 rounded-2xl flex items-start gap-3">
+                <MapPin className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0 mt-0.5" size={20} />
                 <div>
                     <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Smart Putaway Routing</h4>
                     <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 leading-relaxed">
@@ -100,7 +100,7 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                             aria-label="Product Category"
                             value={newCategory}
                             onChange={(e) => setNewCategory(e.target.value)}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/30"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30"
                         >
                             {ALL_CATEGORY_OPTIONS.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
@@ -117,7 +117,7 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                             aria-label="Default Zone"
                             value={newZone}
                             onChange={(e) => setNewZone(e.target.value)}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/30"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30"
                         >
                             {zones.map(z => (
                                 <option key={z.id} value={z.name}>{z.name} ({z.type})</option>
@@ -129,7 +129,7 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                         type="button"
                         onClick={handleAddMapping}
                         disabled={isSaving || !newZone || zones.length === 0}
-                        className="h-10 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40 shrink-0"
+                        className="h-10 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40 shrink-0"
                     >
                         {isSaving ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Plus size={16} />}
                         Add Rule
@@ -159,7 +159,7 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                                     <td className="px-6 py-4 font-semibold text-[var(--theme-text-primary)] text-xs">
                                         {mapping.category}
                                     </td>
-                                    <td className="px-6 py-4 text-[#0071E3] dark:text-[#2997FF] font-mono text-xs font-semibold">
+                                    <td className="px-6 py-4 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-mono text-xs font-semibold">
                                         {mapping.defaultZone}
                                     </td>
                                     <td className="px-6 py-4 text-right">

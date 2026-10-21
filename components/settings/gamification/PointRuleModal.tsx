@@ -57,7 +57,7 @@ export const PointRuleModal: React.FC = () => {
                                 setRuleNameError(false);
                             }}
                             placeholder="e.g., Premium Electronics"
-                            className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors ${
+                            className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors ${
                                 ruleNameError ? 'border-red-500' : 'border-[var(--theme-border)]'
                             }`}
                         />
@@ -71,7 +71,7 @@ export const PointRuleModal: React.FC = () => {
                             value={editedPointRule.type || 'category'}
                             aria-label="Rule Type"
                             onChange={(e) => setEditedPointRule({ ...editedPointRule, type: e.target.value as PointRuleType })}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-semibold outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors cursor-pointer"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-semibold outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
                         >
                             <option value="category">Category-based</option>
                             <option value="product">Specific Product</option>
@@ -92,7 +92,7 @@ export const PointRuleModal: React.FC = () => {
                             value={editedPointRule.categoryId || 'all'}
                             aria-label="Category"
                             onChange={(e) => setEditedPointRule({ ...editedPointRule, categoryId: e.target.value })}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-semibold outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors cursor-pointer"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-semibold outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
                         >
                             <option value="all">All Categories</option>
                             {Object.entries(GROCERY_CATEGORIES).map(([group, items]) => (
@@ -118,7 +118,7 @@ export const PointRuleModal: React.FC = () => {
                             value={editedPointRule.productSku || ''}
                             onChange={(e) => setEditedPointRule({ ...editedPointRule, productSku: e.target.value })}
                             placeholder="Enter product SKU"
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors font-mono"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors font-mono"
                         />
                         <p className="text-[10px] text-[var(--theme-text-secondary)]">
                             Enter the SKU of the specific catalog product this rule targets
@@ -138,7 +138,7 @@ export const PointRuleModal: React.FC = () => {
                             aria-label="Points Per Unit Sold"
                             value={editedPointRule.pointsPerUnit || 0}
                             onChange={(e) => setEditedPointRule({ ...editedPointRule, pointsPerUnit: parseInt(e.target.value) || 0 })}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                         />
                     </div>
                     <div className="space-y-1.5">
@@ -152,7 +152,7 @@ export const PointRuleModal: React.FC = () => {
                             aria-label="Priority"
                             value={editedPointRule.priority || 5}
                             onChange={(e) => setEditedPointRule({ ...editedPointRule, priority: parseInt(e.target.value) || 5 })}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                         />
                     </div>
                 </div>
@@ -170,7 +170,7 @@ export const PointRuleModal: React.FC = () => {
                                 aria-label="Points Per Revenue Threshold"
                                 value={editedPointRule.pointsPerRevenue || 0}
                                 onChange={(e) => setEditedPointRule({ ...editedPointRule, pointsPerRevenue: parseInt(e.target.value) || 0 })}
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                             />
                         </div>
                         <div className="space-y-1">
@@ -183,7 +183,7 @@ export const PointRuleModal: React.FC = () => {
                                 aria-label="Revenue Threshold"
                                 value={editedPointRule.revenueThreshold || 100}
                                 onChange={(e) => setEditedPointRule({ ...editedPointRule, revenueThreshold: parseInt(e.target.value) || 100 })}
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                             />
                         </div>
                         <p className="col-span-2 text-[10px] text-[var(--theme-text-secondary)]">
@@ -205,7 +205,7 @@ export const PointRuleModal: React.FC = () => {
                                 aria-label="Minimum Quantity"
                                 value={editedPointRule.minQuantity || 1}
                                 onChange={(e) => setEditedPointRule({ ...editedPointRule, minQuantity: parseInt(e.target.value) || 1 })}
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                             />
                         </div>
                         <div className="space-y-1">
@@ -219,7 +219,7 @@ export const PointRuleModal: React.FC = () => {
                                 aria-label="Points Multiplier"
                                 value={editedPointRule.multiplier || 1}
                                 onChange={(e) => setEditedPointRule({ ...editedPointRule, multiplier: parseFloat(e.target.value) || 1 })}
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                             />
                         </div>
                         <p className="col-span-2 text-[10px] text-[var(--theme-text-secondary)]">
@@ -245,7 +245,7 @@ export const PointRuleModal: React.FC = () => {
                             })
                         }
                         placeholder="No limit"
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                     />
                     <p className="text-[10px] text-[var(--theme-text-secondary)]">Leave empty for no cap.</p>
                 </div>
@@ -261,7 +261,7 @@ export const PointRuleModal: React.FC = () => {
                         onChange={(e) => setEditedPointRule({ ...editedPointRule, description: e.target.value })}
                         placeholder="Describe what this rule does..."
                         rows={2}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] font-normal outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors resize-none"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] font-normal outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors resize-none"
                     />
                 </div>
 
@@ -278,7 +278,7 @@ export const PointRuleModal: React.FC = () => {
                                 onClick={() => setEditedPointRule({ ...editedPointRule, color: color.value })}
                                 className={`w-8 h-8 rounded-xl bg-gradient-to-br ${color.class} flex items-center justify-center transition-all cursor-pointer ${
                                     editedPointRule.color === color.value
-                                        ? 'ring-2 ring-[#0071E3] dark:ring-[#2997FF] scale-110 shadow-xs'
+                                        ? 'ring-2 ring-[var(--theme-accent)] dark:ring-[var(--theme-accent)] scale-110 shadow-xs'
                                         : 'opacity-70 hover:opacity-100'
                                 }`}
                                 title={color.label}
@@ -302,7 +302,7 @@ export const PointRuleModal: React.FC = () => {
                         onClick={() => setEditedPointRule({ ...editedPointRule, enabled: !(editedPointRule.enabled ?? true) })}
                         aria-label="Enable point rule"
                         className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${
-                            (editedPointRule.enabled ?? true) ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'
+                            (editedPointRule.enabled ?? true) ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                         }`}
                     >
                         <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${(editedPointRule.enabled ?? true) ? 'translate-x-5' : 'translate-x-0'}`} />
@@ -321,7 +321,7 @@ export const PointRuleModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={handleSavePointRule}
-                        className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                         <Save size={14} />
                         {editingPointRule ? 'Update Rule' : 'Add Rule'}

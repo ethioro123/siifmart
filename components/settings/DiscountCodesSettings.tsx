@@ -177,7 +177,7 @@ const DiscountCodesSettings: React.FC = () => {
 
   const getStatusColor = (status: DiscountCode['status']) => {
     switch (status) {
-      case 'Active': return 'bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/15 dark:text-[#2997FF] border-[#0071E3]/20';
+      case 'Active': return 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20';
       case 'Expired': return 'bg-neutral-500/10 text-neutral-500 dark:text-neutral-400 border-neutral-500/20';
       case 'Disabled': return 'bg-neutral-500/10 text-neutral-400 dark:text-neutral-500 border-neutral-500/20';
       case 'Scheduled': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
@@ -204,7 +204,7 @@ const DiscountCodesSettings: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-[var(--theme-text-primary)] flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
               <Tag className="w-4.5 h-4.5" />
             </div>
             Discount & Promotional Codes
@@ -217,7 +217,7 @@ const DiscountCodesSettings: React.FC = () => {
           <button
             onClick={handleOpenCreate}
             disabled={isPending}
-            className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+            className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
           >
             {isPending ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
             Create Code
@@ -232,7 +232,7 @@ const DiscountCodesSettings: React.FC = () => {
 
       {/* Info Banner */}
       <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-start gap-3 shadow-xs">
-        <div className="w-8 h-8 rounded-lg bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0 mt-0.5">
+        <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0 mt-0.5">
           <AlertTriangle className="w-4 h-4" />
         </div>
         <div className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
@@ -250,7 +250,7 @@ const DiscountCodesSettings: React.FC = () => {
         </div>
         <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
           <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Active</p>
-          <p className="text-2xl font-bold text-[#0071E3] dark:text-[#2997FF]">
+          <p className="text-2xl font-bold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
             {discountCodes.filter(c => getEffectiveStatus(c) === 'Active').length}
           </p>
         </div>
@@ -295,7 +295,7 @@ const DiscountCodesSettings: React.FC = () => {
                   {/* Code */}
                   <div className="col-span-3">
                     <div className="flex items-center gap-2">
-                      <code className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-1 rounded-lg font-mono text-[#0071E3] dark:text-[#2997FF] font-semibold text-xs tracking-wider">
+                      <code className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-1 rounded-lg font-mono text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold text-xs tracking-wider">
                         {showCode[code.id] ? code.code : '••••••••'}
                       </code>
                       <button
@@ -307,7 +307,7 @@ const DiscountCodesSettings: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleCopyCode(code.code)}
-                        className="p-1 text-[var(--theme-text-secondary)] hover:text-[#0071E3] dark:hover:text-[#2997FF] transition-colors cursor-pointer"
+                        className="p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] dark:hover:text-[var(--theme-accent)] transition-colors cursor-pointer"
                         title="Copy Code"
                         aria-label="Copy code to clipboard"
                       >
@@ -321,9 +321,9 @@ const DiscountCodesSettings: React.FC = () => {
                   <div className="col-span-2">
                     <div className="flex items-center gap-1.5">
                       {code.type === 'PERCENTAGE' ? (
-                        <Percent className="w-3.5 h-3.5 text-[#0071E3] dark:text-[#2997FF]" />
+                        <Percent className="w-3.5 h-3.5 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                       ) : (
-                        <DollarSign className="w-3.5 h-3.5 text-[#0071E3] dark:text-[#2997FF]" />
+                        <DollarSign className="w-3.5 h-3.5 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                       )}
                       <span className="font-semibold text-xs text-[var(--theme-text-primary)]">
                         {code.type === 'PERCENTAGE' ? `${code.value}%` : formatCompactNumber(code.value, { currency: codeCurrency })}

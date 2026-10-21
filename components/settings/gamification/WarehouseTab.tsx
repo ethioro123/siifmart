@@ -31,7 +31,7 @@ export const WarehouseTab: React.FC = () => {
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                                 <Gift size={20} />
                             </div>
                             <div>
@@ -45,7 +45,7 @@ export const WarehouseTab: React.FC = () => {
                             aria-checked={bonusEnabled}
                             onClick={() => setBonusEnabled(!bonusEnabled)}
                             aria-label="Toggle warehouse bonuses"
-                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${bonusEnabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${bonusEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                         >
                             <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${bonusEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
@@ -54,7 +54,7 @@ export const WarehouseTab: React.FC = () => {
 
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center gap-3 mb-2.5">
-                        <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                             <Calendar size={20} />
                         </div>
                         <div>
@@ -66,7 +66,7 @@ export const WarehouseTab: React.FC = () => {
                         title="Select payout frequency"
                         value={payoutFrequency}
                         onChange={(e) => setPayoutFrequency(e.target.value as any)}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors cursor-pointer"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2 text-xs font-semibold focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors cursor-pointer"
                     >
                         <option value="weekly">Weekly</option>
                         <option value="biweekly">Bi-Weekly</option>
@@ -76,7 +76,7 @@ export const WarehouseTab: React.FC = () => {
 
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
                     <div className="flex items-center gap-3 mb-2.5">
-                        <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                             <DollarSign size={20} />
                         </div>
                         <div>
@@ -95,7 +95,7 @@ export const WarehouseTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <Package className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                            <Package className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                             Warehouse Eligibility
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -116,11 +116,11 @@ export const WarehouseTab: React.FC = () => {
                             return (
                                 <div
                                     key={warehouse.id}
-                                    className={`bg-[var(--theme-bg-subtle)] border rounded-xl p-3.5 transition-all ${isEnabled ? 'border-[#0071E3]/30 hover:border-[#0071E3]/50' : 'border-transparent opacity-60'}`}
+                                    className={`bg-[var(--theme-bg-subtle)] border rounded-xl p-3.5 transition-all ${isEnabled ? 'border-[var(--theme-accent)]/30 hover:border-[var(--theme-accent)]/50' : 'border-transparent opacity-60'}`}
                                 >
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isEnabled ? 'bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/10 dark:text-[#2997FF]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)]'}`}>
+                                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isEnabled ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/10 dark:text-[var(--theme-accent)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)]'}`}>
                                                 <Package size={18} />
                                             </div>
                                             <div>
@@ -134,7 +134,7 @@ export const WarehouseTab: React.FC = () => {
                                             aria-checked={isEnabled}
                                             onClick={() => toggleStoreBonusEligibility(warehouse, 'warehouseBonusEnabled')}
                                             aria-label={`Toggle bonus for ${warehouse.name}`}
-                                            className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${isEnabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                                            className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${isEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                                         >
                                             <div className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${isEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
                                         </button>
@@ -167,7 +167,7 @@ export const WarehouseTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <Users className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                            <Users className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                             Role Eligibility
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -183,7 +183,7 @@ export const WarehouseTab: React.FC = () => {
                     {warehousePointsRoles.map((roleConfig) => (
                         <div
                             key={roleConfig.role}
-                            className={`bg-[var(--theme-bg-subtle)] border rounded-xl p-3.5 transition-all cursor-pointer ${roleConfig.enabled ? 'border-[#0071E3]/30 hover:border-[#0071E3]/50' : 'border-transparent opacity-60'}`}
+                            className={`bg-[var(--theme-bg-subtle)] border rounded-xl p-3.5 transition-all cursor-pointer ${roleConfig.enabled ? 'border-[var(--theme-accent)]/30 hover:border-[var(--theme-accent)]/50' : 'border-transparent opacity-60'}`}
                             onClick={() => {
                                 setWarehousePointsRoles(prev =>
                                     prev.map(r => r.role === roleConfig.role ? { ...r, enabled: !r.enabled } : r)
@@ -192,7 +192,7 @@ export const WarehouseTab: React.FC = () => {
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2.5">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${roleConfig.enabled ? 'bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/10 dark:text-[#2997FF]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)]'}`}>
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${roleConfig.enabled ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/10 dark:text-[var(--theme-accent)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)]'}`}>
                                         <UserCheck size={16} />
                                     </div>
                                     <div>
@@ -210,7 +210,7 @@ export const WarehouseTab: React.FC = () => {
                                             prev.map(r => r.role === roleConfig.role ? { ...r, enabled: !r.enabled } : r)
                                         );
                                     }}
-                                    className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${roleConfig.enabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                                    className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${roleConfig.enabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                                 >
                                     <div className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${roleConfig.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
                                 </button>
@@ -220,7 +220,7 @@ export const WarehouseTab: React.FC = () => {
                 </div>
 
                 <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center gap-2">
-                    <Info size={14} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                    <Info size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                     <p className="text-xs text-[var(--theme-text-secondary)]">
                         Only enabled roles will accumulate points upon job verification. Disable roles not eligible for shift bonuses.
                     </p>
@@ -232,7 +232,7 @@ export const WarehouseTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <Zap className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                            <Zap className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                             Warehouse Point Rules
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -253,7 +253,7 @@ export const WarehouseTab: React.FC = () => {
                                 });
                                 setIsWarehouseRuleModalOpen(true);
                             }}
-                            className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] text-white hover:opacity-90 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                            className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                         >
                             <Plus size={14} /> Add Rule
                         </button>
@@ -271,11 +271,11 @@ export const WarehouseTab: React.FC = () => {
                     {warehousePointRules.map((rule) => (
                         <div
                             key={rule.id}
-                            className={`bg-[var(--theme-bg-subtle)] border rounded-xl p-3.5 transition-all group ${rule.enabled ? 'border-[#0071E3]/30 hover:border-[#0071E3]/50' : 'border-transparent opacity-60'}`}
+                            className={`bg-[var(--theme-bg-subtle)] border rounded-xl p-3.5 transition-all group ${rule.enabled ? 'border-[var(--theme-accent)]/30 hover:border-[var(--theme-accent)]/50' : 'border-transparent opacity-60'}`}
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2.5">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${rule.enabled ? 'bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/10 dark:text-[#2997FF]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)]'}`}>
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${rule.enabled ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/10 dark:text-[var(--theme-accent)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)]'}`}>
                                         {rule.action.includes('STREAK') ? <TrendingUp size={15} /> : <Package size={15} />}
                                     </div>
                                     <div>
@@ -286,7 +286,7 @@ export const WarehouseTab: React.FC = () => {
                                 <div className="flex items-center gap-2">
                                     <div className="text-right mr-1">
                                         <p className="text-[10px] text-[var(--theme-text-secondary)]">Points</p>
-                                        <p className={`text-xs font-bold ${rule.enabled ? 'text-[#0071E3] dark:text-[#2997FF]' : 'text-[var(--theme-text-secondary)]'}`}>
+                                        <p className={`text-xs font-bold ${rule.enabled ? 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'}`}>
                                             +{rule.points}
                                         </p>
                                     </div>
@@ -311,7 +311,7 @@ export const WarehouseTab: React.FC = () => {
                                                 prev.map(r => r.id === rule.id ? { ...r, enabled: !r.enabled } : r)
                                             );
                                         }}
-                                        className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${rule.enabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                                        className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${rule.enabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                                     >
                                         <div className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${rule.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
                                     </button>
@@ -345,7 +345,7 @@ export const WarehouseTab: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => openAddModal('warehouse')}
-                        className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] text-white hover:opacity-90 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                        className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                         <Plus size={14} /> Add Tier
                     </button>
@@ -365,7 +365,7 @@ export const WarehouseTab: React.FC = () => {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                         <h4 className="font-semibold text-[var(--theme-text-primary)] text-xs">{tier.tierName}</h4>
-                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                             Tier {index + 1}
                                         </span>
                                     </div>
@@ -383,7 +383,7 @@ export const WarehouseTab: React.FC = () => {
 
                                 <div className="text-right px-3 border-l border-[var(--theme-border)]">
                                     <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium">Per Point</p>
-                                    <p className="text-sm font-semibold text-[#0071E3] dark:text-[#2997FF]">
+                                    <p className="text-sm font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                         +{currency} {(tier.bonusPerPoint || 0).toFixed(2)}
                                     </p>
                                 </div>
@@ -415,7 +415,7 @@ export const WarehouseTab: React.FC = () => {
             {/* BONUS CALCULATOR PREVIEW */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                    <TrendingUp className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                    <TrendingUp className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                     Bonus Calculator Preview
                 </h3>
                 <p className="text-xs text-[var(--theme-text-secondary)]">
@@ -435,7 +435,7 @@ export const WarehouseTab: React.FC = () => {
                                     {currency} {bonus.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                 </p>
                                 {tier && (
-                                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                         {tier.tierName}
                                     </span>
                                 )}

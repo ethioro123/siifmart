@@ -48,7 +48,7 @@ export const BonusTierModal: React.FC = () => {
                         value={editedTier.tierName || ''}
                         onChange={(e) => setEditedTier({ ...editedTier, tierName: e.target.value })}
                         placeholder="e.g., Gold, Diamond, Elite"
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                     />
                 </div>
 
@@ -63,7 +63,7 @@ export const BonusTierModal: React.FC = () => {
                             aria-label="Min Points"
                             value={editedTier.minPoints || 0}
                             onChange={(e) => setEditedTier({ ...editedTier, minPoints: parseInt(e.target.value) || 0 })}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                         />
                     </div>
                     <div className="space-y-1.5">
@@ -78,7 +78,7 @@ export const BonusTierModal: React.FC = () => {
                                 maxPoints: e.target.value ? parseInt(e.target.value) : null
                             })}
                             placeholder="∞"
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                         />
                     </div>
                 </div>
@@ -94,7 +94,7 @@ export const BonusTierModal: React.FC = () => {
                             aria-label="Base Bonus"
                             value={editedTier.bonusAmount || 0}
                             onChange={(e) => setEditedTier({ ...editedTier, bonusAmount: parseFloat(e.target.value) || 0 })}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                         />
                         <p className="text-[10px] text-[var(--theme-text-secondary)]">Fixed payout for reaching tier</p>
                     </div>
@@ -108,7 +108,7 @@ export const BonusTierModal: React.FC = () => {
                             aria-label="Per-Point Bonus"
                             value={editedTier.bonusPerPoint || 0}
                             onChange={(e) => setEditedTier({ ...editedTier, bonusPerPoint: parseFloat(e.target.value) || 0 })}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                         />
                         <p className="text-[10px] text-[var(--theme-text-secondary)]">Additional incentive per unit</p>
                     </div>
@@ -127,7 +127,7 @@ export const BonusTierModal: React.FC = () => {
                                 onClick={() => setEditedTier({ ...editedTier, tierColor: color.value })}
                                 className={`w-8 h-8 rounded-xl bg-gradient-to-br ${color.class} flex items-center justify-center transition-all cursor-pointer ${
                                     editedTier.tierColor === color.value
-                                        ? 'ring-2 ring-[#0071E3] dark:ring-[#2997FF] scale-110 shadow-xs'
+                                        ? 'ring-2 ring-[var(--theme-accent)] dark:ring-[var(--theme-accent)] scale-110 shadow-xs'
                                         : 'opacity-70 hover:opacity-100'
                                 }`}
                                 title={color.label}
@@ -147,7 +147,7 @@ export const BonusTierModal: React.FC = () => {
                         <p className="text-[11px] text-[var(--theme-text-secondary)]">
                             Worker with <span className="font-semibold text-[var(--theme-text-primary)]">{((editedTier.minPoints || 0) + 50).toLocaleString()}</span> points earns:
                         </p>
-                        <p className="text-lg font-bold text-[#0071E3] dark:text-[#2997FF] mt-1">
+                        <p className="text-lg font-bold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mt-1">
                             {currency} {((editedTier.bonusAmount || 0) + (((editedTier.minPoints || 0) + 50) * (editedTier.bonusPerPoint || 0))).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </p>
                         <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">
@@ -168,7 +168,7 @@ export const BonusTierModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={handleSaveTier}
-                        className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                         <Save size={14} />
                         {editingTier ? 'Update Tier' : 'Add Tier'}

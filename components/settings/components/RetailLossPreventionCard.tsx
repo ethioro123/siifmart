@@ -47,7 +47,7 @@ export const RetailLossPreventionCard: React.FC = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--theme-border)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                         <ShieldAlert size={20} />
                     </div>
                     <div>
@@ -69,7 +69,7 @@ export const RetailLossPreventionCard: React.FC = () => {
                 <div className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-3">
                     <div className="flex items-center justify-between">
                         <label className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <KeyRound size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
+                            <KeyRound size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             Manager Override PIN
                         </label>
                         <button
@@ -90,14 +90,14 @@ export const RetailLossPreventionCard: React.FC = () => {
                         value={pin}
                         onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                         placeholder="1234"
-                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 font-mono text-base font-bold text-[var(--theme-text-primary)] outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 font-mono text-base font-bold text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                     />
                 </div>
 
                 {/* High Value Barcode Lock Threshold */}
                 <div className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-3">
                     <label className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                        <ScanLine size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
+                        <ScanLine size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                         High-Value Barcode Anomaly Lock
                     </label>
                     <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
@@ -114,7 +114,7 @@ export const RetailLossPreventionCard: React.FC = () => {
                             value={threshold}
                             onChange={(e) => setThreshold(e.target.value)}
                             placeholder="3000"
-                            className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 font-mono text-sm font-semibold text-[var(--theme-text-primary)] outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                            className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 font-mono text-sm font-semibold text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                         />
                     </div>
                 </div>
@@ -128,7 +128,7 @@ export const RetailLossPreventionCard: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div
                         onClick={() => setBlindClose(!blindClose)}
-                        className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between cursor-pointer hover:border-[#0071E3]/30 transition-all"
+                        className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between cursor-pointer hover:border-[var(--theme-accent)]/30 transition-all"
                     >
                         <div className="pr-4 space-y-0.5">
                             <p className="text-xs font-semibold text-[var(--theme-text-primary)]">Enforce Blind Shift Close</p>
@@ -142,7 +142,7 @@ export const RetailLossPreventionCard: React.FC = () => {
                                 e.stopPropagation();
                                 setBlindClose(!blindClose);
                             }}
-                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${blindClose ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${blindClose ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                         >
                             <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${blindClose ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
@@ -150,7 +150,7 @@ export const RetailLossPreventionCard: React.FC = () => {
 
                     <div
                         onClick={() => setRequireRefundPin(!requireRefundPin)}
-                        className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between cursor-pointer hover:border-[#0071E3]/30 transition-all"
+                        className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between cursor-pointer hover:border-[var(--theme-accent)]/30 transition-all"
                     >
                         <div className="pr-4 space-y-0.5">
                             <p className="text-xs font-semibold text-[var(--theme-text-primary)]">Require PIN on Cash Refunds</p>
@@ -164,7 +164,7 @@ export const RetailLossPreventionCard: React.FC = () => {
                                 e.stopPropagation();
                                 setRequireRefundPin(!requireRefundPin);
                             }}
-                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${requireRefundPin ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${requireRefundPin ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                         >
                             <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${requireRefundPin ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
@@ -178,7 +178,7 @@ export const RetailLossPreventionCard: React.FC = () => {
                     type="button"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                     {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={15} />}
                     Save Security Policies

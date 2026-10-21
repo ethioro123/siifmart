@@ -134,7 +134,7 @@ export function MobileGatewaysSettingsCard({
             {/* ACTION FOOTER */}
             <div className="pt-6 border-t border-[var(--theme-border)] flex items-center justify-between">
                 <div className="text-[11px] text-[var(--theme-text-secondary)] flex items-center gap-1.5">
-                    <Shield size={14} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                    <Shield size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                     <span>Active gateways automatically populate on POS checkout and thermal receipts.</span>
                 </div>
 
@@ -142,7 +142,7 @@ export function MobileGatewaysSettingsCard({
                     type="button"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                    className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                 >
                     {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={15} />}
                     Save Gateways

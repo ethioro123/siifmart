@@ -37,7 +37,7 @@ export function SiteBarcodeConfigSection({
           <div className="flex-1">
             <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Zone</label>
             <select
-              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40"
+              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40"
               value={testLocation.zone}
               onChange={(e) => setTestLocation({ ...testLocation, zone: e.target.value })}
               aria-label="Test Zone"
@@ -50,7 +50,7 @@ export function SiteBarcodeConfigSection({
           <div className="flex-1">
             <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Aisle</label>
             <select
-              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40"
+              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40"
               value={parseInt(testLocation.aisle, 10)}
               onChange={(e) => setTestLocation({ ...testLocation, aisle: e.target.value.padStart(2, '0') })}
               aria-label="Test Aisle"
@@ -65,7 +65,7 @@ export function SiteBarcodeConfigSection({
           <div className="flex-1">
             <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Bay</label>
             <select
-              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40"
+              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40"
               value={parseInt(testLocation.bay, 10)}
               onChange={(e) => setTestLocation({ ...testLocation, bay: e.target.value.padStart(2, '0') })}
               aria-label="Test Bay"
@@ -82,7 +82,7 @@ export function SiteBarcodeConfigSection({
           <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
             {testLocation.zone}-{testLocation.aisle.toString().padStart(2, '0')}-{testLocation.bay.toString().padStart(2, '0')}
           </span>
-          <span className="text-xs font-mono font-semibold text-[#0071E3] dark:text-[#2997FF]">
+          <span className="text-xs font-mono font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
             {(() => {
               const label = `${testLocation.zone}-${testLocation.aisle.toString().padStart(2, '0')}-${testLocation.bay.toString().padStart(2, '0')}`;
               return encodeLocation(label, currentPrefix);

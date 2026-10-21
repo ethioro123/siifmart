@@ -174,13 +174,13 @@ export default function DataSettings() {
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* HEADER BANNER */}
             <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
-                <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Database size={18} />
                 </div>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
                         <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Data Management & Archive Center</h4>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                             {countryProfile.name} ({activeCountry})
                         </span>
                     </div>
@@ -197,7 +197,7 @@ export default function DataSettings() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--theme-border)]">
                         <div>
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                                <Archive className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                <Archive className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                                 Historical Reports Archive
                             </h3>
                             <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -217,7 +217,7 @@ export default function DataSettings() {
                                 <select
                                     value={selectedYear}
                                     onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] cursor-pointer transition-colors"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
                                     aria-label="Select Fiscal Year"
                                 >
                                     {[2020, 2021, 2022, 2023, 2024, 2025, 2026].map(y => (
@@ -235,7 +235,7 @@ export default function DataSettings() {
                                 <select
                                     value={selectedPeriod}
                                     onChange={(e) => setSelectedPeriod(e.target.value)}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] cursor-pointer transition-colors"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
                                     aria-label="Select Period"
                                 >
                                     {['Q1 (Jan-Mar)', 'Q2 (Apr-Jun)', 'Q3 (Jul-Sep)', 'Q4 (Oct-Dec)', 'Full Year'].map(p => (
@@ -253,7 +253,7 @@ export default function DataSettings() {
                                 <select
                                     value={selectedReportType}
                                     onChange={(e) => setSelectedReportType(e.target.value as 'Operations' | 'Financials' | 'Procurement')}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] cursor-pointer transition-colors"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-semibold appearance-none outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] cursor-pointer transition-colors"
                                     aria-label="Select Report Type"
                                 >
                                     {['Financials', 'Procurement', 'Operations'].map(t => (
@@ -270,7 +270,7 @@ export default function DataSettings() {
                                 type="button"
                                 onClick={handleRetrieveReport}
                                 disabled={isGenerating}
-                                className="w-full h-9 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer text-xs disabled:opacity-50"
+                                className="w-full h-9 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer text-xs disabled:opacity-50"
                             >
                                 {isGenerating ? (
                                     <RefreshCw className="animate-spin" size={14} />
@@ -295,7 +295,7 @@ export default function DataSettings() {
                             <button
                                 type="button"
                                 onClick={handleCreateBackup}
-                                className="h-8 bg-[#0071E3] dark:bg-[#2997FF] text-white hover:opacity-90 active:scale-[0.98] px-3.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                className="h-8 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98] px-3.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                             >
                                 <Download size={13} /> Download
                             </button>
@@ -322,19 +322,19 @@ export default function DataSettings() {
                     <div className="grid grid-cols-2 gap-3">
                         <div
                             onClick={handleExportProductsCSV}
-                            className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center hover:border-[#0071E3]/40 transition-all cursor-pointer group shadow-xs"
+                            className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center hover:border-[var(--theme-accent)]/40 transition-all cursor-pointer group shadow-xs"
                         >
-                            <FileText size={20} className="mx-auto text-[#0071E3] dark:text-[#2997FF] mb-2" />
+                            <FileText size={20} className="mx-auto text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mb-2" />
                             <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">Products Catalog</h5>
-                            <span className="text-[10px] text-[#0071E3] dark:text-[#2997FF] font-semibold bg-[#0071E3]/10 dark:bg-[#2997FF]/10 px-2.5 py-0.5 rounded-full inline-block mt-2">Export CSV</span>
+                            <span className="text-[10px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 px-2.5 py-0.5 rounded-full inline-block mt-2">Export CSV</span>
                         </div>
                         <div
                             onClick={handleExportCustomersCSV}
-                            className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center hover:border-[#0071E3]/40 transition-all cursor-pointer group shadow-xs"
+                            className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center hover:border-[var(--theme-accent)]/40 transition-all cursor-pointer group shadow-xs"
                         >
-                            <FileText size={20} className="mx-auto text-[#0071E3] dark:text-[#2997FF] mb-2" />
+                            <FileText size={20} className="mx-auto text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mb-2" />
                             <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">Customer Registry</h5>
-                            <span className="text-[10px] text-[#0071E3] dark:text-[#2997FF] font-semibold bg-[#0071E3]/10 dark:bg-[#2997FF]/10 px-2.5 py-0.5 rounded-full inline-block mt-2">Export CSV</span>
+                            <span className="text-[10px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 px-2.5 py-0.5 rounded-full inline-block mt-2">Export CSV</span>
                         </div>
                     </div>
                 </div>

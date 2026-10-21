@@ -29,7 +29,7 @@ interface IntegrationCardProps {
 const IntegrationCard: React.FC<IntegrationCardProps> = ({
     name, desc, icon: Icon, connected, category, badge, onAction
 }) => (
-    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 flex flex-col justify-between hover:border-[#0071E3]/30 transition-all shadow-xs relative">
+    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 flex flex-col justify-between hover:border-[var(--theme-accent)]/30 transition-all shadow-xs relative">
         {connected && (
             <div className="absolute top-3 right-3 px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold rounded-full flex items-center gap-1">
                 <CheckCircle2 size={11} /> Active
@@ -48,7 +48,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
                     <div className="flex items-center gap-2">
                         <h4 className="font-semibold text-[var(--theme-text-primary)] text-xs">{name}</h4>
                         {badge && (
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                 {badge}
                             </span>
                         )}
@@ -67,7 +67,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
             className={`w-full h-8 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs flex items-center justify-center ${
                 connected
                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)]'
-                    : 'bg-[#0071E3] dark:bg-[#2997FF] text-white hover:opacity-90 active:scale-[0.98]'
+                    : 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98]'
             }`}
         >
             {connected ? 'Manage Configuration' : 'Connect Integration'}
@@ -139,13 +139,13 @@ export default function IntegrationsSettings() {
 
             {/* HEADER BANNER */}
             <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
-                <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Globe size={18} />
                 </div>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
                         <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Enterprise Integration Hub</h4>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                             {countryProfile.name} ({activeCountry})
                         </span>
                     </div>
@@ -173,7 +173,7 @@ export default function IntegrationsSettings() {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`w-full text-left px-3.5 py-2.5 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer text-xs font-medium ${
                                     isActive
-                                        ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
                                 }`}
                             >
@@ -185,7 +185,7 @@ export default function IntegrationsSettings() {
 
                     <div className="mt-4 p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-2">
                         <h5 className="text-[var(--theme-text-primary)] font-semibold text-xs flex items-center gap-1.5">
-                            <Database size={13} className="text-[#0071E3] dark:text-[#2997FF]" />
+                            <Database size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             Developer Docs
                         </h5>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">
@@ -327,13 +327,13 @@ export default function IntegrationsSettings() {
                                         placeholder="Enter client application name (e.g. 'Warehouse Handheld')"
                                         value={newKeyName}
                                         onChange={(e) => setNewKeyName(e.target.value)}
-                                        className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors"
+                                        className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors"
                                     />
                                     <button
                                         type="button"
                                         onClick={generateKey}
                                         disabled={!newKeyName.trim()}
-                                        className="h-8 px-4 bg-[#0071E3] dark:bg-[#2997FF] text-white font-semibold rounded-xl text-xs hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+                                        className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white font-semibold rounded-xl text-xs hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer shadow-xs"
                                     >
                                         Generate Key
                                     </button>
@@ -344,10 +344,10 @@ export default function IntegrationsSettings() {
                                 {apiKeys.map(key => (
                                     <div
                                         key={key.id}
-                                        className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 flex items-center justify-between hover:border-[#0071E3]/30 transition-all"
+                                        className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 flex items-center justify-between hover:border-[var(--theme-accent)]/30 transition-all"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                                                 <Key size={15} />
                                             </div>
                                             <div>
@@ -397,7 +397,7 @@ export default function IntegrationsSettings() {
                             />
 
                             <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-[var(--theme-border)] rounded-2xl bg-[var(--theme-bg-subtle)] p-6">
-                                <div className="w-12 h-12 bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] rounded-2xl flex items-center justify-center mb-3">
+                                <div className="w-12 h-12 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] rounded-2xl flex items-center justify-center mb-3">
                                     <Webhook size={24} />
                                 </div>
                                 <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm mb-1">Webhook Dispatcher Ready</h4>
@@ -407,7 +407,7 @@ export default function IntegrationsSettings() {
                                 <button
                                     type="button"
                                     onClick={() => showToast('Webhook registration modal ready for future setup', 'info')}
-                                    className="h-8 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+                                    className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
                                 >
                                     <Plus size={14} /> Add Webhook Endpoint
                                 </button>

@@ -90,13 +90,13 @@ export function KenyaGatewaysPanel({
             <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center font-bold text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center font-bold text-xs">
                             M2
                         </div>
                         <div>
                             <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                                 M-Pesa STK Push Express (Daraja API)
-                                <span className="text-[10px] bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] px-2 py-0.5 rounded-full font-semibold">API Automated</span>
+                                <span className="text-[10px] bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] px-2 py-0.5 rounded-full font-semibold">API Automated</span>
                             </h4>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 Sends interactive PIN prompt directly to customer phone handset; auto-completes transaction.
@@ -132,7 +132,7 @@ export function KenyaGatewaysPanel({
                                             onClick={() => setForm(p => ({ ...p, mpesaEnvironment: env }))}
                                             className={`py-1.5 px-3 rounded-lg text-xs font-medium uppercase tracking-wider cursor-pointer transition-all ${
                                                 form.mpesaEnvironment === env
-                                                    ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                                    ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
                                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                             }`}
                                         >
@@ -181,7 +181,7 @@ export function KenyaGatewaysPanel({
                                 type="button"
                                 onClick={onPingGateway}
                                 disabled={pingState === 'pinging'}
-                                className="text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 dark:bg-[#2997FF]/15 px-3.5 py-1.5 rounded-xl border border-[#0071E3]/20 dark:border-[#2997FF]/30 flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-all"
+                                className="text-xs font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 px-3.5 py-1.5 rounded-xl border border-[var(--theme-accent)]/20 dark:border-[var(--theme-accent)]/30 flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-all"
                             >
                                 <Zap size={13} />
                                 {pingState === 'pinging' ? 'Testing Handshake...' : pingState === 'success' ? 'Connected (200 OK)' : 'Ping Gateway'}

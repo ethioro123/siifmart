@@ -20,7 +20,7 @@ export const POSRoleDistributionList: React.FC<POSRoleDistributionListProps> = (
             {posRoleDistribution.map(role => (
                 <div
                     key={role.id}
-                    className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[#0071E3]/40 rounded-xl p-3.5 transition-all group"
+                    className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 rounded-xl p-3.5 transition-all group"
                 >
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getColorClass(role.color)} flex items-center justify-center shrink-0 shadow-xs`}>

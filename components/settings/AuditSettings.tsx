@@ -140,7 +140,7 @@ export default function AuditSettings() {
                 return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
             case 'finance':
             case 'pos':
-                return 'bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border-blue-500/20';
+                return 'bg-blue-500/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-blue-500/20';
             default:
                 return 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]';
         }
@@ -170,7 +170,7 @@ export default function AuditSettings() {
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* HEADER BANNER */}
             <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
-                <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <FileText size={18} />
                 </div>
                 <div className="flex-1">
@@ -179,7 +179,7 @@ export default function AuditSettings() {
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
                             <ShieldCheck size={11} /> Immutable Ledger
                         </span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                             {countryProfile.name} ({activeCountry})
                         </span>
                     </div>
@@ -203,7 +203,7 @@ export default function AuditSettings() {
                                 setSearchTerm(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors font-medium"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none transition-colors font-medium"
                         />
                     </div>
                     <div className="flex items-center gap-2 w-full md:w-auto">
@@ -214,7 +214,7 @@ export default function AuditSettings() {
                                 setCurrentPage(1);
                             }}
                             aria-label="Filter Logs by Module"
-                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-semibold outline-none cursor-pointer focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-semibold outline-none cursor-pointer focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                         >
                             <option value="all">All Modules</option>
                             <option value="Security">Security</option>
@@ -227,7 +227,7 @@ export default function AuditSettings() {
                         <button
                             type="button"
                             onClick={handleExport}
-                            className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs shrink-0"
+                            className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs shrink-0"
                         >
                             <Download size={14} /> Export CSV
                         </button>
@@ -261,7 +261,7 @@ export default function AuditSettings() {
                                     </td>
                                     <td className="p-3 text-xs text-[var(--theme-text-secondary)] whitespace-nowrap">
                                         <div className="flex items-center gap-1.5 font-medium">
-                                            <User size={13} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                                            <User size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                                             <span className="truncate max-w-[150px]">{log.resolvedName}</span>
                                         </div>
                                     </td>

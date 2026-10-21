@@ -21,7 +21,7 @@ const ConnectionBadge: React.FC<ConnectionBadgeProps> = ({ type }) => {
     switch (type) {
         case 'network':
             return (
-                <span className="flex items-center gap-1 text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/15 dark:text-[#2997FF] px-2 py-0.5 rounded-full border border-[#0071E3]/20">
+                <span className="flex items-center gap-1 text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] px-2 py-0.5 rounded-full border border-[var(--theme-accent)]/20">
                     <Wifi size={10} /> Network
                 </span>
             );
@@ -61,7 +61,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onTest, onConfig, isTes
     };
 
     return (
-        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 hover:border-[#0071E3]/30 transition-all flex flex-col gap-3.5 group relative overflow-hidden shadow-xs">
+        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 hover:border-[var(--theme-accent)]/30 transition-all flex flex-col gap-3.5 group relative overflow-hidden shadow-xs">
             {/* Status Indicator */}
             <div
                 className={`absolute top-4 right-4 w-2 h-2 rounded-full ${
@@ -72,7 +72,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onTest, onConfig, isTes
             />
 
             <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
                     {renderIcon()}
                 </div>
                 <div>
@@ -94,14 +94,14 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onTest, onConfig, isTes
                     disabled={isTesting}
                     className="flex-1 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
                 >
-                    <RefreshCw size={12} className={isTesting ? 'animate-spin text-[#0071E3] dark:text-[#2997FF]' : ''} />
+                    <RefreshCw size={12} className={isTesting ? 'animate-spin text-[var(--theme-accent)] dark:text-[var(--theme-accent)]' : ''} />
                     {isTesting ? 'Testing...' : 'Test Ping'}
                 </button>
                 {isAuthorized && (
                     <button
                         type="button"
                         onClick={onConfig}
-                        className="flex-1 py-1.5 bg-[#0071E3]/10 hover:bg-[#0071E3]/20 dark:bg-[#2997FF]/15 dark:hover:bg-[#2997FF]/25 text-[#0071E3] dark:text-[#2997FF] text-xs font-semibold rounded-xl border border-[#0071E3]/20 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="flex-1 py-1.5 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 dark:bg-[var(--theme-accent)]/15 dark:hover:bg-[var(--theme-accent)]/25 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] text-xs font-semibold rounded-xl border border-[var(--theme-accent)]/20 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                         <Settings2 size={12} /> Config
                     </button>
@@ -258,7 +258,7 @@ export default function InfrastructureSettings() {
 
             {/* HEADER BANNER */}
             <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
-                <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0 mt-0.5">
+                <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0 mt-0.5">
                     <Power size={18} />
                 </div>
                 <div>
@@ -281,7 +281,7 @@ export default function InfrastructureSettings() {
                             <button
                                 type="button"
                                 onClick={() => setIsAddModalOpen(true)}
-                                className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all self-start sm:self-auto"
+                                className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all self-start sm:self-auto"
                             >
                                 <Plus size={14} /> Add Device
                             </button>
@@ -319,7 +319,7 @@ export default function InfrastructureSettings() {
                                     disabled={!isAuthorized}
                                     onChange={(e) => setHardware(prev => ({ ...prev, scaleIpAddress: e.target.value }))}
                                     placeholder="e.g. 192.168.1.50"
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                                 />
                             </div>
                             <div className="space-y-1.5">
@@ -330,7 +330,7 @@ export default function InfrastructureSettings() {
                                     disabled={!isAuthorized}
                                     onChange={(e) => setHardware(prev => ({ ...prev, scannerComPort: e.target.value }))}
                                     placeholder="e.g. COM3"
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                                 />
                             </div>
 
@@ -338,10 +338,10 @@ export default function InfrastructureSettings() {
 
                             <div className="flex items-center justify-between p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
                                 <div className="flex items-center gap-2.5">
-                                    <Printer size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                    <Printer size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                                     <div className="text-xs font-semibold text-[var(--theme-text-primary)]">Print Spooler Service</div>
                                 </div>
-                                <span className="text-[10px] font-semibold text-[#0071E3] dark:text-[#2997FF] flex items-center gap-1 bg-[#0071E3]/10 dark:bg-[#2997FF]/15 px-2 py-0.5 rounded-full border border-[#0071E3]/20">
+                                <span className="text-[10px] font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center gap-1 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 px-2 py-0.5 rounded-full border border-[var(--theme-accent)]/20">
                                     <CheckCircle size={10} /> Active
                                 </span>
                             </div>
@@ -352,7 +352,7 @@ export default function InfrastructureSettings() {
                                 type="button"
                                 onClick={handleSave}
                                 disabled={mutation.isPending || !isAuthorized}
-                                className="h-8 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                             >
                                 {mutation.isPending ? (
                                     <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -372,7 +372,7 @@ export default function InfrastructureSettings() {
                             <div className="space-y-1.5">
                                 <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider block">Default Terminal Printer</label>
                                 <select
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] focus:ring-1 focus:ring-[#0071E3]/20 disabled:opacity-50"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 disabled:opacity-50"
                                     value={hardware.defaultPrinter}
                                     disabled={!isAuthorized}
                                     onChange={(e) => setHardware(prev => ({ ...prev, defaultPrinter: e.target.value }))}

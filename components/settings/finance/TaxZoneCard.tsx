@@ -29,10 +29,10 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
     const effectiveRate = (zone.rules || []).reduce((sum: number, r) => sum + (r.rate || 0), 0);
 
     return (
-        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 hover:border-[#0071E3]/30 transition-all group shadow-xs">
+        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 hover:border-[var(--theme-accent)]/30 transition-all group shadow-xs">
             <div className="flex justify-between items-start mb-3.5">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
                         <Globe size={16} />
                     </div>
                     <div>
@@ -42,7 +42,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                                 {zone.type}
                             </span>
                             {(zone.rules || []).length > 0 && (
-                                <span className="text-[10px] font-mono font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border border-[#0071E3]/20 px-2 py-0.5 rounded-full">
+                                <span className="text-[10px] font-mono font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 border border-[var(--theme-accent)]/20 px-2 py-0.5 rounded-full">
                                     {effectiveRate.toFixed(1)}% Total
                                 </span>
                             )}
@@ -98,7 +98,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                         <button
                             type="button"
                             onClick={onAddRule}
-                            className="text-[10px] text-[#0071E3] dark:text-[#2997FF] font-semibold uppercase tracking-wider flex items-center gap-1 hover:opacity-80 cursor-pointer"
+                            className="text-[10px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold uppercase tracking-wider flex items-center gap-1 hover:opacity-80 cursor-pointer"
                         >
                             <Plus size={10} /> Add Rule
                         </button>
@@ -110,7 +110,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                         <div key={idx} className="flex justify-between items-center px-2.5 py-1.5 bg-[var(--theme-bg-card)] rounded-lg border border-[var(--theme-border)] text-xs">
                             <span className="text-[var(--theme-text-primary)] font-medium">{rule.name}</span>
                             <div className="flex items-center gap-2">
-                                <span className="font-mono font-semibold text-[#0071E3] dark:text-[#2997FF]">{rule.rate}%</span>
+                                <span className="font-mono font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">{rule.rate}%</span>
                                 {isAuthorized && (
                                     <button
                                         type="button"
@@ -137,7 +137,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                                 e.target.value = '';
                             }
                         }}
-                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] focus:ring-1 focus:ring-[#0071E3]/20"
+                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20"
                         defaultValue=""
                     >
                         <option value="" disabled>+ Assign Location...</option>

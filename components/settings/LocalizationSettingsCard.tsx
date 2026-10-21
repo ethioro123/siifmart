@@ -110,7 +110,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
         <div className={cardBase}>
             <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-4 mb-5">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Globe size={16} />
                     </div>
                     <div>
@@ -132,7 +132,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                 <div className="p-4 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-[#0071E3]/15 text-[#0071E3] dark:text-[#2997FF]">
+                            <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                 {activeProfile.code}
                             </span>
                             <div>
@@ -187,7 +187,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             value={currency}
                             onChange={(e) => setCurrency(e.target.value)}
                             disabled={!isCeo}
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="KSh">Kenyan Shilling (KSh)</option>
                             <option value="ETB">Ethiopian Birr (ETB)</option>
@@ -210,7 +210,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             value={timezone}
                             onChange={(e) => setTimezone(e.target.value)}
                             disabled={!isCeo}
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="Africa/Nairobi">East Africa Time - Nairobi (UTC+3)</option>
                             <option value="Africa/Addis_Ababa">East Africa Time - Addis Ababa (UTC+3)</option>
@@ -240,7 +240,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             value={language}
                             disabled={isKenya || !isCeo}
                             onChange={(e) => setLanguage(e.target.value)}
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all disabled:opacity-50"
                         >
                             <option value="en">English (Official System Language)</option>
                             {!isKenya && <option value="am">አማርኛ (Amharic)</option>}
@@ -272,7 +272,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                                     onClick={() => setDateFormat(fmt)}
                                     className={`h-8 rounded-lg text-xs font-medium transition-all cursor-pointer disabled:opacity-50 ${
                                         dateFormat === fmt
-                                            ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                            ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
                                             : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                     }`}
                                 >
@@ -289,7 +289,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                         type="button"
                         onClick={handleSaveLocalization}
                         disabled={isSaving || !isCeo}
-                        className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
+                        className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                     >
                         {isSaving ? (
                             <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -118,7 +118,7 @@ export default function RegionsSettingsTab() {
                         <h2 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">
                             Regional Administration & Decentralized Governance
                         </h2>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                             {countryProfile.name}
                         </span>
                     </div>
@@ -139,7 +139,7 @@ export default function RegionsSettingsTab() {
                         <button
                             type="button"
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#0071E3] text-white hover:bg-[#0071E3]/90 transition-all cursor-pointer shadow-xs"
+                            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer shadow-xs"
                         >
                             <Plus size={15} />
                             <span>Provision Region</span>
@@ -153,7 +153,7 @@ export default function RegionsSettingsTab() {
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
                         <span>Active Regions</span>
-                        <Building2 size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
+                        <Building2 size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                     </div>
                     <p className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                         {regions.filter(r => r.status === 'active').length}
@@ -179,7 +179,7 @@ export default function RegionsSettingsTab() {
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
                         <span>Governed Sites</span>
-                        <Store size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
+                        <Store size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                     </div>
                     <p className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                         {governedSitesCount}
@@ -212,7 +212,7 @@ export default function RegionsSettingsTab() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search regions or codes..."
-                        className="w-full pl-8 pr-3 py-1.5 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
+                        className="w-full pl-8 pr-3 py-1.5 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                     />
                 </div>
 
@@ -257,7 +257,7 @@ export default function RegionsSettingsTab() {
                     <button
                         type="button"
                         onClick={loadRegions}
-                        className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold bg-[#0071E3] text-white hover:bg-[#0071E3]/90 transition-all cursor-pointer shadow-xs"
+                        className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer shadow-xs"
                     >
                         Retry Connection
                     </button>
@@ -279,7 +279,7 @@ export default function RegionsSettingsTab() {
                         <button
                             type="button"
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#0071E3] text-white hover:bg-[#0071E3]/90 transition-all cursor-pointer shadow-xs"
+                            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer shadow-xs"
                         >
                             <Plus size={14} />
                             <span>Provision First Region</span>

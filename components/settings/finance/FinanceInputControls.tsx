@@ -35,7 +35,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
     return (
         <div className="group space-y-1.5">
             <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                {Icon && <Icon size={14} className="text-[#0071E3] dark:text-[#2997FF]" />} {label}
+                {Icon && <Icon size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />} {label}
             </label>
             <div className="relative">
                 {prefix && (
@@ -49,7 +49,7 @@ export const InputGroup: React.FC<InputGroupProps> = ({
                     disabled={disabled}
                     onChange={onChange}
                     placeholder={placeholder}
-                    className={`w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl py-2 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all placeholder:text-[var(--theme-text-secondary)]/40 disabled:opacity-50 ${paddingLeft}`}
+                    className={`w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl py-2 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-secondary)]/40 disabled:opacity-50 ${paddingLeft}`}
                 />
                 {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 ml-0.5">{sub}</p>}
             </div>
@@ -82,15 +82,15 @@ export function RadioCard<T extends string = string>({ options, value, onChange,
                     onClick={() => onChange(opt.value)}
                     className={`p-3 rounded-xl border text-left transition-all cursor-pointer disabled:opacity-50 ${
                         value === opt.value
-                            ? 'bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border-[#0071E3] dark:border-[#2997FF] text-[var(--theme-text-primary)] shadow-xs'
-                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[#0071E3]/40'
+                            ? 'bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 border-[var(--theme-accent)] dark:border-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
+                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-accent)]/40'
                     }`}
                 >
                     <div className="flex items-center gap-2 mb-1">
                         {opt.icon && (
                             <opt.icon
                                 size={15}
-                                className={value === opt.value ? 'text-[#0071E3] dark:text-[#2997FF]' : 'text-[var(--theme-text-secondary)]'}
+                                className={value === opt.value ? 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'}
                             />
                         )}
                         <span className="font-semibold text-xs text-[var(--theme-text-primary)]">{opt.label}</span>
@@ -111,7 +111,7 @@ export interface ToggleRowProps {
 }
 
 export const ToggleRow: React.FC<ToggleRowProps> = ({ label, sub, checked = false, onChange, disabled = false }) => (
-    <div className="flex items-start justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[#0071E3]/30 transition-colors">
+    <div className="flex items-start justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors">
         <div className="space-y-0.5 pr-2">
             <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{label}</p>
             {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">{sub}</p>}
@@ -121,7 +121,7 @@ export const ToggleRow: React.FC<ToggleRowProps> = ({ label, sub, checked = fals
             disabled={disabled}
             onClick={onChange}
             className={`w-11 h-6 shrink-0 rounded-full p-0.5 transition-colors relative cursor-pointer disabled:opacity-50 ${
-                checked ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-neutral-300 dark:bg-neutral-700'
+                checked ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-neutral-300 dark:bg-neutral-700'
             }`}
         >
             <div

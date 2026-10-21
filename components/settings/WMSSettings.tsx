@@ -186,8 +186,8 @@ export default function WMSSettings() {
 
             {activeTab === 'rules' && (
                 <div className="space-y-6">
-                    <div className="p-4 bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border border-[#0071E3]/20 dark:border-[#2997FF]/30 rounded-2xl flex items-start gap-3">
-                        <Shield className="text-[#0071E3] dark:text-[#2997FF] shrink-0 mt-0.5" size={20} />
+                    <div className="p-4 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 border border-[var(--theme-accent)]/20 dark:border-[var(--theme-accent)]/30 rounded-2xl flex items-start gap-3">
+                        <Shield className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0 mt-0.5" size={20} />
                         <div>
                             <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Enterprise WMS Engine</h4>
                             <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 leading-relaxed">
@@ -281,7 +281,7 @@ export default function WMSSettings() {
                                         type="button"
                                         onClick={() => handleSaveSection('inbound')}
                                         disabled={isSaving === 'inbound' || !canConfigureWMS}
-                                        className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                        className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                     >
                                         {isSaving === 'inbound' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
                                         Save Inbound
@@ -332,7 +332,7 @@ export default function WMSSettings() {
                                             type="button"
                                             onClick={() => handleSaveSection('health')}
                                             disabled={isSaving === 'health' || !canConfigureWMS}
-                                            className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                            className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                         >
                                             {isSaving === 'health' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
                                             Save Health
@@ -413,7 +413,7 @@ export default function WMSSettings() {
                                             type="button"
                                             onClick={() => handleSaveSection('outbound')}
                                             disabled={isSaving === 'outbound' || !canConfigureWMS}
-                                            className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                            className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                         >
                                             {isSaving === 'outbound' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
                                             Save Outbound

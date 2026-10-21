@@ -41,7 +41,7 @@ const PermissionToggle: React.FC<PermissionToggleProps> = ({
             disabled ? 'opacity-40 cursor-not-allowed' : ''
         } ${
             enabled
-                ? danger ? 'bg-red-500' : 'bg-[#0071E3] dark:bg-[#2997FF]'
+                ? danger ? 'bg-red-500' : 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]'
                 : 'bg-neutral-300 dark:bg-neutral-700'
         }`}
     >
@@ -81,7 +81,7 @@ const SecurityScore: React.FC<SecurityScoreProps> = ({ policies, role }) => {
     }
 
     const getColor = (s: number) => {
-        if (s >= 90) return 'text-[#0071E3] dark:text-[#2997FF] border-[#0071E3]/30';
+        if (s >= 90) return 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/30';
         if (s >= 70) return 'text-amber-600 dark:text-amber-400 border-amber-500/30';
         return 'text-red-500 border-red-500/30';
     };
@@ -167,7 +167,7 @@ export default function RoleSettings() {
         }
 
         return [
-            { id: 'admin', name: 'Assistant CEO / Admin', users: counts.admin, badge: 'bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/15 dark:text-[#2997FF] border-[#0071E3]/20', description: 'HQ executive administration with complete audit visibility' },
+            { id: 'admin', name: 'Assistant CEO / Admin', users: counts.admin, badge: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20', description: 'HQ executive administration with complete audit visibility' },
             { id: 'store_manager', name: 'Store Manager', users: counts.store_manager, badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20', description: 'Branch retail oversight constrained by Zero-Trust approval rules' },
             { id: 'cashier', name: 'Retail Staff (Cashier)', users: counts.cashier, badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', description: 'POS checkout operators locked to local terminal registers' },
             { id: 'warehouse', name: 'Warehouse Ops', users: counts.warehouse, badge: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20', description: 'Fulfillment and putaway personnel governed by blind scanning' },
@@ -228,7 +228,7 @@ export default function RoleSettings() {
             {/* HEADER */}
             <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
                         <ShieldCheck size={18} />
                     </div>
                     <div>
@@ -255,7 +255,7 @@ export default function RoleSettings() {
                             onClick={() => setActiveRole(role.id)}
                             className={`w-full text-left p-3.5 rounded-2xl border transition-all cursor-pointer ${
                                 activeRole === role.id
-                                    ? 'bg-[var(--theme-bg-card)] border-[#0071E3] dark:border-[#2997FF] shadow-xs ring-1 ring-[#0071E3]/30'
+                                    ? 'bg-[var(--theme-bg-card)] border-[var(--theme-accent)] dark:border-[var(--theme-accent)] shadow-xs ring-1 ring-[var(--theme-accent)]/30'
                                     : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                             }`}
                         >
@@ -263,7 +263,7 @@ export default function RoleSettings() {
                                 <span className={`text-[9px] uppercase font-semibold px-2 py-0.5 rounded-full border ${role.badge}`}>
                                     {role.id}
                                 </span>
-                                {activeRole === role.id && <Shield size={13} className="text-[#0071E3] dark:text-[#2997FF]" />}
+                                {activeRole === role.id && <Shield size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />}
                             </div>
                             <div className="font-semibold text-xs text-[var(--theme-text-primary)] mb-0.5">{role.name}</div>
                             <div className="text-[11px] text-[var(--theme-text-secondary)]">{role.users} Active Staff Assigned</div>
@@ -311,7 +311,7 @@ export default function RoleSettings() {
                             {Object.entries(persistedPermissions).map(([category, items]) => (
                                 <div key={category} className="space-y-2">
                                     <h5 className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                                        <div className="w-1.5 h-1.5 bg-[#0071E3] dark:bg-[#2997FF] rounded-full" /> {category}
+                                        <div className="w-1.5 h-1.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] rounded-full" /> {category}
                                     </h5>
                                     <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl divide-y divide-[var(--theme-border)] overflow-hidden">
                                         {items.map((perm: RolePermissionItem) => {
@@ -338,7 +338,7 @@ export default function RoleSettings() {
                                                     <div className="flex items-center gap-3 shrink-0">
                                                         <span className={`text-[10px] uppercase font-semibold ${
                                                             isGranted
-                                                                ? 'text-[#0071E3] dark:text-[#2997FF]'
+                                                                ? 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)]'
                                                                 : 'text-[var(--theme-text-secondary)]'
                                                         }`}>
                                                             {isGranted ? 'Granted' : 'Revoked'}
@@ -376,7 +376,7 @@ export default function RoleSettings() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
                                     <div className="flex items-center gap-2.5 mb-3">
-                                        <div className="w-8 h-8 bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/15 dark:text-[#2997FF] rounded-lg flex items-center justify-center border border-[#0071E3]/20">
+                                        <div className="w-8 h-8 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] rounded-lg flex items-center justify-center border border-[var(--theme-accent)]/20">
                                             <Clock size={15} />
                                         </div>
                                         <div>
@@ -392,9 +392,9 @@ export default function RoleSettings() {
                                         aria-label="Session Timeout"
                                         value={currentPolicy.session_timeout}
                                         onChange={(e) => updatePolicy('session_timeout', parseInt(e.target.value, 10))}
-                                        className="w-full accent-[#0071E3] dark:accent-[#2997FF] h-1.5 bg-[var(--theme-border)] rounded-lg appearance-none cursor-pointer"
+                                        className="w-full accent-[var(--theme-accent)] dark:accent-[var(--theme-accent)] h-1.5 bg-[var(--theme-border)] rounded-lg appearance-none cursor-pointer"
                                     />
-                                    <div className="flex justify-between mt-2 text-[10px] font-mono font-semibold text-[#0071E3] dark:text-[#2997FF]">
+                                    <div className="flex justify-between mt-2 text-[10px] font-mono font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                         <span>5m</span>
                                         <span className="bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-md border border-[var(--theme-border)]">
                                             {currentPolicy.session_timeout} mins
@@ -406,7 +406,7 @@ export default function RoleSettings() {
                                 <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2.5">
-                                            <div className="w-8 h-8 bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/15 dark:text-[#2997FF] rounded-lg flex items-center justify-center border border-[#0071E3]/20">
+                                            <div className="w-8 h-8 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] rounded-lg flex items-center justify-center border border-[var(--theme-accent)]/20">
                                                 <Smartphone size={15} />
                                             </div>
                                             <div>
@@ -430,7 +430,7 @@ export default function RoleSettings() {
                             {/* Context Access */}
                             <div className="p-4.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-3">
                                 <h5 className="font-semibold text-xs text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
-                                    <Shield size={14} className="text-[#0071E3] dark:text-[#2997FF]" /> Context-Aware Access Rules
+                                    <Shield size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> Context-Aware Access Rules
                                 </h5>
                                 <div className="space-y-2.5">
                                     <div className="flex items-center justify-between p-3 border border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-card)]">

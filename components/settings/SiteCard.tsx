@@ -39,7 +39,7 @@ export function SiteCard({
     <div
       onClick={() => setExpandedSiteId(isExpanded ? null : site.id)}
       className={`bg-[var(--theme-bg-card)] border transition-all duration-200 rounded-2xl p-3.5 cursor-pointer shadow-xs ${
-        isExpanded ? 'border-[#0071E3] dark:border-[#2997FF]' : 'border-[var(--theme-border)] hover:border-[var(--theme-border-hover)]'
+        isExpanded ? 'border-[var(--theme-accent)] dark:border-[var(--theme-accent)]' : 'border-[var(--theme-border)] hover:border-[var(--theme-border-hover)]'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -54,7 +54,7 @@ export function SiteCard({
             </h6>
 
             {/* Sovereign Country ID Badge */}
-            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 flex items-center gap-1">
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center gap-1">
               <Globe size={11} />
               <span>{countryId}</span>
             </span>
@@ -68,7 +68,7 @@ export function SiteCard({
             {/* Regional Territory Badge */}
             {(region || site.region_code || site.regionCode) && (
               <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-stone-500/10 text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-1" title={region ? `Territory: ${region.name} (${region.city || region.code})` : `Region: ${site.region_code || site.regionCode}`}>
-                <MapPin size={11} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <MapPin size={11} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                 <span>{region ? (region.city || region.name.replace(/\s+Region$/i, '')) : (site.region_code || site.regionCode)}</span>
               </span>
             )}
@@ -87,7 +87,7 @@ export function SiteCard({
         <ChevronDown
           size={16}
           className={`text-[var(--theme-text-muted)] shrink-0 transition-transform mt-0.5 ${
-            isExpanded ? 'rotate-180 text-[#0071E3] dark:text-[#2997FF]' : ''
+            isExpanded ? 'rotate-180 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]' : ''
           }`}
         />
       </div>
@@ -100,7 +100,7 @@ export function SiteCard({
               <span className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-1 mt-0.5">
                 <span>{countryId}</span>
                 <span className="text-[var(--theme-text-secondary)] font-normal">({countryProfile.name.replace(/\s*\(.*\)/, '')})</span>
-                <span className="text-[11px] text-[#0071E3] dark:text-[#2997FF] font-mono font-semibold ml-0.5">[{humanReadableSiteId}]</span>
+                <span className="text-[11px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-mono font-semibold ml-0.5">[{humanReadableSiteId}]</span>
               </span>
             </div>
             <div>
@@ -130,7 +130,7 @@ export function SiteCard({
             <div>
               <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Operational Region</span>
               <span className="text-[var(--theme-text-primary)] font-semibold truncate block mt-0.5 flex items-center gap-1" title={region?.name || site.region_code || 'Unassigned'}>
-                <MapPin size={11} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                <MapPin size={11} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                 <span className="truncate">{region ? region.name : (site.region_code || site.regionCode || 'Unassigned')}</span>
               </span>
             </div>
@@ -170,7 +170,7 @@ export function SiteCard({
               className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
               title="Edit Location"
             >
-              <Edit2 size={12} className="text-[#0071E3] dark:text-[#2997FF]" />
+              <Edit2 size={12} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
               <span>Edit</span>
             </button>
             {isAdmin ? (

@@ -62,7 +62,7 @@ export function POSIdentityTab({
             <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
               {countryProfile.name}
             </span>
-            <span className="text-[10px] font-semibold text-[#0071E3] dark:text-[#2997FF] uppercase px-2 py-0.5 bg-[#0071E3]/10 dark:bg-[#2997FF]/15 rounded-full">
+            <span className="text-[10px] font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] uppercase px-2 py-0.5 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 rounded-full">
               {countryProfile.currency} ({countryProfile.currencySymbol})
             </span>
           </div>
@@ -126,7 +126,7 @@ export function POSIdentityTab({
                   setReceiptBranding(prev => ({ ...prev, posReceiptPolicy: e.target.value }))
                 }
                 placeholder="Items may be returned within 7 days with valid receipt."
-                className="w-full h-24 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/30 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors resize-none placeholder:text-[var(--theme-text-secondary)]/40"
+                className="w-full h-24 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors resize-none placeholder:text-[var(--theme-text-secondary)]/40"
               />
             </div>
           </div>
@@ -227,7 +227,7 @@ export function POSIdentityTab({
             type="button"
             onClick={() => handleSaveSection('branding')}
             disabled={isSavingBranding}
-            className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+            className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
           >
             {isSavingBranding ? (
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

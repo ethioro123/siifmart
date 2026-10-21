@@ -119,10 +119,10 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
             {activeSubTab === 'strategies' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {fulfillmentSites.map(site => (
-                        <div key={site.id} className={`p-5 rounded-2xl border transition-all ${isSaving === site.id ? 'border-[#0071E3] bg-[#0071E3]/5' : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs'}`}>
+                        <div key={site.id} className={`p-5 rounded-2xl border transition-all ${isSaving === site.id ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/5' : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs'}`}>
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                                         <MapPin size={18} />
                                     </div>
                                     <div>
@@ -137,7 +137,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                                     title={`Toggle node for ${site.name}`}
                                     className="min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer disabled:opacity-40"
                                 >
-                                    <div className={`w-11 h-6 rounded-full p-0.5 transition-colors relative shrink-0 ${site.isFulfillmentNode ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}>
+                                    <div className={`w-11 h-6 rounded-full p-0.5 transition-colors relative shrink-0 ${site.isFulfillmentNode ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}>
                                         <div className={`w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${site.isFulfillmentNode ? 'translate-x-5' : 'translate-x-0'}`} />
                                     </div>
                                 </button>
@@ -149,7 +149,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                                     onChange={(e) => handleStrategyChange(site.id, e.target.value as FulfillmentStrategy)}
                                     disabled={!!isSaving}
                                     title={`Select strategy for ${site.name}`}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/30 transition-all disabled:opacity-40"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30 transition-all disabled:opacity-40"
                                 >
                                     <option value="NEAREST">Nearest Warehouse</option>
                                     <option value="LOCAL_ONLY">Local Only</option>
@@ -165,25 +165,25 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
             {activeSubTab === 'zones' && (
                 <div className="space-y-6">
                     <div className="flex items-center gap-3 bg-[var(--theme-bg-card)] p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
-                        <div className="w-8 h-8 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Layers size={16} />
                         </div>
                         <select
                             value={selectedSiteId}
                             onChange={(e) => setSelectedSiteId(e.target.value)}
                             title="Select site"
-                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs font-medium text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/30 transition-all"
+                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs font-medium text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30 transition-all"
                         >
                             {fulfillmentSites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {siteZones.map(zone => (
-                            <div key={zone.id} className={`p-4 rounded-2xl border transition-all ${isSaving === zone.id ? 'border-[#0071E3] bg-[#0071E3]/5' : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs'}`}>
+                            <div key={zone.id} className={`p-4 rounded-2xl border transition-all ${isSaving === zone.id ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/5' : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs'}`}>
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <h4 className="text-xs font-semibold text-[var(--theme-text-primary)]">{zone.name}</h4>
-                                        <span className="text-[10px] font-semibold px-2 py-0.5 bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] rounded-full uppercase mt-1 inline-block">{zone.zoneType || 'Standard'}</span>
+                                        <span className="text-[10px] font-semibold px-2 py-0.5 bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] rounded-full uppercase mt-1 inline-block">{zone.zoneType || 'Standard'}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-[11px] text-[var(--theme-text-secondary)]">Priority:</span>
@@ -193,7 +193,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                                             title={`Priority for ${zone.name}`}
                                             value={zone.pickingPriority || 10}
                                             onChange={(e) => handlePriorityChange(zone.id, parseInt(e.target.value))}
-                                            className="w-16 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2 py-1.5 text-center text-xs font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/30"
+                                            className="w-16 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2 py-1.5 text-center text-xs font-semibold text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/30"
                                         />
                                     </div>
                                 </div>
@@ -207,7 +207,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
                     <div className="p-4 border-b border-[var(--theme-border)] flex items-center justify-between bg-[var(--theme-bg-subtle)]">
                         <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
-                            <Clock size={15} className="text-[#0071E3] dark:text-[#2997FF]" /> Pending Release Orders
+                            <Clock size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> Pending Release Orders
                         </h3>
                     </div>
                     <div className="overflow-x-auto text-xs">
@@ -225,13 +225,13 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                                     <tr key={sale.id} className="hover:bg-[var(--theme-bg-subtle)]/50 transition-colors">
                                         <td className="px-6 py-4"><div className="font-semibold text-[var(--theme-text-primary)] font-mono">{sale.receiptNumber}</div></td>
                                         <td className="px-6 py-4 text-[var(--theme-text-secondary)]">{formatDateTime(sale.date || sale.created_at || '')}</td>
-                                        <td className="px-6 py-4"><span className="bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] px-2.5 py-0.5 rounded-full text-xs font-semibold">{sale.items.length} units</span></td>
+                                        <td className="px-6 py-4"><span className="bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] px-2.5 py-0.5 rounded-full text-xs font-semibold">{sale.items.length} units</span></td>
                                         <td className="px-6 py-4 text-right">
                                             <button
                                                 type="button"
                                                 onClick={() => handleReleaseClick(sale.id)}
                                                 disabled={isSaving === sale.id}
-                                                className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                                className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                             >
                                                 {isSaving === sale.id ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Play size={12} />}
                                                 Release

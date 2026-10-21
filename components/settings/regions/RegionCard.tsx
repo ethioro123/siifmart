@@ -76,12 +76,12 @@ export const RegionCard: React.FC<RegionCardProps> = ({
     const isNearCap = budgetStatus?.isNearCap ?? (monthlyBudget > 0 && percentUsed >= 85);
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs hover:border-[#0071E3]/40 transition-all flex flex-col justify-between">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs hover:border-[var(--theme-accent)]/40 transition-all flex flex-col justify-between">
             <div>
                 {/* Header Row */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[#0071E3] dark:text-[#2997FF] shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0">
                             <Building2 size={20} />
                         </div>
                         <div>
@@ -115,7 +115,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                             </span>
                         )}
                         {region.status === 'planning' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                                 Planning
                             </span>
                         )}
@@ -133,7 +133,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     <div>
                         <span className="text-[11px] text-[var(--theme-text-secondary)] block">Regional Manager</span>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                            <UserCheck size={13} className="text-[#0071E3] dark:text-[#2997FF]" />
+                            <UserCheck size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             <span className="font-medium text-[var(--theme-text-primary)] truncate">
                                 {regionalManager ? regionalManager.name : 'Unassigned'}
                             </span>
@@ -239,7 +239,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     <button
                         type="button"
                         onClick={() => onEdit(region)}
-                        className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[#0071E3] hover:text-white transition-all cursor-pointer border border-[var(--theme-border)]"
+                        className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)] hover:text-white transition-all cursor-pointer border border-[var(--theme-border)]"
                     >
                         <Sliders size={14} />
                         <span>Governance & Limits</span>

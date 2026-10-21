@@ -45,7 +45,7 @@ interface PolicyToggleProps {
 const PolicyToggle: React.FC<PolicyToggleProps> = ({ label, enabled, onChange }) => (
     <div
         onClick={onChange}
-        className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[#0071E3]/30 transition-colors cursor-pointer"
+        className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors cursor-pointer"
     >
         <span className="font-medium text-[var(--theme-text-primary)] text-xs pr-3">{label}</span>
         <button
@@ -57,7 +57,7 @@ const PolicyToggle: React.FC<PolicyToggleProps> = ({ label, enabled, onChange })
                 onChange();
             }}
             aria-label={label}
-            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${enabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${enabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
         >
             <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
         </button>
@@ -183,7 +183,7 @@ export default function SecuritySettings() {
                 {/* GLOBAL POLICIES */}
                 <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-5">
                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                        <Lock size={16} className="text-[#0071E3] dark:text-[#2997FF]" />
+                        <Lock size={16} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                         Global Authentication Policies
                     </h3>
 
@@ -214,7 +214,7 @@ export default function SecuritySettings() {
                         {/* Administrative IP Allowlist */}
                         <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                             <h5 className="font-semibold text-[var(--theme-text-primary)] text-xs flex items-center gap-2">
-                                <Network size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                <Network size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                                 Administrative IP Allowlist
                             </h5>
                             <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
@@ -226,12 +226,12 @@ export default function SecuritySettings() {
                                     value={ipInput}
                                     onChange={(e) => setIpInput(e.target.value)}
                                     placeholder="e.g. 192.168.1.0/24"
-                                    className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none font-mono transition-colors"
+                                    className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] outline-none font-mono transition-colors"
                                 />
                                 <button
                                     type="button"
                                     onClick={handleAddIp}
-                                    className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] text-white font-semibold rounded-xl text-xs hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+                                    className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white font-semibold rounded-xl text-xs hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
                                 >
                                     <Plus size={14} /> Add IP Range
                                 </button>
@@ -276,7 +276,7 @@ export default function SecuritySettings() {
                                         setRetentionDrawer(e.target.value);
                                         showToast('Audit log retention policy updated', 'success');
                                     }}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors cursor-pointer"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
                                 >
                                     <option>Keep Indefinitely (Recommended)</option>
                                     <option>Delete after 3 years</option>
@@ -294,7 +294,7 @@ export default function SecuritySettings() {
                                         setRetentionBarcode(e.target.value);
                                         showToast('Barcode approval retention policy updated', 'success');
                                     }}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors cursor-pointer"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
                                 >
                                     <option>Keep for 7 years (Audit Trail)</option>
                                     <option>Keep Indefinitely</option>
@@ -315,7 +315,7 @@ export default function SecuritySettings() {
                             onClick={handleExportAudit}
                             className="w-full h-9 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98]"
                         >
-                            <Download size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                            <Download size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             <span>Export Certified Audit Log</span>
                         </button>
                     </div>

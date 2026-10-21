@@ -77,13 +77,13 @@ export default function NotificationSettings() {
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* HEADER BANNER */}
             <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
-                <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Bell size={18} />
                 </div>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
                         <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Notification Channels & Dispatcher</h4>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                             {countryProfile.name} ({activeCountry})
                         </span>
                     </div>
@@ -99,7 +99,7 @@ export default function NotificationSettings() {
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-5">
                     <div>
                         <div className="flex justify-between items-start mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                                 <Mail size={20} />
                             </div>
                             <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export default function NotificationSettings() {
                                     onClick={() => setEmailEnabled(!emailEnabled)}
                                     aria-label="Toggle Email SMTP"
                                     className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${
-                                        emailEnabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'
+                                        emailEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                                     }`}
                                 >
                                     <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${emailEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
@@ -168,7 +168,7 @@ export default function NotificationSettings() {
                         <button
                             type="button"
                             onClick={() => showToast('SMTP credentials verified and operational', 'info')}
-                            className="text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] hover:underline flex items-center gap-1.5 cursor-pointer"
+                            className="text-xs font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] hover:underline flex items-center gap-1.5 cursor-pointer"
                         >
                             <Server size={13} /> Configure SMTP Relay
                         </button>
@@ -200,7 +200,7 @@ export default function NotificationSettings() {
                                     }}
                                     aria-label="Toggle SMS Gateway"
                                     className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${
-                                        smsEnabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'
+                                        smsEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                                     }`}
                                 >
                                     <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${smsEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
@@ -245,7 +245,7 @@ export default function NotificationSettings() {
                         <button
                             type="button"
                             onClick={() => showToast('SMS Gateway parameters ready', 'info')}
-                            className="text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] hover:underline flex items-center gap-1.5 cursor-pointer"
+                            className="text-xs font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] hover:underline flex items-center gap-1.5 cursor-pointer"
                         >
                             <Smartphone size={13} /> Configure Gateway
                         </button>
@@ -266,10 +266,10 @@ export default function NotificationSettings() {
                     {templates.map(tmpl => (
                         <div
                             key={tmpl.id}
-                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[#0071E3]/30 transition-all group"
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-all group"
                         >
                             <div className="flex items-start sm:items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                                <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                     <FileText size={16} />
                                 </div>
                                 <div>
@@ -294,7 +294,7 @@ export default function NotificationSettings() {
                                 <button
                                     type="button"
                                     onClick={() => handleTestNotification(tmpl)}
-                                    className="h-8 px-3 text-xs bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+                                    className="h-8 px-3 text-xs bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-xs"
                                 >
                                     <Send size={12} /> Test
                                 </button>
@@ -322,7 +322,7 @@ export default function NotificationSettings() {
                             <button
                                 type="button"
                                 onClick={handleSaveTemplate}
-                                className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold cursor-pointer shadow-xs transition-all"
+                                className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold cursor-pointer shadow-xs transition-all"
                             >
                                 Save Template
                             </button>
@@ -336,7 +336,7 @@ export default function NotificationSettings() {
                                 type="text"
                                 value={editingTemplate.subject}
                                 onChange={(e) => setEditingTemplate({ ...editingTemplate, subject: e.target.value })}
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -345,7 +345,7 @@ export default function NotificationSettings() {
                                 rows={5}
                                 value={editingTemplate.body}
                                 onChange={(e) => setEditingTemplate({ ...editingTemplate, body: e.target.value })}
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 text-xs text-[var(--theme-text-primary)] font-normal outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
+                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 text-xs text-[var(--theme-text-primary)] font-normal outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors"
                             />
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[11px] text-[var(--theme-text-secondary)]">

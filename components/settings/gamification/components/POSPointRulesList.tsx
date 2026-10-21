@@ -32,8 +32,8 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
                 <div
                     key={rule.id}
                     className={`bg-[var(--theme-bg-subtle)] border rounded-xl p-3.5 transition-all group ${
-                        rule.enabled 
-                            ? 'border-[#0071E3]/30 hover:border-[#0071E3]/50 shadow-xs' 
+                        rule.enabled
+                            ? 'border-[var(--theme-accent)]/30 hover:border-[var(--theme-accent)]/50 shadow-xs'
                             : 'border-transparent opacity-50'
                     }`}
                 >
@@ -45,7 +45,7 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
                             onClick={() => togglePointRule(rule.id)}
                             aria-label={`Toggle rule ${rule.name}`}
                             className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${
-                                rule.enabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'
+                                rule.enabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                             }`}
                         >
                             <div className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${rule.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
@@ -62,7 +62,7 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
                                     {rule.type}
                                 </span>
                                 {rule.multiplier && rule.multiplier > 1 && (
-                                    <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                                    <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                         {rule.multiplier}x
                                     </span>
                                 )}
@@ -79,7 +79,7 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
 
                         <div className="text-right px-3 border-l border-[var(--theme-border)]">
                             <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium">Points/Unit</p>
-                            <p className="text-sm font-semibold text-[#0071E3] dark:text-[#2997FF]">+{rule.pointsPerUnit}</p>
+                            <p className="text-sm font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">+{rule.pointsPerUnit}</p>
                         </div>
 
                         {rule.pointsPerRevenue && (

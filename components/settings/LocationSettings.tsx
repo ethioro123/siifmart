@@ -326,7 +326,7 @@ export default function LocationSettings() {
                                 <Truck size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Distribution Center').length} Distribution</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 px-2.5 py-1 rounded-full border border-[#0071E3]/20">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-2.5 py-1 rounded-full border border-[var(--theme-accent)]/20">
                                 <Box size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Warehouse').length} Warehouses</span>
                             </div>
@@ -346,7 +346,7 @@ export default function LocationSettings() {
                                 onClick={() => setLocationViewMode('category')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                     locationViewMode === 'category'
-                                        ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                 }`}
                             >
@@ -357,7 +357,7 @@ export default function LocationSettings() {
                                 onClick={() => setLocationViewMode('region')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                     locationViewMode === 'region'
-                                        ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                 }`}
                             >
@@ -368,7 +368,7 @@ export default function LocationSettings() {
                                 onClick={() => setLocationViewMode('zone')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                     locationViewMode === 'zone'
-                                        ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                 }`}
                             >
@@ -383,12 +383,12 @@ export default function LocationSettings() {
                             onClick={() => setIsZoneManagerOpen(true)}
                             className="h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-4 rounded-xl font-semibold text-xs flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
                         >
-                            <Globe size={15} className="text-[#0071E3] dark:text-[#2997FF]" /> Manage Zones
+                            <Globe size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" /> Manage Zones
                         </button>
                         <button
                             type="button"
                             onClick={handleOpenAddSite}
-                            className="h-10 bg-[#0071E3] dark:bg-[#2997FF] text-white hover:opacity-95 px-5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-[0.98]"
+                            className="h-10 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-95 px-5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-[0.98]"
                         >
                             <Plus size={16} /> Add Location
                         </button>
