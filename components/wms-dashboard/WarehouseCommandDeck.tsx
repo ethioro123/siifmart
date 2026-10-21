@@ -31,11 +31,11 @@ export const WarehouseCommandDeck: React.FC<WarehouseCommandDeckProps> = ({
       category: 'Procurement & Docks',
       value: metrics.inboundPOs,
       badgeText: 'Dock Schedule',
-      badgeColor: 'bg-[#34C759]/10 text-[#34C759] dark:text-[#30D158] border-[#34C759]/20',
+      badgeColor: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
       icon: Truck,
-      iconColor: 'text-[#34C759] dark:text-[#30D158]',
-      iconBg: 'bg-[#34C759]/10',
-      barColor: 'bg-[#34C759] dark:bg-[#30D158]',
+      iconColor: 'text-[var(--theme-status-success-text)]',
+      iconBg: 'bg-[var(--theme-status-success-bg)]',
+      barColor: 'bg-[var(--theme-status-success)]',
       barWidth: metrics.inboundPOs > 0 ? '70%' : '15%',
       statusLeft: 'Dock Ready',
       statusRight: 'Inbound Orders',
@@ -47,12 +47,12 @@ export const WarehouseCommandDeck: React.FC<WarehouseCommandDeckProps> = ({
       value: metrics.pendingPicks,
       badgeText: metrics.criticalPicks > 0 ? `${metrics.criticalPicks} Priority` : 'Active Orders',
       badgeColor: metrics.criticalPicks > 0
-        ? 'bg-[#FF3B30]/10 text-[#FF3B30] dark:text-[#FF453A] border-[#FF3B30]/20'
-        : 'bg-[#FF9500]/10 text-[#FF9500] dark:text-[#FF9F0A] border-[#FF9500]/20',
+        ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+        : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
       icon: ClipboardList,
-      iconColor: 'text-[#FF9500] dark:text-[#FF9F0A]',
-      iconBg: 'bg-[#FF9500]/10',
-      barColor: 'bg-[#FF9500] dark:bg-[#FF9F0A]',
+      iconColor: 'text-[var(--theme-status-warning-text)]',
+      iconBg: 'bg-[var(--theme-status-warning-bg)]',
+      barColor: 'bg-[var(--theme-status-warning)]',
       barWidth: `${Math.min(100, Math.max(15, metrics.pendingPicks * 10))}%`,
       statusLeft: `${metrics.completedJobs} Dispatched`,
       statusRight: 'Queue Flow',
@@ -63,11 +63,11 @@ export const WarehouseCommandDeck: React.FC<WarehouseCommandDeckProps> = ({
       category: 'Operational Pace',
       value: metrics.avgCycleTime,
       badgeText: 'Efficiency Target',
-      badgeColor: 'bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border-[#0071E3]/20',
+      badgeColor: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20',
       icon: Clock,
-      iconColor: 'text-[#0071E3] dark:text-[#2997FF]',
-      iconBg: 'bg-[#0071E3]/10 dark:bg-[#2997FF]/10',
-      barColor: 'bg-[#0071E3] dark:bg-[#2997FF]',
+      iconColor: 'text-[var(--theme-accent)]',
+      iconBg: 'bg-[var(--theme-accent)]/10/10',
+      barColor: 'bg-[var(--theme-accent)]',
       barWidth: metrics.avgCycleTime !== '--' ? '82%' : '20%',
       statusLeft: 'Target <15m',
       statusRight: 'WMS Latency',
@@ -95,10 +95,11 @@ export const WarehouseCommandDeck: React.FC<WarehouseCommandDeckProps> = ({
       {cards.map((card, idx) => {
         const Icon = card.icon;
         return (
-          <div
+          <button
             key={idx}
+            type="button"
             onClick={() => navigate(card.route)}
-            className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[#0071E3]/40 flex flex-col justify-between cursor-pointer active:scale-[0.99]"
+            className="group relative w-full text-left bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-colors shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between cursor-pointer active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
           >
             <div>
               <div className="flex justify-between items-start mb-3">
@@ -134,13 +135,13 @@ export const WarehouseCommandDeck: React.FC<WarehouseCommandDeckProps> = ({
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   {card.statusLeft}
                 </span>
-                <span className="text-[11px] text-[#0071E3] dark:text-[#2997FF] font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                <span className="text-[11px] text-[var(--theme-accent)] font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                   <span>{card.statusRight}</span>
                   <ArrowRight size={12} />
                 </span>
               </div>
             </div>
-          </div>
+          </button>
         );
       })}
     </div>

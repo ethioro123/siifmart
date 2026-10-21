@@ -43,7 +43,7 @@ export const WMSHeaderBar: React.FC<WMSHeaderBarProps> = ({
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[var(--theme-border)]">
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[#0071E3] dark:text-[#2997FF] rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+          <div className="w-10 h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-accent)] rounded-xl flex items-center justify-center shrink-0 shadow-xs">
             <Box size={20} />
           </div>
           <div>
@@ -51,12 +51,12 @@ export const WMSHeaderBar: React.FC<WMSHeaderBarProps> = ({
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                 Warehouse Operations Center
               </h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                 {countryProfile.name} ({activeCountry})
               </span>
             </div>
             <div className="flex items-center gap-2 text-[var(--theme-text-secondary)] text-xs font-medium mt-1">
-              <span className={`w-2 h-2 rounded-full ${refreshing ? 'bg-[#FF9500] animate-pulse' : 'bg-[#34C759]'}`} />
+              <span className={`w-2 h-2 rounded-full ${refreshing ? 'bg-[var(--theme-status-warning)] animate-pulse' : 'bg-[var(--theme-status-success)]'}`} />
               <span>
                 {refreshing
                   ? 'Synchronizing Operational Data...'
@@ -91,19 +91,19 @@ export const WMSHeaderBar: React.FC<WMSHeaderBarProps> = ({
         )}
 
         <div className="flex items-center gap-2">
-          <div className="px-3 py-1.5 bg-[#FF3B30]/10 border border-[#FF3B30]/20 text-[#FF3B30] dark:text-[#FF453A] text-xs font-medium rounded-xl flex items-center shadow-2xs">
+          <div className="px-3 py-1.5 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-xs font-medium rounded-xl flex items-center shadow-2xs">
             <AlertTriangle size={13} className="mr-1.5" />
             {activeAlerts} Alerts Active
           </div>
 
           {/* Dynamic Real Zone Temperature Telemetry */}
           {coldZone ? (
-            <div className="px-3 py-1.5 bg-[#0071E3]/10 border border-[#0071E3]/20 text-[#0071E3] dark:text-[#2997FF] text-xs font-medium rounded-xl flex items-center shadow-2xs">
+            <div className="px-3 py-1.5 bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 text-[var(--theme-accent)] text-xs font-medium rounded-xl flex items-center shadow-2xs">
               <Thermometer size={13} className="mr-1.5" />
               {coldZone.name}: {coldZone.temperature || 'Cold Chain'}
             </div>
           ) : (
-            <div className="px-3 py-1.5 bg-[#0071E3]/10 border border-[#0071E3]/20 text-[#0071E3] dark:text-[#2997FF] text-xs font-medium rounded-xl flex items-center shadow-2xs">
+            <div className="px-3 py-1.5 bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 text-[var(--theme-accent)] text-xs font-medium rounded-xl flex items-center shadow-2xs">
               <Box size={13} className="mr-1.5" />
               {totalZonesCount} Storage Zones
             </div>
@@ -114,7 +114,7 @@ export const WMSHeaderBar: React.FC<WMSHeaderBarProps> = ({
           <button
             type="button"
             onClick={onOpenOnboardModal}
-            className="h-9 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shadow-xs cursor-pointer shrink-0"
+            className="min-h-11 px-3.5 bg-[var(--theme-btn-primary-bg)] text-[var(--theme-btn-primary-text)] hover:opacity-90 active:scale-95 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2 shadow-xs cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] focus-visible:ring-offset-2"
             title="Onboard warehouse pickers, packers, receivers, drivers & operators"
           >
             <UserPlus size={14} />

@@ -30,9 +30,9 @@ export const FacilityRosterSection: React.FC<FacilityRosterSectionProps> = ({
               <button
                 type="button"
                 onClick={onOpenOnboardModal}
-                className="h-10 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
+                className="min-h-11 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
               >
-                <UserPlus size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <UserPlus size={14} className="text-[var(--theme-accent)]" />
                 <span>Onboard Facility Staff</span>
               </button>
             </div>

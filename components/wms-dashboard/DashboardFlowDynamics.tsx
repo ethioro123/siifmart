@@ -3,9 +3,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 interface DashboardFlowDynamicsProps {
     data: any[];
-    chartStroke: string;
-    chartText: string;
-    theme: string;
     inboundColor: string;
     outboundColor: string;
     t: (key: string) => string;
@@ -13,15 +10,12 @@ interface DashboardFlowDynamicsProps {
 
 export const DashboardFlowDynamics: React.FC<DashboardFlowDynamicsProps> = ({
     data,
-    chartStroke,
-    chartText,
-    theme,
     inboundColor,
     outboundColor,
     t
 }) => {
-    const resolvedInbound = inboundColor || (theme === 'dark' ? '#2997FF' : '#0071E3');
-    const resolvedOutbound = outboundColor || (theme === 'dark' ? '#FF9F0A' : '#FF9500');
+    const resolvedInbound = inboundColor || 'var(--theme-accent)';
+    const resolvedOutbound = outboundColor || 'var(--theme-status-warning)';
 
     return (
         <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs relative overflow-hidden">

@@ -15,7 +15,7 @@ export const DashboardLeaderboard: React.FC<DashboardLeaderboardProps> = ({
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-5 sm:p-6 md:p-8 rounded-2xl shadow-xs relative overflow-hidden mt-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Trophy size={20} />
                     </div>
                     <div>
@@ -28,7 +28,7 @@ export const DashboardLeaderboard: React.FC<DashboardLeaderboardProps> = ({
                     </div>
                 </div>
                 <div className="flex items-center gap-2.5 px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] rounded-full border border-[var(--theme-border)] shrink-0 self-start sm:self-auto">
-                    <span className="w-2 h-2 rounded-full bg-[#34C759] dark:bg-[#30D158] animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success)] animate-pulse" />
                     <span className="text-xs font-medium text-[var(--theme-text-secondary)]">Live Feed Active</span>
                 </div>
             </div>
@@ -54,7 +54,7 @@ export const DashboardLeaderboard: React.FC<DashboardLeaderboardProps> = ({
                                     {badge.icon}
                                     <span>#{rank}</span>
                                 </span>
-                                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF]">
+                                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-accent)]/10/10 text-[var(--theme-accent)]">
                                     LVL {worker.level}
                                 </span>
                             </div>
@@ -90,12 +90,12 @@ export const DashboardLeaderboard: React.FC<DashboardLeaderboardProps> = ({
                                 <div className="flex justify-between items-baseline mb-1.5">
                                     <span className="text-[11px] text-[var(--theme-text-secondary)]">Weekly Target</span>
                                     <span className="text-xs font-semibold font-mono text-[var(--theme-text-primary)]">
-                                        {worker.weeklyPoints.toLocaleString()} <span className="text-[10px] text-[#0071E3] dark:text-[#2997FF]">PTS</span>
+                                        {worker.weeklyPoints.toLocaleString()} <span className="text-[10px] text-[var(--theme-accent)]">PTS</span>
                                     </span>
                                 </div>
                                 <div className="h-1.5 bg-[var(--theme-bg-card)] rounded-full overflow-hidden border border-[var(--theme-border)]">
                                     <div
-                                        className="h-full rounded-full bg-[#0071E3] dark:bg-[#2997FF] transition-all duration-500"
+                                        className="h-full rounded-full bg-[var(--theme-accent)] transition-all duration-500"
                                         style={{ width: `${Math.min(100, Math.max(0, (worker.weeklyPoints / 2000) * 100))}%` }}
                                     />
                                 </div>
@@ -109,7 +109,7 @@ export const DashboardLeaderboard: React.FC<DashboardLeaderboardProps> = ({
                                             className="w-6 h-6 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center"
                                             title={ach.name}
                                         >
-                                            <Award size={13} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                            <Award size={13} className="text-[var(--theme-accent)]" />
                                         </div>
                                     ))}
                                 </div>

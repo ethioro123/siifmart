@@ -14,7 +14,7 @@ export const DashboardStreamMonitor: React.FC<DashboardStreamMonitorProps> = ({
         <div className="lg:col-span-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Activity size={16} />
                     </div>
                     <div>
@@ -25,7 +25,7 @@ export const DashboardStreamMonitor: React.FC<DashboardStreamMonitorProps> = ({
                 <button
                     type="button"
                     onClick={handleViewAllLogs}
-                    className="px-3 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-all cursor-pointer shadow-xs active:scale-95"
+                    className="min-h-11 px-3 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors cursor-pointer shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 >
                     Full Archive
                 </button>
@@ -42,8 +42,8 @@ export const DashboardStreamMonitor: React.FC<DashboardStreamMonitorProps> = ({
                             >
                                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 shrink-0 ${
                                     isIn
-                                        ? 'bg-[#34C759]/10 text-[#34C759] dark:text-[#30D158]'
-                                        : 'bg-[#FF9500]/10 text-[#FF9500] dark:text-[#FF9F0A]'
+                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]'
+                                        : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]'
                                 }`}>
                                     {isIn ? <ArrowDownLeft size={16} /> : <ArrowUpRight size={16} />}
                                 </div>
@@ -54,8 +54,8 @@ export const DashboardStreamMonitor: React.FC<DashboardStreamMonitorProps> = ({
                                         </span>
                                         <span className={`text-xs font-semibold font-mono px-2 py-0.5 rounded-full ${
                                             isIn
-                                                ? 'bg-[#34C759]/10 text-[#34C759] dark:text-[#30D158]'
-                                                : 'bg-[#FF9500]/10 text-[#FF9500] dark:text-[#FF9F0A]'
+                                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]'
+                                                : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]'
                                         }`}>
                                             {isIn ? `+${move.quantity}` : `-${move.quantity}`}
                                         </span>
@@ -71,7 +71,7 @@ export const DashboardStreamMonitor: React.FC<DashboardStreamMonitorProps> = ({
                 </div>
             ) : (
                 <div className="py-8 text-center text-[var(--theme-text-secondary)] text-xs">
-                    <Activity size={22} className="mx-auto mb-2 opacity-40 text-[#0071E3] dark:text-[#2997FF]" />
+                    <Activity size={22} className="mx-auto mb-2 opacity-40 text-[var(--theme-accent)]" />
                     <p className="font-semibold text-[var(--theme-text-primary)]">No Active Inventory Movements</p>
                     <p className="text-[11px] mt-0.5">Physical ledger stream will record incoming & outgoing stock</p>
                 </div>

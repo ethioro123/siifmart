@@ -19,7 +19,7 @@ export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
             {/* Spatial Density Card */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs flex-1">
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="w-8 h-8 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Thermometer size={16} />
                     </div>
                     <div>
@@ -34,14 +34,14 @@ export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
                             const capacity = zone.capacity || 100;
                             const occupied = zone.occupied || 0;
                             const percent = Math.min(100, Math.max(0, (occupied / capacity) * 100));
-                            let barColor = 'bg-[#0071E3] dark:bg-[#2997FF]';
-                            let textColor = 'text-[#0071E3] dark:text-[#2997FF]';
+                            let barColor = 'bg-[var(--theme-accent)]';
+                            let textColor = 'text-[var(--theme-accent)]';
                             if (percent > 90) {
-                                barColor = 'bg-[#FF3B30] dark:bg-[#FF453A]';
-                                textColor = 'text-[#FF3B30] dark:text-[#FF453A]';
+                                barColor = 'bg-[var(--theme-status-danger)]';
+                                textColor = 'text-[var(--theme-status-danger-text)]';
                             } else if (percent > 75) {
-                                barColor = 'bg-[#FF9500] dark:bg-[#FF9F0A]';
-                                textColor = 'text-[#FF9500] dark:text-[#FF9F0A]';
+                                barColor = 'bg-[var(--theme-status-warning)]';
+                                textColor = 'text-[var(--theme-status-warning-text)]';
                             }
 
                             return (
@@ -50,7 +50,7 @@ export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
                                         <div className="flex items-center gap-2">
                                             <span className="text-xs font-medium text-[var(--theme-text-primary)]">{zone.name}</span>
                                             {zone.temperature && (
-                                                <span className="text-[10px] font-mono text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 px-1.5 py-0.2 rounded-md">
+                                                <span className="text-[10px] font-mono text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-1.5 py-0.2 rounded-md">
                                                     {zone.temperature}
                                                 </span>
                                             )}
@@ -70,7 +70,7 @@ export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
                         })
                     ) : (
                         <div className="py-8 text-center text-[var(--theme-text-secondary)] text-xs">
-                            <Thermometer size={22} className="mx-auto mb-2 opacity-40 text-[#0071E3] dark:text-[#2997FF]" />
+                            <Thermometer size={22} className="mx-auto mb-2 opacity-40 text-[var(--theme-accent)]" />
                             <p className="font-semibold text-[var(--theme-text-primary)]">No Active Storage Zones</p>
                             <p className="text-[11px] mt-0.5">Bays will appear when configured in facility settings</p>
                         </div>
@@ -99,7 +99,7 @@ export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
                             <div className="flex items-center gap-2 text-right shrink-0">
                                 <div>
                                     <span className="block text-xs font-semibold font-mono text-[var(--theme-text-primary)]">{item.moved}</span>
-                                    {item.trend && <span className="text-[10px] font-medium text-[#34C759] dark:text-[#30D158]">{item.trend}</span>}
+                                    {item.trend && <span className="text-[10px] font-medium text-[var(--theme-status-success-text)]">{item.trend}</span>}
                                 </div>
                             </div>
                         </div>

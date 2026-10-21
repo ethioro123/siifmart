@@ -28,7 +28,7 @@ type ActivePanel = 'flow' | 'storage' | 'team' | 'all';
 
 export default function WMSDashboard() {
   const navigate = useNavigate();
-  const { user, theme } = useStore();
+  const { user } = useStore();
   const { movements, addNotification, activeSite, sites, employees, settings, effectiveCountry } = useData();
   const { getLeaderboard } = useGamification();
 
@@ -61,10 +61,8 @@ export default function WMSDashboard() {
   const [activeTab, setActiveTab] = React.useState<ActivePanel>('flow');
 
   // Apple HIG Theme-aware colors for Charts
-  const chartStroke = theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
-  const chartText = theme === 'dark' ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.45)';
-  const inboundColor = theme === 'dark' ? '#2997FF' : '#0071E3';
-  const outboundColor = theme === 'dark' ? '#FF9F0A' : '#FF9500';
+  const inboundColor = 'var(--theme-accent)';
+  const outboundColor = 'var(--theme-status-warning)';
 
   // Date Filter
   const { dateRange, setDateRange, startDate, endDate } = useDateFilter('This Quarter');
@@ -249,7 +247,7 @@ export default function WMSDashboard() {
 
         {/* ===== PANEL NAVIGATION TABS (Apple Segmented Control) ===== */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 pb-1 border-b border-[var(--theme-border)]">
-          <div className="inline-flex items-center p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-2xs gap-1 overflow-x-auto no-scrollbar">
+          <div role="group" aria-label="Warehouse dashboard panels" className="inline-flex items-center p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-2xs gap-1 overflow-x-auto no-scrollbar">
             {[
               { id: 'flow', label: 'Fulfillment & Flow', icon: Activity },
               { id: 'storage', label: 'Zones & Capacity', icon: Box },
@@ -260,20 +258,21 @@ export default function WMSDashboard() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as ActivePanel)}
-                className={`px-3.5 sm:px-4 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+                aria-pressed={activeTab === tab.id}
+                className={`min-h-11 px-3.5 sm:px-4 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                   activeTab === tab.id
                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-2xs border border-[var(--theme-border)]'
                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                 }`}
               >
-                <tab.icon size={13} className={activeTab === tab.id ? 'text-[#0071E3] dark:text-[#2997FF]' : ''} />
+                <tab.icon size={13} className={activeTab === tab.id ? 'text-[var(--theme-accent)]' : ''} />
                 <span>{tab.label}</span>
               </button>
             ))}
           </div>
 
           <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-mono">
-            <span className="w-2 h-2 rounded-full bg-[#34C759] dark:bg-[#30D158] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success)] animate-pulse" />
             <span>WMS Core Synced</span>
             {effectiveWarehouse?.code && <span>• [{effectiveWarehouse.code}]</span>}
           </div>
@@ -287,9 +286,6 @@ export default function WMSDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <DashboardFlowDynamics
                 data={INBOUND_OUTBOUND_DATA}
-                chartStroke={chartStroke}
-                chartText={chartText}
-                theme={theme}
                 inboundColor={inboundColor}
                 outboundColor={outboundColor}
                 t={t}
@@ -364,15 +360,12 @@ export default function WMSDashboard() {
             {/* Section 1: Inbound & Storage Dynamics */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                <Activity size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <Activity size={14} className="text-[var(--theme-accent)]" />
                 <span>Flow Dynamics &amp; Spatial Density</span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <DashboardFlowDynamics
                   data={INBOUND_OUTBOUND_DATA}
-                  chartStroke={chartStroke}
-                  chartText={chartText}
-                  theme={theme}
                   inboundColor={inboundColor}
                   outboundColor={outboundColor}
                   t={t}
@@ -388,7 +381,7 @@ export default function WMSDashboard() {
             {/* Section 2: Queue & Job Throughput */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                <Box size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <Box size={14} className="text-[var(--theme-accent)]" />
                 <span>Operational Queue &amp; Fulfillment Stages</span>
               </div>
               <OperationalThroughputCard
@@ -399,7 +392,7 @@ export default function WMSDashboard() {
             {/* Section 3: Facility Personnel & Scheduling */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                <Users2 size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <Users2 size={14} className="text-[var(--theme-accent)]" />
                 <span>Facility Personnel &amp; Electronic Roster</span>
               </div>
               <FacilityRosterSection
@@ -414,7 +407,7 @@ export default function WMSDashboard() {
             {/* Section 4: Live Inventory Stream & Diagnostics */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                <Cpu size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <Cpu size={14} className="text-[var(--theme-accent)]" />
                 <span>Ledger Stream Monitor &amp; Network Health</span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
