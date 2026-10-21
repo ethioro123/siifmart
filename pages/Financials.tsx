@@ -44,12 +44,18 @@ import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBan
 export default function Finance() {
    const state = useFinancialsState();
    const { user } = useStore();
-   const { isRegionalUser, effectiveCountry } = useData();
+   const { isRegionalUser, effectiveCountry, regions, activeRegionCode } = useData();
 
    const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
       'regional_manager',
-      'regional_finance_officer'
+      'regional_operations_director',
+      'regional_finance_officer',
+      'regional_finance_manager'
    ].includes(user?.role || '');
+
+   const targetRegionCode = activeRegionCode || user?.regionCode || (user as any)?.region_code;
+   const activeRegion = (regions || []).find(r => r.code === targetRegionCode);
+   const autonomousExpenseLimit = activeRegion?.autonomous_expense_limit ?? (effectiveCountry === 'KE' ? 85000 : 35000);
 
    const TabButton = ({ id, label, icon: Icon }: { id: any; label: string; icon: any }) => (
       <button
@@ -176,7 +182,7 @@ export default function Finance() {
                moduleName="Financials"
                guardrailBadge={
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[#0071E3] dark:text-[#2997FF] text-xs font-semibold">
-                     <span>Max Petty Cash Float: {effectiveCountry === 'KE' ? 'KES 25,000' : 'ETB 50,000'}</span>
+                     <span>Autonomous Expense Limit: {effectiveCountry === 'KE' ? 'KES' : 'ETB'} {Number(autonomousExpenseLimit).toLocaleString()}</span>
                   </div>
                }
             />
