@@ -21,7 +21,7 @@ import Logo from './Logo';
 import { NAVIGATION_TARGETS } from './topbar/navigationTargets';
 
 export default function TopBar() {
-   const { user, toggleSidebar, theme, toggleTheme, logout } = useStore();
+   const { user, isSidebarOpen, toggleSidebar, theme, toggleTheme, logout } = useStore();
    const { language, setLanguage } = useLanguage();
    const {
       activeSite, sites, setActiveSite, notifications, markNotificationsRead,
@@ -358,9 +358,12 @@ export default function TopBar() {
       >
          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 sm:flex-initial">
             <button
+               type="button"
                onClick={toggleSidebar}
-               className="text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] p-2 min-w-[40px] min-h-[40px] flex items-center justify-center cursor-pointer transition-colors rounded-xl active:bg-[var(--theme-bg-subtle)] flex-shrink-0"
+               className="text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] p-2 min-w-11 min-h-11 flex items-center justify-center cursor-pointer transition-colors rounded-xl active:bg-[var(--theme-bg-subtle)] flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                aria-label="Toggle sidebar"
+               aria-expanded={isSidebarOpen}
+               aria-controls="main-navigation-drawer"
             >
                <Menu size={22} className="md:w-6 md:h-6" />
             </button>
