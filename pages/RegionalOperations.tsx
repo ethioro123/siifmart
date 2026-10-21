@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useRegionalOperationsData } from '../hooks/useRegionalOperationsData';
 import { formatCompactNumber } from '../utils/formatting';
+import { getCountryProfile } from '../utils/localization';
 
 // 5 Purpose-Built Regional Desks + Leaderboard + Strategic Decks
 import { TerritoryFacilityGrid } from '../components/regional-ops/TerritoryFacilityGrid';
@@ -52,6 +53,7 @@ export default function RegionalOperations() {
   } = useRegionalOperationsData();
 
   const regionName = currentRegion?.name || regionCode || 'Territory';
+  const countryName = getCountryProfile(activeCountry).name.split(' (')[0];
 
   return (
     <div className="space-y-6 w-full max-w-full p-2 sm:p-4 md:p-6 pb-24 animate-in fade-in duration-300">
@@ -59,7 +61,7 @@ export default function RegionalOperations() {
       {isAuditInspection && (
         <div className="p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[var(--theme-status-warning)] shrink-0" />
             <span className="text-xs text-[var(--theme-text-primary)] font-medium">
               Corporate HQ Audit Lens:
             </span>
@@ -68,7 +70,7 @@ export default function RegionalOperations() {
                 value={regionCode}
                 onChange={(e) => navigate(`/regional-ops?regionCode=${e.target.value}`)}
                 aria-label="Select Region to Audit"
-                className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1 text-xs text-[var(--theme-text-primary)] font-bold focus:outline-none focus:border-[var(--theme-accent)] transition-colors cursor-pointer"
+                className="min-h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
               >
                 {sovereignRegions.map(r => (
                   <option key={r.code} value={r.code}>
@@ -83,7 +85,7 @@ export default function RegionalOperations() {
           <button
             type="button"
             onClick={() => navigate('/admin')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)] transition-all shadow-sm cursor-pointer"
+            className="min-h-11 flex items-center gap-1.5 px-3 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)] transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Return to Central Operations</span>
@@ -99,7 +101,7 @@ export default function RegionalOperations() {
               {regionCode}
             </span>
             <span className="text-xs font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
-              {activeCountry === 'KE' ? 'Kenya Sovereign' : 'Ethiopia Sovereign'}
+              {countryName}
             </span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--theme-text-primary)] mt-1.5">
@@ -110,10 +112,10 @@ export default function RegionalOperations() {
           </p>
         </div>
 
-        {/* Live Pulse Ticker */}
+        {/* Regional snapshot */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-xs">
-            <Activity className="w-4 h-4 text-emerald-500" />
+            <Activity className="w-4 h-4 text-[var(--theme-accent)]" aria-hidden="true" />
             <span className="font-mono font-bold text-[var(--theme-text-primary)]">
               {metrics.openRegistersCount} Tills Open
             </span>
@@ -129,14 +131,14 @@ export default function RegionalOperations() {
 
       {/* Autonomous Purchase Order Alert Banner */}
       {metrics.pendingAutonomousPOCount > 0 && (
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+        <div className="p-4 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-              <Truck className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
+              <Truck className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
+                <span className="text-xs font-bold text-[var(--theme-status-warning-text)] uppercase tracking-wide">
                   Autonomous Purchase Order Authorization
                 </span>
                 <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300">
@@ -151,7 +153,7 @@ export default function RegionalOperations() {
           <button
             type="button"
             onClick={() => setActiveTab('procurement')}
-            className="px-4 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm shrink-0 self-end sm:self-auto"
+            className="min-h-11 px-4 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm shrink-0 self-end sm:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
           >
             <Truck className="w-3.5 h-3.5" />
             <span>Review & Authorize ({metrics.pendingAutonomousPOCount})</span>
@@ -161,14 +163,14 @@ export default function RegionalOperations() {
 
       {/* 24-Hour Managerial Override Velocity Breach Warning Banner (SOP-MGT-020) */}
       {overrideVelocityBreaches.length > 0 && (
-        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+        <div className="p-4 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-              <ShieldAlert className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide">
+                <span className="text-xs font-bold text-[var(--theme-status-danger-text)] uppercase tracking-wide">
                   Managerial Override Velocity Breach (24h Window)
                 </span>
                 <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300">
@@ -183,7 +185,7 @@ export default function RegionalOperations() {
           <button
             type="button"
             onClick={() => setActiveTab('loss_prevention')}
-            className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm shrink-0 self-end sm:self-auto"
+            className="min-h-11 px-4 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm shrink-0 self-end sm:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
           >
             <ShieldAlert className="w-3.5 h-3.5" />
             <span>Audit LP Incidents ({overrideVelocityBreaches.length})</span>
@@ -197,7 +199,7 @@ export default function RegionalOperations() {
         <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
           <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)]">
             <span>Today Sales</span>
-            <DollarSign className="w-4 h-4 text-emerald-500" />
+            <DollarSign className="w-4 h-4 text-[var(--theme-status-success)]" aria-hidden="true" />
           </div>
           <div className="text-lg font-bold font-mono text-[var(--theme-text-primary)] mt-2">
             {formatCompactNumber(metrics.todaySalesTotal, { currency: currencySymbol })}
@@ -225,7 +227,7 @@ export default function RegionalOperations() {
         <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
           <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)]">
             <span>Regional Staff</span>
-            <Users className="w-4 h-4 text-blue-500" />
+            <Users className="w-4 h-4 text-[var(--theme-accent)]" aria-hidden="true" />
           </div>
           <div className="text-lg font-bold font-mono text-[var(--theme-text-primary)] mt-2">
             {regionalEmployees.length}
@@ -239,7 +241,7 @@ export default function RegionalOperations() {
         <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
           <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)]">
             <span>Flagged Incidents</span>
-            <ShieldAlert className="w-4 h-4 text-amber-500" />
+            <ShieldAlert className="w-4 h-4 text-[var(--theme-status-warning)]" aria-hidden="true" />
           </div>
           <div className="text-lg font-bold font-mono text-[var(--theme-text-primary)] mt-2">
             {metrics.varianceShiftCount}
@@ -262,11 +264,13 @@ export default function RegionalOperations() {
       />
 
       {/* 5 Desks Navigation Tabs */}
-      <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] overflow-x-auto custom-scrollbar">
+      <div role="group" aria-label="Regional operations desks" className="flex items-center gap-1.5 p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] overflow-x-auto custom-scrollbar">
         <button
           type="button"
+          aria-pressed={activeTab === 'facilities'}
+          aria-controls="regional-desk-panel"
           onClick={() => setActiveTab('facilities')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+          className={`min-h-11 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
             activeTab === 'facilities'
               ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -278,8 +282,10 @@ export default function RegionalOperations() {
 
         <button
           type="button"
+          aria-pressed={activeTab === 'leaderboard'}
+          aria-controls="regional-desk-panel"
           onClick={() => setActiveTab('leaderboard')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+          className={`min-h-11 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
             activeTab === 'leaderboard'
               ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -291,8 +297,10 @@ export default function RegionalOperations() {
 
         <button
           type="button"
+          aria-pressed={activeTab === 'transfers'}
+          aria-controls="regional-desk-panel"
           onClick={() => setActiveTab('transfers')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+          className={`min-h-11 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
             activeTab === 'transfers'
               ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -304,8 +312,10 @@ export default function RegionalOperations() {
 
         <button
           type="button"
+          aria-pressed={activeTab === 'procurement'}
+          aria-controls="regional-desk-panel"
           onClick={() => setActiveTab('procurement')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+          className={`min-h-11 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
             activeTab === 'procurement'
               ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -317,8 +327,10 @@ export default function RegionalOperations() {
 
         <button
           type="button"
+          aria-pressed={activeTab === 'workforce'}
+          aria-controls="regional-desk-panel"
           onClick={() => setActiveTab('workforce')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+          className={`min-h-11 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
             activeTab === 'workforce'
               ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -330,8 +342,10 @@ export default function RegionalOperations() {
 
         <button
           type="button"
+          aria-pressed={activeTab === 'loss_prevention'}
+          aria-controls="regional-desk-panel"
           onClick={() => setActiveTab('loss_prevention')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+          className={`min-h-11 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
             activeTab === 'loss_prevention'
               ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -343,7 +357,7 @@ export default function RegionalOperations() {
       </div>
 
       {/* Desk Content */}
-      <div className="pt-2">
+      <div id="regional-desk-panel" className="pt-2">
         {activeTab === 'facilities' && (
           <div className="space-y-6">
             <RegionalInventoryHealthDeck
