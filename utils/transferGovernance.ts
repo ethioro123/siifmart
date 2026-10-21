@@ -36,14 +36,19 @@ export const NON_DELETABLE_TRANSFER_STATUSES = [
 export const TRANSFER_MANAGER_ROLES = [
     'super_admin',
     'ceo',
+    'country_managing_director',
     'admin',
-    'regional_manager',
+    'head_of_operations',
+    'operations_head',
     'operations_manager',
-    'warehouse_manager',
+    'head_of_supply_chain',
+    'supply_chain_head',
     'supply_chain_manager',
+    'regional_manager',
+    'regional_logistics_lead',
+    'warehouse_manager',
     'logistics_manager',
-    'inventory_manager',
-    'regional_logistics_lead'
+    'inventory_manager'
 ] as const;
 
 /**
