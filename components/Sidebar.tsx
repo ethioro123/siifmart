@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingCart, Package, Truck, Users,
@@ -43,6 +43,17 @@ export default function Sidebar() {
   const { user, isSidebarOpen, toggleSidebar } = useStore();
   const { activeSite, sites, setActiveSite, effectiveCountry, regions, activeRegionCode, isRegionalUser } = useData();
   const navigate = useNavigate();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const wasSidebarOpenRef = useRef(false);
+
+  useEffect(() => {
+    if (isSidebarOpen) {
+      closeButtonRef.current?.focus();
+    } else if (wasSidebarOpenRef.current) {
+      document.querySelector<HTMLButtonElement>('[aria-label="Toggle sidebar"]')?.focus();
+    }
+    wasSidebarOpenRef.current = isSidebarOpen;
+  }, [isSidebarOpen]);
 
   if (!user) return null;
 
@@ -250,7 +261,7 @@ export default function Sidebar() {
       {/* Mobile Overlay - Only visible on small screens to prevent "dark thing" effect on desktop */}
       <div
         aria-hidden="true"
-        className={`fixed inset-0 bg-black/40 z-[1000] transition-opacity duration-200 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-[1000] bg-black/40 transition-opacity duration-200 md:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={toggleSidebar}
       />
 
@@ -260,10 +271,35 @@ export default function Sidebar() {
         transform transition-transform duration-200 ease-out
         flex flex-col
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      `}
+        id="main-navigation-drawer"
+        role="dialog"
+        aria-label="Navigation menu"
+        aria-modal={isSidebarOpen}
+        aria-hidden={!isSidebarOpen}
+        inert={!isSidebarOpen}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            toggleSidebar();
+            return;
+          }
+          if (event.key !== 'Tab' || !isSidebarOpen) return;
+          const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'));
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last?.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first?.focus();
+          }
+        }}
+      >
         <div className="p-4 sm:p-5 flex items-center justify-between border-b border-[var(--theme-border)]">
           <Logo size={32} />
-          <button type="button" onClick={toggleSidebar} className="min-h-11 min-w-11 flex items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label="Close navigation">
+          <button ref={closeButtonRef} type="button" onClick={toggleSidebar} className="min-h-11 min-w-11 flex items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label="Close navigation">
             <X size={24} />
           </button>
         </div>
