@@ -70,7 +70,7 @@ export default function DirectoryHeader({
       ...(restricted ? [] : [{ value: filterSite, setValue: setFilterSite, options: siteOptions, default: 'All Locations' }])
    ];
 
-   const hasActiveFilters = (Boolean(filterRegion) && filterRegion !== 'All') || filterRole !== 'All' || filterStatus !== 'All' || filterDepartment !== 'All' || filterSite !== 'All';
+   const hasActiveFilters = Boolean(searchTerm) || (Boolean(filterRegion) && filterRegion !== 'All') || filterRole !== 'All' || filterStatus !== 'All' || filterDepartment !== 'All' || filterSite !== 'All';
 
    const handleClearFilters = () => {
       if (setFilterRegion) setFilterRegion('All');
@@ -106,9 +106,10 @@ export default function DirectoryHeader({
                <button
                   type="button"
                   onClick={() => setIsTaskQueueOpen(!isTaskQueueOpen)}
-                  className={`h-9 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold transition-all border cursor-pointer active:scale-[0.98] ${
+                  aria-pressed={isTaskQueueOpen}
+                  className={`min-h-11 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      isTaskQueueOpen 
-                        ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white border-transparent shadow-[0_2px_8px_rgba(0,113,227,0.25)]' 
+                        ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] border-[var(--theme-accent)] shadow-xs'
                         : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                   }`}
                >
@@ -128,7 +129,7 @@ export default function DirectoryHeader({
                   <button
                      type="button"
                      onClick={onOpenSalaryQueue}
-                     className="h-9 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold transition-all border cursor-pointer bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-primary)] border-[var(--theme-border)] active:scale-[0.98]"
+                     className="min-h-11 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold transition-colors border bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-primary)] border-[var(--theme-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                   >
                      <ShieldCheck size={14} />
                      <span>Compensation</span>
@@ -145,7 +146,8 @@ export default function DirectoryHeader({
                   <button
                      type="button"
                      onClick={() => setLayoutMode('grid')}
-                     className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                     aria-pressed={layoutMode === 'grid'}
+                     className={`min-h-11 min-w-11 flex items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                         layoutMode === 'grid'
                            ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)]'
                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -158,7 +160,8 @@ export default function DirectoryHeader({
                   <button
                      type="button"
                      onClick={() => setLayoutMode('list')}
-                     className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                     aria-pressed={layoutMode === 'list'}
+                     className={`min-h-11 min-w-11 flex items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                         layoutMode === 'list'
                            ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)]'
                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -191,9 +194,10 @@ export default function DirectoryHeader({
                         key={pill.value}
                         type="button"
                         onClick={() => { setFilterSite(pill.value); setCurrentPage(1); }}
-                        className={`h-8 px-3 rounded-xl text-xs font-semibold transition-all border cursor-pointer active:scale-[0.98] ${
+                     aria-pressed={isActive}
+                     className={`min-h-11 px-3 rounded-xl text-xs font-semibold transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                            isActive
-                              ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white border-transparent shadow-xs'
+                              ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] border-[var(--theme-accent)] shadow-xs'
                               : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                         }`}
                      >
@@ -207,9 +211,9 @@ export default function DirectoryHeader({
          {/* Search & Filter Bar */}
          <div className="flex flex-col lg:flex-row gap-3">
             {/* Apple Search Field */}
-            <div className="flex items-center h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 focus-within:border-[var(--theme-border-strong)] focus-within:ring-2 focus-within:ring-[#0071E3]/25 transition-all flex-1">
-               <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
-                  <Search size={14} />
+            <div className="flex items-center min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 focus-within:border-[var(--theme-border-strong)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/25 transition-colors flex-1">
+               <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
+                  <Search size={14} aria-hidden="true" />
                </div>
                <input
                   type="text"
@@ -217,12 +221,13 @@ export default function DirectoryHeader({
                   className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] text-sm outline-none placeholder-[var(--theme-text-muted)] font-normal"
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                  aria-label={canViewAll ? 'Search employees by name, role, or email' : 'Search employee profile'}
                />
                {searchTerm && (
                   <button
                      type="button"
                      onClick={() => setSearchTerm('')}
-                     className="w-5 h-5 rounded-full bg-[var(--theme-border)] hover:bg-[var(--theme-border-strong)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                     className="min-h-11 min-w-11 rounded-full hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                      aria-label="Clear search"
                   >
                      <X size={12} />
@@ -239,7 +244,7 @@ export default function DirectoryHeader({
                            aria-label={filter.default}
                            value={filter.value}
                            onChange={(e) => { filter.setValue(e.target.value); setCurrentPage(1); }}
-                           className="appearance-none h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-3 pr-8 text-xs font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-panel-hover)] focus:ring-2 focus:ring-[#0071E3]/25 transition-all max-w-[150px]"
+                           className="appearance-none min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-3 pr-8 text-xs font-medium text-[var(--theme-text-primary)] focus-visible:outline-none hover:bg-[var(--theme-bg-panel-hover)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] transition-colors max-w-[150px]"
                         >
                            <option value="All" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{filter.default}</option>
                            {filter.options.map((opt: { value: string; label: string }) => (

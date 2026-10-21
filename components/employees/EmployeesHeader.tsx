@@ -49,8 +49,8 @@ export const EmployeesHeader: React.FC<EmployeesHeaderProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
          {/* Title & Icon */}
          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
-               <Briefcase size={20} />
+            <div className="w-10 h-10 rounded-2xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
+               <Briefcase size={20} aria-hidden="true" />
             </div>
             <div>
                <div className="flex items-center gap-2 flex-wrap">
@@ -58,11 +58,11 @@ export const EmployeesHeader: React.FC<EmployeesHeaderProps> = ({
                      Human Capital Management
                   </h2>
                   {isChecker ? (
-                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                         Checker • Supervisory Sign-Off Authority
                      </span>
                   ) : (
-                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
+                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                         Maker • Operational Staff
                      </span>
                   )}
@@ -76,7 +76,7 @@ export const EmployeesHeader: React.FC<EmployeesHeaderProps> = ({
          {/* Navigation Tabs, Maker-Checker Badge & Action */}
          <div className="flex items-center gap-3 flex-wrap">
             {/* Apple Segmented Control for Navigation Tabs */}
-            <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center gap-1 overflow-x-auto max-w-[60vw] select-none">
+            <div role="group" aria-label="Employee sections" className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center gap-1 overflow-x-auto max-w-full select-none">
                {[ 
                   { id: 'directory', icon: User, label: 'Directory' }, 
                   ...(canViewAll ? [
@@ -92,14 +92,15 @@ export const EmployeesHeader: React.FC<EmployeesHeaderProps> = ({
                      <button
                         key={v.id}
                         type="button"
+                        aria-pressed={isActive}
                         onClick={() => setViewMode(v.id as ViewMode)}
-                        className={`px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shrink-0 cursor-pointer whitespace-nowrap transition-all ${
+                        className={`min-h-11 px-3 rounded-lg text-xs flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                            isActive
                               ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)] font-semibold'
                               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-medium'
                         }`}
                      >
-                        <v.icon size={14} />
+                        <v.icon size={14} aria-hidden="true" />
                         <span>{v.label}</span>
                      </button>
                   );
@@ -111,15 +112,15 @@ export const EmployeesHeader: React.FC<EmployeesHeaderProps> = ({
                <button
                   type="button"
                   onClick={onOpenSignOffQueue}
-                  className="h-10 px-3.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-xs flex items-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                  className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] hover:opacity-90 border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] font-semibold text-xs flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-warning)]"
                   title="View pending supervisory sign-offs"
                >
                   <ShieldCheck size={15} />
                   <span>{pendingSignOffsCount} Pending Sign-Offs</span>
                </button>
             ) : (
-               <div className="h-10 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-xs font-medium flex items-center gap-2 select-none">
-                  <CheckCircle2 size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+               <div className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-xs font-medium flex items-center gap-2 select-none">
+                  <CheckCircle2 size={14} className="text-[var(--theme-accent)]" aria-hidden="true" />
                   <span>{pendingSignOffsCount} In Review</span>
                </div>
             )}
@@ -130,14 +131,14 @@ export const EmployeesHeader: React.FC<EmployeesHeaderProps> = ({
                   <button
                      type="button"
                      onClick={onOpenWizard}
-                     className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 cursor-pointer shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all"
+                     className="min-h-11 px-4 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                   >
                      <UserPlus size={15} />
                      <span>Onboard Talent</span>
                   </button>
                </Protected>
             ) : (
-               <div className="h-10 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-xs font-medium flex items-center gap-1.5 select-none">
+               <div className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-xs font-medium flex items-center gap-1.5 select-none">
                   <Lock size={13} />
                   <span>{canViewAll ? 'Hiring Restricted' : 'My HR Profile'}</span>
                </div>

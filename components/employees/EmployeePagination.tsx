@@ -24,7 +24,7 @@ export default function EmployeePagination({
                type="button"
                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                disabled={currentPage === 1}
-               className="h-8 px-2.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1 text-xs font-medium"
+               className="min-h-11 px-2.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] flex items-center gap-1 text-xs font-medium"
                title="Previous Page"
                aria-label="Previous Page"
             >
@@ -47,7 +47,9 @@ export default function EmployeePagination({
                         key={p}
                         type="button"
                         onClick={() => setCurrentPage(p)}
-                        className={`w-8 h-8 rounded-xl text-xs transition-all font-mono tabular-nums cursor-pointer active:scale-[0.98] ${
+                        aria-label={`Page ${p}`}
+                        aria-current={isActive ? 'page' : undefined}
+                        className={`min-w-11 min-h-11 rounded-xl text-xs transition-colors font-mono tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                            isActive
                               ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold shadow-xs'
                               : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium'
@@ -63,7 +65,7 @@ export default function EmployeePagination({
                type="button"
                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                disabled={currentPage === totalPages}
-               className="h-8 px-2.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1 text-xs font-medium"
+               className="min-h-11 px-2.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] flex items-center gap-1 text-xs font-medium"
                title="Next Page"
                aria-label="Next Page"
             >
