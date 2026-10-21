@@ -55,9 +55,13 @@ export function useFinanceSettingsMutation() {
   const settingsMutation = useMutation<void, Error, FinanceSettingsPayload>({
     mutationFn: async ({ section, targetCountry = 'ET', data }) => {
       // ── 1. ROLE GUARD (RULES.md §1 Zero-Trust & AGENTS.md §1) ──
-      const isAuthorized = ['super_admin', 'CEO', 'finance_manager'].includes(user?.role || '');
+      const isAuthorized = [
+        'super_admin', 'CEO', 'ceo',
+        'country_managing_director', 'admin',
+        'head_of_finance', 'finance_head', 'finance_manager'
+      ].includes(user?.role || '');
       if (!isAuthorized) {
-        throw new Error('Unauthorized: Modifying financial and tax settings requires CEO, Super Admin, or Finance Manager credentials.');
+        throw new Error('Unauthorized: Modifying financial and tax settings requires CEO, Managing Director, or Head of Finance credentials.');
       }
 
       // ── 2. ZOD VALIDATION ──
@@ -163,7 +167,11 @@ export function useFinanceSettingsMutation() {
 
   const assignSiteMutation = useMutation<void, Error, AssignSiteJurisdictionPayload>({
     mutationFn: async ({ siteId, taxJurisdictionId }) => {
-      const isAuthorized = ['super_admin', 'CEO', 'finance_manager'].includes(user?.role || '');
+      const isAuthorized = [
+        'super_admin', 'CEO', 'ceo',
+        'country_managing_director', 'admin',
+        'head_of_finance', 'finance_head', 'finance_manager'
+      ].includes(user?.role || '');
       if (!isAuthorized) {
         throw new Error('Unauthorized: Assigning sites to tax jurisdictions requires managerial credentials.');
       }

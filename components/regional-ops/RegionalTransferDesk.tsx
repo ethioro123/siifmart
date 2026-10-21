@@ -33,6 +33,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [dispatchModalTransfer, setDispatchModalTransfer] = useState<TransferRecord | null>(null);
+  const isHQUser = Boolean(user?.role && ['super_admin', 'ceo', 'country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'logistics_manager'].includes(user.role));
 
   // Load regional transfers on mount
   React.useEffect(() => {
@@ -60,7 +61,6 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
     const target = transfers.find(t => t.id === transferId);
     const isInterRegional = Boolean(target?.isInterRegion || target?.is_inter_region ||
       (target?.sourceRegionCode && target?.destRegionCode && target.sourceRegionCode !== target.destRegionCode));
-    const isHQUser = Boolean(user?.role && ['super_admin', 'ceo', 'country_managing_director', 'admin', 'head_of_operations', 'operations_manager', 'head_of_supply_chain', 'supply_chain_manager', 'logistics_manager'].includes(user.role));
 
     if (isInterRegional && !isHQUser) {
       addNotification?.('alert', 'Inter-regional transfers cross territory borders and require Corporate HQ / Logistics sign-off.');
@@ -349,7 +349,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                   {transfer.status === 'Requested' && (() => {
                     const isInter = Boolean(transfer.isInterRegion || transfer.is_inter_region ||
                       (transfer.sourceRegionCode && transfer.destRegionCode && transfer.sourceRegionCode !== transfer.destRegionCode));
-                    const isHQ = Boolean(user?.role && ['super_admin', 'ceo', 'operations_manager', 'logistics_manager'].includes(user.role));
+                    const isHQ = isHQUser;
 
                     if (isInter && !isHQ) {
                       return (

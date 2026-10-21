@@ -151,7 +151,17 @@ export default function Sidebar() {
       { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_hr', 'hr_head', 'hr_manager', 'hr', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'hr_generalist'] },
 
       // SETTINGS
-      { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_it', 'it_head', 'it_support', 'head_of_audit', 'audit_head', 'auditor', 'security_manager', 'regional_manager', 'regional_security_supervisor', 'head_of_operations', 'operations_head', 'operations_manager'] },
+      { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: [
+        'super_admin', 'country_managing_director', 'admin',
+        'head_of_operations', 'operations_head', 'operations_manager',
+        'head_of_finance', 'finance_head', 'finance_manager',
+        'head_of_hr', 'hr_head', 'hr_manager',
+        'head_of_procurement', 'procurement_head', 'procurement_manager',
+        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+        'head_of_it', 'it_head', 'it_support',
+        'head_of_audit', 'audit_head', 'auditor',
+        'security_manager', 'regional_manager', 'regional_security_supervisor'
+      ] },
     ];
 
     // Filter by role AND site-type context
@@ -189,7 +199,7 @@ export default function Sidebar() {
         const isMerchandisingSpecialist = item.section === 'pricing' && ['head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandising_specialist', 'regional_merchandising_lead', 'merchandiser', 'regional_procurement_lead', 'regional_manager'].includes(userRole);
         const isFinanceSpecialist = item.section === 'finance' && ['head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer', 'regional_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'head_of_audit', 'audit_head', 'auditor'].includes(userRole);
         const isSalesSpecialist = item.section === 'sales' && ['regional_finance_officer', 'regional_security_supervisor', 'regional_manager', 'head_of_audit', 'audit_head', 'auditor', 'store_operations_auditor'].includes(userRole);
-        const isSettingsSpecialist = item.section === 'settings' && ['regional_security_supervisor', 'regional_manager', 'security_manager', 'head_of_it', 'it_head', 'it_support', 'head_of_audit', 'audit_head', 'auditor'].includes(userRole);
+        const isSettingsSpecialist = item.section === 'settings' && ['regional_security_supervisor', 'regional_manager', 'security_manager', 'head_of_it', 'it_head', 'it_support', 'head_of_audit', 'audit_head', 'auditor', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_hr', 'hr_head', 'head_of_procurement', 'procurement_head', 'head_of_supply_chain', 'supply_chain_head'].includes(userRole);
         const isCustomersSpecialist = item.section === 'customers' && ['regional_procurement_lead', 'regional_manager', 'cs_manager'].includes(userRole);
         const isPosCommandSpecialist = item.to === '/pos-dashboard' && ['regional_finance_officer', 'regional_security_supervisor', 'regional_manager', 'store_operations_auditor'].includes(userRole);
 
@@ -225,7 +235,7 @@ export default function Sidebar() {
         const isFinanceSpecialist = item.section === 'finance' && ['head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer', 'regional_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'head_of_audit', 'audit_head', 'auditor'].includes(userRole);
         const isProcurementSpecialist = item.section === 'procurement' && ['head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'regional_procurement_lead', 'regional_logistics_lead', 'regional_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
         const isWarehouseSpecialist = item.section === 'warehouse' && ['regional_logistics_lead', 'regional_manager', 'head_of_supply_chain', 'supply_chain_manager', 'logistics_manager'].includes(userRole);
-        const isSettingsSpecialist = item.section === 'settings' && ['regional_security_supervisor', 'regional_manager', 'security_manager', 'head_of_it', 'it_head', 'it_support', 'head_of_audit', 'audit_head', 'auditor'].includes(userRole);
+        const isSettingsSpecialist = item.section === 'settings' && ['regional_security_supervisor', 'regional_manager', 'security_manager', 'head_of_it', 'it_head', 'it_support', 'head_of_audit', 'audit_head', 'auditor', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_hr', 'hr_head', 'head_of_procurement', 'procurement_head', 'head_of_supply_chain', 'supply_chain_head'].includes(userRole);
 
         if (['warehouse', 'inventory', 'procurement', 'pricing', 'finance', 'settings'].includes(item.section)) {
           if (!isMerchandisingSpecialist && !isFinanceSpecialist && !isProcurementSpecialist && !isWarehouseSpecialist && !isSettingsSpecialist && !isRegionalInventoryOrLogistics && !isExecutive) {

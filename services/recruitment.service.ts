@@ -311,7 +311,8 @@ export const recruitmentService = {
         offeredSalary: number,
         notes?: string
     ): Promise<boolean> {
-        const isFinance = ['finance_manager', 'regional_finance_officer', 'super_admin', 'admin'].includes(approver.role);
+        const normRole = (approver.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
+        const isFinance = ['head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer', 'country_managing_director', 'admin', 'super_admin', 'ceo'].includes(normRole);
         if (!isFinance) {
             throw new Error('4-Eyes Violation: Only Finance leadership can authorize salary and compensation bands.');
         }

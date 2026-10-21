@@ -18,7 +18,9 @@ const SPECIALIST_TAB_ACCESS: Record<string, OpTab[]> = {
     dispatcher: ['DOCKS', 'DRIVER', 'ASSIGN'],
     fleet_maintenance_supervisor: ['DOCKS', 'DRIVER', 'ASSIGN'],
     regional_logistics_lead: ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER'],
-    supply_chain_manager: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH'],
+    head_of_supply_chain: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'ASSIGN', 'LABELS'],
+    supply_chain_head: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'ASSIGN', 'LABELS'],
+    supply_chain_manager: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'ASSIGN', 'LABELS'],
 };
 
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
@@ -39,8 +41,16 @@ const TAB_PERMISSIONS: Record<OpTab, string[]> = {
 
 export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
     const normalizedRole = role?.trim().toLowerCase() ?? '';
-    // Global CEO has complete 100% operational access to all fulfillment tabs
-    if (normalizedRole === 'super_admin' || normalizedRole === 'ceo') {
+    // Global CEO, Country Managing Director, and Head of Operations have complete access to all fulfillment tabs
+    if (
+        normalizedRole === 'super_admin' ||
+        normalizedRole === 'ceo' ||
+        normalizedRole === 'country_managing_director' ||
+        normalizedRole === 'admin' ||
+        normalizedRole === 'head_of_operations' ||
+        normalizedRole === 'operations_head' ||
+        normalizedRole === 'operations_manager'
+    ) {
         return Object.keys(TAB_PERMISSIONS) as OpTab[];
     }
 
@@ -73,6 +83,13 @@ export const ROLE_DEFAULT_TABS: Record<string, OpTab> = {
     logistics_manager: 'DOCKS',
     wms: 'RECEIVE',
     manager: 'DOCKS',
+    country_managing_director: 'DOCKS',
+    admin: 'DOCKS',
+    head_of_operations: 'DOCKS',
+    operations_head: 'DOCKS',
+    operations_manager: 'DOCKS',
+    head_of_supply_chain: 'DOCKS',
+    supply_chain_head: 'DOCKS',
 };
 
 export function getDefaultFulfillmentTab(role?: string | null): OpTab {

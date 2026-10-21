@@ -124,42 +124,42 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     purchase_order: {
         name: 'Purchase Order Approval',
         levels: [
-            { roles: ['procurement_manager', 'regional_procurement_lead'], threshold: 10000 },
-            { roles: ['procurement_manager', 'regional_procurement_lead', 'finance_manager', 'regional_finance_officer'], threshold: 50000 },
-            { roles: ['procurement_manager', 'finance_manager', 'regional_manager', 'operations_manager', 'admin', 'super_admin'], threshold: Infinity }
+            { roles: ['head_of_procurement', 'procurement_head', 'procurement_manager', 'buyer', 'regional_procurement_lead'], threshold: 10000 },
+            { roles: ['head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead', 'head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer'], threshold: 50000 },
+            { roles: ['head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     },
     expense: {
         name: 'Expense Approval',
         levels: [
-            { roles: ['store_manager', 'warehouse_manager', 'regional_manager', 'operations_manager', 'regional_finance_officer'], threshold: 1000 },
-            { roles: ['finance_manager', 'regional_finance_officer'], threshold: 5000 },
-            { roles: ['finance_manager', 'admin', 'super_admin'], threshold: Infinity }
+            { roles: ['store_manager', 'warehouse_manager', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_finance_officer', 'head_of_finance', 'finance_head', 'finance_manager'], threshold: 1000 },
+            { roles: ['head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 5000 },
+            { roles: ['head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     },
     employee_hire: {
         name: 'Employee Hiring Approval',
-        levels: [{ roles: ['hr', 'hr_manager', 'regional_hr_officer', 'regional_manager', 'operations_manager', 'admin', 'super_admin'] }]
+        levels: [{ roles: ['head_of_hr', 'hr_head', 'hr_manager', 'hr', 'regional_hr_officer', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'] }]
     },
     inventory_adjustment: {
         name: 'Inventory Adjustment Approval',
         levels: [
-            { roles: ['warehouse_manager'], threshold: 100 },
-            { roles: ['warehouse_manager', 'regional_manager', 'operations_manager', 'admin', 'super_admin'], threshold: Infinity }
+            { roles: ['warehouse_manager', 'inventory_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 100 },
+            { roles: ['warehouse_manager', 'inventory_manager', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     },
     price_change: {
         name: 'Price Change Approval',
         levels: [
-            { roles: ['store_manager', 'regional_manager'], threshold: 10 },
-            { roles: ['regional_manager', 'admin', 'super_admin'], threshold: Infinity }
+            { roles: ['store_manager', 'regional_merchandising_lead', 'regional_manager', 'head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 10 },
+            { roles: ['regional_merchandising_lead', 'regional_manager', 'head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     },
     refund: {
         name: 'Refund Approval',
         levels: [
-            { roles: ['store_manager', 'cs_manager'], threshold: 500 },
-            { roles: ['store_manager', 'cs_manager', 'regional_manager', 'operations_manager', 'admin', 'super_admin'], threshold: Infinity }
+            { roles: ['store_manager', 'cs_manager', 'assistant_manager', 'shift_lead'], threshold: 500 },
+            { roles: ['store_manager', 'cs_manager', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_finance', 'finance_head', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     }
 };
@@ -223,6 +223,12 @@ export function canApprove(
     amount?: number,
     customThreshold?: number
 ): boolean {
+    const norm = ((userRole as string) || '').toLowerCase().trim().replace(/[\s-]/g, '_');
+    // Global CEO and Country Managing Director can sign off any workflow within policy
+    if (norm === 'super_admin' || norm === 'ceo' || norm === 'country_managing_director' || norm === 'admin') {
+        return true;
+    }
+
     // Dynamic budget threshold support: if caller provides custom threshold from region/site budget settings,
     // and amount is within that threshold, regional approver can approve directly
     if (customThreshold !== undefined && amount !== undefined && amount <= customThreshold) {
@@ -231,7 +237,7 @@ export function canApprove(
         }
     }
     const requiredApprovers = getRequiredApprovers(workflowName, amount);
-    return requiredApprovers.includes(userRole);
+    return requiredApprovers.some(r => ((r as string) || '').toLowerCase().trim().replace(/[\s-]/g, '_') === norm);
 }
 
 export function getPermissionDescription(permission: Permission): string {

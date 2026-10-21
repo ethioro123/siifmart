@@ -37,40 +37,40 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     head_of_finance: [
-        'dashboard', 'finance', 'sales', 'pricing', 'profile'
+        'dashboard', 'finance', 'sales', 'pricing', 'settings', 'profile'
     ],
     finance_head: [
-        'dashboard', 'finance', 'sales', 'pricing', 'profile'
+        'dashboard', 'finance', 'sales', 'pricing', 'settings', 'profile'
     ],
     finance_manager: [
-        'dashboard', 'finance', 'sales', 'pricing', 'profile'
+        'dashboard', 'finance', 'sales', 'pricing', 'settings', 'profile'
     ],
     head_of_hr: [
-        'dashboard', 'employees', 'finance', 'profile'
+        'dashboard', 'employees', 'finance', 'settings', 'profile'
     ],
     hr_head: [
-        'dashboard', 'employees', 'finance', 'profile'
+        'dashboard', 'employees', 'finance', 'settings', 'profile'
     ],
     hr_manager: [
-        'dashboard', 'employees', 'finance', 'profile'
+        'dashboard', 'employees', 'finance', 'settings', 'profile'
     ],
     head_of_procurement: [
-        'dashboard', 'procurement', 'warehouse', 'profile'
+        'dashboard', 'procurement', 'warehouse', 'settings', 'profile'
     ],
     procurement_head: [
-        'dashboard', 'procurement', 'warehouse', 'profile'
+        'dashboard', 'procurement', 'warehouse', 'settings', 'profile'
     ],
     procurement_manager: [
-        'dashboard', 'procurement', 'warehouse', 'profile'
+        'dashboard', 'procurement', 'warehouse', 'settings', 'profile'
     ],
     head_of_supply_chain: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'settings', 'profile'
     ],
     supply_chain_head: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'settings', 'profile'
     ],
     supply_chain_manager: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'settings', 'profile'
     ],
     head_of_merchandising: [
         'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'

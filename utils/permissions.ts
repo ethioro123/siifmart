@@ -113,7 +113,16 @@ export const PERMISSIONS = {
     MANAGE_REPLENISHMENT: ['super_admin', 'regional_manager', 'regional_logistics_lead', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'replenishment_planner', 'stock_clerk'],
 
     // Settings
-    ACCESS_SETTINGS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'it_support', 'head_of_it', 'it_head', 'security_manager', 'auditor', 'head_of_audit', 'audit_head', 'regional_security_supervisor'],
+    ACCESS_SETTINGS: [
+        'super_admin', 'admin', 'country_managing_director', 'regional_manager',
+        'operations_manager', 'head_of_operations', 'operations_head',
+        'head_of_finance', 'finance_head', 'finance_manager',
+        'head_of_hr', 'hr_head', 'hr_manager', 'hr',
+        'head_of_procurement', 'procurement_head', 'procurement_manager',
+        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+        'it_support', 'head_of_it', 'it_head', 'security_manager',
+        'auditor', 'head_of_audit', 'audit_head', 'regional_security_supervisor'
+    ],
     EDIT_SYSTEM_SETTINGS: ['super_admin', 'admin', 'country_managing_director', 'it_support', 'head_of_it', 'it_head'],
     EDIT_OPERATIONAL_SETTINGS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head'],
     EDIT_HR_SETTINGS: ['super_admin', 'admin', 'country_managing_director', 'hr', 'hr_manager', 'head_of_hr', 'hr_head'],

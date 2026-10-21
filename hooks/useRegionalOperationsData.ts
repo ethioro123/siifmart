@@ -129,7 +129,10 @@ export function useRegionalOperationsData(): RegionalOperationsData {
   const isHQExecutive = useMemo(() => {
     const role = (user?.role || '').toLowerCase();
     const scope = user?.scopeLevel || user?.scope_level || 'HQ';
-    return scope === 'HQ' && ['super_admin', 'ceo', 'operations_manager', 'admin'].includes(role);
+    return scope === 'HQ' && [
+      'super_admin', 'ceo', 'country_managing_director', 'admin',
+      'head_of_operations', 'operations_head', 'operations_manager'
+    ].includes(role);
   }, [user]);
 
   const effectiveRegionCode = useMemo(() => {
