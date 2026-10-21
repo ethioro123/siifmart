@@ -54,9 +54,9 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
          {/* Top Row: Search & Date Range */}
          <div className="flex flex-col md:flex-row gap-3 sm:gap-4">
             {/* Apple Search Field */}
-            <div className="flex-1 relative flex items-center h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 focus-within:border-[var(--theme-border-strong)] focus-within:ring-2 focus-within:ring-[#0071E3]/25 transition-all">
-               <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
-                  <Search size={14} />
+            <div className="flex-1 relative flex items-center min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 focus-within:border-[var(--theme-border-strong)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/25 transition-colors">
+               <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
+                  <Search size={14} aria-hidden="true" />
                </div>
                <input
                   type="text"
@@ -70,7 +70,7 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
                   <button
                      type="button"
                      onClick={() => handleFilterChange(setSearchTerm, '')}
-                     className="w-5 h-5 rounded-full bg-[var(--theme-border)] hover:bg-[var(--theme-border-strong)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                     className="min-h-11 min-w-11 rounded-full hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                      aria-label="Clear search"
                   >
                      <X size={12} />
@@ -79,7 +79,7 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
             </div>
 
             {/* Date Range Picker */}
-            <div className="flex items-center h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 gap-2 text-[var(--theme-text-primary)] shrink-0">
+            <div className="flex items-center min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 gap-2 text-[var(--theme-text-primary)] shrink-0">
                <div className="w-7 h-7 rounded-lg bg-neutral-500/10 text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0">
                   <Calendar size={14} />
                </div>
@@ -104,7 +104,7 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
          {/* Bottom Row: Segmented Status Controls + Method & Store Dropdowns */}
          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-[var(--theme-border-subtle)]">
             {/* Apple Segmented Control: Status */}
-            <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl inline-flex items-center gap-1 select-none overflow-x-auto max-w-full">
+            <div role="group" aria-label="Filter by transaction status" className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl inline-flex items-center gap-1 select-none overflow-x-auto max-w-full">
                {(['All', 'Completed', 'Pending', 'Refunded'] as const).map((status) => {
                   const isActive = statusFilter === status;
                   return (
@@ -112,7 +112,8 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
                         key={status}
                         type="button"
                         onClick={() => handleFilterChange(setStatusFilter, status)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+                        aria-pressed={isActive}
+                        className={`min-h-11 px-3 rounded-lg text-xs font-medium transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                            isActive
                               ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)] font-semibold'
                               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -129,7 +130,7 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
                {/* Payment Method Select */}
                <div className="relative">
                   <select
-                     className="appearance-none h-9 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 text-xs font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-panel-hover)] focus:ring-2 focus:ring-[#0071E3]/25 transition-all"
+                     className="appearance-none min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 text-xs font-medium text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] hover:bg-[var(--theme-bg-panel-hover)] transition-colors"
                      value={methodFilter}
                      onChange={(e) => handleFilterChange(setMethodFilter, e.target.value)}
                      aria-label="Filter by Payment Method"
@@ -147,7 +148,7 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
                {!restricted && (
                   <div className="relative">
                      <select
-                        className="appearance-none h-9 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 text-xs font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-panel-hover)] focus:ring-2 focus:ring-[#0071E3]/25 transition-all"
+                        className="appearance-none min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 text-xs font-medium text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] hover:bg-[var(--theme-bg-panel-hover)] transition-colors"
                         value={storeFilter}
                         onChange={(e) => handleFilterChange(setStoreFilter, e.target.value)}
                         aria-label="Filter by Store"
@@ -169,7 +170,7 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
                   <button
                      type="button"
                      onClick={handleResetFilters}
-                     className="h-9 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
+                     className="min-h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                      title="Reset all filters"
                   >
                      <RotateCcw size={12} />

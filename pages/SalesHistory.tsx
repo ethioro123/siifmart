@@ -154,7 +154,7 @@ export default function SalesHistory() {
          setSales(filtered.slice(offset, offset + ITEMS_PER_PAGE));
 
          if (navigator.onLine) {
-            addNotification('info', 'Loaded from local cache (Network Error)');
+            addNotification('info', 'Live sales history was unavailable; showing locally available sales.');
          }
       } finally {
          setLoading(false);
@@ -247,7 +247,7 @@ export default function SalesHistory() {
          {/* Apple Section Header */}
          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+               <div className="w-10 h-10 rounded-2xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                   <Receipt size={20} />
                </div>
                <div>
@@ -262,14 +262,14 @@ export default function SalesHistory() {
 
             <div className="flex items-center gap-2.5">
                {/* Apple Sync Status Pill */}
-               <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                  posSyncStatus === 'offline' 
-                     ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' 
-                     : posSyncStatus === 'syncing' 
-                        ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20' 
-                        : (posPendingSyncCount || 0) > 0 
-                           ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' 
-                           : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+               <div role="status" aria-live="polite" className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  posSyncStatus === 'offline'
+                     ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                     : posSyncStatus === 'syncing'
+                        ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
+                        : (posPendingSyncCount || 0) > 0
+                           ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
+                           : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                   }`}>
                   {posSyncStatus === 'syncing' ? (
                      <RefreshCw size={13} className="animate-spin" />
@@ -278,13 +278,13 @@ export default function SalesHistory() {
                   ) : (posPendingSyncCount || 0) > 0 ? (
                      <CloudOff size={13} />
                   ) : (
-                     <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                     <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success)] inline-block" />
                   )}
                   <span>
                      {posSyncStatus === 'offline' ? 'Offline Mode' :
                         posSyncStatus === 'syncing' ? 'Syncing...' :
                            (posPendingSyncCount || 0) > 0 ? `Pending Sync (${posPendingSyncCount})` :
-                              'Telemetry Active'}
+                              'No pending changes'}
                   </span>
                </div>
 
@@ -293,7 +293,7 @@ export default function SalesHistory() {
                   <button
                      type="button"
                      onClick={handleExportCSV}
-                     className="h-10 px-4 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] text-xs sm:text-sm font-semibold transition-all active:scale-[0.98] flex items-center gap-2 cursor-pointer shadow-xs"
+                     className="min-h-11 px-4 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] text-xs sm:text-sm font-semibold transition-colors flex items-center gap-2 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                   >
                      <Download size={14} />
                      <span>Export CSV</span>
@@ -323,11 +323,12 @@ export default function SalesHistory() {
          />
 
          {/* --- DATA GRID --- */}
-         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl isolate overflow-hidden shadow-[var(--shadow-sm)] flex flex-col min-h-[500px]">
+         <div aria-busy={loading} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl isolate overflow-hidden shadow-[var(--shadow-sm)] flex flex-col min-h-[500px]">
             <div className="overflow-x-auto flex-1 relative">
                {loading && (
-                  <div className="absolute inset-0 bg-[var(--theme-bg-card)]/60 backdrop-blur-xs z-20 flex items-center justify-center">
-                     <Loader className="w-7 h-7 text-[var(--theme-text-primary)] animate-spin" />
+                  <div role="status" className="absolute inset-0 bg-[var(--theme-bg-card)]/85 z-20 flex items-center justify-center gap-2">
+                     <Loader className="w-7 h-7 text-[var(--theme-accent)] animate-spin" aria-hidden="true" />
+                     <span className="sr-only">Loading sales records</span>
                   </div>
                )}
                <table className="w-full text-left">
@@ -341,15 +342,18 @@ export default function SalesHistory() {
                         <th className="py-3.5 px-4 text-right">Items</th>
                         <th className="py-3.5 px-4 text-right">Total</th>
                         <th className="py-3.5 px-4 text-center">Status</th>
-                        <th className="py-3.5 px-4 w-10"></th>
+                        <th aria-label="Open transaction details" className="py-3.5 px-4 w-10"></th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--theme-border)]">
                      {sales.map((sale) => (
                         <tr
                            key={sale.id}
+                           tabIndex={0}
+                           aria-label={`Sale ${sale.receiptNumber || sale.id}, ${sale.status}, ${currencySymbol} ${sale.total.toLocaleString()}. Open details.`}
                            onClick={() => handleOpenSaleDetail(sale)}
-                           className="hover:bg-[var(--theme-table-row-hover)] transition-colors cursor-pointer group text-[var(--theme-text-primary)]"
+                           onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleOpenSaleDetail(sale); } }}
+                           className="hover:bg-[var(--theme-table-row-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--theme-accent)] transition-colors cursor-pointer group text-[var(--theme-text-primary)]"
                         >
                            <td className="py-3.5 px-4">
                               <div className="flex items-center gap-2.5">
@@ -426,10 +430,10 @@ export default function SalesHistory() {
                                     <Receipt size={22} />
                                  </div>
                                  <p className="text-sm font-semibold text-[var(--theme-text-primary)]">
-                                    No Transactions Found
+                                    No sales match this view
                                  </p>
                                  <p className="text-xs text-[var(--theme-text-secondary)] mt-1 max-w-sm">
-                                    No sales records matched your search query or filters. Try adjusting the date range or filters.
+                                    Try changing the date range, search, or filters to see other transactions.
                                  </p>
                               </div>
                            </td>
@@ -449,7 +453,7 @@ export default function SalesHistory() {
                      type="button"
                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                      disabled={currentPage === 1 || loading}
-                     className="h-8 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] disabled:opacity-30 disabled:pointer-events-none text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1 transition-all active:scale-[0.98] cursor-pointer"
+                     className="min-h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] disabled:opacity-30 disabled:pointer-events-none text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                      aria-label="Previous Page"
                   >
                      <ChevronLeft size={14} />
@@ -462,7 +466,7 @@ export default function SalesHistory() {
                      type="button"
                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                      disabled={currentPage >= totalPages || totalPages === 0 || loading}
-                     className="h-8 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] disabled:opacity-30 disabled:pointer-events-none text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1 transition-all active:scale-[0.98] cursor-pointer"
+                     className="min-h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] disabled:opacity-30 disabled:pointer-events-none text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                      aria-label="Next Page"
                   >
                      <span className="hidden sm:inline">Next</span>
