@@ -1,8 +1,8 @@
 import { POItem, Product } from '../../types';
 import { getSellUnit } from '../../utils/units';
 import { formatProductDisplayName } from './utils';
-import { computeSellUnitsPerOrderUnit, computeCostPerSellUnit } from './createPOHelpers';
-import { getCountrySkuPrefix, type Country } from '../../utils/localization';
+import { generateSequentialSKU } from '../../utils/skuGenerator';
+import type { Country } from '../../utils/localization';
 
 interface BuildPOItemParams {
     products: Product[];
@@ -109,7 +109,6 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
     let sku = '';
     const cat = selectedMainCategory || 'General';
     let image = customItemImage;
-    let barcode = '';
 
     if (productType === 'catalog') {
         prod = products.find(p => p.id === currentProductToAdd);
@@ -117,36 +116,23 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         name = formatProductDisplayName(prod);
         sku = prod.sku;
         image = prod.image;
-        barcode = prod.barcode || '';
     } else {
         if (customItemBrand && !name.toLowerCase().startsWith(customItemBrand.toLowerCase())) {
             name = `${customItemBrand.trim()} ${name}`;
         }
-        const skuPrefix = getCountrySkuPrefix(country);
         if (editingItem && editingItem.sku && !editingItem.sku.startsWith('CUSTOM-')) {
             sku = editingItem.sku;
-            barcode = editingItem.barcode || sku;
         } else {
-            try {
-                const { generateUniqueSKU } = await import('../../utils/skuGenerator');
-                sku = await generateUniqueSKU(cat, undefined, skuPrefix);
-            } catch {
-                const prefix = cat.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X');
-                const randomDigits = Math.floor(10000 + Math.random() * 90000);
-                sku = `${skuPrefix}-${prefix}-${randomDigits}`;
-            }
-            barcode = sku;
+            sku = await generateSequentialSKU(cat, products, country);
         }
     }
 
     const su = getSellUnit(customItemUnit);
     const derivedPackQty = parseInt(customAttributes.packaging.packQty) || 1;
     const isCaseOrPack = caseSize >= 1 || derivedPackQty > 1;
-    const sellUnitsPerOrder = computeSellUnitsPerOrderUnit({
-        packQuantity: derivedPackQty,
-        customAttributes,
-    });
-    const derivedCostPerSellUnit = computeCostPerSellUnit(currentCost, sellUnitsPerOrder);
+    const resolvedPackageType = isCaseOrPack
+        ? pkgType || (caseSize >= 1 ? 'Case' : 'Pack')
+        : pkgType || su.code;
 
     const itemData: POItem = {
         productId: prod ? prod.id : editingItem?.productId || `CUSTOM-${Date.now()}`,
@@ -157,17 +143,14 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         unitCost: currentCost,
         totalCost: currentQty * currentCost,
         retailPrice: currentRetailPrice,
-        costPerSellUnit: derivedCostPerSellUnit,
         image,
         brand: customItemBrand,
         size: customItemSize,
         unit: customItemUnit,
         packQuantity: derivedPackQty,
+        packageType: resolvedPackageType,
         caseSize: caseSize > 0 ? caseSize : undefined,
-        orderUnit: isCaseOrPack ? pkgType || (caseSize >= 1 ? 'Case' : 'Pack') : su.unitLabel,
-        barcode,
         identityType: productType === 'catalog' ? 'known' : 'new',
-        isCustom: productType === 'new',
         description: customAttributes.descriptive.usage,
         minStock: 10,
         maxStock: 100,
