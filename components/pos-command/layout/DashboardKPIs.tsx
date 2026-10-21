@@ -36,17 +36,31 @@ export const DashboardKPIs: React.FC = () => {
         'auditor'
     ].includes(user?.role?.toLowerCase() || '');
 
-    // Targets scaled dynamically to the selected time filter
+    // Compare period revenue with a target that covers the same calendar period.
     const rangeStr = String(dateRange);
-    const multiplier = rangeStr.includes('Quarter') ? 90 : rangeStr.includes('Month') ? 30 : rangeStr.includes('Year') ? 365 : 1;
+    const now = new Date();
+    let targetDays: number | null = null;
+    if (rangeStr === 'This Month') {
+        targetDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    } else if (rangeStr === 'Last Month') {
+        targetDays = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+    } else if (rangeStr === 'This Quarter') {
+        const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
+        const quarterStart = new Date(now.getFullYear(), quarterMonth, 1);
+        const quarterEnd = new Date(now.getFullYear(), quarterMonth + 3, 0);
+        targetDays = Math.round((quarterEnd.getTime() - quarterStart.getTime()) / 86400000) + 1;
+    } else if (rangeStr === 'This Year' || rangeStr === 'Last Year') {
+        const year = now.getFullYear() - (rangeStr === 'Last Year' ? 1 : 0);
+        targetDays = (new Date(year + 1, 0, 1).getTime() - new Date(year, 0, 1).getTime()) / 86400000;
+    }
     const baseRevenueTarget = settings?.posDailyRevenueTarget || 50000;
     const baseTxTarget = settings?.posDailyTxTarget || 50;
-    const dailyRevenueTarget = baseRevenueTarget * multiplier;
-    const dailyTxTarget = baseTxTarget * multiplier;
-
-    const progressPercent = isCentralHQ
-        ? Math.min((totalRevenue / (dailyRevenueTarget || 1)) * 100, 100)
-        : Math.min((shiftTxCount / (dailyTxTarget || 1)) * 100, 100);
+    const periodRevenueTarget = targetDays === null ? null : baseRevenueTarget * targetDays;
+    const metricTarget = isCentralHQ ? periodRevenueTarget : baseTxTarget;
+    const metricValue = isCentralHQ ? totalRevenue : shiftTxCount;
+    const progressPercent = metricTarget && metricTarget > 0
+        ? Math.min((metricValue / metricTarget) * 100, 100)
+        : null;
 
     return (
         <div className="space-y-4">
@@ -87,7 +101,7 @@ export const DashboardKPIs: React.FC = () => {
                                 <Target size={16} />
                             </div>
                             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20">
-                                {progressPercent.toFixed(1)}%
+                                {progressPercent === null ? '—' : `${progressPercent.toFixed(1)}%`}
                             </span>
                         </div>
                         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-1">
@@ -101,22 +115,32 @@ export const DashboardKPIs: React.FC = () => {
                             </span>
                             <span className="text-xs text-[var(--theme-text-secondary)] font-mono font-medium">
                                 / {isCentralHQ
-                                    ? `${CURRENCY_SYMBOL} ${dailyRevenueTarget.toLocaleString()}`
-                                    : `${dailyTxTarget} Target`}
+                                    ? periodRevenueTarget === null
+                                        ? 'Target not set'
+                                        : `${CURRENCY_SYMBOL} ${periodRevenueTarget.toLocaleString()}`
+                                    : `${baseTxTarget} Target`}
                             </span>
                         </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-[var(--theme-border)]">
                         <div className="relative h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden mb-2">
                             <div
+                                role="progressbar"
+                                aria-label={isCentralHQ ? 'Revenue target progress' : 'Shift transaction target progress'}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-valuenow={progressPercent ?? undefined}
+                                aria-valuetext={progressPercent === null ? 'No target defined for this period' : `${progressPercent.toFixed(1)} percent`}
                                 className="h-full bg-[#0071E3] dark:bg-[#2997FF] rounded-full transition-all duration-500 ease-out"
-                                style={{ width: `${progressPercent}%` }}
+                                style={{ width: `${progressPercent ?? 0}%` }}
                             />
                         </div>
                         <div className="flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
                             <span className="flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                {activeShift ? 'On Schedule' : 'Drawer Inactive'}
+                                <span className={`w-1.5 h-1.5 rounded-full ${activeShift ? 'bg-[var(--theme-status-success)]' : 'bg-[var(--theme-text-muted)]'}`} />
+                                {progressPercent === null
+                                    ? rangeStr === 'All Time' ? 'No all-time target' : 'No period target'
+                                    : activeShift ? 'Shift open' : 'No active shift'}
                             </span>
                             <span className="font-mono text-[10px]">{dateRange}</span>
                         </div>
@@ -136,13 +160,15 @@ export const DashboardKPIs: React.FC = () => {
                                         type="button"
                                         onClick={() => setIsRevealed(!isRevealed)}
                                         title={isRevealed ? "Hide Cash Total" : "Reveal Cash Total"}
-                                        className="p-1 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
+                                        aria-label={isRevealed ? 'Hide cash total' : 'Reveal cash total'}
+                                        aria-pressed={isRevealed}
+                                        className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                                     >
                                         {isRevealed ? <EyeOff size={13} /> : <Eye size={13} />}
                                     </button>
                                 )}
                                 <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                    {isCentralHQ && isRevealed ? 'HQ Audit' : 'Blind Active'}
+                                    {isCentralHQ && isRevealed ? 'Visible to HQ' : 'Blind view'}
                                 </span>
                             </div>
                         </div>
@@ -156,8 +182,10 @@ export const DashboardKPIs: React.FC = () => {
                         </p>
                     </div>
                     <div className="mt-4 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
-                        <span>Anti-Skimming Lock</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">Active</span>
+                        <span>Cash visibility</span>
+                        <span className="font-medium text-[var(--theme-text-primary)]">
+                            {isCentralHQ && isRevealed ? 'Revealed' : 'Hidden'}
+                        </span>
                     </div>
                 </div>
 
@@ -168,9 +196,6 @@ export const DashboardKPIs: React.FC = () => {
                             <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                                 <Activity size={16} />
                             </div>
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                +18%
-                            </span>
                         </div>
                         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-1">
                             {t('pos.transactions') || 'Completed Orders'}
@@ -180,7 +205,7 @@ export const DashboardKPIs: React.FC = () => {
                         </p>
                     </div>
                     <div className="mt-4 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
-                        <span>{dateRange} Volume</span>
+                        <span>{dateRange}</span>
                         <span className="font-mono">{shiftTxCount} in shift</span>
                     </div>
                 </div>
@@ -196,24 +221,17 @@ export const DashboardKPIs: React.FC = () => {
                             }`}>
                                 <RefreshCw size={16} />
                             </div>
-                            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
-                                returnCount > 0
-                                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                                    : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                            }`}>
-                                {returnCount === 0 ? 'Zero Variance' : '-5% Return'}
-                            </span>
                         </div>
                         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-1">
-                            {t('pos.returns') || 'Returns & Voids'}
+                            {t('pos.returns') || 'Refunded Orders'}
                         </h3>
                         <p className="text-2xl font-bold font-mono tracking-tight text-[var(--theme-text-primary)]">
                             {returnCount}
                         </p>
                     </div>
                     <div className="mt-4 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
-                        <span>Rule 18 Audited</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">Compliant</span>
+                        <span>{dateRange}</span>
+                        <span>Refunded or partial</span>
                     </div>
                 </div>
             </div>

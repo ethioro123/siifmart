@@ -30,7 +30,7 @@ export const RecentTransactions: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => navigate('/sales')}
-                        className="text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors hover:underline underline-offset-2 cursor-pointer"
+                        className="min-h-11 inline-flex items-center px-3 rounded-lg text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors hover:underline underline-offset-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {t('posCommand.viewAllHistory')}
                     </button>
@@ -75,10 +75,18 @@ export const RecentTransactions: React.FC = () => {
                                     <td className="px-5 py-4 text-center">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
                                             sale.status === 'Completed'
-                                                ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
-                                                : 'text-amber-500 bg-amber-500/10 border-amber-500/20'
+                                                ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                                                : sale.status === 'Pending'
+                                                    ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20'
+                                                    : 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20'
                                         }`}>
-                                            {sale.status === 'Completed' ? t('common.completed') : t('common.pending')}
+                                            {sale.status === 'Completed'
+                                                ? t('common.completed')
+                                                : sale.status === 'Pending'
+                                                    ? t('common.pending')
+                                                    : sale.status === 'Partially Refunded'
+                                                        ? 'Partially refunded'
+                                                        : 'Refunded'}
                                         </span>
                                     </td>
                                 </tr>
@@ -98,7 +106,8 @@ export const RecentTransactions: React.FC = () => {
                         type="button"
                         onClick={() => setTxPage(p => Math.max(1, p - 1))}
                         disabled={txPage <= 1}
-                        className="px-3.5 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
+                        aria-label="Previous transaction page"
+                        className="min-h-11 px-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shadow-2xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {t('common.previous')}
                     </button>
@@ -106,7 +115,8 @@ export const RecentTransactions: React.FC = () => {
                         type="button"
                         onClick={() => setTxPage(p => Math.min(Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE)), p + 1))}
                         disabled={txPage >= Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE))}
-                        className="px-3.5 py-1.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer active:scale-[0.98]"
+                        aria-label="Next transaction page"
+                        className="min-h-11 px-3.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {t('common.next')}
                     </button>

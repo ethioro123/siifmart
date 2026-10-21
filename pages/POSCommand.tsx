@@ -388,8 +388,8 @@ const POSCommandContent: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-mono">
-            <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success)]" aria-hidden="true" />
-            <span>POS Command</span>
+            <span className="w-2 h-2 rounded-full bg-[var(--theme-accent)]" aria-hidden="true" />
+            <h1 className="text-sm font-semibold text-[var(--theme-text-primary)]">POS Command</h1>
             {activeSite?.code && <span>• [{activeSite.code}]</span>}
           </div>
         </div>
