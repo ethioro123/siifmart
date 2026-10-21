@@ -13,9 +13,9 @@ interface LogoProps {
 }
 
 /**
- * Elegant monochrome emblem: a wheat stalk inside a shopping bag.
- * Faithfully renders SIIFMART's iconic ribbon-'S' grocery cart, twin wheels,
- * and asymmetric organic leaves in a crisp monochrome vector for light and dark mode.
+ * SIIFMART Circular Farmer Seal Emblem — Pure Black & White.
+ * Renders the woodcut-engraved farmer cultivating the soil inside a double
+ * concentric geometric circular medallion that stays crisp across light and dark mode.
  */
 function SiifGroceryEmblem({ size }: { size: number }) {
   return (
@@ -25,21 +25,40 @@ function SiifGroceryEmblem({ size }: { size: number }) {
       viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0 text-[#09090B] dark:text-[#FFFFFF] transition-colors duration-200"
+      className="shrink-0 transition-transform duration-200"
       aria-hidden="true"
     >
-      {/* Shopping bag with handle */}
-      <path d="M24 34H76L81 84Q81.5 90 76 90H24Q18.5 90 19 84Z" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round" />
-      <path d="M40 34V26A10 10 0 0 1 60 26V34" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-      {/* Wheat stalk */}
-      <path d="M50 84V48" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <ellipse cx="50" cy="45" rx="2.6" ry="6" fill="currentColor" />
-      <ellipse cx="43" cy="56" rx="2.6" ry="6" transform="rotate(-40 43 56)" fill="currentColor" />
-      <ellipse cx="57" cy="56" rx="2.6" ry="6" transform="rotate(40 57 56)" fill="currentColor" />
-      <ellipse cx="43" cy="67" rx="2.6" ry="6" transform="rotate(-40 43 67)" fill="currentColor" />
-      <ellipse cx="57" cy="67" rx="2.6" ry="6" transform="rotate(40 57 67)" fill="currentColor" />
-      <ellipse cx="43" cy="78" rx="2.6" ry="6" transform="rotate(-40 43 78)" fill="currentColor" />
-      <ellipse cx="57" cy="78" rx="2.6" ry="6" transform="rotate(40 57 78)" fill="currentColor" />
+      {/* Outer Geometric Medallion Ring (Dark Ink in Light Mode, Pure White in Dark Mode) */}
+      <circle
+        cx="50"
+        cy="50"
+        r="47.2"
+        className="stroke-[#09090B] dark:stroke-[#FFFFFF]"
+        strokeWidth="3.2"
+      />
+      {/* Inner Crisp White Medallion Disc & Delicate Inner Framing Ring */}
+      <circle
+        cx="50"
+        cy="50"
+        r="43.2"
+        fill="#FFFFFF"
+        stroke="#09090B"
+        strokeWidth="1.1"
+      />
+      {/* Circular Clip Path for the Engraved Farmer Illustration */}
+      <clipPath id="siif-farmer-emblem-clip">
+        <circle cx="50" cy="50" r="42.4" />
+      </clipPath>
+      {/* Woodcut Farmer Cultivating the Soil */}
+      <image
+        href="/brand/siifmart-farmer-cutout.png"
+        x="4"
+        y="4"
+        width="92"
+        height="92"
+        preserveAspectRatio="xMidYMid meet"
+        clipPath="url(#siif-farmer-emblem-clip)"
+      />
     </svg>
   );
 }
