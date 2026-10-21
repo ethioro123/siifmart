@@ -214,9 +214,10 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                     </div>
                     <div className="flex items-center gap-3">
                         <button
+                            type="button"
                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                             disabled={currentPage === 1 || isLoading}
-                            className="h-9 px-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] flex items-center gap-1.5 group cursor-pointer shadow-xs active:scale-[0.98]"
+                            className="min-h-11 px-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] flex items-center gap-1.5 group cursor-pointer shadow-xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                             <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
                             Prev
@@ -230,9 +231,10 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                         </div>
 
                         <button
+                            type="button"
                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.max(1, Math.ceil(totalCount / itemsPerPage))))}
                             disabled={currentPage >= Math.ceil(totalCount / itemsPerPage) || isLoading}
-                            className="h-9 px-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] flex items-center gap-1.5 group cursor-pointer shadow-xs active:scale-[0.98]"
+                            className="min-h-11 px-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] flex items-center gap-1.5 group cursor-pointer shadow-xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                             Next
                             <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />

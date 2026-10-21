@@ -364,7 +364,6 @@ export default function Inventory() {
                 hasViewedBarcodeAudit={hasViewedBarcodeAudit}
                 barcodeApprovalsCount={scopedBarcodeApprovals.length}
                 pendingCount={pendingCount}
-                theme={theme}
             />
 
             {/* --- CONTENT --- */}

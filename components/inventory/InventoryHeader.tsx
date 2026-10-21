@@ -15,7 +15,6 @@ interface InventoryHeaderProps {
     hasViewedBarcodeAudit: boolean;
     barcodeApprovalsCount: number;
     pendingCount: number;
-    theme: string;
 }
 
 export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
@@ -27,8 +26,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
     setActiveTab,
     hasViewedBarcodeAudit,
     barcodeApprovalsCount,
-    pendingCount,
-    theme
+    pendingCount
 }) => {
     return (
         <div className="flex-none p-4 sm:p-6 md:p-8 space-y-6">
@@ -40,10 +38,10 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                     <div className="flex items-center gap-2 mt-2">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
                             isReadOnly
-                                ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                                ? "bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]"
+                                : "bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]"
                         }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${isReadOnly ? "bg-amber-500" : "bg-emerald-500"}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full ${isReadOnly ? "bg-[var(--theme-status-warning)]" : "bg-[var(--theme-status-success)]"}`} />
                             {isReadOnly ? 'Read-Only Mode' : 'Live Management Mode'}
                         </span>
                     </div>
@@ -54,7 +52,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                         permission="ADD_PRODUCT"
                         onClick={handleOpenAddProduct}
                         disabled={isReadOnly}
-                        className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 font-semibold text-xs transition-colors flex items-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 active:scale-[0.98]"
+                        className="min-h-11 px-4 rounded-xl bg-[var(--theme-btn-primary-bg)] text-[var(--theme-btn-primary-text)] hover:opacity-90 font-semibold text-xs transition-colors flex items-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <Plus size={16} />
                         Add Product
@@ -63,7 +61,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                         onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }}
                         variant="secondary"
                         icon={<Printer size={16} />}
-                        className="h-10 px-4 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] font-semibold text-xs transition-colors flex items-center gap-2 shadow-xs cursor-pointer active:scale-[0.98]"
+                        className="min-h-11 px-4 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] font-semibold text-xs transition-colors flex items-center gap-2 shadow-xs cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         Print Hub
                     </Button>
@@ -71,7 +69,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
             </div>
 
             {/* --- TABS (Apple Segmented Control Dock) --- */}
-            <div className="p-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] inline-flex items-center gap-1 overflow-x-auto max-w-full scrollbar-hide">
+            <div role="group" aria-label="Inventory sections" className="p-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] inline-flex items-center gap-1 overflow-x-auto max-w-full scrollbar-hide">
                 {[
                     { id: 'overview', label: 'Overview', icon: Layout },
                     { id: 'stock', label: 'Stock List', icon: ClipboardList },
@@ -85,23 +83,18 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                         <button
                             key={tab.id}
                             type="button"
-                            role="tab"
-                            aria-selected={isSelected}
+                            aria-pressed={isSelected}
                             onClick={() => setActiveTab(tab.id as InventoryTab)}
-                            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs transition-all relative cursor-pointer whitespace-nowrap active:scale-[0.98] ${
+                            className={`min-h-11 flex items-center gap-2 border border-transparent px-3.5 py-2 rounded-lg text-xs transition-colors relative cursor-pointer whitespace-nowrap active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                 isSelected
-                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)] font-semibold'
-                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-medium'
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs border-[var(--theme-border)] font-semibold'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium'
                             }`}
                         >
                             <tab.icon size={14} className={isSelected ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-muted)]'} />
                             <span>{tab.label}</span>
                             {tab.count !== undefined && tab.count > 0 && (
-                                <span className={`ml-1 flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[11px] font-semibold font-mono tabular-nums ${
-                                    isSelected
-                                        ? 'bg-rose-500/15 text-rose-500 border border-rose-500/25'
-                                        : 'bg-rose-500 text-white'
-                                }`}>
+                                <span className="ml-1 flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[11px] font-semibold font-mono tabular-nums bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                     {tab.count}
                                 </span>
                             )}
