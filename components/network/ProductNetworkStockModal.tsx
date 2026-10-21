@@ -119,20 +119,20 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
     const getStatusBadge = (stock: number, minStock: number) => {
         if (stock <= 0) {
             return (
-                <span className="flex items-center gap-1 text-[10px] font-semibold font-mono text-rose-600 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-lg">
+                <span className="flex items-center gap-1 text-[10px] font-semibold font-mono text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] px-2 py-0.5 rounded-lg">
                     <XCircle size={11} /> 0 Units (Out of Stock)
                 </span>
             );
         }
         if (stock <= minStock) {
             return (
-                <span className="flex items-center gap-1 text-[10px] font-semibold font-mono text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
+                <span className="flex items-center gap-1 text-[10px] font-semibold font-mono text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] px-2 py-0.5 rounded-lg">
                     <AlertTriangle size={11} /> {stock} Units (Low Stock ≤ {minStock})
                 </span>
             );
         }
         return (
-            <span className="flex items-center gap-1 text-[10px] font-semibold font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
+            <span className="flex items-center gap-1 text-[10px] font-semibold font-mono text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] px-2 py-0.5 rounded-lg">
                 <CheckCircle2 size={11} /> {stock} Units (Healthy)
             </span>
         );
@@ -156,7 +156,7 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
                                 className="w-14 h-14 rounded-xl object-cover border border-[var(--theme-border)] shrink-0"
                             />
                         ) : (
-                            <div className="w-14 h-14 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
+                            <div className="w-14 h-14 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-border)] flex items-center justify-center shrink-0">
                                 <Package size={24} />
                             </div>
                         )}
@@ -177,11 +177,11 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
 
                 {/* Smart Transfer Recommendation Alert (if warehouses have surplus and stores are low) */}
                 {distribution.bestSourceWarehouse && distribution.lowStoreCount > 0 && (
-                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div className="flex items-start gap-3">
-                            <Truck size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                            <Truck size={18} className="text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" />
                             <div>
-                                <h5 className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                <h5 className="text-xs font-bold text-[var(--theme-status-warning-text)]">
                                     Rebalance Opportunity Detected
                                 </h5>
                                 <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
@@ -195,7 +195,7 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
                                 onClose();
                                 navigate(`/wms-ops?tab=transfers&source=${distribution.bestSourceWarehouse?.site.id}&sku=${encodeURIComponent(product.sku || product.name)}`);
                             }}
-                            className="shrink-0 px-3.5 py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl text-xs font-semibold transition-opacity flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                            className="shrink-0 min-h-11 px-3.5 py-2 bg-[var(--theme-btn-primary-bg)] text-[var(--theme-btn-primary-text)] hover:opacity-90 rounded-xl text-xs font-semibold transition-opacity flex items-center justify-center gap-1.5 shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                             <span>Initiate Transfer</span>
                             <ArrowRight size={13} />
@@ -209,7 +209,7 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 space-y-3">
                         <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
                             <h4 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
-                                <Building size={14} className="text-blue-600 dark:text-blue-400" />
+                                <Building size={14} className="text-[var(--theme-accent)]" />
                                 Warehouses & Hubs
                             </h4>
                             <span className="text-[10px] font-mono font-semibold text-[var(--theme-text-secondary)]">
@@ -223,9 +223,9 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
                                     key={i}
                                     className={`p-3 rounded-xl border transition-all ${
                                         node.isOut
-                                            ? 'bg-rose-500/10 border-rose-500/20'
+                                            ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)]'
                                             : node.isLow
-                                                ? 'bg-amber-500/10 border-amber-500/20'
+                                                ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'
                                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
                                     }`}
                                 >
@@ -245,7 +245,7 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 space-y-3">
                         <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
                             <h4 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
-                                <Store size={14} className="text-indigo-600 dark:text-indigo-400" />
+                                <Store size={14} className="text-[var(--theme-accent)]" />
                                 Retail Stores
                             </h4>
                             <span className="text-[10px] font-mono font-semibold text-[var(--theme-text-secondary)]">
@@ -259,9 +259,9 @@ export const ProductNetworkStockModal: React.FC<ProductNetworkStockModalProps> =
                                     key={i}
                                     className={`p-3 rounded-xl border transition-all ${
                                         node.isOut
-                                            ? 'bg-rose-500/10 border-rose-500/20'
+                                            ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)]'
                                             : node.isLow
-                                                ? 'bg-amber-500/10 border-amber-500/20'
+                                                ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'
                                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
                                     }`}
                                 >

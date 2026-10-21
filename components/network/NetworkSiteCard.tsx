@@ -76,10 +76,10 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
     }, [siteProducts, fetchedSiteProducts, isLowStockFilterActive, searchTerm]);
 
     const getStockStatusColor = (stock: number, minStock: number = 10) => {
-        if (stock <= 0) return 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20';
-        if (stock <= minStock) return 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20';
-        if (stock < 50) return 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20';
-        return 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+        if (stock <= 0) return 'text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)]';
+        if (stock <= minStock) return 'text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]';
+        if (stock < 50) return 'text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)]';
+        return 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]';
     };
 
     const totalPages = Math.max(1, Math.ceil(displayedProducts.length / PRODUCTS_PER_PAGE));
@@ -87,17 +87,11 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
     const paginatedProducts = displayedProducts.slice(startIdx, startIdx + PRODUCTS_PER_PAGE);
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-sm transition-all hover:border-[var(--theme-accent)]">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
             <div className="p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start sm:items-center gap-3.5 flex-1">
-                        <div
-                            className={`p-3 rounded-2xl border shrink-0 ${
-                                isWarehouse
-                                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
-                                    : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
-                            }`}
-                        >
+                        <div className="p-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] shrink-0">
                             {isWarehouse ? <Building size={22} /> : <Store size={22} />}
                         </div>
                         <div>
@@ -107,7 +101,7 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                                     {site.code || site.type}
                                 </span>
                                 {(metrics.lowStockItems > 0 || metrics.outOfStockItems > 0) && (
-                                    <span className="text-[9px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                                    <span className="text-[9px] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
                                         <AlertTriangle size={10} />
                                         {metrics.lowStockItems + metrics.outOfStockItems} Low Stock
                                     </span>
@@ -143,15 +137,16 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                         </div>
                         <div className="text-left sm:text-right">
                             <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Asset Value</p>
-                            <p className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">
+                            <p className="text-base sm:text-lg font-bold text-[var(--theme-status-success-text)] font-mono tabular-nums">
                                 {canViewCost ? formatCompactNumber(metrics.totalValue, { currency: CURRENCY_SYMBOL }) : '••••••'}
                             </p>
                         </div>
                         <button
                             type="button"
                             onClick={onToggleExpand}
-                            className="p-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent)] text-[var(--theme-text-secondary)] hover:text-white border border-[var(--theme-border)] rounded-xl transition-all cursor-pointer ml-1"
-                            title={isExpanded ? 'Collapse products list' : 'View products stationed at this location'}
+                            aria-label={isExpanded ? `Collapse products at ${site.name}` : `View products at ${site.name}`}
+                            aria-expanded={isExpanded}
+                            className="min-h-11 min-w-11 flex items-center justify-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent-muted)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] border border-[var(--theme-border)] rounded-xl transition-colors cursor-pointer ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                             {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                         </button>
@@ -165,10 +160,11 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                             <>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {paginatedProducts.map(product => (
-                                        <div
+                                        <button
                                             key={product.id}
+                                            type="button"
                                             onClick={() => onSelectProduct(product)}
-                                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)] rounded-xl p-3.5 flex flex-col justify-between cursor-pointer transition-all group"
+                                            className="w-full min-h-11 text-left bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)] rounded-xl p-3.5 flex flex-col justify-between cursor-pointer transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                         >
                                             <div className="flex items-start justify-between gap-2 mb-2">
                                                 <div className="overflow-hidden flex-1">
@@ -187,7 +183,7 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                                                     {formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}
                                                 </span>
                                             </div>
-                                        </div>
+                                        </button>
                                     ))}
                                 </div>
 
@@ -202,7 +198,7 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                                                 type="button"
                                                 onClick={() => onPageChange(currentPage - 1)}
                                                 disabled={currentPage === 1}
-                                                className="px-3 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-semibold text-[var(--theme-text-primary)] disabled:opacity-40 cursor-pointer hover:bg-[var(--theme-bg-card)] transition-colors"
+                                                className="min-h-11 min-w-11 px-3 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-semibold text-[var(--theme-text-primary)] disabled:opacity-40 cursor-pointer hover:bg-[var(--theme-bg-card)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                             >
                                                 Prev
                                             </button>
@@ -213,7 +209,7 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                                                 type="button"
                                                 onClick={() => onPageChange(currentPage + 1)}
                                                 disabled={currentPage === totalPages}
-                                                className="px-3 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-semibold text-[var(--theme-text-primary)] disabled:opacity-40 cursor-pointer hover:bg-[var(--theme-bg-card)] transition-colors"
+                                                className="min-h-11 min-w-11 px-3 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-semibold text-[var(--theme-text-primary)] disabled:opacity-40 cursor-pointer hover:bg-[var(--theme-bg-card)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                             >
                                                 Next
                                             </button>
