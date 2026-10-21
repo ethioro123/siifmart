@@ -23,8 +23,16 @@ export const purchaseOrdersApprovalService = {
       throw new Error(`Cannot approve PO with status "${currentPO.status}". Must be Draft or Pending.`);
     }
 
-    if (!['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead'].includes(approverRole)) {
-      throw new Error('Purchase order approval requires a procurement lead.');
+    if (![
+      'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
+      'head_of_procurement', 'procurement_head', 'procurement_manager',
+      'head_of_finance', 'finance_head', 'finance_manager',
+      'head_of_operations', 'operations_head', 'operations_manager',
+      'regional_manager', 'regional_operations_director', 'regional_director',
+      'regional_procurement_lead', 'regional_procurement_manager',
+      'regional_finance_officer', 'regional_finance_manager'
+    ].includes(approverRole)) {
+      throw new Error('Purchase order approval requires authorized procurement or executive management role.');
     }
 
     // 4-Eyes rule: Creator cannot approve their own PO
@@ -52,7 +60,11 @@ export const purchaseOrdersApprovalService = {
       const autonomousLimit = region?.autonomous_po_limit ?? 150000;
       if (currentPO.totalAmount > autonomousLimit) {
         isEscalatedToHq = true;
-        const isRegionalRole = ['regional_manager', 'regional_procurement_lead', 'regional_finance_officer'].includes(approverRole);
+        const isRegionalRole = [
+          'regional_manager', 'regional_operations_director', 'regional_director',
+          'regional_procurement_lead', 'regional_procurement_manager',
+          'regional_finance_officer', 'regional_finance_manager'
+        ].includes(approverRole);
         const isHqRole = [
           'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
           'head_of_procurement', 'procurement_head', 'procurement_manager',

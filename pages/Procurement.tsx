@@ -23,7 +23,7 @@ import { useSupplierMutations } from '../hooks/useSupplierMutations';
 export default function Procurement() {
     const { user } = useStore();
     const { createSupplier, verifySupplier } = useSupplierMutations();
-    const { suppliers: allSuppliers, sites, settings, effectiveCountry, isRegionalUser, activeRegionCode } = useData(); // Global suppliers validation & sites
+    const { suppliers: allSuppliers, sites, settings, effectiveCountry, isRegionalUser, activeRegionCode, regions } = useData(); // Global suppliers validation & sites
 
     const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
         'regional_manager',
@@ -36,6 +36,10 @@ export default function Procurement() {
     const countryProfile = getCountryProfile(activeCountry);
     const currencySymbol = countryProfile.currencySymbol;
     const targetRegionCode = activeRegionCode || user?.regionCode || (user as any)?.region_code;
+    const activeRegion = useMemo(() => {
+        return (regions || []).find(r => r.code === targetRegionCode);
+    }, [regions, targetRegionCode]);
+    const regionalAutonomousPoLimit = activeRegion?.autonomous_po_limit ?? (activeCountry === 'KE' ? 500000 : 150000);
     const countrySiteIds = useMemo(() => {
         return sites
             .filter(s => (s.country || 'ET') === activeCountry
@@ -279,7 +283,7 @@ export default function Procurement() {
                 moduleName="Procurement"
                 guardrailBadge={
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-semibold">
-                        <span>Autonomous PO Limit: {currencySymbol} {activeCountry === 'KE' ? '500,000' : '1,000,000'}</span>
+                        <span>Autonomous PO Limit: {currencySymbol} {Number(regionalAutonomousPoLimit).toLocaleString()}</span>
                     </div>
                 }
             />

@@ -60,7 +60,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
     const target = transfers.find(t => t.id === transferId);
     const isInterRegional = Boolean(target?.isInterRegion || target?.is_inter_region ||
       (target?.sourceRegionCode && target?.destRegionCode && target.sourceRegionCode !== target.destRegionCode));
-    const isHQUser = Boolean(user?.role && ['super_admin', 'ceo', 'operations_manager', 'logistics_manager'].includes(user.role));
+    const isHQUser = Boolean(user?.role && ['super_admin', 'ceo', 'country_managing_director', 'admin', 'head_of_operations', 'operations_manager', 'head_of_supply_chain', 'supply_chain_manager', 'logistics_manager'].includes(user.role));
 
     if (isInterRegional && !isHQUser) {
       addNotification?.('alert', 'Inter-regional transfers cross territory borders and require Corporate HQ / Logistics sign-off.');
