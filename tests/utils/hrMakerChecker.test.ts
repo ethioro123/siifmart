@@ -1,9 +1,75 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { payrollRunsService } from '../../services/payroll-runs.service';
 import { disciplinaryService } from '../../services/disciplinary.service';
 import { recruitmentService } from '../../services/recruitment.service';
 import { hasPermission } from '../../utils/permissions';
 import { canEmployRole } from '../../utils/roles';
+
+let inMemoryTables: Record<string, any[]> = {
+    payroll_runs: [],
+    disciplinary_records: [],
+    job_candidates: [],
+    system_logs: []
+};
+
+vi.mock('../../lib/supabase', () => ({
+    supabase: {
+        from: vi.fn().mockImplementation((table: string) => {
+            if (!inMemoryTables[table]) inMemoryTables[table] = [];
+            const createQuery = (conditions: { col: string; val: any }[] = []) => {
+                const getFiltered = () => {
+                    let rows = [...(inMemoryTables[table] || [])];
+                    for (const c of conditions) {
+                        rows = rows.filter(r => r[c.col] === c.val || (c.col === 'id' && r.id === c.val));
+                    }
+                    return rows;
+                };
+
+                const builder: any = {
+                    select: vi.fn(() => builder),
+                    eq: vi.fn((col: string, val: any) => createQuery([...conditions, { col, val }])),
+                    order: vi.fn(() => builder),
+                    limit: vi.fn(() => builder),
+                    single: vi.fn(() => {
+                        const rows = getFiltered();
+                        return Promise.resolve({ data: rows[0] || null, error: rows[0] ? null : { message: 'Not found' } });
+                    }),
+                    maybeSingle: vi.fn(() => {
+                        const rows = getFiltered();
+                        return Promise.resolve({ data: rows[0] || null, error: null });
+                    }),
+                    then: (onfulfilled: any) => Promise.resolve({ data: getFiltered(), error: null }).then(onfulfilled)
+                };
+                return builder;
+            };
+
+            const root: any = createQuery();
+            root.insert = vi.fn().mockImplementation((record: any) => {
+                const payload = Array.isArray(record) ? record[0] : record;
+                const rec = { id: payload.id || `REC-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...payload };
+                inMemoryTables[table].push(rec);
+                return {
+                    select: vi.fn().mockReturnValue({
+                        single: vi.fn().mockResolvedValue({ data: rec, error: null })
+                    }),
+                    then: (onfulfilled: any) => Promise.resolve({ data: rec, error: null }).then(onfulfilled)
+                };
+            });
+            root.update = vi.fn().mockImplementation((updates: any) => {
+                return {
+                    eq: vi.fn().mockImplementation((col: string, val: any) => {
+                        const idx = inMemoryTables[table].findIndex(r => r[col] === val || r.id === val);
+                        if (idx !== -1) {
+                            inMemoryTables[table][idx] = { ...inMemoryTables[table][idx], ...updates };
+                        }
+                        return Promise.resolve({ data: inMemoryTables[table][idx] || updates, error: null });
+                    })
+                };
+            });
+            return root;
+        })
+    }
+}));
 
 describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
     describe('1. Payroll Run 4-Eyes Separation of Duties', () => {
