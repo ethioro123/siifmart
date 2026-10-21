@@ -21,6 +21,12 @@ const supabaseUrl = useLocalDevProxy
     ? `${window.location.origin}/supabase-proxy`
     : rawSupabaseUrl;
 
+// The local proxy has the same hostname for every environment. Keep persisted
+// sessions tied to the actual Supabase project so staging cannot reuse production auth.
+const authStorageKey = rawSupabaseUrl
+    ? `sb-${new URL(rawSupabaseUrl).hostname.split('.')[0]}-auth-token`
+    : undefined;
+
 // Validate environment variables
 if (!rawSupabaseUrl || !supabaseAnonKey) {
     console.error('Missing Supabase environment variables!');
@@ -34,7 +40,8 @@ export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
     auth: {
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        storageKey: authStorageKey
     },
     realtime: {
         params: {

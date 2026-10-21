@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StaffSchedule } from '../types';
 import { schedulesService } from '../services/supabase.service';
 import { useData } from './DataContext';
+import { useStore } from './CentralStore';
 import { logger } from '../utils/logger';
 
 interface RosterContextType {
@@ -17,14 +18,15 @@ const RosterContext = createContext<RosterContextType | undefined>(undefined);
 
 export const RosterProvider = ({ children }: { children: ReactNode }) => {
     const { activeSite, addNotification } = useData();
+    const { user } = useStore();
     const activeSiteId = activeSite?.id;
     const activeCountry = activeSite?.country;
     const queryClient = useQueryClient();
-    const scheduleQueryKey = ['schedules', activeSiteId, activeCountry];
+    const scheduleQueryKey = ['schedules', user?.id, activeSiteId, activeCountry];
     const { data: schedules = [] } = useQuery({
         queryKey: scheduleQueryKey,
         queryFn: () => schedulesService.getAll(activeSiteId as string, undefined, activeCountry),
-        enabled: Boolean(activeSiteId),
+        enabled: Boolean(user?.id && activeSiteId),
         staleTime: 5 * 60 * 1000
     });
 

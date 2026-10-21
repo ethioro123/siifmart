@@ -75,8 +75,8 @@ export function useWeeklyShiftPlanner({
 
     // --- QUERY ---
     const queryKey = useMemo(
-        () => ['staff_schedules_week', startDate, endDate, effectiveSiteId || 'all', activeRegionCode || 'all', effectiveCountry || 'all'],
-        [startDate, endDate, effectiveSiteId, activeRegionCode, effectiveCountry]
+        () => ['staff_schedules_week', user?.id, startDate, endDate, effectiveSiteId || 'all', activeRegionCode || 'all', effectiveCountry || 'all'],
+        [user?.id, startDate, endDate, effectiveSiteId, activeRegionCode, effectiveCountry]
     );
 
     const { data: serverSchedules = [], isLoading, refetch } = useQuery({
@@ -95,6 +95,7 @@ export function useWeeklyShiftPlanner({
                 return [];
             }
         },
+        enabled: Boolean(user?.id),
         staleTime: 60 * 1000
     });
 
