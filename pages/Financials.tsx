@@ -57,10 +57,29 @@ export default function Finance() {
    const activeRegion = (regions || []).find(r => r.code === targetRegionCode);
    const autonomousExpenseLimit = activeRegion?.autonomous_expense_limit ?? (effectiveCountry === 'KE' ? 85000 : 35000);
 
-   const TabButton = ({ id, label, icon: Icon }: { id: any; label: string; icon: any }) => (
+   const TabButton = ({ id, label, icon: Icon }: { id: string; label: string; icon: any }) => (
       <button
+         id={`financials-tab-${id}`}
+         type="button"
+         role="tab"
+         aria-selected={state.activeTab === id}
+         aria-controls="financials-panel"
+         tabIndex={state.activeTab === id ? 0 : -1}
          onClick={() => state.setActiveTab(id)}
-         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+         onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) => {
+            if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+            event.preventDefault();
+            const tabs = Array.from(event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]') || []);
+            const currentIndex = tabs.indexOf(event.currentTarget);
+            const nextIndex = event.key === 'Home'
+               ? 0
+               : event.key === 'End'
+                  ? tabs.length - 1
+                  : (currentIndex + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+            tabs[nextIndex]?.focus();
+            tabs[nextIndex]?.click();
+         }}
+         className={`flex min-h-11 items-center gap-2 px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] ${
             state.activeTab === id
                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs border border-[var(--theme-border)] font-semibold'
                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]/50'
@@ -169,14 +188,16 @@ export default function Finance() {
 
                   <div className="flex items-center gap-2 h-9">
                      <button
+                        type="button"
                         onClick={state.handleExportPnL}
-                        className="h-full bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-3.5 rounded-xl text-xs font-medium flex items-center transition-colors shadow-xs"
+                        className="min-h-11 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-3.5 rounded-xl text-xs font-medium flex items-center transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                      >
                         <Download className="w-3.5 h-3.5 mr-1.5" /> JSON
                      </button>
                      <button
+                        type="button"
                         onClick={state.handleGenerateReport}
-                        className="h-full bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white px-3.5 rounded-xl text-xs font-semibold flex items-center transition-all shadow-xs"
+                        className="min-h-11 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white px-3.5 rounded-xl text-xs font-semibold flex items-center transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                      >
                         <Download className="w-3.5 h-3.5 mr-1.5" /> PDF Report
                      </button>
@@ -195,7 +216,7 @@ export default function Finance() {
             />
 
             {/* Tabs */}
-            <div className="flex flex-wrap items-center gap-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-1 rounded-xl w-fit max-w-full overflow-x-auto shadow-xs">
+            <div role="tablist" aria-label="Financial sections" className="flex items-center gap-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-1 rounded-xl w-full max-w-full overflow-x-auto shadow-xs">
                {isRegionalStaff ? (
                   <>
                      <TabButton id="drawer" label="Drawer Reconciliation" icon={ShieldCheck} />
@@ -223,18 +244,26 @@ export default function Finance() {
             </div>
 
             {/* Render Active Tab */}
-            {state.activeTab === 'overview' && <OverviewTab />}
-            {state.activeTab === 'expenses' && <ExpensesTab />}
-            {state.activeTab === 'drawer' && <DrawerReconciliationTab />}
-            {state.activeTab === 'ap' && <AccountsPayableTab />}
-            {state.activeTab === 'ar' && <AccountsReceivableTab />}
-            {state.activeTab === 'gl' && <GeneralLedgerTab />}
-            {state.activeTab === 'petty_cash' && <PettyCashTab />}
-            {state.activeTab === 'budget' && <BudgetTab />}
-            {state.activeTab === 'margin' && <LowMarginQueueTab />}
-            {state.activeTab === 'workbenches' && <RoleWorkbenchTab />}
-            {state.activeTab === 'payroll' && <PayrollTab />}
-            {state.activeTab === 'tax' && <TaxTab />}
+            <div
+               id="financials-panel"
+               role="tabpanel"
+               aria-labelledby={`financials-tab-${state.activeTab}`}
+               tabIndex={0}
+               className="min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] rounded-xl"
+            >
+               {state.activeTab === 'overview' && <OverviewTab />}
+               {state.activeTab === 'expenses' && <ExpensesTab />}
+               {state.activeTab === 'drawer' && <DrawerReconciliationTab />}
+               {state.activeTab === 'ap' && <AccountsPayableTab />}
+               {state.activeTab === 'ar' && <AccountsReceivableTab />}
+               {state.activeTab === 'gl' && <GeneralLedgerTab />}
+               {state.activeTab === 'petty_cash' && <PettyCashTab />}
+               {state.activeTab === 'budget' && <BudgetTab />}
+               {state.activeTab === 'margin' && <LowMarginQueueTab />}
+               {state.activeTab === 'workbenches' && <RoleWorkbenchTab />}
+               {state.activeTab === 'payroll' && <PayrollTab />}
+               {state.activeTab === 'tax' && <TaxTab />}
+            </div>
 
             {/* Modals */}
             <AddExpenseModal />

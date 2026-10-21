@@ -168,25 +168,25 @@ export const ExpensesTab: React.FC = () => {
                         </div>
 
                         {/* Search Input */}
-                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 h-9 w-56">
+                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 min-h-11 w-full sm:w-56 focus-within:ring-2 focus-within:ring-[var(--theme-border-focus)]">
                             <Search size={14} className="text-[var(--theme-text-secondary)] mr-2 shrink-0" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search description, staff..."
-                                className="bg-transparent text-xs text-[var(--theme-text-primary)] outline-none w-full placeholder:text-[var(--theme-text-secondary)]/60"
+                                className="bg-transparent text-sm text-[var(--theme-text-primary)] outline-none w-full min-w-0 placeholder:text-[var(--theme-text-secondary)]/60"
                                 aria-label="Search expenses"
                             />
                         </div>
 
                         {/* Status Filter Dropdown */}
-                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 h-9">
+                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 min-h-11 focus-within:ring-2 focus-within:ring-[var(--theme-border-focus)]">
                             <Filter size={13} className="text-[var(--theme-text-secondary)] mr-2 shrink-0" />
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                                className="bg-transparent text-xs text-[var(--theme-text-primary)] outline-none cursor-pointer pr-1"
+                                className="bg-transparent text-sm text-[var(--theme-text-primary)] outline-none cursor-pointer pr-1 min-h-10"
                                 aria-label="Filter expenses by status"
                             >
                                 <option value="All">All Statuses</option>
@@ -201,7 +201,8 @@ export const ExpensesTab: React.FC = () => {
 
                     <button
                         onClick={() => setIsAddExpenseOpen(true)}
-                        className="bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-start md:self-auto"
+                        type="button"
+                        className="bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white px-3.5 min-h-11 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-stretch sm:self-start md:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         <Plus size={15} />
                         <span>Log Expense Request</span>
@@ -224,7 +225,13 @@ export const ExpensesTab: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--theme-border)]">
-                            {displayedExpenses.length > 0 ? (
+                            {expensesLoading ? (
+                                <tr>
+                                    <td colSpan={8} className="p-12 text-center text-sm text-[var(--theme-text-secondary)]" aria-live="polite">
+                                        Loading expense vouchers…
+                                    </td>
+                                </tr>
+                            ) : displayedExpenses.length > 0 ? (
                                 displayedExpenses.map(exp => {
                                     const isCreator = Boolean(
                                         (exp.createdById && exp.createdById === (user?.id || user?.employeeId)) ||
@@ -319,7 +326,7 @@ export const ExpensesTab: React.FC = () => {
                                                     {/* Voucher Inspect Button */}
                                                     <button
                                                         onClick={() => setInspectingExpense(exp)}
-                                                        className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors"
+                                                        className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                                                         title="Inspect Voucher Audit Trail"
                                                         aria-label="Inspect Voucher"
                                                     >
@@ -332,7 +339,7 @@ export const ExpensesTab: React.FC = () => {
                                                             <button
                                                                 onClick={() => handleApproveExpense(exp.id)}
                                                                 disabled={approveDisabled}
-                                                                className={`p-1.5 rounded-lg border transition-all ${
+                                                                className={`min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] ${
                                                                     approveDisabled
                                                                         ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/40 cursor-not-allowed'
                                                                         : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
@@ -351,7 +358,7 @@ export const ExpensesTab: React.FC = () => {
                                                             <button
                                                                 onClick={() => handleRejectExpense(exp.id)}
                                                                 disabled={isSubmitting}
-                                                                className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 transition-all disabled:opacity-50"
+                                                                className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                                                                 title="Reject Expense"
                                                                 aria-label="Reject Expense"
                                                             >
@@ -365,7 +372,7 @@ export const ExpensesTab: React.FC = () => {
                                                         <button
                                                             onClick={() => handleTriggerVoidExpense(exp)}
                                                             disabled={isSubmitting}
-                                                            className="p-1.5 rounded-lg hover:bg-amber-500/10 text-[var(--theme-text-secondary)] hover:text-amber-600 dark:hover:text-amber-400 transition-colors disabled:opacity-50"
+                                                            className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg hover:bg-amber-500/10 text-[var(--theme-text-secondary)] hover:text-amber-600 dark:hover:text-amber-400 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                                                             title="Void Expense (Audit Reason Required)"
                                                             aria-label="Void Expense"
                                                         >
@@ -385,11 +392,22 @@ export const ExpensesTab: React.FC = () => {
                                                 <CreditCard size={22} />
                                             </div>
                                             <p className="text-xs font-semibold text-[var(--theme-text-primary)]">
-                                                No expense vouchers found
+                                                {statusFilter !== 'All' || searchQuery ? 'No matching expense vouchers' : 'No expense vouchers yet'}
                                             </p>
                                             <p className="text-[11px] mt-0.5">
-                                                Try adjusting the status or search filter, or log a new zero-trust entry.
+                                                {statusFilter !== 'All' || searchQuery
+                                                    ? 'Clear the search or choose another status to see more records.'
+                                                    : 'Log an expense request to start the ledger.'}
                                             </p>
+                                            {(statusFilter !== 'All' || searchQuery) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setStatusFilter('All'); setSearchQuery(''); }}
+                                                    className="mt-3 min-h-11 px-3 rounded-lg border border-[var(--theme-border)] text-xs font-medium text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                                                >
+                                                    Clear filters
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -401,14 +419,15 @@ export const ExpensesTab: React.FC = () => {
                 {/* Pagination Controls */}
                 <div className="flex flex-col sm:flex-row justify-between items-center p-3.5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/40 gap-3">
                     <div className="text-xs text-[var(--theme-text-secondary)]">
-                        Showing <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{displayedExpenses.length}</span> of <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{formatCompactNumber(totalExpensesCount)}</span> records
-                        {statusFilter !== 'All' && ` (filtered from ${localExpenses.length} loaded)`}
+                        Showing <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{displayedExpenses.length}</span> on this page · <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{formatCompactNumber(totalExpensesCount)}</span> total
+                        {(statusFilter !== 'All' || searchQuery) && ` · filtered from ${localExpenses.length} loaded records`}
                     </div>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentExpensesPage(Math.max(1, currentExpensesPage - 1))}
                             disabled={currentExpensesPage === 1 || expensesLoading}
-                            className="px-3 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs font-medium text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs"
+                            aria-label="Previous expense page"
+                            className="min-h-11 px-3 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs font-medium text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                         >
                             Previous
                         </button>
@@ -418,7 +437,8 @@ export const ExpensesTab: React.FC = () => {
                         <button
                             onClick={() => setCurrentExpensesPage(localExpenses.length === EXPENSES_PER_PAGE ? currentExpensesPage + 1 : currentExpensesPage)}
                             disabled={localExpenses.length < EXPENSES_PER_PAGE || expensesLoading}
-                            className="px-3 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs font-medium text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs"
+                            aria-label="Next expense page"
+                            className="min-h-11 px-3 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs font-medium text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                         >
                             Next
                         </button>
