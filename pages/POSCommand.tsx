@@ -126,7 +126,7 @@ const POSCommandContent: React.FC = () => {
           <h2 className="text-2xl font-bold tracking-tight text-[var(--theme-text-primary)] mb-1">{t('pos.sessionLocked')}</h2>
           <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-[0.2em] font-bold mb-8">{t('pos.enterPinToResume')}</p>
           <PinPad pin={pin} setPin={setPin} onEnter={handleUnlock} />
-          {pinError && <p className="text-red-500 dark:text-red-400 text-sm mt-4 font-bold animate-pulse">{pinError}</p>}
+          {pinError && <p role="alert" className="text-[var(--theme-status-danger-text)] text-sm mt-4 font-semibold">{pinError}</p>}
         </div>
       </div>
     );
@@ -141,10 +141,11 @@ const POSCommandContent: React.FC = () => {
           {/* Left — Back Action + Store & Shift Status */}
           <div className="relative z-10 flex flex-wrap items-center gap-3">
             <button
+              type="button"
               title={t('common.back') || 'Back'}
               aria-label={t('common.back') || 'Back'}
               onClick={handleBack}
-              className="px-3.5 py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-2xl transition-all active:scale-95 border border-[var(--theme-border)] shadow-2xs flex items-center gap-2 text-xs font-semibold cursor-pointer group"
+              className="min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-2xl transition-colors border border-[var(--theme-border)] shadow-2xs flex items-center gap-2 text-xs font-semibold group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
             >
               <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 transition-transform group-hover:-translate-x-0.5">
                 <ArrowLeft size={13} />
@@ -159,10 +160,10 @@ const POSCommandContent: React.FC = () => {
 
             {currentShift ? (
               <span
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-800 dark:text-emerald-300 shadow-2xs cursor-default"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-xs font-semibold text-[var(--theme-status-success-text)] shadow-2xs"
                 title={`Cashier: ${currentShift.cashierName || user?.name || 'Staff'} • Float: ${(currentShift.openingFloat || 0).toLocaleString()}`}
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success)]" />
                 <span className="font-mono font-bold">{currentShift.cashierCode || currentShift.cashier_code || user?.code || 'STAFF'}</span>
                 <span className="text-[10px] opacity-60">•</span>
                 <span>{currentShift.counterNumber || currentShift.counter_number || 'Counter 1'}</span>
@@ -192,8 +193,9 @@ const POSCommandContent: React.FC = () => {
             {/* Primary Shift Action */}
             {currentShift ? (
               <button
+                type="button"
                 onClick={handleEndShift}
-                className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-2xl border border-rose-500/25 transition-all flex items-center gap-2 shadow-2xs active:scale-95 cursor-pointer"
+                className="min-h-11 px-4 bg-[var(--theme-status-danger-bg)] hover:opacity-90 text-[var(--theme-status-danger-text)] text-xs font-semibold rounded-2xl border border-[var(--theme-status-danger-border)] transition-colors flex items-center gap-2 shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                 title="End Shift and Reconcile Cash Drawer"
               >
                 <div className="w-5 h-5 rounded-md bg-rose-500/20 text-rose-500 flex items-center justify-center shrink-0">
@@ -203,8 +205,9 @@ const POSCommandContent: React.FC = () => {
               </button>
             ) : (
               <button
+                type="button"
                 onClick={() => setIsStartShiftModalOpen(true)}
-                className="px-4 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-2xl shadow-xs transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                className="min-h-11 px-4 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-2xl shadow-xs transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 title="Input opening float and start daily cashier shift"
               >
                 <div className="w-5 h-5 rounded-md bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0">
@@ -218,8 +221,9 @@ const POSCommandContent: React.FC = () => {
             <div className="flex items-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5">
               <div className="relative">
                 <button
+                  type="button"
                   onClick={() => setIsStockListOpen(true)}
-                  className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
+                  className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                   title="Stock Catalog & Pricing"
                 >
                   <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
@@ -235,8 +239,9 @@ const POSCommandContent: React.FC = () => {
               </div>
 
               <button
+                type="button"
                 onClick={() => setIsReceivingModalOpen(true)}
-                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
+                className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 title="Receive Stock"
               >
                 <div className="w-5 h-5 rounded-md bg-teal-500/10 text-teal-500 flex items-center justify-center shrink-0">
@@ -246,8 +251,9 @@ const POSCommandContent: React.FC = () => {
               </button>
 
               <button
+                type="button"
                 onClick={() => setIsSafeLedgerOpen(true)}
-                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
+                className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 title="Drop Safe Ledger & Armored Pickups"
               >
                 <div className="w-5 h-5 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
@@ -262,7 +268,7 @@ const POSCommandContent: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsOnboardModalOpen(true)}
-                className="px-3.5 py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs font-semibold rounded-2xl shadow-xs transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                className="min-h-11 px-3.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-2xl shadow-xs transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 title="Onboard store cashiers, sales staff & stock clerks"
               >
                 <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center shrink-0">
@@ -278,7 +284,9 @@ const POSCommandContent: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsPrintMenuOpen(prev => !prev)}
-                  className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer group"
+                  aria-expanded={isPrintMenuOpen}
+                  aria-controls="pos-command-print-menu"
+                  className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                   title="Unified Print Center (Receipts, Barcodes & Shelf Tags)"
                 >
                   <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
@@ -289,14 +297,14 @@ const POSCommandContent: React.FC = () => {
                 </button>
 
                 {isPrintMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-60 p-1.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-md">
+                  <div id="pos-command-print-menu" role="group" aria-label="Print options" className="absolute right-0 top-full mt-2 w-60 p-1.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl z-50 animate-in fade-in zoom-in-95 duration-150">
                     <button
                       type="button"
                       onClick={() => {
                         setIsPrintMenuOpen(false);
                         handleReprint();
                       }}
-                      className="w-full px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 cursor-pointer group"
+                      className="w-full min-h-11 px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                       title="Reprint last customer transaction receipt"
                     >
                       <div className="w-6 h-6 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
@@ -314,7 +322,7 @@ const POSCommandContent: React.FC = () => {
                         setIsPrintMenuOpen(false);
                         setIsPrintHubOpen(true);
                       }}
-                      className="w-full px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 cursor-pointer group"
+                      className="w-full min-h-11 px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                       title="Generate barcode labels and shelf price tags"
                     >
                       <div className="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
@@ -332,7 +340,7 @@ const POSCommandContent: React.FC = () => {
               <button
                 type="button"
                 onClick={handleLockScreen}
-                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
+                className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 title="Lock Terminal Screen"
               >
                 <div className="w-5 h-5 rounded-md bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
@@ -355,7 +363,7 @@ const POSCommandContent: React.FC = () => {
 
         {/* ===== PANEL NAVIGATION TABS (Apple Segmented Control) ===== */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 pb-1 border-b border-[var(--theme-border)]">
-          <div className="inline-flex items-center p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-2xs gap-1">
+          <div role="group" aria-label="POS command panels" className="inline-flex items-center p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-2xs gap-1 overflow-x-auto max-w-full">
             {[
               { id: 'overview', label: 'Register & Sales', icon: ReceiptText },
               { id: 'audit', label: 'Cash & Audit Control', icon: ShieldCheck },
@@ -366,21 +374,22 @@ const POSCommandContent: React.FC = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as 'overview' | 'audit' | 'roster' | 'all')}
-                className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+                aria-pressed={activeTab === tab.id}
+                className={`min-h-11 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-2 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                   activeTab === tab.id
                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-2xs border border-[var(--theme-border)]'
                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                 }`}
               >
-                <tab.icon size={13} className={activeTab === tab.id ? 'text-[#0071E3] dark:text-[#2997FF]' : ''} />
+                <tab.icon size={13} aria-hidden="true" className={activeTab === tab.id ? 'text-[var(--theme-accent)]' : ''} />
                 <span>{tab.label}</span>
               </button>
             ))}
           </div>
 
           <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-mono">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>Terminal Live</span>
+            <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success)]" aria-hidden="true" />
+            <span>POS Command</span>
             {activeSite?.code && <span>• [{activeSite.code}]</span>}
           </div>
         </div>
@@ -392,7 +401,7 @@ const POSCommandContent: React.FC = () => {
           <div className="space-y-6">
             {activeTab === 'all' && (
               <div className="flex items-center gap-2 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                <ReceiptText size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <ReceiptText size={14} aria-hidden="true" className="text-[var(--theme-accent)]" />
                 <span>Register Performance &amp; Live Activity</span>
               </div>
             )}
@@ -406,7 +415,7 @@ const POSCommandContent: React.FC = () => {
           <div className="space-y-6">
             {activeTab === 'all' && (
               <div className="flex items-center gap-2 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                <ShieldCheck size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <ShieldCheck size={14} aria-hidden="true" className="text-[var(--theme-accent)]" />
                 <span>Daily Cash Drawer &amp; Supervisory Audit</span>
               </div>
             )}
@@ -420,7 +429,7 @@ const POSCommandContent: React.FC = () => {
           <div className="space-y-6">
             {activeTab === 'all' && (
               <div className="flex items-center gap-2 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                <Users2 size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <Users2 size={14} aria-hidden="true" className="text-[var(--theme-accent)]" />
                 <span>Personnel Roster, Schedule &amp; Team Bonus</span>
               </div>
             )}
