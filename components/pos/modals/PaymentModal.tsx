@@ -5,7 +5,7 @@ import { useData } from '../../../contexts/DataContext';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { PaymentMethod } from '../../../types';
-import { Banknote, CreditCard, Smartphone, RefreshCcw, Check } from 'lucide-react';
+import { Banknote, CreditCard, Smartphone, Check } from 'lucide-react';
 import { usePOSMobilePayment } from '../hooks/usePOSMobilePayment';
 import { MobilePaymentSection } from './MobilePaymentSection';
 
@@ -51,21 +51,12 @@ export const PaymentModal: React.FC = () => {
     };
 
     const quickCashAmounts = React.useMemo(() => {
-        const exact = Math.ceil(total);
-        const options = new Set<number>([exact]);
-        if (exact < 500) {
-            options.add(100);
-            options.add(200);
-            options.add(500);
-        } else if (exact < 1000) {
-            options.add(Math.ceil(exact / 100) * 100);
-            options.add(1000);
-        } else {
-            options.add(Math.ceil(exact / 100) * 100);
-            options.add(Math.ceil(exact / 500) * 500);
-            options.add(Math.ceil(exact / 1000) * 1000);
-        }
-        return Array.from(options).filter(v => v > 0).sort((a, b) => a - b).slice(0, 4);
+        const exact = Math.round(total * 100) / 100;
+        const options = new Set<number>([exact, Math.ceil(exact)]);
+        [100, 200, 500, 1000].forEach(denomination => {
+            options.add(Math.ceil(exact / denomination) * denomination);
+        });
+        return Array.from(options).filter(v => v >= exact && v > 0).sort((a, b) => a - b).slice(0, 4);
     }, [total]);
 
     const shortage = selectedPaymentMethod === 'Cash' ? Math.max(0, total - parseFloat(amountTendered || '0')) : 0;
@@ -98,13 +89,14 @@ export const PaymentModal: React.FC = () => {
                                 key={method.id}
                                 type="button"
                                 title={t('pos.initializePayment')}
+                                aria-pressed={isSelected}
                                 onClick={() => {
                                     setSelectedPaymentMethod(method.id as PaymentMethod);
                                     if (method.id === 'Cash' && (!amountTendered || parseFloat(amountTendered) < total)) {
-                                        setAmountTendered(Math.ceil(total).toString());
+                                        setAmountTendered((Math.round(total * 100) / 100).toString());
                                     }
                                 }}
-                                className={`p-4 rounded-2xl border flex flex-col items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer active:scale-95 ${
+                                className={`min-h-24 p-4 rounded-2xl border flex flex-col items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] ${
                                     isSelected
                                         ? 'bg-[var(--theme-bg-card)] border-[var(--theme-primary)] ring-2 ring-[var(--theme-primary)] shadow-sm'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-strong)]'
@@ -130,7 +122,7 @@ export const PaymentModal: React.FC = () => {
                                     {t('pos.amountTendered')}
                                 </label>
                                 {shortage > 0 && (
-                                    <span className="text-[11px] font-bold text-rose-500 animate-pulse">
+                                    <span id="amount-tendered-shortage" role="status" className="text-[11px] font-bold text-rose-600 dark:text-rose-400">
                                         Need {CURRENCY_SYMBOL} {shortage.toLocaleString()} more
                                     </span>
                                 )}
@@ -138,8 +130,12 @@ export const PaymentModal: React.FC = () => {
                             <input
                                 id="amount-tendered-input"
                                 type="number"
+                                inputMode="decimal"
+                                min="0"
+                                step="0.01"
                                 value={amountTendered}
                                 onChange={(e) => setAmountTendered(e.target.value)}
+                                aria-describedby={shortage > 0 ? 'amount-tendered-shortage' : undefined}
                                 placeholder="Enter amount..."
                                 className={`w-full bg-[var(--theme-bg-subtle)] border rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] text-2xl outline-none font-mono font-bold transition-all tabular-nums tracking-tight ${
                                     shortage > 0
@@ -153,20 +149,21 @@ export const PaymentModal: React.FC = () => {
                         {/* Quick Cash Buttons */}
                         <div className="grid grid-cols-4 gap-2.5">
                             {quickCashAmounts.map((amt, i) => {
-                                const isExact = amt === Math.ceil(total);
+                                const isExact = amt === Math.round(total * 100) / 100;
                                 const isSelected = parseFloat(amountTendered || '0') === amt;
                                 return (
                                     <button
                                         key={i}
                                         type="button"
                                         onClick={() => setAmountTendered(amt.toString())}
-                                        className={`py-2.5 rounded-xl border text-xs sm:text-sm font-mono font-bold transition-all cursor-pointer tabular-nums active:scale-95 shadow-xs ${
+                                        aria-pressed={isSelected}
+                                        className={`min-h-11 rounded-xl border text-xs sm:text-sm font-mono font-bold transition-all cursor-pointer tabular-nums active:scale-95 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] ${
                                             isSelected
                                                 ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] border-[var(--theme-border)]'
                                         }`}
                                     >
-                                        {isExact ? 'Exact' : `${CURRENCY_SYMBOL} ${amt}`}
+                                        {isExact ? 'Exact' : `${CURRENCY_SYMBOL} ${amt.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
                                     </button>
                                 );
                             })}
@@ -195,10 +192,10 @@ export const PaymentModal: React.FC = () => {
 
                 {selectedPaymentMethod === 'Card' && (
                     <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-3">
-                        <RefreshCcw className="w-5 h-5 text-blue-500 mt-0.5 animate-spin" />
+                        <CreditCard className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
                         <div>
-                            <p className="text-blue-500 text-sm font-bold">Waiting for Terminal...</p>
-                            <p className="text-[var(--theme-text-secondary)] text-xs mt-0.5">Ask customer to tap card or swipe.</p>
+                            <p className="text-blue-600 dark:text-blue-400 text-sm font-bold">Confirm payment on the card terminal</p>
+                            <p className="text-[var(--theme-text-secondary)] text-xs mt-0.5">After approval, complete the sale here to record it.</p>
                         </div>
                     </div>
                 )}
@@ -208,7 +205,7 @@ export const PaymentModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsPaymentModalOpen(false)}
-                        className="flex-1 py-3.5 px-5 bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl font-bold text-sm transition-all cursor-pointer"
+                        className="min-h-11 flex-1 py-3.5 px-5 bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {t('common.cancel')}
                     </button>
@@ -216,7 +213,7 @@ export const PaymentModal: React.FC = () => {
                         type="button"
                         onClick={handleComplete}
                         disabled={!canComplete}
-                        className="flex-[2] py-3.5 px-6 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl font-black text-sm uppercase tracking-wider disabled:cursor-not-allowed transition-all shadow-xs active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                        className="min-h-11 flex-[2] py-3.5 px-6 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl font-black text-sm uppercase tracking-wider disabled:cursor-not-allowed transition-all shadow-xs active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {isProcessing ? (
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
