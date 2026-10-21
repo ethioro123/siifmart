@@ -78,21 +78,19 @@ export default function Pricing() {
 
    const { avgMargin, priceIndex } = useMemo(() => {
       if (!products || products.length === 0) {
-         return { avgMargin: '0.0%', priceIndex: '100.0' };
+         return { avgMargin: '—', priceIndex: '—' };
       }
-      const validProducts = products.filter(p => p.price > 0);
-      const totalMargin = validProducts.reduce((sum, p) => {
-         const cost = p.costPrice || (p.price * 0.7);
-         return sum + (((p.price - cost) / p.price) * 100);
-      }, 0);
-      const calculatedAvgMargin = validProducts.length > 0 
-         ? (totalMargin / validProducts.length).toFixed(1) + '%' 
-         : '0.0%';
+      const marginProducts = products.filter(p => p.price > 0 && (p.costPrice || 0) > 0);
+      const totalMargin = marginProducts.reduce((sum, p) => sum + (((p.price - p.costPrice!) / p.price) * 100), 0);
+      const calculatedAvgMargin = marginProducts.length > 0
+         ? (totalMargin / marginProducts.length).toFixed(1) + '%'
+         : '—';
+      const pricedProducts = products.filter(p => p.price > 0);
 
-      const compProducts = validProducts.filter(p => p.competitorPrice && p.competitorPrice > 0);
+      const compProducts = pricedProducts.filter(p => p.competitorPrice && p.competitorPrice > 0);
       const calculatedPriceIndex = compProducts.length > 0
          ? ((compProducts.reduce((sum, p) => sum + (p.price / p.competitorPrice!), 0) / compProducts.length) * 100).toFixed(1)
-         : '100.0';
+         : '—';
 
       return { avgMargin: calculatedAvgMargin, priceIndex: calculatedPriceIndex };
    }, [products]);
@@ -112,7 +110,7 @@ export default function Pricing() {
                      </h2>
                   </div>
                   <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm font-normal">
-                     AI-driven pricing strategies, markdown optimization, and visual planograms.
+                     Pricing and promotion planning, markdown review, and store display execution.
                   </p>
                </div>
                <div className="flex items-center gap-2.5 flex-wrap">
@@ -121,10 +119,10 @@ export default function Pricing() {
                      <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Price Index:</span>
                      <span className="text-xs font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums">{priceIndex}</span>
                   </div>
-                  <div className="px-3.5 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
-                     <TrendingUp size={14} className="text-emerald-600 dark:text-emerald-400" />
-                     <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">Avg Margin:</span>
-                     <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200 font-mono tabular-nums">{avgMargin}</span>
+                  <div className="px-3.5 py-1.5 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-full flex items-center gap-2">
+                     <TrendingUp size={14} className="text-[var(--theme-status-success-text)]" aria-hidden="true" />
+                     <span className="text-xs text-[var(--theme-status-success-text)] font-medium">Avg Margin:</span>
+                     <span className="text-xs font-semibold text-[var(--theme-status-success-text)] font-mono tabular-nums">{avgMargin}</span>
                   </div>
                </div>
             </div>
@@ -140,13 +138,15 @@ export default function Pricing() {
             />
 
             {/* Segmented Control Tabs */}
-            <div className="inline-flex p-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 flex-wrap w-fit">
-               <button onClick={() => setActiveTab('reviews')} className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs cursor-pointer ${activeTab === 'reviews' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-transparent'}`}>
+            <div role="group" aria-label="Merchandising sections" className="flex w-full max-w-full flex-nowrap overflow-x-auto p-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1">
+               <button type="button" aria-pressed={activeTab === 'reviews'} onClick={() => setActiveTab('reviews')} className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${activeTab === 'reviews' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-transparent'}`}>
                   <ClipboardCheck size={14} /> Proposals
                </button>
                <button
+                  type="button"
+                  aria-pressed={activeTab === 'pricing'}
                   onClick={() => setActiveTab('pricing')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs transition-all duration-200 cursor-pointer ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'pricing'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -156,8 +156,10 @@ export default function Pricing() {
                   <span>Price Manager</span>
                </button>
                <button
+                  type="button"
+                  aria-pressed={activeTab === 'forecast'}
                   onClick={() => setActiveTab('forecast')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs transition-all duration-200 cursor-pointer ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'forecast'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -167,8 +169,10 @@ export default function Pricing() {
                   <span>Demand Forecast</span>
                </button>
                <button
+                  type="button"
+                  aria-pressed={activeTab === 'markdown'}
                   onClick={() => setActiveTab('markdown')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs transition-all duration-200 cursor-pointer ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'markdown'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -178,8 +182,10 @@ export default function Pricing() {
                   <span>Markdown Optimizer</span>
                </button>
                <button
+                  type="button"
+                  aria-pressed={activeTab === 'rules'}
                   onClick={() => setActiveTab('rules')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs transition-all duration-200 cursor-pointer ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'rules'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -189,8 +195,10 @@ export default function Pricing() {
                   <span>Smart Rules</span>
                </button>
                <button
+                  type="button"
+                  aria-pressed={activeTab === 'planogram'}
                   onClick={() => setActiveTab('planogram')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs transition-all duration-200 cursor-pointer ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'planogram'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -200,8 +208,10 @@ export default function Pricing() {
                   <span>Planogram</span>
                </button>
                <button
+                  type="button"
+                  aria-pressed={activeTab === 'promos'}
                   onClick={() => setActiveTab('promos')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs transition-all duration-200 cursor-pointer ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'promos'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
@@ -211,8 +221,10 @@ export default function Pricing() {
                   <span>Campaigns</span>
                </button>
                <button
+                  type="button"
+                  aria-pressed={activeTab === 'shelf-tags'}
                   onClick={() => setActiveTab('shelf-tags')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs transition-all duration-200 cursor-pointer ${
+                  className={`min-h-11 shrink-0 flex items-center gap-2 px-4 rounded-lg text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                      activeTab === 'shelf-tags'
                         ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
