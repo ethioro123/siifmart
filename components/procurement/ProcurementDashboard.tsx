@@ -5,7 +5,6 @@ import DateRangeSelector from '../../components/DateRangeSelector';
 import { formatCompactNumber } from '../../utils/formatting';
 import { Supplier } from '../../types';
 import { DateRangeOption } from '../../hooks/useDateFilter';
-import { useStore } from '../../contexts/CentralStore';
 
 interface ProcurementMetrics {
     totalSpend: number;
@@ -27,18 +26,17 @@ interface ProcurementDashboardProps {
 export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
     metrics, dateRange, setDateRange, suppliers, currencySymbol = 'ETB'
 }) => {
-    const { theme } = useStore();
-    const accentColor = theme === 'dark' ? '#2997FF' : '#0071E3';
+    const accentColor = 'var(--theme-accent)';
     const COLORS = [
         accentColor,
-        '#30D158', // Apple Emerald
-        '#FF9F0A', // Apple Amber
-        '#BF5AF2', // Apple Purple
-        '#64D2FF'  // Apple Cyan
+        'var(--theme-status-success)',
+        'var(--theme-status-warning)',
+        'var(--theme-status-danger)',
+        'var(--theme-status-info)'
     ];
 
     const KpiCard = ({ title, value, sub, icon: Icon }: any) => (
-        <div className="rounded-2xl p-5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm hover:border-[var(--theme-border-focus)] group transition-all duration-200">
+        <div className="rounded-2xl p-5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs group">
             <div className="flex justify-between items-start mb-3">
                 <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] flex items-center justify-center text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-colors">
                     <Icon size={18} strokeWidth={2} />
@@ -97,7 +95,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* Date Analysis Filter */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm relative z-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs relative z-10">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] flex items-center justify-center text-[var(--theme-accent)]">
                         <Calendar size={18} strokeWidth={2} />
@@ -158,7 +156,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
 
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm p-6">
+                <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs p-6">
                     <h3 className="font-semibold text-[var(--theme-text-secondary)] mb-6 text-xs uppercase tracking-wider">Spend by Category</h3>
                     <div className="h-[300px] w-full min-w-0 touch-pan-y">
                         <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
@@ -189,7 +187,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                     </div>
                 </div>
 
-                <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm p-6">
+                <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-xs p-6">
                     <h3 className="font-semibold text-[var(--theme-text-secondary)] mb-6 text-xs uppercase tracking-wider">Monthly Spend Trend</h3>
                     <div className="h-[300px] w-full min-w-0 touch-pan-y">
                         <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>

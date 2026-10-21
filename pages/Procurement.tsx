@@ -249,18 +249,18 @@ export default function Procurement() {
                                     setActiveTab('orders');
                                     setStatusFilter('Draft');
                                 }}
-                                className="h-11 px-4 flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-full transition-all cursor-pointer shadow-xs text-xs font-semibold text-amber-700 dark:text-amber-300 shrink-0"
+                                className="min-h-11 px-4 flex items-center gap-2 bg-[var(--theme-status-warning-bg)] hover:opacity-90 border border-[var(--theme-status-warning-border)] rounded-full transition-colors cursor-pointer shadow-xs text-xs font-semibold text-[var(--theme-status-warning-text)] shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-warning)]"
                                 title={`${pendingSignOffsCount} PO draft(s) awaiting manager sign-off`}
                             >
-                                <ShieldAlert size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                                <ShieldAlert size={16} className="text-[var(--theme-status-warning-text)] shrink-0" />
                                 <span className="font-mono tabular-nums">{pendingSignOffsCount} Pending Sign-Off{pendingSignOffsCount > 1 ? 's' : ''}</span>
                             </button>
                         ) : (
                             <div
-                                className="h-11 px-4 flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] shrink-0"
+                                className="min-h-11 px-4 flex items-center gap-2 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-full text-xs font-semibold text-[var(--theme-status-info-text)] shrink-0"
                                 title={`${pendingSignOffsCount} PO draft(s) in supervisory review`}
                             >
-                                <Clock size={16} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                                <Clock size={16} className="text-[var(--theme-status-info-text)] shrink-0" />
                                 <span className="font-mono tabular-nums">{pendingSignOffsCount} In Review</span>
                             </div>
                         );
@@ -268,8 +268,9 @@ export default function Procurement() {
 
                     <Protected permission="CREATE_PO">
                         <button
+                            type="button"
                             onClick={() => handleCreatePOOpen()}
-                            className="h-11 px-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center gap-2 shadow-sm shrink-0"
+                            className="min-h-11 px-5 rounded-full bg-[var(--theme-btn-primary-bg)] text-[var(--theme-btn-primary-text)] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-colors flex items-center gap-2 shadow-xs shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                             <Plus size={18} strokeWidth={2.5} />
                             Create Order
@@ -282,14 +283,14 @@ export default function Procurement() {
             <RegionalScopeBanner
                 moduleName="Procurement"
                 guardrailBadge={
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-semibold">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-xs font-semibold">
                         <span>Autonomous PO Limit: {currencySymbol} {Number(regionalAutonomousPoLimit).toLocaleString()}</span>
                     </div>
                 }
             />
 
             {/* Navigation Tabs */}
-            <div className="inline-flex p-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 flex-wrap w-fit">
+            <div role="group" aria-label="Procurement sections" className="inline-flex p-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 flex-wrap w-fit">
                 {(isRegionalStaff
                     ? (['overview', 'orders', 'suppliers', 'inbound_qc'] as const)
                     : (['overview', 'orders', 'suppliers', 'vendor_relations', 'customs_import', 'inbound_qc'] as const)
@@ -298,10 +299,12 @@ export default function Procurement() {
                     return (
                         <button
                             key={tab}
+                            type="button"
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 rounded-full text-xs sm:text-sm transition-all duration-200 ${
+                            aria-pressed={isActive}
+                            className={`min-h-11 px-4 py-2 rounded-full text-xs sm:text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                 isActive
-                                    ? 'bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] font-semibold shadow-sm border border-[var(--theme-border)]'
+                                    ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-accent)]'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
                             }`}
                         >
