@@ -32,7 +32,7 @@ describe('Fulfillment tab permissions', () => {
         ['inbound_qc_inspector', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
         ['stock_clerk', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'COUNT', 'REPLENISH', 'LABELS']],
         ['replenishment_planner', ['TRANSFER', 'REPLENISH']],
-        ['returns_clerk', ['RETURNS']],
+        ['returns_clerk', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'RETURNS']],
         ['dispatcher', ['DOCKS', 'DRIVER', 'ASSIGN']],
         ['supply_chain_manager', ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH']],
         ['regional_logistics_lead', ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER']],

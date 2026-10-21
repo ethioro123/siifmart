@@ -105,12 +105,12 @@ export const PERMISSIONS = {
     ACCESS_WAREHOUSE: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'warehouse_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'logistics_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner', 'regional_logistics_lead', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head'],
     MANAGE_WAREHOUSE: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_logistics_lead', 'operations_manager', 'head_of_operations', 'operations_head', 'warehouse_manager', 'inventory_specialist'],
     ASSIGN_TASKS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_logistics_lead', 'warehouse_manager', 'logistics_manager', 'dispatch_manager', 'dispatcher', 'inventory_specialist', 'fleet_maintenance_supervisor'],
-    COMPLETE_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'packer', 'receiver'],
+    COMPLETE_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'packer', 'receiver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector'],
     VIEW_ALL_TASKS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_logistics_lead', 'warehouse_manager', 'logistics_manager', 'dispatch_manager', 'dispatcher', 'inventory_specialist'],
-    PROCESS_RETURNS: ['super_admin', 'warehouse_manager', 'dispatcher'],
+    PROCESS_RETURNS: ['super_admin', 'warehouse_manager', 'dispatcher', 'returns_clerk', 'inventory_specialist'],
     MANAGE_WASTE: ['super_admin', 'warehouse_manager', 'inventory_specialist'],
-    INVENTORY_COUNT: ['super_admin', 'warehouse_manager', 'inventory_specialist'],
-    MANAGE_REPLENISHMENT: ['super_admin', 'regional_manager', 'regional_logistics_lead', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'replenishment_planner'],
+    INVENTORY_COUNT: ['super_admin', 'warehouse_manager', 'inventory_specialist', 'stock_clerk'],
+    MANAGE_REPLENISHMENT: ['super_admin', 'regional_manager', 'regional_logistics_lead', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'replenishment_planner', 'stock_clerk'],
 
     // Settings
     ACCESS_SETTINGS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'it_support', 'head_of_it', 'it_head', 'security_manager', 'auditor', 'head_of_audit', 'audit_head', 'regional_security_supervisor'],

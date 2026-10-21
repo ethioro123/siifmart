@@ -25,7 +25,7 @@ export interface SystemLog {
   ip_address?: string;
 }
 
-export type SiteType = 'Administration' | 'Administrative' | 'Central Operations' | 'Warehouse' | 'Store' | 'Distribution Center' | 'HQ' | 'Headquarters';
+export type SiteType = 'Administration' | 'Administrative' | 'Central Operations' | 'Warehouse' | 'Store' | 'Distribution Center' | 'Dark Store' | 'Online Store' | 'HQ' | 'Headquarters';
 
 export interface TaxRule {
   name: string;
