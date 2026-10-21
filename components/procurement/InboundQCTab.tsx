@@ -12,12 +12,20 @@ interface InboundQCTabProps {
 
 export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
   const { user, showToast } = useStore();
-  const isManager = Boolean(user?.role && ['head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+  const isManager = Boolean(user?.role && [
+    'head_of_procurement', 'procurement_head', 'procurement_manager',
+    'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+    'regional_manager', 'regional_operations_director',
+    'regional_procurement_lead', 'regional_procurement_manager',
+    'regional_logistics_lead',
+    'head_of_operations', 'operations_head', 'operations_manager',
+    'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'
+  ].includes(user.role));
 
   const [inspections, setInspections] = useState<InboundQCInspection[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [availablePOs, setAvailablePOs] = useState<{ id: string; poNumber: string; supplierName: string }[]>([]);
+  const [availablePOs, setAvailablePOs] = useState<{ id: string; poNumber: string; supplierName: string; siteId?: string }[]>([]);
 
   const [poNumber, setPoNumber] = useState('');
   const [sampleSize, setSampleSize] = useState(10);
@@ -47,7 +55,8 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
         setAvailablePOs((res.data || []).map(p => ({
           id: p.id,
           poNumber: p.poNumber || p.id,
-          supplierName: p.supplierName || 'Vendor'
+          supplierName: p.supplierName || 'Vendor',
+          siteId: p.siteId
         })));
       })
       .catch(() => {});
@@ -61,10 +70,13 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
 
     const isTempBreach = tempCelsius !== undefined && tempCelsius > 4.0;
     const finalDisposition = isTempBreach || packaging === 'Compromised' || expiry === 'Expired' ? 'Rejected' : disposition;
+    const selectedPO = availablePOs.find(p => p.poNumber === poNumber.trim() || p.id === poNumber.trim());
 
     try {
       await procurementGovernanceService.createInboundQCInspection({
+        poId: selectedPO?.id,
         poNumber: poNumber.trim(),
+        siteId: selectedPO?.siteId,
         countryCode,
         inspectorId: user?.id || 'QC-01',
         inspectorName: user?.name || 'Inbound QC Inspector',
