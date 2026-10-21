@@ -128,8 +128,15 @@ export default function Finance() {
                   {/* Maker-Checker Sign-off Hub Badge */}
                   {(() => {
                      const pendingExpenses = (state.expenses || []).filter(e => e.status === 'Pending').length;
-                     const userRole = state.user?.role;
-                     const isManager = Boolean(userRole && ['head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(userRole));
+                     const userRole = state.user?.role?.toLowerCase() || '';
+                     const isManager = Boolean(userRole && [
+                        'head_of_finance', 'finance_head', 'finance_manager',
+                        'regional_finance_officer', 'regional_finance_manager',
+                        'head_of_operations', 'operations_head', 'operations_manager',
+                        'regional_manager', 'regional_operations_director',
+                        'country_managing_director', 'managing_director',
+                        'admin', 'super_admin', 'CEO', 'ceo'
+                     ].map(r => r.toLowerCase()).includes(userRole));
 
                      if (pendingExpenses === 0) return null;
 

@@ -218,25 +218,11 @@ export const expensesService = {
 
             if (rpcError) {
                 const msg = rpcError.message || '';
-                if (
-                    msg.includes('Maker-Checker') ||
-                    msg.includes('Executive Authorization') ||
-                    msg.includes('Autonomous Cap Exceeded') ||
-                    msg.includes('Segregation of Duties') ||
-                    msg.includes('Zero-Trust')
-                ) {
-                    throw new Error(msg);
-                }
-                logger.warn('expensesService', 'RPC approve_expense warning, attempting direct path:', { error: String(rpcError.message) });
+                logger.warn('expensesService', 'RPC approve_expense error:', { error: msg });
+                throw new Error(msg);
             }
         } catch (rpcErr: any) {
-            if (
-                rpcErr.message?.includes('Maker-Checker') ||
-                rpcErr.message?.includes('Executive Authorization') ||
-                rpcErr.message?.includes('Autonomous Cap Exceeded')
-            ) {
-                throw rpcErr;
-            }
+            throw rpcErr;
         }
 
         const now = new Date().toISOString();
@@ -246,7 +232,6 @@ export const expensesService = {
                 status: 'Approved',
                 approved_by_id: approver.id,
                 approved_by: approver.name,
-                approved_by_name: approver.name,
                 approved_at: now,
                 updated_at: now
             })
