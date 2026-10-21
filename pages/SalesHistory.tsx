@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
    ChevronRight, Receipt, ChevronLeft, CreditCard, Banknote, Smartphone,
    Loader, RefreshCw, WifiOff, CloudOff, Download
@@ -14,14 +15,13 @@ import { useStore } from '../contexts/CentralStore';
 import { canViewAllSites } from '../utils/permissions';
 import { getCountryProfile, Country } from '../utils/localization';
 
-// --- Sub-Components ---
 import { SalesAnalyticsRibbon } from './sales-history/components/SalesAnalyticsRibbon';
 import { SalesToolbar } from './sales-history/components/SalesToolbar';
 import { SalesDetailModal } from './sales-history/components/SalesDetailModal';
 import { triggerReceiptPrint } from './sales-history/utils/receiptPrinter';
 import { logger } from '../utils/logger';
+import { serializeSalesCsv } from './sales-history/utils/salesCsv';
 
-// Pagination Config (Rule 10: 25-Item Shelf Rule)
 const ITEMS_PER_PAGE = 25;
 
 export default function SalesHistory() {
@@ -37,15 +37,15 @@ export default function SalesHistory() {
 
    const countrySiteIds = useMemo(() => countrySites.map(s => s.id), [countrySites]);
 
-   // --- DATA STATE ---
    const [sales, setSales] = useState<SaleRecord[]>([]);
    const [loading, setLoading] = useState(true);
    const [totalCount, setTotalCount] = useState(0);
 
    const { user } = useStore();
+   const navigate = useNavigate();
+   const fetchRequestId = useRef(0);
    const restricted = !canViewAllSites(user?.role);
 
-   // --- FILTER STATE ---
    const [searchTerm, setSearchTerm] = useState('');
    const [statusFilter, setStatusFilter] = useState('All');
    const [methodFilter, setMethodFilter] = useState('All');
@@ -64,31 +64,24 @@ export default function SalesHistory() {
       end: new Date().toISOString().split('T')[0]
    });
 
-   // --- PAGINATION STATE ---
    const [currentPage, setCurrentPage] = useState(1);
    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
-   // --- MODAL STATE ---
    const [selectedSale, setSelectedSale] = useState<SaleRecord | null>(null);
    const [detailTab, setDetailTab] = useState<'receipt' | 'audit'>('receipt');
 
-   // --- FETCH DATA ---
    const fetchSales = useCallback(async () => {
+      const requestId = ++fetchRequestId.current;
       setLoading(true);
+      const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : (storeFilter === 'All' ? undefined : storeFilter);
+      const targetSiteIds = effectiveSiteId ? [effectiveSiteId] : countrySiteIds;
+      if (targetSiteIds.length === 0 || (restricted && (!user?.siteId || !countrySiteIds.includes(user.siteId)))) {
+         setSales([]);
+         setTotalCount(0);
+         setLoading(false);
+         return;
+      }
       try {
-         // Determine target site IDs for country isolation
-         const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : (storeFilter === 'All' ? undefined : storeFilter);
-         const targetSiteIds = effectiveSiteId ? [effectiveSiteId] : countrySiteIds;
-
-         // If restricted user has no site, or there are no sites in this country, return empty
-         if (targetSiteIds.length === 0 || (restricted && (!user?.siteId || !countrySiteIds.includes(user.siteId)))) {
-            setSales([]);
-            setTotalCount(0);
-            setLoading(false);
-            return;
-         }
-
-         // Check if online before attempting fetch
          if (!navigator.onLine) {
             throw new Error('Offline');
          }
@@ -111,14 +104,13 @@ export default function SalesHistory() {
             filters
          );
 
+         if (requestId !== fetchRequestId.current) return;
          setSales(data);
          setTotalCount(count);
       } catch {
+         if (requestId !== fetchRequestId.current) return;
          logger.warn('SalesHistory', 'Network fetch failed or offline, falling back to local data');
 
-         // Fallback to local allSales filtering
-         const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : (storeFilter === 'All' ? undefined : storeFilter);
-         const targetSiteIds = effectiveSiteId ? [effectiveSiteId] : countrySiteIds;
          let filtered = [...(allSales || [])].filter(s => targetSiteIds.includes(s.siteId));
 
          // Apply Filters Locally
@@ -133,7 +125,8 @@ export default function SalesHistory() {
             filtered = filtered.filter(s =>
                (s.receiptNumber && s.receiptNumber.toLowerCase().includes(lower)) ||
                (s.id && s.id.toLowerCase().includes(lower)) ||
-               (s.cashierName && s.cashierName.toLowerCase().includes(lower))
+               (s.cashierName && s.cashierName.toLowerCase().includes(lower)) ||
+               (s.customerName && s.customerName.toLowerCase().includes(lower))
             );
          }
          if (dateRange.start) {
@@ -157,7 +150,7 @@ export default function SalesHistory() {
             addNotification('info', 'Live sales history was unavailable; showing locally available sales.');
          }
       } finally {
-         setLoading(false);
+         if (requestId === fetchRequestId.current) setLoading(false);
       }
    }, [currentPage, searchTerm, statusFilter, methodFilter, storeFilter, dateRange, addNotification, allSales, restricted, user?.siteId, countrySiteIds]);
 
@@ -166,7 +159,10 @@ export default function SalesHistory() {
       const timer = setTimeout(() => {
          fetchSales();
       }, 500);
-      return () => clearTimeout(timer);
+      return () => {
+         clearTimeout(timer);
+         fetchRequestId.current += 1;
+      };
    }, [fetchSales]);
 
    const handleFilterChange = (setter: (val: any) => void, value: any) => {
@@ -181,7 +177,7 @@ export default function SalesHistory() {
       if (!sale.items || sale.items.length === 0) {
          try {
             const fullSale = await salesService.getById(sale.id);
-            if (fullSale) setSelectedSale(fullSale);
+            if (fullSale) setSelectedSale(previous => previous?.id === sale.id ? fullSale : previous);
          } catch (err) {
             logger.warn('SalesHistory', 'Failed to lazy-fetch sale items', { id: sale.id, err });
          }
@@ -190,10 +186,12 @@ export default function SalesHistory() {
 
    // --- METRICS (Page Level) ---
    const metrics = useMemo(() => {
+      const nonRefundedSales = sales.filter(s => s.status !== 'Refunded');
+      const nonRefundedRevenue = nonRefundedSales.reduce((sum, sale) => sum + sale.total, 0);
       return {
-         totalRev: sales.reduce((sum, s) => sum + (s.status !== 'Refunded' ? s.total : 0), 0),
+         totalRev: nonRefundedRevenue,
          txCount: sales.length,
-         avgTicket: sales.length > 0 ? (sales.reduce((sum, s) => sum + (s.status !== 'Refunded' ? s.total : 0), 0) / sales.length) : 0,
+         avgTicket: nonRefundedSales.length > 0 ? nonRefundedRevenue / nonRefundedSales.length : 0,
       };
    }, [sales]);
 
@@ -216,7 +214,7 @@ export default function SalesHistory() {
             formatDateTime(saleDate, { showTime: true }).split(', ')[1],
             s.cashierName || 'Unknown',
             s.customerName || 'Walk-in',
-            s.items.length,
+            s.itemCount ?? s.items.length,
             s.method,
             s.total,
             s.status,
@@ -224,17 +222,15 @@ export default function SalesHistory() {
          ];
       });
 
-      const csvContent = "data:text/csv;charset=utf-8,"
-         + headers.join(",") + "\n"
-         + rows.map(e => e.join(",")).join("\n");
-
-      const encodedUri = encodeURI(csvContent);
+      const csvContent = serializeSalesCsv(headers, rows);
+      const encodedUri = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8' }));
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
       link.setAttribute("download", `sales_export_${dateRange.start}_to_${dateRange.end}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.setTimeout(() => URL.revokeObjectURL(encodedUri), 1000);
    };
 
    const handleReprint = () => {
@@ -401,7 +397,7 @@ export default function SalesHistory() {
                               </span>
                            </td>
                            <td className="py-3.5 px-4 text-xs font-mono tabular-nums text-[var(--theme-text-secondary)] text-right font-medium">
-                              {sale.items.length}
+                              {sale.itemCount ?? sale.items.length}
                            </td>
                            <td className="py-3.5 px-4 text-sm font-mono tabular-nums text-[var(--theme-text-primary)] font-semibold text-right">
                               {currencySymbol} {sale.total.toLocaleString()}
@@ -486,7 +482,12 @@ export default function SalesHistory() {
             sites={countrySites}
             auditLogs={auditLogs}
             handleReprint={handleReprint}
-            addNotification={addNotification}
+            onIssueReturn={() => {
+               if (!selectedSale) return;
+               const returnReference = selectedSale.receiptNumber || selectedSale.id;
+               setSelectedSale(null);
+               navigate(`/pos?return=${encodeURIComponent(returnReference)}`);
+            }}
             currencySymbol={currencySymbol}
          />
       </div>

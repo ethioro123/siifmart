@@ -14,6 +14,9 @@ function mapSaleRow(s: any): any {
         customerId: s.customer_id,
         receiptNumber: s.receipt_number,
         customerName: s.customers?.name,
+        itemCount: Array.isArray(s.sale_items)
+            ? (s.sale_items[0]?.count !== undefined ? Number(s.sale_items[0].count) : s.sale_items.length)
+            : 0,
         type: s.type || 'In-Store',
         items: Array.isArray(s.sale_items)
             ? s.sale_items.map((i: any) => ({
@@ -33,7 +36,7 @@ export const salesService = {
         // Nested sale_items and deep product joins are loaded on-demand via getById().
         const selectFields = filters?.includeItems
             ? '*, sale_items(*, products(category)), customers!left(*)'
-            : 'id, site_id, customer_id, sale_date, subtotal, tax, total, payment_method, status, amount_tendered, change, cashier_name, receipt_number, fulfillment_status, release_status, country_code, currency, created_at';
+            : 'id, site_id, customer_id, sale_date, subtotal, tax, total, payment_method, status, amount_tendered, change, cashier_name, receipt_number, fulfillment_status, release_status, country_code, currency, created_at, sale_items(count), customers!left(name)';
 
         let query = supabase
             .from('sales')
@@ -61,8 +64,16 @@ export const salesService = {
                 query = query.lte('sale_date', `${filters.endDate}T23:59:59`);
             }
             if (filters.search) {
-                const term = filters.search;
-                query = query.or(`receipt_number.ilike.%${term}%,cashier_name.ilike.%${term}%`);
+                const term = String(filters.search).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                const clauses = [
+                    `receipt_number.ilike."%${term}%"`,
+                    `cashier_name.ilike."%${term}%"`,
+                    `customers.name.ilike."%${term}%"`
+                ];
+                if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(filters.search))) {
+                    clauses.push(`id.eq.${filters.search}`);
+                }
+                query = query.or(clauses.join(','));
             }
         }
 

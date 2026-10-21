@@ -19,7 +19,7 @@ interface SalesDetailModalProps {
     sites: Site[];
     auditLogs: any[];
     handleReprint: () => void;
-    addNotification: (type: any, message: string) => void;
+    onIssueReturn: () => void;
     currencySymbol?: string;
 }
 
@@ -32,7 +32,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
     sites,
     auditLogs,
     handleReprint,
-    addNotification,
+    onIssueReturn,
     currencySymbol = CURRENCY_SYMBOL
 }) => {
     const { user } = useStore();
@@ -288,13 +288,10 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                         <Protected permission="REFUND_SALE">
                             <button
                                 type="button"
-                                onClick={() => {
-                                    addNotification('info', `Initiating return workflow for ${selectedSale.receiptNumber || selectedSale.id.substring(0, 12)}...`);
-                                    onClose();
-                                }}
+                                onClick={onIssueReturn}
                                 className="flex-1 h-11 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 border border-rose-500/20 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
                             >
-                                <RotateCcw size={16} /> Issue Return
+                            <RotateCcw size={16} /> Continue return in POS
                             </button>
                         </Protected>
                     </div>

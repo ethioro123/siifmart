@@ -33,6 +33,7 @@ export interface SaleRecord {
   method: PaymentMethod;
   status: 'Completed' | 'Pending' | 'Refunded' | 'Partially Refunded';
   items: CartItem[];
+  itemCount?: number;
   amountTendered?: number;
   change?: number;
   cashierName?: string;

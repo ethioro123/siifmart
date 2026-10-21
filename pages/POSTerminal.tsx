@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 import { POSProvider, usePOS } from '../components/pos/POSContext';
 import { POSProductGrid } from '../components/pos/POSProductGrid';
@@ -8,8 +9,21 @@ import { Store } from 'lucide-react';
 import Logo from '../components/Logo';
 
 const POSTerminalContent: React.FC = () => {
-  const { needsStoreSelection } = usePOS();
+  const { needsStoreSelection, setReturnSearchId, setIsReturnModalOpen } = usePOS();
   const { sites, setActiveSite } = useData();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const returnReference = new URLSearchParams(location.search).get('return');
+    if (!returnReference) return;
+    setReturnSearchId(returnReference);
+    setIsReturnModalOpen(true);
+    const nextParams = new URLSearchParams(location.search);
+    nextParams.delete('return');
+    const query = nextParams.toString();
+    navigate({ pathname: location.pathname, search: query ? `?${query}` : '' }, { replace: true });
+  }, [location.pathname, location.search, navigate, setIsReturnModalOpen, setReturnSearchId]);
 
   // STORE SELECTION REQUIRED FOR ADMIN USERS
   if (needsStoreSelection) {

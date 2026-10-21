@@ -33,11 +33,14 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
    sites,
    handleFilterChange
 }) => {
+   const today = new Date().toISOString().split('T')[0];
+   const defaultStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
    const hasActiveFilters = Boolean(
       searchTerm ||
       statusFilter !== 'All' ||
       methodFilter !== 'All' ||
-      (!restricted && storeFilter !== 'All')
+      (!restricted && storeFilter !== 'All') ||
+      dateRange.start !== defaultStart || dateRange.end !== today
    );
 
    const handleResetFilters = () => {
@@ -47,6 +50,7 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
       if (!restricted) {
          handleFilterChange(setStoreFilter, 'All');
       }
+      handleFilterChange(setDateRange, { start: defaultStart, end: today });
    };
 
    return (

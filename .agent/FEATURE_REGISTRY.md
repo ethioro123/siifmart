@@ -12,6 +12,13 @@
 - Files: `components/pos/hooks/usePOSPriceHistory.ts`, `components/pos/modals/PriceUpdatesModal.tsx`, `components/pos/POSCartPanel.tsx`, `services/product-price-history.service.ts`, `migrations/20261021_product_price_history.sql`, `tests/components/pos/utils/priceUpdates.test.ts`.
 - Database: `product_price_history`, `product_price_history_reviews`, effective-price trigger functions, scoped RLS policies, and `count_unreviewed_product_price_history` on the linked SIIFMART project.
 
+### Sales History Reliability and Return Handoff (2026-10-21)
+- Sales list rows include item counts and customer names without loading full line-item details.
+- Search supports receipt, cashier, customer, and exact sale ID online and offline; stale fetches cannot replace newer filters.
+- Offline fallback remains constrained to the authorized country and site, and CSV export quotes fields and neutralizes spreadsheet formulas.
+- The return action opens the POS return flow with the receipt reference prefilled; refund authorization remains in POS.
+- Files: `pages/SalesHistory.tsx`, `pages/POSTerminal.tsx`, `pages/sales-history/components/SalesToolbar.tsx`, `pages/sales-history/components/SalesDetailModal.tsx`, `pages/sales-history/utils/salesCsv.ts`, `services/sales.service.ts`, `types/sales.ts`.
+
 ### HQ and Regional Merchandising Proposals (2026-10-21)
 - Added Merchandising Specialist and Regional Merchandising Lead to the role hierarchy and administration assignment flow.
 - Scoped product, price, planogram, and campaign preparation to assigned countries or regions. Merchandising leads approve product and price proposals; Finance independently signs off below-floor prices.
