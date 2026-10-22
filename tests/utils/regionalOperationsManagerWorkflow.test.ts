@@ -11,7 +11,7 @@ import { canAccessRoute, getAvailableSections } from '../../services/auth.rbac';
 import { APPROVAL_WORKFLOWS } from '../../services/permissions.service';
 import { canWorkerPerformJob, getJobAssignmentEligibility } from '../../utils/fulfillmentRoles';
 
-describe('Regional Manager (SOP-MGT-020, Level 2, Rank 95) Full Operational Audit', () => {
+describe('Regional Operations Manager (SOP-MGT-020, Level 4, Rank 90) Full Operational Audit', () => {
 
     describe('1. Module Access & RBAC Route Protection', () => {
         it('grants full access to all operational modules for regional_operations_manager', () => {

@@ -222,7 +222,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18 & Section 14: Manager Accountability Law)
     - Fulfillment Leadership: warehouse_manager.
     - Logistics Leadership: logistics_manager, dispatch_manager.
     - Inventory Leadership: inventory_manager.
-    - Corporate & Regional Directors: regional_operations_manager, head_of_operations, head_of_finance, head_of_hr, head_of_procurement, head_of_supply_chain, security_manager, cs_manager.
+    - HQ Department Heads & Regional Managers: regional_operations_manager, head_of_operations, head_of_finance, head_of_hr, head_of_procurement, head_of_supply_chain, security_manager, cs_manager.
 
 2. MANDATORY IMMUTABLE SUPERVISORY FOOTPRINT
 --------------------------------------------------------------------------------

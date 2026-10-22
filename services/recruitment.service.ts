@@ -250,7 +250,7 @@ export const recruitmentService = {
     canManageHiring(userRole: string): boolean {
         const found = SYSTEM_ROLES.find(r => r.id === userRole);
         if (!found) return false;
-        // Levels 1 through 8 (Executives, Directors, Regional Leads, Facility Captains, Dept Managers & Shift Supervisors) can initiate headcount requisitions
+        // Levels 1 through 8 (Executives, Directors, Regional Department Managers, Facility Captains, Dept Managers & Shift Supervisors) can initiate headcount requisitions
         return found.level <= 8;
     },
 

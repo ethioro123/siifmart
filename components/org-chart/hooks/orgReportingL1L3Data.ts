@@ -131,7 +131,7 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         role: 'regional_operations_manager',
         level: 4,
         levelCategory: 'director',
-        levelTag: 'L4 Regional Director',
+        levelTag: 'L4 Regional Operations',
         reportsToRole: 'head_of_operations',
         reportsToLabel: 'Head of Operations (Corporate HQ)',
         dottedLineRole: 'super_admin',

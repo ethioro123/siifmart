@@ -12,7 +12,7 @@ export function getRoleDisplayName(role: UserRole): string {
         country_managing_director: 'Country Managing Director',
         admin: 'Country Managing Director',
 
-        // Level 2 - Corporate & Regional Directors
+        // Levels 3–5 - HQ Heads and Regional Managers
         head_of_operations: 'Head of Operations',
         regional_operations_manager: 'Regional Operations Manager',
         head_of_finance: 'Head of Finance',
@@ -94,7 +94,7 @@ export function getRoleDescription(role: UserRole): string {
         super_admin: 'Chief Executive Officer - Full enterprise executive oversight and cross-border governance',
         admin: 'Assistant Chief Executive Officer - Enterprise deputy and executive administrator',
 
-        // Level 2 - Corporate & Regional Directors
+        // Levels 3–5 - HQ Heads and Regional Managers
         head_of_operations: 'Head of Operations - Enterprise operations directorate and operational standards',
         regional_operations_manager: 'Regional Operations Manager - Territorial multi-site operational leadership and store network oversight',
         head_of_finance: 'Head of Finance - Enterprise financial oversight, budgeting, and fiscal governance',

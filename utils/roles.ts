@@ -290,7 +290,7 @@ export const canEmployRole = (
         return false;
     }
 
-    // Facility Captains (store_manager, warehouse_manager at Level 6) can ONLY be hired by Executive Leadership, Operations Director, Regional Director, or HR Leadership
+    // Facility Captains (store_manager, warehouse_manager at Level 6) can ONLY be hired by Executive Leadership, Head of Operations, Regional Operations Manager, or HR Leadership
     const isFacilityCaptain = candidateRole === 'store_manager' || candidateRole === 'warehouse_manager';
     if (isFacilityCaptain) {
         return [

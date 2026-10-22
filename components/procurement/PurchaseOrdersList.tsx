@@ -125,7 +125,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                     id: po.id,
                     updates: {
                         requiresHqApproval: true,
-                        notes: (po.notes ? `${po.notes}\n` : '') + `[HQ Escalation] Order total (${po.totalAmount}) exceeds regional ceiling. Escalated by ${user?.name || 'Regional Lead'} to Corporate HQ.`
+                        notes: (po.notes ? `${po.notes}\n` : '') + `[HQ Escalation] Order total (${po.totalAmount}) exceeds regional ceiling. Escalated by ${user?.name || 'Regional Department Manager'} to Corporate HQ.`
                     }
                 });
                 showToast("Order exceeds regional autonomous ceiling. Escalated to Corporate HQ for exception review.", "warning");
