@@ -11,20 +11,18 @@ DECLARE
   sequence_called boolean;
   next_from_sequence bigint;
 BEGIN
-  SELECT COALESCE(MAX(
+  next_from_orders := COALESCE((SELECT MAX(
     (((ASCII(SUBSTRING(UPPER(po_number) FROM 1 FOR 1)) - 65)::bigint * 17576
      + (ASCII(SUBSTRING(UPPER(po_number) FROM 2 FOR 1)) - 65) * 676
      + (ASCII(SUBSTRING(UPPER(po_number) FROM 3 FOR 1)) - 65) * 26
-     + (ASCII(SUBSTRING(UPPER(po_number) FROM 4 FOR 1)) - 65)) * 10000
+     + (ASCII(SUBSTRING(UPPER(po_number) FROM 4 FOR 1)) - 65))) * 10000
      + SUBSTRING(po_number FROM 5 FOR 4)::bigint
-  ), -1) + 2
-  INTO next_from_orders
+  )
   FROM public.purchase_orders
-  WHERE UPPER(po_number) ~ '^[A-Z]{4}[0-9]{4}$';
+  WHERE UPPER(po_number) ~ '^[A-Z]{4}[0-9]{4}$'), -1) + 2;
 
-  SELECT last_value, is_called
-  INTO sequence_last, sequence_called
-  FROM public.po_number_seq;
+  sequence_last := (SELECT last_value FROM public.po_number_seq);
+  sequence_called := (SELECT is_called FROM public.po_number_seq);
 
   next_from_sequence := sequence_last + CASE WHEN sequence_called THEN 1 ELSE 0 END;
   PERFORM setval(
