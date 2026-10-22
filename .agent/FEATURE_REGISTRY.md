@@ -5,6 +5,12 @@
 
 ## Active Features
 
+### Functional Reporting and HR-Reviewed Hiring (2026-10-23)
+- Country functional directors report through their Group functional executives and coordinate with the Country Managing Director; regional retail and regional supply chain remain separate lines. The Group CIO owns the technology chain, the Group CMO sits under the Group CCO, and country compliance reports through the Group CLCO while audit remains independent under the Board/CAE.
+- Hiring eligibility follows the candidate role's primary reporting line. Pending onboarding proposals require sign-off from HR roles or the Group CEO; regional HR approvals continue to be checked against the existing regional boundary.
+- These hiring checks are enforced in the application workflow. No database/RLS policy change is included in this update.
+- **Files**: `components/org-chart/hooks/orgReportingL1L2Data.ts`, `components/org-chart/hooks/orgReportingL3L5Data.ts`, `components/org-chart/hooks/useOrgTreeLayout.ts`, `components/org-chart/types.ts`, `utils/roleHiring.ts`, `hooks/useEmployeeWizard.ts`, `hooks/useEmployeeActions.ts`, `components/employees/modals/ApproveEmployeeModal.tsx`, `components/employees/wizard/StepReview.tsx`.
+
 ### Configurable Purchase Order Approval Authority (2026-10-22)
 - Regional PO approval uses each region's saved autonomous limit, including zero. Country leadership sets that limit with a recorded reason; procurement managers cannot change their own authority.
 - Regional Procurement Managers may approve another person's PO within their region's limit. Above it, HQ Finance records clearance of the current amount and terms before the Country Commercial Director completes final approval. Finance can view POs but does not issue final procurement approval.

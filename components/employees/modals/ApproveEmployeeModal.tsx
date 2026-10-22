@@ -4,7 +4,7 @@ import Modal from '../../Modal';
 import { Employee } from '../../../types';
 import { getEmployeeJobTitle } from '../../../utils/roles';
 import { useStore } from '../../../contexts/CentralStore';
-import { canEmployRole } from '../../../utils/roles';
+import { canApproveEmployeeOnboarding } from '../../../utils/roleHiring';
 
 interface ApproveEmployeeModalProps {
     isOpen: boolean;
@@ -25,7 +25,7 @@ export default function ApproveEmployeeModal({
 
     if (!isOpen || !employee) return null;
 
-    const isAuthorized = canEmployRole(user?.role, employee.role);
+    const isAuthorized = canApproveEmployeeOnboarding(user?.role);
     const locationName = sites.find(s => s.id === employee.siteId)?.name || 'Unassigned';
 
     return (
@@ -69,7 +69,7 @@ export default function ApproveEmployeeModal({
                         <div>
                             <p className="font-semibold">Dual-Control Constraint</p>
                             <p className="text-[11px] opacity-90 mt-0.5">
-                                You cannot approve onboarding for a role equal to or above your level ({getEmployeeJobTitle(employee)}). Approval must be executed by a higher managerial checker.
+                                Sign-off is limited to HR leadership or the Group CEO.
                             </p>
                         </div>
                     </div>

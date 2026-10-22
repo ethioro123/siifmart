@@ -12,7 +12,7 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L1 Global Executive',
         reportsToRole: null,
         reportsToLabel: 'Board of Directors / Ownership',
-        managesRoles: ['group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'group_cmo', 'country_managing_director', 'country_operations_director'],
+        managesRoles: ['group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director'],
         isManagerial: true
     },
     group_coo: {
@@ -22,7 +22,7 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L1 Global Executive',
         reportsToRole: 'group_ceo',
         reportsToLabel: 'Group CEO',
-        managesRoles: ['country_managing_director', 'country_operations_director', 'country_supply_chain_director'],
+        managesRoles: ['country_managing_director', 'country_operations_director'],
         isManagerial: true
     },
     group_cfo: {
@@ -42,7 +42,7 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L1 Global Executive',
         reportsToRole: 'group_ceo',
         reportsToLabel: 'Group CEO',
-        managesRoles: ['country_commercial_director', 'regional_procurement_manager', 'regional_merchandising_manager', 'buyer', 'merchandising_specialist', 'vendor_relations_manager'],
+        managesRoles: ['group_cmo', 'country_commercial_director', 'regional_procurement_manager', 'regional_merchandising_manager', 'buyer', 'merchandising_specialist', 'vendor_relations_manager'],
         isManagerial: true
     },
     group_cmo: {
@@ -50,9 +50,9 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 1,
         levelCategory: 'executive',
         levelTag: 'L1 Global Executive',
-        reportsToRole: 'group_ceo',
-        reportsToLabel: 'Group CEO',
-        managesRoles: ['country_commercial_director', 'regional_merchandising_manager', 'merchandising_specialist'],
+        reportsToRole: 'group_cco',
+        reportsToLabel: 'Group CCO',
+        managesRoles: ['regional_merchandising_manager', 'merchandising_specialist'],
         isManagerial: true
     },
     group_csco: {
@@ -80,9 +80,9 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 1,
         levelCategory: 'executive',
         levelTag: 'L1 Global Executive',
-        reportsToRole: 'group_ceo',
-        reportsToLabel: 'Group CEO',
-        managesRoles: ['country_technology_director', 'it_support'],
+        reportsToRole: 'group_cio',
+        reportsToLabel: 'Group CIO',
+        managesRoles: [],
         isManagerial: true
     },
     group_cio: {
@@ -92,7 +92,7 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L1 Global Executive',
         reportsToRole: 'group_ceo',
         reportsToLabel: 'Group CEO',
-        managesRoles: ['country_technology_director', 'it_support', 'data_analyst'],
+        managesRoles: ['group_cto', 'country_technology_director'],
         isManagerial: true
     },
     group_clco: {
@@ -102,7 +102,7 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L1 Global Executive',
         reportsToRole: 'group_ceo',
         reportsToLabel: 'Group CEO',
-        managesRoles: ['country_compliance_manager', 'tax_compliance_officer', 'customs_import_specialist', 'auditor'],
+        managesRoles: ['country_compliance_manager', 'tax_compliance_officer', 'customs_import_specialist'],
         isManagerial: true
     },
     group_cae: {
@@ -114,7 +114,7 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Board Audit Committee / Ownership',
         dottedLineRole: 'group_ceo',
         dottedLineLabel: 'Group CEO (Administrative Oversight)',
-        managesRoles: ['country_compliance_manager', 'auditor', 'store_operations_auditor', 'loss_prevention'],
+        managesRoles: ['auditor', 'store_operations_auditor'],
         isManagerial: true
     },
 
@@ -138,10 +138,10 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'director',
         levelTag: 'L3 Country Operations Director',
-        reportsToRole: 'country_managing_director',
-        reportsToLabel: 'Country Managing Director',
-        dottedLineRole: 'group_coo',
-        dottedLineLabel: 'Group COO (Functional Oversight)',
+        reportsToRole: 'group_coo',
+        reportsToLabel: 'Group COO',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
         managesRoles: ['regional_operations_manager'],
         isManagerial: true
     },
@@ -150,10 +150,10 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'director',
         levelTag: 'L3 Country Finance Director',
-        reportsToRole: 'country_managing_director',
-        reportsToLabel: 'Country Managing Director',
-        dottedLineRole: 'group_cfo',
-        dottedLineLabel: 'Group CFO (Functional Oversight)',
+        reportsToRole: 'group_cfo',
+        reportsToLabel: 'Group CFO',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
         managesRoles: ['regional_finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
         isManagerial: true
     },
@@ -162,10 +162,10 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'director',
         levelTag: 'L3 Country Commercial Director',
-        reportsToRole: 'country_managing_director',
-        reportsToLabel: 'Country Managing Director',
-        dottedLineRole: 'group_cco',
-        dottedLineLabel: 'Group CCO (Functional Oversight)',
+        reportsToRole: 'group_cco',
+        reportsToLabel: 'Group CCO',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
         managesRoles: ['regional_procurement_manager', 'regional_merchandising_manager', 'buyer', 'merchandising_specialist', 'vendor_relations_manager'],
         isManagerial: true
     },
@@ -174,10 +174,10 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'director',
         levelTag: 'L3 Country Supply Chain Director',
-        reportsToRole: 'country_managing_director',
-        reportsToLabel: 'Country Managing Director',
-        dottedLineRole: 'group_csco',
-        dottedLineLabel: 'Group CSCO (Functional Oversight)',
+        reportsToRole: 'group_csco',
+        reportsToLabel: 'Group CSCO',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
         managesRoles: ['regional_logistics_manager', 'warehouse_manager', 'regional_supply_chain_manager', 'dispatch_supervisor', 'demand_planner', 'replenishment_planner', 'fleet_maintenance_supervisor'],
         isManagerial: true
     },
@@ -186,10 +186,10 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'director',
         levelTag: 'L3 Country HR Director',
-        reportsToRole: 'country_managing_director',
-        reportsToLabel: 'Country Managing Director',
-        dottedLineRole: 'group_chro',
-        dottedLineLabel: 'Group CHRO (Functional Oversight)',
+        reportsToRole: 'group_chro',
+        reportsToLabel: 'Group CHRO',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
         managesRoles: ['regional_hr_manager', 'hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'],
         isManagerial: true
     },
@@ -198,10 +198,10 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'director',
         levelTag: 'L3 Country Technology Director',
-        reportsToRole: 'country_managing_director',
-        reportsToLabel: 'Country Managing Director',
-        dottedLineRole: 'group_cto',
-        dottedLineLabel: 'Group CTO / CIO (Functional Oversight)',
+        reportsToRole: 'group_cio',
+        reportsToLabel: 'Group CIO',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
         managesRoles: ['regional_it_manager', 'it_support', 'data_analyst'],
         isManagerial: true
     },
@@ -210,11 +210,11 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'director',
         levelTag: 'L3 Country Compliance Manager',
-        reportsToRole: 'country_managing_director',
-        reportsToLabel: 'Country Managing Director',
-        dottedLineRole: 'group_cae',
-        dottedLineLabel: 'Chief Audit Executive / Group CLCO (Functional Oversight)',
-        managesRoles: ['regional_compliance_manager', 'auditor', 'store_operations_auditor', 'tax_compliance_officer', 'loss_prevention'],
+        reportsToRole: 'group_clco',
+        reportsToLabel: 'Group General Counsel & Compliance Officer',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
+        managesRoles: ['regional_compliance_manager', 'tax_compliance_officer', 'loss_prevention'],
         isManagerial: true
     }
 };

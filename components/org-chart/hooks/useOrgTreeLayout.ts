@@ -122,7 +122,7 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
 
             // Levels 2-5 (Country Executive, HQ Department Heads, Regional Operations and Department Managers)
             if (node.level >= 2 && node.level <= 5) {
-                // Country Operations Director reports directly to CEO
+                // The Country Operations Director reports to the Group COO.
                 if (node.role === 'country_operations_director') {
                     return rootNode || null;
                 }
@@ -131,9 +131,8 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
                     if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                     return rootNode || null;
                 }
-                // Country Supply Chain Director reports to Country Operations Director (or CEO)
+                // The Country Supply Chain Director reports to the Group CSCO.
                 if (node.role === 'country_supply_chain_director') {
-                    if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                     return rootNode || null;
                 }
                 // Fallback grouping for uncataloged regional and area roles

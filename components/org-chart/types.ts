@@ -1,5 +1,5 @@
 import { UserRole, Employee } from '../../types';
-import { SYSTEM_ROLES } from '../../utils/roles';
+import { SYSTEM_ROLES } from '../../utils/systemRolesData';
 
 export interface HierarchyNode {
     role: string;
@@ -203,10 +203,19 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                 ]
             },
             { role: 'group_cfo', label: 'Group CFO', dept: 'finance', reportsTo: 'Group CEO' },
-            { role: 'group_cco', label: 'Group CCO', dept: 'procurement', reportsTo: 'Group CEO' },
+            {
+                role: 'group_cco', label: 'Group CCO', dept: 'procurement', reportsTo: 'Group CEO',
+                children: [{ role: 'group_cmo', label: 'Group Chief Marketing Officer', dept: 'procurement', reportsTo: 'Group CCO' }]
+            },
             { role: 'group_csco', label: 'Group CSCO', dept: 'warehouse', reportsTo: 'Group CEO' },
             { role: 'group_chro', label: 'Group CHRO', dept: 'hr', reportsTo: 'Group CEO' },
-            { role: 'group_cto', label: 'Group CTO', dept: 'support', reportsTo: 'Group CEO' },
+            {
+                role: 'group_cio', label: 'Group CIO', dept: 'support', reportsTo: 'Group CEO',
+                children: [
+                    { role: 'group_cto', label: 'Group CTO', dept: 'support', reportsTo: 'Group CIO' },
+                    { role: 'country_technology_director', label: 'Country Technology Director', dept: 'support', reportsTo: 'Group CIO' }
+                ]
+            },
             {
                 role: 'group_clco', label: 'Group General Counsel & Compliance', dept: 'support', reportsTo: 'Group CEO',
                 children: [{

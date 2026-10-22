@@ -26,7 +26,7 @@ export const L3_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Group CFO',
         dottedLineRole: 'country_managing_director',
         dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
-        managesRoles: ['regional_finance_manager', 'auditor', 'accountant', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
+        managesRoles: ['regional_finance_manager', 'accountant', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
         isManagerial: true
     },
     country_hr_director: {
@@ -70,23 +70,23 @@ export const L3_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'director',
         levelTag: 'L3 IT Director',
-        reportsToRole: 'group_cto',
-        reportsToLabel: 'Group CTO',
+        reportsToRole: 'group_cio',
+        reportsToLabel: 'Group CIO',
         dottedLineRole: 'country_managing_director',
         dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
-        managesRoles: ['it_support'],
+        managesRoles: ['regional_it_manager', 'it_support', 'data_analyst'],
         isManagerial: true
     },
     country_compliance_manager: {
         role: 'country_compliance_manager',
         level: 3,
         levelCategory: 'director',
-        levelTag: 'L3 Audit Director',
-        reportsToRole: 'group_cae',
-        reportsToLabel: 'Chief Audit Executive',
-        dottedLineRole: 'group_ceo',
-        dottedLineLabel: 'CEO / Audit Committee',
-        managesRoles: ['auditor', 'store_operations_auditor'],
+        levelTag: 'L3 Country Compliance Manager',
+        reportsToRole: 'group_clco',
+        reportsToLabel: 'Group General Counsel & Compliance Officer',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
+        managesRoles: ['regional_compliance_manager', 'tax_compliance_officer', 'loss_prevention'],
         isManagerial: true
     },
 

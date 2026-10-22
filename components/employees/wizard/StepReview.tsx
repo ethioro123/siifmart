@@ -41,7 +41,7 @@ export default function StepReview({
                     <div className="text-xs">
                         <span className="font-bold text-[var(--theme-text-primary)] block">Corporate HQ Exception Queue</span>
                         <span className="text-[var(--theme-text-secondary)] mt-0.5 block">
-                            {quotaResult?.reason || 'As a site or regional manager, submitting this profile registers a candidate proposal in "Pending Approval" status. Requires Corporate HQ review before system credentials can be activated.'}
+                            {quotaResult?.reason || 'Submitting this profile creates a candidate proposal in "Pending Approval" status. HR leadership must review it before system access is activated.'}
                         </span>
                     </div>
                 </div>

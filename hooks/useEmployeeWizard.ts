@@ -315,7 +315,7 @@ export function useEmployeeWizard({
       if (!creatableRoles.includes(newEmpData.role)) {
          setIsSubmitting(false);
          const roleLabel = SYSTEM_ROLES.find(r => r.id === newEmpData.role)?.label || newEmpData.role;
-         const errorMsg = `Unauthorized: You cannot employ a ${roleLabel}. You may only hire employees in roles strictly below your level.`;
+         const errorMsg = `Unauthorized: You cannot employ a ${roleLabel}. Hiring authority follows the role's primary reporting line.`;
          addNotification('alert', errorMsg);
          return errorMsg;
       }
@@ -469,7 +469,7 @@ export function useEmployeeWizard({
          } else if (isAutoApproved) {
             addNotification('success', `Employee Profile Created!\n\n${newEmpData.firstName} has been onboarded successfully.`);
          } else {
-            addNotification('success', `Candidate Proposal Submitted to HQ!\n\n${newEmpData.firstName} ${newEmpData.lastName} has been submitted to Corporate HQ for approval.`);
+            addNotification('success', `Candidate proposal submitted for HR review.\n\n${newEmpData.firstName} ${newEmpData.lastName} remains pending until HR sign-off.`);
          }
          return null;
       } catch (error: any) {

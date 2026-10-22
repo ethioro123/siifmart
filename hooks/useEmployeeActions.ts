@@ -3,7 +3,7 @@ import { Employee, UserRole } from '../types';
 import { systemLogsService, LogEntry } from '../services/local-logs.service';
 import { imageStorageService } from '../services/imageStorage.service';
 import { logger } from '../utils/logger';
-import { canEmployRole } from '../utils/roles';
+import { canApproveEmployeeOnboarding } from '../utils/roleHiring';
 import { terminationsService } from '../services/terminations.service';
 import type { TerminationReasonCode } from '../types/hr-zero-trust';
 import { createAuthAccountForNewHire } from '../utils/employeeAuthHelper';
@@ -143,8 +143,8 @@ export function useEmployeeActions({
 
    const handleConfirmApprove = async () => {
       if (!employeeToApprove) return;
-      if (!canEmployRole(user?.role, employeeToApprove.role)) {
-         addNotification('alert', `Unauthorized: You cannot approve onboarding for a ${employeeToApprove.role}. You can only approve roles below your level.`);
+      if (!canApproveEmployeeOnboarding(user?.role)) {
+         addNotification('alert', 'Unauthorized: employee onboarding sign-off is limited to HR leadership or the Group CEO.');
          setIsApproveModalOpen(false);
          setEmployeeToApprove(null);
          return;
