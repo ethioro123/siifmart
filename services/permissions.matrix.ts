@@ -41,7 +41,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     country_commercial_director: [
         'dashboard.view', 'admin.view',
         'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.delete_po',
-        'inventory.view', 'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
+        'inventory.view', 'pricing.view',
         'sales.view', 'sales.view_reports', 'customers.view', 'settings.view'
     ],
     country_supply_chain_director: HEAD_OF_SUPPLY_CHAIN_PERMISSIONS,
@@ -94,7 +94,6 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'settings.view', 'settings.view_logs',
         'pos.view',
         'sales.view', 'sales.view_reports',
-        'inventory.view',
         'employees.view', 'employees.manage_attendance'
     ],
     regional_it_manager: HEAD_OF_IT_PERMISSIONS,
@@ -302,7 +301,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     ],
     hr_generalist: [
         'dashboard.view',
-        'employees.view', 'employees.edit'
+        'employees.view', 'employees.edit', 'employees.view_salary', 'employees.propose_salary'
     ],
     merchandising_specialist: [
         'dashboard.view', 'inventory.view', 'pricing.view', 'pricing.create_promo',

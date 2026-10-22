@@ -23,10 +23,11 @@ export const ROLE_LEVELS: Record<string, number> = {
     country_technology_director: 3,
     country_compliance_manager: 3,
     // Level 3: Country Functional Directors (above)
-    // Level 4: Regional Operations Manager & Area Managers
+    // Level 4: Regional Operations Manager; Level 5: Area Manager and regional functional managers
     regional_operations_manager: 4,
-    area_operations_manager: 4,
-    // Level 5: Regional Department Managers
+    // Level 5: Area Manager and Regional Functional Managers
+    area_operations_manager: 5,
+    // Level 5: Area Manager and Regional Functional Managers
     regional_supply_chain_manager: 5,
     regional_procurement_manager: 5,
     regional_merchandising_manager: 5,

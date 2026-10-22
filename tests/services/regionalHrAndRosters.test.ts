@@ -145,7 +145,7 @@ describe('Step 8: Regional HR & Roster Management', () => {
         });
     });
 
-    describe('employeesService.getPaginated - Regional Directory Filtering', () => {
+    describe('employeesService.getPaginated - Regional Operations Managery Filtering', () => {
         it('filters employee directory queries by regionCode', async () => {
             const mockQuery: any = {
                 select: vi.fn().mockReturnThis(),

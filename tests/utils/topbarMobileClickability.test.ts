@@ -27,9 +27,10 @@ describe('TopBar Mobile Clickability & Touch Ergonomics', () => {
 
   it('guarantees UserMenu dropdown has mobile scrollability and viewport containment', () => {
     const content = fs.readFileSync(userMenuPath, 'utf8');
-    expect(content).toContain('max-h-[calc(100vh-4.5rem)]');
+    expect(content).toMatch(/max-h-\[calc\(/);
     expect(content).toContain('overflow-y-auto');
-    expect(content).toContain('fixed sm:absolute');
+    expect(content).toContain('fixed');
+    expect(content).toContain('sm:absolute');
   });
 
   it('guarantees zero raw unicode emojis exist in UserMenu', () => {

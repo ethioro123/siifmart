@@ -117,7 +117,7 @@ BEGIN
 
         IF COALESCE(v_effective, 0) > 0 AND COALESCE(v_cost, 0) > 0
            AND ((v_effective - v_cost) / v_effective) * 100 < 15
-           AND (SELECT public.get_my_role()) NOT IN ('finance_manager', 'super_admin') THEN
+           AND (SELECT public.get_my_role()) NOT IN ('country_finance_director', 'group_ceo') THEN
             RAISE EXCEPTION 'Zero-Trust Violation: price changes below the 15%% margin floor require Finance Manager or CEO approval.';
         END IF;
     END IF;

@@ -195,7 +195,7 @@ export default function Procurement() {
     // Live Real-Time Updates: synchronizes PO status changes (approvals, warehouse receiving, item check-ins)
     useEffect(() => {
         const sub = realtimeService.subscribeToPurchaseOrders((event, payload) => {
-            logger.debug('Procurement', `📡 Live PO update received (${event}):`, payload?.id);
+            logger.debug('Procurement', `Live PO update received (${event}):`, payload?.id);
             fetchData();
         });
 

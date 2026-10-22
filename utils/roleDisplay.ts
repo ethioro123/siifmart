@@ -27,7 +27,7 @@ export function getRoleDisplayName(role: UserRole): string {
 
         // Levels 3–5 - HQ Heads and Regional Managers
         regional_operations_manager: 'Regional Operations Manager',
-        area_operations_manager: 'Area Operations Manager',
+        area_operations_manager: 'Area Manager',
         regional_supply_chain_manager: 'Regional Supply Chain Manager',
         merchandising_specialist: 'Merchandising Specialist',
         regional_merchandising_manager: 'Regional Merchandising Manager',
@@ -136,8 +136,8 @@ export function getRoleDescription(role: UserRole): string {
         country_compliance_manager: 'Country Compliance Manager - Statutory audit, regulatory adherence, and internal loss governance',
 
         // Levels 3–5 - HQ Heads and Regional Managers
-        regional_operations_manager: 'Regional Operations Manager - Territorial multi-site operational leadership and store network oversight',
-        area_operations_manager: 'Area Operations Manager - District store cluster leadership, daily audits, and operational standards',
+        regional_operations_manager: 'Regional Operations Manager - Accountable leadership and performance for the full region',
+        area_operations_manager: 'Area Manager - Operational leadership for a cluster of stores',
         regional_supply_chain_manager: 'Regional Supply Chain Manager - Territorial distribution centers, warehouse fulfillment, and fleet logistics',
         merchandising_specialist: 'Merchandising Specialist - Scoped product, pricing, promotion, and planogram preparation',
         regional_merchandising_manager: 'Regional Merchandising Manager - Territorial product and campaign approvals',

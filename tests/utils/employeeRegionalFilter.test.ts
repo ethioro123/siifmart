@@ -39,8 +39,8 @@ describe('Employee Regional Filtering & Territorial Organization', () => {
         const hqStaff = mockEmployees.filter(e => e.scopeLevel === 'HQ');
         const regionalStaff = mockEmployees.filter(e => e.scopeLevel === 'REGIONAL');
 
-        expect(hqStaff.map(e => e.role)).toEqual(['country_operations_director', 'group_ceo']);
-        expect(regionalStaff.map(e => e.role)).toEqual(['store_manager', 'picker', 'warehouse_manager', 'regional_operations_manager']);
+        expect(hqStaff.map(e => e.role)).toEqual(['country_operations_director', 'group_ceo', 'country_operations_director']);
+        expect(regionalStaff.map(e => e.role)).toEqual(['store_manager', 'picker', 'warehouse_manager', 'store_manager', 'regional_operations_manager']);
     });
 
     it('resets location when changing to a region that does not include the active location', () => {

@@ -31,7 +31,7 @@ describe('Zero-Trust Procurement & 4-Eyes Governance Suite', () => {
           approverRole: 'country_commercial_director',
           reasonCode: 'STANDARD_REPLENISHMENT'
         })
-      ).rejects.toThrow(/Zero-Trust 4-Eyes Violation: Self-approval is strictly prohibited/);
+      ).rejects.toThrow(/creator or requester cannot approve/i);
     });
 
     it('strictly blocks warehouse managers from approving purchase orders (SoD Violation)', async () => {
@@ -53,7 +53,7 @@ describe('Zero-Trust Procurement & 4-Eyes Governance Suite', () => {
           approverRole: 'warehouse_manager',
           reasonCode: 'STANDARD_REPLENISHMENT'
         })
-      ).rejects.toThrow(/Purchase order approval requires a procurement lead/);
+      ).rejects.toThrow(/purchase order approval requires a procurement lead/i);
     });
 
     it('mandates structured reason codes on PO approval', async () => {

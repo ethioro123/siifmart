@@ -44,7 +44,7 @@ export function RegionBadge() {
     const cleanRegionName = activeRegion ? activeRegion.name.replace(/\s*(Region|Territory)$/i, '') : 'All Regions';
 
     // Role-based authority:
-    // Only HQ Executives (who can switch regions), dedicated Regional Operations Managers, or Regional Administration
+    // Only HQ Executives (who can switch regions), dedicated Regional Operations Manager, or Regional Administration
     // shared specialists see RegionBadge. Frontline branch workers (cashiers, store staff, warehouse pickers)
     // have their region cleanly unified inside LocationBadge without a duplicate static pill in the top bar.
     const isRegionalOfficer = Boolean(user && (

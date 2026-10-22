@@ -21,6 +21,7 @@ export {
     getRoleDept
 } from './orgRoles';
 import { getRoleLevel, getRoleDept } from './orgRoles';
+import { getRoleReportingMeta } from './orgReportingLines';
 
 interface UseOrgTreeLayoutProps {
     employees: Employee[];
@@ -93,6 +94,32 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
         const findParent = (node: OrgTreeNode): OrgTreeNode | null => {
             if (node.id === rootNode?.id) return null;
 
+            const employee = node.employee;
+            const explicitManagerId = employee?.reportsToEmployeeId || employee?.reports_to_employee_id;
+            if (explicitManagerId) {
+                const explicitManager = nodeMap.get(explicitManagerId);
+                if (explicitManager && explicitManager.id !== node.id) return explicitManager;
+            }
+
+            const reportingRole = getRoleReportingMeta(node.role).reportsToRole;
+            if (reportingRole) {
+                const country = employee?.country || employee?.country_code;
+                const region = employee?.regionCode || employee?.region_code;
+                const matchingManagers = allNodes.filter(candidate => candidate.role === reportingRole && candidate.id !== node.id);
+                matchingManagers.sort((a, b) => {
+                    const scopeScore = (candidate: OrgTreeNode) => {
+                        const manager = candidate.employee;
+                        let score = 0;
+                        if (country && (manager?.country || manager?.country_code) === country) score += 4;
+                        if (region && (manager?.regionCode || manager?.region_code) === region) score += 2;
+                        if (node.siteId && candidate.siteId === node.siteId) score += 1;
+                        return score;
+                    };
+                    return scopeScore(b) - scopeScore(a);
+                });
+                if (matchingManagers[0]) return matchingManagers[0];
+            }
+
             // Levels 2-5 (Country Executive, HQ Department Heads, Regional Operations and Department Managers)
             if (node.level >= 2 && node.level <= 5) {
                 // Country Operations Director reports directly to CEO
@@ -109,7 +136,7 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
                     if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                     return rootNode || null;
                 }
-                // Regional Department Managers (Level 5) report to their Regional Operations Manager
+                // Fallback grouping for uncataloged regional and area roles
                 if (node.level === 5 && regionalMgr && regionalMgr.id !== node.id) {
                     return regionalMgr;
                 }
@@ -133,7 +160,7 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
                 if (['regional_security_manager', 'cs_manager'].includes(node.role)) {
                     if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                 }
-                // Store/Warehouse managers report to their Regional Operations Manager in the same territory
+                // Store Managers report through Area Managers; warehouse roles follow supply-chain lines
                 if (['store_manager', 'warehouse_manager'].includes(node.role)) {
                     const empObj = node.employee as any;
                     const empRegion = empObj?.regionCode || empObj?.region_code;

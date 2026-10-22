@@ -51,7 +51,7 @@ export const canEmployRole = (
         return false;
     }
 
-    // Corporate HQ Directors (Level 3) and Regional Operations Managers (Level 4) can ONLY be appointed by L1 CEO/COO or L2 Country Managing Director
+    // Corporate HQ Directors (Level 3) and Regional Operations Manager (Level 4) can ONLY be appointed by L1 CEO/COO or L2 Country Managing Director
     if (candidateLevel <= 4 && userLevel > 2) {
         return false;
     }

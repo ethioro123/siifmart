@@ -1,8 +1,20 @@
 // @vitest-environment jsdom
+import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useCountryScoping } from '../../contexts/hooks/useCountryScoping';
 import type { Site, PurchaseOrder, SaleRecord, Employee, ShiftRecord } from '../../types';
+
+const createWrapper = () => {
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: { retry: false }
+        }
+    });
+    return ({ children }: { children: React.ReactNode }) =>
+        React.createElement(QueryClientProvider, { client: queryClient }, children);
+};
 
 describe('Adaptive Regional Scope across Workflows', () => {
     const mockSites: any[] = [
@@ -47,7 +59,8 @@ describe('Adaptive Regional Scope across Workflows', () => {
                 suppliers: [],
                 customers: [],
                 discountCodes: []
-            })
+            }),
+            { wrapper: createWrapper() }
         );
 
         // When locked to KE-NRB
@@ -77,7 +90,8 @@ describe('Adaptive Regional Scope across Workflows', () => {
                 suppliers: [],
                 customers: [],
                 discountCodes: []
-            })
+            }),
+            { wrapper: createWrapper() }
         );
 
         // HQ without regional filter sees both Nairobi and Coast facilities in Kenya

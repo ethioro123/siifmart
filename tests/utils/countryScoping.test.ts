@@ -1,8 +1,21 @@
 // @vitest-environment jsdom
+import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useCountryScoping } from '../../contexts/hooks/useCountryScoping';
 import { Site, PurchaseOrder, SaleRecord, Employee, StockMovement, ShiftRecord, ExpenseRecord, Product } from '../../types';
+
+const createWrapper = () => {
+    const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } }
+    });
+    return ({ children }: { children: React.ReactNode }) =>
+        React.createElement(QueryClientProvider, { client: queryClient }, children);
+};
+
+const renderHookWithQuery = (callback: () => any, options?: any) =>
+    renderHook(callback, { wrapper: createWrapper(), ...options });
 
 describe('useCountryScoping Hook', () => {
     const mockSites: Site[] = [
@@ -160,7 +173,7 @@ describe('useCountryScoping Hook', () => {
 
     it('scopes sites, orders, sales, movements, and employees to Kenya when country is KE', () => {
         const setActiveSiteId = vi.fn();
-        const { result } = renderHook(() =>
+        const { result } = renderHookWithQuery(() =>
             useCountryScoping({
                 country: 'KE',
                 sites: mockSites,
@@ -196,7 +209,7 @@ describe('useCountryScoping Hook', () => {
 
     it('scopes sites, orders, sales, movements, and employees to Ethiopia when country is ET', () => {
         const setActiveSiteId = vi.fn();
-        const { result } = renderHook(() =>
+        const { result } = renderHookWithQuery(() =>
             useCountryScoping({
                 country: 'ET',
                 sites: mockSites,
@@ -232,7 +245,7 @@ describe('useCountryScoping Hook', () => {
 
     it('auto-switches activeSiteId to first matching country site when country switches', () => {
         const setActiveSiteId = vi.fn();
-        renderHook(() =>
+        renderHookWithQuery(() =>
             useCountryScoping({
                 country: 'KE',
                 sites: mockSites,
@@ -262,7 +275,7 @@ describe('useCountryScoping Hook', () => {
             siteId: 'site-eth-1'
         };
 
-        const { result } = renderHook(() =>
+        const { result } = renderHookWithQuery(() =>
             useCountryScoping({
                 country: 'KE', // Try to view Kenya as a cashier
                 user: nonCeoUser,
@@ -298,7 +311,7 @@ describe('useCountryScoping Hook', () => {
         };
 
         // When CEO selects Kenya
-        const { result: kenyaResult } = renderHook(() =>
+        const { result: kenyaResult } = renderHookWithQuery(() =>
             useCountryScoping({
                 country: 'KE',
                 user: ceoUser,
@@ -322,7 +335,7 @@ describe('useCountryScoping Hook', () => {
         expect(kenyaResult.current.scopedAllOrders.map(o => o.id)).toEqual(['po-ke-1']);
 
         // When CEO switches to Ethiopia
-        const { result: ethResult } = renderHook(() =>
+        const { result: ethResult } = renderHookWithQuery(() =>
             useCountryScoping({
                 country: 'ET',
                 user: ceoUser,
@@ -398,7 +411,7 @@ describe('useCountryScoping Hook', () => {
 
         // 1. CEO viewing Uganda
         const ceoUser = { id: 'ceo-1', role: 'group_ceo' as any };
-        const { result: ceoResult } = renderHook(() =>
+        const { result: ceoResult } = renderHookWithQuery(() =>
             useCountryScoping({
                 country: 'UG',
                 user: ceoUser,
@@ -423,7 +436,7 @@ describe('useCountryScoping Hook', () => {
 
         // 2. Ugandan cashier: strictly locked to Uganda
         const ugCashier = { id: 'emp-ug-1', role: 'cashier' as const, siteId: 'site-ug-1' };
-        const { result: cashierResult } = renderHook(() =>
+        const { result: cashierResult } = renderHookWithQuery(() =>
             useCountryScoping({
                 country: 'ET', // Attemping to view Ethiopia
                 user: ugCashier,

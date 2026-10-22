@@ -26,7 +26,6 @@ export const ADMIN_ACCESS_PERMISSIONS: Permission[] = FULL_ACCESS_PERMISSIONS.fi
 
 export const HEAD_OF_FINANCE_PERMISSIONS: Permission[] = [
     'dashboard.view',
-    'procurement.view',
     'finance.view', 'finance.view_reports', 'finance.approve_expense', 'finance.edit_expense', 'finance.void_expense', 'finance.reconcile_drawer', 'finance.manage_ap', 'finance.manage_gl', 'finance.manage_budget', 'finance.manage_payroll', 'finance.view_payroll',
     'sales.view', 'sales.view_reports',
     'pricing.view', 'pricing.edit', 'pricing.approve_promo',
@@ -57,7 +56,7 @@ export const HEAD_OF_OPERATIONS_PERMISSIONS: Permission[] = [
 export const HEAD_OF_HR_PERMISSIONS: Permission[] = [
     'dashboard.view',
     'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.view_salary', 'employees.propose_salary', 'employees.manage_attendance',
-    'finance.view_payroll', 'finance.manage_payroll', 'settings.view'
+    'finance.view_payroll', 'finance.manage_payroll'
 ];
 
 export const HR_STAFF_PERMISSIONS: Permission[] = [

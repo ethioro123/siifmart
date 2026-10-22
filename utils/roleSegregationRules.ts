@@ -254,7 +254,7 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         role: 'area_operations_manager',
         siteType: 'Any',
         department: 'Management',
-        description: 'Area Operations Manager - Oversees store cluster and district retail performance'
+        description: 'Area Manager - Oversees store cluster and district retail performance'
     },
     {
         role: 'regional_supply_chain_manager',

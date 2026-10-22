@@ -6,7 +6,7 @@ export type HierarchyLevelNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 export interface RoleReportingMeta {
     role: string;
     level: HierarchyLevelNumber;
-    levelCategory: 'executive' | 'director' | 'supervisor' | 'specialist';
+    levelCategory: 'executive' | 'director' | 'manager' | 'supervisor' | 'specialist';
     levelTag: string;
     reportsToRole: string | null;
     reportsToLabel: string;

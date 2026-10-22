@@ -111,7 +111,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         });
     });
 
-    it('verifies Level 3 Corporate Directorates, Level 4 Regional Directors, and Level 5 Regional Department Managers', () => {
+    it('verifies Level 3 Corporate Directorates, Level 4 Regional Operations Managers, and Level 5 Area and Regional Functional Managers', () => {
         const l3Directors = ['country_operations_director', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director'];
 
         l3Directors.forEach(role => {
@@ -124,20 +124,20 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
 
         const rm = getRoleReportingMeta('regional_operations_manager');
         expect(rm.level).toBe(4);
-        expect(rm.levelCategory).toBe('director');
+        expect(rm.levelCategory).toBe('manager');
         expect(rm.reportsToRole).toBe('country_operations_director');
         expect(rm.isManagerial).toBe(true);
 
         const aom = getRoleReportingMeta('area_operations_manager');
-        expect(aom.level).toBe(4);
-        expect(aom.levelCategory).toBe('director');
+        expect(aom.level).toBe(5);
+        expect(aom.levelCategory).toBe('manager');
         expect(aom.reportsToRole).toBe('regional_operations_manager');
         expect(aom.dottedLineRole).toBe('country_operations_director');
         expect(aom.isManagerial).toBe(true);
 
         const rscm = getRoleReportingMeta('regional_supply_chain_manager');
         expect(rscm.level).toBe(5);
-        expect(rscm.levelCategory).toBe('director');
+        expect(rscm.levelCategory).toBe('manager');
         expect(rscm.reportsToRole).toBe('country_supply_chain_director');
         expect(rscm.dottedLineRole).toBe('regional_operations_manager');
         expect(rscm.isManagerial).toBe(true);
@@ -147,7 +147,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         l5Leads.forEach(role => {
             const meta = getRoleReportingMeta(role);
             expect(meta.level).toBe(5);
-            expect(meta.levelCategory).toBe('director');
+            expect(meta.levelCategory).toBe('manager');
             expect(meta.isManagerial).toBe(true);
         });
     });
@@ -161,7 +161,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
             expect(meta.isManagerial).toBe(true);
         });
 
-        const l7Managers = ['warehouse_operations_manager', 'transport_fleet_manager', 'regional_supply_chain_manager', 'inventory_manager', 'regional_security_manager', 'dispatch_supervisor', 'cs_manager', 'vendor_relations_manager'];
+        const l7Managers = ['warehouse_operations_manager', 'transport_fleet_manager', 'inventory_manager', 'cs_manager', 'vendor_relations_manager'];
         l7Managers.forEach(role => {
             const meta = getRoleReportingMeta(role);
             expect(meta.level).toBe(7);
@@ -354,8 +354,8 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(HIERARCHY_LEVEL_CONFIGS[1].badge).toBe('L1 Global Exec');
         expect(HIERARCHY_LEVEL_CONFIGS[2].badge).toBe('L2 Country Exec');
         expect(HIERARCHY_LEVEL_CONFIGS[3].badge).toBe('L3 HQ Director');
-        expect(HIERARCHY_LEVEL_CONFIGS[4].badge).toBe('L4 Regional Dir');
-        expect(HIERARCHY_LEVEL_CONFIGS[5].badge).toBe('L5 Regional Lead');
+        expect(HIERARCHY_LEVEL_CONFIGS[4].badge).toBe('L4 Regional Ops');
+        expect(HIERARCHY_LEVEL_CONFIGS[5].badge).toBe('L5 Manager');
         expect(HIERARCHY_LEVEL_CONFIGS[6].badge).toBe('L6 Facility Captain');
         expect(HIERARCHY_LEVEL_CONFIGS[7].badge).toBe('L7 Dept Manager');
         expect(HIERARCHY_LEVEL_CONFIGS[8].badge).toBe('L8 Supervisor');

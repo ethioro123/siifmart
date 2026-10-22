@@ -43,7 +43,7 @@ describe('Category-Driven Product Attributes System', () => {
             expect(keys).toContain('origin');
             expect(keys).toContain('grade');
             expect(keys).toContain('produceVariety');
-            expect(keys).toContain('coldChainRequired');
+            expect(keys).toContain('storageTemp');
         });
 
         it('resolves Meat & Poultry specs with mandatory Halal certification field', () => {
@@ -75,7 +75,7 @@ describe('Category-Driven Product Attributes System', () => {
 
             const keys = group.fields.map(f => f.key);
             expect(keys).toContain('cleaningForm');
-            expect(keys).toContain('surfaceApplication');
+            expect(keys).toContain('cleaningCategory');
             expect(keys).toContain('scentFragrance');
             expect(keys).toContain('hazardSafety');
         });
@@ -201,7 +201,7 @@ describe('Category-Driven Product Attributes System', () => {
 
             const summary = getPOItemCategorySpecsSummary(item);
             expect(summary.badgeLabel).toBe('Halal Protein');
-            expect(summary.summaryText).toContain('Butchery Cut Type: Bone-In Ribeye');
+            expect(summary.summaryText).toContain('Cut: Bone-In Ribeye');
             expect(summary.summaryText).toContain('Halal Certification: 100% Certified Halal (Mandatory)');
         });
 
@@ -287,8 +287,8 @@ describe('Category-Driven Product Attributes System', () => {
             const summary = getPOItemCategorySpecsSummary(item);
             expect(summary.domainTitle).toBe('Confectionery, Sweets & Snacks');
             expect(summary.badgeLabel).toBe('Snack Master');
-            expect(summary.summaryText).toContain('Confectionery Type: Chocolate Bar / Slab');
-            expect(summary.summaryText).toContain('Cocoa Solids: 70% Dark Cocoa');
+            expect(summary.summaryText).toContain('Snack Classification: Chocolate Bar / Slab');
+            expect(summary.summaryText).toContain('Cocoa: 70% Dark Cocoa');
             expect(summary.summaryText).toContain('Halal Certification: 100% Certified Halal (Mandatory)');
         });
     });
