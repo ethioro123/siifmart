@@ -109,8 +109,14 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     regional_operations_manager: [
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
+    area_operations_manager: [
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+    ],
 
     // ═══ LEVEL 5 - REGIONAL DEPARTMENT MANAGERS ═══
+    regional_supply_chain_manager: [
+        'dashboard', 'admin', 'regional-ops', 'warehouse', 'inventory', 'procurement', 'employees', 'settings', 'profile'
+    ],
     regional_procurement_manager: [
         'dashboard', 'regional-ops', 'procurement', 'inventory', 'pricing', 'customers', 'profile'
     ],
@@ -223,7 +229,8 @@ export function getAvailableSections(userRole: UserRole, siteType?: string): str
         'admin', 'country_managing_director',
         'country_operations_director', 'country_finance_director', 'country_commercial_director',
         'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager',
-        'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
+        'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager',
+        'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
         'head_of_operations',
         'head_of_finance',
         'head_of_hr',

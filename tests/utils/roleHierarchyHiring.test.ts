@@ -51,11 +51,13 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
 
         it('country functional directors (Rank 97) can employ regional managers and facility staff', () => {
             expect(canEmployRole('country_operations_director', 'regional_operations_manager')).toBe(true);
+            expect(canEmployRole('country_operations_director', 'area_operations_manager')).toBe(true);
             expect(canEmployRole('country_operations_director', 'store_manager')).toBe(true);
             expect(canEmployRole('country_operations_director', 'cashier')).toBe(true);
             expect(canEmployRole('country_operations_director', 'country_managing_director')).toBe(false);
             expect(canEmployRole('country_operations_director', 'country_operations_director')).toBe(false);
 
+            expect(canEmployRole('country_supply_chain_director', 'regional_supply_chain_manager')).toBe(true);
             expect(canEmployRole('country_supply_chain_director', 'warehouse_manager')).toBe(true);
             expect(canEmployRole('country_supply_chain_director', 'picker')).toBe(true);
 
@@ -64,6 +66,21 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
 
             expect(canEmployRole('country_hr_director', 'regional_hr_manager')).toBe(true);
             expect(canEmployRole('country_hr_director', 'hr_generalist')).toBe(true);
+        });
+
+        it('regional and area operations managers (Rank 88-90) have scoped hiring authority', () => {
+            expect(canEmployRole('regional_operations_manager', 'store_manager')).toBe(true);
+            expect(canEmployRole('regional_operations_manager', 'cashier')).toBe(true);
+            expect(canEmployRole('regional_operations_manager', 'country_operations_director')).toBe(false);
+
+            expect(canEmployRole('area_operations_manager', 'store_manager')).toBe(true);
+            expect(canEmployRole('area_operations_manager', 'cashier')).toBe(true);
+            expect(canEmployRole('area_operations_manager', 'regional_operations_manager')).toBe(false);
+            expect(canEmployRole('area_operations_manager', 'country_operations_director')).toBe(false);
+
+            expect(canEmployRole('regional_supply_chain_manager', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('regional_supply_chain_manager', 'picker')).toBe(true);
+            expect(canEmployRole('regional_supply_chain_manager', 'country_supply_chain_director')).toBe(false);
         });
     });
 

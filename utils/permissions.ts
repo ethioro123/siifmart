@@ -310,7 +310,9 @@ export function isAdmin(userRole: UserRole | undefined): boolean {
         'country_operations_director', 'country_finance_director',
         'country_commercial_director', 'country_supply_chain_director',
         'country_hr_director', 'country_technology_director',
-        'country_compliance_manager'
+        'country_compliance_manager',
+        'regional_operations_manager', 'area_operations_manager',
+        'regional_supply_chain_manager'
     ];
     return adminRoles.includes((userRole || '').toLowerCase());
 }
@@ -350,7 +352,8 @@ export function canViewAllSites(userRole: UserRole | undefined): boolean {
         'head_of_merchandising',
         'head_of_it', 'it_support',
         'head_of_audit', 'auditor', 'store_operations_auditor',
-        'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager',
+        'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager',
+        'regional_procurement_manager', 'regional_finance_manager',
         'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
         'cs_manager', 'logistics_manager', 'inventory_manager', 'security_manager',
         'treasury_officer', 'tax_compliance_officer', 'credit_control_officer',
@@ -374,7 +377,8 @@ export function canViewAllEmployees(userRole: UserRole | undefined): boolean {
         'head_of_procurement',
         'head_of_supply_chain',
         'head_of_it', 'it_support',
-        'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager',
+        'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager',
+        'regional_procurement_manager', 'regional_finance_manager',
         'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
         'logistics_manager', 'inventory_manager', 'security_manager',
         'hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'

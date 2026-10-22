@@ -132,9 +132,25 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         const rm = getRoleReportingMeta('regional_operations_manager');
         expect(rm.level).toBe(4);
         expect(rm.levelCategory).toBe('director');
+        expect(rm.reportsToRole).toBe('country_operations_director');
         expect(rm.isManagerial).toBe(true);
 
+        const aom = getRoleReportingMeta('area_operations_manager');
+        expect(aom.level).toBe(4);
+        expect(aom.levelCategory).toBe('director');
+        expect(aom.reportsToRole).toBe('regional_operations_manager');
+        expect(aom.dottedLineRole).toBe('country_operations_director');
+        expect(aom.isManagerial).toBe(true);
+
+        const rscm = getRoleReportingMeta('regional_supply_chain_manager');
+        expect(rscm.level).toBe(5);
+        expect(rscm.levelCategory).toBe('director');
+        expect(rscm.reportsToRole).toBe('country_supply_chain_director');
+        expect(rscm.dottedLineRole).toBe('regional_operations_manager');
+        expect(rscm.isManagerial).toBe(true);
+
         const l5Leads = [
+            'regional_supply_chain_manager',
             'regional_procurement_manager',
             'regional_finance_manager',
             'regional_merchandising_manager',
@@ -249,10 +265,10 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(cashier.dottedLineRole).toBe('head_of_finance');
         expect(cashier.dottedLineLabel).toContain('Finance');
 
-        // Receiver -> Head of Procurement / Inbound QC
+        // Receiver -> Receiving Supervisor / Inbound QC
         const receiver = getRoleReportingMeta('receiver');
-        expect(receiver.dottedLineRole).toBe('head_of_procurement');
-        expect(receiver.dottedLineLabel).toContain('Procurement');
+        expect(receiver.dottedLineRole).toBe('receiving_supervisor');
+        expect(receiver.dottedLineLabel).toContain('Receiving Supervisor');
 
         // Driver -> Fleet Maintenance Supervisor
         const driver = getRoleReportingMeta('driver');
@@ -299,9 +315,9 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         const hoa = getRoleReportingMeta('head_of_audit');
         expect(hoa.reportsToRole).toBe('group_cae');
 
-        // Regional Finance Manager -> Head of Finance (solid) & Regional Operations Manager (dotted)
+        // Regional Finance Manager -> Country Finance Director (solid) & Regional Operations Manager (dotted)
         const rfm = getRoleReportingMeta('regional_finance_manager');
-        expect(rfm.reportsToRole).toBe('head_of_finance');
+        expect(rfm.reportsToRole).toBe('country_finance_director');
         expect(rfm.dottedLineRole).toBe('regional_operations_manager');
     });
 

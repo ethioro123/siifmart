@@ -170,7 +170,7 @@ export const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Country Managing Director',
         dottedLineRole: 'group_coo',
         dottedLineLabel: 'Group COO (Functional Oversight)',
-        managesRoles: ['regional_operations_manager', 'store_manager'],
+        managesRoles: ['regional_operations_manager', 'area_operations_manager', 'store_manager'],
         isManagerial: true
     },
     country_finance_director: {
@@ -347,33 +347,61 @@ export const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     },
 
     // =========================================================================
-    // LEVEL 4: REGIONAL OPERATIONS MANAGERS
+    // LEVEL 4: REGIONAL OPERATIONS & AREA MANAGERS
     // =========================================================================
     regional_operations_manager: {
         role: 'regional_operations_manager',
         level: 4,
         levelCategory: 'director',
         levelTag: 'L4 Regional Operations',
-        reportsToRole: 'head_of_operations',
-        reportsToLabel: 'Head of Operations (Corporate HQ)',
-        dottedLineRole: 'super_admin',
-        dottedLineLabel: 'CEO (Executive Oversight)',
-        managesRoles: ['store_manager', 'warehouse_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'],
+        reportsToRole: 'country_operations_director',
+        reportsToLabel: 'Country Operations Director',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Executive Oversight)',
+        managesRoles: [
+            'area_operations_manager', 'store_manager',
+            'regional_procurement_manager', 'regional_finance_manager',
+            'regional_merchandising_manager', 'regional_hr_manager', 'regional_security_manager'
+        ],
+        isManagerial: true
+    },
+    area_operations_manager: {
+        role: 'area_operations_manager',
+        level: 4,
+        levelCategory: 'director',
+        levelTag: 'L4 Area Operations',
+        reportsToRole: 'regional_operations_manager',
+        reportsToLabel: 'Regional Operations Manager (Regional Territory Command)',
+        dottedLineRole: 'country_operations_director',
+        dottedLineLabel: 'Country Operations Director (National Retail Standards)',
+        managesRoles: ['store_manager'],
         isManagerial: true
     },
 
     // =========================================================================
     // LEVEL 5: REGIONAL DEPARTMENT MANAGERS
     // =========================================================================
+    regional_supply_chain_manager: {
+        role: 'regional_supply_chain_manager',
+        level: 5,
+        levelCategory: 'director',
+        levelTag: 'L5 Regional Supply Chain',
+        reportsToRole: 'country_supply_chain_director',
+        reportsToLabel: 'Country Supply Chain Director (National Supply Chain Directorate)',
+        dottedLineRole: 'regional_operations_manager',
+        dottedLineLabel: 'Regional Operations Manager (Territory Fulfillment Alignment)',
+        managesRoles: ['warehouse_manager', 'transport_fleet_manager', 'logistics_manager'],
+        isManagerial: true
+    },
     regional_merchandising_manager: {
         role: 'regional_merchandising_manager',
         level: 5,
         levelCategory: 'director',
         levelTag: 'L5 Regional Merchandising',
-        reportsToRole: 'regional_operations_manager',
-        reportsToLabel: 'Regional Operations Manager (Territory Administration)',
-        dottedLineRole: 'head_of_merchandising',
-        dottedLineLabel: 'Head of Merchandising (Country Pricing & Campaigns)',
+        reportsToRole: 'country_commercial_director',
+        reportsToLabel: 'Country Commercial Director (National Commercial Directorate)',
+        dottedLineRole: 'regional_operations_manager',
+        dottedLineLabel: 'Regional Operations Manager (Territory Administration)',
         managesRoles: ['merchandising_specialist'],
         isManagerial: true
     },
@@ -382,10 +410,10 @@ export const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 5,
         levelCategory: 'director',
         levelTag: 'L5 Regional Procurement',
-        reportsToRole: 'regional_operations_manager',
-        reportsToLabel: 'Regional Operations Manager (Territory Administration)',
-        dottedLineRole: 'head_of_procurement',
-        dottedLineLabel: 'Head of Procurement (Corporate Sourcing)',
+        reportsToRole: 'country_commercial_director',
+        reportsToLabel: 'Country Commercial Director (National Commercial Directorate)',
+        dottedLineRole: 'regional_operations_manager',
+        dottedLineLabel: 'Regional Operations Manager (Territory Administration)',
         managesRoles: ['buyer', 'vendor_relations_manager'],
         isManagerial: true
     },
@@ -394,8 +422,8 @@ export const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 5,
         levelCategory: 'director',
         levelTag: 'L5 Regional Finance',
-        reportsToRole: 'head_of_finance',
-        reportsToLabel: 'Head of Finance (Corporate Finance Directorate)',
+        reportsToRole: 'country_finance_director',
+        reportsToLabel: 'Country Finance Director (National Finance Directorate)',
         dottedLineRole: 'regional_operations_manager',
         dottedLineLabel: 'Regional Operations Manager (Territory Administration)',
         managesRoles: ['accountant', 'treasury_officer'],
@@ -406,10 +434,10 @@ export const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 5,
         levelCategory: 'director',
         levelTag: 'L5 Regional HR',
-        reportsToRole: 'regional_operations_manager',
-        reportsToLabel: 'Regional Operations Manager (Territory Administration)',
-        dottedLineRole: 'head_of_hr',
-        dottedLineLabel: 'Head of Human Resources (Corporate People & Payroll)',
+        reportsToRole: 'country_hr_director',
+        reportsToLabel: 'Country HR Director (National HR Directorate)',
+        dottedLineRole: 'regional_operations_manager',
+        dottedLineLabel: 'Regional Operations Manager (Territory Administration)',
         managesRoles: ['hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'],
         isManagerial: true
     },
@@ -418,10 +446,10 @@ export const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 5,
         levelCategory: 'director',
         levelTag: 'L5 Regional Logistics',
-        reportsToRole: 'regional_operations_manager',
-        reportsToLabel: 'Regional Operations Manager (Territory Administration)',
-        dottedLineRole: 'head_of_supply_chain',
-        dottedLineLabel: 'Head of Supply Chain (Corporate Fulfillment)',
+        reportsToRole: 'regional_supply_chain_manager',
+        reportsToLabel: 'Regional Supply Chain Manager (Regional Logistics Execution)',
+        dottedLineRole: 'regional_operations_manager',
+        dottedLineLabel: 'Regional Operations Manager (Territory Administration)',
         managesRoles: ['logistics_manager', 'dispatch_manager'],
         isManagerial: true
     },
@@ -430,10 +458,10 @@ export const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 5,
         levelCategory: 'director',
         levelTag: 'L5 Regional Security',
-        reportsToRole: 'regional_operations_manager',
-        reportsToLabel: 'Regional Operations Manager (Territory Administration)',
-        dottedLineRole: 'head_of_operations',
-        dottedLineLabel: 'Head of Operations (Enterprise Asset Protection)',
+        reportsToRole: 'country_compliance_manager',
+        reportsToLabel: 'Country Compliance Manager (National Risk & Compliance)',
+        dottedLineRole: 'regional_operations_manager',
+        dottedLineLabel: 'Regional Operations Manager (Territory Administration)',
         managesRoles: ['security_manager', 'loss_prevention'],
         isManagerial: true
     }

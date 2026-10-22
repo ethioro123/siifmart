@@ -6,6 +6,8 @@ export { ROLE_SEGREGATION_RULES };
 
 export const REGIONAL_WORKFORCE_ROLES = [
     'regional_operations_manager',
+    'area_operations_manager',
+    'regional_supply_chain_manager',
     'regional_procurement_manager',
     'regional_finance_manager',
     'regional_merchandising_manager',

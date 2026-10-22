@@ -268,6 +268,18 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         description: 'Regional Operations Manager - Oversees multiple locations'
     },
     {
+        role: 'area_operations_manager',
+        siteType: 'Any',
+        department: 'Management',
+        description: 'Area Operations Manager - Oversees store cluster and district retail performance'
+    },
+    {
+        role: 'regional_supply_chain_manager',
+        siteType: 'Any',
+        department: 'Logistics',
+        description: 'Regional Supply Chain Manager - Territorial distribution centers and fleet logistics'
+    },
+    {
         role: 'regional_procurement_manager',
         siteType: 'Any',
         department: 'Procurement',

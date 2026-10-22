@@ -35,9 +35,11 @@ export const ROLE_LEVELS: Record<string, number> = {
     head_of_merchandising: 3,
     head_of_it: 3,
     head_of_audit: 3,
-    // Level 4: Regional Operations Manager
+    // Level 4: Regional Operations Manager & Area Managers
     regional_operations_manager: 4,
+    area_operations_manager: 4,
     // Level 5: Regional Department Managers
+    regional_supply_chain_manager: 5,
     regional_procurement_manager: 5,
     regional_merchandising_manager: 5,
     regional_finance_manager: 5,
@@ -48,6 +50,8 @@ export const ROLE_LEVELS: Record<string, number> = {
     store_manager: 6,
     warehouse_manager: 6,
     // Level 7: Functional & Department Managers
+    warehouse_operations_manager: 7,
+    transport_fleet_manager: 7,
     logistics_manager: 7,
     inventory_manager: 7,
     security_manager: 7,
@@ -55,11 +59,26 @@ export const ROLE_LEVELS: Record<string, number> = {
     cs_manager: 7,
     vendor_relations_manager: 7,
     manager: 7,
-    // Level 8: Deputy & Shift Supervisors
+    // Level 8: Deputy & Shift Supervisors & Team Leaders
+    assistant_store_manager: 8,
     assistant_manager: 8,
-    fleet_maintenance_supervisor: 8,
+    shift_supervisor: 8,
     store_supervisor: 8,
     shift_lead: 8,
+    receiving_supervisor: 8,
+    stock_control_supervisor: 8,
+    pos_supervisor: 8,
+    inventory_control_supervisor: 8,
+    putaway_replenishment_supervisor: 8,
+    picking_supervisor: 8,
+    packing_supervisor: 8,
+    dispatch_supervisor: 8,
+    returns_waste_supervisor: 8,
+    fleet_maintenance_supervisor: 8,
+    receiving_team_leader: 8,
+    picking_team_leader: 8,
+    packing_team_leader: 8,
+    dispatch_team_leader: 8,
     // Level 9: Corporate, Audit & Planning Specialists
     store_operations_auditor: 9,
     auditor: 9,
@@ -83,12 +102,21 @@ export const ROLE_LEVELS: Record<string, number> = {
     loss_prevention: 9,
     // Level 10: Frontline Store, Warehouse & Fleet Staff
     cashier: 10,
+    store_associate: 10,
     sales_associate: 10,
     pos: 10,
     merchandiser: 10,
     inventory_specialist: 10,
     customer_service: 10,
     stock_clerk: 10,
+    receiving_operator: 10,
+    putaway_operator: 10,
+    replenishment_operator: 10,
+    inventory_controller: 10,
+    stock_counter: 10,
+    dispatch_operator: 10,
+    returns_operator: 10,
+    fleet_mechanic: 10,
     picker: 10,
     packer: 10,
     receiver: 10,
@@ -129,12 +157,14 @@ export const ROLE_MATRIX_RANK: Record<string, number> = {
     admin: 11.8,
     head_of_operations: 12,
     regional_operations_manager: 13,
+    area_operations_manager: 14,
 
     // 2. Department Heads & Directors (20-29)
     head_of_finance: 20,
     head_of_hr: 21,
     head_of_procurement: 22,
     head_of_supply_chain: 23,
+    regional_supply_chain_manager: 23.5,
     head_of_merchandising: 24,
     head_of_it: 24,
     head_of_audit: 24,
@@ -149,7 +179,9 @@ export const ROLE_MATRIX_RANK: Record<string, number> = {
     // 3. Facility Managers (30-39)
     store_manager: 30,
     warehouse_manager: 31,
-    logistics_manager: 32,
+    warehouse_operations_manager: 31.5,
+    transport_fleet_manager: 32,
+    logistics_manager: 32.5,
     inventory_manager: 33,
     dispatch_manager: 34,
     security_manager: 35,
@@ -157,12 +189,27 @@ export const ROLE_MATRIX_RANK: Record<string, number> = {
     manager: 37,
 
     // 4. Assistant Managers & Shift Leads (40-49)
-    assistant_manager: 40,
-    store_supervisor: 41,
+    assistant_store_manager: 40,
+    assistant_manager: 40.5,
+    shift_supervisor: 41,
+    store_supervisor: 41.5,
     shift_lead: 42,
-    dispatcher: 43,
-    training_coordinator: 44,
+    stock_control_supervisor: 42.5,
+    receiving_supervisor: 43,
+    pos_supervisor: 43.5,
+    dispatcher: 44,
+    training_coordinator: 44.5,
     fleet_maintenance_supervisor: 45,
+    inventory_control_supervisor: 45.2,
+    putaway_replenishment_supervisor: 45.4,
+    picking_supervisor: 45.6,
+    packing_supervisor: 45.8,
+    dispatch_supervisor: 46,
+    returns_waste_supervisor: 46.2,
+    receiving_team_leader: 47,
+    picking_team_leader: 47.2,
+    packing_team_leader: 47.4,
+    dispatch_team_leader: 47.6,
 
     // 5. Senior Staff & Specialists (50-59)
     auditor: 50,
@@ -178,6 +225,8 @@ export const ROLE_MATRIX_RANK: Record<string, number> = {
     demand_planner: 56,
     replenishment_planner: 56,
     inventory_specialist: 57,
+    inventory_controller: 57.5,
+    stock_counter: 57.8,
     store_operations_auditor: 48,
     it_support: 58,
     loss_prevention: 59,
@@ -186,15 +235,22 @@ export const ROLE_MATRIX_RANK: Record<string, number> = {
     customer_service: 60,
     merchandiser: 61,
     cashier: 62,
-    sales_associate: 63,
+    store_associate: 63,
+    sales_associate: 63.5,
     stock_clerk: 64,
-    returns_clerk: 65,
+    returns_operator: 65,
+    returns_clerk: 65.5,
     pos: 66,
     forklift_operator: 67,
     receiver: 68,
+    receiving_operator: 68.2,
+    putaway_operator: 68.4,
+    replenishment_operator: 68.6,
     picker: 69,
     packer: 70,
+    dispatch_operator: 70.5,
     driver: 71,
+    fleet_mechanic: 71.5,
 
     default: 99
 };
@@ -219,22 +275,22 @@ export const getRoleDept = (role: string, empDept?: string): string => {
         if (d.includes('it') || d.includes('tech') || d.includes('secur') || d.includes('support') || d.includes('loss')) return 'support';
         
         // If role unequivocally dictates core department, prioritize core
-        if (['cashier', 'sales_associate', 'stock_clerk', 'store_manager', 'shift_lead'].includes(r)) return 'store';
-        if (['picker', 'packer', 'receiver', 'driver', 'warehouse_manager', 'country_supply_chain_director'].includes(r)) return 'warehouse';
+        if (['cashier', 'store_associate', 'sales_associate', 'stock_clerk', 'store_manager', 'assistant_store_manager', 'assistant_manager', 'shift_supervisor', 'store_supervisor', 'shift_lead', 'stock_control_supervisor', 'pos_supervisor'].includes(r)) return 'store';
+        if (['picker', 'packer', 'receiver', 'receiving_operator', 'putaway_operator', 'replenishment_operator', 'inventory_controller', 'stock_counter', 'dispatch_operator', 'returns_operator', 'fleet_mechanic', 'driver', 'forklift_operator', 'warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'inventory_control_supervisor', 'putaway_replenishment_supervisor', 'picking_supervisor', 'packing_supervisor', 'dispatch_supervisor', 'returns_waste_supervisor', 'receiving_supervisor', 'receiving_team_leader', 'picking_team_leader', 'packing_team_leader', 'dispatch_team_leader', 'regional_supply_chain_manager', 'country_supply_chain_director'].includes(r)) return 'warehouse';
         if (['accountant', 'head_of_finance', 'country_finance_director', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'].includes(r)) return 'finance';
         if (['head_of_hr', 'hr', 'country_hr_director', 'payroll_specialist', 'talent_recruiter', 'training_coordinator', 'hr_generalist'].includes(r)) return 'hr';
-        if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'country_operations_director', 'country_commercial_director', 'country_technology_director', 'country_compliance_manager', 'regional_operations_manager', 'head_of_operations',].includes(r)) return 'executive';
+        if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'country_operations_director', 'regional_operations_manager', 'area_operations_manager', 'head_of_operations'].includes(r)) return 'executive';
 
         return d;
     }
 
     // 2. Authoritative role-based department mapping
-    if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'country_operations_director', 'regional_operations_manager', 'head_of_operations', 'head_of_merchandising', 'regional_merchandising_manager', 'merchandising_specialist', 'store_operations_auditor'].includes(r)) return 'executive';
+    if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'country_operations_director', 'regional_operations_manager', 'area_operations_manager', 'head_of_operations', 'head_of_merchandising', 'regional_merchandising_manager', 'merchandising_specialist', 'store_operations_auditor'].includes(r)) return 'executive';
     if (['head_of_finance', 'country_finance_director', 'country_compliance_manager', 'accountant', 'head_of_audit', 'auditor', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_manager'].includes(r)) return 'finance';
     if (['head_of_hr', 'hr', 'country_hr_director', 'payroll_specialist', 'talent_recruiter', 'training_coordinator', 'hr_generalist', 'regional_hr_manager'].includes(r)) return 'hr';
     if (['head_of_procurement', 'head_of_supply_chain', 'country_commercial_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'regional_procurement_manager'].includes(r)) return 'procurement';
-    if (['store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'merchandiser', 'returns_clerk', 'pos'].includes(r)) return 'store';
-    if (['warehouse_manager', 'country_supply_chain_director', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'fleet_maintenance_supervisor', 'regional_logistics_manager'].includes(r)) return 'warehouse';
+    if (['store_manager', 'assistant_store_manager', 'assistant_manager', 'shift_supervisor', 'shift_lead', 'store_supervisor', 'stock_control_supervisor', 'pos_supervisor', 'cashier', 'store_associate', 'sales_associate', 'stock_clerk', 'customer_service', 'merchandiser', 'returns_clerk', 'pos'].includes(r)) return 'store';
+    if (['warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'regional_supply_chain_manager', 'country_supply_chain_director', 'inventory_control_supervisor', 'putaway_replenishment_supervisor', 'picking_supervisor', 'packing_supervisor', 'dispatch_supervisor', 'returns_waste_supervisor', 'receiving_supervisor', 'receiving_team_leader', 'picking_team_leader', 'packing_team_leader', 'dispatch_team_leader', 'receiving_operator', 'putaway_operator', 'replenishment_operator', 'inventory_controller', 'stock_counter', 'dispatch_operator', 'returns_operator', 'fleet_mechanic', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'fleet_maintenance_supervisor', 'regional_logistics_manager'].includes(r)) return 'warehouse';
     if (['head_of_it', 'country_technology_director', 'it_support', 'security_manager', 'loss_prevention', 'regional_security_manager'].includes(r)) return 'support';
 
     return 'support';

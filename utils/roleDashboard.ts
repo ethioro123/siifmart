@@ -28,7 +28,8 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     const isStoreSite = siteType && ['Store', 'Retail', 'POS'].includes(siteType);
 
     // 1. Regional Command: Regional Operations and Department Managers command from /regional-ops
-    if (role === 'regional_operations_manager' || [
+    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || [
+        'regional_supply_chain_manager',
         'regional_procurement_manager',
         'regional_finance_manager',
         'regional_merchandising_manager',
