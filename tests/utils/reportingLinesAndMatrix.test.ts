@@ -31,6 +31,43 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(groupCfo.isManagerial).toBe(true);
         expect(groupCfo.managesRoles.length).toBeGreaterThan(0);
 
+        const groupCco = getRoleReportingMeta('group_cco');
+        expect(groupCco.level).toBe(1);
+        expect(groupCco.reportsToRole).toBe('group_ceo');
+        expect(groupCco.isManagerial).toBe(true);
+
+        const groupCsco = getRoleReportingMeta('group_csco');
+        expect(groupCsco.level).toBe(1);
+        expect(groupCsco.reportsToRole).toBe('group_ceo');
+        expect(groupCsco.isManagerial).toBe(true);
+
+        const groupChro = getRoleReportingMeta('group_chro');
+        expect(groupChro.level).toBe(1);
+        expect(groupChro.reportsToRole).toBe('group_ceo');
+        expect(groupChro.isManagerial).toBe(true);
+
+        const groupCto = getRoleReportingMeta('group_cto');
+        expect(groupCto.level).toBe(1);
+        expect(groupCto.reportsToRole).toBe('group_ceo');
+        expect(groupCto.isManagerial).toBe(true);
+
+        const groupCio = getRoleReportingMeta('group_cio');
+        expect(groupCio.level).toBe(1);
+        expect(groupCio.reportsToRole).toBe('group_ceo');
+        expect(groupCio.isManagerial).toBe(true);
+
+        const groupClco = getRoleReportingMeta('group_clco');
+        expect(groupClco.level).toBe(1);
+        expect(groupClco.reportsToRole).toBe('group_ceo');
+        expect(groupClco.isManagerial).toBe(true);
+
+        const groupCae = getRoleReportingMeta('group_cae');
+        expect(groupCae.level).toBe(1);
+        expect(groupCae.reportsToRole).toBeNull();
+        expect(groupCae.reportsToLabel).toContain('Audit Committee');
+        expect(groupCae.dottedLineRole).toBe('group_ceo');
+        expect(groupCae.isManagerial).toBe(true);
+
         const ceo = getRoleReportingMeta('super_admin');
         expect(ceo.level).toBe(1);
         expect(ceo.levelCategory).toBe('executive');
@@ -212,6 +249,26 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         const hof = getRoleReportingMeta('head_of_finance');
         expect(hof.reportsToRole).toBe('group_cfo');
         expect(hof.dottedLineRole).toBe('country_managing_director');
+
+        // Head of Procurement -> Group CCO (solid)
+        const hop = getRoleReportingMeta('head_of_procurement');
+        expect(hop.reportsToRole).toBe('group_cco');
+
+        // Head of Supply Chain -> Group CSCO (solid)
+        const hosc = getRoleReportingMeta('head_of_supply_chain');
+        expect(hosc.reportsToRole).toBe('group_csco');
+
+        // Head of HR -> Group CHRO (solid)
+        const hohr = getRoleReportingMeta('head_of_hr');
+        expect(hohr.reportsToRole).toBe('group_chro');
+
+        // Head of IT -> Group CTO (solid)
+        const hoit = getRoleReportingMeta('head_of_it');
+        expect(hoit.reportsToRole).toBe('group_cto');
+
+        // Head of Audit -> Group CAE (solid)
+        const hoa = getRoleReportingMeta('head_of_audit');
+        expect(hoa.reportsToRole).toBe('group_cae');
 
         // Regional Finance Manager -> Head of Finance (solid) & Regional Operations Manager (dotted)
         const rfm = getRoleReportingMeta('regional_finance_manager');

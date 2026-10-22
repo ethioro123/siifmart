@@ -15,7 +15,9 @@ export const REGIONAL_WORKFORCE_ROLES = [
 ] as const;
 
 export const CORPORATE_HQ_DIRECTORATE_ROLES = [
-    'group_ceo', 'group_coo', 'group_cfo', 'super_admin', 'ceo', 'country_managing_director', 'admin',
+    'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco',
+    'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
+    'super_admin', 'ceo', 'country_managing_director', 'admin',
     'head_of_operations',
     'head_of_finance',
     'head_of_hr',

@@ -22,6 +22,27 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     group_cfo: [
         'dashboard', 'admin', 'finance', 'sales', 'pricing', 'procurement', 'settings', 'profile'
     ],
+    group_cco: [
+        'dashboard', 'admin', 'procurement', 'pricing', 'inventory', 'sales', 'customers', 'settings', 'profile'
+    ],
+    group_csco: [
+        'dashboard', 'admin', 'warehouse', 'inventory', 'procurement', 'regional-ops', 'sales', 'settings', 'profile'
+    ],
+    group_chro: [
+        'dashboard', 'admin', 'employees', 'finance', 'settings', 'profile'
+    ],
+    group_cto: [
+        'dashboard', 'admin', 'settings', 'employees', 'profile'
+    ],
+    group_cio: [
+        'dashboard', 'admin', 'settings', 'employees', 'sales', 'finance', 'profile'
+    ],
+    group_clco: [
+        'dashboard', 'admin', 'settings', 'finance', 'procurement', 'profile'
+    ],
+    group_cae: [
+        'dashboard', 'admin', 'regional-ops', 'finance', 'sales', 'inventory', 'pos', 'pricing', 'warehouse', 'settings', 'profile'
+    ],
     super_admin: ['*'], // Global CEO / Owner - Full Access to EVERYTHING
     CEO: ['*'],
     ceo: ['*'],
@@ -177,7 +198,7 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
 export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
     const basePermissions = ROLE_PERMISSIONS[userRole] || [];
     if (basePermissions.includes('*') || [
-        'group_coo', 'group_cfo', 'admin', 'country_managing_director',
+        'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'admin', 'country_managing_director',
         'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
         'head_of_operations',
         'head_of_finance',

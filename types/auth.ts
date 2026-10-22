@@ -1,6 +1,8 @@
 export type UserRole =
   // Level 1 - Global Executive
-  | 'group_ceo' | 'group_coo' | 'group_cfo' | 'super_admin' | 'CEO' | 'ceo'
+  | 'group_ceo' | 'group_coo' | 'group_cfo' | 'group_cco' | 'group_csco'
+  | 'group_chro' | 'group_cto' | 'group_cio' | 'group_clco' | 'group_cae'
+  | 'super_admin' | 'CEO' | 'ceo'
   // Level 2 - Country Executive
   | 'country_managing_director' | 'admin'
   // Level 3 - Corporate HQ Directorate Heads

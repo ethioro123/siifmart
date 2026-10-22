@@ -41,7 +41,8 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
 
     // 1.5. Corporate HQ Executive Deck
     const isHQExecutive = [
-        'group_ceo', 'group_coo', 'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
+        'group_ceo', 'group_coo', 'group_clco', 'group_cae',
+        'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
         'head_of_operations',
     ].includes(role);
     if (isHQExecutive) {
@@ -52,17 +53,16 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
 
     // 2. Level 2 - Specialized Directors & Department Heads
     switch (role) {
+        case 'group_cco':
         case 'head_of_procurement':
-        case 'head_of_procurement':
-        case 'head_of_procurement':
-        case 'head_of_supply_chain':
-        case 'head_of_supply_chain':
-        case 'head_of_supply_chain':
         case 'buyer':
         case 'demand_planner':
         case 'vendor_relations_manager':
         case 'customs_import_specialist':
             return '/procurement';
+
+        case 'group_csco':
+            return '/wms-ops';
 
         case 'group_cfo':
         case 'head_of_finance':
@@ -75,8 +75,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'credit_control_officer':
             return '/finance';
 
-        case 'head_of_hr':
-        case 'head_of_hr':
+        case 'group_chro':
         case 'head_of_hr':
         case 'hr':
         case 'hr_generalist':
@@ -85,14 +84,13 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
             return '/employees';
 
         case 'head_of_merchandising':
-        case 'head_of_merchandising':
-        case 'head_of_merchandising':
         case 'merchandising_specialist':
         case 'regional_merchandising_manager':
         case 'merchandiser':
             return '/pricing';
 
-        case 'head_of_it':
+        case 'group_cto':
+        case 'group_cio':
         case 'head_of_it':
         case 'it_support':
         case 'security_manager':

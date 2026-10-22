@@ -11,6 +11,13 @@ export const SYSTEM_ROLES: {
    { id: 'group_ceo', label: 'Group Chief Executive Officer', desc: 'Multinational Enterprise Governance and Global Group Strategy', level: 1, styles: { text: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-400/10', border: 'border-yellow-200 dark:border-yellow-400/20', badge: 'bg-yellow-100 dark:bg-yellow-400/20 text-yellow-700 dark:text-yellow-400' } },
    { id: 'group_coo', label: 'Group Chief Operating Officer', desc: 'Enterprise Operational Execution and Multinational Country Governance', level: 1, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-100 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },
    { id: 'group_cfo', label: 'Group Chief Financial Officer', desc: 'Global Financial Strategy, Treasury, Capital Allocation, and Statutory Governance', level: 1, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
+   { id: 'group_cco', label: 'Group Chief Commercial Officer', desc: 'Global Sourcing, Merchandising, Category Strategy, and Supplier Alliances', level: 1, styles: { text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-400/10', border: 'border-amber-200 dark:border-amber-400/20', badge: 'bg-amber-100 dark:bg-amber-400/20 text-amber-700 dark:text-amber-400' } },
+   { id: 'group_csco', label: 'Group Chief Supply Chain Officer', desc: 'Global Warehousing, Fleet Logistics, Network Distribution, and Inventory Planning', level: 1, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
+   { id: 'group_chro', label: 'Group Chief Human Resources Officer', desc: 'Global People Strategy, Talent Governance, Executive Compensation, and Culture', level: 1, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
+   { id: 'group_cto', label: 'Group Chief Technology Officer', desc: 'Global Engineering Architecture, Infrastructure, and Core Platform Innovation', level: 1, styles: { text: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-100 dark:bg-cyan-400/10', border: 'border-cyan-200 dark:border-cyan-400/20', badge: 'bg-cyan-100 dark:bg-cyan-400/20 text-cyan-700 dark:text-cyan-400' } },
+   { id: 'group_cio', label: 'Group Chief Information Officer', desc: 'Enterprise Business Systems, IT Governance, Data Intelligence, and Security Policy', level: 1, styles: { text: 'text-purple-600 dark:text-purple-300', bg: 'bg-purple-100 dark:bg-purple-300/10', border: 'border-purple-200 dark:border-purple-300/20', badge: 'bg-purple-100 dark:bg-purple-300/20 text-purple-700 dark:text-purple-300' } },
+   { id: 'group_clco', label: 'Group Chief Legal & Compliance Officer', desc: 'Global Regulatory Affairs, Sovereign Trade Compliance, Contracts, and Risk', level: 1, styles: { text: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-400/10', border: 'border-slate-200 dark:border-slate-400/20', badge: 'bg-slate-100 dark:bg-slate-400/20 text-slate-700 dark:text-slate-400' } },
+   { id: 'group_cae', label: 'Chief Audit Executive', desc: 'Independent Internal Audit, Enterprise Fraud Control, and Zero-Trust Governance', level: 1, styles: { text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-100 dark:bg-rose-400/10', border: 'border-rose-200 dark:border-rose-400/20', badge: 'bg-rose-100 dark:bg-rose-400/20 text-rose-700 dark:text-rose-400' } },
    { id: 'super_admin', label: 'Chief Executive Officer', desc: 'Enterprise Ownership and Sovereign Executive Governance', level: 1, styles: { text: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-400/10', border: 'border-yellow-200 dark:border-yellow-400/20', badge: 'bg-yellow-100 dark:bg-yellow-400/20 text-yellow-700 dark:text-yellow-400' } },
 
    // ═══ LEVEL 2 - COUNTRY EXECUTIVE ═══
@@ -100,6 +107,13 @@ export function getJobTitleForRole(role?: string | null): string {
    if (normalizedRole === 'group_ceo') return 'Group Chief Executive Officer';
    if (normalizedRole === 'group_coo' || normalizedRole === 'coo') return 'Group Chief Operating Officer';
    if (normalizedRole === 'group_cfo' || normalizedRole === 'cfo') return 'Group Chief Financial Officer';
+   if (normalizedRole === 'group_cco' || normalizedRole === 'cco') return 'Group Chief Commercial Officer';
+   if (normalizedRole === 'group_csco' || normalizedRole === 'csco') return 'Group Chief Supply Chain Officer';
+   if (normalizedRole === 'group_chro' || normalizedRole === 'chro') return 'Group Chief Human Resources Officer';
+   if (normalizedRole === 'group_cto' || normalizedRole === 'cto') return 'Group Chief Technology Officer';
+   if (normalizedRole === 'group_cio' || normalizedRole === 'cio') return 'Group Chief Information Officer';
+   if (normalizedRole === 'group_clco' || normalizedRole === 'clco') return 'Group Chief Legal & Compliance Officer';
+   if (normalizedRole === 'group_cae' || normalizedRole === 'cae') return 'Chief Audit Executive';
    if (normalizedRole === 'ceo') return 'Chief Executive Officer';
 
    const configuredRole = SYSTEM_ROLES.find(item => item.id.toLowerCase() === normalizedRole);
@@ -127,6 +141,13 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'ceo': 100,
         'group_coo': 99,
         'group_cfo': 99,
+        'group_cco': 99,
+        'group_csco': 99,
+        'group_chro': 99,
+        'group_cto': 99,
+        'group_cio': 99,
+        'group_clco': 99,
+        'group_cae': 99,
         'country_managing_director': 98,
         'admin': 98, // Country Managing Director (National Executive below Global CEO)
 
@@ -210,8 +231,14 @@ export const canViewLocation = (
     if (isOwn) return true;
     if (!userRole) return false;
 
-    // Global CEO, Group COO, and Group CFO can see everyone across operational facilities
-    if (userRole === 'group_ceo' || userRole === 'group_coo' || userRole === 'group_cfo' || userRole === 'super_admin' || userRole === 'ceo' || userRole === 'CEO') return true;
+    const isGlobalExecutive = (r?: string) => [
+        'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco',
+        'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
+        'super_admin', 'ceo', 'CEO'
+    ].includes(r || '');
+
+    // Global C-Suite executives can see everyone across operational facilities
+    if (isGlobalExecutive(userRole)) return true;
 
     // Country Managing Director and HR/Operations leadership can see anyone in their country except Global C-Suite
     if ([
@@ -219,7 +246,7 @@ export const canViewLocation = (
         'hr', 'head_of_hr',
         'head_of_operations',
     ].includes(userRole)) {
-        return targetRole !== 'group_ceo' && targetRole !== 'group_coo' && targetRole !== 'group_cfo' && targetRole !== 'super_admin' && targetRole !== 'ceo' && targetRole !== 'CEO';
+        return !isGlobalExecutive(targetRole);
     }
 
     // Otherwise, follow hierarchy: user role hierarchy level must be greater than target
@@ -234,7 +261,8 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
 
     // Explicitly allow executive, regional/operations directors, finance, procurement, and merchandising leadership
     if ([
-        'group_ceo', 'group_coo', 'group_cfo', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+        'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
+        'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
         'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager',
         'head_of_operations',
         'head_of_finance',
@@ -278,14 +306,18 @@ export const canEmployRole = (
         return normCandidateRole !== 'group_ceo' && normCandidateRole !== 'super_admin' && normCandidateRole !== 'ceo';
     }
 
-    // Group COO can employ Country Managing Directors, Operations Directors, and subordinate staff
-    if (normUserRole === 'group_coo') {
-        return normCandidateRole !== 'group_ceo' && normCandidateRole !== 'super_admin' && normCandidateRole !== 'ceo' && normCandidateRole !== 'group_coo';
-    }
-
-    // Group CFO can employ Corporate Finance Directors, Regional Finance Managers, and financial staff
-    if (normUserRole === 'group_cfo') {
-        return normCandidateRole !== 'group_ceo' && normCandidateRole !== 'super_admin' && normCandidateRole !== 'ceo' && normCandidateRole !== 'group_coo' && normCandidateRole !== 'group_cfo';
+    // Global Level 1 C-Suite Executives can employ subordinate roles in their vertical domain
+    const isLevelOneCSuite = [
+        'group_coo', 'group_cfo', 'group_cco', 'group_csco',
+        'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae'
+    ].includes(normUserRole);
+    if (isLevelOneCSuite) {
+        const topLeadershipRoles = [
+            'group_ceo', 'super_admin', 'ceo', 'group_coo', 'group_cfo',
+            'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio',
+            'group_clco', 'group_cae'
+        ];
+        return !topLeadershipRoles.includes(normCandidateRole);
     }
 
     const userHierarchy = getRoleHierarchy(userRole);
@@ -313,7 +345,7 @@ export const canEmployRole = (
     const isFacilityCaptain = candidateRole === 'store_manager' || candidateRole === 'warehouse_manager';
     if (isFacilityCaptain) {
         return [
-            'group_ceo', 'group_coo', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+            'group_ceo', 'group_coo', 'group_csco', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
             'head_of_operations',
             'head_of_supply_chain',
             'regional_operations_manager', 'regional_hr_manager',
@@ -332,7 +364,8 @@ export const canEmployRole = (
     ].includes(candidateRole as string);
     if (isRegionalDepartmentManager) {
         return [
-            'group_ceo', 'group_coo', 'group_cfo', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+            'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
+            'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
             'head_of_operations',
             'regional_operations_manager',
             'head_of_hr', 'hr',
@@ -357,6 +390,13 @@ export const MANAGERIAL_ROLES: readonly string[] = [
     'group_ceo',
     'group_coo',
     'group_cfo',
+    'group_cco',
+    'group_csco',
+    'group_chro',
+    'group_cto',
+    'group_cio',
+    'group_clco',
+    'group_cae',
     'super_admin',
     'admin',
     'country_managing_director',

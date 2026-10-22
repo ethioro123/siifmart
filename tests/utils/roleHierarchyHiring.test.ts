@@ -54,6 +54,30 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
         });
     });
 
+    describe('Remaining Level 1 Global Executives (group_cco, group_csco, group_chro, etc.)', () => {
+        it('group_cco can employ procurement/merchandising leaders and subordinate staff', () => {
+            expect(canEmployRole('group_cco', 'head_of_procurement')).toBe(true);
+            expect(canEmployRole('group_cco', 'head_of_merchandising')).toBe(true);
+            expect(canEmployRole('group_cco', 'buyer')).toBe(true);
+            expect(canEmployRole('group_cco', 'group_ceo')).toBe(false);
+            expect(canEmployRole('group_cco', 'group_coo')).toBe(false);
+        });
+
+        it('group_csco can employ supply chain directors, warehouse managers, and logistics staff', () => {
+            expect(canEmployRole('group_csco', 'head_of_supply_chain')).toBe(true);
+            expect(canEmployRole('group_csco', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('group_csco', 'picker')).toBe(true);
+            expect(canEmployRole('group_csco', 'group_ceo')).toBe(false);
+        });
+
+        it('group_chro can employ HR leadership and people operations specialists', () => {
+            expect(canEmployRole('group_chro', 'head_of_hr')).toBe(true);
+            expect(canEmployRole('group_chro', 'hr_generalist')).toBe(true);
+            expect(canEmployRole('group_chro', 'talent_recruiter')).toBe(true);
+            expect(canEmployRole('group_chro', 'group_ceo')).toBe(false);
+        });
+    });
+
     describe('HR and Head of Human Resources (Level 2, Rank 85)', () => {
         it('cannot employ CEO (super_admin or group_ceo, Level 1)', () => {
             expect(canEmployRole('head_of_hr', 'group_ceo')).toBe(false);
