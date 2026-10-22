@@ -1,4 +1,5 @@
 import type { StagingSiteType } from '../../utils/stagingQuickLogin';
+import { SYSTEM_ROLES } from '../../utils/roles';
 
 export interface SiteTheme {
   iconColor: string;
@@ -78,15 +79,15 @@ export function getSiteTheme(type: StagingSiteType): SiteTheme {
   }
 }
 
+const MANAGER_AND_DIRECTOR_ROLE_CHIPS = SYSTEM_ROLES
+  .filter(role => /\b(manager|director)\b/i.test(role.label))
+  .map(({ id, label }) => ({ id, label }));
+
 export const POPULAR_ROLE_CHIPS = [
+  ...MANAGER_AND_DIRECTOR_ROLE_CHIPS,
   { id: 'cashier', label: 'Cashier' },
-  { id: 'store_manager', label: 'Store Manager' },
-  { id: 'regional_operations_manager', label: 'Regional Operations Manager' },
-  { id: 'warehouse_manager', label: 'Warehouse Manager' },
-  { id: 'country_managing_director', label: 'Country Managing Director' },
   { id: 'picker', label: 'Picker' },
   { id: 'packer', label: 'Packer' },
   { id: 'driver', label: 'Driver' },
   { id: 'receiver', label: 'Receiver' },
-  { id: 'inventory_specialist', label: 'Inventory Specialist' },
 ] as const;
