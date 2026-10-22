@@ -5,6 +5,18 @@
 
 ## Active Features
 
+### PO Creator Permissions Aligned With Database Policy (2026-10-23)
+- PO creation in the application now matches the authenticated insert roles enforced in staging and production. The Group CEO retains creation authority; other Group executives, Area Operations Managers, and Regional Supply Chain Managers no longer see a create permission the database will reject.
+- Country functional roles with database authority keep it. Buyer and regional procurement roles remain role-based, so multiple employees can share the role and provide operational coverage; PO approval still requires a different person from the creator.
+- **Files**: `services/permissions.matrix.ts`, `services/permissions.matrix-base.ts`, `utils/permissions.ts`.
+- **Database**: Read-only checked staging and production; both already use the same role and authorized-scope checks for PO inserts.
+
+### Purchase Request to PO Workflow (2026-10-23)
+- Added country/region-scoped purchase requests for employees, Buyer review with request-owner separation, and handoff to a draft PO.
+- The request is transactionally marked converted when the linked draft PO is inserted; existing PO approval controls require a separate approver.
+- `migrations/20261023_purchase_requisitions.sql` adds RLS, review RPC, request/PO linking and server-side insert validation.
+- PO creation roles remain aligned with the live purchase-order insert policy; `CreatePOModal` checks the same allowlist before creating.
+
 ### Device-Aware Appearance (2026-10-23)
 - New sessions follow the device's light or dark appearance and update when the system preference changes. A manual theme toggle is saved in browser storage and takes precedence on later visits.
 - The document applies the initial theme before the app loads to avoid a flash of the opposite appearance.

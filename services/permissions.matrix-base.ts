@@ -69,7 +69,7 @@ export const HEAD_OF_SUPPLY_CHAIN_PERMISSIONS: Permission[] = [
     'dashboard.view',
     'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
     'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.receive',
+    'procurement.view', 'procurement.edit_po', 'procurement.receive',
     'sales.view', 'sales.view_reports'
 ];
 

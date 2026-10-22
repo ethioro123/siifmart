@@ -66,7 +66,8 @@ export const purchaseOrdersService = {
             currency: po.currency || 'ETB',
             country_code: po.countryCode || po.country_code || destSite?.country || getEffectiveCountry({ country: po.countryCode || po.country_code, currency: po.currency }),
             region_code: po.regionCode || po.region_code || destSite?.region_code || null,
-            requires_hq_approval: Boolean(po.requiresHqApproval || po.requires_hq_approval)
+            requires_hq_approval: Boolean(po.requiresHqApproval || po.requires_hq_approval),
+            purchase_requisition_id: po.purchaseRequisitionId || null
         };
 
         const insertBuilder: any = supabase.from('purchase_orders').insert(dbPO);

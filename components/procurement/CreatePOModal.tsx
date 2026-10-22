@@ -16,6 +16,7 @@ import { PODraftBanner } from './PODraftBanner';
 import { buildPurchaseOrders, resolvePOVendor } from './createPOHelpers';
 import { CreatePOFooter } from './CreatePOFooter';
 import { logger } from '../../utils/logger';
+import { hasPermission } from '../../utils/permissions';
 
 interface CreatePOModalProps {
     isOpen: boolean;
@@ -310,6 +311,10 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     };
 
     const handleCreatePO = async () => {
+        if (!isEditMode && !hasPermission(user?.role, 'CREATE_PO')) {
+            showToast('Your role is not authorized to create purchase orders.', 'error');
+            return;
+        }
         if (hasUnsavedItemDraft) {
             showToast('You have an un-added item in the form above. Click "Add Item to Order" or clear it before submitting.', 'warning');
             const formElement = document.getElementById('po-item-form-container');
@@ -322,6 +327,10 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         }
         if (destinationSiteIds.length === 0) {
             showToast("Select a receiving Warehouse or Distribution Center.", 'warning');
+            return;
+        }
+        if (initialDraft?.purchaseRequisitionId && destinationSiteIds.length !== 1) {
+            showToast('A purchase request can create a PO for one destination only.', 'warning');
             return;
         }
         const invalidSites = destinationSiteIds
@@ -354,7 +363,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 shippingCost, discountRate, taxRate, editingPO, sites, currencySymbol,
                 vendorId, vendorName, expectedDate, ...poDelivery, poNotes, paymentTerms,
                 incoterms, poPriority, userName: user?.name, poRequestedBy,
-                isRegionalUser, regionalAutonomousPoLimit
+                isRegionalUser, regionalAutonomousPoLimit,
+                purchaseRequisitionId: initialDraft?.purchaseRequisitionId
             });
 
             let successCount = 0;

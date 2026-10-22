@@ -17,6 +17,7 @@ declare global {
 export * from './types/auth';
 export * from './types/employee';
 export * from './types/product';
+export * from './types/purchaseRequisition';
 export * from './types/sales';
 export * from './types/wms';
 export * from './types/infrastructure';

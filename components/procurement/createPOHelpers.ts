@@ -207,6 +207,7 @@ export interface BuildPurchaseOrdersParams {
     dockSlot?: string;
     isRegionalUser?: boolean;
     regionalAutonomousPoLimit?: number;
+    purchaseRequisitionId?: string;
 }
 
 export interface GeneratedPurchaseOrder {
@@ -238,7 +239,8 @@ export function buildPurchaseOrders(params: BuildPurchaseOrdersParams): Generate
         shelfLife,
         dockSlot,
         isRegionalUser = false,
-        regionalAutonomousPoLimit = 0
+        regionalAutonomousPoLimit = 0,
+        purchaseRequisitionId
     } = params;
 
     const results: GeneratedPurchaseOrder[] = [];
@@ -323,6 +325,7 @@ export function buildPurchaseOrders(params: BuildPurchaseOrdersParams): Generate
             region_code: effectiveRegion || undefined,
             requiresHqApproval,
             requires_hq_approval: requiresHqApproval,
+            purchaseRequisitionId,
             destination: destSite?.name || editingPO?.destination || undefined,
             incoterms: incoterms || undefined,
             tempReq: tempReq || undefined,

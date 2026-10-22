@@ -80,7 +80,7 @@ export const PERMISSIONS = {
 
     // Procurement
     ACCESS_PROCUREMENT: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'country_operations_director', 'country_commercial_director', 'country_supply_chain_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'credit_control_officer'],
-    CREATE_PO: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'regional_procurement_manager', 'regional_operations_manager', 'buyer', 'country_supply_chain_director'],
+    CREATE_PO: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'regional_procurement_manager', 'country_supply_chain_director', 'country_operations_director', 'regional_operations_manager', 'buyer'],
     APPROVE_PO: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'regional_procurement_manager', 'regional_operations_manager'],
     RECEIVE_PO: ['group_ceo', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'receiver', 'regional_logistics_manager', 'regional_procurement_manager'],
     DELETE_PO: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'regional_procurement_manager'],
@@ -207,6 +207,12 @@ export function hasPermission(userRole: UserRole | undefined, permission: keyof 
 
     // The canonical group_ceo role has sovereign module and action access
     if (userRole === 'group_ceo') return true;
+
+    // Keep this high-impact action aligned with the database insert allowlist;
+    // editable role settings must not expose a create button the RLS policy rejects.
+    if (permission === 'CREATE_PO') {
+        return (PERMISSIONS.CREATE_PO as readonly string[]).includes(userRole);
+    }
 
     // Zero-Trust dynamic policy override from RoleSettings
     const dynamicCheck = checkDynamicRolePermission(userRole as string, permission as string);

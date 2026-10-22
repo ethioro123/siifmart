@@ -365,6 +365,7 @@ export interface PurchaseOrder {
   region_code?: string;
   requiresHqApproval?: boolean;
   requires_hq_approval?: boolean;
+  purchaseRequisitionId?: string;
   hqApprovedBy?: string;
   hq_approved_by?: string;
   hqApprovedAt?: string;

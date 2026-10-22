@@ -13,6 +13,7 @@ import { getAvailableSections } from '../services/auth.service';
 import { native } from '../utils/native';
 import { findCountryAdminSite } from '../utils/countryAdmin';
 import Logo from './Logo';
+import { ACTION_PERMISSIONS } from '../services/permissions.matrix';
 
 interface SidebarItemProps {
   to: string;
@@ -98,6 +99,7 @@ export default function Sidebar() {
 
       // PROCUREMENT - Corporate administration, procurement & operational leadership
       { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'country_finance_director', 'country_supply_chain_director', 'country_operations_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'replenishment_planner'] },
+      { to: "/purchase-requests", icon: ClipboardList, label: "Purchase Requests", section: "requests", roles: Object.keys(ACTION_PERMISSIONS) },
 
       // ROADMAP - CEO Only (Confidential Strategic Canvas)
       { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['group_ceo'] },
