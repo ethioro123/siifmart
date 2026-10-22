@@ -270,6 +270,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                     </p>
                 </div>
 
+                <p className="text-xs text-[var(--theme-text-secondary)]">Category-based preview suggestions must be checked against the product label or supplier specification.</p>
                 {/* Normalized Pricing / Margin Block */}
                 {(effectiveCost > 0 || effectiveRetail > 0) && (
                     <div className="text-left sm:text-right whitespace-nowrap flex flex-col items-start sm:items-end gap-1 font-mono">

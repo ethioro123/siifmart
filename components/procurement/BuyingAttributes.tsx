@@ -1,3 +1,4 @@
+import type { POItemFormDraft } from './POItemForm';
 import React, { useState, useEffect } from 'react';
 import { Tag, ChevronDown, ChevronUp, Lock, Package, Thermometer } from 'lucide-react';
 import { PRODUCT_CATEGORIES } from './utils';
@@ -50,16 +51,16 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     nextPkg.packageType = 'Retail Box';
                 }
             } else if (level === 'case') {
-                nextPkg.packQty = (!p.packaging.packQty || p.packaging.packQty === '1') ? '24' : p.packaging.packQty;
+                nextPkg.packQty = (!p.packaging.packQty || p.packaging.packQty === '1') ? '' : p.packaging.packQty;
                 nextPkg.caseSize = '';
                 nextPkg.packageType = nextPkg.packageType || 'Case';
             } else if (level === 'bale') {
-                nextPkg.packQty = (!p.packaging.packQty || p.packaging.packQty === '1') ? '12' : p.packaging.packQty;
+                nextPkg.packQty = (!p.packaging.packQty || p.packaging.packQty === '1') ? '' : p.packaging.packQty;
                 nextPkg.caseSize = '';
                 nextPkg.packageType = 'Bale';
             } else if (level === 'two_tier') {
-                nextPkg.packQty = (!p.packaging.packQty || p.packaging.packQty === '1') ? '6' : p.packaging.packQty;
-                nextPkg.caseSize = (!p.packaging.caseSize || p.packaging.caseSize === '0') ? '4' : p.packaging.caseSize;
+                nextPkg.packQty = (!p.packaging.packQty || p.packaging.packQty === '1') ? '' : p.packaging.packQty;
+                nextPkg.caseSize = (!p.packaging.caseSize || p.packaging.caseSize === '0') ? '' : p.packaging.caseSize;
                 nextPkg.packageType = nextPkg.packageType || 'Master Case';
             }
             return { ...p, packaging: nextPkg };
@@ -115,17 +116,18 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
             },
             storage: {
                 ...p.storage,
+                requirementsConfirmed: false,
                 type: nextStorageDefaults.defaultStorage,
                 isPerishable: nextStorageDefaults.defaultPerishable,
-                shelfLifeDays: p.storage?.shelfLifeDays || nextStorageDefaults.defaultShelfLife || '',
+                shelfLifeDays: nextStorageDefaults.defaultShelfLife || '',
                 inboundQcDirective: p.storage?.inboundQcDirective || nextStorageDefaults.inboundDirectives[0] || '',
             }
         }));
     };
 
-    const packQtyNum = parseInt(customAttributes.packaging?.packQty) || 1;
-    const caseSizeNum = parseInt(customAttributes.packaging?.caseSize) || 0;
-    const multiplier = packagingLevel === 'two_tier' ? (packQtyNum * (caseSizeNum || 1)) : packagingLevel === 'single' ? 1 : packQtyNum;
+    const packQtyNum = Number(customAttributes.packaging?.packQty) || 0;
+    const caseSizeNum = Number(customAttributes.packaging?.caseSize) || 0;
+    const multiplier = packagingLevel === 'two_tier' ? (packQtyNum * caseSizeNum) : packagingLevel === 'single' ? 1 : packQtyNum;
 
     const [showStorageSection, setShowStorageSection] = useState(false);
 
@@ -143,7 +145,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     <Package size={13} className="text-[var(--theme-accent)]" /> Product Master & Item Specifications
                 </span>
                 <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                    <Lock size={11} className="shrink-0 text-[var(--theme-accent)]" /> Walmart Item 360 / GS1 Standard
+                    <Lock size={11} className="shrink-0 text-[var(--theme-accent)]" /> Product specifications
                 </span>
             </div>
 
@@ -156,33 +158,42 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                         <span>1. Item Identification & Merchandising</span>
                     </div>
 
-                    <div className="grid grid-cols-6 gap-3.5">
-                        <div className="col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Brand <span className="text-rose-500">*</span></label>
+                    <div className="grid grid-cols-1 sm:grid-cols-6 gap-3.5">
+                        <div className="col-span-full sm:col-span-2 space-y-1">
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Brand { !customAttributes.identity?.unbranded && <span className="text-rose-500">*</span> }</label>
                             <input
                                 type="text"
                                 className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.brand ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold`}
                                 placeholder="e.g. Amazon, Samsung, Brookside"
+                                aria-label="Brand"
+                                disabled={Boolean(customAttributes.identity?.unbranded)}
                                 value={customItemBrand}
-                                onChange={e => { setCustomItemBrand(e.target.value); if (errors.brand) setErrors(p => ({ ...p, brand: '' })); }}
+                                onChange={e => { setCustomItemBrand(e.target.value); setCustomAttributes((previous: POItemFormDraft['customAttributes']) => ({ ...previous, storage: { ...previous.storage, requirementsConfirmed: false } })); if (errors.brand) setErrors(p => ({ ...p, brand: '' })); }}
                             />
+                            <label className="flex min-h-11 items-center gap-2 text-xs text-[var(--theme-text-secondary)]"><input type="checkbox" checked={Boolean(customAttributes.identity?.unbranded)} onChange={event => {
+                                const unbranded = event.target.checked;
+                                if (unbranded) setCustomItemBrand('');
+                                setCustomAttributes((previous: POItemFormDraft['customAttributes']) => ({ ...previous, identity: { ...previous.identity, unbranded } }));
+                                setErrors(previous => ({ ...previous, brand: '' }));
+                            }} />Unbranded product</label>
                             {errors.brand && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.brand}</span>}
                         </div>
-                        <div className="col-span-4 space-y-1">
+                        <div className="col-span-full sm:col-span-4 space-y-1">
                             <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Product Name / Consumer Description <span className="text-rose-500">*</span></label>
                             <input
                                 type="text"
                                 className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.name ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-semibold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
+                                aria-label="Product name"
                                 placeholder="e.g. Kindle Paperwhite 16GB, Basmati Rice 5kg"
                                 value={customItemName}
-                                onChange={e => { setCustomItemName(e.target.value); if (errors.name) setErrors(p => ({ ...p, name: '' })); }}
+                                onChange={e => { setCustomItemName(e.target.value); setCustomAttributes((previous: POItemFormDraft['customAttributes']) => ({ ...previous, storage: { ...previous.storage, requirementsConfirmed: false } })); if (errors.name) setErrors(p => ({ ...p, name: '' })); }}
                             />
                             {errors.name && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.name}</span>}
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-6 gap-3.5">
-                        <div className="col-span-2 space-y-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-6 gap-3.5">
+                        <div className="col-span-full sm:col-span-2 space-y-1">
                             <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Category <span className="text-rose-500">*</span></label>
                             <div className="relative">
                                 <select
@@ -202,7 +213,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                             </div>
                             {errors.category && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.category}</span>}
                         </div>
-                        <div className="col-span-2 space-y-1">
+                        <div className="col-span-full sm:col-span-2 space-y-1">
                             <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Subcategory</label>
                             <input
                                 type="text"
@@ -212,7 +223,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 onChange={e => setCustomAttributes((p: any) => ({ ...p, identity: { ...p.identity, subcategory: e.target.value } }))}
                             />
                         </div>
-                        <div className="col-span-2 space-y-1">
+                        <div className="col-span-full sm:col-span-2 space-y-1">
                             <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Variant / Style</label>
                             <input
                                 type="text"
@@ -225,6 +236,8 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     </div>
                 </div>
 
+                <details className="rounded-xl border border-[var(--theme-border)] p-3" open={Boolean(Object.keys(errors).some(key => key.startsWith('category')))}>
+                    <summary className="min-h-11 cursor-pointer text-sm font-medium text-[var(--theme-text-primary)]">Category-specific details</summary>
                 {/* ── 2. CATEGORY-SPECIFIC PRODUCT ATTRIBUTES ── */}
                 <CategorySpecificAttributes
                     category={selectedMainCategory}
@@ -235,6 +248,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     setErrors={setErrors}
                 />
 
+                </details>
                 {/* ── 3. PHYSICAL PRODUCT SPECIFICATIONS (DYNAMIC PER CATEGORY) ── */}
                 <DynamicPhysicalAttributesSection
                     selectedMainCategory={selectedMainCategory}
@@ -294,6 +308,14 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                         </div>
                     )}
                 </div>
+                <label className="flex min-h-11 items-start gap-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] p-3 text-sm text-[var(--theme-text-primary)]">
+                    <input type="checkbox" className="mt-1" checked={Boolean(customAttributes.storage?.requirementsConfirmed)} onChange={event => {
+                        const requirementsConfirmed = event.target.checked;
+                        setCustomAttributes((previous: POItemFormDraft['customAttributes']) => ({ ...previous, storage: { ...previous.storage, requirementsConfirmed } }));
+                        setErrors(previous => ({ ...previous, storageConfirmation: '' }));
+                    }} />I have checked the product’s storage, handling and shelf-life requirements against its label or supplier specification.
+                </label>
+                {errors.storageConfirmation && <p role="alert" className="text-sm text-[var(--theme-text-primary)]">{errors.storageConfirmation}</p>}
             </div>
         </div>
     );

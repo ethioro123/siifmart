@@ -60,12 +60,12 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                     <span>4. Supply Chain Packaging Hierarchy (GS1 Logistics Standard)</span>
                 </div>
                 <div className="px-2.5 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[9px] font-mono font-bold text-[var(--theme-accent)]">
-                    {packagingLevel === 'single' ? '1 Order Unit = 1 Consumer Each (1:1)' : `1 Order Unit = ${multiplier} Consumer Eaches (×${multiplier})`}
+                    {packagingLevel === 'single' ? '1 order unit = 1 consumer unit' : multiplier > 0 ? `1 order unit = ${multiplier} consumer units` : 'Enter packaging counts to calculate units'}
                 </div>
             </div>
 
             {/* Packaging Level Selector Pills */}
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {tiers.map(tier => (
                     <button
                         key={tier.id}
@@ -88,8 +88,8 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
             </div>
 
             {/* Container Type + Multipliers */}
-            <div className="grid grid-cols-6 gap-3.5 pt-1">
-                <div className="col-span-2 space-y-1">
+            <div className="grid grid-cols-1 sm:grid-cols-6 gap-3.5 pt-1">
+                <div className="col-span-full sm:col-span-2 space-y-1">
                     <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Package Container Type</label>
                     <div className="relative">
                         <select 
@@ -106,7 +106,7 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                 </div>
 
                 {packagingLevel !== 'single' && (
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-full sm:col-span-2 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                             {packagingLevel === 'two_tier' ? 'Inner Pack Qty' : packagingLevel === 'bale' ? 'Bale Qty' : 'Case Qty'}{' '}
                             <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">
@@ -130,7 +130,7 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                 )}
 
                 {packagingLevel === 'two_tier' && (
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-full sm:col-span-2 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                             Case Size <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(inner packs per case)</span> <span className="text-rose-500">*</span>
                         </label>
@@ -149,7 +149,7 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                     </div>
                 )}
 
-                <div className="col-span-2 space-y-1">
+                <div className="col-span-full sm:col-span-2 space-y-1">
                     <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Packaging Material</label>
                     <div className="relative">
                         <select

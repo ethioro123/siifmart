@@ -1,3 +1,4 @@
+import { validatePODelivery } from '../utils/poDeliveryRequirements';
 import { supabase } from '../lib/supabase';
 import type { PurchaseOrder } from '../types';
 import { wmsJobsService } from './wms-jobs.service';
@@ -32,6 +33,8 @@ export const purchaseOrdersService = {
     reject: purchaseOrdersApprovalService.reject,
 
     async create(po: Omit<PurchaseOrder, 'created_at' | 'updated_at'>, items: any[]) {
+        const deliveryError = validatePODelivery(items, po.tempReq || 'Ambient', po.shelfLife);
+        if (deliveryError) throw new Error(deliveryError);
         const poId = po.id || crypto.randomUUID();
         const dbStatus = po.status;
 
@@ -165,7 +168,12 @@ export const purchaseOrdersService = {
     async update(id: string, updates: Partial<PurchaseOrder>) {
         const dbUpdates: any = {};
 
-        const currentPO = await getById(id).catch(() => null);
+        const currentPO = await getById(id);
+        if (!currentPO) throw new Error('Purchase Order not found');
+        if (updates.lineItems || updates.tempReq !== undefined || updates.shelfLife !== undefined || updates.status === 'Approved') {
+            const deliveryError = validatePODelivery(updates.lineItems || currentPO.lineItems || [], updates.tempReq ?? currentPO.tempReq ?? 'Ambient', updates.shelfLife ?? currentPO.shelfLife);
+            if (deliveryError) throw new Error(deliveryError);
+        }
         const currentNotes = currentPO?.notes || '';
         const effectiveStatus = updates.status || currentPO.status;
 

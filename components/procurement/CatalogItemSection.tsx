@@ -88,6 +88,7 @@ export const CatalogItemSection: React.FC<CatalogItemSectionProps> = ({
             {/* Dynamic Category Attributes for Selected Catalog Product */}
             {selectedCatalogProduct && effectiveCategory && (
                 <div className="rounded-2xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-4 space-y-2.5 shadow-sm">
+                    <details><summary className="min-h-11 cursor-pointer text-sm font-medium text-[var(--theme-text-primary)]">Approved catalog specifications (read only)</summary><fieldset disabled>
                     <CategorySpecificAttributes
                         category={effectiveCategory}
                         subcategory={selectedCatalogProduct?.customAttributes?.identity?.subcategory || customAttributes.identity?.subcategory}
@@ -95,6 +96,7 @@ export const CatalogItemSection: React.FC<CatalogItemSectionProps> = ({
                         setCustomAttributes={setCustomAttributes}
                         errors={errors}
                     />
+                    </fieldset></details>
                 </div>
             )}
 
@@ -112,7 +114,7 @@ export const CatalogItemSection: React.FC<CatalogItemSectionProps> = ({
                 orderUnitName={orderUnitName}
                 sellUnit={sellUnit}
                 currencySymbol={currencySymbol}
-                showRetailInput={true}
+                showRetailInput={false}
                 errors={errors}
                 setErrors={setErrors}
             />

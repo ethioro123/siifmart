@@ -30,7 +30,7 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
 
     const handleFlagChange = (flagId: string, checked: boolean) => {
         setCustomAttributes((prev: any) => {
-            const nextStorage = { ...prev.storage };
+            const nextStorage = { ...prev.storage, requirementsConfirmed: false };
             const nextPackaging = { ...prev.packaging };
 
             if (flagId === 'isBreakable') {
@@ -72,20 +72,20 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                     <span>5. Storage, Inbound QC & Handling Directives</span>
                 </div>
                 <span className="text-[9px] text-[var(--theme-text-secondary)] font-medium">
-                    Category-tailored receiving protocol & facility climate rules
+                    Category suggestions — verify against the product label or supplier specification
                 </span>
             </div>
 
-            <div className="grid grid-cols-6 gap-3.5">
+            <div className="grid gap-3.5 sm:grid-cols-6">
                 {/* Storage Temperature Condition */}
-                <div className="col-span-2 space-y-1">
+                <div className="col-span-full sm:col-span-2 space-y-1">
                     <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Storage Temperature</label>
                     <div className="relative">
                         <select
                             title="Storage Temperature"
                             className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] outline-none font-semibold cursor-pointer appearance-none"
                             value={storageType}
-                            onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, type: e.target.value } }))}
+                            onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, requirementsConfirmed: false, type: e.target.value } }))}
                         >
                             {Array.from(new Set([storageConfig.defaultStorage, ...STORAGE_CONDITIONS])).map(s => (
                                 <option key={s} value={s} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">
@@ -98,13 +98,14 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                 </div>
 
                 {/* Shelf Life Days */}
-                <div className="col-span-2 space-y-1">
+                <div className="col-span-full sm:col-span-2 space-y-1">
                     <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                        Shelf Life (Days) {storageConfig.defaultPerishable && <span className="text-rose-500">*</span>}
+                        Total product shelf life (days) {isPerishable && <span className="text-rose-500">*</span>}
                     </label>
                     <input
                         type="number"
-                        min="0"
+                        aria-label="Total product shelf life (days)"
+                        min="1" step="1"
                         className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.shelfLifeDays ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                         placeholder={storageConfig.defaultShelfLife ? `e.g. ${storageConfig.defaultShelfLife}` : 'Leave blank if durable'}
                         value={customAttributes.storage?.shelfLifeDays || ''}
@@ -116,6 +117,7 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                                 ...p,
                                 storage: {
                                     ...p.storage,
+                                    requirementsConfirmed: false,
                                     shelfLifeDays: e.target.value,
                                     isPerishable: Boolean(e.target.value && parseInt(e.target.value) > 0)
                                 }
@@ -126,10 +128,11 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                 </div>
 
                 {/* Max Stack Limit */}
-                <div className="col-span-2 space-y-1">
+                <div className="col-span-full sm:col-span-2 space-y-1">
                     <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Max Stack Limit</label>
                     <input
                         type="number"
+                        aria-label="Total product shelf life (days)"
                         min="1"
                         className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
                         placeholder="e.g. 5 cartons high"

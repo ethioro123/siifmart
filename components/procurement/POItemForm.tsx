@@ -16,10 +16,10 @@ import { computeSellUnitsPerOrderUnit, resolveOrderUnitLabels } from './createPO
 import type { Country } from '../../utils/localization';
 
 const createDefaultCustomAttributes = () => ({
-    identity: { variant: '', type: '', subcategory: '', modelNumber: '' },
+    identity: { unbranded: false, variant: '', type: '', subcategory: '', modelNumber: '' },
     physical: { netWeight: '', grossWeight: '', volume: '', unit: '', sizeType: '', dims: '', color: '', form: '', texture: '' },
     packaging: { unitSize: '', packQty: '', caseSize: '', packagingLevel: '', material: '', isBreakable: false, packageType: '' },
-    storage: { type: 'Ambient', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false, inboundQcDirective: '', shelfLifeDays: '' },
+    storage: { requirementsConfirmed: false, type: 'Ambient', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false, inboundQcDirective: '', shelfLifeDays: '' },
     commercial: { isWeighted: false, sellBy: 'Unit', priceType: 'Fixed', isBundleEligible: false, isReturnable: true },
     descriptive: { usage: '', audience: '', ingredients: '', keyFeatures: '', scent: '', flavor: '', strength: '' },
     categorySpecific: {} as Record<string, any>
@@ -105,7 +105,7 @@ export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
     }));
 
     const selectedCatalogProduct = productType === 'catalog' ? products.find(p => p.id === currentProductToAdd) : null;
-    const activePackaging = selectedCatalogProduct?.customAttributes?.packaging || (selectedCatalogProduct as any)?.custom_attributes?.packaging || customAttributes.packaging;
+    const activePackaging = { ...customAttributes.packaging, ...(selectedCatalogProduct?.customAttributes?.packaging || (selectedCatalogProduct as any)?.custom_attributes?.packaging || {}) };
     const packagingLevel = activePackaging?.packagingLevel || (parseInt(activePackaging?.caseSize) > 0 ? 'two_tier' : activePackaging?.packageType === 'Bale' ? 'bale' : parseInt(activePackaging?.packQty) > 1 ? 'case' : 'single');
     const caseSize = packagingLevel === 'single' ? 0 : (parseInt(activePackaging?.caseSize) || 0);
     const packQty = packagingLevel === 'single' ? 1 : (parseInt(activePackaging?.packQty) || selectedCatalogProduct?.packQuantity || (selectedCatalogProduct as any)?.pack_quantity || 1);
@@ -113,13 +113,15 @@ export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
     const hasCases = caseSize >= 1 && caseSize > 0;
     const hasPacks = packQty > 1 && !hasCases;
     const { orderUnitName, unitSuffix } = resolveOrderUnitLabels(packagingLevel, hasCases, hasPacks, caseSize, packQty);
-    const unitsPerOrderUnit = computeSellUnitsPerOrderUnit(
+    const packagingComplete = packagingLevel === 'single' || (Number.isSafeInteger(Number(activePackaging?.packQty)) && Number(activePackaging?.packQty) >= 2 &&
+        (packagingLevel !== 'two_tier' || (Number.isSafeInteger(Number(activePackaging?.caseSize)) && Number(activePackaging?.caseSize) >= 1)));
+    const unitsPerOrderUnit = packagingComplete ? computeSellUnitsPerOrderUnit(
         customAttributes.physical?.netWeight || customItemSize || '',
         customAttributes.physical?.sizeType || '',
         customItemUnit || 'UNIT',
         packQty,
         caseSize
-    );
+    ) : 0;
     const totalUnits = Math.round(currentQty * unitsPerOrderUnit * 100) / 100;
     const showConversion = currentQty > 0 && unitsPerOrderUnit > 1;
     const activeSizeType = customAttributes.physical?.sizeType || '';
@@ -349,7 +351,7 @@ export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
                         category={selectedMainCategory || selectedCatalogProduct?.category || ''}
                         description={selectedCatalogProduct?.description || ''}
                         cost={currentCost}
-                        retailPrice={currentRetailPrice}
+                        retailPrice={productType === 'catalog' ? currentRetailPrice : undefined}
                         image={customItemImage || selectedCatalogProduct?.image || ''}
                         sku={selectedCatalogProduct?.sku}
                         currencySymbol={currencySymbol}
@@ -385,7 +387,7 @@ export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
                         unitsPerOrderUnit={unitsPerOrderUnit}
                         totalUnits={totalUnits}
                         showConversion={showConversion}
-                        unitSuffix={unitSuffix}
+                        unitSuffix={packagingComplete ? unitSuffix : ''}
                         orderUnitName={orderUnitName}
                         sellUnit={customItemUnit ? getSellUnit(customItemUnit).shortLabel : 'unit'}
                         currencySymbol={currencySymbol}
@@ -418,7 +420,7 @@ export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
                             unitsPerOrderUnit={unitsPerOrderUnit}
                             totalUnits={totalUnits}
                             showConversion={showConversion}
-                            unitSuffix={unitSuffix}
+                            unitSuffix={packagingComplete ? unitSuffix : ''}
                             orderUnitName={orderUnitName}
                             sellUnit={customItemUnit ? getSellUnit(customItemUnit).shortLabel : 'unit'}
                             currencySymbol={currencySymbol}

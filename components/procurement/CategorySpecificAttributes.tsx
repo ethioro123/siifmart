@@ -89,7 +89,7 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
 
             const nextIdentity = { ...(prev.identity || {}) };
             const nextPhysical = { ...(prev.physical || {}) };
-            const nextStorage = { ...(prev.storage || {}) };
+            const nextStorage = { ...(prev.storage || {}), requirementsConfirmed: false };
             const nextDescriptive = { ...(prev.descriptive || {}) };
 
             // Cross-mesh dynamic synchronization with core GS1 nodes

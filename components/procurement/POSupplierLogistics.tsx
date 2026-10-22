@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Supplier, Site } from '../../types';
 import { Truck, MapPin, ChevronDown, ChevronUp, Check, Info, AlertTriangle, X, Layers } from 'lucide-react';
 import { formatDisplaySiteId } from '../../utils/siteIdGenerator';
+import { parseShelfLifeDays } from '../../utils/poDeliveryRequirements';
 import { getPOReceivingRegionLabel } from '../../utils/poReceivingSelection';
 
 interface POSupplierLogisticsProps {
@@ -358,7 +359,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                     </div>
 
                     {/* Date & Priority */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Expected Delivery</label>
                             <input
@@ -388,7 +389,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                             </div>
                         </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid gap-3 sm:grid-cols-3">
                         <div className="space-y-1.5">
                             <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Required temperature</label>
                             <select
@@ -402,12 +403,13 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                             </select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Minimum shelf life</label>
+                            <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Minimum remaining days at delivery</label>
                             <input
-                                type="text"
-                                placeholder="e.g. 180 days"
+                                type="number"
+                                placeholder="e.g. 7"
+                                min="1" step="1" aria-label="Minimum remaining shelf life at delivery (days)"
                                 className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none"
-                                value={poDelivery.shelfLife}
+                                value={parseShelfLifeDays(poDelivery.shelfLife) ?? poDelivery.shelfLife}
                                 onChange={e => setPoDelivery(prev => ({ ...prev, shelfLife: e.target.value }))}
                             />
                         </div>

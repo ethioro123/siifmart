@@ -181,7 +181,7 @@ describe('PO Creation Flow Fixes & Helpers', () => {
                 identity: { variant: '', type: '', subcategory: '', modelNumber: '' },
                 physical: { netWeight: '500', grossWeight: '0.55', volume: '', unit: '', sizeType: 'g', dims: '', color: '', form: '', texture: '' },
                 packaging: { unitSize: '', packQty: '1', caseSize: '', packagingLevel: 'single', material: '', isBreakable: false, packageType: '' },
-                storage: { type: '', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false, inboundQcDirective: '', shelfLifeDays: '' },
+                storage: { requirementsConfirmed: true, type: '', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false, inboundQcDirective: '', shelfLifeDays: '' },
                 commercial: { isWeighted: false, sellBy: 'Unit', priceType: 'Fixed', isBundleEligible: false, isReturnable: true },
                 descriptive: { usage: '', audience: '', ingredients: '', keyFeatures: '', scent: '', flavor: '', strength: '' },
                 categorySpecific: {}
@@ -197,7 +197,7 @@ describe('PO Creation Flow Fixes & Helpers', () => {
         expect(result.item?.customAttributes?.storage?.inboundQcDirective).toBeTruthy();
     });
 
-    it('enforces whole-number pricing globally (no decimal points) and uses concise "Juice" beverage option', async () => {
+    it('preserves buying-cost rounding and approved catalog retail while using the concise Juice option', async () => {
         const beverageField = CATEGORY_SPEC_GROUPS.beverages.fields.find(f => f.key === 'beverageType');
         expect(beverageField?.options).toContain('Juice');
         expect(beverageField?.options).not.toContain('100% Pure Fruit Juice');
@@ -229,7 +229,7 @@ describe('PO Creation Flow Fixes & Helpers', () => {
         });
 
         expect(itemRes.item?.unitCost).toBe(120);
-        expect(itemRes.item?.retailPrice).toBe(186);
+        expect(itemRes.item?.retailPrice).toBe(185.6);
         expect(itemRes.item?.totalCost).toBe(600);
     });
 });

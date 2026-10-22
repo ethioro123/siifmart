@@ -68,6 +68,10 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                 </span>
             </div>
 
+            {currentQty > 0 && unitsPerOrderUnit > 0 && <div className="rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] p-3 text-sm text-[var(--theme-text-primary)]" aria-label="Packaging calculation">
+                <p className="font-medium">{currentQty.toLocaleString()} {orderUnitName.toLowerCase()}{currentQty === 1 ? '' : 's'} × {unitsPerOrderUnit.toLocaleString()} {sellUnit} = {totalUnits.toLocaleString()} {sellUnit}</p>
+                <p className="mt-1 text-xs text-[var(--theme-text-secondary)]">{currencySymbol} {currentCost.toLocaleString(undefined, { maximumFractionDigits: 2 })} per {orderUnitName.toLowerCase()}{costPerSellUnit !== null ? ` · ${currencySymbol} ${costPerSellUnit.toLocaleString(undefined, { maximumFractionDigits: 2 })} per ${sellUnit}` : ''}</p>
+            </div>}
             <div className="rounded-2xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-5 shadow-sm space-y-4">
                 <div className="grid grid-cols-12 gap-4">
                     {/* Order Qty */}
@@ -83,6 +87,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                         </label>
                         <input
                             type="number"
+                            aria-label="Order quantity"
                             step="1"
                             min="1"
                             className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.qty ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums`}
@@ -109,6 +114,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                         </label>
                         <input
                             type="number"
+                            aria-label="Buying cost per order unit"
                             step="1"
                             min="0"
                             className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.cost ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums`}
@@ -121,7 +127,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                         />
                         {currentCost > 0 && unitsPerOrderUnit > 1 && (
                             <span className="text-[10px] text-[var(--theme-text-secondary)] block text-center font-mono font-medium">
-                                = ~{currencySymbol} {Math.round(costPerSellUnit).toLocaleString()} / {sellUnit}
+                                = ~{currencySymbol} {costPerSellUnit.toLocaleString(undefined, { maximumFractionDigits: 2 })} / {sellUnit}
                             </span>
                         )}
                         {errors.cost && <span className="text-[9px] text-rose-500 block text-center font-semibold">{errors.cost}</span>}
@@ -180,7 +186,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                         {totalCommitment > 0 && (
                             <div className="text-[11px] font-mono font-bold text-[var(--theme-text-primary)]">
                                 <span className="text-[10px] text-[var(--theme-text-secondary)] font-normal mr-1">Line Commitment:</span>
-                                {currencySymbol} {Math.round(totalCommitment).toLocaleString()}
+                                {currencySymbol} {totalCommitment.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                             </div>
                         )}
                     </div>

@@ -474,3 +474,9 @@
 ### Responsive top bar priorities (2026-10-23)
 - Header adapts to measured available width, including sidebar changes. Compact views retain navigation, search, notifications and profile, with workplace/region controls in an overflow panel.
 - Long profile names and secondary appearance/search controls yield space before overlap; appearance and refresh remain available in the profile menu.
+
+### PO attribute consistency and pricing handoff (2026-10-23)
+- Live delivery checks align order temperature and minimum remaining days with item storage and total product shelf life; conflicting temperature groups require separate orders.
+- New product handling requirements require confirmation, packaging counts require entry, and unbranded identity is explicit. Category preview suggestions are labeled and advanced catalog specifications are read only.
+- Procurement no longer requires retail pricing; catalog snapshots retain approved prices/specifications, and new unpriced products remain pending product approval.
+- Migration: `migrations/20261023_po_item_delivery_and_pricing_integrity.sql` (SIIFMART Staging).

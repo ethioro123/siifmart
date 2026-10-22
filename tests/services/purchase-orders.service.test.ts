@@ -311,3 +311,13 @@ describe('purchaseOrdersService', () => {
         });
     });
 });
+
+
+describe('purchase order delivery preflight', () => {
+    it('rejects conflicting requirements before creating a header or writing items', async () => {
+        vi.clearAllMocks();
+        const po = { tempReq: 'Ambient', shelfLife: '7' } as Parameters<typeof purchaseOrdersService.create>[0];
+        await expect(purchaseOrdersService.create(po, [{ customAttributes: { storage: { type: 'Chilled', isPerishable: true, shelfLifeDays: '14' } } }])).rejects.toThrow('Chilled');
+        expect(supabase.from).not.toHaveBeenCalled();
+    });
+});

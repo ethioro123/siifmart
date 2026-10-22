@@ -1,3 +1,6 @@
+import { validatePOCreation } from '../../utils/poCreationValidation';
+import { validatePODelivery } from '../../utils/poDeliveryRequirements';
+import { PODeliveryRequirementsSummary } from './PODeliveryRequirementsSummary';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Modal from '../../components/Modal';
 import { PurchaseOrder, POItem, Product } from '../../types';
@@ -309,41 +312,15 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     };
 
     const handleCreatePO = async () => {
-        if (!isEditMode && !hasPermission(user?.role, 'CREATE_PO')) {
-            showToast('Your role is not authorized to create purchase orders.', 'error');
-            return;
-        }
-        if (hasUnsavedItemDraft) {
-            showToast('You have an un-added item in the form above. Click "Add Item to Order" or clear it before submitting.', 'warning');
-            const formElement = document.getElementById('po-item-form-container');
-            if (formElement) formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
-        if (newPOItems.length === 0) {
-            showToast("Please add items to the order.", 'warning');
-            return;
-        }
-        if (destinationSiteIds.length === 0) {
-            showToast("Select a receiving Warehouse or Distribution Center.", 'warning');
-            return;
-        }
-        if (initialDraft?.purchaseRequisitionId && destinationSiteIds.length !== 1) {
-            showToast('A purchase request can create a PO for one destination only.', 'warning');
-            return;
-        }
-        const invalidSites = destinationSiteIds
-            .map(id => sites.find(s => s.id === id))
-            .filter(s => s && s.type !== 'Warehouse' && s.type !== 'Distribution Center');
-        if (invalidSites.length > 0) {
-            showToast("Procurement orders can only be sent to a Warehouse or Distribution Center.", 'error');
-            return;
-        }
-        if (!isManualVendor && !newPOSupplier) {
-            showToast("Please select a supplier.", 'warning');
-            return;
-        }
-        if (isManualVendor && !manualVendorName.trim()) {
-            showToast("Please enter the supplier name.", 'warning');
+        const validationError = validatePOCreation({
+            isEditMode, canCreate: hasPermission(user?.role, 'CREATE_PO'), hasUnsavedItem: hasUnsavedItemDraft,
+            itemCount: newPOItems.length, destinations: destinationSiteIds, receivingSites: countryWarehouses,
+            fromRequest: Boolean(initialDraft?.purchaseRequisitionId), manualVendor: isManualVendor,
+            vendorName: manualVendorName, supplierId: newPOSupplier
+        }) || validatePODelivery(newPOItems, poDelivery.tempReq, poDelivery.shelfLife);
+        if (validationError) {
+            showToast(validationError, !isEditMode && !hasPermission(user?.role, 'CREATE_PO') ? 'error' : 'warning');
+            if (hasUnsavedItemDraft) document.getElementById('po-item-form-container')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
@@ -440,6 +417,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
                 <div className="h-[1px] w-full bg-[var(--theme-border-subtle)]" />
 
+                <PODeliveryRequirementsSummary items={newPOItems} temperature={poDelivery.tempReq} shelfLife={poDelivery.shelfLife}
+                    onApplyTemperature={tempReq => setPoDelivery(previous => ({ ...previous, tempReq }))} />
                 <POItemForm
                     key={itemFormKey}
                     ref={itemFormRef}

@@ -122,3 +122,11 @@ npx tsc --noEmit
 npm run lint:size
 git status --short
 ```
+
+## PO delivery requirements and pricing handoff
+
+- If a PO reports incompatible temperature groups, create separate orders for Ambient, Chilled and Frozen items; choose the temperature required by each group.
+- Minimum remaining shelf life is measured in whole days at delivery and cannot exceed a perishable item's total product shelf life. Legacy values such as `7 days` remain readable.
+- New products need confirmed handling requirements and explicit packaging counts. Choose Unbranded only when the product has no brand.
+- Procurement does not set catalog selling prices. Catalog attributes/prices are snapshotted from approved master data; new unpriced records remain pending product approval.
+- Regression checks: `tests/utils/poDeliveryRequirements.test.ts`, `tests/components/buildPOItem.test.ts`, and rollback-only `tests/database/po-delivery-and-pricing-integrity.sql`.

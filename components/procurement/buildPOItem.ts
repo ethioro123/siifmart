@@ -1,3 +1,4 @@
+import { parseShelfLifeDays } from '../../utils/poDeliveryRequirements';
 import { POItem, Product } from '../../types';
 import { getSellUnit } from '../../utils/units';
 import { formatProductDisplayName, isConsumableCategory, getCategorySpecGroup } from './utils';
@@ -52,9 +53,9 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
     } = params;
 
     const newErrors: Record<string, string> = {};
-    if (!currentQty || currentQty <= 0) newErrors.qty = 'Quantity is required';
-    if (!currentCost || currentCost <= 0) newErrors.cost = 'Unit cost is required';
-    if (!currentRetailPrice || currentRetailPrice <= 0) newErrors.retail = 'Retail price is required';
+    if (!Number.isFinite(currentQty) || currentQty <= 0) newErrors.qty = 'Quantity is required';
+    if (!Number.isFinite(currentCost) || currentCost <= 0) newErrors.cost = 'Unit cost is required';
+
 
     const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes.identity?.subcategory);
     const domainId = specGroup.id;
@@ -63,7 +64,7 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
 
     if (productType === 'new') {
         if (!customItemName.trim()) newErrors.name = 'Product name is required';
-        if (!customItemBrand.trim()) newErrors.brand = 'Brand is required';
+        if (!customItemBrand.trim() && !customAttributes.identity?.unbranded) newErrors.brand = 'Brand is required';
         if (!selectedMainCategory) newErrors.category = 'Main category is required';
         if (!customItemUnit) newErrors.unit = 'Sell unit is required';
 
@@ -85,15 +86,17 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
                 ? 'case'
                 : 'single');
 
+        if (packagingLevel !== 'single' && !Number.isInteger(currentQty)) newErrors.qty = 'Order whole cases or packs';
+        if (customAttributes.storage?.requirementsConfirmed !== true) newErrors.storageConfirmation = 'Confirm the storage, handling and shelf-life requirements before adding this item.';
         if (packagingLevel !== 'single') {
-            const pq = parseInt(customAttributes.packaging?.packQty) || 0;
-            if (pq < 2) {
+            const pq = Number(customAttributes.packaging?.packQty);
+            if (!Number.isSafeInteger(pq) || pq < 2) {
                 newErrors.packQty = 'Enter at least 2 units per pack/case';
             }
         }
         if (packagingLevel === 'two_tier') {
-            const cs = parseInt(customAttributes.packaging?.caseSize) || 0;
-            if (cs < 1) {
+            const cs = Number(customAttributes.packaging?.caseSize);
+            if (!Number.isSafeInteger(cs) || cs < 1) {
                 newErrors.caseSize = 'Enter at least 1 inner pack per case';
             }
         }
@@ -103,13 +106,13 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
                 ? Boolean(customAttributes.storage.isPerishable)
                 : storageDefaults.defaultPerishable;
         if (isPerishable) {
-            const shelfDays = parseInt(customAttributes.storage?.shelfLifeDays) || 0;
+            const shelfDays = parseShelfLifeDays(customAttributes.storage?.shelfLifeDays) || 0;
             if (shelfDays <= 0) {
                 newErrors.shelfLifeDays = 'Shelf life (days) is required for perishable items';
             }
         }
 
-        if (!editingItem && customItemName.trim() && customItemBrand.trim()) {
+        if (!editingItem && customItemName.trim() && (customItemBrand.trim() || customAttributes.identity?.unbranded)) {
             const normName = customItemName.trim().toLowerCase();
             const normBrand = customItemBrand.trim().toLowerCase();
             const sizeType = (customAttributes.physical?.sizeType || '').trim().toLowerCase();
@@ -151,12 +154,13 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
     let prod: Product | undefined;
     let name = customItemName.trim();
     let sku = '';
-    const cat = selectedMainCategory || 'General';
+    let cat = selectedMainCategory || 'General';
     let image = customItemImage;
 
     if (productType === 'catalog') {
         prod = products.find(p => p.id === currentProductToAdd);
         if (!prod) return { errors: { search: 'Selected product not found' } };
+        cat = prod.category || cat;
         name = formatProductDisplayName(prod);
         sku = prod.sku;
         image = prod.image;
@@ -220,7 +224,7 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
     };
 
     const wholeCost = Math.round(currentCost);
-    const wholeRetail = Math.round(currentRetailPrice);
+    const wholeRetail = prod ? Number(prod.price) || 0 : 0;
 
     const itemData: POItem = {
         productId: prod ? prod.id : editingItem?.productId || `CUSTOM-${Date.now()}`,
@@ -229,10 +233,10 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         category: cat,
         quantity: currentQty,
         unitCost: wholeCost,
-        totalCost: currentQty * wholeCost,
+        totalCost: Math.round(currentQty * wholeCost),
         retailPrice: wholeRetail,
         image,
-        brand: customItemBrand,
+        brand: prod?.brand || (customAttributes.identity?.unbranded ? '' : customItemBrand),
         size: formattedSize,
         unit: customItemUnit || 'UNIT',
         packQuantity: derivedPackQty,
@@ -242,7 +246,7 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         description: customAttributes.descriptive?.usage,
         minStock: 10,
         maxStock: 100,
-        customAttributes: resolvedCustomAttributes,
+        customAttributes: prod ? (prod.customAttributes || (prod as Product & { custom_attributes?: Product['customAttributes'] }).custom_attributes || {}) : resolvedCustomAttributes,
     };
 
     return { item: itemData };
