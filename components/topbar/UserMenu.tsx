@@ -353,7 +353,7 @@ export function UserMenu({
                      </div>
                       {/* Theme and Refresh shortcuts */}
                       <div className="mt-2 pt-2 border-t border-[var(--theme-border)] space-y-1">
-                         <ThemeSelector className="w-full" />
+                         <ThemeSelector variant="menu" className="w-full" />
 
                          {onRefresh && (
                             <button

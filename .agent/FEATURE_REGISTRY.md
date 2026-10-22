@@ -459,3 +459,6 @@
 ### Device appearance following (2026-10-23)
 - Appearance defaults to the device setting and follows live light/dark changes. Login, header and user menu provide explicit device/light/dark choices.
 - Legacy theme toggles no longer pin users permanently to an old manual choice; explicit new preferences persist with matching first-paint initialization.
+
+### Profile appearance control (2026-10-23)
+- User menu appearance uses labeled Device/Light/Dark buttons with a visible selected state, keyboard focus, and consistent theme tokens. Changing appearance keeps the menu open.
