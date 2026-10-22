@@ -214,8 +214,8 @@ const PERMISSION_MAP: Record<string, Permission> = {
 export function hasPermission(userRole: UserRole | undefined, permission: keyof typeof PERMISSIONS): boolean {
     if (!userRole) return false;
 
-    // Level 1 Global CEO (super_admin / ceo) has 100% sovereign module & action access
-    if (userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo') return true;
+    // Level 1 Global CEO (super_admin / ceo / group_ceo) has 100% sovereign module & action access
+    if (userRole === 'group_ceo' || userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo') return true;
 
     // Zero-Trust dynamic policy override from RoleSettings
     const dynamicCheck = checkDynamicRolePermission(userRole as string, permission as string);
@@ -299,17 +299,17 @@ export function getAccessibleModules(userRole: UserRole | undefined): string[] {
 }
 
 /**
- * Check if user is admin level (super_admin or admin)
+ * Check if user is admin level (group_ceo, super_admin or admin)
  */
 export function isAdmin(userRole: UserRole | undefined): boolean {
-    return userRole === 'super_admin' || userRole === 'admin' || userRole === 'country_managing_director' || (userRole as string)?.toLowerCase() === 'ceo';
+    return userRole === 'group_ceo' || userRole === 'super_admin' || userRole === 'admin' || userRole === 'country_managing_director' || (userRole as string)?.toLowerCase() === 'ceo';
 }
 
 /**
  * Check if user is CEO
  */
 export function isSuperAdmin(userRole: UserRole | undefined): boolean {
-    return userRole === 'super_admin';
+    return userRole === 'group_ceo' || userRole === 'super_admin';
 }
 
 /**

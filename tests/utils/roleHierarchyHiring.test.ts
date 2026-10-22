@@ -2,9 +2,27 @@ import { describe, it, expect } from 'vitest';
 import { canEmployRole, getRoleHierarchy, SYSTEM_ROLES } from '../../utils/roles';
 
 describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
+    describe('Group CEO and Global Executive (Level 1, Rank 100)', () => {
+        it('can employ subordinate roles across the enterprise', () => {
+            expect(canEmployRole('group_ceo', 'country_managing_director')).toBe(true);
+            expect(canEmployRole('group_ceo', 'head_of_operations')).toBe(true);
+            expect(canEmployRole('group_ceo', 'regional_operations_manager')).toBe(true);
+            expect(canEmployRole('group_ceo', 'store_manager')).toBe(true);
+            expect(canEmployRole('group_ceo', 'cashier')).toBe(true);
+        });
+
+        it('cannot employ another Group CEO or Super Admin', () => {
+            expect(canEmployRole('group_ceo', 'group_ceo')).toBe(false);
+            expect(canEmployRole('group_ceo', 'super_admin')).toBe(false);
+            expect(canEmployRole('super_admin', 'group_ceo')).toBe(false);
+        });
+    });
+
     describe('HR and Head of Human Resources (Level 2, Rank 85)', () => {
-        it('cannot employ CEO (super_admin, Level 1)', () => {
+        it('cannot employ CEO (super_admin or group_ceo, Level 1)', () => {
+            expect(canEmployRole('head_of_hr', 'group_ceo')).toBe(false);
             expect(canEmployRole('head_of_hr', 'super_admin')).toBe(false);
+            expect(canEmployRole('hr', 'group_ceo')).toBe(false);
             expect(canEmployRole('hr', 'super_admin')).toBe(false);
         });
 

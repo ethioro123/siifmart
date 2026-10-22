@@ -195,7 +195,7 @@ export function formatSiteAssignment(
     facilityId?: string;
     isCEO: boolean;
 } {
-    const isCEO = role === 'ceo' || role === 'super_admin' || role === 'CEO';
+    const isCEO = role === 'group_ceo' || role === 'ceo' || role === 'super_admin' || role === 'CEO';
 
     if (isCEO) {
         const site = siteId ? sites.find(s => s.id === siteId) : null;

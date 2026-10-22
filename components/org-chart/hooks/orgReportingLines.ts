@@ -84,7 +84,7 @@ export const HIERARCHY_LEVEL_CONFIGS: Record<number, HierarchyLevelConfig> = {
         level: 5,
         title: 'Level 5: Regional Department Managers',
         subtitle: 'Territorial leads for procurement, finance, merchandising, HR, logistics & security',
-        badge: 'L5 Regional Manager',
+        badge: 'L5 Regional Lead',
         color: '#0369a1',
         bgLight: '#f0f9ff',
         bgDark: '#0c2333',

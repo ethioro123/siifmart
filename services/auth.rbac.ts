@@ -15,6 +15,7 @@ import type { UserRole } from './auth.service';
 
 export const ROLE_PERMISSIONS: Record<string, string[]> = {
     // ═══ LEVEL 1 - GLOBAL EXECUTIVE BOARD ═══
+    group_ceo: ['*'], // Global Group CEO - Full Access to EVERYTHING
     super_admin: ['*'], // Global CEO / Owner - Full Access to EVERYTHING
     CEO: ['*'],
     ceo: ['*'],
@@ -207,7 +208,7 @@ export function getAvailableSections(userRole: UserRole, siteType?: string): str
  * ============================================================================
  */
 export function canAccessSite(userRole: UserRole, userSiteId: string, targetSiteId: string): boolean {
-    const multiSiteRoles: UserRole[] = ['super_admin'];
+    const multiSiteRoles: UserRole[] = ['super_admin', 'group_ceo'];
     if (multiSiteRoles.includes(userRole)) return true;
     return userSiteId === targetSiteId;
 }

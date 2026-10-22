@@ -91,6 +91,7 @@ const HEAD_OF_IT_PERMISSIONS: Permission[] = [
 
 export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     // ═══ LEVEL 1: GLOBAL EXECUTIVE ═══
+    group_ceo: FULL_ACCESS_PERMISSIONS,
     super_admin: FULL_ACCESS_PERMISSIONS,
     CEO: FULL_ACCESS_PERMISSIONS,
     ceo: FULL_ACCESS_PERMISSIONS,

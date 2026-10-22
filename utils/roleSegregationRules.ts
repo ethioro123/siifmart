@@ -21,6 +21,7 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     // ========================================
     // HQ ROLES - Must be at SIIFMART HQ
     // ========================================
+    { role: 'group_ceo', siteType: 'Administration', department: 'Management', description: 'Group CEO - Multinational enterprise leadership at Global HQ' },
     { role: 'super_admin', siteType: 'Administration', department: 'Management', description: 'CEO - Executive leadership at headquarters' },
     { role: 'country_managing_director', siteType: 'Administration', department: 'Management', description: 'Country Managing Director - National executive leadership at Country HQ' },
     { role: 'admin', siteType: 'Administration', department: 'Management', description: 'Country Managing Director - National executive leadership at Country HQ' },

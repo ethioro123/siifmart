@@ -9,7 +9,7 @@ export function canSwitchCountry(user: { role?: string; title?: string } | null 
     if (!user) return false;
     const role = (user.role || '').toLowerCase();
     const title = (user.title || '').toLowerCase();
-    return role === 'ceo' || role === 'super_admin' || title === 'ceo' || title.includes('chief executive');
+    return role === 'group_ceo' || role === 'ceo' || role === 'super_admin' || title === 'ceo' || title.includes('chief executive');
 }
 
 /**

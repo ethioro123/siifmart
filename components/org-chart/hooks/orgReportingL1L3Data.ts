@@ -5,13 +5,23 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     // =========================================================================
     // LEVEL 1: GLOBAL EXECUTIVE LEADERSHIP
     // =========================================================================
+    group_ceo: {
+        role: 'group_ceo',
+        level: 1,
+        levelCategory: 'executive',
+        levelTag: 'L1 Global Executive',
+        reportsToRole: null,
+        reportsToLabel: 'Board of Directors / Ownership',
+        managesRoles: ['country_managing_director', 'admin', 'regional_operations_manager', 'head_of_operations', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_merchandising', 'head_of_supply_chain', 'head_of_it', 'head_of_audit', 'it_support'],
+        isManagerial: true
+    },
     super_admin: {
         role: 'super_admin',
         level: 1,
         levelCategory: 'executive',
         levelTag: 'L1 Global Executive',
         reportsToRole: null,
-        reportsToLabel: 'Enterprise Board / Ownership',
+        reportsToLabel: 'Board of Directors / Ownership',
         managesRoles: ['country_managing_director', 'admin', 'regional_operations_manager', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_operations', 'it_support'],
         isManagerial: true
     },

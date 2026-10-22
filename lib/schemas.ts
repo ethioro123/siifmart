@@ -7,7 +7,7 @@ export const optionalNumber = z.number().optional().nullable();
 
 // --- Role Registry ---
 export const UserRoleSchema = z.enum([
-    'super_admin', 'regional_operations_manager', 'head_of_operations', 'head_of_finance',
+    'group_ceo', 'super_admin', 'regional_operations_manager', 'head_of_operations', 'head_of_finance',
     'head_of_hr', 'head_of_procurement', 'head_of_supply_chain', 'store_manager',
     'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',
     'store_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'picker',

@@ -6,6 +6,7 @@ import { UserRole } from '../types';
 export function getRoleDisplayName(role: UserRole): string {
     const displayNames: Partial<Record<UserRole, string>> = {
         // Level 1 - Executive
+        group_ceo: 'Group Chief Executive Officer',
         super_admin: 'Chief Executive Officer',
         CEO: 'Chief Executive Officer',
         ceo: 'Chief Executive Officer',
@@ -91,6 +92,7 @@ export function getRoleDisplayName(role: UserRole): string {
 export function getRoleDescription(role: UserRole): string {
     const descriptions: Partial<Record<UserRole, string>> = {
         // Level 1 - Executive
+        group_ceo: 'Group Chief Executive Officer - Multinational enterprise governance and global group strategy',
         super_admin: 'Chief Executive Officer - Full enterprise executive oversight and cross-border governance',
         admin: 'Assistant Chief Executive Officer - Enterprise deputy and executive administrator',
 
@@ -171,6 +173,7 @@ export function getRoleDescription(role: UserRole): string {
 export function getRoleColor(role: UserRole): string {
     const colors: Partial<Record<UserRole, string>> = {
         // Level 1
+        group_ceo: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-400/10 border-yellow-200 dark:border-yellow-400/20',
         super_admin: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-400/10 border-yellow-200 dark:border-yellow-400/20',
         admin: 'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-400/10 border-purple-200 dark:border-purple-400/20',
 

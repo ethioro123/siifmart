@@ -7,6 +7,14 @@ import {
 
 describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
     it('verifies Level 1 Global Executive and Level 2 Country Executive Leadership roles', () => {
+        const groupCeo = getRoleReportingMeta('group_ceo');
+        expect(groupCeo.level).toBe(1);
+        expect(groupCeo.levelCategory).toBe('executive');
+        expect(groupCeo.reportsToRole).toBeNull();
+        expect(groupCeo.reportsToLabel).toContain('Board');
+        expect(groupCeo.isManagerial).toBe(true);
+        expect(groupCeo.managesRoles.length).toBeGreaterThan(0);
+
         const ceo = getRoleReportingMeta('super_admin');
         expect(ceo.level).toBe(1);
         expect(ceo.levelCategory).toBe('executive');
