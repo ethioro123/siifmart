@@ -1,7 +1,7 @@
 import { RoleReportingMeta } from './orgReportingTypes';
 
 // Hierarchy Levels 9 & 10: Operational Specialists & Frontline Workforce
-export const L4_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
+export const L9_L10_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     // =========================================================================
     // LEVEL 10: FRONTLINE STORE, WAREHOUSE & FLEET STAFF
     // =========================================================================

@@ -2,16 +2,19 @@
 // Codified under SOP-ORG-036 & Rule 18 ("The Captain Owns the Ship")
 
 import { RoleReportingMeta, HierarchyLevelConfig } from './orgReportingTypes';
-import { L1_L3_REPORTING_REGISTRY } from './orgReportingL1L3Data';
-import { L4_REPORTING_REGISTRY } from './orgReportingL4Data';
+import { L1_L5_REPORTING_REGISTRY } from './orgReportingL1L5Data';
+import { L6_L8_REPORTING_REGISTRY } from './orgReportingL6L8Data';
+import { L9_L10_REPORTING_REGISTRY } from './orgReportingL9L10Data';
 
 export * from './orgReportingTypes';
-export { L1_L3_REPORTING_REGISTRY } from './orgReportingL1L3Data';
-export { L4_REPORTING_REGISTRY } from './orgReportingL4Data';
+export { L1_L5_REPORTING_REGISTRY } from './orgReportingL1L5Data';
+export { L6_L8_REPORTING_REGISTRY } from './orgReportingL6L8Data';
+export { L9_L10_REPORTING_REGISTRY } from './orgReportingL9L10Data';
 
 export const ROLE_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
-    ...L1_L3_REPORTING_REGISTRY,
-    ...L4_REPORTING_REGISTRY
+    ...L1_L5_REPORTING_REGISTRY,
+    ...L6_L8_REPORTING_REGISTRY,
+    ...L9_L10_REPORTING_REGISTRY
 };
 
 export const getRoleReportingMeta = (role: string): RoleReportingMeta => {

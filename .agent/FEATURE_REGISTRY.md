@@ -5,6 +5,10 @@
 
 ## Active Features
 
+### Lower Role Reporting Metadata (2026-10-22)
+- The Org Matrix composes Levels 1–5, 6–8, and 9–10 explicitly from registries named for their actual levels. This keeps existing lower-role reporting behavior and makes the level boundaries clear for future role changes.
+- **Files**: `components/org-chart/hooks/orgReportingLines.ts`, `components/org-chart/hooks/orgReportingL1L5Data.ts`, `components/org-chart/hooks/orgReportingL6L8Data.ts`, `components/org-chart/hooks/orgReportingL9L10Data.ts`.
+
 ### Purchase Order Pause and Resume (2026-10-22)
 - Closing an unfinished new PO now saves the latest form values immediately, including an item still being entered or edited; the form closes only after the browser confirms storage.
 - Resuming restores the supplier, destinations, quantities, totals, and in-progress item. A failed browser save leaves the form open with an error; explicit draft deletion starts a fresh item form.

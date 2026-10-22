@@ -1,8 +1,7 @@
 import { RoleReportingMeta } from './orgReportingTypes';
-import { L6_L8_REPORTING_REGISTRY } from './orgReportingL6L8Data';
 
 // Hierarchy Levels 1 through 5: Executive Leadership, Directorates, Regional Leadership
-const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
+export const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     // =========================================================================
     // LEVEL 1: GLOBAL EXECUTIVE LEADERSHIP (C-SUITE BOARD)
     // =========================================================================
@@ -348,7 +347,3 @@ const L1_L5_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     }
 };
 
-export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
-    ...L1_L5_REPORTING_REGISTRY,
-    ...L6_L8_REPORTING_REGISTRY
-};
