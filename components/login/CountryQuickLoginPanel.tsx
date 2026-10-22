@@ -421,9 +421,6 @@ export function CountryQuickLoginPanel({
                           <span className="text-[10.5px] font-medium text-stone-600 dark:text-stone-300 truncate">
                             {acc.name}
                           </span>
-                          <span className="text-[8px] font-mono text-stone-400 dark:text-stone-500 truncate">
-                            ({acc.roleId})
-                          </span>
                         </div>
                       </div>
 

@@ -27,8 +27,9 @@ export function isStagingQuickLoginAvailable(
 }
 
 export function mapStagingEmployee(row: StagingEmployeeRow): StagingQuickAccount | null {
-    const role = SYSTEM_ROLES.find(item => item.id.toLowerCase() === row.role.toLowerCase());
-    const global = ['group_ceo'].includes(row.role.toLowerCase());
+    const role = SYSTEM_ROLES.find(item => item.id === row.role);
+    if (!role) return null;
+    const global = row.role === 'group_ceo';
     const country = global ? 'GLOBAL' : row.site?.country?.toUpperCase();
     if (country !== 'GLOBAL' && country !== 'ET' && country !== 'KE') return null;
     const facility = row.site ? { ...row.site, region_code: row.site.region_code || undefined } : null;
@@ -39,9 +40,9 @@ export function mapStagingEmployee(row: StagingEmployeeRow): StagingQuickAccount
     const siteType = headquarters ? 'HQ' : regional ? 'Regional Administration'
         : row.site?.type as StagingSiteType;
     return {
-        id: row.id, name: row.name, role: row.job_title || role?.label || row.role,
-        roleId: row.role, level: role?.level || (global ? 1 : 10),
-        levelTag: `L${role?.level || (global ? 1 : 10)}`,
+        id: row.id, name: row.name, role: role.label,
+        roleId: role.id, level: role.level,
+        levelTag: `L${role.level}`,
         code: row.code || '', email: row.email, country, facilityTier, siteType,
         siteCode: row.site?.code || 'HQ-GLOBAL', siteName: row.site?.name || 'Global Headquarters'
     };

@@ -138,7 +138,7 @@ export default function LoginPage() {
                 >
                   <div className="flex items-center gap-2">
                     <Crown size={14} className="text-amber-600 dark:text-amber-400" />
-                    <span>Global CEO (All Access)</span>
+                    <span>Group Chief Executive Officer (All Access)</span>
                   </div>
                   <span className="text-[10px] font-mono opacity-70">{stagingExecutive.email}</span>
                 </button>
@@ -156,7 +156,7 @@ export default function LoginPage() {
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className="text-xs">🇰🇪</span>
-                        <span className="truncate">KE Regional Mgr</span>
+                        <span className="truncate">Kenya Regional Operations Manager</span>
                       </div>
                       <span className="text-[9px] font-mono opacity-70 shrink-0">Kamau</span>
                     </button>
@@ -171,7 +171,7 @@ export default function LoginPage() {
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className="text-xs">🇪🇹</span>
-                        <span className="truncate">ET Regional Mgr</span>
+                        <span className="truncate">Ethiopia Regional Operations Manager</span>
                       </div>
                       <span className="text-[9px] font-mono opacity-70 shrink-0">Henok</span>
                     </button>
