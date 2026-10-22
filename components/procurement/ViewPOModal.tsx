@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Modal from '../../components/Modal';
 import { PurchaseOrder, Product } from '../../types';
 import { getCountryProfile } from '../../utils/localization';
-import { CheckCircle, XCircle, Printer, Edit3, Trash2, Package, Loader2, MapPin, ChevronDown, ChevronUp, Clock, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Printer, Edit3, Trash2, Package, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { purchaseOrdersService } from '../../services/supabase.service';
@@ -49,11 +49,12 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
     const { limit: autonomousLimit, hasConfiguredLimit, needsFinanceClearance: isExceedingAutonomous,
         financeCleared, isCreator, canApprove, canClearFinance } = getPoApprovalPolicy({
-        po, role: user?.role, actorName: user?.name, regions, sites
+        po, role: user?.role, actorName: user?.name,
+        actorRegionCode: user?.regionCode || user?.region_code, regions, sites
     });
     const isCEO = user?.role === 'super_admin';
     const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager',
-        'regional_finance_manager', 'head_of_operations'].includes(user?.role || '');
+        'head_of_operations'].includes(user?.role || '');
     const canFullDelete = isCEO || isOperationalDirector;
 
     const handleOpenApprove = () => {
@@ -72,11 +73,12 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
         setIsSubmitting(true);
         try {
             if (approvalModal.mode === 'approve') {
+                if (!user?.id || !user.role) throw new Error('Signed-in approver identity is required.');
                 await purchaseOrdersService.approve({
                     poId: po.id,
-                    approverId: user?.id || (user as any)?.employeeId || 'USR',
+                    approverId: user.id,
                     approverName: user?.name || 'Authorized Manager',
-                    approverRole: user?.role || 'head_of_procurement',
+                    approverRole: user.role,
                     reasonCode: reasonCode as any,
                     notes: notes || 'Approved via PO Inspector modal'
                 });
@@ -85,11 +87,12 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 await purchaseOrdersService.clearFinance(po.id, notes);
                 showToast(`Finance clearance recorded for PO ${formatPONumber(po)}`, 'success');
             } else {
+                if (!user?.id || !user.role) throw new Error('Signed-in rejector identity is required.');
                 await purchaseOrdersService.reject({
                     poId: po.id,
-                    rejectorId: user?.id || (user as any)?.employeeId || 'USR',
+                    rejectorId: user.id,
                     rejectorName: user?.name || 'Authorized Manager',
-                    rejectorRole: user?.role || 'head_of_procurement',
+                    rejectorRole: user.role,
                     reasonCode: reasonCode as any,
                     notes: notes || 'Rejected via PO Inspector modal'
                 });

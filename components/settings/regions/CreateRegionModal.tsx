@@ -322,7 +322,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                     step="5000"
                                     value={autonomousLimit}
                                     onChange={(e) => setAutonomousLimit(e.target.value)}
-                                    placeholder="150000"
+                                    placeholder="Set a regional limit"
                                     className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                                 />
                             </div>

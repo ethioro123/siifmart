@@ -69,7 +69,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
 
     const currency = region.default_currency || getCountryProfile(region.country).currencyCode;
     const monthlyBudget = region.monthly_procurement_budget ?? 0;
-    const autonomousLimit = region.autonomous_po_limit ?? 150000;
+    const autonomousLimit = region.autonomous_po_limit;
     const currentSpend = budgetStatus?.currentMonthSpend ?? 0;
     const percentUsed = budgetStatus?.percentUsed ?? (monthlyBudget > 0 ? (currentSpend / monthlyBudget) * 100 : 0);
     const isOverBudget = budgetStatus?.isOverBudget ?? (monthlyBudget > 0 && currentSpend > monthlyBudget);
@@ -210,7 +210,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     <div className="mt-3 pt-2.5 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px]">
                         <span className="text-[var(--theme-text-secondary)]">Autonomous PO Limit:</span>
                         <span className="font-mono font-medium text-[var(--theme-text-primary)]">
-                            {autonomousLimit > 0 ? `${autonomousLimit.toLocaleString()} ${currency}` : '0 (HQ Approval Required)'}
+                            {autonomousLimit == null ? 'Not configured' : autonomousLimit > 0 ? `${autonomousLimit.toLocaleString()} ${currency}` : '0 (HQ Approval Required)'}
                         </span>
                     </div>
                     <div className="mt-1.5 pt-1.5 border-t border-[var(--theme-border)]/40 flex items-center justify-between text-[11px]">

@@ -98,7 +98,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
             const monthlySpent = currentMonthOrders.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
 
             // Autonomous vs Escalated PO count
-            const autonomousLimit = Number(region.autonomous_po_limit) || 150000;
+            const autonomousLimit = Number(region.autonomous_po_limit ?? 0);
             const budgetCap = Number(region.monthly_procurement_budget) || 0;
             const autonomousCount = currentMonthOrders.filter(o => (o.totalAmount || 0) <= autonomousLimit).length;
             const escalatedCount = currentMonthOrders.filter(o => (o.totalAmount || 0) > autonomousLimit || o.requiresHqApproval).length;

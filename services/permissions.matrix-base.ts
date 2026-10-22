@@ -21,11 +21,12 @@ export const FULL_ACCESS_PERMISSIONS: Permission[] = [
 ];
 
 export const ADMIN_ACCESS_PERMISSIONS: Permission[] = FULL_ACCESS_PERMISSIONS.filter(
-    permission => permission !== 'procurement.receive'
+    permission => permission !== 'procurement.receive' && permission !== 'procurement.approve_po'
 );
 
 export const HEAD_OF_FINANCE_PERMISSIONS: Permission[] = [
     'dashboard.view',
+    'procurement.view',
     'finance.view', 'finance.view_reports', 'finance.approve_expense', 'finance.edit_expense', 'finance.void_expense', 'finance.reconcile_drawer', 'finance.manage_ap', 'finance.manage_gl', 'finance.manage_budget', 'finance.manage_payroll', 'finance.view_payroll',
     'sales.view', 'sales.view_reports',
     'pricing.view', 'pricing.edit', 'pricing.approve_promo',
@@ -44,7 +45,7 @@ export const HEAD_OF_OPERATIONS_PERMISSIONS: Permission[] = [
     'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
     'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
     'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
+    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.delete_po', 'procurement.receive',
     'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.view_payroll',
     'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
     'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
@@ -69,7 +70,7 @@ export const HEAD_OF_SUPPLY_CHAIN_PERMISSIONS: Permission[] = [
     'dashboard.view',
     'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
     'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.receive',
+    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.receive',
     'sales.view', 'sales.view_reports'
 ];
 

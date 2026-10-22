@@ -123,11 +123,7 @@ export interface ApprovalWorkflow {
 export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     purchase_order: {
         name: 'Purchase Order Approval',
-        levels: [
-            { roles: ['head_of_procurement', 'buyer', 'regional_procurement_manager'], threshold: 10000 },
-            { roles: ['head_of_procurement', 'regional_procurement_manager', 'head_of_finance', 'regional_finance_manager'], threshold: 50000 },
-            { roles: ['head_of_procurement', 'head_of_finance', 'head_of_operations', 'regional_operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
-        ]
+        levels: [{ roles: ['head_of_procurement', 'regional_procurement_manager', 'super_admin'] }]
     },
     expense: {
         name: 'Expense Approval',
@@ -224,6 +220,12 @@ export function canApprove(
     customThreshold?: number
 ): boolean {
     const norm = ((userRole as string) || '').toLowerCase().trim().replace(/[\s-]/g, '_');
+    if (workflowName === 'purchase_order') {
+        if (norm === 'head_of_procurement' || norm === 'super_admin') return true;
+        return norm === 'regional_procurement_manager' && amount !== undefined &&
+            customThreshold !== undefined && Number.isFinite(customThreshold) &&
+            amount <= customThreshold;
+    }
     // Global CEO and Country Managing Director can sign off any workflow within policy
     if (norm === 'super_admin' || norm === 'ceo' || norm === 'country_managing_director' || norm === 'admin') {
         return true;

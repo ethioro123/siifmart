@@ -92,7 +92,11 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
         credentialsHandedOverAt: (e as any).credentials_handed_over_at || (e as any).credentialsHandedOverAt,
         credentials_handed_over_at: (e as any).credentials_handed_over_at || (e as any).credentialsHandedOverAt,
         credentialsHandedOverBy: (e as any).credentials_handed_over_by || (e as any).credentialsHandedOverBy,
-        credentials_handed_over_by: (e as any).credentials_handed_over_by || (e as any).credentialsHandedOverBy
+        credentials_handed_over_by: (e as any).credentials_handed_over_by || (e as any).credentialsHandedOverBy,
+        reportsToEmployeeId: (e.reports_to_employee_id || (e as any).reportsToEmployeeId) as string | undefined,
+        reports_to_employee_id: (e.reports_to_employee_id || (e as any).reportsToEmployeeId) as string | undefined,
+        functionalManagerEmployeeId: (e.functional_manager_employee_id || (e as any).functionalManagerEmployeeId) as string | undefined,
+        functional_manager_employee_id: (e.functional_manager_employee_id || (e as any).functionalManagerEmployeeId) as string | undefined
     } as Employee;
 }
 

@@ -32,7 +32,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     const [adminHubSiteId, setAdminHubSiteId] = useState(region.admin_hub_site_id || '');
     const [regionalManagerId, setRegionalManagerId] = useState(region.regional_manager_id || '');
     const [monthlyBudget, setMonthlyBudget] = useState(String(region.monthly_procurement_budget ?? 0));
-    const [autonomousLimit, setAutonomousLimit] = useState(String(region.autonomous_po_limit ?? 150000));
+    const [autonomousLimit, setAutonomousLimit] = useState(String(region.autonomous_po_limit ?? ''));
     const [monthlyExpenseBudget, setMonthlyExpenseBudget] = useState(String(region.monthly_expense_budget ?? 0));
     const [autonomousExpenseLimit, setAutonomousExpenseLimit] = useState(String(region.autonomous_expense_limit ?? 25000));
     const [changeReason, setChangeReason] = useState('');
@@ -86,7 +86,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
             return;
         }
 
-        if (!Number.isFinite(parsedLimit) || parsedLimit < 0) {
+        if (!autonomousLimit.trim() || !Number.isFinite(parsedLimit) || parsedLimit < 0) {
             addNotification('alert', 'Autonomous PO limit must be a positive number');
             return;
         }

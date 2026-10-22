@@ -122,7 +122,7 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
         <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
           <div className="flex items-center gap-2.5">
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-              isApprove
+              isApprove || isFinance
                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                 : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
             }`}>
@@ -214,7 +214,7 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
               type="submit"
               disabled={isSubmitting}
               className={`h-11 px-6 rounded-full text-xs font-semibold text-white shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer ${
-                isApprove
+                isApprove || isFinance
                   ? 'bg-emerald-600 hover:bg-emerald-700'
                   : 'bg-rose-600 hover:bg-rose-700'
               }`}

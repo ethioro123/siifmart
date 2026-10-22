@@ -105,7 +105,7 @@ export default function Sidebar() {
       { to: "/online-store", icon: Globe, label: "Online Operations", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'head_of_operations', 'logistics_manager', 'regional_logistics_manager'] },
 
       // PROCUREMENT - Corporate administration, procurement & operational leadership
-      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_procurement', 'head_of_supply_chain', 'head_of_operations', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'regional_operations_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'replenishment_planner'] },
+      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_procurement', 'head_of_finance', 'head_of_supply_chain', 'head_of_operations', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'replenishment_planner'] },
 
       // ROADMAP - CEO Only (Confidential Strategic Canvas)
       { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin'] },
@@ -233,7 +233,7 @@ export default function Sidebar() {
 
         const isMerchandisingSpecialist = item.section === 'pricing' && ['head_of_merchandising', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_procurement_manager', 'regional_operations_manager'].includes(userRole);
         const isFinanceSpecialist = item.section === 'finance' && ['head_of_finance', 'regional_finance_manager', 'regional_operations_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'head_of_audit', 'auditor'].includes(userRole);
-        const isProcurementSpecialist = item.section === 'procurement' && ['head_of_procurement', 'head_of_supply_chain', 'regional_procurement_manager', 'regional_logistics_manager', 'regional_operations_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
+        const isProcurementSpecialist = item.section === 'procurement' && ['head_of_procurement', 'head_of_finance', 'head_of_supply_chain', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_operations_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
         const isWarehouseSpecialist = item.section === 'warehouse' && ['regional_logistics_manager', 'regional_operations_manager', 'head_of_supply_chain', 'logistics_manager'].includes(userRole);
         const isSettingsSpecialist = item.section === 'settings' && ['regional_security_manager', 'regional_operations_manager', 'security_manager', 'head_of_it', 'it_support', 'head_of_audit', 'auditor', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_supply_chain',].includes(userRole);
 

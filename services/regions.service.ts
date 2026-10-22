@@ -102,7 +102,7 @@ export const regionsService = {
                 admin_hub_site_id: r.admin_hub_site_id,
                 regional_manager_id: r.regional_manager_id,
                 monthly_procurement_budget: Number(r.monthly_procurement_budget || 0),
-                autonomous_po_limit: Number(r.autonomous_po_limit || 150000),
+                autonomous_po_limit: r.autonomous_po_limit == null ? undefined : Number(r.autonomous_po_limit),
                 monthly_expense_budget: Number(r.monthly_expense_budget || 0),
                 autonomous_expense_limit: Number(r.autonomous_expense_limit || 25000),
                 status: r.status || 'active',
@@ -159,7 +159,7 @@ export const regionsService = {
                 admin_hub_site_id: data.admin_hub_site_id,
                 regional_manager_id: data.regional_manager_id,
                 monthly_procurement_budget: Number(data.monthly_procurement_budget || 0),
-                autonomous_po_limit: Number(data.autonomous_po_limit || 150000),
+                autonomous_po_limit: data.autonomous_po_limit == null ? undefined : Number(data.autonomous_po_limit),
                 monthly_expense_budget: Number(data.monthly_expense_budget || 0),
                 autonomous_expense_limit: Number(data.autonomous_expense_limit || 25000),
                 status: data.status || 'active',
@@ -179,6 +179,9 @@ export const regionsService = {
         try {
             const changeReason = input.change_reason?.trim();
             if (!changeReason) throw new Error('A reason is required when creating a region');
+            if (input.autonomous_po_limit == null || !Number.isFinite(input.autonomous_po_limit) || input.autonomous_po_limit < 0) {
+                throw new Error('Set the regional PO approval limit before creating a region');
+            }
             const payload = {
                 code: input.code.toLowerCase().trim(),
                 name: input.name.trim(),
@@ -189,7 +192,7 @@ export const regionsService = {
                 admin_hub_site_id: input.admin_hub_site_id || null,
                 regional_manager_id: input.regional_manager_id || null,
                 monthly_procurement_budget: input.monthly_procurement_budget ?? 0,
-                autonomous_po_limit: input.autonomous_po_limit ?? 150000,
+                autonomous_po_limit: input.autonomous_po_limit,
                 monthly_expense_budget: input.monthly_expense_budget ?? 0,
                 autonomous_expense_limit: input.autonomous_expense_limit ?? 25000,
                 status: input.status || 'active',
@@ -344,7 +347,7 @@ export const regionsService = {
                 regionName: region.name,
                 currency: region.default_currency || getCountryProfile(region.country).currencyCode,
                 monthlyBudget,
-                autonomousPoLimit: Number(region.autonomous_po_limit || 150000),
+                autonomousPoLimit: Number(region.autonomous_po_limit ?? 0),
                 currentMonthSpend,
                 remainingBudget,
                 percentUsed,

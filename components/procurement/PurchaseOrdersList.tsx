@@ -46,7 +46,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
 }) => {
     const { user, showToast } = useStore();
     const { regions } = useData();
-    const { approvePOMutation, bulkApproveMutation, cancelPOMutation, updatePOMutation } = usePurchaseOrderMutations();
+    const { bulkApproveMutation, cancelPOMutation } = usePurchaseOrderMutations();
     const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
     const [selectedPOIds, setSelectedPOIds] = useState<string[]>([]);
     const isBulkApproving = bulkApproveMutation.isPending;
@@ -58,7 +58,8 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     const canApprove = isProcurementManager;
 
     const approvalPolicy = (po: PurchaseOrder) => getPoApprovalPolicy({
-        po, role: user?.role, actorName: user?.name, regions, sites
+        po, role: user?.role, actorName: user?.name,
+        actorRegionCode: user?.regionCode || user?.region_code, regions, sites
     });
 
     const handleBulkApprove = async () => {
@@ -309,30 +310,19 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                 Details
                                             </button>
                                             {isDraft && (() => {
-                                                const isCreator = Boolean(
-                                                    user?.name && ((po.createdBy && po.createdBy.toLowerCase().trim() === user.name.toLowerCase().trim()) ||
-                                                                   (po.requestedBy && po.requestedBy.toLowerCase().trim() === user.name.toLowerCase().trim()))
-                                                );
-
-                                                if (canApprove && (!isCreator || isCEO)) {
-                                                    const isOverLimit = isExceedingRegionalLimit(po);
+                                                const policy = approvalPolicy(po);
+                                                if (policy.canApprove) {
                                                     return (
                                                         <button
                                                             onClick={(e) => handleSingleApprove(e, po)}
-                                                            className={`h-8 px-3.5 rounded-full border text-xs font-medium transition-all active:scale-[0.98] flex items-center gap-1.5 cursor-pointer ${
-                                                                isOverLimit
-                                                                    ? 'border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300'
-                                                                    : 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                                                            }`}
-                                                            title={isOverLimit ? 'Order exceeds regional autonomous ceiling. Click to route to Corporate HQ for exception review.' : 'Authorize & Sign Off PO'}
+                                                            className="h-8 px-3.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium transition-all active:scale-[0.98] flex items-center gap-1.5"
+                                                            title="Review this purchase order before approval"
                                                         >
-                                                            {isOverLimit ? <ShieldAlert size={13} /> : <CheckCircle size={13} />}
-                                                            <span>{isOverLimit ? 'Escalate to HQ' : 'Sign Off'}</span>
+                                                            <CheckCircle size={13} /> Review
                                                         </button>
                                                     );
                                                 }
-
-                                                if (canApprove && isCreator && !isCEO) {
+                                                if (canApprove && policy.isCreator) {
                                                     return (
                                                         <span
                                                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"

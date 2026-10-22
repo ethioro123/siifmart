@@ -263,7 +263,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
   }, [regionalSales, monthPrefix]);
 
   // Autonomous Procurement (SOP-MGT-020)
-  const autonomousLimit = Number(currentRegion?.autonomous_po_limit) || 150000;
+  const autonomousLimit = Number(currentRegion?.autonomous_po_limit ?? 0);
   const monthlyBudget = Number(currentRegion?.monthly_procurement_budget) || 0;
 
   const currentMonthOrders = useMemo(() => {

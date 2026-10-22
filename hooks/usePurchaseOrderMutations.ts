@@ -51,13 +51,14 @@ export function usePurchaseOrderMutations() {
 
   const approvePOMutation = useMutation({
     mutationFn: async (po: PurchaseOrder) => {
+      if (!user?.id || !user.role) throw new Error('Signed-in approver identity is required.');
       const approvedBy = user?.name || user?.email || 'Authorized Executive';
 
       const updated = await purchaseOrdersService.approve({
         poId: po.id,
-        approverId: user?.id || (user as any)?.employeeId || 'USR',
+        approverId: user.id,
         approverName: approvedBy,
-        approverRole: user?.role || 'head_of_procurement',
+        approverRole: user.role,
         reasonCode: 'STANDARD_REPLENISHMENT',
         notes: 'Quick list approval'
       });
@@ -77,26 +78,28 @@ export function usePurchaseOrderMutations() {
 
   const bulkApproveMutation = useMutation({
     mutationFn: async (ordersToApprove: PurchaseOrder[]) => {
+      if (!user?.id || !user.role) throw new Error('Signed-in approver identity is required.');
       const approvedBy = user?.name || user?.email || 'HQ Bulk Action';
 
-      const promises = ordersToApprove.map(po =>
+      const results = await Promise.allSettled(ordersToApprove.map(po =>
         purchaseOrdersService.approve({
           poId: po.id,
-          approverId: user?.id || (user as any)?.employeeId || 'USR',
+          approverId: user.id,
           approverName: approvedBy,
-          approverRole: user?.role || 'head_of_procurement',
+          approverRole: user.role,
           reasonCode: 'STANDARD_REPLENISHMENT',
           notes: 'HQ Bulk Action Approval'
         })
-      );
-
-      await Promise.all(promises);
+      ));
+      const approvedOrders = ordersToApprove.filter((_, index) => results[index].status === 'fulfilled');
+      const failedCount = ordersToApprove.length - approvedOrders.length;
+      if (approvedOrders.length === 0) throw new Error('No purchase orders were approved.');
 
       // Audit log
       try {
         await systemLogsService.create({
           action: 'PO_BULK_APPROVED',
-          details: `Bulk approved ${ordersToApprove.length} purchase orders: ${ordersToApprove.map(p => formatPONumber(p)).join(', ')}`,
+          details: `Bulk approved ${approvedOrders.length} purchase orders: ${approvedOrders.map(p => formatPONumber(p)).join(', ')}`,
           user_name: approvedBy,
           module: 'Procurement'
         });
@@ -104,12 +107,14 @@ export function usePurchaseOrderMutations() {
         logger.warn('usePurchaseOrderMutations', 'Bulk approve audit log failed', { error: String(logErr) });
       }
 
-      logSystemEvent('PO_BULK_APPROVED', `Bulk approved ${ordersToApprove.length} POs`, approvedBy, 'Procurement');
-      return ordersToApprove.length;
+      logSystemEvent('PO_BULK_APPROVED', `Bulk approved ${approvedOrders.length} POs`, approvedBy, 'Procurement');
+      return { approvedCount: approvedOrders.length, failedCount };
     },
-    onSuccess: (count) => {
+    onSuccess: ({ approvedCount, failedCount }) => {
       queryClient.invalidateQueries({ queryKey: ['purchase_orders'] });
-      showToast(`Approved ${count} POs`, 'success');
+      showToast(failedCount > 0
+        ? `Approved ${approvedCount} POs; ${failedCount} still need review.`
+        : `Approved ${approvedCount} POs`, failedCount > 0 ? 'warning' : 'success');
     },
     onError: (error: any) => {
       logger.error('usePurchaseOrderMutations', 'Bulk approve failed', error);

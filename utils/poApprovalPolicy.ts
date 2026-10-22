@@ -4,11 +4,12 @@ interface PoApprovalContext {
     po: PurchaseOrder;
     role?: string;
     actorName?: string;
+    actorRegionCode?: string;
     regions: Region[];
     sites: Site[];
 }
 
-export function getPoApprovalPolicy({ po, role, actorName, regions, sites }: PoApprovalContext) {
+export function getPoApprovalPolicy({ po, role, actorName, actorRegionCode, regions, sites }: PoApprovalContext) {
     const site = sites.find(candidate => candidate.id === po.siteId);
     const regionCode = po.regionCode || po.region_code || site?.regionCode || site?.region_code;
     const region = regionCode ? regions.find(candidate => candidate.code === regionCode) : undefined;
@@ -29,7 +30,7 @@ export function getPoApprovalPolicy({ po, role, actorName, regions, sites }: PoA
     const isRegionalProcurement = role === 'regional_procurement_manager';
     const isHqProcurement = role === 'head_of_procurement' || role === 'super_admin';
     const canApprove = isOpen && !isCreator && hasConfiguredLimit &&
-        ((isRegionalProcurement && limit != null && !needsFinanceClearance) ||
+        ((isRegionalProcurement && regionCode === actorRegionCode && limit != null && !needsFinanceClearance) ||
             (isHqProcurement && (!needsFinanceClearance || financeCleared)));
     const canClearFinance = isOpen && !isCreator && hasConfiguredLimit &&
         role === 'head_of_finance' && needsFinanceClearance && !financeCleared;
