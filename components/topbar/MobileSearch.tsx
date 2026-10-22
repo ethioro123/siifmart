@@ -22,7 +22,7 @@ export function MobileSearch({
    if (!isMobileSearchVisible) return null;
 
    return (
-      <div className="lg:hidden fixed inset-0 z-[100] bg-[var(--theme-bg-app)]/98 backdrop-blur-2xl flex flex-col animate-in fade-in duration-200">
+      <div style={{ top: 'var(--app-top-inset, 0px)' }} className="fixed inset-0 z-[100] bg-[var(--theme-bg-app)]/98 backdrop-blur-2xl flex flex-col animate-in fade-in duration-200">
          <div className="p-4 flex items-center gap-3 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)]">
             <button
                onClick={() => { setIsMobileSearchVisible(false); setSearchValue(''); }}

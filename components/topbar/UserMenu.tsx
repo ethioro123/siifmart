@@ -113,7 +113,7 @@ export function UserMenu({
                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 md:w-3 md:h-3 bg-emerald-500 border-2 border-[var(--theme-bg-panel)] rounded-full animate-pulse"></div>
             </div>
 
-            <div className="hidden md:flex flex-col text-left">
+            <div className="topbar-profile-name hidden md:flex flex-col text-left">
                <span className="text-sm font-bold text-[var(--theme-text-primary)] leading-none">{user.name}</span>
                <span className="text-[10px] font-mono text-[var(--theme-text-secondary)] uppercase tracking-wider mt-0.5 leading-none">{formatRole(user.role)}</span>
             </div>
@@ -124,7 +124,7 @@ export function UserMenu({
          {/* Dropdown Menu */}
          {isUserMenuOpen && (
             <div
-               className="fixed inset-x-2 top-[calc(env(safe-area-inset-top)+3.5rem)] z-[150] mx-auto w-auto max-w-[26rem] overflow-y-auto overscroll-contain rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] shadow-[var(--shadow-lg)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 max-h-[calc(100dvh-env(safe-area-inset-top)-4.25rem)] custom-scrollbar sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mx-0 sm:mt-2 sm:w-[22rem] sm:max-h-[calc(100vh-5rem)] sm:rounded-2xl"
+               className="fixed inset-x-2 top-[calc(var(--app-top-inset,0px)+env(safe-area-inset-top)+3.5rem)] z-[150] mx-auto w-auto max-w-[26rem] overflow-y-auto overscroll-contain rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] shadow-[var(--shadow-lg)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 max-h-[calc(100dvh-env(safe-area-inset-top)-4.25rem)] custom-scrollbar sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mx-0 sm:mt-2 sm:w-[22rem] sm:max-h-[calc(100vh-5rem)] sm:rounded-2xl"
                onClick={event => event.stopPropagation()}
                onKeyDown={event => {
                   if (event.key === 'Escape') {

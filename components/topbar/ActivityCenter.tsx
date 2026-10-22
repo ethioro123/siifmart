@@ -101,7 +101,7 @@ export function ActivityCenter({
 
          {isNotifOpen && (
             <div
-               className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[3.75rem] sm:top-full mt-0 sm:mt-2 w-auto sm:w-96 max-w-[400px] bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.25)] z-[150] animate-in fade-in slide-in-from-top-4 overflow-hidden backdrop-blur-xl"
+               className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[calc(var(--app-top-inset,0px)+3.75rem)] sm:top-full mt-0 sm:mt-2 w-auto sm:w-96 max-w-[400px] bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.25)] z-[150] animate-in fade-in slide-in-from-top-4 overflow-hidden backdrop-blur-xl"
                onClick={(e) => e.stopPropagation()}
             >
                   {/* Header */}

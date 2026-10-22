@@ -24,7 +24,7 @@ export function DesktopSearch({
    containerRef
 }: DesktopSearchProps) {
    return (
-      <div className="relative hidden lg:block" ref={containerRef}>
+      <div className="topbar-desktop-search relative hidden lg:block" ref={containerRef}>
          <form
             onSubmit={handleSearch}
             className="flex items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-full px-3.5 py-1.5 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/15 focus-within:bg-[var(--theme-bg-card)] transition-all group shadow-2xs"
@@ -35,7 +35,7 @@ export function DesktopSearch({
             <input
                type="text"
                placeholder="Global Search..."
-               className="bg-transparent border-none focus:ring-0 text-sm text-[var(--theme-text-primary)] ml-2.5 w-64 placeholder-[var(--theme-text-muted)] outline-none font-medium tracking-tight"
+               className="bg-transparent border-none focus:ring-0 text-sm text-[var(--theme-text-primary)] ml-2.5 w-40 xl:w-48 placeholder-[var(--theme-text-muted)] outline-none font-medium tracking-tight"
                value={searchValue}
                onChange={(e) => {
                   setSearchValue(e.target.value);

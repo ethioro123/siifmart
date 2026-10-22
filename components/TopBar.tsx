@@ -1,6 +1,8 @@
+import '../styles/topbar.css';
+import { useTopBarLayout } from '../hooks/useTopBarLayout';
 import { ThemeSelector } from './ThemeSelector';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Menu, Search, RefreshCw } from 'lucide-react';
+import { Menu, Search, MoreHorizontal, RefreshCw } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useGamification } from '../contexts/GamificationContext';
@@ -85,9 +87,11 @@ export default function TopBar() {
             if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
             e.preventDefault();
             const input = searchRef.current?.querySelector('input');
-            if (input) {
+            if (input && input.getClientRects().length > 0) {
                input.focus();
                setIsSearchOpen(true);
+            } else {
+               setIsMobileSearchVisible(true);
             }
          }
       };
@@ -350,14 +354,15 @@ export default function TopBar() {
       }
    };
 
+   const { headerRef, density, isContextOpen, setIsContextOpen } = useTopBarLayout();
    if (!user) return null;
 
    return (
-      <header
-         className="sticky top-0 z-[100] px-2 sm:px-4 md:px-6 flex items-center justify-between transition-colors duration-300 min-h-[56px] h-14 sm:h-16 border-0 border-transparent shadow-none"
+      <header ref={headerRef} data-density={density}
+         className="app-topbar sticky top-0 z-[100] px-2 sm:px-4 md:px-6 flex items-center justify-between transition-colors duration-300 min-h-[56px] h-14 sm:h-16 border-0 border-transparent shadow-none"
          style={{ backgroundColor: 'var(--bg-app)', paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
-         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 sm:flex-initial">
+         <div className="topbar-leading">
             <button
                type="button"
                onClick={toggleSidebar}
@@ -369,7 +374,7 @@ export default function TopBar() {
                <Menu size={22} className="md:w-6 md:h-6" />
             </button>
 
-            <Logo size={20} className="mr-1" />
+            <Logo size={20} className="topbar-logo" />
 
             <DesktopSearch 
                searchValue={searchValue}
@@ -382,6 +387,7 @@ export default function TopBar() {
                containerRef={searchRef}
             />
 
+            <div id="topbar-workplace-controls" className="topbar-context" data-open={isContextOpen}>
             <LocationBadge 
                user={user}
                sites={sites}
@@ -391,22 +397,25 @@ export default function TopBar() {
             />
 
             <RegionBadge />
+            </div>
          </div>
 
-         <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 flex-shrink-0 ml-2">
+         <div className="topbar-actions">
             {/* Mobile Search Trigger */}
             <button
                onClick={() => setIsMobileSearchVisible(true)}
-               className="lg:hidden p-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center touch-manipulation"
+               className="topbar-search-trigger p-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-w-11 min-h-11 flex items-center justify-center touch-manipulation"
                aria-label="Search"
             >
                <Search size={18} />
             </button>
 
+            <button type="button" onClick={() => setIsContextOpen(open => !open)} aria-label="Workplace and region" aria-expanded={isContextOpen} aria-controls="topbar-workplace-controls"
+               className="topbar-context-toggle min-h-11 min-w-11 items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] cursor-pointer"><MoreHorizontal size={20} /></button>
             {/* Refresh Button */}
             <button 
                onClick={handleRefresh}
-               className={`hidden sm:flex p-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-focus)] transition-all cursor-pointer ${isRefreshing ? 'animate-spin text-[var(--theme-text-primary)]' : ''}`}
+               className={`topbar-refresh hidden sm:flex p-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-focus)] transition-all cursor-pointer ${isRefreshing ? 'animate-spin text-[var(--theme-text-primary)]' : ''}`}
                title="Reload Page"
                aria-label="Reload Page"
             >
@@ -414,7 +423,7 @@ export default function TopBar() {
             </button>
 
             {/* Dark/Light Toggle */}
-            <ThemeSelector className="hidden sm:block" />
+            <ThemeSelector className="topbar-appearance hidden sm:block" />
 
             <ActivityCenter 
                notifRef={notifRef}

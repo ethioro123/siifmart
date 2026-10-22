@@ -470,3 +470,7 @@
 ### Purchase request workspace (2026-10-23)
 - Separate stock/suggestion views, clearer forms and item quantities, assigned-workspace context, next-step guidance, and searchable status-filtered history.
 - Review notes remain separate per request; receiving options stay within the requester’s assigned region and active facilities.
+
+### Responsive top bar priorities (2026-10-23)
+- Header adapts to measured available width, including sidebar changes. Compact views retain navigation, search, notifications and profile, with workplace/region controls in an overflow panel.
+- Long profile names and secondary appearance/search controls yield space before overlap; appearance and refresh remain available in the profile menu.

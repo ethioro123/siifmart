@@ -34,7 +34,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
 
 
   return (
-    <div className="flex h-[100dvh] min-h-[100dvh] text-gray-700 dark:text-gray-300 font-sans overflow-hidden transition-colors duration-300" style={{ backgroundColor: 'var(--bg-app)' }}>
+    <div className="flex h-[100dvh] min-h-[100dvh] text-gray-700 dark:text-gray-300 font-sans overflow-hidden transition-colors duration-300" style={{ backgroundColor: 'var(--bg-app)', paddingTop: import.meta.env.MODE === 'staging' ? 'calc(1.5rem + env(safe-area-inset-top, 0px))' : undefined, '--app-top-inset': import.meta.env.MODE === 'staging' ? '1.5rem' : '0px' } as React.CSSProperties}>
       <NetworkStatusIndicator />
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
