@@ -123,7 +123,7 @@ export interface ApprovalWorkflow {
 export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     purchase_order: {
         name: 'Purchase Order Approval',
-        levels: [{ roles: ['head_of_procurement', 'regional_procurement_manager', 'super_admin'] }]
+        levels: [{ roles: ['head_of_procurement', 'regional_procurement_manager', 'super_admin', 'group_ceo'] }]
     },
     expense: {
         name: 'Expense Approval',
@@ -221,7 +221,7 @@ export function canApprove(
 ): boolean {
     const norm = ((userRole as string) || '').toLowerCase().trim().replace(/[\s-]/g, '_');
     if (workflowName === 'purchase_order') {
-        if (norm === 'head_of_procurement' || norm === 'super_admin') return true;
+        if (norm === 'head_of_procurement' || norm === 'super_admin' || norm === 'group_ceo') return true;
         return norm === 'regional_procurement_manager' && amount !== undefined &&
             customThreshold !== undefined && Number.isFinite(customThreshold) &&
             amount <= customThreshold;
