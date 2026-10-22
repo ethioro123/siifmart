@@ -4,6 +4,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <script>
+    let savedTheme = null;
+    try {
+      savedTheme = window.localStorage.getItem('siifmart_theme');
+    } catch {}
+    const systemPrefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+    const initialTheme = savedTheme === 'dark' || savedTheme === 'light'
+      ? savedTheme
+      : systemPrefersDark ? 'dark' : 'light';
+    document.documentElement.dataset.theme = initialTheme;
+    document.documentElement.style.colorScheme = initialTheme;
+    document.documentElement.classList.toggle('dark', initialTheme === 'dark');
+  </script>
   <title>SIIFMART | Retail & Warehouse System</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="alternate icon" type="image/png" href="/favicon.png" />

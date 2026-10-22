@@ -16,6 +16,7 @@ import { fetchLoginLocation } from '../utils/geolocationHelper';
 import { evaluateGeofence } from '../utils/geofence';
 import { getDeviceDetails } from '../utils/deviceHelper';
 import { formatRole } from '../utils/formatting';
+import { useTheme } from '../hooks/useTheme';
 interface ToastMessage {
   id: string; message: string; type: 'info' | 'warning' | 'error' | 'success'; duration?: number; title?: string;
 }
@@ -34,7 +35,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export function StoreProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
-  const [theme, setTheme] = useState<'dark' | 'light'>('light');
+  const { theme, toggleTheme } = useTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isServerDown, setIsServerDown] = useState(false);
@@ -266,12 +267,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(cleanupInterval);
   }, []);
 
-  // Theme persistence
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
   // --- SERVER HEALTH KILL-SWITCH (Event-Driven On Suspected Error) ---
   useEffect(() => {
     let recoveryTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -390,10 +385,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       sessionStorage.removeItem('siifmart_login_location');
       localStorage.removeItem('siifmart_sites_cache');
     } catch (e) {}
-  };
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
   const toggleSidebar = () => {

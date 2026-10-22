@@ -5,6 +5,11 @@
 
 ## Active Features
 
+### Device-Aware Appearance (2026-10-23)
+- New sessions follow the device's light or dark appearance and update when the system preference changes. A manual theme toggle is saved in browser storage and takes precedence on later visits.
+- The document applies the initial theme before the app loads to avoid a flash of the opposite appearance.
+- **Files**: `hooks/useTheme.ts`, `contexts/CentralStore.tsx`, `index.html`.
+
 ### Functional Reporting and HR-Reviewed Hiring (2026-10-23)
 - Country functional directors report through their Group functional executives and coordinate with the Country Managing Director; regional retail and regional supply chain remain separate lines. The Group CIO owns the technology chain, the Group CMO sits under the Group CCO, and country compliance reports through the Group CLCO while audit remains independent under the Board/CAE.
 - Hiring eligibility follows the candidate role's primary reporting line. Pending onboarding proposals require sign-off from HR roles or the Group CEO; regional HR approvals continue to be checked against the existing regional boundary.
