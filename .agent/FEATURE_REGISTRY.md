@@ -452,3 +452,6 @@
 - Order lists, receiving destinations, and catalog fallback use employee-assigned regional/site scope and deny missing assignments.
 - Database procurement guards prevent regional or site staff from accessing orders beyond their assignment; regional supplier access requires the matching region.
 - Policy persisted in `rules/02-country-and-operations.md`; migration `migrations/20261023_enforce_procurement_assignment_boundaries.sql` (staging).
+
+### Receiving hub region heading (2026-10-23)
+- Procurement receiving dropdown identifies the worker’s assigned region rather than the country HQ label. National/global views derive the visible hubs’ regions; missing names use region codes.

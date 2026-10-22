@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Supplier, Site } from '../../types';
 import { Truck, MapPin, ChevronDown, ChevronUp, Check, Info, AlertTriangle, X, Layers } from 'lucide-react';
 import { formatDisplaySiteId } from '../../utils/siteIdGenerator';
-import { getCountryProfile } from '../../utils/localization';
+import { getPOReceivingRegionLabel } from '../../utils/poReceivingSelection';
 
 interface POSupplierLogisticsProps {
     poDelivery: { tempReq: 'Ambient' | 'Chilled' | 'Frozen'; shelfLife: string; dockSlot: string };
@@ -17,6 +17,7 @@ interface POSupplierLogisticsProps {
     allSuppliers: Supplier[];
 
     // Logistics State
+    assignedRegionCode?: string | null;
     destinationSiteIds: string[];
     setDestinationSiteIds: React.Dispatch<React.SetStateAction<string[]>>;
     isSiteDropdownOpen: boolean;
@@ -37,7 +38,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
     newPOSupplier, setNewPOSupplier,
     manualVendorName, setManualVendorName,
     allSuppliers,
-    destinationSiteIds, setDestinationSiteIds,
+    assignedRegionCode, destinationSiteIds, setDestinationSiteIds,
     isSiteDropdownOpen, setIsSiteDropdownOpen,
     sites,
     quantityDistribution, setQuantityDistribution,
@@ -46,6 +47,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
     isEditMode = false
 }) => {
     const siteDropdownRef = useRef<HTMLDivElement>(null);
+    const receivingRegionLabel = getPOReceivingRegionLabel(sites, assignedRegionCode);
     const todayIso = new Date().toISOString().split('T')[0];
 
     useEffect(() => {
@@ -217,7 +219,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                             <div className="absolute z-50 w-full mt-2 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-xl p-2 max-h-56 overflow-y-auto">
                                 <div className="flex justify-between items-center px-2 py-1 border-b border-[var(--theme-border-subtle)] mb-1.5">
                                     <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase">
-                                        Storage Hubs & DCs {sites.length > 0 && `(${getCountryProfile(sites[0]?.country || 'ET').name || sites[0]?.country})`}
+                                        Storage Hubs & DCs {receivingRegionLabel && `(${receivingRegionLabel})`}
                                     </span>
                                     <div className="flex gap-2">
                                         <button

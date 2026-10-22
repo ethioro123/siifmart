@@ -421,6 +421,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     manualVendorName={manualVendorName}
                     setManualVendorName={setManualVendorName}
                     allSuppliers={allSuppliers}
+                    assignedRegionCode={activeRegionCode}
                     destinationSiteIds={destinationSiteIds}
                     setDestinationSiteIds={setDestinationSiteIds}
                     isSiteDropdownOpen={isSiteDropdownOpen}
