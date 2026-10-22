@@ -88,7 +88,7 @@ export function generatePOHTML(po: PurchaseOrder, sites: any[], user: any, allPr
             ${(settings?.logoUrl || settings?.posReceiptLogo) ? `
                 <img src="${settings.logoUrl || settings.posReceiptLogo}" alt="Logo" style="max-height: 48px; max-width: 120px; object-fit: contain;" />
             ` : ''}
-            <div>
+            <div style="text-align: center;">
                 <h1 class="brand">${settings?.storeName ? `${settings.storeName} HQ` : 'SIIFMART HQ'}</h1>
                 <div class="subbrand">${settings?.slogan || settings?.legalBusinessName || 'Supply Chain & Procurement'}</div>
             </div>
@@ -191,7 +191,7 @@ export const POPrintView: React.FC<POPrintViewProps> = ({ po, sites, user, allPr
                             className="max-h-12 max-w-[120px] object-contain" 
                         />
                     )}
-                    <div>
+                    <div className="text-center">
                         <h1 className="text-3xl font-bold tracking-tight text-black mb-1 leading-none">
                             {settings?.storeName ? `${settings.storeName} HQ` : 'SIIFMART HQ'}
                         </h1>
