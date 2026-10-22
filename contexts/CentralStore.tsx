@@ -222,7 +222,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = authService.onAuthStateChange(
       (event, session) => {
         logger.debug('CentralStore', 'Auth state changed:');
-        if (event === 'SIGNED_IN' && session?.user) {
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
           // Supabase invokes this callback while holding its auth lock. Defer
           // profile reads until after the callback returns to avoid deadlocking
           // getSession() and other auth operations during startup.

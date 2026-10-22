@@ -55,6 +55,7 @@ export function useDataInitialization({
 
   // --- SYNC USER'S SITE ---
   const userSiteSyncRef = React.useRef<boolean>(false);
+  const missingSiteWarningRef = React.useRef<string | null>(null);
 
   useEffect(() => {
     const canSwitchSites = ['super_admin', 'CEO', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
@@ -81,10 +82,16 @@ export function useDataInitialization({
       const userSite = sites.find(s => s.id === user.siteId || (s as any).code === user.siteId);
 
       if (!userSite) {
-        logger.error('useDataInitialization', `❌ User's siteId "${user.siteId}" not found in sites list!`, new Error(String(`❌ User's siteId "${user.siteId}" not found in sites list!`)));
+        // The site directory is access scoped; a stale assignment can be absent
+        // while country scoping has already selected an accessible site.
+        if (!sites.some(s => s.id === activeSiteId) && missingSiteWarningRef.current !== user.siteId) {
+          logger.warn('useDataInitialization', 'Assigned site is unavailable in the accessible site directory', { siteId: user.siteId });
+          missingSiteWarningRef.current = user.siteId;
+        }
         return;
       }
 
+      missingSiteWarningRef.current = null;
       if ((!canSwitchSites) && (!activeSiteId || (activeSiteId !== userSite.id && activeSiteId !== userSite.code))) {
         setActiveSiteId(userSite.id);
       }
