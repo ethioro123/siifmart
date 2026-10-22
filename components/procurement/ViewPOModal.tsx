@@ -362,41 +362,26 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 <div className="pt-4 border-t border-[var(--theme-border)] space-y-3">
                     {/* Primary Actions for Draft POs */}
                     {po.status === 'Draft' && (
-                        canApprove ? (
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={handleOpenApprove}
-                                    disabled={isSubmitting}
-                                    className={`h-11 px-5 bg-[var(--theme-primary)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full transition-all flex items-center justify-center gap-2 shadow-sm ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                    {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
-                                    {isSubmitting ? 'Signing Off...' : isExceedingAutonomous ? 'Authorize Escalated PO (HQ)' : 'Sign Off & Authorize PO'}
-                                </button>
-                                {user?.role === 'super_admin' && (
-                                    <button
-                                        onClick={handleOpenReject}
-                                        className="h-11 px-5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-sm rounded-full border border-red-500/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
-                                    >
-                                        <XCircle size={16} /> Reject
-                                    </button>
-                                )}
-                            </div>
-                        ) : isExceedingAutonomous && isRegionalRole && !isHQExecutive ? (
-                            <div className="p-3.5 px-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-2.5 text-amber-600 dark:text-amber-400 text-xs font-medium">
-                                <Clock size={16} className="shrink-0" />
-                                <span>Autonomous Limit Exceeded: PO ({currencySymbol} {po.totalAmount.toLocaleString()}) exceeds regional cap ({currencySymbol} {autonomousLimit.toLocaleString()}). Escalated to National HQ for approval.</span>
-                            </div>
-                        ) : isCreator && !isCEO ? (
-                            <div className="p-3.5 px-4 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center gap-2.5 text-purple-600 dark:text-purple-400 text-xs font-medium">
-                                <Clock size={16} className="shrink-0" />
-                                <span>Anti-Self-Approval: You created this PO. Dual sign-off by a secondary manager or CEO is required.</span>
-                            </div>
-                        ) : (
-                            <div className="p-3.5 px-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-2.5 text-amber-600 dark:text-amber-400 text-xs font-medium">
-                                <Clock size={16} className="shrink-0" />
-                                <span>Maker Draft: PO drafted by {po.createdBy || 'Staff'} • {isExceedingAutonomous ? 'Awaiting National HQ Sign-Off' : 'Awaiting Head of Procurement Sign-Off'}</span>
-                            </div>
-                        )
+                        <div className="space-y-3">
+                            {canApprove && <button onClick={handleOpenApprove} disabled={isSubmitting}
+                                className="h-11 px-5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full disabled:opacity-50">
+                                {isSubmitting ? 'Signing off...' : 'Approve purchase order'}
+                            </button>}
+                            {canClearFinance && <button onClick={() => setApprovalModal({ isOpen: true, mode: 'finance' })}
+                                disabled={isSubmitting} className="h-11 px-5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full disabled:opacity-50">
+                                Record finance clearance
+                            </button>}
+                            {isCEO && !canApprove && !isCreator && <button onClick={handleOpenReject}
+                                className="h-11 px-5 rounded-full border border-[var(--theme-border)] text-[var(--theme-text-primary)] text-sm">
+                                Reject
+                            </button>}
+                            <p className="text-xs text-[var(--theme-text-secondary)]">
+                                {!hasConfiguredLimit ? 'Approval is waiting for a configured regional PO limit.'
+                                    : isCreator ? 'The creator or requester needs a different approver.'
+                                    : isExceedingAutonomous ? `Regional limit: ${currencySymbol} ${autonomousLimit?.toLocaleString()}. ${financeCleared ? 'Finance clearance recorded; HQ procurement approval required.' : 'HQ finance clearance required before HQ procurement approval.'}`
+                                    : `Regional limit: ${currencySymbol} ${autonomousLimit?.toLocaleString() ?? 'not applicable'}. Awaiting procurement approval.`}
+                            </p>
+                        </div>
                     )}
 
                     {/* Status Messages */}

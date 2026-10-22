@@ -11,6 +11,7 @@ import { logger } from '../../utils/logger';
 import { purchaseOrdersService } from '../../services/purchase-orders.service';
 import { PurchaseOrdersMobileList } from './components/PurchaseOrdersMobileList';
 import { renderPriorityBadge, renderStatusBadge } from './components/POBadges';
+import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
 
 interface PurchaseOrdersListProps {
     orders: PurchaseOrder[];
@@ -44,6 +45,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     suppliers, sites, currencySymbol = 'ETB', onEdit, onRefresh
 }) => {
     const { user, showToast } = useStore();
+    const { regions } = useData();
     const { approvePOMutation, bulkApproveMutation, cancelPOMutation, updatePOMutation } = usePurchaseOrderMutations();
     const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
     const [selectedPOIds, setSelectedPOIds] = useState<string[]>([]);
@@ -51,36 +53,22 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
 
     const ITEMS_PER_PAGE = 20;
     const isCEO = user?.role === 'super_admin';
-    const isProcurementManager = ['head_of_procurement', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '');
+    const isProcurementManager = ['head_of_procurement', 'regional_procurement_manager', 'super_admin'].includes(user?.role || '');
     const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager', 'head_of_operations',].includes(user?.role || '');
-    const canApprove = isProcurementManager || user?.role === 'regional_procurement_manager' || isCEO;
+    const canApprove = isProcurementManager;
 
-    const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
-        'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager'
-    ].includes(user?.role || '');
-
-    const isExceedingRegionalLimit = (po: PurchaseOrder) => {
-        if (!isRegionalStaff) return false;
-        const isKe = po.countryCode === 'KE' || (po as any).country_code === 'KE' || po.currency === 'KSh' || po.currency === 'KES';
-        return (po.totalAmount || 0) > (isKe ? 500000 : 1000000);
-    };
+    const approvalPolicy = (po: PurchaseOrder) => getPoApprovalPolicy({
+        po, role: user?.role, actorName: user?.name, regions, sites
+    });
 
     const handleBulkApprove = async () => {
         let ordersToApprove = orders.filter(p => selectedPOIds.includes(p.id));
         if (ordersToApprove.length === 0) return;
 
-        if (isRegionalStaff) {
-            const overLimit = ordersToApprove.filter(isExceedingRegionalLimit);
-            ordersToApprove = ordersToApprove.filter(p => !isExceedingRegionalLimit(p));
-            for (const po of overLimit) {
-                await updatePOMutation.mutateAsync({
-                    id: po.id,
-                    updates: { requiresHqApproval: true }
-                });
-            }
-            if (overLimit.length > 0) {
-                showToast(`${overLimit.length} order(s) exceeded regional autonomous cap and were routed to Corporate HQ.`, 'warning');
-            }
+        const unavailable = ordersToApprove.filter(po => !approvalPolicy(po).canApprove);
+        ordersToApprove = ordersToApprove.filter(po => approvalPolicy(po).canApprove);
+        if (unavailable.length > 0) {
+            showToast(`${unavailable.length} order(s) need a separate approver, configured limit, or finance clearance.`, 'warning');
         }
 
         if (ordersToApprove.length > 0) {
@@ -119,29 +107,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
 
     const handleSingleApprove = async (e: React.MouseEvent, po: PurchaseOrder) => {
         e.stopPropagation();
-        if (isExceedingRegionalLimit(po)) {
-            try {
-                await updatePOMutation.mutateAsync({
-                    id: po.id,
-                    updates: {
-                        requiresHqApproval: true,
-                        notes: (po.notes ? `${po.notes}\n` : '') + `[HQ Escalation] Order total (${po.totalAmount}) exceeds regional ceiling. Escalated by ${user?.name || 'Regional Department Manager'} to Corporate HQ.`
-                    }
-                });
-                showToast("Order exceeds regional autonomous ceiling. Escalated to Corporate HQ for exception review.", "warning");
-                onRefresh();
-            } catch (err) {
-                logger.error('PurchaseOrdersList', "Escalate to HQ failed", err);
-            }
-            return;
-        }
-
-        try {
-            await approvePOMutation.mutateAsync(po);
-            onRefresh();
-        } catch (e) {
-            logger.error('PurchaseOrdersList', "Approve failed", e);
-        }
+        await handleOpenPODetails(po);
     };
 
     return (
