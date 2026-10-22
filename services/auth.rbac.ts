@@ -14,8 +14,12 @@ import type { UserRole } from './auth.service';
 // ============================================================================
 
 export const ROLE_PERMISSIONS: Record<string, string[]> = {
-    // ═══ LEVEL 1 - EXECUTIVE ═══
-    super_admin: ['*'], // CEO / Owner - Full Access to EVERYTHING
+    // ═══ LEVEL 1 - GLOBAL EXECUTIVE BOARD ═══
+    super_admin: ['*'], // Global CEO / Owner - Full Access to EVERYTHING
+    CEO: ['*'],
+    ceo: ['*'],
+
+    // ═══ LEVEL 2 - NATIONAL EXECUTIVE BOARD ═══
     country_managing_director: [
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
@@ -23,10 +27,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
 
-    // ═══ LEVEL 2 - REGIONAL/DIRECTORS ═══
-    regional_manager: [
-        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
-    ],
+    // ═══ LEVEL 3 - CORPORATE DIRECTORATES (HQ C-SUITE) ═══
     head_of_operations: [
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
@@ -52,16 +53,16 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'employees', 'finance', 'settings', 'profile'
     ],
     hr_manager: [
-        'dashboard', 'employees', 'finance', 'settings', 'profile'
+        'dashboard', 'employees', 'finance', 'profile'
     ],
     head_of_procurement: [
-        'dashboard', 'procurement', 'warehouse', 'settings', 'profile'
+        'dashboard', 'procurement', 'inventory', 'pricing', 'warehouse', 'settings', 'profile'
     ],
     procurement_head: [
-        'dashboard', 'procurement', 'warehouse', 'settings', 'profile'
+        'dashboard', 'procurement', 'inventory', 'pricing', 'warehouse', 'settings', 'profile'
     ],
     procurement_manager: [
-        'dashboard', 'procurement', 'warehouse', 'settings', 'profile'
+        'dashboard', 'procurement', 'inventory', 'pricing', 'warehouse', 'profile'
     ],
     head_of_supply_chain: [
         'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'settings', 'profile'
@@ -70,7 +71,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'settings', 'profile'
     ],
     supply_chain_manager: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'settings', 'profile'
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
     ],
     head_of_merchandising: [
         'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
@@ -80,9 +81,6 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     ],
     merchandising_manager: [
         'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
-    ],
-    merchandising_specialist: [
-        'dashboard', 'regional-ops', 'pricing', 'inventory', 'sales', 'profile'
     ],
     head_of_it: [
         'dashboard', 'settings', 'employees', 'profile'
@@ -96,6 +94,16 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     audit_head: [
         'dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'pos', 'profile'
     ],
+    auditor: [
+        'dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'pos', 'profile'
+    ],
+
+    // ═══ LEVEL 4 - REGIONAL TERRITORY DIRECTORS ═══
+    regional_manager: [
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+    ],
+
+    // ═══ LEVEL 5 - REGIONAL DIVISION LEADS ═══
     regional_procurement_lead: [
         'dashboard', 'regional-ops', 'procurement', 'inventory', 'pricing', 'customers', 'profile'
     ],
@@ -115,7 +123,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'regional-ops', 'settings', 'pos', 'inventory', 'sales', 'employees', 'profile'
     ],
 
-    // ═══ LEVEL 3 - SITE MANAGERS ═══
+    // ═══ LEVEL 6 - FACILITY CAPTAINS (STORE, WAREHOUSE & DISPATCH GMs) ═══
     store_manager: [
         'dashboard', 'pos', 'inventory', 'sales', 'customers', 'employees', 'profile'
     ],
@@ -125,14 +133,48 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     dispatch_manager: [
         'dashboard', 'warehouse', 'inventory', 'employees', 'profile'
     ],
+
+    // ═══ LEVEL 7 - FUNCTIONAL & DEPARTMENT MANAGERS ═══
     assistant_manager: [
         'dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'
     ],
+    logistics_manager: ['dashboard', 'regional-ops', 'warehouse', 'inventory', 'employees', 'profile'],
+    inventory_manager: ['dashboard', 'regional-ops', 'inventory', 'warehouse', 'profile'],
+    security_manager: ['dashboard', 'regional-ops', 'settings', 'employees', 'profile'],
+    vendor_relations_manager: ['dashboard', 'regional-ops', 'procurement', 'pricing', 'inventory', 'profile'],
+    cs_manager: ['dashboard', 'regional-ops', 'customers', 'sales', 'profile'],
+
+    // ═══ LEVEL 8 - SHIFT LEADS & FLOOR SUPERVISORS ═══
     shift_lead: [
         'dashboard', 'pos', 'inventory', 'customers', 'profile'
     ],
+    store_supervisor: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
+    fleet_maintenance_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
+    dispatcher: ['dashboard', 'inventory', 'warehouse', 'profile'],
 
-    // ═══ LEVEL 4 - STAFF ═══
+    // ═══ LEVEL 9 - SPECIALISTS, ANALYSTS & OFFICERS ═══
+    merchandising_specialist: ['dashboard', 'regional-ops', 'pricing', 'inventory', 'sales', 'profile'],
+    merchandiser: ['dashboard', 'regional-ops', 'inventory', 'pricing', 'profile'],
+    inventory_specialist: ['dashboard', 'inventory', 'warehouse', 'profile'],
+    it_support: ['dashboard', 'regional-ops', 'settings', 'employees', 'profile'],
+    buyer: ['dashboard', 'regional-ops', 'procurement', 'profile'],
+    demand_planner: ['dashboard', 'regional-ops', 'inventory', 'procurement', 'sales', 'profile'],
+    replenishment_planner: ['dashboard', 'regional-ops', 'inventory', 'warehouse', 'procurement', 'sales', 'profile'],
+    payroll_specialist: ['dashboard', 'regional-ops', 'employees', 'finance', 'profile'],
+    talent_recruiter: ['dashboard', 'regional-ops', 'employees', 'profile'],
+    hr_generalist: ['dashboard', 'regional-ops', 'employees', 'profile'],
+    training_coordinator: ['dashboard', 'regional-ops', 'employees', 'profile'],
+    treasury_officer: ['dashboard', 'regional-ops', 'finance', 'pos', 'sales', 'profile'],
+    tax_compliance_officer: ['dashboard', 'regional-ops', 'finance', 'sales', 'profile'],
+    credit_control_officer: ['dashboard', 'regional-ops', 'finance', 'sales', 'customers', 'procurement', 'profile'],
+    accountant: ['dashboard', 'regional-ops', 'finance', 'sales', 'procurement', 'profile'],
+    customs_import_specialist: ['dashboard', 'regional-ops', 'procurement', 'inventory', 'profile'],
+    inbound_qc_inspector: ['dashboard', 'regional-ops', 'procurement', 'warehouse', 'inventory', 'profile'],
+    store_operations_auditor: ['dashboard', 'regional-ops', 'pos', 'inventory', 'pricing', 'sales', 'profile'],
+    data_analyst: ['dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'profile'],
+    loss_prevention: ['dashboard', 'inventory', 'sales', 'profile'],
+
+    // ═══ LEVEL 10 - FRONTLINE EXECUTION STAFF ═══
     cashier: ['dashboard', 'pos', 'profile'],
     sales_associate: ['dashboard', 'pos', 'customers', 'inventory', 'profile'],
     stock_clerk: ['dashboard', 'warehouse', 'inventory', 'profile'],
@@ -141,41 +183,13 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     receiver: ['dashboard', 'warehouse', 'inventory', 'profile'],
     driver: ['dashboard', 'warehouse', 'inventory', 'profile'],
     forklift_operator: ['dashboard', 'warehouse', 'inventory', 'profile'],
-    inventory_specialist: ['dashboard', 'inventory', 'warehouse', 'profile'],
+    returns_clerk: ['dashboard', 'warehouse', 'inventory', 'customers', 'profile'],
     customer_service: ['dashboard', 'customers', 'sales', 'profile'],
-    auditor: ['dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'profile'],
-    it_support: ['dashboard', 'regional-ops', 'settings', 'employees', 'profile'],
-    buyer: ['dashboard', 'regional-ops', 'procurement', 'profile'],
-    demand_planner: ['dashboard', 'regional-ops', 'inventory', 'procurement', 'sales', 'profile'],
-    inventory_manager: ['dashboard', 'regional-ops', 'inventory', 'warehouse', 'profile'],
-    logistics_manager: ['dashboard', 'regional-ops', 'warehouse', 'inventory', 'employees', 'profile'],
-    security_manager: ['dashboard', 'regional-ops', 'settings', 'employees', 'profile'],
-    payroll_specialist: ['dashboard', 'regional-ops', 'employees', 'finance', 'profile'],
-    talent_recruiter: ['dashboard', 'regional-ops', 'employees', 'profile'],
-    hr_generalist: ['dashboard', 'regional-ops', 'employees', 'profile'],
-    treasury_officer: ['dashboard', 'regional-ops', 'finance', 'pos', 'sales', 'profile'],
-    tax_compliance_officer: ['dashboard', 'regional-ops', 'finance', 'sales', 'profile'],
-    credit_control_officer: ['dashboard', 'regional-ops', 'finance', 'sales', 'customers', 'procurement', 'profile'],
-    vendor_relations_manager: ['dashboard', 'regional-ops', 'procurement', 'pricing', 'inventory', 'profile'],
-    customs_import_specialist: ['dashboard', 'regional-ops', 'procurement', 'inventory', 'profile'],
-    inbound_qc_inspector: ['dashboard', 'regional-ops', 'procurement', 'warehouse', 'inventory', 'profile'],
-    store_operations_auditor: ['dashboard', 'regional-ops', 'pos', 'inventory', 'pricing', 'sales', 'profile'],
-    replenishment_planner: ['dashboard', 'regional-ops', 'inventory', 'warehouse', 'procurement', 'sales', 'profile'],
-    fleet_maintenance_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
 
-    // ═══ LEGACY ROLES (backwards compatibility) ═══
+    // ═══ LEGACY ALIASES (backwards compatibility) ═══
     manager: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
     hr: ['dashboard', 'regional-ops', 'employees', 'profile'],
-    pos: ['dashboard', 'pos', 'profile'],
-    dispatcher: ['dashboard', 'inventory', 'warehouse', 'profile'],
-    cs_manager: ['dashboard', 'regional-ops', 'customers', 'sales', 'profile'],
-    store_supervisor: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
-    returns_clerk: ['dashboard', 'warehouse', 'inventory', 'customers', 'profile'],
-    merchandiser: ['dashboard', 'regional-ops', 'inventory', 'pricing', 'profile'],
-    loss_prevention: ['dashboard', 'inventory', 'sales', 'profile'],
-    accountant: ['dashboard', 'regional-ops', 'finance', 'sales', 'procurement', 'profile'],
-    data_analyst: ['dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'profile'],
-    training_coordinator: ['dashboard', 'regional-ops', 'employees', 'profile']
+    pos: ['dashboard', 'pos', 'profile']
 };
 
 export function canAccessRoute(userRole: UserRole, route: string): boolean {

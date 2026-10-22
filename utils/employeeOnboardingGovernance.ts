@@ -41,13 +41,16 @@ export const isDirectOnboardingAuthorized = (
     if (DIRECT_ONBOARDING_ROLES.some(r => r.toLowerCase() === cleanRole)) {
         return true;
     }
-    // Regional & Site Managers can fast-track Level 4 frontline hires if pre-approved quota slot is available
+    // Regional & Site Managers (L3-L7) can fast-track Level 10 frontline hires if pre-approved quota slot is available
     if (isQuotaApproved && candidateRole) {
         const managerialRoles = [
             'regional_manager', 'regional_hr_officer', 'regional_logistics_lead',
             'regional_procurement_lead', 'regional_finance_officer', 'regional_security_supervisor',
+            'regional_merchandising_lead',
             'store_manager', 'warehouse_manager', 'dispatch_manager',
-            'operations_manager', 'head_of_operations', 'operations_head'
+            'logistics_manager', 'inventory_manager', 'security_manager',
+            'operations_manager', 'head_of_operations', 'operations_head',
+            'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head'
         ];
         if (managerialRoles.includes(cleanRole)) {
             return true;

@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
+import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useCountryScoping } from '../../contexts/hooks/useCountryScoping';
 import { getCountryProfile } from '../../utils/localization';
 import { CURRENCY_SYMBOL } from '../../constants/categories';
@@ -83,6 +85,10 @@ describe('POS Catalog & Staff Market Sovereignty (Amina Ali Case)', () => {
   ];
 
   it('locks Amina Ali strictly to Ethiopia and resolves currency to ETB', () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
     const { result } = renderHook(() =>
       useCountryScoping({
         country: 'KE', // Even if global setting was left on Kenya
@@ -99,7 +105,8 @@ describe('POS Catalog & Staff Market Sovereignty (Amina Ali Case)', () => {
         allProducts: mockProducts,
         products: mockProducts,
         suppliers: []
-      })
+      }),
+      { wrapper }
     );
 
     // 1. Non-CEO staff locked to Ethiopia

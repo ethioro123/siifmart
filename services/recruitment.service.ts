@@ -276,7 +276,8 @@ export const recruitmentService = {
         approver: { id: string; name: string; role: string },
         notes?: string
     ): Promise<boolean> {
-        const isHR = ['hr_manager', 'regional_hr_officer', 'hr', 'super_admin', 'admin'].includes(approver.role);
+        const normRole = (approver.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
+        const isHR = ['head_of_hr', 'hr_head', 'hr_manager', 'regional_hr_officer', 'hr', 'country_managing_director', 'admin', 'super_admin', 'ceo'].includes(normRole);
         if (!isHR) {
             throw new Error('4-Eyes Violation: Only HR leadership can perform candidate identity & compliance approval.');
         }

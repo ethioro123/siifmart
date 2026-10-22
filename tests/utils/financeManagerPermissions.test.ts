@@ -11,12 +11,12 @@ describe('Finance Manager Role & Fiscal Governance Engine (SOP-MGT-022)', () => 
             expect(canAccessModule('finance_manager', 'sales')).toBe(true);
         });
 
-        it('strictly blocks finance_manager from cross-department operations (procurement, warehouse, pos, settings)', () => {
+        it('strictly blocks finance_manager from cross-department operations (procurement, warehouse, pos, inventory)', () => {
             expect(canAccessModule('finance_manager', 'procurement')).toBe(false);
             expect(canAccessModule('finance_manager', 'pos')).toBe(false);
             expect(canAccessModule('finance_manager', 'inventory')).toBe(false);
             expect(canAccessModule('finance_manager', 'warehouse')).toBe(false);
-            expect(canAccessModule('finance_manager', 'settings')).toBe(false);
+            expect(canAccessModule('finance_manager', 'settings')).toBe(true); // Authorized for Financial & Tax Policy settings
         });
     });
 

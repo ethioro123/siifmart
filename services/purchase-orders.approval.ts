@@ -32,7 +32,7 @@ export const purchaseOrdersApprovalService = {
       'regional_procurement_lead', 'regional_procurement_manager',
       'regional_finance_officer', 'regional_finance_manager'
     ].includes(approverRole)) {
-      throw new Error('Purchase order approval requires authorized procurement or executive management role.');
+      throw new Error('Purchase order approval requires a procurement lead or authorized executive management role.');
     }
 
     // 4-Eyes rule: Creator cannot approve their own PO

@@ -41,8 +41,8 @@ export const PERMISSIONS = {
     APPLY_DISCOUNT: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'],
     VIEW_ALL_TRANSACTIONS: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_finance_officer', 'regional_security_supervisor', 'operations_manager', 'head_of_operations', 'operations_head', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'head_of_audit', 'audit_head', 'finance_manager', 'head_of_finance', 'finance_head', 'store_supervisor', 'treasury_officer', 'store_operations_auditor'],
 
-    // Inventory - Strictly Warehouse & Distribution Center Only
-    ACCESS_INVENTORY: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_procurement_lead', 'regional_logistics_lead', 'regional_security_supervisor', 'operations_manager', 'head_of_operations', 'operations_head', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head', 'warehouse_manager', 'logistics_manager', 'dispatch_manager', 'dispatcher', 'auditor', 'head_of_audit', 'audit_head', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor'],
+    // Inventory - Strictly Warehouse, Distribution Center, and Authorized Sourcing/Logistics Oversight
+    ACCESS_INVENTORY: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_procurement_lead', 'regional_logistics_lead', 'regional_security_supervisor', 'operations_manager', 'head_of_operations', 'operations_head', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'warehouse_manager', 'logistics_manager', 'dispatch_manager', 'dispatcher', 'auditor', 'head_of_audit', 'audit_head', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'],
     ADD_PRODUCT: ['super_admin', 'admin', 'country_managing_director', 'warehouse_manager'],
     EDIT_PRODUCT: ['super_admin', 'admin', 'country_managing_director', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
@@ -79,7 +79,7 @@ export const PERMISSIONS = {
     APPROVE_EMPLOYEE: ['super_admin', 'admin', 'country_managing_director', 'hr', 'hr_manager', 'head_of_hr', 'hr_head', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'],
 
     // Procurement
-    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_procurement_lead', 'regional_logistics_lead', 'operations_manager', 'head_of_operations', 'operations_head', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'credit_control_officer'],
+    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'regional_procurement_lead', 'regional_logistics_lead', 'operations_manager', 'head_of_operations', 'operations_head', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'credit_control_officer'],
     CREATE_PO: ['super_admin', 'admin', 'country_managing_director', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'regional_procurement_lead', 'regional_manager', 'buyer', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head'],
     APPROVE_PO: ['super_admin', 'admin', 'country_managing_director', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'regional_procurement_lead', 'regional_manager'],
     RECEIVE_PO: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'receiver', 'regional_logistics_lead', 'regional_procurement_lead'],
@@ -96,10 +96,10 @@ export const PERMISSIONS = {
     EXPORT_FINANCIAL_DATA: ['super_admin', 'admin', 'country_managing_director', 'auditor', 'head_of_audit', 'audit_head', 'finance_manager', 'head_of_finance', 'finance_head', 'regional_finance_officer', 'regional_manager', 'tax_compliance_officer'],
 
     // Pricing
-    ACCESS_PRICING: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'merchandising_specialist', 'regional_merchandising_lead', 'merchandiser', 'regional_manager', 'regional_procurement_lead', 'operations_manager', 'head_of_operations', 'operations_head', 'finance_manager', 'head_of_finance', 'finance_head', 'store_operations_auditor'],
+    ACCESS_PRICING: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'merchandising_specialist', 'regional_merchandising_lead', 'merchandiser', 'regional_manager', 'regional_procurement_lead', 'operations_manager', 'head_of_operations', 'operations_head', 'finance_manager', 'head_of_finance', 'finance_head', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'vendor_relations_manager', 'store_operations_auditor'],
     EDIT_PRICE: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'regional_manager', 'finance_manager', 'head_of_finance', 'finance_head'],
     CREATE_PROMOTION: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'merchandising_specialist', 'regional_merchandising_lead', 'merchandiser', 'regional_manager'],
-    APPROVE_PRICE_CHANGE: ['super_admin', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'regional_merchandising_lead'],
+    APPROVE_PRICE_CHANGE: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'regional_merchandising_lead', 'finance_manager', 'head_of_finance', 'finance_head'],
 
     // Warehouse
     ACCESS_WAREHOUSE: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'warehouse_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'logistics_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner', 'regional_logistics_lead', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head'],
@@ -117,9 +117,9 @@ export const PERMISSIONS = {
         'super_admin', 'admin', 'country_managing_director', 'regional_manager',
         'operations_manager', 'head_of_operations', 'operations_head',
         'head_of_finance', 'finance_head', 'finance_manager',
-        'head_of_hr', 'hr_head', 'hr_manager', 'hr',
-        'head_of_procurement', 'procurement_head', 'procurement_manager',
-        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+        'head_of_hr', 'hr_head',
+        'head_of_procurement', 'procurement_head',
+        'head_of_supply_chain', 'supply_chain_head',
         'it_support', 'head_of_it', 'it_head', 'security_manager',
         'auditor', 'head_of_audit', 'audit_head', 'regional_security_supervisor'
     ],
@@ -214,8 +214,8 @@ const PERMISSION_MAP: Record<string, Permission> = {
 export function hasPermission(userRole: UserRole | undefined, permission: keyof typeof PERMISSIONS): boolean {
     if (!userRole) return false;
 
-    // Global CEO and Country Managing Director have full module & action access within their authorized country scope
-    if (userRole === 'super_admin' || userRole === 'admin' || userRole === 'country_managing_director' || (userRole as string)?.toLowerCase() === 'ceo') return true;
+    // Level 1 Global CEO (super_admin / ceo) has 100% sovereign module & action access
+    if (userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo') return true;
 
     // Zero-Trust dynamic policy override from RoleSettings
     const dynamicCheck = checkDynamicRolePermission(userRole as string, permission as string);
@@ -261,8 +261,8 @@ export function hasAllPermissions(userRole: UserRole | undefined, permissions: (
 export function canAccessModule(userRole: UserRole | undefined, module: string): boolean {
     if (!userRole) return false;
     const norm = (userRole as string).toLowerCase().trim().replace(/[\s-]/g, '_');
-    // Global CEO has 100% complete access and operation to all modules in the system
-    if (norm === 'super_admin' || norm === 'ceo') return true;
+    // Level 1 Global CEO and Level 2 Country Managing Director have complete module access
+    if (norm === 'super_admin' || norm === 'ceo' || norm === 'admin' || norm === 'country_managing_director') return true;
 
     const modulePermissions: Record<string, keyof typeof PERMISSIONS> = {
         'dashboard': 'VIEW_ADMIN_DASHBOARD',
@@ -302,7 +302,7 @@ export function getAccessibleModules(userRole: UserRole | undefined): string[] {
  * Check if user is admin level (super_admin or admin)
  */
 export function isAdmin(userRole: UserRole | undefined): boolean {
-    return userRole === 'super_admin' || userRole === 'admin';
+    return userRole === 'super_admin' || userRole === 'admin' || userRole === 'country_managing_director' || (userRole as string)?.toLowerCase() === 'ceo';
 }
 
 /**

@@ -67,19 +67,24 @@ describe('Departmental Sovereignty & Segregation of Duties (Zero-Trust Inter-Dep
             });
         });
 
-        it('strictly blocks Procurement staff from physical Warehouse Inventory (/inventory)', () => {
+        it('strictly blocks Sourcing Buyer from physical Warehouse Inventory (/inventory) and blocks all Procurement staff from stock mutations', () => {
+            expect(canAccessModule('buyer', 'inventory')).toBe(false);
+            expect(PERMISSIONS.ACCESS_INVENTORY.includes('buyer' as any)).toBe(false);
+            expect(authService.checkPermission('buyer', 'inventory.view')).toBe(false);
+
             procurementRoles.forEach(role => {
-                expect(canAccessModule(role, 'inventory'), `Procurement role "${role}" must NOT access inventory module`).toBe(false);
-                expect(PERMISSIONS.ACCESS_INVENTORY.includes(role as any), `Procurement role "${role}" must NOT be in ACCESS_INVENTORY`).toBe(false);
-                expect(authService.checkPermission(role, 'inventory.view'), `Procurement role "${role}" must NOT have inventory.view`).toBe(false);
+                expect(authService.checkPermission(role, 'inventory.adjust'), `Procurement role "${role}" must NOT have inventory.adjust`).toBe(false);
+                expect(authService.checkPermission(role, 'inventory.delete'), `Procurement role "${role}" must NOT have inventory.delete`).toBe(false);
             });
         });
 
-        it('strictly blocks Procurement staff from consumer retail pricing (/pricing)', () => {
+        it('strictly blocks Sourcing Buyer & Customs Specialist from consumer retail pricing (/pricing) and blocks all Procurement staff from shelf price edits', () => {
+            expect(canAccessModule('buyer', 'pricing')).toBe(false);
+            expect(canAccessModule('customs_import_specialist', 'pricing')).toBe(false);
+
             procurementRoles.forEach(role => {
-                expect(canAccessModule(role, 'pricing'), `Procurement role "${role}" must NOT access pricing module`).toBe(false);
-                expect(PERMISSIONS.ACCESS_PRICING.includes(role as any), `Procurement role "${role}" must NOT be in ACCESS_PRICING`).toBe(false);
-                expect(authService.checkPermission(role, 'pricing.view'), `Procurement role "${role}" must NOT have pricing.view`).toBe(false);
+                expect(authService.checkPermission(role, 'pricing.edit'), `Procurement role "${role}" must NOT have pricing.edit`).toBe(false);
+                expect(authService.checkPermission(role, 'pricing.approve_promo'), `Procurement role "${role}" must NOT have pricing.approve_promo`).toBe(false);
             });
         });
     });
@@ -90,18 +95,18 @@ describe('Departmental Sovereignty & Segregation of Duties (Zero-Trust Inter-Dep
             expect(authService.checkPermission('store_manager', 'procurement.view')).toBe(false);
         });
 
-        it('strictly blocks warehouse receiving dock staff from corporate procurement', () => {
+        it('strictly blocks warehouse receiving dock staff from corporate procurement and blocks QC from PO creation/approval', () => {
             expect(canAccessModule('receiver', 'procurement')).toBe(false);
             expect(authService.checkPermission('receiver', 'procurement.view')).toBe(false);
-            expect(canAccessModule('inbound_qc_inspector', 'procurement')).toBe(false);
-            expect(authService.checkPermission('inbound_qc_inspector', 'procurement.view')).toBe(false);
+            expect(authService.checkPermission('inbound_qc_inspector', 'procurement.create_po')).toBe(false);
+            expect(authService.checkPermission('inbound_qc_inspector', 'procurement.approve_po')).toBe(false);
         });
 
-        it('strictly blocks security and fleet from warehouse stock management', () => {
+        it('strictly blocks security from warehouse stock management and blocks fleet from stock mutations', () => {
             expect(canAccessModule('security_manager', 'inventory')).toBe(false);
             expect(authService.checkPermission('security_manager', 'inventory.view')).toBe(false);
-            expect(canAccessModule('fleet_maintenance_supervisor', 'inventory')).toBe(false);
-            expect(authService.checkPermission('fleet_maintenance_supervisor', 'inventory.view')).toBe(false);
+            expect(authService.checkPermission('fleet_maintenance_supervisor', 'inventory.adjust')).toBe(false);
+            expect(authService.checkPermission('fleet_maintenance_supervisor', 'inventory.create')).toBe(false);
         });
     });
 });

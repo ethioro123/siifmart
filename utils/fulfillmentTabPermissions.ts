@@ -20,7 +20,7 @@ const SPECIALIST_TAB_ACCESS: Record<string, OpTab[]> = {
     regional_logistics_lead: ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER'],
     head_of_supply_chain: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'ASSIGN', 'LABELS'],
     supply_chain_head: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'ASSIGN', 'LABELS'],
-    supply_chain_manager: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'ASSIGN', 'LABELS'],
+    supply_chain_manager: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH'],
 };
 
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {

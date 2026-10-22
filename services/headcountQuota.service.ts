@@ -3,7 +3,11 @@ import { UserRole } from '../types';
 import { FacilityHeadcountQuota, RegionalDelegationRule, HeadcountQuotaRequest } from '../types/employee';
 import { logger } from '../utils/logger';
 
-export const LEVEL_4_FRONTLINE_ROLES: UserRole[] = [
+/**
+ * Level 10 Frontline Execution Roles eligible for fast-track onboarding within pre-approved facility quotas.
+ * Kept as LEVEL_4_FRONTLINE_ROLES export alias for backward compatibility.
+ */
+export const LEVEL_10_FRONTLINE_ROLES: UserRole[] = [
   'cashier',
   'sales_associate',
   'stock_clerk',
@@ -12,8 +16,10 @@ export const LEVEL_4_FRONTLINE_ROLES: UserRole[] = [
   'receiver',
   'driver',
   'forklift_operator',
+  'returns_clerk',
   'customer_service'
 ];
+export const LEVEL_4_FRONTLINE_ROLES = LEVEL_10_FRONTLINE_ROLES;
 
 export interface QuotaEvaluationResult {
   canAutoActivate: boolean;

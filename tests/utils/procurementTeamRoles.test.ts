@@ -13,12 +13,13 @@ describe('Procurement Directorate Team Roles & Hierarchy', () => {
             expect(canAccessRoute(role, '/procurement')).toBe(true);
             expect(canAccessRoute(role, '/inventory')).toBe(true);
             expect(canAccessRoute(role, '/warehouse')).toBe(true);
-            expect(canAccessRoute(role, '/finance')).toBe(true);
+            expect(canAccessRoute(role, '/pricing')).toBe(true);
             expect(canAccessRoute(role, '/profile')).toBe(true);
 
             expect(canAccessModule(role, 'procurement')).toBe(true);
             expect(canAccessModule(role, 'inventory')).toBe(true);
-            expect(canAccessModule(role, 'finance')).toBe(true); // Read-only cross-reference for budgets and cost prices
+            expect(canAccessModule(role, 'pricing')).toBe(true);
+            expect(canAccessModule(role, 'finance')).toBe(false); // Departmental isolation: uses VIEW_COST_PRICE instead of full Finance module
         });
 
         it('has supervisory PO approval and deletion permissions', () => {
@@ -108,8 +109,9 @@ describe('Procurement Directorate Team Roles & Hierarchy', () => {
             expect(hasPermission(role, 'APPROVE_PO')).toBe(false);
         });
 
-        it('has Level 4 ranking and hierarchy rank 35', () => {
+        it('has Level 9 ranking and hierarchy rank 35', () => {
             expect(getRoleHierarchy(role)).toBe(35);
+            expect(getRoleLevel(role)).toBe(9);
             expect(getRoleDept(role)).toBe('procurement');
         });
     });
@@ -131,8 +133,9 @@ describe('Procurement Directorate Team Roles & Hierarchy', () => {
             expect(hasPermission(role, 'APPROVE_PO')).toBe(false);
         });
 
-        it('has Level 4 ranking and hierarchy rank 30', () => {
+        it('has Level 9 ranking and hierarchy rank 30', () => {
             expect(getRoleHierarchy(role)).toBe(30);
+            expect(getRoleLevel(role)).toBe(9);
             expect(getRoleDept(role)).toBe('procurement');
         });
     });
