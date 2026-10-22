@@ -5,6 +5,10 @@ export type UserRole =
   | 'super_admin' | 'CEO' | 'ceo'
   // Level 2 - Country Executive
   | 'country_managing_director' | 'admin'
+  | 'country_operations_director' | 'country_finance_director'
+  | 'country_commercial_director' | 'country_supply_chain_director'
+  | 'country_hr_director' | 'country_technology_director'
+  | 'country_compliance_manager'
   // Level 3 - Corporate HQ Directorate Heads
   | 'head_of_operations' | 'head_of_finance' | 'head_of_hr'
   | 'head_of_procurement' | 'head_of_supply_chain' | 'head_of_merchandising'

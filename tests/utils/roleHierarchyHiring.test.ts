@@ -23,6 +23,7 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
     describe('Group COO (Level 1, Rank 99)', () => {
         it('can employ country managing directors, operations heads, and subordinate staff', () => {
             expect(canEmployRole('group_coo', 'country_managing_director')).toBe(true);
+            expect(canEmployRole('group_coo', 'country_operations_director')).toBe(true);
             expect(canEmployRole('group_coo', 'head_of_operations')).toBe(true);
             expect(canEmployRole('group_coo', 'regional_operations_manager')).toBe(true);
             expect(canEmployRole('group_coo', 'store_manager')).toBe(true);
@@ -33,6 +34,36 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
             expect(canEmployRole('group_coo', 'group_ceo')).toBe(false);
             expect(canEmployRole('group_coo', 'super_admin')).toBe(false);
             expect(canEmployRole('group_coo', 'group_coo')).toBe(false);
+        });
+    });
+
+    describe('Level 2 Country Leadership Directors (Rank 97-98)', () => {
+        it('country_managing_director (Rank 98) can employ country directors and subordinates', () => {
+            expect(canEmployRole('country_managing_director', 'country_operations_director')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'country_finance_director')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'head_of_operations')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'regional_operations_manager')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'store_manager')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'cashier')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'group_ceo')).toBe(false);
+            expect(canEmployRole('country_managing_director', 'group_coo')).toBe(false);
+        });
+
+        it('country functional directors (Rank 97) can employ regional managers and facility staff', () => {
+            expect(canEmployRole('country_operations_director', 'regional_operations_manager')).toBe(true);
+            expect(canEmployRole('country_operations_director', 'store_manager')).toBe(true);
+            expect(canEmployRole('country_operations_director', 'cashier')).toBe(true);
+            expect(canEmployRole('country_operations_director', 'country_managing_director')).toBe(false);
+            expect(canEmployRole('country_operations_director', 'country_operations_director')).toBe(false);
+
+            expect(canEmployRole('country_supply_chain_director', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('country_supply_chain_director', 'picker')).toBe(true);
+
+            expect(canEmployRole('country_finance_director', 'regional_finance_manager')).toBe(true);
+            expect(canEmployRole('country_finance_director', 'accountant')).toBe(true);
+
+            expect(canEmployRole('country_hr_director', 'regional_hr_manager')).toBe(true);
+            expect(canEmployRole('country_hr_director', 'hr_generalist')).toBe(true);
         });
     });
 

@@ -21,6 +21,13 @@ export function getRoleDisplayName(role: UserRole): string {
         ceo: 'Chief Executive Officer',
         country_managing_director: 'Country Managing Director',
         admin: 'Country Managing Director',
+        country_operations_director: 'Country Operations Director',
+        country_finance_director: 'Country Finance Director',
+        country_commercial_director: 'Country Commercial Director',
+        country_supply_chain_director: 'Country Supply Chain Director',
+        country_hr_director: 'Country HR Director',
+        country_technology_director: 'Country Technology Director',
+        country_compliance_manager: 'Country Compliance Manager',
 
         // Levels 3–5 - HQ Heads and Regional Managers
         head_of_operations: 'Head of Operations',
@@ -113,6 +120,14 @@ export function getRoleDescription(role: UserRole): string {
         group_cae: 'Chief Audit Executive - Independent internal audit, anti-fraud assurance, forensic review, and zero-trust controls',
         super_admin: 'Chief Executive Officer - Full enterprise executive oversight and cross-border governance',
         admin: 'Assistant Chief Executive Officer - Enterprise deputy and executive administrator',
+        country_managing_director: 'Country Managing Director - National executive leadership and country operations governance',
+        country_operations_director: 'Country Operations Director - Retail store network execution, store operations, and service standards',
+        country_finance_director: 'Country Finance Director - National fiscal governance, statutory tax reporting, and treasury reconciliation',
+        country_commercial_director: 'Country Commercial Director - National strategic sourcing, supplier terms, and local merchandising',
+        country_supply_chain_director: 'Country Supply Chain Director - National warehousing, fulfillment centers, and fleet distribution',
+        country_hr_director: 'Country HR Director - National talent acquisition, payroll compliance, and workforce operations',
+        country_technology_director: 'Country Technology Director - National systems continuity, store POS infrastructure, and IT security',
+        country_compliance_manager: 'Country Compliance Manager - Statutory audit, regulatory adherence, and internal loss governance',
 
         // Levels 3–5 - HQ Heads and Regional Managers
         head_of_operations: 'Head of Operations - Enterprise operations directorate and operational standards',
@@ -203,6 +218,14 @@ export function getRoleColor(role: UserRole): string {
         group_cae: 'text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-400/10 border-rose-200 dark:border-rose-400/20',
         super_admin: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-400/10 border-yellow-200 dark:border-yellow-400/20',
         admin: 'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-400/10 border-purple-200 dark:border-purple-400/20',
+        country_managing_director: 'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-400/10 border-purple-200 dark:border-purple-400/20',
+        country_operations_director: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-400/10 border-blue-200 dark:border-blue-400/20',
+        country_finance_director: 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-400/10 border-emerald-200 dark:border-emerald-400/20',
+        country_commercial_director: 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-400/10 border-amber-200 dark:border-amber-400/20',
+        country_supply_chain_director: 'text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-400/10 border-violet-200 dark:border-violet-400/20',
+        country_hr_director: 'text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-400/10 border-pink-200 dark:border-pink-400/20',
+        country_technology_director: 'text-cyan-600 dark:text-cyan-400 bg-cyan-100 dark:bg-cyan-400/10 border-cyan-200 dark:border-cyan-400/20',
+        country_compliance_manager: 'text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-400/10 border-rose-200 dark:border-rose-400/20',
 
         // Level 2
         head_of_operations: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-400/10 border-blue-200 dark:border-blue-400/20',

@@ -54,6 +54,27 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     admin: [
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
+    country_operations_director: [
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+    ],
+    country_finance_director: [
+        'dashboard', 'admin', 'finance', 'sales', 'pricing', 'procurement', 'settings', 'profile'
+    ],
+    country_commercial_director: [
+        'dashboard', 'admin', 'procurement', 'pricing', 'inventory', 'sales', 'customers', 'settings', 'profile'
+    ],
+    country_supply_chain_director: [
+        'dashboard', 'admin', 'warehouse', 'inventory', 'procurement', 'regional-ops', 'sales', 'settings', 'profile'
+    ],
+    country_hr_director: [
+        'dashboard', 'admin', 'employees', 'finance', 'settings', 'profile'
+    ],
+    country_technology_director: [
+        'dashboard', 'admin', 'settings', 'employees', 'profile'
+    ],
+    country_compliance_manager: [
+        'dashboard', 'admin', 'regional-ops', 'finance', 'sales', 'inventory', 'pos', 'pricing', 'settings', 'profile'
+    ],
 
     // ═══ LEVEL 3 - CORPORATE DIRECTORATES (HQ C-SUITE) ═══
     head_of_operations: [
@@ -198,7 +219,10 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
 export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
     const basePermissions = ROLE_PERMISSIONS[userRole] || [];
     if (basePermissions.includes('*') || [
-        'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'admin', 'country_managing_director',
+        'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
+        'admin', 'country_managing_director',
+        'country_operations_director', 'country_finance_director', 'country_commercial_director',
+        'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager',
         'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
         'head_of_operations',
         'head_of_finance',

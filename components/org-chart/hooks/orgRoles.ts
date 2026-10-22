@@ -17,6 +17,13 @@ export const ROLE_LEVELS: Record<string, number> = {
     ceo: 1,
     // Level 2: Country Executive
     country_managing_director: 2,
+    country_operations_director: 2,
+    country_finance_director: 2,
+    country_commercial_director: 2,
+    country_supply_chain_director: 2,
+    country_hr_director: 2,
+    country_technology_director: 2,
+    country_compliance_manager: 2,
     admin: 2,
     // Level 3: Corporate HQ Directorate Heads
     head_of_operations: 3,
@@ -112,7 +119,14 @@ export const ROLE_MATRIX_RANK: Record<string, number> = {
     CEO: 10,
     ceo: 10,
     country_managing_director: 11,
-    admin: 11,
+    country_operations_director: 11.1,
+    country_finance_director: 11.2,
+    country_commercial_director: 11.3,
+    country_supply_chain_director: 11.4,
+    country_hr_director: 11.5,
+    country_technology_director: 11.6,
+    country_compliance_manager: 11.7,
+    admin: 11.8,
     head_of_operations: 12,
     regional_operations_manager: 13,
 
@@ -206,22 +220,22 @@ export const getRoleDept = (role: string, empDept?: string): string => {
         
         // If role unequivocally dictates core department, prioritize core
         if (['cashier', 'sales_associate', 'stock_clerk', 'store_manager', 'shift_lead'].includes(r)) return 'store';
-        if (['picker', 'packer', 'receiver', 'driver', 'warehouse_manager'].includes(r)) return 'warehouse';
-        if (['accountant', 'head_of_finance', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'].includes(r)) return 'finance';
-        if (['head_of_hr', 'hr', 'payroll_specialist', 'talent_recruiter', 'training_coordinator', 'hr_generalist'].includes(r)) return 'hr';
-        if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_operations',].includes(r)) return 'executive';
+        if (['picker', 'packer', 'receiver', 'driver', 'warehouse_manager', 'country_supply_chain_director'].includes(r)) return 'warehouse';
+        if (['accountant', 'head_of_finance', 'country_finance_director', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'].includes(r)) return 'finance';
+        if (['head_of_hr', 'hr', 'country_hr_director', 'payroll_specialist', 'talent_recruiter', 'training_coordinator', 'hr_generalist'].includes(r)) return 'hr';
+        if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'country_operations_director', 'country_commercial_director', 'country_technology_director', 'country_compliance_manager', 'regional_operations_manager', 'head_of_operations',].includes(r)) return 'executive';
 
         return d;
     }
 
     // 2. Authoritative role-based department mapping
-    if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_operations', 'head_of_merchandising', 'regional_merchandising_manager', 'merchandising_specialist', 'store_operations_auditor'].includes(r)) return 'executive';
-    if (['head_of_finance', 'accountant', 'head_of_audit', 'auditor', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_manager'].includes(r)) return 'finance';
-    if (['head_of_hr', 'hr', 'payroll_specialist', 'talent_recruiter', 'training_coordinator', 'hr_generalist', 'regional_hr_manager'].includes(r)) return 'hr';
-    if (['head_of_procurement', 'head_of_supply_chain', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'regional_procurement_manager'].includes(r)) return 'procurement';
+    if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'country_operations_director', 'regional_operations_manager', 'head_of_operations', 'head_of_merchandising', 'regional_merchandising_manager', 'merchandising_specialist', 'store_operations_auditor'].includes(r)) return 'executive';
+    if (['head_of_finance', 'country_finance_director', 'country_compliance_manager', 'accountant', 'head_of_audit', 'auditor', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_manager'].includes(r)) return 'finance';
+    if (['head_of_hr', 'hr', 'country_hr_director', 'payroll_specialist', 'talent_recruiter', 'training_coordinator', 'hr_generalist', 'regional_hr_manager'].includes(r)) return 'hr';
+    if (['head_of_procurement', 'head_of_supply_chain', 'country_commercial_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'regional_procurement_manager'].includes(r)) return 'procurement';
     if (['store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'merchandiser', 'returns_clerk', 'pos'].includes(r)) return 'store';
-    if (['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'fleet_maintenance_supervisor', 'regional_logistics_manager'].includes(r)) return 'warehouse';
-    if (['head_of_it', 'it_support', 'security_manager', 'loss_prevention', 'regional_security_manager'].includes(r)) return 'support';
+    if (['warehouse_manager', 'country_supply_chain_director', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'fleet_maintenance_supervisor', 'regional_logistics_manager'].includes(r)) return 'warehouse';
+    if (['head_of_it', 'country_technology_director', 'it_support', 'security_manager', 'loss_prevention', 'regional_security_manager'].includes(r)) return 'support';
 
     return 'support';
 };

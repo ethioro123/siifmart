@@ -80,6 +80,35 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(cmd.levelCategory).toBe('executive');
         expect(cmd.reportsToRole).toBe('group_coo');
         expect(cmd.isManagerial).toBe(true);
+        expect(cmd.managesRoles).toContain('country_operations_director');
+        expect(cmd.managesRoles).toContain('country_finance_director');
+        expect(cmd.managesRoles).toContain('country_commercial_director');
+        expect(cmd.managesRoles).toContain('country_supply_chain_director');
+        expect(cmd.managesRoles).toContain('country_hr_director');
+        expect(cmd.managesRoles).toContain('country_technology_director');
+        expect(cmd.managesRoles).toContain('country_compliance_manager');
+    });
+
+    it('verifies Level 2 Country Functional Directors solid and dotted-line reporting structure', () => {
+        const countryRoles = [
+            { role: 'country_operations_director', dotted: 'group_coo' },
+            { role: 'country_finance_director', dotted: 'group_cfo' },
+            { role: 'country_commercial_director', dotted: 'group_cco' },
+            { role: 'country_supply_chain_director', dotted: 'group_csco' },
+            { role: 'country_hr_director', dotted: 'group_chro' },
+            { role: 'country_technology_director', dotted: 'group_cto' },
+            { role: 'country_compliance_manager', dotted: 'group_cae' }
+        ];
+
+        countryRoles.forEach(({ role, dotted }) => {
+            const meta = getRoleReportingMeta(role);
+            expect(meta.level).toBe(2);
+            expect(meta.levelCategory).toBe('director');
+            expect(meta.reportsToRole).toBe('country_managing_director');
+            expect(meta.dottedLineRole).toBe(dotted);
+            expect(meta.isManagerial).toBe(true);
+            expect(meta.managesRoles.length).toBeGreaterThan(0);
+        });
     });
 
     it('verifies Level 3 Corporate Directorates, Level 4 Regional Directors, and Level 5 Regional Department Managers', () => {

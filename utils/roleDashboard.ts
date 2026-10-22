@@ -43,6 +43,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     const isHQExecutive = [
         'group_ceo', 'group_coo', 'group_clco', 'group_cae',
         'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
+        'country_operations_director', 'country_compliance_manager',
         'head_of_operations',
     ].includes(role);
     if (isHQExecutive) {
@@ -54,6 +55,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     // 2. Level 2 - Specialized Directors & Department Heads
     switch (role) {
         case 'group_cco':
+        case 'country_commercial_director':
         case 'head_of_procurement':
         case 'buyer':
         case 'demand_planner':
@@ -62,9 +64,11 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
             return '/procurement';
 
         case 'group_csco':
+        case 'country_supply_chain_director':
             return '/wms-ops';
 
         case 'group_cfo':
+        case 'country_finance_director':
         case 'head_of_finance':
         case 'head_of_audit':
         case 'auditor':
@@ -76,6 +80,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
             return '/finance';
 
         case 'group_chro':
+        case 'country_hr_director':
         case 'head_of_hr':
         case 'hr':
         case 'hr_generalist':
@@ -91,6 +96,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
 
         case 'group_cto':
         case 'group_cio':
+        case 'country_technology_director':
         case 'head_of_it':
         case 'it_support':
         case 'security_manager':

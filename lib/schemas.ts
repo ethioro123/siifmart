@@ -9,6 +9,9 @@ export const optionalNumber = z.number().optional().nullable();
 export const UserRoleSchema = z.enum([
     'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco',
     'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
+    'country_managing_director', 'country_operations_director', 'country_finance_director',
+    'country_commercial_director', 'country_supply_chain_director', 'country_hr_director',
+    'country_technology_director', 'country_compliance_manager',
     'super_admin', 'regional_operations_manager', 'head_of_operations', 'head_of_finance',
     'head_of_hr', 'head_of_procurement', 'head_of_supply_chain', 'store_manager',
     'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',

@@ -108,6 +108,18 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     // ═══ LEVEL 2: COUNTRY EXECUTIVE (Segregation of Duties: no dock self-receiving) ═══
     country_managing_director: ADMIN_ACCESS_PERMISSIONS,
     admin: ADMIN_ACCESS_PERMISSIONS,
+    country_operations_director: HEAD_OF_OPERATIONS_PERMISSIONS,
+    country_finance_director: HEAD_OF_FINANCE_PERMISSIONS,
+    country_commercial_director: [
+        'dashboard.view', 'admin.view',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po',
+        'inventory.view', 'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
+        'sales.view', 'sales.view_reports', 'customers.view', 'settings.view'
+    ],
+    country_supply_chain_director: HEAD_OF_SUPPLY_CHAIN_PERMISSIONS,
+    country_hr_director: HEAD_OF_HR_PERMISSIONS,
+    country_technology_director: HEAD_OF_IT_PERMISSIONS,
+    country_compliance_manager: HEAD_OF_AUDIT_PERMISSIONS,
 
     // ═══ LEVEL 3: CORPORATE HQ DIRECTORATE HEADS ═══
     head_of_finance: HEAD_OF_FINANCE_PERMISSIONS,

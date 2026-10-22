@@ -23,6 +23,13 @@ export const SYSTEM_ROLES: {
    // ═══ LEVEL 2 - COUNTRY EXECUTIVE ═══
    { id: 'country_managing_director', label: 'Country Managing Director', desc: 'National Executive Leadership and Country Operations Governance', level: 2, styles: { text: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-400/10', border: 'border-purple-200 dark:border-purple-400/20', badge: 'bg-purple-100 dark:bg-purple-400/20 text-purple-700 dark:text-purple-400' } },
    { id: 'admin', label: 'Country Managing Director', desc: 'National Executive Leadership and Country Operations Governance', level: 2, styles: { text: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-400/10', border: 'border-purple-200 dark:border-purple-400/20', badge: 'bg-purple-100 dark:bg-purple-400/20 text-purple-700 dark:text-purple-400' } },
+   { id: 'country_operations_director', label: 'Country Operations Director', desc: 'National Store Network and Retail Execution', level: 2, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-100 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },
+   { id: 'country_finance_director', label: 'Country Finance Director', desc: 'National Fiscal Strategy, Tax, and Treasury Governance', level: 2, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
+   { id: 'country_commercial_director', label: 'Country Commercial Director', desc: 'National Sourcing, Vendor Alliances, and Assortment', level: 2, styles: { text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-400/10', border: 'border-amber-200 dark:border-amber-400/20', badge: 'bg-amber-100 dark:bg-amber-400/20 text-amber-700 dark:text-amber-400' } },
+   { id: 'country_supply_chain_director', label: 'Country Supply Chain Director', desc: 'National Warehousing, Fleet Logistics, and Inventory Flow', level: 2, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
+   { id: 'country_hr_director', label: 'Country HR Director', desc: 'National Workforce Strategy, Payroll, and People Governance', level: 2, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
+   { id: 'country_technology_director', label: 'Country Technology Director', desc: 'National IT Continuity, Systems, and Infrastructure', level: 2, styles: { text: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-100 dark:bg-cyan-400/10', border: 'border-cyan-200 dark:border-cyan-400/20', badge: 'bg-cyan-100 dark:bg-cyan-400/20 text-cyan-700 dark:text-cyan-400' } },
+   { id: 'country_compliance_manager', label: 'Country Compliance Manager', desc: 'Statutory Regulations, Risk Governance, and Internal Audit', level: 2, styles: { text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-100 dark:bg-rose-400/10', border: 'border-rose-200 dark:border-rose-400/20', badge: 'bg-rose-100 dark:bg-rose-400/20 text-rose-700 dark:text-rose-400' } },
 
    // ═══ LEVEL 3 - CORPORATE HQ DIRECTORATE HEADS ═══
    { id: 'head_of_operations', label: 'Head of Operations', desc: 'Enterprise Operations Directorate and Network Standards', level: 3, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-50 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },
@@ -150,6 +157,13 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'group_cae': 99,
         'country_managing_director': 98,
         'admin': 98, // Country Managing Director (National Executive below Global CEO)
+        'country_operations_director': 97,
+        'country_finance_director': 97,
+        'country_commercial_director': 97,
+        'country_supply_chain_director': 97,
+        'country_hr_director': 97,
+        'country_technology_director': 97,
+        'country_compliance_manager': 97,
 
         // Level 2: Directors & Regional ("Head of...")
         'head_of_operations': 95,
@@ -243,6 +257,9 @@ export const canViewLocation = (
     // Country Managing Director and HR/Operations leadership can see anyone in their country except Global C-Suite
     if ([
         'admin', 'country_managing_director',
+        'country_operations_director', 'country_finance_director',
+        'country_commercial_director', 'country_supply_chain_director',
+        'country_hr_director', 'country_technology_director', 'country_compliance_manager',
         'hr', 'head_of_hr',
         'head_of_operations',
     ].includes(userRole)) {
@@ -263,6 +280,7 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
     if ([
         'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
         'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+        'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_compliance_manager',
         'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager',
         'head_of_operations',
         'head_of_finance',
@@ -320,6 +338,17 @@ export const canEmployRole = (
         return !topLeadershipRoles.includes(normCandidateRole);
     }
 
+    // Country Managing Director can employ any subordinate country directors, regional managers, and staff
+    const isCountryManagingDirector = normUserRole === 'country_managing_director' || normUserRole === 'admin';
+    if (isCountryManagingDirector) {
+        const topLeadershipAndPeers = [
+            'group_ceo', 'super_admin', 'ceo', 'group_coo', 'group_cfo',
+            'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio',
+            'group_clco', 'group_cae', 'country_managing_director', 'admin'
+        ];
+        return !topLeadershipAndPeers.includes(normCandidateRole);
+    }
+
     const userHierarchy = getRoleHierarchy(userRole);
     const candidateHierarchy = getRoleHierarchy(candidateRole);
 
@@ -346,6 +375,7 @@ export const canEmployRole = (
     if (isFacilityCaptain) {
         return [
             'group_ceo', 'group_coo', 'group_csco', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+            'country_operations_director', 'country_supply_chain_director', 'country_hr_director',
             'head_of_operations',
             'head_of_supply_chain',
             'regional_operations_manager', 'regional_hr_manager',
@@ -366,6 +396,8 @@ export const canEmployRole = (
         return [
             'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
             'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+            'country_operations_director', 'country_finance_director', 'country_commercial_director',
+            'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager',
             'head_of_operations',
             'regional_operations_manager',
             'head_of_hr', 'hr',
@@ -400,6 +432,13 @@ export const MANAGERIAL_ROLES: readonly string[] = [
     'super_admin',
     'admin',
     'country_managing_director',
+    'country_operations_director',
+    'country_finance_director',
+    'country_commercial_director',
+    'country_supply_chain_director',
+    'country_hr_director',
+    'country_technology_director',
+    'country_compliance_manager',
     'CEO',
     'ceo',
     'regional_operations_manager',
