@@ -462,3 +462,7 @@
 
 ### Profile appearance control (2026-10-23)
 - User menu appearance uses labeled Device/Light/Dark buttons with a visible selected state, keyboard focus, and consistent theme tokens. Changing appearance keeps the menu open.
+
+### Profile dropdown refinement (2026-10-23)
+- Compact identity summary, expandable activity/achievements, consistent preference groups and pinned sign-out action with responsive sizing. Country controls appear only for authorized executives.
+- Close control is available on desktop and mobile; Escape closes the dropdown and returns focus to its trigger.

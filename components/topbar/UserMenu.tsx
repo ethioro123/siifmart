@@ -6,6 +6,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useData } from '../../contexts/DataContext';
 import { canSwitchCountry } from '../../utils/permissions';
 import { getCountryProfile, getRegisteredCountries, Country } from '../../utils/localization';
+import { logger } from '../../utils/logger';
 import { evaluateGeofence } from '../../utils/geofence';
 
 interface UserMenuProps {
@@ -73,7 +74,7 @@ export function UserMenu({
             window.location.reload();
          }
       } catch (err) {
-         console.error('Failed to switch market:', err);
+         logger.error('UserMenu', 'Failed to switch market', err);
          setIsSwitchingMarket(false);
       }
    };
@@ -123,24 +124,31 @@ export function UserMenu({
          {/* Dropdown Menu */}
          {isUserMenuOpen && (
             <div
-               className="fixed inset-x-2 top-[calc(env(safe-area-inset-top)+3.5rem)] z-[150] mx-auto w-auto max-w-[26rem] overflow-y-auto overscroll-contain rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] shadow-[0_20px_50px_rgba(0,0,0,0.28)] animate-in fade-in slide-in-from-top-2 max-h-[calc(100dvh-env(safe-area-inset-top)-4.25rem)] custom-scrollbar sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mx-0 sm:mt-2 sm:w-80 sm:max-h-[calc(100vh-5rem)] sm:rounded-2xl"
-               onClick={() => setIsUserMenuOpen(false)}
+               className="fixed inset-x-2 top-[calc(env(safe-area-inset-top)+3.5rem)] z-[150] mx-auto w-auto max-w-[26rem] overflow-y-auto overscroll-contain rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] shadow-[var(--shadow-lg)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 max-h-[calc(100dvh-env(safe-area-inset-top)-4.25rem)] custom-scrollbar sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mx-0 sm:mt-2 sm:w-[22rem] sm:max-h-[calc(100vh-5rem)] sm:rounded-2xl"
+               onClick={event => event.stopPropagation()}
+               onKeyDown={event => {
+                  if (event.key === 'Escape') {
+                     event.stopPropagation();
+                     setIsUserMenuOpen(false);
+                     dropdownRef.current?.querySelector('button')?.focus();
+                  }
+               }}
                role="dialog"
                aria-modal="false"
                aria-label="User menu"
             >
-                  <div className="p-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]" onClick={(e) => e.stopPropagation()}>
+                  <div className="p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-panel)]" onClick={(e) => e.stopPropagation()}>
                      <div className="flex items-start gap-3">
-                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center text-lg font-bold">
+                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center text-lg font-bold">
                            {user.avatar ? <img src={user.avatar} alt="" className="h-full w-full object-cover" /> : user.name.charAt(0).toUpperCase()}
                            <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-[var(--theme-bg-panel)] bg-emerald-500" />
                         </div>
                         <div className="min-w-0 flex-1 pt-0.5">
-                           <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-text-muted)]">Signed in as</p>
                            <p className="mt-0.5 truncate text-base font-bold text-[var(--theme-text-primary)]">{user.name}</p>
-                           <p className="mt-0.5 truncate text-xs font-medium text-[var(--theme-primary)]">{formatRole(user.role)}</p>
+                           <p className="mt-1 truncate text-xs font-medium text-[var(--theme-text-secondary)]">{formatRole(user.role)}</p>
+                           {user.email && <p className="mt-1 truncate text-xs text-[var(--theme-text-muted)]" title={user.email}>{user.email}</p>}
                         </div>
-                        <button type="button" onClick={() => setIsUserMenuOpen(false)} aria-label="Close user menu" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] sm:hidden">
+                        <button type="button" onClick={() => setIsUserMenuOpen(false)} aria-label="Close user menu" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
                            <X size={18} />
                         </button>
                      </div>
@@ -167,6 +175,12 @@ export function UserMenu({
                         );
                      })()}
 
+                     {(currentUserPoints || todayJobsTotal > 0) && (
+                        <details className="mt-4 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-3">
+                           <summary className="min-h-11 flex items-center justify-between gap-2 text-xs font-medium text-[var(--theme-text-secondary)] cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] rounded-lg">
+                              <span>Activity & achievements</span><ChevronDown size={14} aria-hidden="true" />
+                           </summary>
+                           <div className="pb-3">
                      {/* Performance Highlights */}
                      {currentUserPoints && (
                         <div className="grid grid-cols-2 gap-2.5 mt-4">
@@ -232,16 +246,20 @@ export function UserMenu({
                            </div>
                         </div>
                      )}
+                           </div>
+                        </details>
+                     )}
                   </div>
 
 
-                  <div className="p-2">
+                  <div className="p-3 space-y-1">
                      <button
                         onClick={() => { navigate('/profile'); setIsUserMenuOpen(false); }}
-                        className="w-full min-h-12 flex items-center gap-3 px-3.5 py-3 text-sm font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/15 rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="w-full min-h-12 flex items-center gap-3 px-3.5 py-3 text-sm font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                      >
                         <User size={16} />
-                        <span>My Profile</span>
+                        <span className="flex-1 text-left">My profile</span>
+                        <ChevronDown size={14} className="-rotate-90 text-[var(--theme-text-muted)]" aria-hidden="true" />
                      </button>
 
                      {user.role === 'group_ceo' && (
@@ -250,18 +268,18 @@ export function UserMenu({
                            className="w-full min-h-12 flex items-center gap-3 px-3.5 py-3 text-sm font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                            <MapPin size={16} />
-                           <span>Switch Location</span>
+                           <span>Switch location</span>
                         </button>
                      )}
 
-                     {/* Market Instance Switcher (CEO Dual Market vs Staff Locked) */}
-                     <div
-                        className="mt-3 px-1 py-3 border-t border-[var(--theme-border)]"
+                     {/* Operating country Switcher (CEO Dual Market vs Staff Locked) */}
+                     {isCeoUser && (<div
+                        className="mt-3 px-2 py-4 border-t border-[var(--theme-border)]"
                         onClick={(e) => e.stopPropagation()}
                      >
                         <div className="flex items-center justify-between mb-1.5">
-                           <p className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-widest">
-                              Market Instance
+                           <p className="text-xs font-semibold text-[var(--theme-text-secondary)]">
+                              Operating country
                            </p>
                            {isCeoUser ? (
                               isSwitchingMarket ? (
@@ -311,15 +329,15 @@ export function UserMenu({
                               </span>
                            </div>
                         )}
-                     </div>
+                     </div>)}
 
                      {/* Language Switcher */}
                      <div
-                        className="mt-3 px-1 py-3 border-t border-[var(--theme-border)]"
+                        className="mt-3 px-2 py-4 border-t border-[var(--theme-border)]"
                         onClick={(e) => e.stopPropagation()}
                      >
                         <div className="flex items-center justify-between mb-2">
-                           <p className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-widest">Display Language</p>
+                           <p className="text-xs font-semibold text-[var(--theme-text-secondary)]">Language</p>
                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-primary)]">
                               {currentMarketProfile.code}
                            </span>
@@ -339,7 +357,7 @@ export function UserMenu({
                               <select
                                  value={language}
                                  onChange={(e) => setLanguage(e.target.value as any)}
-                                 className="min-h-10 bg-transparent text-[var(--theme-text-primary)] text-sm outline-none border-none flex-1 cursor-pointer font-semibold"
+                                 className="min-h-10 !bg-transparent text-[var(--theme-text-primary)] text-sm outline-none border-none flex-1 cursor-pointer font-semibold"
                                  title="Select Language"
                               >
                                  {availableLanguages.map(lang => (
@@ -352,7 +370,7 @@ export function UserMenu({
                         )}
                      </div>
                       {/* Theme and Refresh shortcuts */}
-                      <div className="mt-2 pt-2 border-t border-[var(--theme-border)] space-y-1">
+                      <div className="mt-2 px-1 pt-3 border-t border-[var(--theme-border)] space-y-2">
                          <ThemeSelector variant="menu" className="w-full" />
 
                          {onRefresh && (
@@ -362,19 +380,19 @@ export function UserMenu({
                                className="w-full min-h-12 flex items-center gap-3 px-3.5 py-3 text-sm font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
                                <RefreshCw size={16} />
-                               <span>Reload Data</span>
+                               <span>Refresh data</span>
                             </button>
                          )}
                       </div>
                    </div>
 
-                  <div className="p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] border-t border-[var(--theme-border)] sm:pb-3">
+                  <div className="sticky bottom-0 bg-[var(--theme-bg-panel)] p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] border-t border-[var(--theme-border)] sm:pb-3">
                      <button
                         onClick={() => { logout(); setIsUserMenuOpen(false); }}
                         className="w-full min-h-12 flex items-center gap-3 px-3.5 py-3 text-sm font-semibold text-red-500 dark:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                      >
                         <LogOut size={16} />
-                        <span>Sign Out</span>
+                        <span>Sign out</span>
                      </button>
                   </div>
                </div>
