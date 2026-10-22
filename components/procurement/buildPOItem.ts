@@ -189,7 +189,7 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         ...customAttributes,
         identity: {
             ...customAttributes.identity,
-            subcategory: customAttributes.identity?.subcategory || specGroup.label || cat,
+            subcategory: customAttributes.identity?.subcategory || specGroup.title || cat,
         },
         physical: {
             ...customAttributes.physical,
