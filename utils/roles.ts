@@ -43,6 +43,7 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'group_coo': 99,
         'group_cfo': 99,
         'group_cco': 99,
+        'group_cmo': 99,
         'group_csco': 99,
         'group_chro': 99,
         'group_cto': 99,
@@ -78,6 +79,8 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'regional_hr_manager': 81,
         'regional_logistics_manager': 81,
         'regional_security_manager': 81,
+        'regional_it_manager': 81,
+        'regional_compliance_manager': 81,
 
         // Level 3: Site Managers & Department Heads
         'store_manager': 80,
@@ -103,6 +106,8 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'packing_supervisor': 56,
         'dispatch_supervisor': 56,
         'returns_waste_supervisor': 56,
+        'inbound_operations_supervisor': 56,
+        'outbound_operations_supervisor': 56,
         'store_supervisor': 55,
         'shift_lead': 55,
         'receiving_team_leader': 50,
@@ -117,6 +122,7 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'treasury_officer': 38,
         'tax_compliance_officer': 38,
         'credit_control_officer': 36,
+        'cash_office_officer': 36,
         'accountant': 35,
         'data_analyst': 35,
         'training_coordinator': 35,
@@ -155,6 +161,7 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'returns_clerk': 22,
         'driver': 20,
         'forklift_operator': 20,
+        'warehouse_administrator': 24,
     };
     return hierarchy[role] || 0;
 };

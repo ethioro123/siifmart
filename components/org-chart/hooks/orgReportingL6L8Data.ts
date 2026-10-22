@@ -56,7 +56,8 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         dottedLineLabel: 'Regional Supply Chain Manager (Regional Operations & Wave Governance)',
         managesRoles: [
             'putaway_replenishment_supervisor', 'picking_supervisor',
-            'packing_supervisor', 'receiving_supervisor'
+            'packing_supervisor', 'receiving_supervisor',
+            'inbound_operations_supervisor', 'outbound_operations_supervisor'
         ],
         isManagerial: true
     },
@@ -237,7 +238,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Assistant Store Manager (Store Operations)',
         dottedLineRole: 'regional_finance_manager',
         dottedLineLabel: 'Regional Finance Manager (Cash Office, Till Limits & Variance Auditing)',
-        managesRoles: ['cashier', 'pos'],
+        managesRoles: ['cashier', 'pos', 'cash_office_officer'],
         isManagerial: true
     },
     receiving_supervisor: {
@@ -309,7 +310,31 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Transport & Fleet Manager',
         dottedLineRole: 'warehouse_manager',
         dottedLineLabel: 'Warehouse Manager (Outbound Dock Staging & Carrier Manifests)',
-        managesRoles: ['dispatch_team_leader', 'dispatch_operator', 'driver'],
+        managesRoles: ['dispatch_team_leader', 'dispatch_operator', 'driver', 'warehouse_administrator'],
+        isManagerial: true
+    },
+    inbound_operations_supervisor: {
+        role: 'inbound_operations_supervisor',
+        level: 8,
+        levelCategory: 'supervisor',
+        levelTag: 'L8 Inbound Supervisor',
+        reportsToRole: 'warehouse_operations_manager',
+        reportsToLabel: 'Warehouse Operations Manager',
+        dottedLineRole: 'warehouse_manager',
+        dottedLineLabel: 'Warehouse Manager (Facility Inbound Coordination)',
+        managesRoles: ['receiving_team_leader', 'receiving_operator', 'receiver', 'inbound_qc_inspector', 'putaway_operator'],
+        isManagerial: true
+    },
+    outbound_operations_supervisor: {
+        role: 'outbound_operations_supervisor',
+        level: 8,
+        levelCategory: 'supervisor',
+        levelTag: 'L8 Outbound Supervisor',
+        reportsToRole: 'warehouse_operations_manager',
+        reportsToLabel: 'Warehouse Operations Manager',
+        dottedLineRole: 'warehouse_manager',
+        dottedLineLabel: 'Warehouse Manager (Facility Outbound Staging & Manifests)',
+        managesRoles: ['picking_team_leader', 'packing_team_leader', 'dispatch_team_leader', 'picker', 'packer', 'dispatch_operator', 'driver'],
         isManagerial: true
     },
     returns_waste_supervisor: {

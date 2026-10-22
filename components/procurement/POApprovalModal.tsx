@@ -10,7 +10,7 @@ import {
 interface POApprovalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'approve' | 'reject';
+  mode: 'approve' | 'reject' | 'finance';
   po: PurchaseOrder;
   onConfirm: (reasonCode: string, notes: string) => Promise<void>;
   isSubmitting: boolean;
@@ -108,11 +108,12 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
   if (!isOpen) return null;
 
   const isApprove = mode === 'approve';
+  const isFinance = mode === 'finance';
   const reasons = isApprove ? APPROVAL_REASONS : REJECTION_REASONS;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onConfirm(selectedReason, notes.trim());
+    await onConfirm(isFinance ? 'FINANCE_CLEARANCE' : selectedReason, notes.trim());
   };
 
   return (
@@ -125,11 +126,11 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                 : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
             }`}>
-              {isApprove ? <ShieldCheck size={20} /> : <XCircle size={20} />}
+              {isApprove || isFinance ? <ShieldCheck size={20} /> : <XCircle size={20} />}
             </div>
             <div>
               <h3 className="text-base font-bold tracking-tight text-[var(--theme-text-primary)]">
-                {isApprove ? 'Authorize Purchase Order' : 'Reject Purchase Order'}
+                {isFinance ? 'Clear PO Budget and Terms' : isApprove ? 'Authorize Purchase Order' : 'Reject Purchase Order'}
               </h3>
               <p className="text-xs text-[var(--theme-text-secondary)] font-mono font-medium">
                 {formatPONumber(po)} • {po.currency} {po.totalAmount.toLocaleString()}
@@ -146,7 +147,7 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          {!isFinance && <div>
             <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">
               Structured Reason Code *
             </label>
@@ -184,15 +185,16 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
                 );
               })}
             </div>
-          </div>
+          </div>}
 
           <div>
             <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">
-              Supervisory Notes (Optional)
+              {isFinance ? 'Finance Clearance Reason *' : 'Supervisory Notes (Optional)'}
             </label>
             <textarea
               rows={2}
-              placeholder={isApprove ? 'e.g. Verified dock capacity and price schedule...' : 'e.g. Request buyer to re-negotiate case pack discount...'}
+              placeholder={isFinance ? 'Explain the budget and payment terms review...' : isApprove ? 'e.g. Verified dock capacity and price schedule...' : 'e.g. Request buyer to re-negotiate case pack discount...'}
+              required={isFinance}
               value={notes}
               onChange={e => setNotes(e.target.value)}
               className="w-full p-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] resize-none"
@@ -218,8 +220,8 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
               }`}
             >
               {isSubmitting
-                ? (isApprove ? 'Authorizing...' : 'Rejecting...')
-                : (isApprove ? 'Confirm Approval' : 'Confirm Rejection')}
+                ? (isFinance ? 'Recording clearance...' : isApprove ? 'Authorizing...' : 'Rejecting...')
+                : (isFinance ? 'Record Finance Clearance' : isApprove ? 'Confirm Approval' : 'Confirm Rejection')}
             </button>
           </div>
         </form>

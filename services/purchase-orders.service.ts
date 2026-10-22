@@ -28,6 +28,7 @@ export const purchaseOrdersService = {
     getMetrics,
     getById,
     approve: purchaseOrdersApprovalService.approve,
+    clearFinance: purchaseOrdersApprovalService.clearFinance,
     reject: purchaseOrdersApprovalService.reject,
 
     async create(po: Omit<PurchaseOrder, 'created_at' | 'updated_at'>, items: any[]) {

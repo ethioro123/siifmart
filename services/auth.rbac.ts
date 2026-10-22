@@ -43,6 +43,9 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     group_cae: [
         'dashboard', 'admin', 'regional-ops', 'finance', 'sales', 'inventory', 'pos', 'pricing', 'warehouse', 'settings', 'profile'
     ],
+    group_cmo: [
+        'dashboard', 'admin', 'sales', 'pricing', 'procurement', 'customers', 'settings', 'profile'
+    ],
     super_admin: ['*'], // Global CEO / Owner - Full Access to EVERYTHING
     CEO: ['*'],
     ceo: ['*'],
@@ -135,6 +138,12 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     regional_security_manager: [
         'dashboard', 'regional-ops', 'settings', 'pos', 'inventory', 'sales', 'employees', 'profile'
     ],
+    regional_it_manager: [
+        'dashboard', 'regional-ops', 'settings', 'employees', 'profile'
+    ],
+    regional_compliance_manager: [
+        'dashboard', 'regional-ops', 'sales', 'inventory', 'pos', 'pricing', 'settings', 'profile'
+    ],
 
     // ═══ LEVEL 6 - FACILITY CAPTAINS (STORE, WAREHOUSE & DISPATCH GMs) ═══
     store_manager: [
@@ -180,6 +189,8 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     picking_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
     packing_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
     dispatch_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
+    inbound_operations_supervisor: ['dashboard', 'warehouse', 'inventory', 'procurement', 'employees', 'profile'],
+    outbound_operations_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
     returns_waste_supervisor: ['dashboard', 'warehouse', 'inventory', 'customers', 'sales', 'employees', 'profile'],
     fleet_maintenance_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
     receiving_team_leader: ['dashboard', 'warehouse', 'inventory', 'procurement', 'profile'],
@@ -209,6 +220,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     store_operations_auditor: ['dashboard', 'regional-ops', 'pos', 'inventory', 'pricing', 'sales', 'profile'],
     data_analyst: ['dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'profile'],
     loss_prevention: ['dashboard', 'inventory', 'sales', 'profile'],
+    cash_office_officer: ['dashboard', 'pos', 'finance', 'sales', 'profile'],
 
     // ═══ LEVEL 10 - FRONTLINE EXECUTION STAFF ═══
     cashier: ['dashboard', 'pos', 'profile'],
@@ -229,6 +241,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     driver: ['dashboard', 'warehouse', 'inventory', 'profile'],
     forklift_operator: ['dashboard', 'warehouse', 'inventory', 'profile'],
     fleet_mechanic: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    warehouse_administrator: ['dashboard', 'warehouse', 'inventory', 'profile'],
     customer_service: ['dashboard', 'customers', 'sales', 'profile'],
 
     // ═══ LEGACY ALIASES (backwards compatibility) ═══
@@ -257,12 +270,13 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
 export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
     const basePermissions = ROLE_PERMISSIONS[userRole] || [];
     if (basePermissions.includes('*') || [
-        'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
+        'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'group_cmo',
         'admin', 'country_managing_director',
         'country_operations_director', 'country_finance_director', 'country_commercial_director',
         'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager',
         'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager',
         'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
+        'regional_it_manager', 'regional_compliance_manager',
         'head_of_operations',
         'head_of_finance',
         'head_of_hr',

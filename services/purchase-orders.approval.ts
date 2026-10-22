@@ -7,6 +7,15 @@ import { wmsJobsService } from './wms-jobs.service';
 import { regionsService } from './regions.service';
 
 export const purchaseOrdersApprovalService = {
+  async clearFinance(poId: string, reason: string) {
+    if (!reason.trim()) throw new Error('A finance clearance reason is required.');
+    const { error } = await supabase.rpc('clear_purchase_order_finance', {
+      p_po_id: poId,
+      p_reason: reason.trim()
+    });
+    if (error) throw new Error(error.message || 'Finance clearance was rejected.');
+    return getById(poId);
+  },
   /**
    * Approves a Purchase Order using Zero-Trust 4-Eyes Governance.
    * Calls the PostgreSQL RPC `approve_purchase_order` (SECURITY DEFINER).
@@ -23,27 +32,16 @@ export const purchaseOrdersApprovalService = {
       throw new Error(`Cannot approve PO with status "${currentPO.status}". Must be Draft or Pending.`);
     }
 
-    if (![
-      'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
-      'head_of_procurement',
-      'head_of_finance',
-      'head_of_operations',
-      'regional_operations_manager',
-      'regional_procurement_manager',
-      'regional_finance_manager',
-    ].includes(approverRole)) {
-      throw new Error('Purchase order approval requires a procurement lead or authorized executive management role.');
+    if (!['super_admin', 'head_of_procurement', 'regional_procurement_manager'].includes(approverRole)) {
+      throw new Error('Final purchase order approval requires a procurement lead.');
     }
 
     // 4-Eyes rule: Creator cannot approve their own PO
-    if (!['super_admin', 'CEO', 'ceo'].includes(approverRole)) {
-      const creatorName = currentPO.createdBy?.toLowerCase().trim();
-      const requesterName = currentPO.requestedBy?.toLowerCase().trim();
-      const approverLower = approverName.toLowerCase().trim();
-
-      if ((creatorName && creatorName === approverLower) || (requesterName && requesterName === approverLower)) {
-        throw new Error('Zero-Trust 4-Eyes Violation: Self-approval is strictly prohibited. The creator of a purchase order cannot approve it.');
-      }
+    const creatorName = currentPO.createdBy?.toLowerCase().trim();
+    const requesterName = currentPO.requestedBy?.toLowerCase().trim();
+    const approverLower = approverName.toLowerCase().trim();
+    if ((creatorName && creatorName === approverLower) || (requesterName && requesterName === approverLower)) {
+      throw new Error('The creator or requester cannot approve their own purchase order.');
     }
 
     // Mandatory structured reason code
@@ -53,35 +51,24 @@ export const purchaseOrdersApprovalService = {
 
     // Dynamic Regional Autonomous PO Limit Check
     const poRegionCode = currentPO.regionCode || (currentPO as any).region_code;
-    let isEscalatedToHq = Boolean(currentPO.requiresHqApproval || (currentPO as any).requires_hq_approval);
-
     if (poRegionCode) {
       const region = await regionsService.getRegionByCode(poRegionCode);
-      const autonomousLimit = region?.autonomous_po_limit ?? 150000;
+      if (!region || region.status !== 'active' || region.autonomous_po_limit == null) {
+        throw new Error('The region has no active configured PO approval limit.');
+      }
+      const autonomousLimit = Number(region.autonomous_po_limit);
       if (currentPO.totalAmount > autonomousLimit) {
-        isEscalatedToHq = true;
-        const isRegionalRole = [
-          'regional_operations_manager',
-          'regional_procurement_manager',
-          'regional_finance_manager',
-        ].includes(approverRole);
-        const isHqRole = [
-          'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
-          'head_of_procurement',
-          'head_of_finance',
-          'head_of_operations',
-        ].includes(approverRole);
-
-        if (isRegionalRole && !isHqRole) {
-          throw new Error(
-            `Autonomous Cap Exceeded: Order total (${currentPO.totalAmount.toLocaleString()} ${currentPO.currency || ''}) exceeds your region's autonomous limit of ${autonomousLimit.toLocaleString()} ${currentPO.currency || ''}. This order requires National HQ sign-off.`
-          );
+        if (approverRole === 'regional_procurement_manager') {
+          throw new Error('This order exceeds the configured regional PO limit and requires HQ approval.');
+        }
+        if (!currentPO.finance_cleared_at) {
+          throw new Error('HQ finance clearance is required before approving this order.');
         }
       }
     }
 
     // 2. Execute via Server-Side RPC
-    const { data: rpcResult, error: rpcError } = await supabase.rpc('approve_purchase_order', {
+    const { error: rpcError } = await supabase.rpc('approve_purchase_order', {
       p_po_id: poId,
       p_approver_id: approverId,
       p_approver_name: approverName,
@@ -91,61 +78,7 @@ export const purchaseOrdersApprovalService = {
       p_gps_coords: gpsCoords || null
     });
 
-    if (rpcError) {
-      // If RPC is missing on DB, fall back to atomic direct update + tamper-proof system_logs
-      if (rpcError.code === '42883' || rpcError.message?.includes('function public.approve_purchase_order') || rpcError.message?.includes('does not exist')) {
-        logger.warn('PurchaseOrdersApproval', 'approve_purchase_order RPC not found, falling back to direct update', { error: String(rpcError.message) });
-        
-        const approvalTag = isEscalatedToHq
-          ? `\n[APPROVED_BY:${approverName} (${approverRole}):${new Date().toISOString()} REASON:${reasonCode} (NATIONAL_HQ_ESCALATION)]`
-          : `\n[APPROVED_BY:${approverName} (${approverRole}):${new Date().toISOString()} REASON:${reasonCode}]`;
-        const updatedNotes = (currentPO.notes || '') + approvalTag + (notes ? `\n[APPROVAL_NOTE: ${notes}]` : '');
-
-        const updatePayload: any = {
-            status: 'Approved',
-            approved_by: approverName,
-            approved_at: new Date().toISOString(),
-            approver_role: approverRole,
-            approver_employee_id: approverId,
-            approver_gps: gpsCoords || null,
-            approval_reason_code: reasonCode,
-            approval_notes: notes,
-            notes: updatedNotes,
-            updated_at: new Date().toISOString(),
-            requires_hq_approval: false
-        };
-
-        if (isEscalatedToHq) {
-            updatePayload.hq_approved_by = approverName;
-            updatePayload.hq_approved_at = new Date().toISOString();
-        }
-
-        const { error: updateError } = await supabase
-          .from('purchase_orders')
-          .update(updatePayload)
-          .eq('id', poId);
-
-        if (updateError) throw updateError;
-
-        await systemLogsService.create({
-          user_name: approverName,
-          action: 'PURCHASE_ORDER_APPROVED',
-          module: 'Procurement',
-          details: JSON.stringify({
-            po_id: poId,
-            po_number: currentPO.poNumber || currentPO.id,
-            total_amount: currentPO.totalAmount,
-            currency: currentPO.currency,
-            approver_role: approverRole,
-            reason_code: reasonCode,
-            notes,
-            gps: gpsCoords
-          })
-        });
-      } else {
-        throw new Error(rpcError.message || 'Server rejected PO approval');
-      }
-    }
+    if (rpcError) throw new Error(rpcError.message || 'Server rejected PO approval');
 
     // 3. Auto-Trigger WMS Inbound Receiving Job for the approved PO
     let jobCreationError: Error | null = null;

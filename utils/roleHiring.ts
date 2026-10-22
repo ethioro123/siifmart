@@ -21,13 +21,13 @@ export const canEmployRole = (
     // 2. Global Level 1 C-Suite Executives can employ subordinate roles in their vertical domain
     const isLevelOneCSuite = [
         'group_coo', 'group_cfo', 'group_cco', 'group_csco',
-        'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae'
+        'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'group_cmo'
     ].includes(normUserRole);
     if (isLevelOneCSuite) {
         const topLeadershipRoles = [
             'group_ceo', 'super_admin', 'ceo', 'group_coo', 'group_cfo',
             'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio',
-            'group_clco', 'group_cae'
+            'group_clco', 'group_cae', 'group_cmo'
         ];
         return !topLeadershipRoles.includes(normCandidateRole);
     }
@@ -38,7 +38,7 @@ export const canEmployRole = (
         const topLeadershipAndPeers = [
             'group_ceo', 'super_admin', 'ceo', 'group_coo', 'group_cfo',
             'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio',
-            'group_clco', 'group_cae', 'country_managing_director', 'admin'
+            'group_clco', 'group_cae', 'group_cmo', 'country_managing_director', 'admin'
         ];
         return !topLeadershipAndPeers.includes(normCandidateRole);
     }
@@ -85,11 +85,13 @@ export const canEmployRole = (
         'regional_finance_manager',
         'regional_hr_manager',
         'regional_logistics_manager',
-        'regional_security_manager'
+        'regional_security_manager',
+        'regional_it_manager',
+        'regional_compliance_manager'
     ].includes(candidateRole as string);
     if (isRegionalDepartmentManager) {
         return [
-            'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
+            'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'group_cmo',
             'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
             'country_operations_director', 'country_finance_director', 'country_commercial_director',
             'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager',

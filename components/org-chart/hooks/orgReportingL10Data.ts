@@ -266,5 +266,17 @@ export const L10_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         dottedLineLabel: 'Transport & Fleet Manager (Roadworthiness Signoff)',
         managesRoles: [],
         isManagerial: false
+    },
+    warehouse_administrator: {
+        role: 'warehouse_administrator',
+        level: 10,
+        levelCategory: 'specialist',
+        levelTag: 'L10 Manifest & Documentation',
+        reportsToRole: 'dispatch_supervisor',
+        reportsToLabel: 'Dispatch Supervisor',
+        dottedLineRole: 'warehouse_operations_manager',
+        dottedLineLabel: 'Warehouse Operations Manager (Document Control & Manifest Audit)',
+        managesRoles: [],
+        isManagerial: false
     }
 };

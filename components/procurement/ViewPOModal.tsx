@@ -15,6 +15,7 @@ import { POPrintView, generatePOHTML } from './POPrintView';
 import { printHtmlContent } from '../../utils/printHelper';
 import { logger } from '../../utils/logger';
 import { POApprovalModal } from './POApprovalModal';
+import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
 
 interface ViewPOModalProps {
     isOpen: boolean;
@@ -29,7 +30,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     const { user, showToast } = useStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
-    const [approvalModal, setApprovalModal] = useState<{ isOpen: boolean; mode: 'approve' | 'reject' }>({
+    const [approvalModal, setApprovalModal] = useState<{ isOpen: boolean; mode: 'approve' | 'reject' | 'finance' }>({
         isOpen: false,
         mode: 'approve'
     });
@@ -46,34 +47,18 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
     if (!po) return null;
 
-    const poRegionCode = po.regionCode || (po as any).region_code;
-    const poRegion = poRegionCode ? regions.find(r => r.code === poRegionCode) : undefined;
-    const autonomousLimit = poRegion?.autonomous_po_limit ?? 150000;
-    const isExceedingAutonomous = Boolean(poRegionCode && po.totalAmount > autonomousLimit);
-
-    const isCEO = user?.role === 'super_admin' || user?.role === 'CEO' || user?.role === 'ceo';
-    const isProcurementManager = ['head_of_procurement', 'regional_procurement_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '');
-    const isHQExecutive = isCEO || ['country_managing_director', 'admin'].includes(user?.role || '') || ['head_of_finance',].includes(user?.role || '') || isProcurementManager;
-    const isRegionalRole = [
-        'regional_operations_manager',
-        'regional_procurement_manager',
-        'regional_finance_manager',
-    ].includes(user?.role || '');
-    const isOperationalDirector = isRegionalRole || ['head_of_operations',].includes(user?.role || '');
-    const isAuthorizedApprover = isExceedingAutonomous
-        ? isHQExecutive
-        : (isProcurementManager || user?.role === 'head_of_finance' || user?.role === 'admin' || isCEO || isOperationalDirector);
-
-    // Zero-Trust 4-Eyes Check: Creator cannot approve their own PO (Captain Owns the Ship Doctrine)
-    const isCreator = Boolean(
-        user?.name && po.createdBy && user.name.toLowerCase().trim() === po.createdBy.toLowerCase().trim()
-    );
-    const canApprove = isAuthorizedApprover && (!isCreator || isCEO);
+    const { limit: autonomousLimit, hasConfiguredLimit, needsFinanceClearance: isExceedingAutonomous,
+        financeCleared, isCreator, canApprove, canClearFinance } = getPoApprovalPolicy({
+        po, role: user?.role, actorName: user?.name, regions, sites
+    });
+    const isCEO = user?.role === 'super_admin';
+    const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager',
+        'regional_finance_manager', 'head_of_operations'].includes(user?.role || '');
     const canFullDelete = isCEO || isOperationalDirector;
 
     const handleOpenApprove = () => {
-        if (isCreator && !isCEO) {
-            showToast('Zero-Trust Violation: You cannot approve a PO you created yourself.', 'error');
+        if (!canApprove) {
+            showToast('This purchase order is not ready for your approval.', 'error');
             return;
         }
         setApprovalModal({ isOpen: true, mode: 'approve' });
@@ -96,6 +81,9 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                     notes: notes || 'Approved via PO Inspector modal'
                 });
                 showToast(`PO ${formatPONumber(po)} approved successfully`, 'success');
+            } else if (approvalModal.mode === 'finance') {
+                await purchaseOrdersService.clearFinance(po.id, notes);
+                showToast(`Finance clearance recorded for PO ${formatPONumber(po)}`, 'success');
             } else {
                 await purchaseOrdersService.reject({
                     poId: po.id,

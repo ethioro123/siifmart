@@ -18,6 +18,7 @@ import {
     HEAD_OF_MERCHANDISING_PERMISSIONS,
     HEAD_OF_IT_PERMISSIONS
 } from './permissions.matrix-base';
+import { FRONTLINE_PERMISSIONS } from './permissions.matrix-frontline';
 
 export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     // ═══ LEVEL 1: GLOBAL EXECUTIVE ═══
@@ -25,6 +26,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     group_coo: FULL_ACCESS_PERMISSIONS,
     group_cfo: FULL_ACCESS_PERMISSIONS,
     group_cco: FULL_ACCESS_PERMISSIONS,
+    group_cmo: FULL_ACCESS_PERMISSIONS,
     group_csco: FULL_ACCESS_PERMISSIONS,
     group_chro: FULL_ACCESS_PERMISSIONS,
     group_cto: FULL_ACCESS_PERMISSIONS,
@@ -107,6 +109,8 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'inventory.view',
         'employees.view', 'employees.manage_attendance'
     ],
+    regional_it_manager: HEAD_OF_IT_PERMISSIONS,
+    regional_compliance_manager: HEAD_OF_AUDIT_PERMISSIONS,
 
     // ═══ LEVEL 6: FACILITY CAPTAINS (Store & Warehouse Command) ═══
     store_manager: [
@@ -254,6 +258,19 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'inventory.view',
         'employees.view', 'employees.manage_attendance'
     ],
+    inbound_operations_supervisor: [
+        'dashboard.view',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.putaway', 'warehouse.count',
+        'inventory.view', 'inventory.count',
+        'procurement.view', 'procurement.receive',
+        'employees.view', 'employees.manage_attendance'
+    ],
+    outbound_operations_supervisor: [
+        'dashboard.view',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.count',
+        'inventory.view', 'inventory.count',
+        'employees.view', 'employees.manage_attendance'
+    ],
     returns_waste_supervisor: [
         'dashboard.view',
         'warehouse.view', 'warehouse.view_tasks',
@@ -366,82 +383,13 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     loss_prevention: [
         'dashboard.view', 'sales.view', 'sales.view_reports', 'settings.view_logs'
     ],
+    cash_office_officer: [
+        'dashboard.view',
+        'pos.view',
+        'finance.view', 'finance.reconcile_drawer',
+        'sales.view', 'sales.view_reports'
+    ],
 
-    // ═══ LEVEL 10: FRONTLINE STORE & WAREHOUSE STAFF ═══
-    cashier: [
-        'dashboard.view', 'pos.view', 'pos.create_sale', 'customers.view'
-    ],
-    sales_associate: [
-        'dashboard.view', 'pos.view', 'pos.create_sale', 'customers.view', 'customers.create'
-    ],
-    pos: [
-        'dashboard.view', 'pos.view', 'pos.create_sale', 'pos.hold_order', 'customers.view', 'customers.create'
-    ],
-    store_associate: [
-        'dashboard.view', 'pos.view', 'pos.create_sale', 'inventory.view', 'customers.view', 'customers.create'
-    ],
-    merchandiser: [
-        'dashboard.view', 'inventory.view', 'inventory.count', 'pricing.view', 'pricing.create_promo'
-    ],
-    inventory_specialist: [
-        'dashboard.view', 'inventory.view', 'inventory.count', 'inventory.adjust', 'inventory.transfer',
-        'warehouse.view', 'warehouse.view_tasks', 'warehouse.count'
-    ],
-    customer_service: [
-        'dashboard.view', 'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
-        'sales.view', 'sales.refund'
-    ],
-    stock_clerk: [
-        'dashboard.view', 'inventory.view', 'inventory.count', 'warehouse.view'
-    ],
-    picker: [
-        'dashboard.view', 'warehouse.view', 'warehouse.pick', 'warehouse.receive', 'warehouse.pack', 'warehouse.putaway', 'inventory.view'
-    ],
-    packer: [
-        'dashboard.view', 'warehouse.view', 'warehouse.pack', 'warehouse.receive', 'warehouse.pick', 'warehouse.putaway', 'inventory.view'
-    ],
-    receiver: [
-        'dashboard.view', 'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.putaway',
-        'inventory.view', 'procurement.receive'
-    ],
-    receiving_operator: [
-        'dashboard.view', 'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.putaway',
-        'inventory.view', 'procurement.receive'
-    ],
-    putaway_operator: [
-        'dashboard.view', 'warehouse.view', 'warehouse.putaway', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack',
-        'inventory.view'
-    ],
-    replenishment_operator: [
-        'dashboard.view', 'warehouse.view', 'warehouse.putaway', 'warehouse.pick', 'warehouse.pack', 'warehouse.receive',
-        'inventory.view', 'inventory.transfer'
-    ],
-    inventory_controller: [
-        'dashboard.view', 'inventory.view', 'inventory.count', 'inventory.adjust', 'inventory.transfer',
-        'warehouse.view', 'warehouse.view_tasks', 'warehouse.count'
-    ],
-    stock_counter: [
-        'dashboard.view', 'inventory.view', 'inventory.count', 'warehouse.view', 'warehouse.count'
-    ],
-    dispatch_operator: [
-        'dashboard.view', 'warehouse.view', 'warehouse.dispatch', 'warehouse.pack', 'warehouse.pick', 'warehouse.receive', 'warehouse.putaway',
-        'inventory.view'
-    ],
-    returns_operator: [
-        'dashboard.view', 'warehouse.view', 'warehouse.receive', 'warehouse.putaway',
-        'inventory.view', 'customers.view', 'sales.refund'
-    ],
-    returns_clerk: [
-        'dashboard.view', 'warehouse.view', 'inventory.view',
-        'customers.view', 'customers.view_history', 'sales.refund'
-    ],
-    driver: [
-        'dashboard.view', 'warehouse.view', 'warehouse.dispatch', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.putaway'
-    ],
-    forklift_operator: [
-        'dashboard.view', 'warehouse.view', 'warehouse.putaway', 'inventory.view'
-    ],
-    fleet_mechanic: [
-        'dashboard.view', 'warehouse.view', 'inventory.view'
-    ]
+    // ═══ LEVEL 10: FRONTLINE STORE & WAREHOUSE STAFF (Extracted to permissions.matrix-frontline.ts) ═══
+    ...FRONTLINE_PERMISSIONS
 };

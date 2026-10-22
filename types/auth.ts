@@ -1,6 +1,6 @@
 export type UserRole =
   // Level 1 - Global Executive
-  | 'group_ceo' | 'group_coo' | 'group_cfo' | 'group_cco' | 'group_csco'
+  | 'group_ceo' | 'group_coo' | 'group_cfo' | 'group_cco' | 'group_cmo' | 'group_csco'
   | 'group_chro' | 'group_cto' | 'group_cio' | 'group_clco' | 'group_cae'
   | 'super_admin' | 'CEO' | 'ceo'
   // Level 2 - Country Executive
@@ -20,6 +20,7 @@ export type UserRole =
   | 'regional_procurement_manager' | 'regional_finance_manager' | 'regional_hr_manager'
   | 'regional_merchandising_manager'
   | 'regional_logistics_manager' | 'regional_security_manager'
+  | 'regional_it_manager' | 'regional_compliance_manager'
   // Level 6 - Facility Captains
   | 'store_manager' | 'warehouse_manager'
   // Level 7 - Functional & Department Managers
@@ -33,15 +34,17 @@ export type UserRole =
   | 'inventory_control_supervisor' | 'putaway_replenishment_supervisor'
   | 'picking_supervisor' | 'packing_supervisor' | 'dispatch_supervisor'
   | 'returns_waste_supervisor' | 'fleet_maintenance_supervisor'
+  | 'inbound_operations_supervisor' | 'outbound_operations_supervisor'
   | 'receiving_team_leader' | 'picking_team_leader' | 'packing_team_leader'
   | 'dispatch_team_leader'
   // Level 9 - Corporate, Audit & Planning Specialists
   | 'store_operations_auditor' | 'auditor' | 'payroll_specialist'
   | 'treasury_officer' | 'tax_compliance_officer' | 'credit_control_officer'
-  | 'accountant' | 'data_analyst' | 'training_coordinator' | 'talent_recruiter'
-  | 'hr_generalist' | 'merchandising_specialist' | 'customs_import_specialist'
-  | 'it_support' | 'dispatcher' | 'buyer' | 'demand_planner'
-  | 'replenishment_planner' | 'inbound_qc_inspector' | 'loss_prevention'
+  | 'cash_office_officer' | 'accountant' | 'data_analyst' | 'training_coordinator'
+  | 'talent_recruiter' | 'hr_generalist' | 'merchandising_specialist'
+  | 'customs_import_specialist' | 'it_support' | 'dispatcher' | 'buyer'
+  | 'demand_planner' | 'replenishment_planner' | 'inbound_qc_inspector'
+  | 'loss_prevention'
   // Level 10 - Frontline Store, Warehouse & Fleet Staff
   | 'cashier' | 'store_associate' | 'sales_associate' | 'pos' | 'merchandiser'
   | 'inventory_specialist' | 'customer_service' | 'stock_clerk'
@@ -49,7 +52,7 @@ export type UserRole =
   | 'inventory_controller' | 'stock_counter' | 'dispatch_operator'
   | 'returns_operator' | 'fleet_mechanic'
   | 'picker' | 'packer' | 'receiver' | 'returns_clerk'
-  | 'driver' | 'forklift_operator'
+  | 'driver' | 'forklift_operator' | 'warehouse_administrator'
   // Legacy roles (for backwards compatibility during migration)
   | 'hr';
 
@@ -75,6 +78,8 @@ export interface User {
   scopeLevel?: 'HQ' | 'REGIONAL';
   scope_level?: 'HQ' | 'REGIONAL';
   loginLocation?: string;
+  reports_to_employee_id?: string;
+  functional_manager_employee_id?: string;
 }
 
 export interface StoreContextType {

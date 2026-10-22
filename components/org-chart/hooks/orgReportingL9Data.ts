@@ -225,5 +225,17 @@ export const L9_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         dottedLineLabel: 'Head of Operations (POS Terminal Uptime)',
         managesRoles: [],
         isManagerial: false
+    },
+    cash_office_officer: {
+        role: 'cash_office_officer',
+        level: 9,
+        levelCategory: 'specialist',
+        levelTag: 'L9 Cash Office Control',
+        reportsToRole: 'pos_supervisor',
+        reportsToLabel: 'POS Supervisor (Front-of-House Lead)',
+        dottedLineRole: 'regional_finance_manager',
+        dottedLineLabel: 'Regional Finance Manager (Cash Auditing & Safe Reconciliation)',
+        managesRoles: [],
+        isManagerial: false
     }
 };

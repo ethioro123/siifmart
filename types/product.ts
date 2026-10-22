@@ -369,6 +369,18 @@ export interface PurchaseOrder {
   hq_approved_by?: string;
   hqApprovedAt?: string;
   hq_approved_at?: string;
+  financeClearedAt?: string;
+  finance_cleared_at?: string;
+  financeClearedAmount?: number;
+  finance_cleared_amount?: number;
+  financeClearedSupplierId?: string;
+  finance_cleared_supplier_id?: string;
+  financeClearedCurrency?: string;
+  finance_cleared_currency?: string;
+  financeClearedPaymentTerms?: string;
+  finance_cleared_payment_terms?: string;
+  financeClearanceReason?: string;
+  finance_clearance_reason?: string;
 }
 
 export interface ReceivingItem {

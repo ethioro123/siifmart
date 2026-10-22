@@ -98,6 +98,10 @@ export interface Employee {
   quotaApprovedBy?: string;
   quota_approved_by?: string;
   onboardingTier?: 'FRONTLINE_FAST_TRACK' | 'HQ_GOVERNANCE';
+  reportsToEmployeeId?: string;
+  reports_to_employee_id?: string;
+  functionalManagerEmployeeId?: string;
+  functional_manager_employee_id?: string;
   onboarding_tier?: string;
   quotaStatus?: 'WITHIN_QUOTA' | 'EXCEEDED_QUOTA';
   quota_status?: string;
