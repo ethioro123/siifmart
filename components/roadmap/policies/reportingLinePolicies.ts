@@ -41,10 +41,10 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
       b) DOTTED LINE (Functional / Governance / Compliance Chain of Command):
          * Controls fiscal integrity, inventory reconciliations, quality assurance, safety standards, anti-theft audits, and statutory compliance.
 1.2 Organizational hierarchy (L1 to L10):
-    - LEVEL 1 (Executive C-Suite): Chief Executive Officer (CEO / Super Admin).
+    - LEVEL 1 (Executive C-Suite): Group Chief Executive Officer.
       * Overall strategic vision, multi-country tenancy governance, national capital allocation, and executive approvals.
     - LEVEL 2 (Country Executive): Country Managing Director.
-    - LEVEL 3 (HQ Department Heads): Country Operations Director, Country Finance Director, Country HR Director, Country Commercial Director, Country Supply Chain Director, Country Commercial Director, Country Technology Director, Head of Audit.
+    - LEVEL 3 (HQ Department Heads): Country Operations Director, Country Finance Director, Country HR Director, Country Commercial Director, Country Supply Chain Director, Country Commercial Director, Country Technology Director, Group Chief Audit Executive.
     - LEVEL 4 (Regional Operations): Regional Operations Manager.
     - LEVEL 5 (Regional Departments): Regional Finance, Procurement, HR, Merchandising, Logistics, and Security Managers.
       * Multi-site cluster governance, corporate budget controls, cross-functional policy enforcement, and executive escalations.
@@ -56,7 +56,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
 2. AUTHORITATIVE SOLID-LINE REPORTING CHANNELS (CHAIN OF COMMAND)
 --------------------------------------------------------------------------------
 2.1 Executive, HQ and Regional Leadership (L1 -> L5):
-    - CEO (group_ceo) directs:
+    - Group Chief Executive Officer (group_ceo) directs:
       * Country Managing Director (National leadership)
       * Country Operations Director (HQ operations leadership)
       * Country Finance Director (Treasury, accounting, audits, taxation)

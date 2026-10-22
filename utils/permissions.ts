@@ -205,7 +205,7 @@ const PERMISSION_MAP: Record<string, Permission> = {
 export function hasPermission(userRole: UserRole | undefined, permission: keyof typeof PERMISSIONS): boolean {
     if (!userRole) return false;
 
-    // Level 1 Global CEO (group_ceo / ceo / group_ceo) has 100% sovereign module & action access
+    // The canonical group_ceo role has sovereign module and action access
     if (userRole === 'group_ceo') return true;
 
     // Zero-Trust dynamic policy override from RoleSettings
@@ -251,9 +251,9 @@ export function hasAllPermissions(userRole: UserRole | undefined, permissions: (
  */
 export function canAccessModule(userRole: UserRole | undefined, module: string): boolean {
     if (!userRole) return false;
-    const norm = (userRole as string).toLowerCase().trim().replace(/[\s-]/g, '_');
+    const norm = userRole as string;
     // Level 1 Global CEO and Level 2 Country Managing Director have complete module access
-    if (norm === 'group_ceo' || norm === 'ceo' || norm === 'admin' || norm === 'country_managing_director') return true;
+    if (norm === 'group_ceo' || norm === 'country_managing_director') return true;
 
     const modulePermissions: Record<string, keyof typeof PERMISSIONS> = {
         'dashboard': 'VIEW_ADMIN_DASHBOARD',

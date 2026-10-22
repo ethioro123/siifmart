@@ -101,7 +101,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                         <p className="text-sm font-bold text-[var(--theme-text-primary)] mt-0.5">
                             {opsManager ? opsManager.name : 'Country Operations Director (HQ)'}
                         </p>
-                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Head of Central Operations</p>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Central Operations</p>
                     </div>
                     <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
                         <span className="text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Field Leadership</span>

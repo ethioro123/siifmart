@@ -69,7 +69,7 @@ export default function WarehouseOperations() {
     const adjustStockMutation = useAdjustStockMutation();
     const relocateProductMutation = useRelocateProductMutation();
 
-    const canApprove = ['group_ceo', 'country_managing_director', 'Admin', 'regional_operations_manager', 'country_operations_director', 'country_supply_chain_director'].includes(user?.role || '');
+    const canApprove = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_supply_chain_director'].includes(user?.role || '');
 
 
     const [isMobileTabMenuOpen, setIsMobileTabMenuOpen] = useState(false); // Mobile Tab Selector Toggle
@@ -136,7 +136,7 @@ export default function WarehouseOperations() {
     // LOCATION-BASED ACCESS CONTROL
     // CEOs MUST select a specific warehouse/store to view operations
     // If at HQ or no site selected, show empty results
-    const isMultiSiteRole = ['group_ceo', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
+    const isMultiSiteRole = ['group_ceo', 'auditor'].includes(user?.role || '');
 
     const isHQ = activeSite ? ['Administration', 'Administrative', 'Central Operations'].includes(activeSite.type) : 'N/A';
     const needsSiteSelection = isMultiSiteRole && (!activeSite || ['Administration', 'Administrative', 'Central Operations'].includes(activeSite.type));

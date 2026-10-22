@@ -113,7 +113,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                         <div>
                             <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">Pending Onboarding Approval</h4>
                             <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
-                                This employee was onboarded with "Pending Approval" status and requires HR / Super Admin sign-off before being granted active system access.
+                                This employee was onboarded with "Pending Approval" status and requires HR or Group Chief Executive Officer sign-off before being granted active system access.
                             </p>
                         </div>
                     </div>

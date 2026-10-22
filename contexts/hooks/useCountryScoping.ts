@@ -61,7 +61,7 @@ export function useCountryScoping({
   discountCodes = []
 }: UseCountryScopingProps) {
   // 0. Role-based Country Authority:
-  // ONLY CEO / Super Admin can check both sides of the country.
+  // Only the group_ceo role can check both countries.
   // Regular employees from another country CANNOT access a different country.
   // Their country is strictly pinned to their assigned site.
   const isCeo = canSwitchCountry(user);
@@ -70,7 +70,7 @@ export function useCountryScoping({
   }, [user, sites, employees]);
 
   const effectiveCountry: Country = useMemo(() => {
-    // If no user context (e.g. system init/testing) or user is CEO/Super Admin, respect active country setting
+    // If no user context exists or the user is group_ceo, respect the active country setting
     if (!user || isCeo) {
       return (country || 'ET') as Country;
     }

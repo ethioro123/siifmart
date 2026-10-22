@@ -54,7 +54,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                 const offset = (currentMovementsPage - 1) * MOVEMENTS_PER_PAGE;
 
                 // Enforce Visibility: 
-                // 1. If HQ View + Super Admin -> Use dropdown filter
+                // 1. If HQ View + group_ceo -> Use dropdown filter
                 // 2. If Warehouse View -> ALWAYS use activeSite.id, regardless of dropdown (security)
                 let siteIdToQuery = activeSite?.id;
 

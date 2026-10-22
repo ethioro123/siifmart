@@ -278,7 +278,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 6, Rule 15, Rule 16, Rule 17, Rule 1
 3.1 Delivery Lockdown Breach Strictly Prohibited (Rule 15):
     - STRICTLY PROHIBITED from assigning floor workers (pickers, packers, receivers, inventory clerks) to vehicle delivery missions. Delivery jobs are locked exclusively to verified drivers.
 3.2 No Unauthorized Cross-Border Vehicle Movement:
-    - Cannot route domestic fleet vehicles across national borders (ET <-> KE) without corporate customs manifests and Super Admin authorization.
+    - Cannot route domestic fleet vehicles across national borders (ET <-> KE) without corporate customs manifests and Group Chief Executive Officer authorization.
 3.3 No Unilateral In-Transit Cargo Loss Write-Offs (Rule 1):
     - CANNOT write off stolen, damaged, or lost in-transit inventory without formal investigation, police report (if theft), and Central HQ approval.
 3.4 No Alteration of Store Pricing or Cash Vaults:

@@ -8,7 +8,7 @@ import {
 import { getRoleHierarchy } from './roles';
 
 /**
- * Checks if the acting user is the CEO or Super Admin with sovereign universal override authority.
+ * Checks if the acting user is the Group Chief Executive Officer with sovereign universal override authority.
  * Country Managing Director ('admin') is Level 98 and NOT sovereign CEO (Level 100).
  */
 export function isSovereignCEO(role?: string): boolean {
@@ -305,7 +305,7 @@ export function canApproveChangeRequest(
         case 'Human Resources':
             return ['country_managing_director', 'country_hr_director', 'regional_hr_manager', 'hr_generalist'].includes(userRole);
         case 'Finance Department':
-            return ['country_managing_director', 'country_finance_director', 'regional_finance_manager', 'cfo'].includes(userRole);
+            return ['country_managing_director', 'country_finance_director', 'regional_finance_manager', 'group_cfo'].includes(userRole);
         case 'Operations Management':
             return ['country_managing_director', 'country_operations_director', 'regional_operations_manager', 'store_manager'].includes(userRole);
         case 'Logistics & Warehouse':

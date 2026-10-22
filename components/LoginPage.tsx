@@ -26,10 +26,10 @@ export default function LoginPage() {
   const { data: stagingAccounts = [] } = useStagingAccounts();
   const stagingExecutive = stagingAccounts.find(account => account.country === 'GLOBAL');
   const stagingKeRegionalMgr = stagingAccounts.find(
-    account => account.country === 'KE' && (account.roleId === 'regional_operations_manager' || account.roleId === 'regional_manager')
+    account => account.country === 'KE' && account.roleId === 'regional_operations_manager'
   );
   const stagingEtRegionalMgr = stagingAccounts.find(
-    account => account.country === 'ET' && (account.roleId === 'regional_operations_manager' || account.roleId === 'regional_manager')
+    account => account.country === 'ET' && account.roleId === 'regional_operations_manager'
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

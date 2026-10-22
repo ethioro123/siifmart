@@ -108,7 +108,7 @@ export default function GeneralSettings() {
 
     const handleSaveSection = async (section: 'branding' | 'legal') => {
         if (!isAuthorized) {
-            showToast('Permission denied: Only CEO or Super Admin can modify corporate settings.', 'error');
+            showToast('Permission denied: Only the Group Chief Executive Officer can modify corporate settings.', 'error');
             return;
         }
 

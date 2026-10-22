@@ -326,8 +326,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1 & Zero-Trust SoD Mandate)
 2.1 Approver Role Boundaries:
     - Approval authority ('employees.approve_salary') is strictly restricted to:
         * Country Finance Director (country_finance_director)
-        * Chief Executive Officer (CEO)
-        * Super Administrator (group_ceo)
+        * Group Chief Executive Officer (group_ceo)
 2.2 Mandatory Justification Requirement:
     - Every proposed compensation adjustment must be accompanied by a structured business rationale (e.g. annual merit increase, role promotion, market benchmarking).
     - Unsubstantiated or zero-justification submissions are automatically rejected.

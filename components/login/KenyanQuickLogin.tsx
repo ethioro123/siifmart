@@ -71,7 +71,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
         continue;
       }
       const id = acc.roleId.toLowerCase();
-      const key = (id === 'regional_manager' || id === 'regional_operations_manager') ? 'regional_operations_manager' : id;
+      const key = id;
       counts[key] = (counts[key] || 0) + 1;
     }
     return counts;
@@ -88,15 +88,13 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
       if (roleFilter !== 'ALL') {
         const normRole = acc.roleId.toLowerCase();
         const target = roleFilter.toLowerCase();
-        const isMatch = normRole === target ||
-          (target === 'regional_operations_manager' && (normRole === 'regional_manager' || normRole === 'regional_operations_manager'));
+        const isMatch = normRole === target;
         if (!isMatch) return false;
       }
       if (searchTerms.length > 0) {
         const roleIdText = acc.roleId.toLowerCase().replace(/_/g, ' ');
         const emailText = acc.email.toLowerCase().replace(/[.@]/g, ' ');
-        const alias = (acc.roleId === 'regional_operations_manager' || acc.roleId === 'regional_manager') ? 'regional manager reg mgr' : '';
-        const haystack = `${acc.name} ${acc.role} ${acc.roleId} ${roleIdText} ${alias} ${acc.siteName} ${acc.siteCode} ${acc.siteType} ${acc.code} ${acc.email} ${emailText}`.toLowerCase();
+        const haystack = `${acc.name} ${acc.role} ${acc.roleId} ${roleIdText} ${acc.siteName} ${acc.siteCode} ${acc.siteType} ${acc.code} ${acc.email} ${emailText}`.toLowerCase();
         const matchesAll = searchTerms.every(term => haystack.includes(term));
         if (!matchesAll) return false;
       }

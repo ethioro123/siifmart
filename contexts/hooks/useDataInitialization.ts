@@ -58,11 +58,11 @@ export function useDataInitialization({
   const missingSiteWarningRef = React.useRef<string | null>(null);
 
   useEffect(() => {
-    const canSwitchSites = ['group_ceo', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
+    const canSwitchSites = ['group_ceo', 'auditor'].includes(user?.role || '');
 
     if (user && sites.length > 0 && !activeSiteId) {
       if (canSwitchSites) {
-        // CEO / group_ceo: default to the Administration / Central Operations site for the active country
+        // The group_ceo role defaults to the Administration / Central Operations site for the active country
         const activeCountry = (settings?.country || 'ET') as Country;
         const countrySites = sites.filter(s => (s.country || 'ET') === activeCountry);
         const adminSite = findCountryAdminSite(countrySites, activeCountry) || countrySites[0];

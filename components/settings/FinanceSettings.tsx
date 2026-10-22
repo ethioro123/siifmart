@@ -238,7 +238,7 @@ export default function FinanceSettings() {
                 <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5">
                     <ShieldAlert className="text-amber-600 dark:text-amber-400 shrink-0" size={18} />
                     <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">
-                        Read-Only View: Modifying corporate financial policies, tax matrices, and drawer caps requires CEO, Super Admin, or Country Finance Director authorization.
+                        Read-Only View: Modifying corporate financial policies, tax matrices, and drawer caps requires Group Chief Executive Officer or Country Finance Director authorization.
                     </p>
                 </div>
             )}

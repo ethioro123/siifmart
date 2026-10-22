@@ -65,7 +65,7 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
             });
         });
 
-        // Identify Root (CEO / Super Admin)
+        // Identify the Group Chief Executive Officer root
         const allNodes = Array.from(nodeMap.values());
         let rootNode = allNodes.find(n => n.role === 'group_ceo' || n.role === 'country_managing_director');
 

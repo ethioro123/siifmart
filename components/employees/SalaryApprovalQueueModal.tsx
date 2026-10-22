@@ -35,7 +35,7 @@ export default function SalaryApprovalQueueModal({
     const [rejectError, setRejectError] = useState<string>('');
 
     const country = (effectiveCountry || 'ET').toUpperCase();
-    const canApprove = ['group_ceo', 'country_managing_director', 'country_finance_director', 'cfo'].includes(user?.role || '');
+    const canApprove = ['group_ceo', 'country_managing_director', 'country_finance_director', 'group_cfo'].includes(user?.role || '');
 
     const loadRequests = useCallback(async () => {
         setIsLoading(true);

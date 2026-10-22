@@ -163,7 +163,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                         {pendingRecruitsCount} Pending Onboarding {pendingRecruitsCount === 1 ? 'Recruit' : 'Recruits'} Awaiting Approval
                      </h4>
                      <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
-                        Talent onboarded with "Pending Approval" require authorization from HR or Super Admin before activating system access.
+                        Talent onboarded with "Pending Approval" require authorization from HR or the Group Chief Executive Officer before activating system access.
                      </p>
                   </div>
                </div>

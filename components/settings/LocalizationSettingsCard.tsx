@@ -62,7 +62,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
 
     const handleSaveLocalization = async () => {
         if (!isCeo) {
-            showToast('Only CEO or Super Admin can apply market localization changes.', 'error');
+            showToast('Only the Group Chief Executive Officer can apply market localization changes.', 'error');
             return;
         }
 

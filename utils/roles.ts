@@ -5,24 +5,10 @@ export { SYSTEM_ROLES } from './systemRolesData';
 
 export function getJobTitleForRole(role?: string | null): string {
    const normalizedRole = (role || '').trim().toLowerCase();
-   if (normalizedRole === 'group_ceo') return 'Group Chief Executive Officer';
-   if (normalizedRole === 'group_coo' || normalizedRole === 'coo') return 'Group Chief Operating Officer';
-   if (normalizedRole === 'group_cfo' || normalizedRole === 'cfo') return 'Group Chief Financial Officer';
-   if (normalizedRole === 'group_cco' || normalizedRole === 'cco') return 'Group Chief Commercial Officer';
-   if (normalizedRole === 'group_csco' || normalizedRole === 'csco') return 'Group Chief Supply Chain Officer';
-   if (normalizedRole === 'group_chro' || normalizedRole === 'chro') return 'Group Chief Human Resources Officer';
-   if (normalizedRole === 'group_cto' || normalizedRole === 'cto') return 'Group Chief Technology Officer';
-   if (normalizedRole === 'group_cio' || normalizedRole === 'cio') return 'Group Chief Information Officer';
-   if (normalizedRole === 'group_clco' || normalizedRole === 'clco') return 'Group Chief Legal & Compliance Officer';
-   if (normalizedRole === 'group_cae' || normalizedRole === 'cae') return 'Chief Audit Executive';
-   if (normalizedRole === 'group_ceo') return 'Chief Executive Officer';
+   if (!normalizedRole) return 'Unassigned role';
 
    const configuredRole = SYSTEM_ROLES.find(item => item.id.toLowerCase() === normalizedRole);
-   if (configuredRole) return configuredRole.label;
-
-   return normalizedRole
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, character => character.toUpperCase());
+   return configuredRole?.label || 'Unrecognized role';
 }
 
 export function getEmployeeJobTitle(employee: {
@@ -56,7 +42,7 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'country_technology_director': 97,
         'country_compliance_manager': 97,
 
-        // Level 2: Directors & Regional ("Head of...")
+        // Level 2: Directors & Regional Management
         'regional_operations_manager': 90,
         'area_operations_manager': 88,
         'regional_supply_chain_manager': 83,

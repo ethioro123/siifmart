@@ -30,8 +30,8 @@ export const AccountsPayableTab: React.FC = () => {
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<string[]>([]);
 
-    const canCreatePaymentRun = ['country_finance_director', 'country_managing_director', 'group_ceo', 'cfo'].includes(user?.role);
-    const canOverride = ['country_finance_director', 'regional_finance_manager', 'country_managing_director', 'cfo', 'group_ceo'].includes(user?.role);
+    const canCreatePaymentRun = ['country_finance_director', 'country_managing_director', 'group_ceo', 'group_cfo'].includes(user?.role);
+    const canOverride = ['country_finance_director', 'regional_finance_manager', 'country_managing_director', 'group_cfo', 'group_ceo'].includes(user?.role);
 
     const loadInvoices = async () => {
         setLoading(true);

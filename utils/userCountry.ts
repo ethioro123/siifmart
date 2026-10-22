@@ -2,13 +2,12 @@ import { Country } from '../types';
 import { isCorporateHqDirectorateRole, isSharedHqRegionalRole } from './roleSegregation';
 
 /**
- * Check if user is CEO / Super Admin who can access and switch between both country instances.
+ * Check whether the user has the canonical group_ceo role and can switch between country instances.
  * Branch managers and regular staff are strictly locked to their single country.
  */
 export function canSwitchCountry(user: { role?: string; title?: string } | null | undefined): boolean {
     if (!user) return false;
     const role = (user.role || '').toLowerCase();
-    const title = (user.title || '').toLowerCase();
     return role === 'group_ceo';
 }
 
@@ -73,16 +72,9 @@ export function canSwitchRegion(
 ): boolean {
     if (!user) return false;
     const role = (user.role || '').toLowerCase();
-    const title = (user.title || '').toLowerCase();
 
     // 1. Level 1 & Level 2 Corporate HQ Directorate roles always have country-wide regional lens switching
-    if (
-        isCorporateHqDirectorateRole(role) ||
-        title.includes('ceo') ||
-        title.includes('chief executive') ||
-        title.includes('managing director') ||
-        title.includes('head of')
-    ) {
+    if (isCorporateHqDirectorateRole(role)) {
         return true;
     }
 

@@ -14,8 +14,8 @@ export const canEmployRole = (
     // 1. Global CEO can employ anyone below CEO
     const normUserRole = (userRole || '').toLowerCase();
     const normCandidateRole = (candidateRole || '').toLowerCase();
-    if (normUserRole === 'group_ceo' || normUserRole === 'ceo' || normUserRole === 'super_admin') {
-        return normCandidateRole !== 'group_ceo' && normCandidateRole !== 'ceo' && normCandidateRole !== 'super_admin';
+    if (normUserRole === 'group_ceo') {
+        return normCandidateRole !== 'group_ceo';
     }
 
     // 2. Global Level 1 C-Suite Executives can employ subordinate roles in their vertical domain
