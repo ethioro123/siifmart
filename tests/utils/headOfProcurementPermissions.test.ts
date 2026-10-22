@@ -157,7 +157,7 @@ describe('Head of Procurement Role & Sourcing Governance Engine (SOP-MGT-024)', 
             expect(authService.checkPermission('admin', 'procurement.view')).toBe(true);
             expect(authService.checkPermission('admin', 'procurement.create_po')).toBe(true);
             expect(authService.checkPermission('admin', 'procurement.edit_po')).toBe(true);
-            expect(authService.checkPermission('admin', 'procurement.approve_po')).toBe(true);
+            expect(authService.checkPermission('admin', 'procurement.approve_po')).toBe(false);
             expect(authService.checkPermission('admin', 'procurement.delete_po')).toBe(true);
 
             expect(hasPermission('admin', 'ACCESS_PROCUREMENT')).toBe(true);

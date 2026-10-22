@@ -34,8 +34,8 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
             expect(getDefaultFulfillmentTab('admin')).toBe('DOCKS');
         });
 
-        it('authorizes Managing Director to approve all enterprise workflows', () => {
-            expect(canApprove('country_managing_director', 'purchase_order', 1500000)).toBe(true);
+        it('keeps final PO sign-off with procurement while authorizing other executive workflows', () => {
+            expect(canApprove('country_managing_director', 'purchase_order', 1500000)).toBe(false);
             expect(canApprove('country_managing_director', 'expense', 500000)).toBe(true);
             expect(canApprove('country_managing_director', 'employee_hire')).toBe(true);
             expect(canApprove('country_managing_director', 'inventory_adjustment', 5000)).toBe(true);
@@ -82,7 +82,7 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
         });
 
         it('authorizes Head of Operations on operational workflows', () => {
-            expect(canApprove('head_of_operations', 'purchase_order', 150000)).toBe(true);
+            expect(canApprove('head_of_operations', 'purchase_order', 150000)).toBe(false);
             expect(canApprove('head_of_operations', 'inventory_adjustment', 500)).toBe(true);
             expect(canApprove('head_of_operations', 'refund', 10000)).toBe(true);
             expect(canApprove('head_of_operations', 'employee_hire')).toBe(true);
@@ -103,8 +103,8 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
         it('authorizes Head of Finance to approve financial workflows', () => {
             expect(canApprove('head_of_finance', 'expense', 4500)).toBe(true);
             expect(canApprove('head_of_finance', 'expense', 50000)).toBe(true);
-            expect(canApprove('head_of_finance', 'purchase_order', 45000)).toBe(true);
-            expect(canApprove('head_of_finance', 'purchase_order', 250000)).toBe(true);
+            expect(canApprove('head_of_finance', 'purchase_order', 45000)).toBe(false);
+            expect(canApprove('head_of_finance', 'purchase_order', 250000)).toBe(false);
             expect(canApprove('head_of_finance', 'price_change', 25)).toBe(true);
         });
 
