@@ -30,6 +30,8 @@ export interface NewEmployeeFormData {
    joinDate: string;
    avatar: string;
    siteId?: string;
+   reportsToEmployeeId?: string;
+   functionalManagerEmployeeId?: string;
    nationalIdNumber?: string;
    nationalIdPhoto?: string | null;
    nationalIdInfo?: any;
@@ -394,6 +396,8 @@ export function useEmployeeWizard({
             id: employeeId,
             code: employeeCode,
             siteId: validatedSiteId,
+            reportsToEmployeeId: newEmpData.reportsToEmployeeId || undefined,
+            functionalManagerEmployeeId: newEmpData.functionalManagerEmployeeId || undefined,
             regionCode: assignedRegionCode,
             region_code: assignedRegionCode,
             scopeLevel,

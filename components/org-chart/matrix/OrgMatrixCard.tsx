@@ -7,6 +7,7 @@ import { getEmployeeJobTitle } from '../../../utils/roles';
 
 interface OrgMatrixCardProps {
     employee: Employee;
+    allEmployees: Employee[];
     siteName: string;
     isDark: boolean;
     isOnline: boolean;
@@ -17,6 +18,7 @@ interface OrgMatrixCardProps {
 
 export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
     employee,
+    allEmployees,
     siteName,
     isDark,
     isOnline,
@@ -29,6 +31,8 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
     const meta = getRoleReportingMeta(roleKey);
     const levelConfig = HIERARCHY_LEVEL_CONFIGS[meta.level];
 
+    const primaryManager = allEmployees.find(item => item.id === (employee.reportsToEmployeeId || employee.reports_to_employee_id));
+    const functionalManager = allEmployees.find(item => item.id === (employee.functionalManagerEmployeeId || employee.functional_manager_employee_id));
     const avatar = employee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=2C5E3B&color=EAE5D9&size=96`;
 
     return (
@@ -113,17 +117,17 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                         <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold shrink-0">↳</span>
                         <span className="text-stone-400 shrink-0">Reports to:</span>
                         <span className="font-semibold truncate text-[#1E3F27] dark:text-[#EAE5D9]">
-                            {meta.reportsToLabel}
+                            {primaryManager ? primaryManager.name : (employee.reportsToEmployeeId || employee.reports_to_employee_id) ? 'Manager unavailable in current view' : `Unassigned · expected ${meta.reportsToLabel}`}
                         </span>
                     </div>
 
                     {/* Dotted Line Functional Compliance (if applicable) */}
-                    {meta.dottedLineLabel && (
+                    {(functionalManager || employee.functionalManagerEmployeeId || employee.functional_manager_employee_id || meta.dottedLineLabel) && (
                         <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300/90">
                             <span className="font-bold shrink-0">⤑</span>
                             <span className="text-stone-400 shrink-0">Functional:</span>
                             <span className="font-medium truncate">
-                                {meta.dottedLineLabel}
+                                {functionalManager ? functionalManager.name : (employee.functionalManagerEmployeeId || employee.functional_manager_employee_id) ? 'Manager unavailable in current view' : `Expected role: ${meta.dottedLineLabel}`}
                             </span>
                         </div>
                     )}

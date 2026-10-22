@@ -16,6 +16,7 @@ interface OrgMatrixSwimlaneProps {
     isDark: boolean;
     action?: React.ReactNode;
     employees: Employee[];
+    allEmployees: Employee[];
     siteMap: Map<string, string>;
     onlineIds?: Set<string>;
     onSelectEmployee: (employee: Employee) => void;
@@ -37,6 +38,7 @@ export const OrgMatrixSwimlane: React.FC<OrgMatrixSwimlaneProps> = ({
     isDark,
     action,
     employees,
+    allEmployees,
     siteMap,
     onlineIds,
     onSelectEmployee,
@@ -101,6 +103,7 @@ export const OrgMatrixSwimlane: React.FC<OrgMatrixSwimlaneProps> = ({
                                 <OrgMatrixCard
                                     key={emp.id}
                                     employee={emp}
+                                    allEmployees={allEmployees}
                                     siteName={siteMap.get(emp.siteId || emp.site_id || '') || 'All Sites'}
                                     isDark={isDark}
                                     isOnline={onlineIds ? onlineIds.has(emp.id) : false}

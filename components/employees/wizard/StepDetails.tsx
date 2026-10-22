@@ -1,5 +1,7 @@
 import React from 'react';
-import { DollarSign, Star, Calendar, PhoneCall, Building2 } from 'lucide-react';
+import { DollarSign, Star, Calendar, PhoneCall, Building2, GitBranch } from 'lucide-react';
+import type { Employee, Site } from '../../../types';
+import { getRoleHierarchy } from '../../../utils/roles';
 
 interface StepDetailsProps {
     newEmpData: any;
@@ -7,6 +9,8 @@ interface StepDetailsProps {
     availableDepartments: string[];
     canAdjustPayroll: boolean;
     currencySymbol: string;
+    employees: Employee[];
+    sites: Site[];
 }
 
 export default function StepDetails({
@@ -14,8 +18,41 @@ export default function StepDetails({
     setNewEmpData,
     availableDepartments,
     canAdjustPayroll,
-    currencySymbol
+    currencySymbol,
+    employees,
+    sites
 }: StepDetailsProps) {
+    const selectedSite = sites.find(site => site.id === newEmpData.siteId);
+    const targetCountry = selectedSite?.country;
+    const eligibleManagers = employees.filter(employee => {
+        if (!employee.id || employee.status !== 'Active') return false;
+        if (getRoleHierarchy(employee.role) <= getRoleHierarchy(newEmpData.role)) return false;
+        const managerSite = sites.find(site => site.id === (employee.siteId || employee.site_id));
+        const managerCountry = employee.country || employee.country_code || managerSite?.country;
+        const isGlobalExecutive = ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'super_admin', 'ceo'].includes(employee.role);
+        return !targetCountry || (managerCountry
+            ? String(managerCountry).toUpperCase() === String(targetCountry).toUpperCase()
+            : isGlobalExecutive);
+    }).sort((a, b) => a.name.localeCompare(b.name));
+
+    const reportingSelect = (label: string, value: string | undefined, key: 'reportsToEmployeeId' | 'functionalManagerEmployeeId') => (
+        <label className="block">
+            <span className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-1 block">{label}</span>
+            <select
+                value={value || ''}
+                onChange={event => setNewEmpData({ ...newEmpData, [key]: event.target.value || undefined })}
+                className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[#2C5E3B] outline-none text-sm"
+            >
+                <option value="">Unassigned</option>
+                {eligibleManagers.map(manager => (
+                    <option key={manager.id} value={manager.id}>
+                        {manager.name} · {manager.jobTitle || manager.job_title || manager.role}
+                    </option>
+                ))}
+            </select>
+        </label>
+    );
+
     return (
         <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
             <div>
@@ -31,6 +68,18 @@ export default function StepDetails({
                 />
                 <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">This HR title is independent of the app access profile.</p>
             </div>
+
+            <section className="rounded-xl border border-[#E2DCCE] dark:border-white/10 p-3.5 space-y-3" aria-label="Reporting relationships">
+                <div className="flex items-center gap-2">
+                    <GitBranch size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <h3 className="text-[11px] text-stone-700 dark:text-stone-200 uppercase font-bold">Reporting Relationships</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {reportingSelect('Primary manager', newEmpData.reportsToEmployeeId, 'reportsToEmployeeId')}
+                    {reportingSelect('Functional manager', newEmpData.functionalManagerEmployeeId, 'functionalManagerEmployeeId')}
+                </div>
+                <p className="text-[11px] text-stone-500 dark:text-stone-400">Choose an active employee in the same country with a higher reporting level. Global executives may be selected across countries. Leave a line unassigned when no manager has been appointed.</p>
+            </section>
 
             {/* Department */}
             <div>

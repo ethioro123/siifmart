@@ -358,6 +358,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                                     ) : null
                                 }
                                 employees={deptEmps}
+                                allEmployees={employees}
                                 siteMap={siteMap}
                                 onlineIds={onlineIds}
                                 onSelectEmployee={onSelectEmployee}
@@ -412,6 +413,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                                 onToggle={() => toggleSwimlane(String(lvl))}
                                 isDark={isDark}
                                 employees={levelEmps}
+                                allEmployees={employees}
                                 siteMap={siteMap}
                                 onlineIds={onlineIds}
                                 onSelectEmployee={onSelectEmployee}
@@ -454,6 +456,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                                 onToggle={() => toggleSwimlane(siteId)}
                                 isDark={isDark}
                                 employees={siteEmps}
+                                allEmployees={employees}
                                 siteMap={siteMap}
                                 onlineIds={onlineIds}
                                 onSelectEmployee={onSelectEmployee}

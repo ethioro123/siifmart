@@ -78,7 +78,7 @@ export default function AddEmployeeWizard({
     lastSavedAt,
     quotaResult
 }: AddEmployeeWizardProps) {
-    const { settings, activeSite, addNotification } = useData();
+    const { settings, activeSite, addNotification, employees } = useData();
     const [isDraftsOpen, setIsDraftsOpen] = useState(false);
     const currencySymbol = (activeSite as any)?.currency || settings?.currency || CURRENCY_SYMBOL;
     const isDirect = isDirectOnboardingAuthorized(user?.role, newEmpData.role, Boolean(quotaResult?.canAutoActivate));
@@ -187,6 +187,8 @@ export default function AddEmployeeWizard({
                             availableDepartments={availableDepartments}
                             canAdjustPayroll={canAdjustPayroll}
                             currencySymbol={currencySymbol}
+                            employees={employees}
+                            sites={sites}
                         />
                     )}
 
