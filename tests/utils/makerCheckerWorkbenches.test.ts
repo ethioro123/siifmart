@@ -142,7 +142,7 @@ describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
             expect(canSelfApprove).toBe(false);
 
             // A secondary supervisor or CEO can approve it
-            const ceoUser = { id: 'user-ceo-01', role: 'CEO' };
+            const ceoUser = { id: 'user-ceo-01', role: 'group_ceo' };
             const canCeoApprove = ['country_finance_director', 'group_ceo'].includes(ceoUser.role) && expenseRecord.createdBy !== ceoUser.id;
             expect(canCeoApprove).toBe(true);
         });

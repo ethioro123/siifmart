@@ -166,7 +166,7 @@ export function validatePasswordAgainstPolicy(
 export function checkTimeRestriction(userRole?: string): { allowed: boolean; reason?: string } {
     if (!userRole) return { allowed: true };
     const norm = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
-    if (norm === 'group_ceo' || norm === 'ceo') return { allowed: true };
+    if (norm === 'group_ceo') return { allowed: true };
 
     const policy = getActiveRolePolicy(userRole);
     if (!policy.time_restriction) return { allowed: true };
@@ -190,7 +190,7 @@ export function checkTimeRestriction(userRole?: string): { allowed: boolean; rea
 export function checkIpRestriction(userRole?: string, hostOrIp?: string): { allowed: boolean; reason?: string } {
     if (!userRole) return { allowed: true };
     const norm = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
-    if (norm === 'group_ceo' || norm === 'ceo') return { allowed: true };
+    if (norm === 'group_ceo') return { allowed: true };
 
     const policy = getActiveRolePolicy(userRole);
     if (!policy.ip_restriction) return { allowed: true };

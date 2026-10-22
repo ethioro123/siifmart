@@ -68,8 +68,8 @@ describe('Global CEO Total Access, Control & Sovereignty Engine', () => {
     describe('Sovereign Cross-Border National Switching Authority', () => {
         it('authorizes Global CEO to switch between Kenya (KE) and Ethiopia (ET)', () => {
             expect(canSwitchCountry({ role: 'group_ceo' })).toBe(true);
-            expect(canSwitchCountry({ role: 'ceo' })).toBe(true);
-            expect(canSwitchCountry({ role: 'CEO' })).toBe(true);
+            expect(canSwitchCountry({ role: 'group_ceo' })).toBe(true);
+            expect(canSwitchCountry({ role: 'group_ceo' })).toBe(true);
             expect(canSwitchCountry({ title: 'Chief Executive Officer' })).toBe(true);
         });
 
@@ -92,20 +92,20 @@ describe('Global CEO Total Access, Control & Sovereignty Engine', () => {
             expect(canEmployRole('group_ceo', 'store_manager')).toBe(true);
             expect(canEmployRole('group_ceo', 'cashier')).toBe(true);
 
-            expect(canEmployRole('ceo', 'country_managing_director')).toBe(true);
-            expect(canEmployRole('ceo', 'group_ceo')).toBe(false);
+            expect(canEmployRole('group_ceo', 'country_managing_director')).toBe(true);
+            expect(canEmployRole('group_ceo', 'group_ceo')).toBe(false);
         });
 
         it('grants Global CEO complete visibility into supplier cost prices', () => {
             expect(canViewCostPrice('group_ceo')).toBe(true);
-            expect(canViewCostPrice('ceo')).toBe(true);
+            expect(canViewCostPrice('group_ceo')).toBe(true);
             expect(canViewCostPrice('cashier')).toBe(false);
             expect(canViewCostPrice('driver')).toBe(false);
         });
 
         it('authorizes Global CEO to view any location/telemetry globally', () => {
             expect(canViewLocation('group_ceo', 'country_managing_director', false)).toBe(true);
-            expect(canViewLocation('ceo', 'country_operations_director', false)).toBe(true);
+            expect(canViewLocation('group_ceo', 'country_operations_director', false)).toBe(true);
         });
     });
 });

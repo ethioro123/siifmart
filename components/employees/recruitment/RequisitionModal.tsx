@@ -69,7 +69,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                 target_salary: Number(targetSalary),
                 justification: justification.trim(),
                 requested_by: user?.name || 'Manager',
-                requested_by_role: user?.role || 'manager'
+                requested_by_role: user?.role || 'store_manager'
             });
             showToast('Requisition logged and forwarded to HR for 4-Eyes sign-off', 'success');
             onSuccess();

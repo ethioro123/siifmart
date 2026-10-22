@@ -257,7 +257,7 @@ describe('Warehouse to POS Command Center Transfer Lifecycle', () => {
 
         it('reveals expected count only to Central HQ auditors', () => {
             expect(isBlindCountActive('group_ceo')).toBe(false);
-            expect(isBlindCountActive('ceo')).toBe(false);
+            expect(isBlindCountActive('group_ceo')).toBe(false);
             expect(isBlindCountActive('country_operations_director')).toBe(false);
         });
 

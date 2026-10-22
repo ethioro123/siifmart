@@ -66,7 +66,7 @@ export const useFilteredFulfillmentData = ({
         // Dispatchers and Warehouse Managers (and elevated roles) can see ALL jobs for the site.
         // Operational roles (Picker, Packer, etc.) ONLY see jobs specifically assigned to them.
         const canSeeGlobalQueue = [
-            'group_ceo', 'admin', 'manager', 'regional_operations_manager',
+            'group_ceo', 'country_managing_director', 'regional_operations_manager',
             'country_operations_director', 'warehouse_manager', 'dispatcher',
             // Site managers and department heads can see all jobs in their site queue
             'store_manager', 'regional_supply_chain_manager', 'inventory_manager',

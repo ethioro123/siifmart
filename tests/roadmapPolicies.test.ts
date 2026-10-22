@@ -97,7 +97,7 @@ describe('Roadmap Policies Registry', () => {
     expect(hrManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(hrManagerPolicy?.content).toContain('Wase / Guarantor Bypass');
     expect(hrManagerPolicy?.content).toContain('Anti-Cartel Rotation Execution');
-    expect(hrManagerPolicy?.department).toBe('hr');
+    expect(hrManagerPolicy?.department).toBe('hr_generalist');
     expect(hrManagerPolicy?.priority).toBe('critical');
     expect(hrManagerPolicy?.isStarred).toBe(true);
   });
@@ -202,7 +202,7 @@ describe('Roadmap Policies Registry', () => {
     expect(secPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(secPolicy?.content).toContain('Exit Gate Pass Protocol');
     expect(secPolicy?.content).toContain('Separation of Duties — Zero Operational Access');
-    expect(secPolicy?.department).toBe('admin');
+    expect(secPolicy?.department).toBe('country_managing_director');
     expect(secPolicy?.priority).toBe('critical');
     expect(secPolicy?.isStarred).toBe(true);
   });
@@ -284,7 +284,7 @@ describe('Roadmap Policies Registry', () => {
       p => p.id === 'policy-dual-control-salary-sop-024'
     );
     expect(salaryPolicy).toBeDefined();
-    expect(salaryPolicy?.department).toBe('hr');
+    expect(salaryPolicy?.department).toBe('hr_generalist');
     expect(salaryPolicy?.priority).toBe('critical');
     expect(salaryPolicy?.content).toContain('DUAL-CONTROL SALARY ADJUSTMENT');
     expect(salaryPolicy?.content).toContain('ZERO UNILATERAL HR AUTHORITY');
@@ -297,7 +297,7 @@ describe('Roadmap Policies Registry', () => {
     expect(reportingPolicy).toBeDefined();
     expect(reportingPolicy?.title).toContain('SOP-ORG-036');
     expect(reportingPolicy?.title).toContain('Enterprise Dual-Control Reporting Lines');
-    expect(reportingPolicy?.department).toBe('admin');
+    expect(reportingPolicy?.department).toBe('country_managing_director');
     expect(reportingPolicy?.priority).toBe('critical');
     expect(reportingPolicy?.isStarred).toBe(true);
     expect(reportingPolicy?.content).toContain('DUAL-MATRIX ARCHITECTURE');
@@ -314,7 +314,7 @@ describe('Roadmap Policies Registry', () => {
     expect(merchPolicy).toBeDefined();
     expect(merchPolicy?.title).toContain('SOP-MER-037');
     expect(merchPolicy?.title).toContain('Corporate Merchandising');
-    expect(merchPolicy?.department).toBe('admin');
+    expect(merchPolicy?.department).toBe('country_managing_director');
     expect(merchPolicy?.priority).toBe('critical');
     expect(merchPolicy?.isStarred).toBe(true);
     expect(merchPolicy?.content).toContain('CORPORATE ADMINISTRATION');

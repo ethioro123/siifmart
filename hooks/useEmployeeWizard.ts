@@ -108,7 +108,7 @@ export function useEmployeeWizard({
 
    const getCreatableRoles = (): UserRole[] => {
       if (!user?.role) return [];
-      if (user.role === 'group_ceo' || (user.role as string) === 'CEO') {
+      if (user.role === 'group_ceo') {
          return SYSTEM_ROLES.map(r => r.id).filter(id => id !== 'group_ceo');
       }
 

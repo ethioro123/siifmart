@@ -15,14 +15,14 @@ export const ROLE_LEVELS: Record<string, number> = {
     group_cae: 1,
     // Level 2: Country Executive
     country_managing_director: 2,
-    country_operations_director: 2,
-    country_finance_director: 2,
-    country_commercial_director: 2,
-    country_supply_chain_director: 2,
-    country_hr_director: 2,
-    country_technology_director: 2,
-    country_compliance_manager: 2,
-    // Level 3: Corporate HQ Directorate Heads
+    country_operations_director: 3,
+    country_finance_director: 3,
+    country_commercial_director: 3,
+    country_supply_chain_director: 3,
+    country_hr_director: 3,
+    country_technology_director: 3,
+    country_compliance_manager: 3,
+    // Level 3: Country Functional Directors (above)
     // Level 4: Regional Operations Manager & Area Managers
     regional_operations_manager: 4,
     area_operations_manager: 4,

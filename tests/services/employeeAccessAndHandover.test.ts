@@ -4,7 +4,7 @@ import { validateRegionalBoundary } from '../../utils/roleSegregation';
 describe('Employee Regional Boundaries & Handover Security Tests', () => {
     describe('validateRegionalBoundary', () => {
         it('allows HQ executives and non-regional managers to assign across sites', () => {
-            const hqResult = validateRegionalBoundary('CEO', undefined, { regionCode: 'ADDIS' });
+            const hqResult = validateRegionalBoundary('group_ceo', undefined, { regionCode: 'ADDIS' });
             expect(hqResult).toBeNull();
 
             const hrManagerResult = validateRegionalBoundary('country_hr_director', undefined, { regionCode: 'OROMIA' });

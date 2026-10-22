@@ -83,7 +83,7 @@ export const POPULAR_ROLE_CHIPS = [
   { id: 'store_manager', label: 'Store Mgr' },
   { id: 'regional_operations_manager', label: 'Regional Mgr' },
   { id: 'warehouse_manager', label: 'WH Mgr' },
-  { id: 'admin', label: 'Admin' },
+  { id: 'country_managing_director', label: 'Country MD' },
   { id: 'picker', label: 'Picker' },
   { id: 'packer', label: 'Packer' },
   { id: 'driver', label: 'Driver' },

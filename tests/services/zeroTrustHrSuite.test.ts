@@ -285,7 +285,7 @@ describe('Zero-Trust HR Suite Tests', () => {
         terminationsService.approveTermination(term.id, {
           id: 'MGR-HR-01',
           name: 'HR Officer Martha',
-          role: 'hr'
+          role: 'hr_generalist'
         })
       ).rejects.toThrow(/Maker-Checker violation/);
     });

@@ -5,9 +5,9 @@ import type { Site, Employee } from '../../types';
 describe('Regional Authority & Lens Scoping', () => {
     describe('canSwitchRegion', () => {
         it('permits National HQ executive roles to switch regional lenses', () => {
-            expect(canSwitchRegion({ role: 'ceo' })).toBe(true);
             expect(canSwitchRegion({ role: 'group_ceo' })).toBe(true);
-            expect(canSwitchRegion({ role: 'admin' })).toBe(true);
+            expect(canSwitchRegion({ role: 'group_ceo' })).toBe(true);
+            expect(canSwitchRegion({ role: 'country_managing_director' })).toBe(true);
             expect(canSwitchRegion({ role: 'country_operations_director' })).toBe(true);
             expect(canSwitchRegion({ role: 'country_finance_director' })).toBe(true);
             expect(canSwitchRegion({ role: 'auditor' })).toBe(true);
@@ -58,7 +58,7 @@ describe('Regional Authority & Lens Scoping', () => {
         });
 
         it('returns null for unassigned or global users', () => {
-            const userHQ = { id: 'ceo-user', role: 'ceo' };
+            const userHQ = { id: 'ceo-user', role: 'group_ceo' };
             const region = getUserRegion(userHQ, mockSites as Site[], mockEmployees as Employee[]);
             expect(region).toBeNull();
         });

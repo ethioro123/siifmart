@@ -49,7 +49,7 @@ describe('WMS Logistics & Cross-Border Transfer Quarantine Governance Suite', ()
 
     describe('Managerial Authority & Harmonized HQ Roles (isTransferManager)', () => {
         it('authorizes Global CEO and Country Managing Director as transfer managers', () => {
-            expect(isTransferManager({ id: '1', role: 'ceo', name: 'Global CEO' } as any)).toBe(true);
+            expect(isTransferManager({ id: '1', role: 'group_ceo', name: 'Global CEO' } as any)).toBe(true);
             expect(isTransferManager({ id: '2', role: 'group_ceo', name: 'Super Admin' } as any)).toBe(true);
             expect(isTransferManager({ id: '3', role: 'country_managing_director', name: 'MD' } as any)).toBe(true);
         });
@@ -109,7 +109,7 @@ describe('WMS Logistics & Cross-Border Transfer Quarantine Governance Suite', ()
         });
 
         it('strictly denies deletion of in-transit transfers even for executive leadership', () => {
-            const ceoUser = { id: 'u-ceo', name: 'CEO', role: 'ceo' };
+            const ceoUser = { id: 'u-ceo', name: 'CEO', role: 'group_ceo' };
             const decision = canDeleteTransferManifest(mockInTransitJob as any, ceoUser as any);
             expect(decision.canDelete).toBe(false);
             expect(decision.isDeletableStatus).toBe(false);

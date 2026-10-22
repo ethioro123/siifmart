@@ -209,9 +209,9 @@ describe('Headcount Quota & Frontline Fast-Track Delegation', () => {
   describe('3. Maker-Checker Authority Gating (isDirectOnboardingAuthorized)', () => {
     it('grants unconditional direct onboarding authority to corporate HQ & Executive roles', () => {
       expect(isDirectOnboardingAuthorized('group_ceo')).toBe(true);
-      expect(isDirectOnboardingAuthorized('CEO')).toBe(true);
+      expect(isDirectOnboardingAuthorized('group_ceo')).toBe(true);
       expect(isDirectOnboardingAuthorized('country_hr_director')).toBe(true);
-      expect(isDirectOnboardingAuthorized('hr')).toBe(true);
+      expect(isDirectOnboardingAuthorized('hr_generalist')).toBe(true);
     });
 
     it('grants delegated direct onboarding authority to site/regional managers for Level 4 staff when quota slot is open', () => {

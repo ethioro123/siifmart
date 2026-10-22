@@ -115,16 +115,6 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         managesRoles: ['buyer', 'customs_import_specialist'],
         isManagerial: true
     },
-    manager: {
-        role: 'manager',
-        level: 7,
-        levelCategory: 'supervisor',
-        levelTag: 'L7 Manager',
-        reportsToRole: 'country_operations_director',
-        reportsToLabel: 'Country Operations Director',
-        managesRoles: ['sales_associate', 'cashier'],
-        isManagerial: true
-    },
 
     // =========================================================================
     // LEVEL 8: DEPUTY & SHIFT SUPERVISORS & TEAM LEADERS

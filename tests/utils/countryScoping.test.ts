@@ -293,7 +293,7 @@ describe('useCountryScoping Hook', () => {
         const ceoUser = {
             id: 'ceo-1',
             name: 'Executive Director',
-            role: 'CEO' as any,
+            role: 'group_ceo' as any,
             title: 'Chief Executive Officer'
         };
 
@@ -397,7 +397,7 @@ describe('useCountryScoping Hook', () => {
         ];
 
         // 1. CEO viewing Uganda
-        const ceoUser = { id: 'ceo-1', role: 'CEO' as any };
+        const ceoUser = { id: 'ceo-1', role: 'group_ceo' as any };
         const { result: ceoResult } = renderHook(() =>
             useCountryScoping({
                 country: 'UG',

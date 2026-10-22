@@ -40,11 +40,11 @@ describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
 
     describe('2. Submit Action Label Adaptation', () => {
         it('renders direct onboarding labels for HR and Executive roles', () => {
-            expect(getOnboardingSubmitLabel('hr', false)).toBe('Confirm & Onboard Talent');
-            expect(getOnboardingSubmitLabel('hr', true)).toBe('Creating Employee...');
+            expect(getOnboardingSubmitLabel('hr_generalist', false)).toBe('Confirm & Onboard Talent');
+            expect(getOnboardingSubmitLabel('hr_generalist', true)).toBe('Creating Employee...');
             expect(getOnboardingSubmitLabel('group_ceo', false)).toBe('Confirm & Onboard Talent');
             expect(getOnboardingSubmitLabel('group_ceo', true)).toBe('Creating Employee...');
-            expect(getOnboardingSubmitLabel('CEO', false)).toBe('Confirm & Onboard Talent');
+            expect(getOnboardingSubmitLabel('group_ceo', false)).toBe('Confirm & Onboard Talent');
         });
 
         it('renders draft and HR submission labels for warehouse and store managers', () => {
@@ -58,7 +58,7 @@ describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
 
     describe('3. Modal Header Title Adaptation', () => {
         it('renders standard title for HR and Executive roles', () => {
-            expect(getOnboardingModalTitle('hr')).toBe('Onboard Talent');
+            expect(getOnboardingModalTitle('hr_generalist')).toBe('Onboard Talent');
             expect(getOnboardingModalTitle('group_ceo')).toBe('Onboard Talent');
         });
 

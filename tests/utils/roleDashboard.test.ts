@@ -24,7 +24,7 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
     expect(getRoleDashboardRoute('country_finance_director', 'Administration')).toBe('/finance');
     expect(getRoleDashboardRoute('country_hr_director', 'Administration')).toBe('/employees');
     expect(getRoleDashboardRoute('country_hr_director', 'Administration')).toBe('/employees');
-    expect(getRoleDashboardRoute('hr', 'Administration')).toBe('/employees');
+    expect(getRoleDashboardRoute('hr_generalist', 'Administration')).toBe('/employees');
     expect(getRoleDashboardRoute('country_commercial_director', 'Administration')).toBe('/pricing');
     expect(getRoleDashboardRoute('country_commercial_director', 'Administration')).toBe('/pricing');
     expect(getRoleDashboardRoute('country_technology_director', 'Administration')).toBe('/settings');
@@ -40,9 +40,9 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
 
   it('routes Executive Leadership to Central Operations (/admin) unless scoped to a physical site', () => {
     expect(getRoleDashboardRoute('group_ceo', 'Administration')).toBe('/admin');
-    expect(getRoleDashboardRoute('CEO', 'Administration')).toBe('/admin');
+    expect(getRoleDashboardRoute('group_ceo', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('country_managing_director', 'Administration')).toBe('/admin');
-    expect(getRoleDashboardRoute('admin', 'Administration')).toBe('/admin');
+    expect(getRoleDashboardRoute('country_managing_director', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('country_operations_director', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('regional_operations_manager', 'Administration')).toBe('/regional-ops');
     expect(getRoleDashboardRoute('country_operations_director', 'Administration')).toBe('/admin');
@@ -80,7 +80,7 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
 
     expect(getRoleDashboardRoute('cashier', 'Store')).toBe('/pos');
     expect(getRoleDashboardRoute('sales_associate', 'Store')).toBe('/pos');
-    expect(getRoleDashboardRoute('pos', 'Store')).toBe('/pos');
+    expect(getRoleDashboardRoute('cashier', 'Store')).toBe('/pos');
   });
 
   it('falls back safely to /profile for unknown or missing roles without infinite loops', () => {

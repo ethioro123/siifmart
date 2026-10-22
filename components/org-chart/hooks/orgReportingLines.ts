@@ -49,7 +49,7 @@ export const HIERARCHY_LEVEL_CONFIGS: Record<number, HierarchyLevelConfig> = {
     },
     2: {
         level: 2,
-        title: 'Level 2: Country Executive Leadership',
+        title: 'Level 2: Country Managing Director',
         subtitle: 'National managing directorate, country P&L & sovereign operations',
         badge: 'L2 Country Exec',
         color: '#7c3aed',
@@ -61,9 +61,9 @@ export const HIERARCHY_LEVEL_CONFIGS: Record<number, HierarchyLevelConfig> = {
     },
     3: {
         level: 3,
-        title: 'Level 3: Corporate HQ Directorate Heads',
-        subtitle: 'National functional heads across Operations, Finance, HR, Supply Chain & Audit',
-        badge: 'L3 HQ Director',
+        title: 'Level 3: Country Functional Directors',
+        subtitle: 'Country directors for Operations, Finance, Commercial, Supply Chain, HR, Technology & Compliance',
+        badge: 'L3 Country Director',
         color: '#2C5E3B',
         bgLight: '#f0f4f0',
         bgDark: '#18241b',

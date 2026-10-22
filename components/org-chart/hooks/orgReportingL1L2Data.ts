@@ -121,18 +121,6 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     // =========================================================================
     // LEVEL 2: COUNTRY EXECUTIVE LEADERSHIP
     // =========================================================================
-    admin: {
-        role: 'admin',
-        level: 2,
-        levelCategory: 'executive',
-        levelTag: 'L2 Country Executive',
-        reportsToRole: 'group_coo',
-        reportsToLabel: 'Group COO',
-        dottedLineRole: 'group_ceo',
-        dottedLineLabel: 'Group CEO (Executive Oversight)',
-        managesRoles: ['country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager', 'regional_operations_manager'],
-        isManagerial: true
-    },
     country_managing_director: {
         role: 'country_managing_director',
         level: 2,
@@ -147,9 +135,9 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     },
     country_operations_director: {
         role: 'country_operations_director',
-        level: 2,
+        level: 3,
         levelCategory: 'director',
-        levelTag: 'L2 Country Operations Director',
+        levelTag: 'L3 Country Operations Director',
         reportsToRole: 'country_managing_director',
         reportsToLabel: 'Country Managing Director',
         dottedLineRole: 'group_coo',
@@ -159,9 +147,9 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     },
     country_finance_director: {
         role: 'country_finance_director',
-        level: 2,
+        level: 3,
         levelCategory: 'director',
-        levelTag: 'L2 Country Finance Director',
+        levelTag: 'L3 Country Finance Director',
         reportsToRole: 'country_managing_director',
         reportsToLabel: 'Country Managing Director',
         dottedLineRole: 'group_cfo',
@@ -171,9 +159,9 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     },
     country_commercial_director: {
         role: 'country_commercial_director',
-        level: 2,
+        level: 3,
         levelCategory: 'director',
-        levelTag: 'L2 Country Commercial Director',
+        levelTag: 'L3 Country Commercial Director',
         reportsToRole: 'country_managing_director',
         reportsToLabel: 'Country Managing Director',
         dottedLineRole: 'group_cco',
@@ -183,9 +171,9 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     },
     country_supply_chain_director: {
         role: 'country_supply_chain_director',
-        level: 2,
+        level: 3,
         levelCategory: 'director',
-        levelTag: 'L2 Country Supply Chain Director',
+        levelTag: 'L3 Country Supply Chain Director',
         reportsToRole: 'country_managing_director',
         reportsToLabel: 'Country Managing Director',
         dottedLineRole: 'group_csco',
@@ -195,9 +183,9 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     },
     country_hr_director: {
         role: 'country_hr_director',
-        level: 2,
+        level: 3,
         levelCategory: 'director',
-        levelTag: 'L2 Country HR Director',
+        levelTag: 'L3 Country HR Director',
         reportsToRole: 'country_managing_director',
         reportsToLabel: 'Country Managing Director',
         dottedLineRole: 'group_chro',
@@ -207,9 +195,9 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     },
     country_technology_director: {
         role: 'country_technology_director',
-        level: 2,
+        level: 3,
         levelCategory: 'director',
-        levelTag: 'L2 Country Technology Director',
+        levelTag: 'L3 Country Technology Director',
         reportsToRole: 'country_managing_director',
         reportsToLabel: 'Country Managing Director',
         dottedLineRole: 'group_cto',
@@ -219,9 +207,9 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     },
     country_compliance_manager: {
         role: 'country_compliance_manager',
-        level: 2,
+        level: 3,
         levelCategory: 'director',
-        levelTag: 'L2 Country Compliance Manager',
+        levelTag: 'L3 Country Compliance Manager',
         reportsToRole: 'country_managing_director',
         reportsToLabel: 'Country Managing Director',
         dottedLineRole: 'group_cae',

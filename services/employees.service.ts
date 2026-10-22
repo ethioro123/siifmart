@@ -299,7 +299,7 @@ export const employeesService = {
     },
 
     async create(employee: Omit<Employee, 'created_at' | 'updated_at'>) {
-        const isCEO = employee.role === 'group_ceo' || (employee.role as string) === 'CEO';
+        const isCEO = employee.role === 'group_ceo';
         if (!isCEO && (!employee.siteId || !employee.siteId.trim())) {
             throw new Error('Workplace location is mandatory. Every employee must be tied to an operating facility ID, except the CEO.');
         }

@@ -9,7 +9,7 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
     describe('Country Managing Director (country_managing_director / admin)', () => {
         it('grants complete access to all 12 fulfillment tabs in WMS Ops', () => {
             const tabsCmd = getVisibleFulfillmentTabs('country_managing_director');
-            const tabsAdmin = getVisibleFulfillmentTabs('admin');
+            const tabsAdmin = getVisibleFulfillmentTabs('country_managing_director');
 
             expect(tabsCmd).toHaveLength(13);
             expect(tabsCmd).toContain('RECEIVE');
@@ -31,7 +31,7 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
 
         it('assigns DOCKS as the default operational fulfillment tab', () => {
             expect(getDefaultFulfillmentTab('country_managing_director')).toBe('DOCKS');
-            expect(getDefaultFulfillmentTab('admin')).toBe('DOCKS');
+            expect(getDefaultFulfillmentTab('country_managing_director')).toBe('DOCKS');
         });
 
         it('keeps final PO sign-off with procurement while authorizing other executive workflows', () => {
@@ -96,8 +96,8 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
             expect(FINANCE_COAPPROVER_ROLES).toContain('country_finance_director');
             expect(FINANCE_COAPPROVER_ROLES).toContain('country_managing_director');
             expect(FINANCE_COAPPROVER_ROLES).toContain('group_ceo');
-            expect(FINANCE_COAPPROVER_ROLES).toContain('CEO');
-            expect(FINANCE_COAPPROVER_ROLES).toContain('ceo');
+            expect(FINANCE_COAPPROVER_ROLES).toContain('group_ceo');
+            expect(FINANCE_COAPPROVER_ROLES).toContain('group_ceo');
         });
 
         it('authorizes Head of Finance to approve financial workflows', () => {

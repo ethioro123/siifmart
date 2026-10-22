@@ -130,15 +130,15 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
         it('cannot employ CEO (super_admin or group_ceo, Level 1)', () => {
             expect(canEmployRole('country_hr_director', 'group_ceo')).toBe(false);
             expect(canEmployRole('country_hr_director', 'group_ceo')).toBe(false);
-            expect(canEmployRole('hr', 'group_ceo')).toBe(false);
-            expect(canEmployRole('hr', 'group_ceo')).toBe(false);
+            expect(canEmployRole('hr_generalist', 'group_ceo')).toBe(false);
+            expect(canEmployRole('hr_generalist', 'group_ceo')).toBe(false);
         });
 
         it('cannot employ Level 2 superiors (regional_operations_manager, head_of_operations)', () => {
             expect(canEmployRole('country_hr_director', 'regional_operations_manager')).toBe(false);
             expect(canEmployRole('country_hr_director', 'country_operations_director')).toBe(false);
-            expect(canEmployRole('hr', 'regional_operations_manager')).toBe(false);
-            expect(canEmployRole('hr', 'country_operations_director')).toBe(false);
+            expect(canEmployRole('hr_generalist', 'regional_operations_manager')).toBe(false);
+            expect(canEmployRole('hr_generalist', 'country_operations_director')).toBe(false);
         });
 
         it('cannot employ their own level peers (head_of_hr, hr, head_of_finance, head_of_procurement, head_of_supply_chain)', () => {
@@ -147,8 +147,8 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
             expect(canEmployRole('country_hr_director', 'country_finance_director')).toBe(false);
             expect(canEmployRole('country_hr_director', 'country_commercial_director')).toBe(false);
             expect(canEmployRole('country_hr_director', 'country_supply_chain_director')).toBe(false);
-            expect(canEmployRole('hr', 'country_hr_director')).toBe(false);
-            expect(canEmployRole('hr', 'hr')).toBe(false);
+            expect(canEmployRole('hr_generalist', 'country_hr_director')).toBe(false);
+            expect(canEmployRole('hr_generalist', 'hr')).toBe(false);
         });
 
         it('can only employ roles strictly less than their role (Level 3 Site Managers & Level 4 Staff)', () => {
@@ -229,23 +229,23 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
 
     describe('Country Managing Director (admin, Level 1, Rank 98)', () => {
         it('cannot employ Global CEO (super_admin) or another Country Managing Director (admin)', () => {
-            expect(getRoleHierarchy('admin')).toBe(98);
-            expect(canEmployRole('admin', 'group_ceo')).toBe(false);
-            expect(canEmployRole('admin', 'admin')).toBe(false);
+            expect(getRoleHierarchy('country_managing_director')).toBe(98);
+            expect(canEmployRole('country_managing_director', 'group_ceo')).toBe(false);
+            expect(canEmployRole('country_managing_director', 'admin')).toBe(false);
         });
 
         it('can employ all Level 2 Directors, Level 3 Site Managers, and Level 4 Staff in their country', () => {
-            expect(canEmployRole('admin', 'country_operations_director')).toBe(true);
-            expect(canEmployRole('admin', 'regional_operations_manager')).toBe(true);
-            expect(canEmployRole('admin', 'country_finance_director')).toBe(true);
-            expect(canEmployRole('admin', 'country_hr_director')).toBe(true);
-            expect(canEmployRole('admin', 'country_commercial_director')).toBe(true);
-            expect(canEmployRole('admin', 'country_supply_chain_director')).toBe(true);
-            expect(canEmployRole('admin', 'country_commercial_director')).toBe(true);
-            expect(canEmployRole('admin', 'store_manager')).toBe(true);
-            expect(canEmployRole('admin', 'warehouse_manager')).toBe(true);
-            expect(canEmployRole('admin', 'cashier')).toBe(true);
-            expect(canEmployRole('admin', 'picker')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'country_operations_director')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'regional_operations_manager')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'country_finance_director')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'country_hr_director')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'country_commercial_director')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'country_supply_chain_director')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'country_commercial_director')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'store_manager')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'cashier')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'picker')).toBe(true);
         });
     });
 
@@ -362,19 +362,19 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
         });
 
         it('supports legacy roles (hr, admin)', () => {
-            expect(canEmployRole('hr', 'group_ceo')).toBe(false);
-            expect(canEmployRole('hr', 'store_manager')).toBe(true);
-            expect(canEmployRole('admin', 'group_ceo')).toBe(false);
-            expect(canEmployRole('admin', 'store_manager')).toBe(true);
+            expect(canEmployRole('hr_generalist', 'group_ceo')).toBe(false);
+            expect(canEmployRole('hr_generalist', 'store_manager')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'group_ceo')).toBe(false);
+            expect(canEmployRole('country_managing_director', 'store_manager')).toBe(true);
         });
     });
 
     describe('Pending Onboarding Approval Authorization (e.g. Makena Benson, Store Manager)', () => {
         it('allows Super Admin, Admin, and HR to approve Store Manager pending recruits', () => {
             expect(canEmployRole('group_ceo', 'store_manager')).toBe(true);
-            expect(canEmployRole('admin', 'store_manager')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'store_manager')).toBe(true);
             expect(canEmployRole('country_hr_director', 'store_manager')).toBe(true);
-            expect(canEmployRole('hr', 'store_manager')).toBe(true);
+            expect(canEmployRole('hr_generalist', 'store_manager')).toBe(true);
             expect(canEmployRole('regional_operations_manager', 'store_manager')).toBe(true);
         });
 

@@ -26,8 +26,8 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
     describe('isManagerialRole helper', () => {
         it('identifies Level 1 executive roles as managerial', () => {
             expect(isManagerialRole('group_ceo')).toBe(true);
-            expect(isManagerialRole('admin')).toBe(true);
-            expect(isManagerialRole('CEO')).toBe(true);
+            expect(isManagerialRole('country_managing_director')).toBe(true);
+            expect(isManagerialRole('group_ceo')).toBe(true);
         });
 
         it('identifies Level 2 corporate directorates as managerial', () => {

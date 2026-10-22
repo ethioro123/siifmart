@@ -62,7 +62,7 @@ describe('Adaptive Regional Scope across Workflows', () => {
             useCountryScoping({
                 country: 'KE',
                 settings: { country: 'KE', storeName: 'SIIFMART' } as any,
-                user: { id: 'user-hq-1', role: 'CEO', scopeLevel: 'HQ' } as any,
+                user: { id: 'user-hq-1', role: 'group_ceo', scopeLevel: 'HQ' } as any,
                 sites: mockSites,
                 activeSiteId: 'site-ke-nrb-1',
                 setActiveSiteId: () => {},

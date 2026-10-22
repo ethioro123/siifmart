@@ -73,7 +73,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
             const updated = await employeeChangesService.approve(
                 req.id,
                 user?.name || (isCEO ? 'CEO Executive' : 'Authorized Approver'),
-                user?.role || 'admin',
+                user?.role || 'country_managing_director',
                 'Approved via Cross-Department Governance Portal'
             );
 

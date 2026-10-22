@@ -6,7 +6,7 @@ import { Employee } from '../../types';
 describe('orgTreeLayout helpers', () => {
     it('correctly ranks 10-level hierarchy role levels (L1 CEO to L10 Frontline)', () => {
         expect(getRoleLevel('group_ceo')).toBe(1);
-        expect(getRoleLevel('admin')).toBe(2);
+        expect(getRoleLevel('country_managing_director')).toBe(2);
         expect(getRoleLevel('country_operations_director')).toBe(3);
         expect(getRoleLevel('country_finance_director')).toBe(3);
         expect(getRoleLevel('regional_operations_manager')).toBe(4);
@@ -45,7 +45,7 @@ describe('orgTreeLayout helpers', () => {
         expect(getRoleDept('picker')).toBe('warehouse');
         expect(getRoleDept('warehouse_manager')).toBe('warehouse');
         expect(getRoleDept('country_finance_director')).toBe('finance');
-        expect(getRoleDept('country_hr_director')).toBe('hr');
+        expect(getRoleDept('country_hr_director')).toBe('hr_generalist');
         expect(getRoleDept('buyer')).toBe('procurement');
         expect(getRoleDept('vendor_relations_manager')).toBe('procurement');
         expect(getRoleDept('customs_import_specialist')).toBe('procurement');

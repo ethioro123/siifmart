@@ -6,5 +6,5 @@ export function isStagingTestEmail(email: unknown): email is string {
 }
 
 export function isStagingExecutive(role: unknown): boolean {
-    return typeof role === 'string' && ['super_admin', 'ceo'].includes(role.toLowerCase());
+    return typeof role === 'string' && ['group_ceo'].includes(role.toLowerCase());
 }

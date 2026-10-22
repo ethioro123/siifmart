@@ -71,9 +71,9 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
         // No specific role required → use the existing canApprove
         if (!requiredRole) return true;
         // Check if user's role matches the required approval role
-        if ((requiredRole === 'country_commercial_director') && (role === 'country_commercial_director' || role === 'procurement')) return true;
-        if (requiredRole === 'warehouse_manager' && (role === 'warehouse_manager' || role === 'manager' || role === 'warehouse')) return true;
-        if (requiredRole === 'store_manager' && (role === 'store_manager' || role === 'manager')) return true;
+        if ((requiredRole === 'country_commercial_director') && role === 'country_commercial_director') return true;
+        if (requiredRole === 'warehouse_manager' && role === 'warehouse_manager') return true;
+        if (requiredRole === 'store_manager' && role === 'store_manager') return true;
         return false;
     };
 

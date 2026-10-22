@@ -227,7 +227,7 @@ export function canApprove(
             amount <= customThreshold;
     }
     // Global CEO and Country Managing Director can sign off any workflow within policy
-    if (norm === 'group_ceo' || norm === 'ceo' || norm === 'country_managing_director' || norm === 'admin') {
+    if (norm === 'group_ceo' || norm === 'country_managing_director') {
         return true;
     }
 

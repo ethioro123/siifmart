@@ -42,7 +42,7 @@ describe('HR Compensation & Employee Lifecycle Governance Suite', () => {
     describe('2. Anti-Self-Compensation & CEO Sovereign Compensation Protection', () => {
         it('identifies sovereign CEO roles and blocks subordinate modification', () => {
             expect(isSovereignCEO('group_ceo')).toBe(true);
-            expect(isSovereignCEO('ceo')).toBe(true);
+            expect(isSovereignCEO('group_ceo')).toBe(true);
             expect(isSovereignCEO('group_ceo')).toBe(true);
             expect(isSovereignCEO('country_hr_director')).toBe(false);
             expect(isSovereignCEO('country_finance_director')).toBe(false);

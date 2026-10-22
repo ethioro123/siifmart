@@ -90,10 +90,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const rawRole = profile.role;
         const rawNormalized = rawRole.toLowerCase().trim().replace(/[\s-]/g, '_');
         
-        // Map common aliases to internal role keys used in ACTION_PERMISSIONS
-        let mappedRole = rawNormalized;
-        if (rawNormalized === 'ceo') mappedRole = 'group_ceo';
-        else if (rawNormalized === 'procurement') mappedRole = 'country_commercial_director';
+        // Stored role IDs are canonical; no alias mapping is performed
+        const mappedRole = rawNormalized;
 
         // Resolve location: use preset on explicit login, check sessionStorage/localStorage, or fallback to active session
         let location = presetLocation;

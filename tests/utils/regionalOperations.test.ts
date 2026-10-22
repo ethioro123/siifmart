@@ -21,7 +21,7 @@ describe('Regional Operations Architecture & RBAC', () => {
 
     it('routes HQ executives (CEO, super_admin, head_of_operations) to /admin', () => {
       expect(getRoleDashboardRoute('group_ceo')).toBe('/admin');
-      expect(getRoleDashboardRoute('CEO')).toBe('/admin');
+      expect(getRoleDashboardRoute('group_ceo')).toBe('/admin');
       expect(getRoleDashboardRoute('country_operations_director')).toBe('/admin');
     });
 

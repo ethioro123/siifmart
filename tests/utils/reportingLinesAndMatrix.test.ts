@@ -19,7 +19,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(groupCoo.level).toBe(1);
         expect(groupCoo.levelCategory).toBe('executive');
         expect(groupCoo.reportsToRole).toBe('group_ceo');
-        expect(groupCoo.reportsToLabel).toContain('CEO');
+        expect(groupCoo.reportsToLabel).toContain('group_ceo');
         expect(groupCoo.isManagerial).toBe(true);
         expect(groupCoo.managesRoles.length).toBeGreaterThan(0);
 
@@ -27,7 +27,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(groupCfo.level).toBe(1);
         expect(groupCfo.levelCategory).toBe('executive');
         expect(groupCfo.reportsToRole).toBe('group_ceo');
-        expect(groupCfo.reportsToLabel).toContain('CEO');
+        expect(groupCfo.reportsToLabel).toContain('group_ceo');
         expect(groupCfo.isManagerial).toBe(true);
         expect(groupCfo.managesRoles.length).toBeGreaterThan(0);
 

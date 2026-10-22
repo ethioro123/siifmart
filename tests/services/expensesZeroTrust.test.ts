@@ -163,7 +163,7 @@ describe('Zero-Trust Hardened Expenses Service', () => {
         const approved = await expensesService.approve('EXP-300', {
             id: 'EMP-CEO-01',
             name: 'Shukri CEO',
-            role: 'CEO'
+            role: 'group_ceo'
         });
 
         expect(approved.status).toBe('Approved');

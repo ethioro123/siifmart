@@ -36,7 +36,7 @@ describe('zeroTrustPolicies.service runtime enforcement', () => {
 
     describe('checkTimeRestriction', () => {
         it('always allows CEO and super_admin regardless of time', () => {
-            expect(checkTimeRestriction('CEO').allowed).toBe(true);
+            expect(checkTimeRestriction('group_ceo').allowed).toBe(true);
             expect(checkTimeRestriction('group_ceo').allowed).toBe(true);
         });
 
@@ -73,7 +73,7 @@ describe('zeroTrustPolicies.service runtime enforcement', () => {
             setActiveRolePolicies({
                 admin: { ...DEFAULT_ROLE_POLICIES.admin, ip_restriction: false }
             });
-            expect(checkIpRestriction('admin', 'external-wifi.org').allowed).toBe(true);
+            expect(checkIpRestriction('country_managing_director', 'external-wifi.org').allowed).toBe(true);
         });
     });
 
@@ -84,22 +84,22 @@ describe('zeroTrustPolicies.service runtime enforcement', () => {
             });
 
             // Without MFA (factor enrolled: nextLevel === 'aal2', currentLevel === 'aal1')
-            const unverified = checkMfaRequirement('admin', 'aal1', 'aal2');
+            const unverified = checkMfaRequirement('country_managing_director', 'aal1', 'aal2');
             expect(unverified.required).toBe(true);
             expect(unverified.satisfied).toBe(false);
 
             // With AAL2 MFA
-            const verifiedAal2 = checkMfaRequirement('admin', 'aal2', 'aal2');
+            const verifiedAal2 = checkMfaRequirement('country_managing_director', 'aal2', 'aal2');
             expect(verifiedAal2.required).toBe(true);
             expect(verifiedAal2.satisfied).toBe(true);
 
             // An enrolled factor or user-editable metadata alone is not an AAL2 session.
-            const enrolledOnly = checkMfaRequirement('admin', undefined);
+            const enrolledOnly = checkMfaRequirement('country_managing_director', undefined);
             expect(enrolledOnly.required).toBe(true);
             expect(enrolledOnly.satisfied).toBe(false);
 
             // When no verified MFA factor is enrolled on the account (nextLevel === 'aal1'), do not emit a false session warning.
-            const noFactorEnrolled = checkMfaRequirement('admin', 'aal1', 'aal1');
+            const noFactorEnrolled = checkMfaRequirement('country_managing_director', 'aal1', 'aal1');
             expect(noFactorEnrolled.required).toBe(false);
             expect(noFactorEnrolled.satisfied).toBe(true);
 
@@ -113,7 +113,7 @@ describe('zeroTrustPolicies.service runtime enforcement', () => {
 
     describe('checkDynamicRolePermission', () => {
         it('sovereign CEO and super_admin bypass dynamic permission restrictions', () => {
-            expect(checkDynamicRolePermission('CEO', 'pos.void')).toBe(true);
+            expect(checkDynamicRolePermission('group_ceo', 'pos.void')).toBe(true);
             expect(checkDynamicRolePermission('group_ceo', 'inventory.adjust')).toBe(true);
         });
 

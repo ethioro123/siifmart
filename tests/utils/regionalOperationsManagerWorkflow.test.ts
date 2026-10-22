@@ -81,15 +81,15 @@ describe('Regional Operations Manager (SOP-MGT-020, Level 4, Rank 90) Full Opera
             expect(storeSections).toContain('warehouse');
             expect(storeSections).toContain('procurement');
             expect(storeSections).toContain('pricing');
-            expect(storeSections).toContain('admin');
+            expect(storeSections).toContain('country_managing_director');
             expect(storeSections).toContain('finance');
         });
 
         it('never strips pos section from regional_operations_manager when viewing a Warehouse', () => {
             const whSections = getAvailableSections('regional_operations_manager', 'Warehouse');
-            expect(whSections).toContain('pos');
+            expect(whSections).toContain('cashier');
             expect(whSections).toContain('pricing');
-            expect(whSections).toContain('admin');
+            expect(whSections).toContain('country_managing_director');
             expect(whSections).toContain('finance');
             expect(whSections).toContain('procurement');
         });

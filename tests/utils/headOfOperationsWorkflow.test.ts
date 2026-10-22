@@ -79,14 +79,14 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
     describe('2. Multi-Site Executive Exemption & Navigation Resilience', () => {
         it('preserves all sections regardless of active site type (exempt from section stripping)', () => {
             const warehouseSections = getAvailableSections('country_operations_director', 'Warehouse');
-            expect(warehouseSections).toContain('admin');
-            expect(warehouseSections).toContain('pos');
+            expect(warehouseSections).toContain('country_managing_director');
+            expect(warehouseSections).toContain('cashier');
             expect(warehouseSections).toContain('pricing');
             expect(warehouseSections).toContain('finance');
             expect(warehouseSections).toContain('settings');
 
             const storeSections = getAvailableSections('country_operations_director', 'Store');
-            expect(storeSections).toContain('admin');
+            expect(storeSections).toContain('country_managing_director');
             expect(storeSections).toContain('warehouse');
             expect(storeSections).toContain('pricing');
             expect(storeSections).toContain('finance');

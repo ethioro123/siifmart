@@ -31,10 +31,10 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
     describe('CEO Sovereign Universal Authority', () => {
         it('identifies CEO and super_admin as sovereign roles, excluding admin (Country MD)', () => {
             expect(isSovereignCEO('group_ceo')).toBe(true);
-            expect(isSovereignCEO('admin')).toBe(false); // Country Managing Director is not Sovereign CEO
-            expect(isSovereignCEO('ceo')).toBe(true);
+            expect(isSovereignCEO('country_managing_director')).toBe(false); // Country Managing Director is not Sovereign CEO
+            expect(isSovereignCEO('group_ceo')).toBe(true);
             expect(isSovereignCEO('country_hr_director')).toBe(false);
-            expect(isSovereignCEO('hr')).toBe(false);
+            expect(isSovereignCEO('hr_generalist')).toBe(false);
         });
 
         it('bypasses all approvals when CEO edits name, age, salary, and department', () => {
@@ -182,7 +182,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
         });
 
         it('denies standard HR roles from approving governed requests', () => {
-            expect(canApproveChangeRequest('hr', 'Finance Department')).toBe(false);
+            expect(canApproveChangeRequest('hr_generalist', 'Finance Department')).toBe(false);
             expect(canApproveChangeRequest('country_hr_director', 'Finance Department')).toBe(false);
             expect(canApproveChangeRequest('cashier', 'Finance Department')).toBe(false);
         });
@@ -223,7 +223,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
         });
 
         it('strictly blocks Country Managing Director from approving change requests targeting Global CEO', () => {
-            const canAdminApproveCEO = canApproveChangeRequest('admin', 'Finance Department', {
+            const canAdminApproveCEO = canApproveChangeRequest('country_managing_director', 'Finance Department', {
                 targetEmployeeRole: 'group_ceo'
             });
             expect(canAdminApproveCEO).toBe(false);
