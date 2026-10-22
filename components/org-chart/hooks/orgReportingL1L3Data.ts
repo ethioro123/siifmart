@@ -12,7 +12,7 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L1 Global Executive',
         reportsToRole: null,
         reportsToLabel: 'Board of Directors / Ownership',
-        managesRoles: ['group_coo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_operations', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_merchandising', 'head_of_supply_chain', 'head_of_it', 'head_of_audit', 'it_support'],
+        managesRoles: ['group_coo', 'group_cfo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_operations', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_merchandising', 'head_of_supply_chain', 'head_of_it', 'head_of_audit', 'it_support'],
         isManagerial: true
     },
     group_coo: {
@@ -25,6 +25,16 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         managesRoles: ['country_managing_director', 'admin', 'head_of_operations', 'regional_operations_manager', 'head_of_supply_chain'],
         isManagerial: true
     },
+    group_cfo: {
+        role: 'group_cfo',
+        level: 1,
+        levelCategory: 'executive',
+        levelTag: 'L1 Global Executive',
+        reportsToRole: 'group_ceo',
+        reportsToLabel: 'Group CEO',
+        managesRoles: ['head_of_finance', 'regional_finance_manager', 'auditor', 'accountant', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'payroll_specialist'],
+        isManagerial: true
+    },
     super_admin: {
         role: 'super_admin',
         level: 1,
@@ -32,7 +42,7 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L1 Global Executive',
         reportsToRole: null,
         reportsToLabel: 'Board of Directors / Ownership',
-        managesRoles: ['group_coo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_operations', 'it_support'],
+        managesRoles: ['group_coo', 'group_cfo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_operations', 'it_support'],
         isManagerial: true
     },
 
@@ -82,9 +92,11 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'director',
         levelTag: 'L3 Finance Director',
-        reportsToRole: 'super_admin',
-        reportsToLabel: 'CEO',
-        managesRoles: ['auditor', 'accountant', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
+        reportsToRole: 'group_cfo',
+        reportsToLabel: 'Group CFO',
+        dottedLineRole: 'country_managing_director',
+        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
+        managesRoles: ['regional_finance_manager', 'auditor', 'accountant', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
         isManagerial: true
     },
     head_of_hr: {
@@ -196,10 +208,10 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 5,
         levelCategory: 'director',
         levelTag: 'L5 Regional Finance',
-        reportsToRole: 'regional_operations_manager',
-        reportsToLabel: 'Regional Operations Manager (Territory Administration)',
-        dottedLineRole: 'head_of_finance',
-        dottedLineLabel: 'Head of Finance (Corporate Finance & Audit)',
+        reportsToRole: 'head_of_finance',
+        reportsToLabel: 'Head of Finance (Corporate Finance Directorate)',
+        dottedLineRole: 'regional_operations_manager',
+        dottedLineLabel: 'Regional Operations Manager (Territory Administration)',
         managesRoles: ['accountant', 'treasury_officer'],
         isManagerial: true
     },

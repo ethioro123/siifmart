@@ -4,6 +4,7 @@ export const ROLE_LEVELS: Record<string, number> = {
     // Level 1: Global Executive
     group_ceo: 1,
     group_coo: 1,
+    group_cfo: 1,
     super_admin: 1,
     CEO: 1,
     ceo: 1,
@@ -92,6 +93,7 @@ export const ROLE_MATRIX_RANK: Record<string, number> = {
     // 1. Executive Leadership (10-19)
     group_ceo: 10,
     group_coo: 10.5,
+    group_cfo: 10.6,
     super_admin: 10,
     CEO: 10,
     ceo: 10,

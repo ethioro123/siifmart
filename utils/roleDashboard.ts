@@ -64,10 +64,8 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'customs_import_specialist':
             return '/procurement';
 
+        case 'group_cfo':
         case 'head_of_finance':
-        case 'head_of_finance':
-        case 'head_of_finance':
-        case 'head_of_audit':
         case 'head_of_audit':
         case 'auditor':
         case 'accountant':

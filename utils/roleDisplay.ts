@@ -8,6 +8,7 @@ export function getRoleDisplayName(role: UserRole): string {
         // Level 1 - Executive
         group_ceo: 'Group Chief Executive Officer',
         group_coo: 'Group Chief Operating Officer',
+        group_cfo: 'Group Chief Financial Officer',
         super_admin: 'Chief Executive Officer',
         CEO: 'Chief Executive Officer',
         ceo: 'Chief Executive Officer',
@@ -95,6 +96,7 @@ export function getRoleDescription(role: UserRole): string {
         // Level 1 - Executive
         group_ceo: 'Group Chief Executive Officer - Multinational enterprise governance and global group strategy',
         group_coo: 'Group Chief Operating Officer - Global operational execution and multi-country operational performance',
+        group_cfo: 'Group Chief Financial Officer - Global financial strategy, capital allocation, treasury, and statutory fiscal governance',
         super_admin: 'Chief Executive Officer - Full enterprise executive oversight and cross-border governance',
         admin: 'Assistant Chief Executive Officer - Enterprise deputy and executive administrator',
 
@@ -177,6 +179,7 @@ export function getRoleColor(role: UserRole): string {
         // Level 1
         group_ceo: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-400/10 border-yellow-200 dark:border-yellow-400/20',
         group_coo: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-400/10 border-blue-200 dark:border-blue-400/20',
+        group_cfo: 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-400/10 border-emerald-200 dark:border-emerald-400/20',
         super_admin: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-400/10 border-yellow-200 dark:border-yellow-400/20',
         admin: 'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-400/10 border-purple-200 dark:border-purple-400/20',
 

@@ -5,6 +5,7 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
     describe('Group CEO and Global Executive (Level 1, Rank 100)', () => {
         it('can employ subordinate roles across the enterprise', () => {
             expect(canEmployRole('group_ceo', 'group_coo')).toBe(true);
+            expect(canEmployRole('group_ceo', 'group_cfo')).toBe(true);
             expect(canEmployRole('group_ceo', 'country_managing_director')).toBe(true);
             expect(canEmployRole('group_ceo', 'head_of_operations')).toBe(true);
             expect(canEmployRole('group_ceo', 'regional_operations_manager')).toBe(true);
@@ -32,6 +33,24 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
             expect(canEmployRole('group_coo', 'group_ceo')).toBe(false);
             expect(canEmployRole('group_coo', 'super_admin')).toBe(false);
             expect(canEmployRole('group_coo', 'group_coo')).toBe(false);
+        });
+    });
+
+    describe('Group CFO (Level 1, Rank 99)', () => {
+        it('can employ finance heads, regional managers, and subordinate staff', () => {
+            expect(canEmployRole('group_cfo', 'country_managing_director')).toBe(true);
+            expect(canEmployRole('group_cfo', 'head_of_finance')).toBe(true);
+            expect(canEmployRole('group_cfo', 'regional_finance_manager')).toBe(true);
+            expect(canEmployRole('group_cfo', 'accountant')).toBe(true);
+            expect(canEmployRole('group_cfo', 'treasury_officer')).toBe(true);
+            expect(canEmployRole('group_cfo', 'cashier')).toBe(true);
+        });
+
+        it('cannot employ Group CEO, Super Admin, Group COO, or another Group CFO', () => {
+            expect(canEmployRole('group_cfo', 'group_ceo')).toBe(false);
+            expect(canEmployRole('group_cfo', 'super_admin')).toBe(false);
+            expect(canEmployRole('group_cfo', 'group_coo')).toBe(false);
+            expect(canEmployRole('group_cfo', 'group_cfo')).toBe(false);
         });
     });
 

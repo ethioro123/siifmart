@@ -27,9 +27,9 @@ export type { Permission };
  */
 export const PERMISSIONS = {
     // Dashboard
-    VIEW_ADMIN_DASHBOARD: ['group_ceo', 'group_coo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations', 'hr', 'head_of_hr', 'auditor', 'head_of_audit', 'head_of_finance', 'it_support', 'head_of_it', 'store_operations_auditor', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_merchandising_manager'],
-    ACCESS_ADMIN_MODULE: ['group_ceo', 'group_coo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations', 'store_operations_auditor'],
-    ACCESS_REGIONAL_OPS: ['group_ceo', 'group_coo', 'super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'head_of_operations', 'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_merchandising_manager', 'auditor', 'head_of_audit', 'store_operations_auditor', 'hr', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator', 'it_support', 'security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'logistics_manager', 'inventory_manager', 'merchandiser', 'data_analyst', 'cs_manager'],
+    VIEW_ADMIN_DASHBOARD: ['group_ceo', 'group_coo', 'group_cfo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations', 'hr', 'head_of_hr', 'auditor', 'head_of_audit', 'head_of_finance', 'it_support', 'head_of_it', 'store_operations_auditor', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_merchandising_manager'],
+    ACCESS_ADMIN_MODULE: ['group_ceo', 'group_coo', 'group_cfo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations', 'store_operations_auditor'],
+    ACCESS_REGIONAL_OPS: ['group_ceo', 'group_coo', 'group_cfo', 'super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'head_of_operations', 'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_merchandising_manager', 'auditor', 'head_of_audit', 'store_operations_auditor', 'hr', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator', 'it_support', 'security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'logistics_manager', 'inventory_manager', 'merchandiser', 'data_analyst', 'cs_manager'],
     VIEW_WMS_DASHBOARD: ['group_ceo', 'group_coo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'regional_logistics_manager', 'head_of_operations', 'warehouse_manager', 'logistics_manager', 'dispatch_manager', 'dispatcher', 'picker', 'driver', 'head_of_procurement', 'head_of_supply_chain', 'inventory_specialist', 'inventory_manager', 'fleet_maintenance_supervisor'],
     VIEW_POS_DASHBOARD: ['group_ceo', 'group_coo', 'super_admin', 'admin', 'country_managing_director', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'cs_manager', 'head_of_operations', 'regional_operations_manager', 'regional_finance_manager', 'regional_security_manager', 'head_of_finance', 'auditor', 'head_of_audit', 'treasury_officer', 'store_operations_auditor'],
 
@@ -71,9 +71,9 @@ export const PERMISSIONS = {
     DELETE_EMPLOYEE: ['super_admin'],
     TERMINATE_EMPLOYEE: ['super_admin', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'regional_operations_manager', 'regional_hr_manager', 'head_of_operations',],
     MANAGE_SHIFTS: ['super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'head_of_operations', 'hr', 'head_of_hr', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'logistics_manager', 'dispatch_manager', 'dispatcher', 'store_supervisor'],
-    VIEW_SALARY: ['super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'head_of_finance', 'payroll_specialist', 'regional_operations_manager', 'regional_hr_manager', 'regional_finance_manager'],
+    VIEW_SALARY: ['group_cfo', 'super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'head_of_finance', 'payroll_specialist', 'regional_operations_manager', 'regional_hr_manager', 'regional_finance_manager'],
     PROPOSE_SALARY: ['super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'payroll_specialist', 'regional_operations_manager', 'regional_hr_manager'],
-    APPROVE_SALARY: ['super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'head_of_finance',],
+    APPROVE_SALARY: ['group_cfo', 'super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'head_of_finance',],
     RESET_PASSWORD: ['super_admin', 'admin', 'country_managing_director', 'it_support', 'head_of_it',],
     CREATE_LOGIN_ACCOUNT: ['super_admin', 'admin', 'country_managing_director', 'it_support', 'head_of_it',],
     APPROVE_EMPLOYEE: ['super_admin', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'regional_operations_manager', 'head_of_operations', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_security_manager'],
@@ -87,16 +87,16 @@ export const PERMISSIONS = {
     MANAGE_SUPPLIERS: ['super_admin', 'admin', 'country_managing_director', 'head_of_procurement', 'regional_procurement_manager', 'regional_operations_manager', 'buyer', 'vendor_relations_manager'],
 
     // Finance
-    ACCESS_FINANCE: ['super_admin', 'admin', 'country_managing_director', 'head_of_finance', 'regional_operations_manager', 'head_of_operations', 'auditor', 'head_of_audit', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_manager'],
-    VIEW_REVENUE: ['super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'regional_finance_manager', 'head_of_operations', 'auditor', 'head_of_audit', 'head_of_finance', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
-    VIEW_EXPENSES: ['super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'regional_finance_manager', 'head_of_operations', 'auditor', 'head_of_audit', 'head_of_finance', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
-    ADD_EXPENSE: ['super_admin', 'head_of_finance', 'regional_finance_manager', 'regional_operations_manager', 'accountant'],
-    VIEW_PAYROLL: ['super_admin', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'head_of_finance', 'payroll_specialist', 'regional_finance_manager', 'regional_hr_manager', 'regional_operations_manager'],
-    PROCESS_PAYROLL: ['super_admin', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'head_of_finance', 'payroll_specialist'],
-    EXPORT_FINANCIAL_DATA: ['super_admin', 'admin', 'country_managing_director', 'auditor', 'head_of_audit', 'head_of_finance', 'regional_finance_manager', 'regional_operations_manager', 'tax_compliance_officer'],
+    ACCESS_FINANCE: ['group_cfo', 'super_admin', 'admin', 'country_managing_director', 'head_of_finance', 'regional_operations_manager', 'head_of_operations', 'auditor', 'head_of_audit', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_manager'],
+    VIEW_REVENUE: ['group_cfo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'regional_finance_manager', 'head_of_operations', 'auditor', 'head_of_audit', 'head_of_finance', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
+    VIEW_EXPENSES: ['group_cfo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'regional_finance_manager', 'head_of_operations', 'auditor', 'head_of_audit', 'head_of_finance', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
+    ADD_EXPENSE: ['group_cfo', 'super_admin', 'head_of_finance', 'regional_finance_manager', 'regional_operations_manager', 'accountant'],
+    VIEW_PAYROLL: ['group_cfo', 'super_admin', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'head_of_finance', 'payroll_specialist', 'regional_finance_manager', 'regional_hr_manager', 'regional_operations_manager'],
+    PROCESS_PAYROLL: ['group_cfo', 'super_admin', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'head_of_finance', 'payroll_specialist'],
+    EXPORT_FINANCIAL_DATA: ['group_cfo', 'super_admin', 'admin', 'country_managing_director', 'auditor', 'head_of_audit', 'head_of_finance', 'regional_finance_manager', 'regional_operations_manager', 'tax_compliance_officer'],
 
     // Pricing
-    ACCESS_PRICING: ['super_admin', 'admin', 'country_managing_director', 'head_of_merchandising', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_operations_manager', 'regional_procurement_manager', 'head_of_operations', 'head_of_finance', 'head_of_procurement', 'vendor_relations_manager', 'store_operations_auditor'],
+    ACCESS_PRICING: ['group_cfo', 'super_admin', 'admin', 'country_managing_director', 'head_of_merchandising', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_operations_manager', 'regional_procurement_manager', 'head_of_operations', 'head_of_finance', 'head_of_procurement', 'vendor_relations_manager', 'store_operations_auditor'],
     EDIT_PRICE: ['super_admin', 'admin', 'country_managing_director', 'head_of_merchandising', 'regional_operations_manager', 'head_of_finance',],
     CREATE_PROMOTION: ['super_admin', 'admin', 'country_managing_director', 'head_of_merchandising', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_operations_manager'],
     APPROVE_PRICE_CHANGE: ['super_admin', 'admin', 'country_managing_director', 'head_of_merchandising', 'regional_merchandising_manager', 'head_of_finance',],
@@ -114,7 +114,7 @@ export const PERMISSIONS = {
 
     // Settings
     ACCESS_SETTINGS: [
-        'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager',
+        'group_ceo', 'group_coo', 'group_cfo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager',
         'head_of_operations',
         'head_of_finance',
         'head_of_hr',
@@ -299,10 +299,10 @@ export function getAccessibleModules(userRole: UserRole | undefined): string[] {
 }
 
 /**
- * Check if user is admin level (group_ceo, group_coo, super_admin or admin)
+ * Check if user is admin level (group_ceo, group_coo, group_cfo, super_admin or admin)
  */
 export function isAdmin(userRole: UserRole | undefined): boolean {
-    return userRole === 'group_ceo' || userRole === 'group_coo' || userRole === 'super_admin' || userRole === 'admin' || userRole === 'country_managing_director' || (userRole as string)?.toLowerCase() === 'ceo';
+    return userRole === 'group_ceo' || userRole === 'group_coo' || userRole === 'group_cfo' || userRole === 'super_admin' || userRole === 'admin' || userRole === 'country_managing_director' || (userRole as string)?.toLowerCase() === 'ceo';
 }
 
 /**
@@ -327,7 +327,7 @@ export { getRoleDisplayName, getRoleDescription, getRoleColor };
  */
 export function canViewAllSites(userRole: UserRole | undefined): boolean {
     return [
-        'super_admin', 'country_managing_director', 'admin',
+        'group_ceo', 'group_coo', 'group_cfo', 'super_admin', 'country_managing_director', 'admin',
         'head_of_operations',
         'head_of_finance',
         'head_of_hr', 'hr',
@@ -349,7 +349,7 @@ export function canViewAllSites(userRole: UserRole | undefined): boolean {
  */
 export function canViewAllEmployees(userRole: UserRole | undefined): boolean {
     return [
-        'super_admin', 'country_managing_director', 'admin',
+        'group_ceo', 'group_coo', 'group_cfo', 'super_admin', 'country_managing_director', 'admin',
         'head_of_operations',
         'head_of_finance',
         'head_of_hr', 'hr',

@@ -23,6 +23,14 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(groupCoo.isManagerial).toBe(true);
         expect(groupCoo.managesRoles.length).toBeGreaterThan(0);
 
+        const groupCfo = getRoleReportingMeta('group_cfo');
+        expect(groupCfo.level).toBe(1);
+        expect(groupCfo.levelCategory).toBe('executive');
+        expect(groupCfo.reportsToRole).toBe('group_ceo');
+        expect(groupCfo.reportsToLabel).toContain('CEO');
+        expect(groupCfo.isManagerial).toBe(true);
+        expect(groupCfo.managesRoles.length).toBeGreaterThan(0);
+
         const ceo = getRoleReportingMeta('super_admin');
         expect(ceo.level).toBe(1);
         expect(ceo.levelCategory).toBe('executive');
@@ -199,6 +207,16 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         const storeMerch = getRoleReportingMeta('merchandiser');
         expect(storeMerch.dottedLineRole).toBe('head_of_merchandising');
         expect(storeMerch.dottedLineLabel).toContain('Merchandising');
+
+        // Head of Finance -> Group CFO (solid) & Country MD (dotted)
+        const hof = getRoleReportingMeta('head_of_finance');
+        expect(hof.reportsToRole).toBe('group_cfo');
+        expect(hof.dottedLineRole).toBe('country_managing_director');
+
+        // Regional Finance Manager -> Head of Finance (solid) & Regional Operations Manager (dotted)
+        const rfm = getRoleReportingMeta('regional_finance_manager');
+        expect(rfm.reportsToRole).toBe('head_of_finance');
+        expect(rfm.dottedLineRole).toBe('regional_operations_manager');
     });
 
     it('verifies Hierarchy Level Configs for L1 through L10', () => {
