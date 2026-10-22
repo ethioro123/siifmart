@@ -1,7 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { PurchaseOrder } from '../types';
 import { wmsJobsService } from './wms-jobs.service';
-import { generateNextPONumber } from '../utils/jobIdFormatter';
 import { getAll, getMetrics, getById } from './purchase-orders.read';
 import { logger } from '../utils/logger';
 import { systemLogsService } from './system-logs.service';
@@ -35,32 +34,6 @@ export const purchaseOrdersService = {
         const poId = po.id || crypto.randomUUID();
         const dbStatus = po.status;
 
-        // Generate simple sequential PO number if not provided
-        let poNumber = po.poNumber;
-        if (!poNumber) {
-            try {
-                const { data: latestPOs, error: fetchError } = await supabase
-                    .from('purchase_orders')
-                    .select('po_number')
-                    .not('po_number', 'is', null)
-                    .order('created_at', { ascending: false })
-                    .limit(5);
-
-                let lastValidPONumber: string | undefined;
-                if (!fetchError && latestPOs && latestPOs.length > 0) {
-                    const match = latestPOs.find(p => p.po_number?.match(/^[A-Z]{4}\d{4}$/i));
-                    if (match) {
-                        lastValidPONumber = match.po_number;
-                    }
-                }
-
-                poNumber = generateNextPONumber(lastValidPONumber);
-            } catch (error) {
-                logger.warn('PurchaseOrdersService', 'Failed to generate sequential PO number, using fallback', { error: String(error) });
-                poNumber = `AUTO-${Date.now().toString().slice(-8)}`;
-            }
-        }
-
         // Enforce enterprise procurement policy: Purchase orders can only be sent to Warehouse or Distribution Center
         const destSite = await validateWarehouseDestination(po.siteId);
 
@@ -84,7 +57,6 @@ export const purchaseOrdersService = {
             temp_req: po.tempReq,
             shelf_life: po.shelfLife,
             dock_slot: po.dockSlot || null,
-            po_number: poNumber,
             requested_by: po.requestedBy,
             created_by: po.createdBy,
             priority: po.priority,
@@ -94,14 +66,20 @@ export const purchaseOrdersService = {
             requires_hq_approval: Boolean(po.requiresHqApproval || po.requires_hq_approval)
         };
 
-        let { error: poError } = await supabase.from('purchase_orders').insert(dbPO);
+        let { data: insertedPO, error: poError } = await supabase
+            .from('purchase_orders')
+            .insert(dbPO)
+            .select('po_number')
+            .single();
         if (poError && (poError.code === '42703' || poError.message?.includes('country_code'))) {
             logger.warn('PurchaseOrdersService', 'purchase_orders.country_code column not present on DB, inserting without country_code');
             const { country_code: _, ...fallbackPO } = dbPO;
-            const retry = await supabase.from('purchase_orders').insert(fallbackPO);
+            const retry = await supabase.from('purchase_orders').insert(fallbackPO).select('po_number').single();
+            insertedPO = retry.data;
             poError = retry.error;
         }
         if (poError) throw poError;
+        const poNumber = insertedPO?.po_number;
 
         // Create PO items
         const itemsWithPOId = items.map(item => {
