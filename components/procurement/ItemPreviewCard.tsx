@@ -277,7 +277,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[11px] uppercase font-bold text-[var(--theme-text-secondary)]">Retail:</span>
                                 <span className="text-sm font-bold text-[var(--theme-text-primary)] tabular-nums">
-                                    {currencySymbol} {formatPriceValue(effectiveRetail)}{' '}
+                                    {currencySymbol} {formatPriceValue(Math.round(effectiveRetail))}{' '}
                                     <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] font-sans">
                                         /{sellUnitLabel}
                                     </span>
@@ -293,7 +293,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Unit Cost:</span>
                                 <span className="text-xs font-bold text-[var(--theme-text-primary)] tabular-nums">
-                                    {currencySymbol} {formatPriceValue(costPerSellUnit)}{' '}
+                                    {currencySymbol} {formatPriceValue(Math.round(costPerSellUnit))}{' '}
                                     <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] font-sans">
                                         /{sellUnitLabel}
                                     </span>
@@ -302,7 +302,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                         )}
                         {isBulkOrder && effectiveCost > 0 && (
                             <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono">
-                                Order: {currencySymbol} {formatPriceValue(effectiveCost)}/{orderUnitName.toLowerCase()} ({unitsPerOrder} {sellUnitLabel})
+                                Order: {currencySymbol} {formatPriceValue(Math.round(effectiveCost))}/{orderUnitName.toLowerCase()} ({unitsPerOrder} {sellUnitLabel})
                             </div>
                         )}
                         {marginPct !== null && grossProfit !== null && (
@@ -315,9 +315,9 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                                         : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
                                 }`}
                             >
-                                <span>+{marginPct.toFixed(1)}% margin</span>
+                                <span>+{Math.round(marginPct)}% margin</span>
                                 <span className="text-[9px] opacity-80">
-                                    (+{currencySymbol} {formatPriceValue(grossProfit)}/{sellUnitLabel})
+                                    (+{currencySymbol} {formatPriceValue(Math.round(grossProfit))}/{sellUnitLabel})
                                 </span>
                             </div>
                         )}

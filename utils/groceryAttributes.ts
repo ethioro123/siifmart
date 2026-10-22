@@ -240,34 +240,34 @@ function computeUnitPriceEquivalent(
             const unit = match[2].toLowerCase();
             if (val > 0) {
                 if (unit === 'kg') {
-                    const perKg = price / val;
-                    return `${prefix}${perKg.toFixed(perKg >= 100 ? 0 : 2)}/kg`;
+                    const perKg = Math.round(price / val);
+                    return `${prefix}${perKg.toLocaleString()}/kg`;
                 }
                 if (unit === 'g' || unit === 'gr' || unit === 'grams') {
                     if (val >= 500) {
-                        const perKg = (price / val) * 1000;
-                        return `${prefix}${perKg.toFixed(perKg >= 100 ? 0 : 2)}/kg`;
+                        const perKg = Math.round((price / val) * 1000);
+                        return `${prefix}${perKg.toLocaleString()}/kg`;
                     }
-                    const per100g = (price / val) * 100;
-                    return `${prefix}${per100g.toFixed(per100g >= 100 ? 0 : 2)}/100g`;
+                    const per100g = Math.round((price / val) * 100);
+                    return `${prefix}${per100g.toLocaleString()}/100g`;
                 }
                 if (unit === 'l' || unit === 'ltr' || unit === 'litres') {
-                    const perL = price / val;
-                    return `${prefix}${perL.toFixed(perL >= 100 ? 0 : 2)}/L`;
+                    const perL = Math.round(price / val);
+                    return `${prefix}${perL.toLocaleString()}/L`;
                 }
                 if (unit === 'ml') {
                     if (val >= 500) {
-                        const perL = (price / val) * 1000;
-                        return `${prefix}${perL.toFixed(perL >= 100 ? 0 : 2)}/L`;
+                        const perL = Math.round((price / val) * 1000);
+                        return `${prefix}${perL.toLocaleString()}/L`;
                     }
-                    const per100ml = (price / val) * 100;
-                    return `${prefix}${per100ml.toFixed(per100ml >= 100 ? 0 : 2)}/100ml`;
+                    const per100ml = Math.round((price / val) * 100);
+                    return `${prefix}${per100ml.toLocaleString()}/100ml`;
                 }
             }
         }
     }
 
-    return `${prefix}${price.toLocaleString()}/${sellUnitShort || 'ea'}`;
+    return `${prefix}${Math.round(price).toLocaleString()}/${sellUnitShort || 'ea'}`;
 }
 
 export function resolveSmartProductAttributes(

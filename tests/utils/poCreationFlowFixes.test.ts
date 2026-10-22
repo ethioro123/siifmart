@@ -7,6 +7,8 @@ import {
     resolveOrderUnitLabels
 } from '../../components/procurement/createPOHelpers';
 import { buildPOItem } from '../../components/procurement/buildPOItem';
+import { CATEGORY_SPEC_GROUPS } from '../../components/procurement/categorySpecGroups';
+import { formatPriceValue } from '../../utils/formatting';
 import type { Product, POItem, PurchaseOrder } from '../../types';
 
 describe('PO Creation Flow Fixes & Helpers', () => {
@@ -193,5 +195,41 @@ describe('PO Creation Flow Fixes & Helpers', () => {
         expect(result.item?.size).toBe('500g');
         expect(result.item?.customAttributes?.packaging?.material).toBe('Paper / Cardboard');
         expect(result.item?.customAttributes?.storage?.inboundQcDirective).toBeTruthy();
+    });
+
+    it('enforces whole-number pricing globally (no decimal points) and uses concise "Juice" beverage option', async () => {
+        const beverageField = CATEGORY_SPEC_GROUPS.beverages.fields.find(f => f.key === 'beverageType');
+        expect(beverageField?.options).toContain('Juice');
+        expect(beverageField?.options).not.toContain('100% Pure Fruit Juice');
+
+        expect(formatPriceValue(1299.78)).toBe('1,300');
+        expect(formatPriceValue(520.4)).toBe('520');
+
+        const itemRes = await buildPOItem({
+            products: [
+                { id: 'prod-1', name: 'Mango Juice 1L', sku: 'ET-BEV-0001', price: 185.6, costPrice: 120.4, category: 'Beverages', stock: 10 } as Product
+            ],
+            existingItems: [],
+            editingItem: null,
+            country: 'ET',
+            productType: 'catalog',
+            currentProductToAdd: 'prod-1',
+            currentQty: 5,
+            currentCost: 120.4,
+            currentRetailPrice: 185.6,
+            customItemName: 'Mango Juice 1L',
+            customItemBrand: 'Rani',
+            selectedMainCategory: 'Beverages',
+            customItemSize: '1L',
+            customItemUnit: 'UNIT',
+            customItemImage: '',
+            customAttributes: {},
+            caseSize: 0,
+            pkgType: ''
+        });
+
+        expect(itemRes.item?.unitCost).toBe(120);
+        expect(itemRes.item?.retailPrice).toBe(186);
+        expect(itemRes.item?.totalCost).toBe(600);
     });
 });

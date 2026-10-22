@@ -219,15 +219,18 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         },
     };
 
+    const wholeCost = Math.round(currentCost);
+    const wholeRetail = Math.round(currentRetailPrice);
+
     const itemData: POItem = {
         productId: prod ? prod.id : editingItem?.productId || `CUSTOM-${Date.now()}`,
         productName: name,
         sku,
         category: cat,
         quantity: currentQty,
-        unitCost: currentCost,
-        totalCost: currentQty * currentCost,
-        retailPrice: currentRetailPrice,
+        unitCost: wholeCost,
+        totalCost: currentQty * wholeCost,
+        retailPrice: wholeRetail,
         image,
         brand: customItemBrand,
         size: formattedSize,

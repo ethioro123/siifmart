@@ -45,7 +45,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
     regionalCapAmount = 0
 }) => {
     const isMultiHubPerStore = hubCount > 1 && quantityDistribution === 'per-store';
-    const singleHubTotal = isMultiHubPerStore ? poTotal / hubCount : poTotal;
+    const singleHubTotal = isMultiHubPerStore ? Math.round(poTotal / hubCount) : poTotal;
     return (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left: Notes & Commercial Terms */}
@@ -155,9 +155,10 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         <input
                             type="number"
                             min="0"
+                            step="1"
                             className="w-16 bg-transparent text-right text-[var(--theme-text-primary)] font-mono text-xs outline-none font-bold"
                             value={shippingCost || ''}
-                            onChange={(e) => setShippingCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                            onChange={(e) => setShippingCost(Math.max(0, Math.round(parseFloat(e.target.value) || 0)))}
                             placeholder="0"
                         />
                     </div>

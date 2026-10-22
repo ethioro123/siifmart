@@ -37,8 +37,10 @@ export const purchaseOrdersService = {
         // Enforce enterprise procurement policy: Purchase orders can only be sent to Warehouse or Distribution Center
         const destSite = await validateWarehouseDestination(po.siteId);
 
+        const explicitPoNumber = po.po_number || po.poNumber;
         const dbPO = {
             id: poId,
+            ...(explicitPoNumber ? { po_number: explicitPoNumber } : {}),
             site_id: po.siteId,
             supplier_id: po.supplierId === 'UNSPECIFIED' ? null : po.supplierId,
             supplier_name: po.supplierName,
@@ -66,20 +68,22 @@ export const purchaseOrdersService = {
             requires_hq_approval: Boolean(po.requiresHqApproval || po.requires_hq_approval)
         };
 
-        let { data: insertedPO, error: poError } = await supabase
-            .from('purchase_orders')
-            .insert(dbPO)
-            .select('po_number')
-            .single();
+        const insertBuilder: any = supabase.from('purchase_orders').insert(dbPO);
+        let { data: insertedPO, error: poError } = typeof insertBuilder?.select === 'function'
+            ? await insertBuilder.select('po_number').single()
+            : await insertBuilder;
         if (poError && (poError.code === '42703' || poError.message?.includes('country_code'))) {
             logger.warn('PurchaseOrdersService', 'purchase_orders.country_code column not present on DB, inserting without country_code');
             const { country_code: _, ...fallbackPO } = dbPO;
-            const retry = await supabase.from('purchase_orders').insert(fallbackPO).select('po_number').single();
+            const retryBuilder: any = supabase.from('purchase_orders').insert(fallbackPO);
+            const retry = typeof retryBuilder?.select === 'function'
+                ? await retryBuilder.select('po_number').single()
+                : await retryBuilder;
             insertedPO = retry.data;
             poError = retry.error;
         }
         if (poError) throw poError;
-        const poNumber = insertedPO?.po_number;
+        const poNumber = insertedPO?.po_number || explicitPoNumber;
 
         // Create PO items
         const itemsWithPOId = items.map(item => {

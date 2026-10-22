@@ -256,7 +256,7 @@ export function buildPurchaseOrders(params: BuildPurchaseOrdersParams): Generate
                 if (item.quantity % siteCount !== 0 && idx === 0) {
                     qty += item.quantity % siteCount;
                 }
-                total = Math.round(qty * item.unitCost * 100) / 100;
+                total = Math.round(qty * item.unitCost);
             }
 
             return {
@@ -268,17 +268,17 @@ export function buildPurchaseOrders(params: BuildPurchaseOrdersParams): Generate
 
         if (siteItems.length === 0) continue;
 
-        let siteShippingCost = shippingCost;
+        let siteShippingCost = Math.round(shippingCost);
         if (quantityDistribution === 'split' && siteCount > 1 && shippingCost > 0) {
-            const baseSplit = Math.floor((shippingCost / siteCount) * 100) / 100;
-            const remainder = Math.round((shippingCost - baseSplit * siteCount) * 100) / 100;
-            siteShippingCost = idx === 0 ? Math.round((baseSplit + remainder) * 100) / 100 : baseSplit;
+            const baseSplit = Math.floor(shippingCost / siteCount);
+            const remainder = Math.round(shippingCost - baseSplit * siteCount);
+            siteShippingCost = idx === 0 ? baseSplit + remainder : baseSplit;
         }
 
-        const siteSubtotal = siteItems.reduce((sum, item) => sum + item.totalCost, 0);
-        const siteDiscount = Math.round(siteSubtotal * (discountRate / 100) * 100) / 100;
-        const siteTax = Math.round(siteSubtotal * (taxRate / 100) * 100) / 100;
-        const siteTotalAmount = Math.round((siteSubtotal + siteShippingCost - siteDiscount + siteTax) * 100) / 100;
+        const siteSubtotal = Math.round(siteItems.reduce((sum, item) => sum + item.totalCost, 0));
+        const siteDiscount = Math.round(siteSubtotal * (discountRate / 100));
+        const siteTax = Math.round(siteSubtotal * (taxRate / 100));
+        const siteTotalAmount = Math.round(siteSubtotal + siteShippingCost - siteDiscount + siteTax);
 
         const destSite = sites.find(s => s.id === siteId);
         const poCurrency = destSite?.currency || (destSite?.country === 'KE' ? 'KSh' : currencySymbol);

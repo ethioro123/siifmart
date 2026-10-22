@@ -109,19 +109,19 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                         </label>
                         <input
                             type="number"
-                            step="any"
+                            step="1"
                             min="0"
                             className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.cost ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums`}
                             value={currentCost || ''}
                             onChange={e => {
-                                setCurrentCost(parseFloat(e.target.value) || 0);
+                                setCurrentCost(Math.round(parseFloat(e.target.value) || 0));
                                 if (errors.cost) setErrors(prev => ({ ...prev, cost: '' }));
                             }}
-                            placeholder="0.00"
+                            placeholder="0"
                         />
                         {currentCost > 0 && unitsPerOrderUnit > 1 && (
                             <span className="text-[10px] text-[var(--theme-text-secondary)] block text-center font-mono font-medium">
-                                = ~{currencySymbol} {costPerSellUnit.toFixed(2)} / {sellUnit}
+                                = ~{currencySymbol} {Math.round(costPerSellUnit).toLocaleString()} / {sellUnit}
                             </span>
                         )}
                         {errors.cost && <span className="text-[9px] text-rose-500 block text-center font-semibold">{errors.cost}</span>}
@@ -144,21 +144,21 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                                         : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20';
                                     return (
                                         <div className={`absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${badgeClass}`}>
-                                            {parseFloat(marginPct.toFixed(2))}%
+                                            {Math.round(marginPct)}%
                                         </div>
                                     );
                                 })()}
                                 <input
                                     type="number"
-                                    step="any"
+                                    step="1"
                                     min="0"
                                     className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.retail ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums ${currentRetailPrice > 0 && currentCost > 0 ? 'pl-16 pr-2' : 'px-4'}`}
                                     value={currentRetailPrice || ''}
                                     onChange={e => {
-                                        setCurrentRetailPrice(Math.round((parseFloat(e.target.value) || 0) * 100) / 100);
+                                        setCurrentRetailPrice(Math.round(parseFloat(e.target.value) || 0));
                                         if (errors.retail) setErrors(prev => ({ ...prev, retail: '' }));
                                     }}
-                                    placeholder="0.00"
+                                    placeholder="0"
                                 />
                             </div>
                             {errors.retail && <span className="text-[9px] text-rose-500 block text-center font-semibold">{errors.retail}</span>}
@@ -180,7 +180,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                         {totalCommitment > 0 && (
                             <div className="text-[11px] font-mono font-bold text-[var(--theme-text-primary)]">
                                 <span className="text-[10px] text-[var(--theme-text-secondary)] font-normal mr-1">Line Commitment:</span>
-                                {currencySymbol} {totalCommitment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                {currencySymbol} {Math.round(totalCommitment).toLocaleString()}
                             </div>
                         )}
                     </div>

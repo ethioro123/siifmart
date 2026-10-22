@@ -71,26 +71,26 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
         caseSize
     );
 
-    // When margin changes, auto-calculate retail price (rounded to 2 decimal places)
+    // When margin changes, auto-calculate retail price (rounded to whole number — no decimals for African currencies)
     const handleMarginChange = useCallback((marginStr: string) => {
         setMarginPercent(marginStr);
         const margin = parseFloat(marginStr);
         if (!margin || margin <= 0 || margin >= 100 || !costPerSellUnit) return;
         // Margin formula: retail = cost / (1 - margin/100)
-        const retail = Math.round((costPerSellUnit / (1 - margin / 100)) * 100) / 100;
+        const retail = Math.round(costPerSellUnit / (1 - margin / 100));
         setCurrentRetailPrice(retail);
         if (errors.retail) setErrors(prev => ({ ...prev, retail: '' }));
     }, [costPerSellUnit, setCurrentRetailPrice, errors.retail, setErrors]);
 
-    // When retail price changes, round to 2 decimal places and recalculate margin
+    // When retail price changes, round to whole number and recalculate margin
     const handleRetailChange = useCallback((val: number) => {
-        const roundedVal = Math.round(val * 100) / 100;
+        const roundedVal = Math.round(val);
         setCurrentRetailPrice(roundedVal);
         if (errors.retail) setErrors(prev => ({ ...prev, retail: '' }));
         if (costPerSellUnit && roundedVal > 0) {
             const margin = ((roundedVal - costPerSellUnit) / roundedVal) * 100;
             if (margin > 0 && margin < 100) {
-                setMarginPercent((Math.round(margin * 100) / 100).toString());
+                setMarginPercent(Math.round(margin).toString());
             } else {
                 setMarginPercent('');
             }
@@ -102,7 +102,7 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
         if (marginPercent && costPerSellUnit) {
             const margin = parseFloat(marginPercent);
             if (margin > 0 && margin < 100) {
-                const retail = Math.round((costPerSellUnit / (1 - margin / 100)) * 100) / 100;
+                const retail = Math.round(costPerSellUnit / (1 - margin / 100));
                 setCurrentRetailPrice(retail);
             }
         }
@@ -190,7 +190,7 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                         {costPerSellUnit !== null && (
                             <div className="rounded-xl px-3 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                                 <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-tight">Cost/{unitDef.shortLabel}: </span>
-                                <span className="text-[11px] text-[var(--theme-text-primary)] font-mono font-bold tabular-nums">{currencySymbol} {costPerSellUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                <span className="text-[11px] text-[var(--theme-text-primary)] font-mono font-bold tabular-nums">{currencySymbol} {Math.round(costPerSellUnit).toLocaleString()}</span>
                             </div>
                         )}
 
@@ -211,9 +211,9 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                                 <div className="relative">
                                     <input
                                         type="number"
-                                        min="0.1"
-                                        max="99.99"
-                                        step="0.01"
+                                        min="1"
+                                        max="99"
+                                        step="1"
                                         className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl pl-3 pr-8 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all text-center tabular-nums"
                                         value={marginPercent}
                                         onChange={e => handleMarginChange(e.target.value)}
@@ -230,16 +230,18 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                                 <label className="text-[9px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block mb-0.5">Shelf Price</label>
                                 <input
                                     type="number"
+                                    min="0"
+                                    step="1"
                                     className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.retail ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] outline-none transition-all text-center font-bold tabular-nums`}
                                     value={currentRetailPrice || ''}
                                     onChange={e => handleRetailChange(parseFloat(e.target.value) || 0)}
-                                    placeholder="0.00"
+                                    placeholder="0"
                                 />
                             </div>
                         </div>
                         {currentRetailPrice > 0 && costPerSellUnit && costPerSellUnit > 0 && (
                             <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block text-center font-mono font-semibold">
-                                Margin Gross: {currencySymbol} {(currentRetailPrice - costPerSellUnit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/{unitDef.shortLabel}
+                                Margin Gross: {currencySymbol} {Math.round(currentRetailPrice - costPerSellUnit).toLocaleString()}/{unitDef.shortLabel}
                             </span>
                         )}
                         {errors.retail && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.retail}</span>}

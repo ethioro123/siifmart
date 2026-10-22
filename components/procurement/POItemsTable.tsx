@@ -42,9 +42,9 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
         if (editingIndex === null || !editValues) return;
 
         const safeQty = Math.max(1, Math.floor(editValues.qty || 1));
-        const safePrice = Math.max(0, Math.round((editValues.price || 0) * 100) / 100);
+        const safePrice = Math.max(0, Math.round(editValues.price || 0));
         const originalItem = items[editingIndex];
-        const newTotal = Math.round(safeQty * safePrice * 100) / 100;
+        const newTotal = safeQty * safePrice;
 
         const updatedItem: POItem = {
             ...originalItem,
@@ -171,11 +171,11 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                                 <input
                                                     type="number"
                                                     min="0"
-                                                    step="any"
+                                                    step="1"
                                                     aria-label="Edit Order Unit Cost"
                                                     className="w-24 bg-[var(--theme-bg-subtle)] border border-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl px-3 py-1.5 text-right text-xs outline-none font-bold font-mono tabular-nums"
                                                     value={editValues.price}
-                                                    onChange={e => setEditValues({ ...editValues, price: Math.max(0, parseFloat(e.target.value) || 0) })}
+                                                    onChange={e => setEditValues({ ...editValues, price: Math.max(0, Math.round(parseFloat(e.target.value) || 0)) })}
                                                 />
                                             </div>
                                         ) : (

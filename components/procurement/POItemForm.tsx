@@ -129,10 +129,10 @@ export const POItemForm: React.FC<POItemFormProps> = ({
         const pUnitsPerOrder = pCaseSize >= 1 ? pCaseSize * pPackQty : (pPackQty > 1 ? pPackQty : 1);
 
         // Catalog costPrice is stored per sellable unit; scale to order-unit cost when ordering by pack/case
-        const rawCost = p.costPrice || 0;
-        const rawRetail = p.price || 0;
+        const rawCost = Math.round(p.costPrice || 0);
+        const rawRetail = Math.round(p.price || 0);
         const orderUnitCost = (pUnitsPerOrder > 1 && rawCost > 0 && (rawRetail === 0 || rawCost <= rawRetail))
-            ? Math.round(rawCost * pUnitsPerOrder * 100) / 100
+            ? Math.round(rawCost * pUnitsPerOrder)
             : rawCost;
         setCurrentCost(orderUnitCost);
         setCurrentRetailPrice(rawRetail);

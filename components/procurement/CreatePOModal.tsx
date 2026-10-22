@@ -75,18 +75,18 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         countryCode: activeCountry, userId: user?.id, enabled: enableAutoSave, isEditMode, isOpen
     });
 
-    // Computed Totals (accounting for multi-hub per-store multiplication)
+    // Computed Totals (whole-number currency values, accounting for multi-hub per-store multiplication)
     const hubCount = !isEditMode && destinationSiteIds.length > 1 ? destinationSiteIds.length : 1;
     const perStoreMultiplier = hubCount > 1 && quantityDistribution === 'per-store' ? hubCount : 1;
-    const singleHubSubtotal = newPOItems.reduce((sum, item) => sum + item.totalCost, 0);
-    const singleHubTax = Math.round(singleHubSubtotal * (taxRate / 100) * 100) / 100;
-    const singleHubDiscount = Math.round(singleHubSubtotal * (discountRate / 100) * 100) / 100;
-    const singleHubTotal = Math.round((singleHubSubtotal + singleHubTax + shippingCost - singleHubDiscount) * 100) / 100;
+    const singleHubSubtotal = Math.round(newPOItems.reduce((sum, item) => sum + item.totalCost, 0));
+    const singleHubTax = Math.round(singleHubSubtotal * (taxRate / 100));
+    const singleHubDiscount = Math.round(singleHubSubtotal * (discountRate / 100));
+    const singleHubTotal = Math.round(singleHubSubtotal + singleHubTax + shippingCost - singleHubDiscount);
 
-    const poSubtotal = Math.round(singleHubSubtotal * perStoreMultiplier * 100) / 100;
-    const poTax = Math.round(singleHubTax * perStoreMultiplier * 100) / 100;
-    const poDiscount = Math.round(singleHubDiscount * perStoreMultiplier * 100) / 100;
-    const poTotal = Math.round(singleHubTotal * perStoreMultiplier * 100) / 100;
+    const poSubtotal = singleHubSubtotal * perStoreMultiplier;
+    const poTax = singleHubTax * perStoreMultiplier;
+    const poDiscount = singleHubDiscount * perStoreMultiplier;
+    const poTotal = singleHubTotal * perStoreMultiplier;
     const exceedsRegionalCap = Boolean(isRegionalUser && regionalAutonomousPoLimit > 0 && singleHubTotal > regionalAutonomousPoLimit);
 
     const resetPOForm = () => {
@@ -243,7 +243,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     const mergedItem: POItem = {
                         ...existing, ...item,
                         quantity: mergedQty,
-                        totalCost: Math.round(mergedQty * item.unitCost * 100) / 100
+                        totalCost: Math.round(mergedQty * item.unitCost)
                     };
                     showToast(`Merged quantity for ${item.productName} (${mergedQty})`, 'info');
                     return prev.map((row, idx) => idx === dupIdx ? mergedItem : row);

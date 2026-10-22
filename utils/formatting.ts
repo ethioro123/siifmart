@@ -82,15 +82,14 @@ export const formatCompactNumber = (value: number | undefined | null, options?: 
 };
 
 /**
- * Format a number with thousands separators, only displaying decimal places if a fractional value exists.
- * e.g. 520 -> "520", 70000 -> "70,000", 1299.78 -> "1,299.78"
+ * Format a price value as a whole integer with thousands separators (no decimal points for African currencies).
+ * e.g. 520 -> "520", 70000 -> "70,000", 1299.78 -> "1,300"
  */
 export const formatPriceValue = (val: number | undefined | null): string => {
     if (val === undefined || val === null || isNaN(val)) return '0';
-    const hasFraction = val % 1 !== 0;
-    return val.toLocaleString('en-US', {
-        minimumFractionDigits: hasFraction ? 2 : 0,
-        maximumFractionDigits: 2
+    return Math.round(val).toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
     });
 };
 

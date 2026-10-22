@@ -149,7 +149,7 @@ export const CATEGORY_SPEC_GROUPS: Record<string, CategorySpecGroup> = {
         badgeLabel: 'Halal Drinks',
         description: 'Packaging, volume, sugar profile, and 100% non-alcoholic compliance',
         fields: [
-            { key: 'beverageType', label: 'Beverage Category', type: 'select', options: ['Mineral / Spring Water', '100% Pure Fruit Juice', 'Carbonated Soft Drink', 'Energy / Sports Drink', 'RTD Tea & Coffee', 'Flavored Still Drink'], colSpan: 2, role: 'display' },
+            { key: 'beverageType', label: 'Beverage Category', type: 'select', options: ['Mineral / Spring Water', 'Juice', 'Carbonated Soft Drink', 'Energy / Sports Drink', 'RTD Tea & Coffee', 'Flavored Still Drink'], colSpan: 2, role: 'display' },
             { key: 'containerType', label: 'Container Package', type: 'select', options: ['PET Plastic Bottle', 'Aluminium Sleek Can', 'Standard Aluminium Can', 'Glass Bottle', 'Tetra Pak Carton'], colSpan: 2, role: 'display' },
             { key: 'servingVolume', label: 'Single Serving Volume', type: 'text', placeholder: 'e.g. 330 ml, 500 ml, 1 Litre, 1.5 Litre', colSpan: 2, role: 'display' },
             { key: 'sugarContent', label: 'Sugar / Sweetener Profile', type: 'select', options: ['Zero Sugar / Diet', 'No Added Sugar (Natural)', 'Low Sugar', 'Standard Sweetened'], colSpan: 2, role: 'display' },
