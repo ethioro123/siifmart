@@ -5,6 +5,11 @@
 
 ## Active Features
 
+### Configurable Purchase Order Approval Authority (2026-10-22)
+- Regional PO approval uses each region's saved autonomous limit, including zero. Country leadership sets that limit with a recorded reason; procurement managers cannot change their own authority.
+- Regional Procurement Managers may approve another person's PO within their region's limit. Above it, HQ Finance records clearance of the current amount and terms before the Head of Procurement completes final approval. Finance can view POs but does not issue final procurement approval.
+- **Files**: `utils/poApprovalPolicy.ts`, `services/purchase-orders.approval.ts`, `components/procurement/ViewPOModal.tsx`, `migrations/20261022_configurable_po_approval_and_finance_clearance.sql`, `migrations/20261022_po_approval_rpc_uses_configured_limit.sql`, `migrations/20261022_finance_read_only_purchase_orders.sql`.
+
 ### Lower Role Reporting Metadata (2026-10-22)
 - The Org Matrix composes Levels 1–5, 6–8, and 9–10 explicitly from registries named for their actual levels. This keeps existing lower-role reporting behavior and makes the level boundaries clear for future role changes.
 - **Files**: `components/org-chart/hooks/orgReportingLines.ts`, `components/org-chart/hooks/orgReportingL1L5Data.ts`, `components/org-chart/hooks/orgReportingL6L8Data.ts`, `components/org-chart/hooks/orgReportingL9L10Data.ts`.

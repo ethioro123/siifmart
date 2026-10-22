@@ -343,7 +343,8 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                 );
                                             })()}
                                             {(po.status === 'Draft' || po.status === 'Pending') &&
-                                              (isCEO || isOperationalDirector || isProcurementManager || po.createdBy === user?.name || po.requestedBy === user?.name) && (
+                                              (isCEO || isOperationalDirector || isProcurementManager ||
+                                                (!['head_of_finance', 'regional_finance_manager'].includes(user?.role || '') && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onEdit(po); }}
                                                     className="w-8 h-8 rounded-full flex items-center justify-center border border-transparent hover:border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all active:scale-[0.95]"
@@ -355,7 +356,8 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                             {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') || 
                                               (isOperationalDirector && po.status !== 'Received' && po.status !== 'Cancelled') ||
                                               (isProcurementManager && po.status !== 'Received' && po.status !== 'Cancelled') ||
-                                              (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
+                                              (po.status === 'Draft' && !['head_of_finance', 'regional_finance_manager'].includes(user?.role || '') &&
+                                                (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => handleDeletePO(e, po)}
                                                     className="w-8 h-8 rounded-full flex items-center justify-center border border-transparent hover:border-red-500/30 hover:bg-red-500/10 text-[var(--theme-text-secondary)] hover:text-red-400 transition-all active:scale-[0.95]"

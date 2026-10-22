@@ -53,6 +53,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
         actorRegionCode: user?.regionCode || user?.region_code, regions, sites
     });
     const isCEO = user?.role === 'super_admin';
+    const isFinanceRole = user?.role === 'head_of_finance' || user?.role === 'regional_finance_manager';
     const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager',
         'head_of_operations'].includes(user?.role || '');
     const canFullDelete = isCEO || isOperationalDirector;
@@ -416,7 +417,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             2. Other staff can ONLY Edit/Delete their own Draft POs.
                         */}
                         {((canFullDelete && po.status !== 'Received') || 
-                          (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
+                          (!isFinanceRole && po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                             <>
                                 <button
                                     onClick={() => {

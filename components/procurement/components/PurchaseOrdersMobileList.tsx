@@ -199,12 +199,13 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                         onClick={(e) => handleSingleApprove(e, po)}
                                         className="h-7 px-3 text-[11px] font-medium rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20 transition-all active:scale-[0.98]"
                                     >
-                                        Approve
+                                        Review
                                     </button>
                                 )}
                                 {((isCEO && po.status !== 'Received') ||
                                     (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
-                                    (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
+                                    (po.status === 'Draft' && !['head_of_finance', 'regional_finance_manager'].includes(user?.role || '') &&
+                                        (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={() => onEdit(po)}
                                         className="w-7 h-7 rounded-full flex items-center justify-center border border-transparent hover:border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all active:scale-[0.95]"
@@ -216,7 +217,8 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                 )}
                                 {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') ||
                                     (['head_of_procurement', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '') && po.status !== 'Received' && po.status !== 'Cancelled') ||
-                                    (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
+                                    (po.status === 'Draft' && !['head_of_finance', 'regional_finance_manager'].includes(user?.role || '') &&
+                                        (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={(e) => handleDeletePO(e, po)}
                                         className="w-7 h-7 rounded-full flex items-center justify-center border border-transparent hover:border-red-500/30 hover:bg-red-500/10 text-[var(--theme-text-secondary)] hover:text-red-400 transition-all active:scale-[0.95]"

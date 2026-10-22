@@ -218,7 +218,9 @@ describe('regionsService - Dynamic Budget & Operations', () => {
             code: 'ke_rift',
             name: 'Rift Valley Region',
             country: 'Kenya',
-            default_currency: 'KES'
+            default_currency: 'KES',
+            autonomous_po_limit: 0,
+            change_reason: 'Initial regional authority'
         });
 
         expect(insertedPayload.country).toBe('KE');
