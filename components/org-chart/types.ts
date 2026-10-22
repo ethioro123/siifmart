@@ -110,11 +110,8 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
         role: 'super_admin', label: 'CEO', dept: 'executive', reportsTo: null,
         children: [
             {
-                role: 'regional_operations_manager', label: 'Regional Manager', dept: 'executive', reportsTo: 'CEO',
+                role: 'head_of_operations', label: 'Head of Operations', dept: 'executive', reportsTo: 'CEO',
                 children: [
-                    {
-                        role: 'head_of_operations', label: 'Head of Operations', dept: 'executive', reportsTo: 'Regional Manager',
-                        children: [
                             // Central Operations Team
                             { role: 'head_of_merchandising', label: 'Head of Merchandising', dept: 'executive', reportsTo: 'Head of Operations' },
                             { role: 'data_analyst', label: 'Data Analyst', dept: 'executive', reportsTo: 'Head of Operations' },
@@ -127,9 +124,12 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                             },
                             { role: 'store_operations_auditor', label: 'Store Operations Auditor', dept: 'executive', reportsTo: 'Head of Operations' },
 
+                    {
+                        role: 'regional_operations_manager', label: 'Regional Operations Manager', dept: 'executive', reportsTo: 'Head of Operations',
+                        children: [
                             // Direct Facility Oversight Lines
                             {
-                                role: 'store_manager', label: 'Store Manager', dept: 'store', reportsTo: 'Head of Operations',
+                                role: 'store_manager', label: 'Store Manager', dept: 'store', reportsTo: 'Regional Operations Manager',
                                 children: [
                                     {
                                         role: 'assistant_manager', label: 'Assistant Manager', dept: 'store', reportsTo: 'Store Manager',
@@ -149,7 +149,7 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                                 ]
                             },
                             {
-                                role: 'warehouse_manager', label: 'Warehouse Manager', dept: 'warehouse', reportsTo: 'Head of Operations',
+                                role: 'warehouse_manager', label: 'Warehouse Manager', dept: 'warehouse', reportsTo: 'Regional Operations Manager',
                                 children: [
                                     { role: 'receiver', label: 'Receiver', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
                                     { role: 'picker', label: 'Picker', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
@@ -158,7 +158,7 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                                 ]
                             },
                             {
-                                role: 'logistics_manager', label: 'Logistics Manager', dept: 'warehouse', reportsTo: 'Head of Operations',
+                                role: 'logistics_manager', label: 'Logistics Manager', dept: 'warehouse', reportsTo: 'Regional Operations Manager',
                                 children: [
                                     {
                                         role: 'dispatch_manager', label: 'Dispatch Manager', dept: 'warehouse', reportsTo: 'Logistics Manager',
@@ -171,27 +171,27 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                                 ]
                             },
                             {
-                                role: 'inventory_manager', label: 'Inventory Manager', dept: 'warehouse', reportsTo: 'Head of Operations',
+                                role: 'inventory_manager', label: 'Inventory Manager', dept: 'warehouse', reportsTo: 'Regional Operations Manager',
                                 children: [
                                     { role: 'inventory_specialist', label: 'Inventory Specialist', dept: 'warehouse', reportsTo: 'Inventory Manager' },
                                     { role: 'stock_clerk', label: 'Stock Clerk', dept: 'warehouse', reportsTo: 'Inventory Manager' },
                                 ]
                             },
                             {
-                                role: 'security_manager', label: 'Security & LP Manager', dept: 'support', reportsTo: 'Head of Operations',
+                                role: 'security_manager', label: 'Security & LP Manager', dept: 'support', reportsTo: 'Regional Operations Manager',
                                 children: [
                                     { role: 'loss_prevention', label: 'Loss Prevention', dept: 'store', reportsTo: 'Security & LP Manager' }
                                 ]
                             }
                         ]
-                    },
-                    {
-                        role: 'head_of_supply_chain', label: 'Head of Supply Chain', dept: 'procurement', reportsTo: 'Regional Manager',
-                        children: [
-                            { role: 'demand_planner', label: 'Demand Planner', dept: 'procurement', reportsTo: 'Head of Supply Chain' },
-                            { role: 'replenishment_planner', label: 'Replenishment Planner', dept: 'procurement', reportsTo: 'Head of Supply Chain' }
-                        ]
-                    },
+                    }
+                ]
+            },
+            {
+                role: 'head_of_supply_chain', label: 'Head of Supply Chain', dept: 'procurement', reportsTo: 'CEO',
+                children: [
+                    { role: 'demand_planner', label: 'Demand Planner', dept: 'procurement', reportsTo: 'Head of Supply Chain' },
+                    { role: 'replenishment_planner', label: 'Replenishment Planner', dept: 'procurement', reportsTo: 'Head of Supply Chain' }
                 ]
             },
             {

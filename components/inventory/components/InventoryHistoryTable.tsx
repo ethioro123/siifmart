@@ -228,7 +228,7 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                                                     <span>Approved</span>
                                                 </div>
                                                 <p className="text-[11px] text-[var(--theme-text-primary)] font-semibold mt-1">
-                                                    {item.approvedBy || 'Regional Manager'}
+                                                    {item.approvedBy || 'Regional Operations Manager'}
                                                 </p>
                                                 <span className="text-[10px] text-[var(--theme-text-muted)] block font-mono">
                                                     {item.approvedAt ? formatDateTime(item.approvedAt, { showTime: true }) : ''}

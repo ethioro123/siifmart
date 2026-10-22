@@ -251,10 +251,10 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         </select>
                     </div>
 
-                    {/* Appoint Regional Manager */}
+                    {/* Appoint Regional Operations Manager */}
                     <div>
                         <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
-                            Regional Manager Appointment
+                            Regional Operations Manager Appointment
                         </label>
                         <select
                             value={regionalManagerId}

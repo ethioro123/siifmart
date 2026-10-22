@@ -302,7 +302,7 @@ export const canEmployRole = (
         ].includes(userRole as string);
     }
 
-    // Regional Department Managers (Level 5, hierarchy 81) can be employed by Executive Leadership, Operations Director, Regional Manager, HR Leadership, or their Corporate Directorate Head
+    // Regional Department Managers (Level 5, hierarchy 81) can be employed by Executive Leadership, Operations Director, Regional Operations Manager, HR Leadership, or their Corporate Directorate Head
     const isRegionalDepartmentManager = [
         'regional_procurement_manager',
         'regional_merchandising_manager',

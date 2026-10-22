@@ -100,7 +100,7 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                     <div className="p-3.5 rounded-xl bg-[#34C759]/10 border border-[#34C759]/20 flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 text-[#34C759] font-bold">
                             <CheckCircle size={15} />
-                            <span>Approved by {requestForDetails.approvedBy || 'Regional Manager'}</span>
+                            <span>Approved by {requestForDetails.approvedBy || 'Regional Operations Manager'}</span>
                         </div>
                         {requestForDetails.approvedAt && (
                             <span className="text-[var(--theme-text-secondary)] font-mono text-[11px]">

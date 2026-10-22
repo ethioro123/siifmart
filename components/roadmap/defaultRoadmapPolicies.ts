@@ -33,7 +33,7 @@ import { CORPORATE_MERCHANDISING_POLICIES } from './policies/corporateMerchandis
  * - SOP-OPS-017: Weekly Cycle Counting, Zero-Trust Discrepancy Control & Anti-Theft
  * - SOP-GOV-018: Manager & Supervisory Accountability Law ("The Captain Owns the Ship")
  * - SOP-MER-019: Non-Alcoholic / Halal Catalog Compliance Policy
- * - SOP-MGT-020: Regional Manager Operational Authority & Supervisory Accountability Policy
+ * - SOP-MGT-020: Regional Operations Manager Operational Authority & Supervisory Accountability Policy
  * - SOP-MGT-021: Head of Operations Operational Authority & Accountability Policy
  * - SOP-MGT-022: Head of Finance Fiscal Authority & Financial Accountability Policy
  * - SOP-MGT-023: Head of Human Resources Workforce Governance & Anti-Collusion Policy

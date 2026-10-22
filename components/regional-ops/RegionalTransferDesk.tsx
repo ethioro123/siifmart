@@ -70,7 +70,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
     try {
       await transfersService.approve(transferId, {
         approverId: user?.id || user?.employeeId || 'unknown',
-        approverName: user?.name || (isHQUser ? 'Corporate Logistics' : 'Regional Manager'),
+        approverName: user?.name || (isHQUser ? 'Corporate Logistics' : 'Regional Operations Manager'),
         approverRole: user?.role || (isHQUser ? 'head_of_operations' : 'regional_operations_manager'),
         notes: isInterRegional ? 'HQ Inter-Regional Authorization' : 'Autonomous Regional Approval'
       });

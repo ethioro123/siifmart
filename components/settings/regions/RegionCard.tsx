@@ -64,7 +64,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
     // Find Administrative Hub Site
     const hubSite = sites.find(s => s.id === region.admin_hub_site_id);
 
-    // Find Regional Manager
+    // Find Regional Operations Manager
     const regionalManager = employees.find(e => e.id === region.regional_manager_id);
 
     const currency = region.default_currency || getCountryProfile(region.country).currencyCode;
@@ -131,7 +131,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                         </span>
                     </div>
                     <div>
-                        <span className="text-[11px] text-[var(--theme-text-secondary)] block">Regional Manager</span>
+                        <span className="text-[11px] text-[var(--theme-text-secondary)] block">Regional Operations Manager</span>
                         <div className="flex items-center gap-1.5 mt-0.5">
                             <UserCheck size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             <span className="font-medium text-[var(--theme-text-primary)] truncate">

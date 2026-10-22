@@ -63,7 +63,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
         ...candidate,
         status: 'Active'
       };
-      await updateEmployee(updated, user?.name || 'Regional Manager');
+      await updateEmployee(updated, user?.name || 'Regional Operations Manager');
       addNotification?.('success', `Candidate ${candidate.name} certified with 1st-tier regional endorsement.`);
     } catch (err: any) {
       logger.error('RegionalWorkforceDesk', 'Failed to certify candidate', err);
@@ -103,7 +103,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
         loanedAt: new Date().toISOString(),
         loaned_at: new Date().toISOString()
       };
-      await updateEmployee(updated, user?.name || 'Regional Manager');
+      await updateEmployee(updated, user?.name || 'Regional Operations Manager');
       addNotification?.('success', `Successfully loaned ${emp.name} to ${targetSite.name}.`);
       setSelectedEmployeeId('');
       setTargetSiteId('');
@@ -135,7 +135,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
         loanedAt: undefined,
         loaned_at: undefined
       };
-      await updateEmployee(updated, user?.name || 'Regional Manager');
+      await updateEmployee(updated, user?.name || 'Regional Operations Manager');
       addNotification?.('success', `${emp.name} returned to home station (${homeSite?.name || 'Home Facility'}).`);
     } catch (err: any) {
       logger.error('RegionalWorkforceDesk', 'Failed to return loaned worker', err);

@@ -201,7 +201,7 @@ export function getAvailableSections(userRole: UserRole, siteType?: string): str
  * ============================================================================
  * DO NOT MODIFY THIS LIST TO ADD ANY OTHER ROLES!
  * MULTI-SITE ACCESS (SWITCHING SITES) IS STRICTLY RESTRICTED TO THE CEO.
- * NO WORKER, NOT EVEN HIGH-LEVEL POSITIONS OR REGIONAL MANAGERS, ARE ALLOWED
+ * NO WORKER, NOT EVEN HIGH-LEVEL POSITIONS OR REGIONAL OPERATIONS MANAGERS, ARE ALLOWED
  * MULTI-SITE ACCESS EXCEPT THE CEO.
  * THIS IS A HARD SECURITY REQUIREMENT BY THE OWNER.
  * ============================================================================

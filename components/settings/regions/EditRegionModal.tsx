@@ -208,7 +208,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                         </div>
                     </div>
 
-                    {/* Admin Hub & Regional Manager */}
+                    {/* Admin Hub & Regional Operations Manager */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
@@ -229,7 +229,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                         </div>
                         <div>
                             <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
-                                Regional Manager
+                                Regional Operations Manager
                             </label>
                             <select
                                 value={regionalManagerId}

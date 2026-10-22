@@ -60,7 +60,7 @@ export const RequestQuotaAdjustmentModal: React.FC<RequestQuotaAdjustmentModalPr
         increaseAmount: requestedQuota - currentQuota,
         requestType,
         reason: reason.trim(),
-        requestedBy: user?.name || 'Regional Manager',
+        requestedBy: user?.name || 'Regional Operations Manager',
         requestedByRole: user?.role || 'regional_operations_manager'
       });
 

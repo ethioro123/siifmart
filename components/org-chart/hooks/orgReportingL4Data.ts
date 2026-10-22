@@ -203,7 +203,7 @@ export const L4_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToRole: 'head_of_supply_chain',
         reportsToLabel: 'Head of Supply Chain',
         dottedLineRole: 'regional_operations_manager',
-        dottedLineLabel: 'Regional Manager (Store Stock Balances)',
+        dottedLineLabel: 'Regional Operations Manager (Store Stock Balances)',
         managesRoles: [],
         isManagerial: false
     },

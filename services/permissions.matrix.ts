@@ -61,7 +61,7 @@ const HEAD_OF_HR_PERMISSIONS: Permission[] = [
     'finance.view_payroll', 'finance.manage_payroll', 'settings.view'
 ];
 
-const HR_MANAGER_PERMISSIONS: Permission[] = [
+const HR_STAFF_PERMISSIONS: Permission[] = [
     'dashboard.view',
     'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.view_salary', 'employees.propose_salary', 'employees.manage_attendance',
     'finance.view_payroll', 'finance.manage_payroll'
@@ -113,7 +113,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     head_of_operations: HEAD_OF_OPERATIONS_PERMISSIONS,
 
     head_of_hr: HEAD_OF_HR_PERMISSIONS,
-    hr: HR_MANAGER_PERMISSIONS,
+    hr: HR_STAFF_PERMISSIONS,
 
     head_of_supply_chain: HEAD_OF_SUPPLY_CHAIN_PERMISSIONS,
 

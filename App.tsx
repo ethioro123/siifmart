@@ -220,7 +220,7 @@ export default function App() {
               </ProtectedRoute>
             } />
 
-            {/* Regional Operations Command - Regional Manager & Regional Leads */}
+            {/* Regional Operations Command - Regional Operations Manager & Regional Department Managers */}
             <Route path="/regional-ops" element={
               <ProtectedRoute module="regional-ops">
                 <ModuleErrorBoundary moduleName="Regional Operations">

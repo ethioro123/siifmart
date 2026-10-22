@@ -119,7 +119,7 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                             siteId: change.siteId,
                             proposedChanges: change.proposedChanges,
                             requestedBy: change.requestedBy,
-                            approvedBy: user?.name || 'Regional Manager',
+                            approvedBy: user?.name || 'Regional Operations Manager',
                             approverRole: user?.role,
                             summary: `Approved by ${user?.role || 'Manager'} ${user?.name}: Updated ${change.productName} (${change.productSku})`
                         },

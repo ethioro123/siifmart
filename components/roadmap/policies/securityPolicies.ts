@@ -239,7 +239,7 @@ TRACEABILITY: .agent/RULES.md (Shift Reconciliations & Drawer Governance)
     content: `================================================================================
 STARTUP EMPLOYEE OPERATIONS PLAYBOOK
 STANDARD OPERATING PROCEDURE: HR-OPS-006
-APPLIES TO: FOUNDERS, REGIONAL MANAGERS, HR & STORE LEADS
+APPLIES TO: FOUNDERS, REGIONAL OPERATIONS MANAGERS, HR & STORE LEADS
 TRACEABILITY: .agent/RULES.md (Workforce Governance & Anti-Collusion Model)
 ================================================================================
 
