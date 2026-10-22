@@ -148,6 +148,12 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     ],
 
     // ═══ LEVEL 7 - FUNCTIONAL & DEPARTMENT MANAGERS ═══
+    warehouse_operations_manager: [
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'employees', 'profile'
+    ],
+    transport_fleet_manager: [
+        'dashboard', 'warehouse', 'inventory', 'employees', 'profile'
+    ],
     assistant_manager: [
         'dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'
     ],
@@ -157,12 +163,29 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     vendor_relations_manager: ['dashboard', 'regional-ops', 'procurement', 'pricing', 'inventory', 'profile'],
     cs_manager: ['dashboard', 'regional-ops', 'customers', 'sales', 'profile'],
 
-    // ═══ LEVEL 8 - SHIFT LEADS & FLOOR SUPERVISORS ═══
+    // ═══ LEVEL 8 - SHIFT LEADS, FLOOR SUPERVISORS & TEAM LEADERS ═══
+    assistant_store_manager: [
+        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'employees', 'profile'
+    ],
+    shift_supervisor: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
     shift_lead: [
         'dashboard', 'pos', 'inventory', 'customers', 'profile'
     ],
     store_supervisor: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
+    receiving_supervisor: ['dashboard', 'inventory', 'procurement', 'employees', 'profile'],
+    stock_control_supervisor: ['dashboard', 'inventory', 'employees', 'profile'],
+    pos_supervisor: ['dashboard', 'pos', 'sales', 'customers', 'employees', 'profile'],
+    inventory_control_supervisor: ['dashboard', 'inventory', 'warehouse', 'employees', 'profile'],
+    putaway_replenishment_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
+    picking_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
+    packing_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
+    dispatch_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
+    returns_waste_supervisor: ['dashboard', 'warehouse', 'inventory', 'customers', 'sales', 'employees', 'profile'],
     fleet_maintenance_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
+    receiving_team_leader: ['dashboard', 'warehouse', 'inventory', 'procurement', 'profile'],
+    picking_team_leader: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    packing_team_leader: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    dispatch_team_leader: ['dashboard', 'warehouse', 'inventory', 'profile'],
     dispatcher: ['dashboard', 'inventory', 'warehouse', 'profile'],
 
     // ═══ LEVEL 9 - SPECIALISTS, ANALYSTS & OFFICERS ═══
@@ -190,13 +213,22 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     // ═══ LEVEL 10 - FRONTLINE EXECUTION STAFF ═══
     cashier: ['dashboard', 'pos', 'profile'],
     sales_associate: ['dashboard', 'pos', 'customers', 'inventory', 'profile'],
+    store_associate: ['dashboard', 'pos', 'customers', 'inventory', 'profile'],
     stock_clerk: ['dashboard', 'warehouse', 'inventory', 'profile'],
     picker: ['dashboard', 'warehouse', 'inventory', 'profile'],
     packer: ['dashboard', 'warehouse', 'inventory', 'profile'],
     receiver: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    receiving_operator: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    putaway_operator: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    replenishment_operator: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    inventory_controller: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    stock_counter: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    dispatch_operator: ['dashboard', 'warehouse', 'inventory', 'profile'],
+    returns_operator: ['dashboard', 'warehouse', 'inventory', 'customers', 'profile'],
+    returns_clerk: ['dashboard', 'warehouse', 'inventory', 'customers', 'profile'],
     driver: ['dashboard', 'warehouse', 'inventory', 'profile'],
     forklift_operator: ['dashboard', 'warehouse', 'inventory', 'profile'],
-    returns_clerk: ['dashboard', 'warehouse', 'inventory', 'customers', 'profile'],
+    fleet_mechanic: ['dashboard', 'warehouse', 'inventory', 'profile'],
     customer_service: ['dashboard', 'customers', 'sales', 'profile'],
 
     // ═══ LEGACY ALIASES (backwards compatibility) ═══
