@@ -15,6 +15,14 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(groupCeo.isManagerial).toBe(true);
         expect(groupCeo.managesRoles.length).toBeGreaterThan(0);
 
+        const groupCoo = getRoleReportingMeta('group_coo');
+        expect(groupCoo.level).toBe(1);
+        expect(groupCoo.levelCategory).toBe('executive');
+        expect(groupCoo.reportsToRole).toBe('group_ceo');
+        expect(groupCoo.reportsToLabel).toContain('CEO');
+        expect(groupCoo.isManagerial).toBe(true);
+        expect(groupCoo.managesRoles.length).toBeGreaterThan(0);
+
         const ceo = getRoleReportingMeta('super_admin');
         expect(ceo.level).toBe(1);
         expect(ceo.levelCategory).toBe('executive');
@@ -25,7 +33,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         const cmd = getRoleReportingMeta('country_managing_director');
         expect(cmd.level).toBe(2);
         expect(cmd.levelCategory).toBe('executive');
-        expect(cmd.reportsToRole).toBe('super_admin');
+        expect(cmd.reportsToRole).toBe('group_coo');
         expect(cmd.isManagerial).toBe(true);
     });
 

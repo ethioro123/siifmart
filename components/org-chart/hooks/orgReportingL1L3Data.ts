@@ -12,7 +12,17 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L1 Global Executive',
         reportsToRole: null,
         reportsToLabel: 'Board of Directors / Ownership',
-        managesRoles: ['country_managing_director', 'admin', 'regional_operations_manager', 'head_of_operations', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_merchandising', 'head_of_supply_chain', 'head_of_it', 'head_of_audit', 'it_support'],
+        managesRoles: ['group_coo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_operations', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_merchandising', 'head_of_supply_chain', 'head_of_it', 'head_of_audit', 'it_support'],
+        isManagerial: true
+    },
+    group_coo: {
+        role: 'group_coo',
+        level: 1,
+        levelCategory: 'executive',
+        levelTag: 'L1 Global Executive',
+        reportsToRole: 'group_ceo',
+        reportsToLabel: 'Group CEO',
+        managesRoles: ['country_managing_director', 'admin', 'head_of_operations', 'regional_operations_manager', 'head_of_supply_chain'],
         isManagerial: true
     },
     super_admin: {
@@ -22,7 +32,7 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L1 Global Executive',
         reportsToRole: null,
         reportsToLabel: 'Board of Directors / Ownership',
-        managesRoles: ['country_managing_director', 'admin', 'regional_operations_manager', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_operations', 'it_support'],
+        managesRoles: ['group_coo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_finance', 'head_of_hr', 'head_of_procurement', 'head_of_operations', 'it_support'],
         isManagerial: true
     },
 
@@ -34,8 +44,10 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 2,
         levelCategory: 'executive',
         levelTag: 'L2 Country Executive',
-        reportsToRole: 'super_admin',
-        reportsToLabel: 'CEO',
+        reportsToRole: 'group_coo',
+        reportsToLabel: 'Group COO',
+        dottedLineRole: 'group_ceo',
+        dottedLineLabel: 'Group CEO (Executive Oversight)',
         managesRoles: ['regional_operations_manager', 'head_of_finance', 'head_of_operations'],
         isManagerial: true
     },
@@ -44,9 +56,11 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 2,
         levelCategory: 'executive',
         levelTag: 'L2 Country Executive',
-        reportsToRole: 'super_admin',
-        reportsToLabel: 'CEO',
-        managesRoles: ['regional_operations_manager', 'head_of_finance', 'head_of_operations',],
+        reportsToRole: 'group_coo',
+        reportsToLabel: 'Group COO',
+        dottedLineRole: 'group_ceo',
+        dottedLineLabel: 'Group CEO (Executive Oversight)',
+        managesRoles: ['regional_operations_manager', 'head_of_finance', 'head_of_operations'],
         isManagerial: true
     },
 

@@ -16,6 +16,9 @@ import type { UserRole } from './auth.service';
 export const ROLE_PERMISSIONS: Record<string, string[]> = {
     // ═══ LEVEL 1 - GLOBAL EXECUTIVE BOARD ═══
     group_ceo: ['*'], // Global Group CEO - Full Access to EVERYTHING
+    group_coo: [
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+    ],
     super_admin: ['*'], // Global CEO / Owner - Full Access to EVERYTHING
     CEO: ['*'],
     ceo: ['*'],
@@ -171,7 +174,7 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
 export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
     const basePermissions = ROLE_PERMISSIONS[userRole] || [];
     if (basePermissions.includes('*') || [
-        'admin', 'country_managing_director',
+        'group_coo', 'admin', 'country_managing_director',
         'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
         'head_of_operations',
         'head_of_finance',

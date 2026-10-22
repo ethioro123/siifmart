@@ -4,6 +4,7 @@ import { canEmployRole, getRoleHierarchy, SYSTEM_ROLES } from '../../utils/roles
 describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
     describe('Group CEO and Global Executive (Level 1, Rank 100)', () => {
         it('can employ subordinate roles across the enterprise', () => {
+            expect(canEmployRole('group_ceo', 'group_coo')).toBe(true);
             expect(canEmployRole('group_ceo', 'country_managing_director')).toBe(true);
             expect(canEmployRole('group_ceo', 'head_of_operations')).toBe(true);
             expect(canEmployRole('group_ceo', 'regional_operations_manager')).toBe(true);
@@ -15,6 +16,22 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
             expect(canEmployRole('group_ceo', 'group_ceo')).toBe(false);
             expect(canEmployRole('group_ceo', 'super_admin')).toBe(false);
             expect(canEmployRole('super_admin', 'group_ceo')).toBe(false);
+        });
+    });
+
+    describe('Group COO (Level 1, Rank 99)', () => {
+        it('can employ country managing directors, operations heads, and subordinate staff', () => {
+            expect(canEmployRole('group_coo', 'country_managing_director')).toBe(true);
+            expect(canEmployRole('group_coo', 'head_of_operations')).toBe(true);
+            expect(canEmployRole('group_coo', 'regional_operations_manager')).toBe(true);
+            expect(canEmployRole('group_coo', 'store_manager')).toBe(true);
+            expect(canEmployRole('group_coo', 'cashier')).toBe(true);
+        });
+
+        it('cannot employ Group CEO, Super Admin, or another Group COO', () => {
+            expect(canEmployRole('group_coo', 'group_ceo')).toBe(false);
+            expect(canEmployRole('group_coo', 'super_admin')).toBe(false);
+            expect(canEmployRole('group_coo', 'group_coo')).toBe(false);
         });
     });
 

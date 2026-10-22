@@ -41,7 +41,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
 
     // 1.5. Corporate HQ Executive Deck
     const isHQExecutive = [
-        'group_ceo', 'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
+        'group_ceo', 'group_coo', 'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
         'head_of_operations',
     ].includes(role);
     if (isHQExecutive) {

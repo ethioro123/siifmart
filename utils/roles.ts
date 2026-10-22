@@ -9,6 +9,7 @@ export const SYSTEM_ROLES: {
 }[] = [
    // ═══ LEVEL 1 - GLOBAL EXECUTIVE ═══
    { id: 'group_ceo', label: 'Group Chief Executive Officer', desc: 'Multinational Enterprise Governance and Global Group Strategy', level: 1, styles: { text: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-400/10', border: 'border-yellow-200 dark:border-yellow-400/20', badge: 'bg-yellow-100 dark:bg-yellow-400/20 text-yellow-700 dark:text-yellow-400' } },
+   { id: 'group_coo', label: 'Group Chief Operating Officer', desc: 'Enterprise Operational Execution and Multinational Country Governance', level: 1, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-100 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },
    { id: 'super_admin', label: 'Chief Executive Officer', desc: 'Enterprise Ownership and Sovereign Executive Governance', level: 1, styles: { text: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-400/10', border: 'border-yellow-200 dark:border-yellow-400/20', badge: 'bg-yellow-100 dark:bg-yellow-400/20 text-yellow-700 dark:text-yellow-400' } },
 
    // ═══ LEVEL 2 - COUNTRY EXECUTIVE ═══
@@ -96,6 +97,7 @@ export const SYSTEM_ROLES: {
 export function getJobTitleForRole(role?: string | null): string {
    const normalizedRole = (role || '').trim().toLowerCase();
    if (normalizedRole === 'group_ceo') return 'Group Chief Executive Officer';
+   if (normalizedRole === 'group_coo' || normalizedRole === 'coo') return 'Group Chief Operating Officer';
    if (normalizedRole === 'ceo') return 'Chief Executive Officer';
 
    const configuredRole = SYSTEM_ROLES.find(item => item.id.toLowerCase() === normalizedRole);
@@ -121,6 +123,7 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'super_admin': 100,
         'CEO': 100,
         'ceo': 100,
+        'group_coo': 99,
         'country_managing_director': 98,
         'admin': 98, // Country Managing Director (National Executive below Global CEO)
 
@@ -204,16 +207,16 @@ export const canViewLocation = (
     if (isOwn) return true;
     if (!userRole) return false;
 
-    // Global CEO can see everyone
-    if (userRole === 'group_ceo' || userRole === 'super_admin' || userRole === 'ceo' || userRole === 'CEO') return true;
+    // Global CEO and Group COO can see everyone across operational facilities
+    if (userRole === 'group_ceo' || userRole === 'group_coo' || userRole === 'super_admin' || userRole === 'ceo' || userRole === 'CEO') return true;
 
-    // Country Managing Director and HR/Operations leadership can see anyone in their country except Global CEO
+    // Country Managing Director and HR/Operations leadership can see anyone in their country except Global CEO & COO
     if ([
         'admin', 'country_managing_director',
         'hr', 'head_of_hr',
         'head_of_operations',
     ].includes(userRole)) {
-        return targetRole !== 'group_ceo' && targetRole !== 'super_admin' && targetRole !== 'ceo' && targetRole !== 'CEO';
+        return targetRole !== 'group_ceo' && targetRole !== 'group_coo' && targetRole !== 'super_admin' && targetRole !== 'ceo' && targetRole !== 'CEO';
     }
 
     // Otherwise, follow hierarchy: user role hierarchy level must be greater than target
@@ -228,7 +231,7 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
 
     // Explicitly allow executive, regional/operations directors, finance, procurement, and merchandising leadership
     if ([
-        'group_ceo', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+        'group_ceo', 'group_coo', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
         'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager',
         'head_of_operations',
         'head_of_finance',
@@ -265,11 +268,16 @@ export const canEmployRole = (
 ): boolean => {
     if (!userRole) return false;
 
-    // CEO / Super Admin can employ anyone below CEO
+    // Global CEO can employ anyone below CEO
     const normUserRole = (userRole || '').toLowerCase();
     const normCandidateRole = (candidateRole || '').toLowerCase();
     if (normUserRole === 'group_ceo' || normUserRole === 'super_admin' || normUserRole === 'ceo') {
         return normCandidateRole !== 'group_ceo' && normCandidateRole !== 'super_admin' && normCandidateRole !== 'ceo';
+    }
+
+    // Group COO can employ Country Managing Directors, Operations Directors, and subordinate staff
+    if (normUserRole === 'group_coo') {
+        return normCandidateRole !== 'group_ceo' && normCandidateRole !== 'super_admin' && normCandidateRole !== 'ceo' && normCandidateRole !== 'group_coo';
     }
 
     const userHierarchy = getRoleHierarchy(userRole);
@@ -288,7 +296,7 @@ export const canEmployRole = (
         return false;
     }
 
-    // Corporate HQ Directors (Level 3) and Regional Operations Managers (Level 4) can ONLY be appointed by L1 CEO or L2 Country Managing Director
+    // Corporate HQ Directors (Level 3) and Regional Operations Managers (Level 4) can ONLY be appointed by L1 CEO/COO or L2 Country Managing Director
     if (candidateLevel <= 4 && userLevel > 2) {
         return false;
     }
@@ -297,7 +305,7 @@ export const canEmployRole = (
     const isFacilityCaptain = candidateRole === 'store_manager' || candidateRole === 'warehouse_manager';
     if (isFacilityCaptain) {
         return [
-            'group_ceo', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+            'group_ceo', 'group_coo', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
             'head_of_operations',
             'head_of_supply_chain',
             'regional_operations_manager', 'regional_hr_manager',
@@ -316,7 +324,7 @@ export const canEmployRole = (
     ].includes(candidateRole as string);
     if (isRegionalDepartmentManager) {
         return [
-            'group_ceo', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+            'group_ceo', 'group_coo', 'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
             'head_of_operations',
             'regional_operations_manager',
             'head_of_hr', 'hr',
@@ -339,6 +347,7 @@ export const canEmployRole = (
 // Canonical list of Levels 1 through 8 managerial & leadership roles for selective egress loading
 export const MANAGERIAL_ROLES: readonly string[] = [
     'group_ceo',
+    'group_coo',
     'super_admin',
     'admin',
     'country_managing_director',

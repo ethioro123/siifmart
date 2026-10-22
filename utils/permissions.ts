@@ -27,11 +27,11 @@ export type { Permission };
  */
 export const PERMISSIONS = {
     // Dashboard
-    VIEW_ADMIN_DASHBOARD: ['super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations', 'hr', 'head_of_hr', 'auditor', 'head_of_audit', 'head_of_finance', 'it_support', 'head_of_it', 'store_operations_auditor', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_merchandising_manager'],
-    ACCESS_ADMIN_MODULE: ['super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations', 'store_operations_auditor'],
-    ACCESS_REGIONAL_OPS: ['super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'head_of_operations', 'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_merchandising_manager', 'auditor', 'head_of_audit', 'store_operations_auditor', 'hr', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator', 'it_support', 'security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'logistics_manager', 'inventory_manager', 'merchandiser', 'data_analyst', 'cs_manager'],
-    VIEW_WMS_DASHBOARD: ['super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'regional_logistics_manager', 'head_of_operations', 'warehouse_manager', 'logistics_manager', 'dispatch_manager', 'dispatcher', 'picker', 'driver', 'head_of_procurement', 'head_of_supply_chain', 'inventory_specialist', 'inventory_manager', 'fleet_maintenance_supervisor'],
-    VIEW_POS_DASHBOARD: ['super_admin', 'admin', 'country_managing_director', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'cs_manager', 'head_of_operations', 'regional_operations_manager', 'regional_finance_manager', 'regional_security_manager', 'head_of_finance', 'auditor', 'head_of_audit', 'treasury_officer', 'store_operations_auditor'],
+    VIEW_ADMIN_DASHBOARD: ['group_ceo', 'group_coo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations', 'hr', 'head_of_hr', 'auditor', 'head_of_audit', 'head_of_finance', 'it_support', 'head_of_it', 'store_operations_auditor', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_merchandising_manager'],
+    ACCESS_ADMIN_MODULE: ['group_ceo', 'group_coo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations', 'store_operations_auditor'],
+    ACCESS_REGIONAL_OPS: ['group_ceo', 'group_coo', 'super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'head_of_operations', 'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_merchandising_manager', 'auditor', 'head_of_audit', 'store_operations_auditor', 'hr', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator', 'it_support', 'security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'logistics_manager', 'inventory_manager', 'merchandiser', 'data_analyst', 'cs_manager'],
+    VIEW_WMS_DASHBOARD: ['group_ceo', 'group_coo', 'super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'regional_logistics_manager', 'head_of_operations', 'warehouse_manager', 'logistics_manager', 'dispatch_manager', 'dispatcher', 'picker', 'driver', 'head_of_procurement', 'head_of_supply_chain', 'inventory_specialist', 'inventory_manager', 'fleet_maintenance_supervisor'],
+    VIEW_POS_DASHBOARD: ['group_ceo', 'group_coo', 'super_admin', 'admin', 'country_managing_director', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'cs_manager', 'head_of_operations', 'regional_operations_manager', 'regional_finance_manager', 'regional_security_manager', 'head_of_finance', 'auditor', 'head_of_audit', 'treasury_officer', 'store_operations_auditor'],
 
     // POS
     ACCESS_POS: ['super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cashier', 'sales_associate', 'store_supervisor', 'store_operations_auditor', 'treasury_officer', 'regional_finance_manager', 'regional_security_manager', 'head_of_audit', 'auditor'],
@@ -299,10 +299,10 @@ export function getAccessibleModules(userRole: UserRole | undefined): string[] {
 }
 
 /**
- * Check if user is admin level (group_ceo, super_admin or admin)
+ * Check if user is admin level (group_ceo, group_coo, super_admin or admin)
  */
 export function isAdmin(userRole: UserRole | undefined): boolean {
-    return userRole === 'group_ceo' || userRole === 'super_admin' || userRole === 'admin' || userRole === 'country_managing_director' || (userRole as string)?.toLowerCase() === 'ceo';
+    return userRole === 'group_ceo' || userRole === 'group_coo' || userRole === 'super_admin' || userRole === 'admin' || userRole === 'country_managing_director' || (userRole as string)?.toLowerCase() === 'ceo';
 }
 
 /**
