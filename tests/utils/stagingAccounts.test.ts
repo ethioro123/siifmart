@@ -10,7 +10,7 @@ describe('live staging roster mapping', () => {
     it('includes newly provisioned floor staff at their actual distribution center', () => {
         const account = mapStagingEmployee(row)!;
         expect(account.roleId).toBe('picker');
-        expect(account.role).toBe('Warehouse Order Picker');
+        expect(account.role).toBe('Order Picker');
         expect(account.level).toBe(10);
         expect(account.facilityTier).toBe('Operation Sites');
         expect(account.siteCode).toBe('ET-ADD-DC-01');
@@ -34,12 +34,13 @@ describe('live staging roster mapping', () => {
     it('excludes unsupported country records rather than classifying them as Ethiopia', () => {
         expect(mapStagingEmployee({ ...row, site: { ...row.site!, country: 'ZZ' } })).toBeNull();
     });
-    it('keeps one representative site per country and facility type, including administration', () => {
+    it('keeps one representative site per country and facility type, and every regional administration office', () => {
         const makeAccount = (id: string, country: 'ET' | 'KE', code: string, type: string, regionCode: string | null = null, name = type) =>
             mapStagingEmployee({ ...row, id, site: { code, name, type, country, region_code: regionCode } })!;
         const roster = [
             makeAccount('et-hq', 'ET', 'ET-HQ', 'Administration'),
             makeAccount('et-region', 'ET', 'ET-ADD', 'Administration', 'ET-ADD', 'Regional Administration'),
+            makeAccount('et-region-2', 'ET', 'ET-ADA', 'Administration', 'ET-ADA', 'Regional Administration'),
             makeAccount('et-store-1a', 'ET', 'ET-ADD-STORE-01', 'Store', 'ET-ADD'),
             makeAccount('et-store-1b', 'ET', 'ET-ADD-STORE-01', 'Store', 'ET-ADD'),
             makeAccount('et-store-2', 'ET', 'ET-ADD-STORE-02', 'Store', 'ET-ADD'),
@@ -55,7 +56,7 @@ describe('live staging roster mapping', () => {
 
         const selected = selectRepresentativeStagingAccounts(roster);
         expect(selected.map(account => account.id)).toEqual([
-            'et-hq', 'et-region', 'et-store-1a', 'et-store-1b', 'et-wh', 'et-dc',
+            'et-hq', 'et-region', 'et-region-2', 'et-store-1a', 'et-store-1b', 'et-wh', 'et-dc',
             'ke-hq', 'ke-region', 'ke-store', 'ke-wh', 'ke-dc', 'global-admin'
         ]);
     });

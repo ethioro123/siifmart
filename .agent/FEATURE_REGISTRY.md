@@ -431,3 +431,9 @@
 - Allowed demand and replenishment planners to prepare scoped draft POs; approval remains a separate, maker-checker controlled action.
 - Removed required price estimates from stock requests so requesters provide item and quantity while Procurement fills sourcing and price during PO preparation.
 - Files: pages/PurchaseRequests.tsx, types/productSuggestion.ts, services/product-suggestions.service.ts, hooks/useProductSuggestions.ts, types/purchaseRequisition.ts, utils/permissions.ts, services/permissions.matrix.ts, components/ProtectedRoute.tsx, migrations/20261023_product_suggestions_and_po_preparer_roles.sql.
+
+### Regional department support staging accounts (2026-10-23)
+- Two additional support employees per existing regional administration department, with country/region scope and department manager reporting links.
+- Auth identities use random server-side passwords and existing local staging one-time-token quick login.
+- Regional quick login lists every office; other facility types retain representative-site selection.
+- Migration: `migrations/20261023_seed_regional_department_support.sql` (staging only).
