@@ -147,7 +147,7 @@ export default function Logo({
     const stackedTitleSize = `${Math.round(1.22 * scale * 16)}px`;
     return (
       <div className={`inline-flex flex-col items-center gap-2.5 select-none ${className}`.trim()}>
-        <SiifGroceryEmblem size={Math.round(size * 1.65)} />
+        <SiifGroceryEmblem size={Math.round(size * 2.15)} />
         <SiifWordmark
           fontSize={stackedTitleSize}
           storeName={effectiveStoreName}
