@@ -128,7 +128,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                         {/* Header: PO Num & status */}
                         <div className="flex justify-between items-center gap-2">
                             <div className="flex items-center gap-2">
-                                {user?.role === 'super_admin' && (
+                                {user?.role === 'group_ceo' && (
                                     <div onClick={(e) => e.stopPropagation()}>
                                         {isDraft ? (
                                             <input
@@ -204,7 +204,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                 )}
                                 {((isCEO && po.status !== 'Received') ||
                                     (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
-                                    (po.status === 'Draft' && !['head_of_finance', 'regional_finance_manager'].includes(user?.role || '') &&
+                                    (po.status === 'Draft' && !['country_finance_director', 'regional_finance_manager'].includes(user?.role || '') &&
                                         (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={() => onEdit(po)}
@@ -216,8 +216,8 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                     </button>
                                 )}
                                 {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') ||
-                                    (['head_of_procurement', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '') && po.status !== 'Received' && po.status !== 'Cancelled') ||
-                                    (po.status === 'Draft' && !['head_of_finance', 'regional_finance_manager'].includes(user?.role || '') &&
+                                    (['country_commercial_director', 'country_managing_director', 'group_ceo'].includes(user?.role || '') && po.status !== 'Received' && po.status !== 'Cancelled') ||
+                                    (po.status === 'Draft' && !['country_finance_director', 'regional_finance_manager'].includes(user?.role || '') &&
                                         (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={(e) => handleDeletePO(e, po)}

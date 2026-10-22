@@ -46,9 +46,9 @@ describe('price governance helpers (SOP-MER-037)', () => {
         const ok = { ...buildPriceChangeRequest({ product, proposal: { price: 120, costPrice: 80 }, requestedBy: 'm', countryCode: 'ET', source: 'x' }), id: 'r2' } as PendingInventoryChange;
         expect(requiresFinanceCoApproval(low)).toBe(true);
         expect(requiresFinanceCoApproval(ok)).toBe(false);
-        expect(canApproveBelowFloor('head_of_finance')).toBe(true);
-        expect(canApproveBelowFloor('super_admin')).toBe(true);
-        expect(canApproveBelowFloor('head_of_operations')).toBe(false);
+        expect(canApproveBelowFloor('country_finance_director')).toBe(true);
+        expect(canApproveBelowFloor('group_ceo')).toBe(true);
+        expect(canApproveBelowFloor('country_operations_director')).toBe(false);
     });
 });
 
@@ -73,7 +73,7 @@ describe('merchandising no longer writes prices directly', () => {
         expect(sql).toContain('ENABLE ROW LEVEL SECURITY');
         expect(sql).toContain('country_code');
         expect(sql).toContain('enforce_price_change_margin_floor');
-        expect(sql).toContain("'head_of_finance', 'super_admin'");
+        expect(sql).toContain("'country_finance_director', 'group_ceo'");
     });
 
     it('rules service is country scoped and paginated to 25', () => {

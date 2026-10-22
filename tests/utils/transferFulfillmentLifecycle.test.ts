@@ -88,15 +88,7 @@ describe('Transfer Fulfillment Lifecycle & Receiving Architecture', () => {
     describe('2. Receiving Permission & Status Gating', () => {
         const canOpenReceiving = (job: WMSJob, activeSiteId: string, userRole: string) => {
             const allowedStatuses = ['In-Transit', 'Shipped', 'Delivered', 'Partially Delivered'];
-            const allowedRoles = [
-                'super_admin',
-                'admin',
-                'warehouse_manager',
-                'inventory_specialist',
-                'stock_clerk',
-                'receiver',
-                'store_manager'
-            ];
+            const allowedRoles = ['group_ceo', 'country_managing_director', 'warehouse_manager', 'inventory_specialist', 'stock_clerk', 'receiver', 'store_manager'];
 
             const statusMatch = allowedStatuses.includes(job.transferStatus || '');
             const authMatch = job.destSiteId === activeSiteId || allowedRoles.includes(userRole);

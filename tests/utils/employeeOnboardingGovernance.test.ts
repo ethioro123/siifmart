@@ -10,25 +10,14 @@ import { canEmployRole } from '../../utils/roles';
 describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
     describe('1. Direct Onboarding Authority Check', () => {
         it('authorizes only executive admins and HR leadership for direct activation', () => {
-            const authorizedRoles = ['super_admin', 'CEO', 'ceo', 'admin', 'hr', 'head_of_hr'];
+            const authorizedRoles = ['group_ceo', 'country_managing_director', 'hr_generalist', 'country_hr_director'];
             for (const role of authorizedRoles) {
                 expect(isDirectOnboardingAuthorized(role)).toBe(true);
             }
         });
 
         it('strictly forbids site and facility managers from direct onboarding', () => {
-            const siteManagerRoles = [
-                'warehouse_manager',
-                'store_manager',
-                'dispatch_manager',
-                'assistant_manager',
-                'shift_lead',
-                'store_supervisor',
-                'logistics_manager',
-                'inventory_manager',
-                'head_of_operations',
-                'fleet_maintenance_supervisor'
-            ];
+            const siteManagerRoles = ['warehouse_manager', 'store_manager', 'dispatch_supervisor', 'assistant_store_manager', 'shift_supervisor', 'regional_supply_chain_manager', 'inventory_manager', 'country_operations_director', 'fleet_maintenance_supervisor'];
 
             for (const role of siteManagerRoles) {
                 expect(isDirectOnboardingAuthorized(role)).toBe(false);
@@ -53,8 +42,8 @@ describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
         it('renders direct onboarding labels for HR and Executive roles', () => {
             expect(getOnboardingSubmitLabel('hr', false)).toBe('Confirm & Onboard Talent');
             expect(getOnboardingSubmitLabel('hr', true)).toBe('Creating Employee...');
-            expect(getOnboardingSubmitLabel('super_admin', false)).toBe('Confirm & Onboard Talent');
-            expect(getOnboardingSubmitLabel('super_admin', true)).toBe('Creating Employee...');
+            expect(getOnboardingSubmitLabel('group_ceo', false)).toBe('Confirm & Onboard Talent');
+            expect(getOnboardingSubmitLabel('group_ceo', true)).toBe('Creating Employee...');
             expect(getOnboardingSubmitLabel('CEO', false)).toBe('Confirm & Onboard Talent');
         });
 
@@ -63,14 +52,14 @@ describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
             expect(getOnboardingSubmitLabel('warehouse_manager', true)).toBe('Submitting to HR...');
             expect(getOnboardingSubmitLabel('store_manager', false)).toBe('Submit to HR for Approval');
             expect(getOnboardingSubmitLabel('store_manager', true)).toBe('Submitting to HR...');
-            expect(getOnboardingSubmitLabel('assistant_manager', false)).toBe('Submit to HR for Approval');
+            expect(getOnboardingSubmitLabel('assistant_store_manager', false)).toBe('Submit to HR for Approval');
         });
     });
 
     describe('3. Modal Header Title Adaptation', () => {
         it('renders standard title for HR and Executive roles', () => {
             expect(getOnboardingModalTitle('hr')).toBe('Onboard Talent');
-            expect(getOnboardingModalTitle('super_admin')).toBe('Onboard Talent');
+            expect(getOnboardingModalTitle('group_ceo')).toBe('Onboard Talent');
         });
 
         it('renders draft proposal title for site managers', () => {
@@ -81,7 +70,7 @@ describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
 
     describe('4. Dual-Control Supervisory Sign-Off & Authorization (SOP-HR-003)', () => {
         it('authorizes Head of Human Resources to approve warehouse and store candidate drafts', () => {
-            const hrRoles = ['head_of_hr', 'hr', 'super_admin', 'CEO'];
+            const hrRoles = ['country_hr_director', 'hr_generalist', 'group_ceo'];
             const candidateRoles = ['picker', 'packer', 'receiver', 'cashier', 'driver', 'stock_clerk'];
 
             for (const hrRole of hrRoles) {
@@ -101,7 +90,7 @@ describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
         it('strictly blocks self-approval or peer manager approval across same hierarchy tier', () => {
             expect(canEmployRole('warehouse_manager', 'warehouse_manager')).toBe(false);
             expect(canEmployRole('store_manager', 'warehouse_manager')).toBe(false);
-            expect(canEmployRole('head_of_hr', 'head_of_hr')).toBe(false);
+            expect(canEmployRole('country_hr_director', 'country_hr_director')).toBe(false);
         });
     });
 });

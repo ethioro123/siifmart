@@ -39,7 +39,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
     const activeCountry = (effectiveCountry || settings?.country || 'ET') as any;
     const dynamicCurrency = currencySymbol || getCountryProfile(activeCountry).currencySymbol || 'ETB';
     const showCost = canViewCostPrice(user?.role);
-    const isCEO = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
+    const isCEO = user?.role === 'group_ceo';
     const canDirectEdit = isCEO;
 
     const [activeTab, setActiveTab] = useState<ModalTab>('unit');

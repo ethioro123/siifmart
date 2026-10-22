@@ -162,9 +162,9 @@ describe('Finance Directorate Team Roles Integration', () => {
 
     describe('4. Managerial Authority & Hiring Governance', () => {
         it('allows head_of_finance to employ all three finance team roles', () => {
-            expect(canEmployRole('head_of_finance', 'treasury_officer')).toBe(true);
-            expect(canEmployRole('head_of_finance', 'tax_compliance_officer')).toBe(true);
-            expect(canEmployRole('head_of_finance', 'credit_control_officer')).toBe(true);
+            expect(canEmployRole('country_finance_director', 'treasury_officer')).toBe(true);
+            expect(canEmployRole('country_finance_director', 'tax_compliance_officer')).toBe(true);
+            expect(canEmployRole('country_finance_director', 'credit_control_officer')).toBe(true);
         });
 
         it('blocks Level 4 staff from employing finance team roles', () => {

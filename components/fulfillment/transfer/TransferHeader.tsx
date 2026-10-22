@@ -78,7 +78,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
 
                     {user?.role !== 'receiver' && <button
                         onClick={() => {
-                            const isHQ = activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['super_admin', 'admin'].includes(user?.role || '');
+                            const isHQ = activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['group_ceo', 'country_managing_director'].includes(user?.role || '');
                             const isWarehouse = activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center';
                             setTransferCenterTab(isHQ ? 'smart' : isWarehouse ? 'bulk' : 'request');
                             setShowTransferCenter(true);

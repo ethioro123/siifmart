@@ -40,7 +40,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
 }) => {
     const { t } = useLanguage();
     const { settings } = useData();
-    const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
+    const isRestricted = !['group_ceo', 'country_managing_director'].includes(user?.role || '') && !!user?.siteId;
     const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
     const [transferSourceSite, setTransferSourceSite] = useState('');
     const [transferDestSite, setTransferDestSite] = useState('');
@@ -131,7 +131,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
 
     // Reset destination site if it becomes invalid due to source site changes under regional zoning
     useEffect(() => {
-        if (transferDestSite && settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+        if (transferDestSite && settings?.enforceRegionalZoning && user?.role !== 'group_ceo') {
             const sourceSiteObj = sites.find(s => s.id === (transferSourceSite || activeSite?.id));
             const destSiteObj = sites.find(s => s.id === transferDestSite);
             if (sourceSiteObj && destSiteObj && (sourceSiteObj.logisticsZoneId || '') !== (destSiteObj.logisticsZoneId || '')) {
@@ -184,7 +184,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
         }
 
         // Validate regional zoning restriction
-        if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+        if (settings?.enforceRegionalZoning && user?.role !== 'group_ceo') {
             if (sourceSiteObj && destSiteObj && (sourceSiteObj.logisticsZoneId || '') !== (destSiteObj.logisticsZoneId || '')) {
                 addNotification('alert', `Regional Zoning Error: Cannot replenishment between ${sourceSiteObj.name} (Zone: ${getZoneName(sourceSiteObj.logisticsZoneId)}) and ${destSiteObj.name} (Zone: ${getZoneName(destSiteObj.logisticsZoneId)})`);
                 return;
@@ -369,7 +369,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                 const sourceSiteObj = sites.find(x => x.id === (transferSourceSite || activeSite?.id));
                                                 if (sourceSiteObj && (s.country || 'ET') !== (sourceSiteObj.country || 'ET')) return false;
 
-                                                if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+                                                if (settings?.enforceRegionalZoning && user?.role !== 'group_ceo') {
                                                     if (sourceSiteObj) {
                                                         const sourceZone = sourceSiteObj.logisticsZoneId || '';
                                                         const destZone = s.logisticsZoneId || '';

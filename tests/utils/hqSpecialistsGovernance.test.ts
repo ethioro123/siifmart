@@ -59,23 +59,23 @@ describe('HQ Specialists & Directorate Governance Suite', () => {
 
     describe('Head of Internal Audit (head_of_audit / head_of_audit / auditor)', () => {
         it('authorizes system audit inspection, forensic logs, and financial review', () => {
-            expect(hasPermission('head_of_audit', 'VIEW_AUDIT_LOGS')).toBe(true);
-            expect(hasPermission('head_of_audit', 'ACCESS_FINANCE')).toBe(true);
-            expect(hasPermission('head_of_audit', 'ACCESS_SETTINGS')).toBe(true);
-            expect(canAccessModule('head_of_audit', 'finance')).toBe(true);
-            expect(canAccessModule('head_of_audit', 'settings')).toBe(true);
+            expect(hasPermission('country_compliance_manager', 'VIEW_AUDIT_LOGS')).toBe(true);
+            expect(hasPermission('country_compliance_manager', 'ACCESS_FINANCE')).toBe(true);
+            expect(hasPermission('country_compliance_manager', 'ACCESS_SETTINGS')).toBe(true);
+            expect(canAccessModule('country_compliance_manager', 'finance')).toBe(true);
+            expect(canAccessModule('country_compliance_manager', 'settings')).toBe(true);
         });
 
         it('authorizes POS Command monitoring while strictly denying cashier checkout (PROCESS_SALE)', () => {
-            expect(hasPermission('head_of_audit', 'ACCESS_POS')).toBe(true);
-            expect(hasPermission('head_of_audit', 'PROCESS_SALE')).toBe(false);
-            expect(hasPermission('head_of_audit', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('country_compliance_manager', 'ACCESS_POS')).toBe(true);
+            expect(hasPermission('country_compliance_manager', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('country_compliance_manager', 'PROCESS_SALE')).toBe(false);
             expect(hasPermission('auditor', 'PROCESS_SALE')).toBe(false);
         });
 
         it('strictly denies purchase order creation to maintain independent audit integrity', () => {
-            expect(hasPermission('head_of_audit', 'CREATE_PO')).toBe(false);
-            expect(hasPermission('head_of_audit', 'CREATE_PO')).toBe(false);
+            expect(hasPermission('country_compliance_manager', 'CREATE_PO')).toBe(false);
+            expect(hasPermission('country_compliance_manager', 'CREATE_PO')).toBe(false);
             expect(hasPermission('auditor', 'CREATE_PO')).toBe(false);
         });
     });

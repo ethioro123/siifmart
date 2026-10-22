@@ -58,7 +58,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
         if (getRoleHierarchy(candidate.role) <= getRoleHierarchy(employee.role)) return false;
         const candidateSite = sites.find(site => site.id === (candidate.siteId || candidate.site_id));
         const candidateCountry = candidate.country || candidate.country_code || candidateSite?.country;
-        const globalExecutives = ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'super_admin', 'ceo'];
+        const globalExecutives = ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae'];
         const countryMatches = !employeeCountry || (candidateCountry
             ? String(candidateCountry).toUpperCase() === String(employeeCountry).toUpperCase()
             : globalExecutives.includes(candidate.role));

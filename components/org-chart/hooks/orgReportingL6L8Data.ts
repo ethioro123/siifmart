@@ -14,12 +14,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Area Operations Manager (Multi-Store Cluster Lead)',
         dottedLineRole: 'regional_operations_manager',
         dottedLineLabel: 'Regional Operations Manager (Regional Retail Oversight)',
-        managesRoles: [
-            'assistant_store_manager', 'assistant_manager',
-            'shift_supervisor', 'store_supervisor', 'shift_lead',
-            'stock_control_supervisor', 'receiving_supervisor', 'pos_supervisor',
-            'merchandiser', 'returns_clerk'
-        ],
+        managesRoles: ['assistant_store_manager', 'shift_supervisor', 'stock_control_supervisor', 'receiving_supervisor', 'pos_supervisor', 'merchandiser', 'returns_clerk'],
         isManagerial: true
     },
     warehouse_manager: {
@@ -31,14 +26,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Regional Supply Chain Manager (Regional Warehousing & Distribution)',
         dottedLineRole: 'country_supply_chain_director',
         dottedLineLabel: 'Country Supply Chain Director (National Supply Chain Governance)',
-        managesRoles: [
-            'warehouse_operations_manager', 'transport_fleet_manager',
-            'inventory_manager', 'logistics_manager',
-            'receiving_supervisor', 'inventory_control_supervisor',
-            'putaway_replenishment_supervisor', 'picking_supervisor',
-            'packing_supervisor', 'dispatch_supervisor', 'returns_waste_supervisor',
-            'receiver', 'picker', 'packer', 'forklift_operator'
-        ],
+        managesRoles: ['warehouse_operations_manager', 'transport_fleet_manager', 'inventory_manager', 'regional_supply_chain_manager', 'receiving_supervisor', 'inventory_control_supervisor', 'putaway_replenishment_supervisor', 'picking_supervisor', 'packing_supervisor', 'dispatch_supervisor', 'returns_waste_supervisor', 'receiver', 'picker', 'packer', 'forklift_operator'],
         isManagerial: true
     },
 
@@ -73,16 +61,16 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         managesRoles: ['dispatch_supervisor', 'fleet_maintenance_supervisor', 'driver', 'dispatcher'],
         isManagerial: true
     },
-    logistics_manager: {
-        role: 'logistics_manager',
+    regional_supply_chain_manager: {
+        role: 'regional_supply_chain_manager',
         level: 7,
         levelCategory: 'supervisor',
         levelTag: 'L7 Logistics Lead',
         reportsToRole: 'regional_supply_chain_manager',
         reportsToLabel: 'Regional Supply Chain Manager',
-        dottedLineRole: 'head_of_supply_chain',
-        dottedLineLabel: 'Head of Supply Chain (HQ Supply Chain)',
-        managesRoles: ['dispatch_manager', 'fleet_maintenance_supervisor', 'driver', 'dispatcher'],
+        dottedLineRole: 'country_supply_chain_director',
+        dottedLineLabel: 'Country Supply Chain Director (HQ Supply Chain)',
+        managesRoles: ['dispatch_supervisor', 'fleet_maintenance_supervisor', 'driver', 'dispatcher'],
         isManagerial: true
     },
     inventory_manager: {
@@ -92,31 +80,19 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L7 Stock Integrity Lead',
         reportsToRole: 'regional_supply_chain_manager',
         reportsToLabel: 'Regional Supply Chain Manager',
-        dottedLineRole: 'head_of_finance',
+        dottedLineRole: 'country_finance_director',
         dottedLineLabel: 'Internal Auditor (Variance Deep-Dives)',
         managesRoles: ['inventory_specialist', 'stock_clerk'],
         isManagerial: true
     },
-    security_manager: {
-        role: 'security_manager',
+    regional_security_manager: {
+        role: 'regional_security_manager',
         level: 7,
         levelCategory: 'supervisor',
         levelTag: 'L7 Security Lead',
-        reportsToRole: 'head_of_operations',
-        reportsToLabel: 'Head of Operations',
+        reportsToRole: 'country_operations_director',
+        reportsToLabel: 'Country Operations Director',
         managesRoles: ['loss_prevention'],
-        isManagerial: true
-    },
-    dispatch_manager: {
-        role: 'dispatch_manager',
-        level: 7,
-        levelCategory: 'supervisor',
-        levelTag: 'L7 Fleet Lead',
-        reportsToRole: 'transport_fleet_manager',
-        reportsToLabel: 'Transport & Fleet Manager',
-        dottedLineRole: 'logistics_manager',
-        dottedLineLabel: 'Logistics Manager',
-        managesRoles: ['driver', 'dispatcher'],
         isManagerial: true
     },
     cs_manager: {
@@ -124,8 +100,8 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 7,
         levelCategory: 'supervisor',
         levelTag: 'L7 Customer Lead',
-        reportsToRole: 'head_of_operations',
-        reportsToLabel: 'Head of Operations',
+        reportsToRole: 'country_operations_director',
+        reportsToLabel: 'Country Operations Director',
         managesRoles: ['customer_service'],
         isManagerial: true
     },
@@ -134,8 +110,8 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 7,
         levelCategory: 'supervisor',
         levelTag: 'L7 Vendor Lead',
-        reportsToRole: 'head_of_procurement',
-        reportsToLabel: 'Head of Procurement',
+        reportsToRole: 'country_commercial_director',
+        reportsToLabel: 'Country Commercial Director',
         managesRoles: ['buyer', 'customs_import_specialist'],
         isManagerial: true
     },
@@ -144,8 +120,8 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 7,
         levelCategory: 'supervisor',
         levelTag: 'L7 Manager',
-        reportsToRole: 'head_of_operations',
-        reportsToLabel: 'Head of Operations',
+        reportsToRole: 'country_operations_director',
+        reportsToLabel: 'Country Operations Director',
         managesRoles: ['sales_associate', 'cashier'],
         isManagerial: true
     },
@@ -162,23 +138,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Store Manager (Store Facility Lead)',
         dottedLineRole: 'area_operations_manager',
         dottedLineLabel: 'Area Operations Manager (Multi-Store Operational Standards)',
-        managesRoles: [
-            'shift_supervisor', 'store_supervisor', 'shift_lead',
-            'pos_supervisor', 'stock_control_supervisor',
-            'store_associate', 'cashier', 'sales_associate', 'customer_service'
-        ],
-        isManagerial: true
-    },
-    assistant_manager: {
-        role: 'assistant_manager',
-        level: 8,
-        levelCategory: 'supervisor',
-        levelTag: 'L8 Store Deputy',
-        reportsToRole: 'store_manager',
-        reportsToLabel: 'Store Manager (Store Facility Lead)',
-        dottedLineRole: 'area_operations_manager',
-        dottedLineLabel: 'Area Operations Manager (Multi-Store Operational Standards)',
-        managesRoles: ['shift_lead', 'cashier', 'sales_associate'],
+        managesRoles: ['shift_supervisor', 'pos_supervisor', 'stock_control_supervisor', 'store_associate', 'cashier', 'sales_associate', 'customer_service'],
         isManagerial: true
     },
     shift_supervisor: {
@@ -190,31 +150,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Assistant Store Manager (Store Operations)',
         dottedLineRole: 'store_manager',
         dottedLineLabel: 'Store Manager (Floor Continuity & Customer Experience)',
-        managesRoles: ['cashier', 'store_associate', 'sales_associate', 'pos'],
-        isManagerial: true
-    },
-    store_supervisor: {
-        role: 'store_supervisor',
-        level: 8,
-        levelCategory: 'supervisor',
-        levelTag: 'L8 Floor Supervisor',
-        reportsToRole: 'assistant_store_manager',
-        reportsToLabel: 'Assistant Store Manager (Store Operations)',
-        dottedLineRole: 'store_manager',
-        dottedLineLabel: 'Store Manager (Floor Merchandising & Shelf Availability)',
-        managesRoles: ['merchandiser', 'stock_clerk'],
-        isManagerial: true
-    },
-    shift_lead: {
-        role: 'shift_lead',
-        level: 8,
-        levelCategory: 'supervisor',
-        levelTag: 'L8 Shift Lead',
-        reportsToRole: 'assistant_store_manager',
-        reportsToLabel: 'Assistant Store Manager (Store Operations)',
-        dottedLineRole: 'store_manager',
-        dottedLineLabel: 'Store Manager (Floor Continuity)',
-        managesRoles: ['cashier', 'sales_associate', 'pos'],
+        managesRoles: ['cashier', 'store_associate', 'sales_associate'],
         isManagerial: true
     },
     stock_control_supervisor: {
@@ -238,7 +174,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Assistant Store Manager (Store Operations)',
         dottedLineRole: 'regional_finance_manager',
         dottedLineLabel: 'Regional Finance Manager (Cash Office, Till Limits & Variance Auditing)',
-        managesRoles: ['cashier', 'pos', 'cash_office_officer'],
+        managesRoles: ['cashier', 'cash_office_officer'],
         isManagerial: true
     },
     receiving_supervisor: {

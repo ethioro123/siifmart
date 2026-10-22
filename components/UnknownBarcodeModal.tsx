@@ -50,15 +50,7 @@ export default function UnknownBarcodeModal({
     const barcodeValidation = React.useMemo(() => validateBarcodeFormat(barcode), [barcode]);
 
     // Check if user is manager/admin
-    const isManagerOrAdmin = [
-        'super_admin',
-        'admin',
-        'store_manager',
-        'warehouse_manager',
-        'head_of_operations',
-        'regional_operations_manager',
-        'ceo'
-    ].includes(user?.role?.toLowerCase() || '');
+    const isManagerOrAdmin = ['group_ceo', 'country_managing_director', 'store_manager', 'warehouse_manager', 'country_operations_director', 'regional_operations_manager'].includes(user?.role?.toLowerCase() || '');
 
     const stopCamera = () => {
         if (cameraStream) {

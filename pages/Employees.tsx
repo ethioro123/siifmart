@@ -234,11 +234,7 @@ export default function Employees() {
    };
 
    // --- ACCESS CONTROL ---
-   const canAccessDirectory = canViewAllEmployees(user?.role) || [
-      'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_hr', 'hr',
-      'regional_operations_manager', 'head_of_operations', 'head_of_supply_chain',
-      'store_manager', 'warehouse_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'logistics_manager', 'inventory_manager', 'security_manager'
-   ].includes(user?.role || '');
+   const canAccessDirectory = canViewAllEmployees(user?.role) || ['group_ceo', 'country_managing_director', 'country_hr_director', 'hr_generalist', 'regional_operations_manager', 'country_operations_director', 'country_supply_chain_director', 'store_manager', 'warehouse_manager', 'assistant_store_manager', 'shift_supervisor', 'regional_supply_chain_manager', 'inventory_manager', 'regional_security_manager'].includes(user?.role || '');
 
    if (!canAccessDirectory) {
       const self = employees.find(e => e.id === user?.id || (user?.email && e.email === user.email));

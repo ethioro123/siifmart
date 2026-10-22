@@ -7,7 +7,7 @@ describe('Employee Regional Boundaries & Handover Security Tests', () => {
             const hqResult = validateRegionalBoundary('CEO', undefined, { regionCode: 'ADDIS' });
             expect(hqResult).toBeNull();
 
-            const hrManagerResult = validateRegionalBoundary('head_of_hr', undefined, { regionCode: 'OROMIA' });
+            const hrManagerResult = validateRegionalBoundary('country_hr_director', undefined, { regionCode: 'OROMIA' });
             expect(hrManagerResult).toBeNull();
         });
 

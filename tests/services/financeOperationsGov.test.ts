@@ -211,7 +211,7 @@ describe('SIIFMART Finance - Operations, Float, Margins & Zero-Trust Governance'
                 expensesService.approve('EXP-101', {
                     id: 'EMP-SAM-01',
                     name: 'Sam Creator',
-                    role: 'head_of_finance'
+                    role: 'country_finance_director'
                 })
             ).rejects.toThrow('Maker-Checker violation: Expense creator cannot approve their own expense');
         });
@@ -236,7 +236,7 @@ describe('SIIFMART Finance - Operations, Float, Margins & Zero-Trust Governance'
                 expensesService.approve('EXP-102', {
                     id: 'EMP-FIN-01',
                     name: 'Fatuma Head of Finance',
-                    role: 'head_of_finance'
+                    role: 'country_finance_director'
                 })
             ).rejects.toThrow('Executive Authorization required: This expense exceeds the sovereign threshold and requires CEO approval.');
         });

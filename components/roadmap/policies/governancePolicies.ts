@@ -37,7 +37,7 @@ TRACEABILITY: .agent/RULES.md (Rules 7 & 8, Multi-Country Sections 1-3)
 2. SINGLE GLOBAL COUNTRY SWITCH (CEO-ONLY) & INVISIBLE MULTI-TENANCY
 --------------------------------------------------------------------------------
 2.1 Executive Switch Exclusivity:
-    - Choosing between country instances is performed exclusively by the CEO or super_admin through ONE central global switch in the top navigation.
+    - Choosing between country instances is performed exclusively by the CEO or group_ceo through ONE central global switch in the top navigation.
 2.2 Invisible Tenancy for Branch Staff:
     - Non-CEO users (cashiers, store managers, pickers, drivers, branch accountants) must NEVER see country pickers, partition banners, or multi-tenant switches anywhere.
     - To each user, the application is presented 100% as a native, single-nation system (e.g. fully Kenyan website for Kenyan branches). A user should not see or be aware of multi-tenant mechanics.
@@ -218,11 +218,11 @@ TRACEABILITY: .agent/RULES.md (Rule 18 & Section 14: Manager Accountability Law)
     - Holding floor workers, cashiers, and drivers accountable without holding managers equally accountable is strictly unacceptable.
     - Under the Captain's Responsibility Doctrine: Any operational loss, unexplained shrinkage, unverified cash deficit, or procedural failure occurring during a shift or under a supervisor's stamp is co-attributed to the on-duty manager.
 1.2 Scope Across All 16 Management Roles:
-    - Retail Store Leadership: store_manager, assistant_manager, shift_lead, store_supervisor.
+    - Retail Store Leadership: store_manager, assistant_store_manager, shift_supervisor, shift_supervisor.
     - Fulfillment Leadership: warehouse_manager.
-    - Logistics Leadership: logistics_manager, dispatch_manager.
+    - Logistics Leadership: regional_supply_chain_manager, dispatch_supervisor.
     - Inventory Leadership: inventory_manager.
-    - HQ Department Heads & Regional Managers: regional_operations_manager, head_of_operations, head_of_finance, head_of_hr, head_of_procurement, head_of_supply_chain, security_manager, cs_manager.
+    - HQ Department Heads & Regional Managers: regional_operations_manager, country_operations_director, country_finance_director, country_hr_director, country_commercial_director, country_supply_chain_director, regional_security_manager, cs_manager.
 
 2. MANDATORY IMMUTABLE SUPERVISORY FOOTPRINT
 --------------------------------------------------------------------------------
@@ -295,7 +295,7 @@ TRACEABILITY: .agent/RULES.md (Rule 17 & Section 13: Non-Alcoholic Catalog Law)
   {
     id: 'policy-dual-control-salary-sop-024',
     title: 'Dual-Control Compensation & Salary Governance Policy (SOP-GOV-024)',
-    description: 'Strict 4-Eyes Separation of Duties for employee compensation: HR proposes adjustments with mandatory business justification, while Head of Finance or Executive Office authorizes before database mutation.',
+    description: 'Strict 4-Eyes Separation of Duties for employee compensation: HR proposes adjustments with mandatory business justification, while Country Finance Director or Executive Office authorizes before database mutation.',
     department: 'hr',
     type: 'policy',
     priority: 'critical',
@@ -315,7 +315,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1 & Zero-Trust SoD Mandate)
 1. ZERO UNILATERAL HR AUTHORITY (SEPARATION OF DUTIES)
 --------------------------------------------------------------------------------
 1.1 Absolute Ban on Direct HR Salary Mutation:
-    - Under Zero-Trust and Separation of Duties (SoD), human resources personnel (hr, head_of_hr) CANNOT unilaterally edit employee base salaries, bonus structures, or compensation fields directly in the database.
+    - Under Zero-Trust and Separation of Duties (SoD), human resources personnel (hr, country_hr_director) CANNOT unilaterally edit employee base salaries, bonus structures, or compensation fields directly in the database.
     - The legacy permission 'employees.edit_salary' is strictly revoked from HR roles and replaced with 'employees.propose_salary'.
 1.2 4-Eyes Governance Queue:
     - All salary changes proposed by HR must be submitted as a formal SalaryChangeRequest through the central Dual-Control Salary Approval Queue (salary_requests).
@@ -325,9 +325,9 @@ TRACEABILITY: .agent/RULES.md (Rule 1 & Zero-Trust SoD Mandate)
 --------------------------------------------------------------------------------
 2.1 Approver Role Boundaries:
     - Approval authority ('employees.approve_salary') is strictly restricted to:
-        * Head of Finance (head_of_finance)
+        * Country Finance Director (country_finance_director)
         * Chief Executive Officer (CEO)
-        * Super Administrator (super_admin)
+        * Super Administrator (group_ceo)
 2.2 Mandatory Justification Requirement:
     - Every proposed compensation adjustment must be accompanied by a structured business rationale (e.g. annual merit increase, role promotion, market benchmarking).
     - Unsubstantiated or zero-justification submissions are automatically rejected.

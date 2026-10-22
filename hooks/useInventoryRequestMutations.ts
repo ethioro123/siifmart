@@ -34,19 +34,12 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
             // Sovereign Cross-Border Protection
             const userCountry = (user?.country || '').toUpperCase();
             const requestCountry = (change.countryCode || (change as any).country_code || '').toUpperCase();
-            if (userCountry && requestCountry && userCountry !== requestCountry && user?.role !== 'super_admin' && user?.role !== 'CEO') {
+            if (userCountry && requestCountry && userCountry !== requestCountry && user?.role !== 'group_ceo') {
                 throw new Error('Multi-country sovereignty violation: You cannot approve inventory requests outside your sovereign country.');
             }
 
             // Regional Governance Scoping
-            const isNationalHq = [
-                'super_admin', 'CEO', 'ceo',
-                'country_managing_director', 'admin',
-                'head_of_operations',
-                'head_of_supply_chain',
-                'head_of_finance',
-                'auditor', 'head_of_audit',
-            ].includes(user?.role || '');
+            const isNationalHq = ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'country_finance_director', 'auditor', 'country_compliance_manager'].includes(user?.role || '');
             const userRegion = user?.regionCode || (user as any)?.region_code;
             const requestRegion = change.regionCode || (change as any)?.region_code;
 
@@ -60,9 +53,9 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                 return { success: true, change };
             }
 
-            // SOP-MER-037: price changes below the margin floor need Head of Finance / CEO sign-off
+            // SOP-MER-037: price changes below the margin floor need Country Finance Director / CEO sign-off
             if (requiresFinanceCoApproval(change) && !canApproveBelowFloor(user?.role)) {
-                throw new Error(`Price change is below the ${MARGIN_FLOOR_PCT}% margin floor: Head of Finance or CEO approval is required.`);
+                throw new Error(`Price change is below the ${MARGIN_FLOOR_PCT}% margin floor: Country Finance Director or CEO approval is required.`);
             }
 
             let success = false;

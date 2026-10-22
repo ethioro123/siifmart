@@ -78,7 +78,7 @@ describe('Guideline Role Extensions & Dual-Control Reporting', () => {
     describe('2. Hiring Governance & Authority', () => {
         it('Group CEO can employ Group CMO, but Group CMO cannot employ Group CEO or C-Suite peers', () => {
             expect(canEmployRole('group_ceo', 'group_cmo')).toBe(true);
-            expect(canEmployRole('super_admin', 'group_cmo')).toBe(true);
+            expect(canEmployRole('group_ceo', 'group_cmo')).toBe(true);
 
             expect(canEmployRole('group_cmo', 'group_ceo')).toBe(false);
             expect(canEmployRole('group_cmo', 'group_coo')).toBe(false);
@@ -100,7 +100,7 @@ describe('Guideline Role Extensions & Dual-Control Reporting', () => {
             expect(canEmployRole('country_compliance_manager', 'regional_compliance_manager')).toBe(true);
             expect(canEmployRole('group_cae', 'regional_compliance_manager')).toBe(true);
             expect(canEmployRole('country_managing_director', 'regional_compliance_manager')).toBe(true);
-            expect(canEmployRole('head_of_operations', 'regional_compliance_manager')).toBe(true);
+            expect(canEmployRole('country_operations_director', 'regional_compliance_manager')).toBe(true);
         });
 
         it('Facility leadership can employ warehouse supervisors and documentation staff', () => {
@@ -150,7 +150,7 @@ describe('Guideline Role Extensions & Dual-Control Reporting', () => {
         });
 
         it('enforces multi-site isolation invariant strictly for CEO only', () => {
-            const ceo = 'super_admin';
+            const ceo = 'group_ceo';
             const cmo = 'group_cmo';
             const regMgr = 'regional_operations_manager';
             const siteA = 'site-store-nairobi';

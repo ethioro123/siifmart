@@ -42,18 +42,7 @@ describe('Transfer Manifest Governance & Deletion Lifecycle', () => {
 
     describe('2. Manager Role Authorization', () => {
         it('authorizes executive and operational managers', () => {
-            const managerRoles = [
-                'super_admin',
-                'CEO',
-                'admin',
-                'warehouse_manager',
-                'head_of_operations',
-                'head_of_supply_chain',
-                'logistics_manager',
-                'regional_operations_manager',
-                'inventory_manager',
-                'regional_logistics_manager'
-            ];
+            const managerRoles = ['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_operations_director', 'country_supply_chain_director', 'regional_supply_chain_manager', 'regional_operations_manager', 'inventory_manager', 'regional_logistics_manager'];
 
             for (const role of managerRoles) {
                 const user = { id: 'u1', name: 'Manager Bob', role: role as any, avatar: '', title: '' };
@@ -62,7 +51,7 @@ describe('Transfer Manifest Governance & Deletion Lifecycle', () => {
         });
 
         it('denies non-approver roles from transfer approval authority', () => {
-            const floorRoles = ['cashier', 'picker', 'packer', 'receiver', 'stock_clerk', 'sales_associate', 'driver', 'inventory_specialist', 'replenishment_planner', 'dispatcher', 'dispatch_manager', 'assistant_manager', 'store_manager'];
+            const floorRoles = ['cashier', 'picker', 'packer', 'receiver', 'stock_clerk', 'sales_associate', 'driver', 'inventory_specialist', 'replenishment_planner', 'dispatcher', 'dispatch_supervisor', 'assistant_store_manager', 'store_manager'];
 
             for (const role of floorRoles) {
                 const user = { id: 'u2', name: 'Staff Alice', role: role as any, avatar: '', title: '' };

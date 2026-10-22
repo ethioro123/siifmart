@@ -63,9 +63,9 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
     const canManageTarget = !isOwnProfile && (isActorCEO || (hasPermission(user?.role, 'EDIT_EMPLOYEE') && !isTargetCEO && isSuperiorToTarget));
     const canManageTasks = hasPermission(user?.role, 'EDIT_EMPLOYEE') && (isActorCEO || !isTargetCEO);
     const canViewPayroll = hasPermission(user?.role, 'VIEW_PAYROLL') || isOwnProfile;
-    const canTerminate = (['super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'regional_hr_manager', 'regional_operations_manager', 'head_of_operations',].includes(user?.role || '')) && userRoleLevel > targetRoleLevel && !isOwnProfile && !isTargetCEO;
-    const canDelete = user?.role === 'super_admin' && userRoleLevel > targetRoleLevel && !isOwnProfile && !isTargetCEO;
-    const canApprove = (['super_admin', 'CEO', 'ceo', 'admin', 'country_managing_director', 'hr', 'head_of_hr', 'regional_hr_manager', 'regional_operations_manager', 'head_of_operations',].includes(user?.role || '')) &&
+    const canTerminate = (['group_ceo', 'country_managing_director', 'hr_generalist', 'country_hr_director', 'regional_hr_manager', 'regional_operations_manager', 'country_operations_director'].includes(user?.role || '')) && userRoleLevel > targetRoleLevel && !isOwnProfile && !isTargetCEO;
+    const canDelete = user?.role === 'group_ceo' && userRoleLevel > targetRoleLevel && !isOwnProfile && !isTargetCEO;
+    const canApprove = (['group_ceo', 'country_managing_director', 'hr_generalist', 'country_hr_director', 'regional_hr_manager', 'regional_operations_manager', 'country_operations_director'].includes(user?.role || '')) &&
         canEmployRole(user?.role, employee.role) &&
         employee.status === 'Pending Approval' &&
         !isOwnProfile && !isTargetCEO;

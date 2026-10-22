@@ -26,15 +26,7 @@ export const DashboardKPIs: React.FC = () => {
 
     const [isRevealed, setIsRevealed] = useState(false);
 
-    const isCentralHQ = [
-        'super_admin',
-        'ceo',
-        'admin',
-        'regional_operations_manager',
-        'head_of_operations',
-        'head_of_finance',
-        'auditor'
-    ].includes(user?.role?.toLowerCase() || '');
+    const isCentralHQ = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_finance_director', 'auditor'].includes(user?.role?.toLowerCase() || '');
 
     // Compare period revenue with a target that covers the same calendar period.
     const rangeStr = String(dateRange);

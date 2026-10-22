@@ -105,7 +105,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                     adjustmentReason: returnType === 'procurement'
                         ? `PO-RTN: ${item.reason} (${item.condition}) — PO ${formatJobId(job)} [REQUIRES PROCUREMENT APPROVAL]`
                         : `RTW: ${item.reason} (${item.condition}) — Job ${formatJobId(job)}`,
-                    approvalRole: returnType === 'procurement' ? 'head_of_procurement' : 'warehouse_manager'
+                    approvalRole: returnType === 'procurement' ? 'country_commercial_director' : 'warehouse_manager'
                 };
 
                 await createRequestMutation.mutateAsync(request);

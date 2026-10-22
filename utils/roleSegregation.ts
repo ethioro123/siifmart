@@ -4,44 +4,11 @@ import { RoleSegregationRule, ROLE_SEGREGATION_RULES } from './roleSegregationRu
 export type { RoleSegregationRule };
 export { ROLE_SEGREGATION_RULES };
 
-export const REGIONAL_WORKFORCE_ROLES = [
-    'regional_operations_manager',
-    'area_operations_manager',
-    'regional_supply_chain_manager',
-    'regional_procurement_manager',
-    'regional_finance_manager',
-    'regional_merchandising_manager',
-    'regional_hr_manager',
-    'regional_logistics_manager',
-    'regional_security_manager'
-] as const;
+export const REGIONAL_WORKFORCE_ROLES = ['regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'] as const;
 
-export const CORPORATE_HQ_DIRECTORATE_ROLES = [
-    'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco',
-    'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
-    'super_admin', 'ceo', 'country_managing_director', 'admin',
-    'country_operations_director', 'country_finance_director', 'country_commercial_director',
-    'country_supply_chain_director', 'country_hr_director', 'country_technology_director',
-    'country_compliance_manager',
-    'head_of_operations',
-    'head_of_finance',
-    'head_of_hr',
-    'head_of_procurement',
-    'head_of_supply_chain',
-    'head_of_merchandising',
-    'head_of_it',
-    'head_of_audit',
-] as const;
+export const CORPORATE_HQ_DIRECTORATE_ROLES = ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager'] as const;
 
-export const SHARED_HQ_REGIONAL_ROLES = [
-    'hr', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator',
-    'it_support', 'auditor', 'store_operations_auditor', 'security_manager',
-    'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer',
-    'buyer', 'demand_planner', 'replenishment_planner', 'merchandising_specialist', 'vendor_relations_manager',
-    'customs_import_specialist', 'inbound_qc_inspector',
-    'logistics_manager', 'inventory_manager', 'merchandiser',
-    'data_analyst', 'cs_manager'
-] as const;
+export const SHARED_HQ_REGIONAL_ROLES = ['hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator', 'it_support', 'auditor', 'store_operations_auditor', 'regional_security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'buyer', 'demand_planner', 'replenishment_planner', 'merchandising_specialist', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'regional_supply_chain_manager', 'inventory_manager', 'merchandiser', 'data_analyst', 'cs_manager'] as const;
 
 export function isRegionalWorkforceRole(role?: string | null): boolean {
     return REGIONAL_WORKFORCE_ROLES.includes(

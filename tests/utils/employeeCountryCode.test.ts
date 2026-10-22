@@ -188,7 +188,7 @@ describe('employeeIdGenerator - Sovereign Country-Prefixed Worker IDs', () => {
             const musyoka = {
                 id: 'emp-musyoka-43',
                 name: 'Musyoka Kioko',
-                role: 'head_of_hr',
+                role: 'country_hr_director',
                 phone: '+254722456754',
                 siteId: 'KE-ADMIN',
                 code: 'ET-SIIF0043' // previously mislabeled as ET-

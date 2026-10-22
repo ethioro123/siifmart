@@ -42,14 +42,7 @@ export const ExpensesTab: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [inspectingExpense, setInspectingExpense] = useState<ExpenseRecord | null>(null);
 
-    const canApproveRole = [
-        'head_of_finance',
-        'regional_finance_manager',
-        'head_of_operations',
-        'regional_operations_manager',
-        'country_managing_director', 'managing_director',
-        'admin', 'super_admin', 'CEO', 'ceo'
-    ].includes(user?.role?.toLowerCase() || '');
+    const canApproveRole = ['country_finance_director', 'regional_finance_manager', 'country_operations_director', 'regional_operations_manager', 'country_managing_director', 'managing_director', 'group_ceo'].includes(user?.role?.toLowerCase() || '');
 
     // Summary metrics
     const stats = useMemo(() => {
@@ -238,7 +231,7 @@ export const ExpensesTab: React.FC = () => {
                                         (exp.createdByName && exp.createdByName === user?.name)
                                     );
                                     const isCeoEscalated = Boolean(exp.escalatedToCeo);
-                                    const userIsCeo = ['CEO', 'ceo', 'super_admin'].includes(user?.role);
+                                    const userIsCeo = ['group_ceo'].includes(user?.role);
                                     const blockedByEscalation = isCeoEscalated && !userIsCeo;
                                     const approveDisabled = isSubmitting || isCreator || blockedByEscalation;
 

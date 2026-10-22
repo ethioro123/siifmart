@@ -13,7 +13,7 @@ import { getRoleHierarchy } from './roles';
  */
 export function isSovereignCEO(role?: string): boolean {
     if (!role) return false;
-    return ['super_admin', 'ceo'].includes(role.toLowerCase().trim());
+    return ['group_ceo'].includes(role.toLowerCase().trim());
 }
 
 /**
@@ -42,7 +42,7 @@ export function getDepartmentApprovingAuthority(department?: string): ApprovingA
  * cross-departmental approval based on the actor's role and the fields being changed.
  *
  * Rules:
- * 1. CEO (super_admin) has sovereign universal override: can edit EVERYTHING directly (0 approvals).
+ * 1. CEO (group_ceo) has sovereign universal override: can edit EVERYTHING directly (0 approvals).
  * 2. HR can initiate edits, but:
  *    - Name, Age / DOB, National ID -> Requires Executive / Compliance approval (ERCA/KRA fraud protection).
  *    - Salary -> Requires Finance Department approval (Segregation of Duties).
@@ -303,19 +303,19 @@ export function canApproveChangeRequest(
 
     switch (authority) {
         case 'Human Resources':
-            return ['country_managing_director', 'admin', 'head_of_hr', 'regional_hr_manager', 'hr'].includes(userRole);
+            return ['country_managing_director', 'country_hr_director', 'regional_hr_manager', 'hr_generalist'].includes(userRole);
         case 'Finance Department':
-            return ['country_managing_director', 'admin', 'head_of_finance', 'regional_finance_manager', 'cfo'].includes(userRole);
+            return ['country_managing_director', 'country_finance_director', 'regional_finance_manager', 'cfo'].includes(userRole);
         case 'Operations Management':
-            return ['country_managing_director', 'admin', 'head_of_operations', 'regional_operations_manager', 'store_manager'].includes(userRole);
+            return ['country_managing_director', 'country_operations_director', 'regional_operations_manager', 'store_manager'].includes(userRole);
         case 'Logistics & Warehouse':
-            return ['country_managing_director', 'admin', 'head_of_supply_chain', 'head_of_operations', 'regional_logistics_manager', 'regional_operations_manager', 'warehouse_manager', 'logistics_manager'].includes(userRole);
+            return ['country_managing_director', 'country_supply_chain_director', 'country_operations_director', 'regional_logistics_manager', 'regional_operations_manager', 'warehouse_manager', 'regional_supply_chain_manager'].includes(userRole);
         case 'Procurement':
-            return ['country_managing_director', 'admin', 'head_of_procurement', 'head_of_supply_chain', 'head_of_operations', 'regional_procurement_manager', 'regional_operations_manager'].includes(userRole);
+            return ['country_managing_director', 'country_commercial_director', 'country_supply_chain_director', 'country_operations_director', 'regional_procurement_manager', 'regional_operations_manager'].includes(userRole);
         case 'Security Management':
-            return ['country_managing_director', 'admin', 'head_of_audit', 'head_of_it', 'head_of_operations', 'regional_security_manager', 'regional_operations_manager', 'security_manager'].includes(userRole);
+            return ['country_managing_director', 'country_compliance_manager', 'country_technology_director', 'country_operations_director', 'regional_security_manager', 'regional_operations_manager'].includes(userRole);
         case 'Executive / Compliance':
-            return ['super_admin', 'country_managing_director', 'admin', 'head_of_audit', 'compliance_officer'].includes(userRole);
+            return ['group_ceo', 'country_managing_director', 'country_compliance_manager', 'compliance_officer'].includes(userRole);
         default:
             return false;
     }

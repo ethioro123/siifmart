@@ -52,10 +52,9 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
         po, role: user?.role, actorName: user?.name,
         actorRegionCode: user?.regionCode || user?.region_code, regions, sites
     });
-    const isCEO = user?.role === 'super_admin';
-    const isFinanceRole = user?.role === 'head_of_finance' || user?.role === 'regional_finance_manager';
-    const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager',
-        'head_of_operations'].includes(user?.role || '');
+    const isCEO = user?.role === 'group_ceo';
+    const isFinanceRole = user?.role === 'country_finance_director' || user?.role === 'regional_finance_manager';
+    const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager', 'country_operations_director'].includes(user?.role || '');
     const canFullDelete = isCEO || isOperationalDirector;
 
     const handleOpenApprove = () => {
@@ -413,7 +412,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         </button>
 
                         {/* Edit & Delete Action Logic:
-                            1. CEO/Head of Procurement can Edit/Delete anything NOT fully Received.
+                            1. CEO/Country Commercial Director can Edit/Delete anything NOT fully Received.
                             2. Other staff can ONLY Edit/Delete their own Draft POs.
                         */}
                         {((canFullDelete && po.status !== 'Received') || 

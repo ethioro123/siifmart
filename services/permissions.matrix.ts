@@ -33,13 +33,9 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     group_cio: FULL_ACCESS_PERMISSIONS,
     group_clco: FULL_ACCESS_PERMISSIONS,
     group_cae: FULL_ACCESS_PERMISSIONS,
-    super_admin: FULL_ACCESS_PERMISSIONS,
-    CEO: FULL_ACCESS_PERMISSIONS,
-    ceo: FULL_ACCESS_PERMISSIONS,
 
     // ═══ LEVEL 2: COUNTRY EXECUTIVE (Segregation of Duties: no dock self-receiving) ═══
     country_managing_director: ADMIN_ACCESS_PERMISSIONS,
-    admin: ADMIN_ACCESS_PERMISSIONS,
     country_operations_director: HEAD_OF_OPERATIONS_PERMISSIONS,
     country_finance_director: HEAD_OF_FINANCE_PERMISSIONS,
     country_commercial_director: [
@@ -54,17 +50,8 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     country_compliance_manager: HEAD_OF_AUDIT_PERMISSIONS,
 
     // ═══ LEVEL 3: CORPORATE HQ DIRECTORATE HEADS ═══
-    head_of_finance: HEAD_OF_FINANCE_PERMISSIONS,
-    head_of_procurement: HEAD_OF_PROCUREMENT_PERMISSIONS,
-    head_of_it: HEAD_OF_IT_PERMISSIONS,
     it_support: HEAD_OF_IT_PERMISSIONS,
-    head_of_audit: HEAD_OF_AUDIT_PERMISSIONS,
     auditor: HEAD_OF_AUDIT_PERMISSIONS,
-    head_of_operations: HEAD_OF_OPERATIONS_PERMISSIONS,
-    head_of_hr: HEAD_OF_HR_PERMISSIONS,
-    hr: HR_STAFF_PERMISSIONS,
-    head_of_supply_chain: HEAD_OF_SUPPLY_CHAIN_PERMISSIONS,
-    head_of_merchandising: HEAD_OF_MERCHANDISING_PERMISSIONS,
 
     // ═══ LEVEL 4: REGIONAL OPERATIONS & AREA MANAGERS ═══
     regional_operations_manager: HEAD_OF_OPERATIONS_PERMISSIONS,
@@ -143,28 +130,11 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'inventory.view', 'inventory.transfer',
         'employees.view', 'employees.manage_attendance'
     ],
-    logistics_manager: [
-        'dashboard.view',
-        'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-        'inventory.view', 'inventory.transfer',
-        'employees.view', 'employees.manage_attendance'
-    ],
     inventory_manager: [
         'dashboard.view',
         'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
         'warehouse.view', 'warehouse.view_tasks', 'warehouse.count',
         'employees.view'
-    ],
-    security_manager: [
-        'dashboard.view',
-        'settings.view', 'settings.view_logs',
-        'employees.view', 'employees.manage_attendance'
-    ],
-    dispatch_manager: [
-        'dashboard.view',
-        'warehouse.view', 'warehouse.dispatch',
-        'inventory.view', 'inventory.transfer',
-        'employees.view', 'employees.manage_attendance'
     ],
     cs_manager: [
         'dashboard.view',
@@ -184,30 +154,10 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
         'employees.view', 'employees.manage_attendance'
     ],
-    assistant_manager: [
-        'dashboard.view',
-        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
-        'sales.view', 'sales.view_reports',
-        'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
-        'employees.view', 'employees.manage_attendance'
-    ],
     shift_supervisor: [
         'dashboard.view',
         'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
         'sales.view',
-        'customers.view', 'customers.create', 'customers.edit',
-        'employees.view', 'employees.manage_attendance'
-    ],
-    store_supervisor: [
-        'dashboard.view',
-        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
-        'sales.view',
-        'customers.view', 'customers.create', 'customers.edit',
-        'employees.view', 'employees.manage_attendance'
-    ],
-    shift_lead: [
-        'dashboard.view',
-        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
         'customers.view', 'customers.create', 'customers.edit',
         'employees.view', 'employees.manage_attendance'
     ],

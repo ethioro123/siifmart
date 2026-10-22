@@ -99,7 +99,7 @@ Successfully transformed the employee directory from a card-based grid layout to
 - [ ] Send message to employee
 - [ ] Reset password (admin only)
 - [ ] Approve pending employee (HR/admin)
-- [ ] Delete terminated employee (super_admin only)
+- [ ] Delete terminated employee (group_ceo only)
 - [ ] View task queue (admin)
 - [ ] Verify responsive layout on different screen sizes
 

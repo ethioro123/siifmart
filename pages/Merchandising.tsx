@@ -30,13 +30,7 @@ export default function Pricing() {
    const { user } = useStore();
    const { isRegionalUser } = useData();
 
-   const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
-      'regional_operations_manager',
-      'regional_procurement_manager',
-      'regional_finance_manager',
-      'regional_merchandising_manager',
-      'store_manager'
-   ].includes(user?.role || '');
+   const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || ['regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'store_manager'].includes(user?.role || '');
 
    const {
       activeTab,

@@ -8,7 +8,7 @@ import { recruitmentService } from '../../services/recruitment.service';
 
 describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
     describe('1. Head of Human Resources (head_of_hr)', () => {
-        const role = 'head_of_hr' as const;
+        const role = 'country_hr_director' as const;
 
         it('has correct route and module access', () => {
             expect(canAccessRoute(role, '/employees')).toBe(true);
@@ -50,9 +50,9 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
             expect(canEmployRole(role, 'payroll_specialist')).toBe(true);
 
             // Cannot hire peer or higher
-            expect(canEmployRole(role, 'head_of_finance')).toBe(false);
-            expect(canEmployRole(role, 'head_of_operations')).toBe(false);
-            expect(canEmployRole(role, 'super_admin')).toBe(false);
+            expect(canEmployRole(role, 'country_finance_director')).toBe(false);
+            expect(canEmployRole(role, 'country_operations_director')).toBe(false);
+            expect(canEmployRole(role, 'group_ceo')).toBe(false);
         });
     });
 

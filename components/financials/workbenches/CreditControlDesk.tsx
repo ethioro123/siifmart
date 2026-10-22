@@ -21,14 +21,14 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
     currencySymbol
 }) => {
     const { user, addNotification } = useFinance();
-    const isManager = Boolean(user?.role && ['head_of_finance', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+    const isManager = Boolean(user?.role && ['country_finance_director', 'country_managing_director', 'group_ceo'].includes(user.role));
 
     const [holdReleaseStatus, setHoldReleaseStatus] = useState<'locked' | 'submitted' | 'unlocked'>('locked');
     const [remindersSent, setRemindersSent] = useState(false);
 
     const handleStaffSubmitHoldRelease = () => {
         setHoldReleaseStatus('submitted');
-        addNotification?.('info', 'Credit hold release proposal submitted to Head of Finance for authorization.');
+        addNotification?.('info', 'Credit hold release proposal submitted to Country Finance Director for authorization.');
     };
 
     const handleManagerAuthorizeHoldRelease = () => {
@@ -191,7 +191,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                                         type="button"
                                         onClick={handleManagerAuthorizeHoldRelease}
                                         className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
-                                        title="Head of Finance supervisory authority to grant temporary credit release"
+                                        title="Country Finance Director supervisory authority to grant temporary credit release"
                                     >
                                         <Check size={13} />
                                         Authorize Hold Release (Sign-Off)

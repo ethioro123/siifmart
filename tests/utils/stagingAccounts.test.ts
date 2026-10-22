@@ -27,7 +27,7 @@ describe('live staging roster mapping', () => {
     it('excludes retired online-store staff and maps headquarters', () => {
         const online = mapStagingEmployee({ ...row, site: { ...row.site!, type: 'Dark Store' } });
         expect(online).toBeNull();
-        const executive = mapStagingEmployee({ ...row, role: 'super_admin', site: null });
+        const executive = mapStagingEmployee({ ...row, role: 'group_ceo', site: null });
         expect(executive?.country).toBe('GLOBAL');
         expect(executive?.facilityTier).toBe('HQ');
     });
@@ -50,7 +50,7 @@ describe('live staging roster mapping', () => {
             makeAccount('ke-store', 'KE', 'KE-NRB-STORE-01', 'Store', 'KE-NRB'),
             makeAccount('ke-wh', 'KE', 'KE-NRB-WH-01', 'Warehouse', 'KE-NRB'),
             makeAccount('ke-dc', 'KE', 'KE-NRB-DC-01', 'Distribution Center', 'KE-NRB'),
-            mapStagingEmployee({ ...row, id: 'global-admin', role: 'super_admin', site: null })!
+            mapStagingEmployee({ ...row, id: 'global-admin', role: 'group_ceo', site: null })!
         ];
 
         const selected = selectRepresentativeStagingAccounts(roster);

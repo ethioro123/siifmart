@@ -314,11 +314,11 @@ export function useEmployeeActions({
          });
 
          // 2. If Super Admin, execute immediate sign-off under supervisory executive authority
-         if (user?.role === 'super_admin') {
+         if (user?.role === 'group_ceo') {
             await terminationsService.approveTermination(proposed.id, {
-               id: user.id || 'super_admin',
+               id: user.id || 'group_ceo',
                name: user.name || 'Super Admin',
-               role: 'super_admin'
+               role: 'group_ceo'
             });
             const result = updateEmployee({ ...employee, status: 'Terminated' }, user?.name || 'System');
             if (result instanceof Promise) await result;

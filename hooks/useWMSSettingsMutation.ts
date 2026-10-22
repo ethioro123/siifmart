@@ -45,13 +45,7 @@ export function useWMSSettingsMutation() {
   return useMutation<void, Error, WMSSettingsPayload>({
     mutationFn: async ({ section, targetCountry, data }) => {
       // ── 1. ROLE GUARD (RULES.md §Role Hierarchy & Zero-Trust) ──
-      const authorizedRoles = [
-        'super_admin', 'CEO', 'ceo',
-        'country_managing_director', 'admin',
-        'head_of_operations',
-        'head_of_supply_chain',
-        'warehouse_manager'
-      ];
+      const authorizedRoles = ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'warehouse_manager'];
       if (!authorizedRoles.includes(user?.role || '')) {
         throw new Error('Unauthorized: WMS policy configuration requires Warehouse Manager or HQ Operations credentials.');
       }

@@ -437,7 +437,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                 {filteredActiveJobs.length > 0 ? (
                     filteredActiveJobs.map(job => {
                         const bestMatchEmployee = employees
-                            .filter(e => e.status === 'Active' && e.role?.toLowerCase() !== 'super_admin' && canWorkerPerformJob(e.role, job.type))
+                            .filter(e => e.status === 'Active' && e.role?.toLowerCase() !== 'group_ceo' && canWorkerPerformJob(e.role, job.type))
                             .map(e => {
                                 const activeAssignments = jobAssignments.filter(
                                     a => a.employeeId === e.id && ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)

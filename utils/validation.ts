@@ -183,7 +183,7 @@ export function validateEmployee(employee: Partial<Employee>): ValidationResult<
     }
 
     // Role validation
-    const validRoles = ['super_admin', 'admin', 'manager', 'wms', 'pos', 'picker', 'hr', 'auditor', 'driver'];
+    const validRoles = ['group_ceo', 'country_managing_director', 'wms', 'cashier', 'picker', 'hr_generalist', 'auditor', 'driver'];
     if (!employee.role || !validRoles.includes(employee.role)) {
         errors.push('Invalid role');
     }
@@ -364,10 +364,10 @@ export function canDeleteEmployee(employeeId: string, employees: Employee[]): Va
     const errors: string[] = [];
 
     // Prevent deleting the last admin
-    const admins = employees.filter(e => e.role === 'super_admin' || e.role === 'admin');
+    const admins = employees.filter(e => e.role === 'group_ceo' || e.role === 'country_managing_director');
     const employee = employees.find(e => e.id === employeeId);
 
-    if (employee && (employee.role === 'super_admin' || employee.role === 'admin') && admins.length <= 1) {
+    if (employee && (employee.role === 'group_ceo' || employee.role === 'country_managing_director') && admins.length <= 1) {
         errors.push('Cannot delete the last administrator');
     }
 

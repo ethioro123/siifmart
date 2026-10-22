@@ -12,11 +12,7 @@ export const MARGIN_FLOOR_PCT = 15;
 export const PRICE_CHANGE_TAG = 'PRICE_CHANGE';
 
 /** Roles allowed to approve a price change that falls below the margin floor. */
-export const FINANCE_COAPPROVER_ROLES: readonly string[] = [
-    'head_of_finance',
-    'country_managing_director', 'admin',
-    'super_admin', 'CEO', 'ceo'
-];
+export const FINANCE_COAPPROVER_ROLES: readonly string[] = ['country_finance_director', 'country_managing_director', 'group_ceo'];
 
 export type PriceProposal = Pick<Product, 'price' | 'costPrice' | 'salePrice' | 'isOnSale'>;
 

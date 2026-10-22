@@ -18,22 +18,7 @@ import { UserRole } from '../types';
  * THIS IS A HARD SECURITY REQUIREMENT BY THE OWNER.
  * ============================================================================
  */
-const MULTI_SITE_ROLES: UserRole[] = [
-    'super_admin',
-    'country_managing_director',
-    'admin',
-    'head_of_operations',
-    'head_of_supply_chain',
-    'head_of_finance',
-    'head_of_hr',
-    'head_of_procurement',
-    'head_of_merchandising',
-    'head_of_audit',
-    'auditor',
-    'head_of_it',
-    'it_support',
-    'regional_operations_manager'
-];
+const MULTI_SITE_ROLES: UserRole[] = ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_compliance_manager', 'auditor', 'country_technology_director', 'it_support', 'regional_operations_manager'];
 
 /**
  * Roles that are restricted to their assigned site (Frontline Branch Workers)
@@ -42,7 +27,7 @@ const SINGLE_SITE_ROLES: UserRole[] = [
     // Warehouse workers
     'warehouse_manager',
     'dispatcher',
-    'dispatch_manager',
+    'dispatch_supervisor',
     'picker',
     'packer',
     'receiver',
@@ -54,12 +39,10 @@ const SINGLE_SITE_ROLES: UserRole[] = [
 
     // Store workers
     'store_manager',
-    'assistant_manager',
-    'shift_lead',
-    'store_supervisor',
+    'assistant_store_manager',
+    'shift_supervisor',
     'cashier',
-    'sales_associate',
-    'pos'
+    'sales_associate'
 ];
 
 /**

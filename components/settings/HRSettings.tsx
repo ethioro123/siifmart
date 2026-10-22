@@ -319,7 +319,7 @@ export default function HRSettings() {
                                 Require Finance Department Sign-Off for Salary Adjustments
                             </span>
                             <span className="text-[11px] text-[var(--theme-text-secondary)] block mt-0.5">
-                                Prevents HR from unilaterally increasing base pay without Head of Finance budget certification.
+                                Prevents HR from unilaterally increasing base pay without Country Finance Director budget certification.
                             </span>
                         </div>
                     </label>

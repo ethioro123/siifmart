@@ -1,16 +1,14 @@
 import type { JobItem, PurchaseOrder, User, WMSJob } from '../types';
 
 export const DOCK_BAYS = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'] as const;
-export const DISPATCH_LEADERSHIP = ['super_admin', 'ceo', 'admin', 'manager', 'regional_operations_manager',
-    'head_of_operations', 'warehouse_manager', 'logistics_manager', 'dispatch_manager',
-    'dispatcher', 'fleet_maintenance_supervisor', 'regional_logistics_manager', 'head_of_supply_chain'];
+export const DISPATCH_LEADERSHIP = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'warehouse_manager', 'regional_supply_chain_manager', 'dispatch_supervisor', 'dispatcher', 'fleet_maintenance_supervisor', 'regional_logistics_manager', 'country_supply_chain_director'];
 
 export type ShipmentPhase = 'not-ready' | 'ready' | 'in-transit' | 'awaiting-receipt' | 'closed' | 'cancelled';
 
 export function canInspectTransferArrival(job: WMSJob, role?: string, siteId?: string): boolean {
     return job.type === 'TRANSFER' && Boolean(siteId && job.destSiteId === siteId) &&
         ['Delivered', 'Partially Delivered'].includes(job.transferStatus || '') &&
-        ['super_admin', 'ceo', 'regional_operations_manager', 'warehouse_manager', 'store_manager', 'receiver', 'inventory_manager']
+        ['group_ceo', 'regional_operations_manager', 'warehouse_manager', 'store_manager', 'receiver', 'inventory_manager']
             .includes(role?.trim().toLowerCase() || '');
 }
 

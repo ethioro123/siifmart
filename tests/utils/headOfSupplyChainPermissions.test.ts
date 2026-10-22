@@ -7,65 +7,65 @@ import { canWorkerPerformJob } from '../../utils/fulfillmentRoles';
 describe('Head of Supply Chain Role & Network Logistics Engine (SOP-MGT-025)', () => {
     describe('Module & Network Access Controls', () => {
         it('allows head_of_supply_chain to access warehouse, inventory, and procurement modules', () => {
-            expect(canAccessModule('head_of_supply_chain', 'warehouse')).toBe(true);
-            expect(canAccessModule('head_of_supply_chain', 'inventory')).toBe(true);
-            expect(canAccessModule('head_of_supply_chain', 'procurement')).toBe(true);
+            expect(canAccessModule('country_supply_chain_director', 'warehouse')).toBe(true);
+            expect(canAccessModule('country_supply_chain_director', 'inventory')).toBe(true);
+            expect(canAccessModule('country_supply_chain_director', 'procurement')).toBe(true);
         });
 
         it('blocks head_of_supply_chain from cashier POS and system settings modules', () => {
-            expect(canAccessModule('head_of_supply_chain', 'pos')).toBe(false);
-            expect(canAccessModule('head_of_supply_chain', 'settings')).toBe(false);
+            expect(canAccessModule('country_supply_chain_director', 'pos')).toBe(false);
+            expect(canAccessModule('country_supply_chain_director', 'settings')).toBe(false);
         });
 
         it('grants enterprise-wide network visibility across all sites and facilities', () => {
-            expect(canViewAllSites('head_of_supply_chain')).toBe(true);
-            expect(canViewCostPrice('head_of_supply_chain')).toBe(true);
+            expect(canViewAllSites('country_supply_chain_director')).toBe(true);
+            expect(canViewCostPrice('country_supply_chain_director')).toBe(true);
         });
     });
 
     describe('Logistics & Inventory Flow Permissions', () => {
         it('grants macro inventory transfer, dispatch, and staging permissions', () => {
-            expect(authService.checkPermission('head_of_supply_chain', 'inventory.transfer')).toBe(true);
-            expect(authService.checkPermission('head_of_supply_chain', 'warehouse.dispatch')).toBe(true);
-            expect(authService.checkPermission('head_of_supply_chain', 'warehouse.putaway')).toBe(true);
-            expect(authService.checkPermission('head_of_supply_chain', 'inventory.view')).toBe(true);
-            expect(authService.checkPermission('head_of_supply_chain', 'warehouse.view')).toBe(true);
+            expect(authService.checkPermission('country_supply_chain_director', 'inventory.transfer')).toBe(true);
+            expect(authService.checkPermission('country_supply_chain_director', 'warehouse.dispatch')).toBe(true);
+            expect(authService.checkPermission('country_supply_chain_director', 'warehouse.putaway')).toBe(true);
+            expect(authService.checkPermission('country_supply_chain_director', 'inventory.view')).toBe(true);
+            expect(authService.checkPermission('country_supply_chain_director', 'warehouse.view')).toBe(true);
         });
 
         it('blocks live cashier till operations (Zero Live Till Operation)', () => {
-            expect(authService.checkPermission('head_of_supply_chain', 'pos.create_sale')).toBe(false);
-            expect(authService.checkPermission('head_of_supply_chain', 'pos.void_sale')).toBe(false);
-            expect(authService.checkPermission('head_of_supply_chain', 'pos.refund')).toBe(false);
+            expect(authService.checkPermission('country_supply_chain_director', 'pos.create_sale')).toBe(false);
+            expect(authService.checkPermission('country_supply_chain_director', 'pos.void_sale')).toBe(false);
+            expect(authService.checkPermission('country_supply_chain_director', 'pos.refund')).toBe(false);
         });
 
         it('blocks unilateral retail shelf price alterations (Merchandising remit)', () => {
-            expect(authService.checkPermission('head_of_supply_chain', 'pricing.edit')).toBe(false);
-            expect(authService.checkPermission('head_of_supply_chain', 'pricing.approve_promo')).toBe(false);
+            expect(authService.checkPermission('country_supply_chain_director', 'pricing.edit')).toBe(false);
+            expect(authService.checkPermission('country_supply_chain_director', 'pricing.approve_promo')).toBe(false);
         });
     });
 
     describe('Supervisory Sourcing & Logistics Hiring Authority (canEmployRole)', () => {
         it('authorizes head_of_supply_chain to hire Logistics Managers, Dispatch Managers, and fleet staff', () => {
-            expect(canEmployRole('head_of_supply_chain', 'logistics_manager')).toBe(true);
-            expect(canEmployRole('head_of_supply_chain', 'dispatch_manager')).toBe(true);
-            expect(canEmployRole('head_of_supply_chain', 'driver')).toBe(true);
-            expect(canEmployRole('head_of_supply_chain', 'forklift_operator')).toBe(true);
-            expect(canEmployRole('head_of_supply_chain', 'replenishment_planner')).toBe(true);
-            expect(canEmployRole('head_of_supply_chain', 'fleet_maintenance_supervisor')).toBe(true);
+            expect(canEmployRole('country_supply_chain_director', 'regional_supply_chain_manager')).toBe(true);
+            expect(canEmployRole('country_supply_chain_director', 'dispatch_supervisor')).toBe(true);
+            expect(canEmployRole('country_supply_chain_director', 'driver')).toBe(true);
+            expect(canEmployRole('country_supply_chain_director', 'forklift_operator')).toBe(true);
+            expect(canEmployRole('country_supply_chain_director', 'replenishment_planner')).toBe(true);
+            expect(canEmployRole('country_supply_chain_director', 'fleet_maintenance_supervisor')).toBe(true);
         });
 
         it('authorizes department managers to hire their specialized team members', () => {
-            expect(canEmployRole('logistics_manager', 'fleet_maintenance_supervisor')).toBe(true);
+            expect(canEmployRole('regional_supply_chain_manager', 'fleet_maintenance_supervisor')).toBe(true);
             expect(canEmployRole('inventory_manager', 'replenishment_planner')).toBe(true);
         });
 
         it('blocks head_of_supply_chain from hiring superiors or Level 2 peers', () => {
-            expect(canEmployRole('head_of_supply_chain', 'super_admin')).toBe(false);
-            expect(canEmployRole('head_of_supply_chain', 'regional_operations_manager')).toBe(false);
-            expect(canEmployRole('head_of_supply_chain', 'head_of_operations')).toBe(false);
-            expect(canEmployRole('head_of_supply_chain', 'head_of_finance')).toBe(false);
-            expect(canEmployRole('head_of_supply_chain', 'head_of_hr')).toBe(false);
-            expect(canEmployRole('head_of_supply_chain', 'head_of_supply_chain')).toBe(false);
+            expect(canEmployRole('country_supply_chain_director', 'group_ceo')).toBe(false);
+            expect(canEmployRole('country_supply_chain_director', 'regional_operations_manager')).toBe(false);
+            expect(canEmployRole('country_supply_chain_director', 'country_operations_director')).toBe(false);
+            expect(canEmployRole('country_supply_chain_director', 'country_finance_director')).toBe(false);
+            expect(canEmployRole('country_supply_chain_director', 'country_hr_director')).toBe(false);
+            expect(canEmployRole('country_supply_chain_director', 'country_supply_chain_director')).toBe(false);
         });
     });
 

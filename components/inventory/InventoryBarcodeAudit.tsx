@@ -369,7 +369,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                     <span>Details</span>
                                                     <ChevronRight size={13} />
                                                 </button>
-                                                {['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'regional_operations_manager'].includes(user?.role) && (
+                                                {['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_operations_director', 'regional_operations_manager'].includes(user?.role) && (
                                                     <button
                                                         type="button"
                                                         onClick={() => handleDeleteAuditRecord(approval)}

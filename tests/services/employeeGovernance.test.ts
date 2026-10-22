@@ -30,10 +30,10 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
 
     describe('CEO Sovereign Universal Authority', () => {
         it('identifies CEO and super_admin as sovereign roles, excluding admin (Country MD)', () => {
-            expect(isSovereignCEO('super_admin')).toBe(true);
+            expect(isSovereignCEO('group_ceo')).toBe(true);
             expect(isSovereignCEO('admin')).toBe(false); // Country Managing Director is not Sovereign CEO
             expect(isSovereignCEO('ceo')).toBe(true);
-            expect(isSovereignCEO('head_of_hr')).toBe(false);
+            expect(isSovereignCEO('country_hr_director')).toBe(false);
             expect(isSovereignCEO('hr')).toBe(false);
         });
 
@@ -46,7 +46,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                     salary: 20000,
                     department: 'Logistics & Warehouse'
                 },
-                'super_admin'
+                'group_ceo'
             );
 
             expect(result.requiresApproval).toBe(false);
@@ -63,7 +63,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                     name: 'Abebe Kebede Bikila',
                     age: 32
                 },
-                'head_of_hr'
+                'country_hr_director'
             );
 
             expect(result.requiresApproval).toBe(true);
@@ -95,7 +95,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                 {
                     department: 'Logistics & Warehouse'
                 },
-                'head_of_hr'
+                'country_hr_director'
             );
 
             expect(warehouseTransfer.requiresApproval).toBe(true);
@@ -106,7 +106,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                 {
                     department: 'Procurement'
                 },
-                'head_of_hr'
+                'country_hr_director'
             );
 
             expect(procurementTransfer.requiresApproval).toBe(true);
@@ -117,7 +117,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
             const roleChange = evaluateEmployeeProfileChanges(
                 mockEmployee,
                 {
-                    role: 'store_supervisor'
+                    role: 'shift_supervisor'
                 },
                 'hr'
             );
@@ -165,15 +165,15 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
 
     describe('Segregation of Duties Authorization Checks', () => {
         it('grants CEO universal authorization to approve any department request', () => {
-            expect(canApproveChangeRequest('super_admin', 'Finance Department')).toBe(true);
-            expect(canApproveChangeRequest('super_admin', 'Logistics & Warehouse')).toBe(true);
-            expect(canApproveChangeRequest('super_admin', 'Executive / Compliance')).toBe(true);
+            expect(canApproveChangeRequest('group_ceo', 'Finance Department')).toBe(true);
+            expect(canApproveChangeRequest('group_ceo', 'Logistics & Warehouse')).toBe(true);
+            expect(canApproveChangeRequest('group_ceo', 'Executive / Compliance')).toBe(true);
         });
 
         it('authorizes Head of Finance only for Finance requests', () => {
-            expect(canApproveChangeRequest('head_of_finance', 'Finance Department')).toBe(true);
-            expect(canApproveChangeRequest('head_of_finance', 'Logistics & Warehouse')).toBe(false);
-            expect(canApproveChangeRequest('head_of_finance', 'Executive / Compliance')).toBe(false);
+            expect(canApproveChangeRequest('country_finance_director', 'Finance Department')).toBe(true);
+            expect(canApproveChangeRequest('country_finance_director', 'Logistics & Warehouse')).toBe(false);
+            expect(canApproveChangeRequest('country_finance_director', 'Executive / Compliance')).toBe(false);
         });
 
         it('authorizes Warehouse Manager only for Warehouse requests', () => {
@@ -183,7 +183,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
 
         it('denies standard HR roles from approving governed requests', () => {
             expect(canApproveChangeRequest('hr', 'Finance Department')).toBe(false);
-            expect(canApproveChangeRequest('head_of_hr', 'Finance Department')).toBe(false);
+            expect(canApproveChangeRequest('country_hr_director', 'Finance Department')).toBe(false);
             expect(canApproveChangeRequest('cashier', 'Finance Department')).toBe(false);
         });
 
@@ -198,7 +198,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                 targetRegionCode: 'ke_mombasa'
             })).toBe(false);
 
-            expect(canApproveChangeRequest('super_admin', 'Operations Management', {
+            expect(canApproveChangeRequest('group_ceo', 'Operations Management', {
                 userRegionCode: 'ke_nairobi',
                 targetRegionCode: 'ke_mombasa'
             })).toBe(true);
@@ -208,7 +208,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
             const ceoEmployee: Employee = {
                 ...mockEmployee,
                 id: 'emp-ceo',
-                role: 'super_admin',
+                role: 'group_ceo',
                 name: 'Global CEO'
             };
 
@@ -224,7 +224,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
 
         it('strictly blocks Country Managing Director from approving change requests targeting Global CEO', () => {
             const canAdminApproveCEO = canApproveChangeRequest('admin', 'Finance Department', {
-                targetEmployeeRole: 'super_admin'
+                targetEmployeeRole: 'group_ceo'
             });
             expect(canAdminApproveCEO).toBe(false);
         });
@@ -233,7 +233,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
             const result = evaluateEmployeeProfileChanges(
                 mockEmployee,
                 { salary: 50000 },
-                'head_of_hr',
+                'country_hr_director',
                 mockEmployee.id // Acting user is modifying their own record
             );
 
@@ -242,7 +242,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
         });
 
         it('strictly blocks self-approval of change requests', () => {
-            const canSelfApprove = canApproveChangeRequest('head_of_finance', 'Finance Department', {
+            const canSelfApprove = canApproveChangeRequest('country_finance_director', 'Finance Department', {
                 approverId: 'emp-fin-001',
                 targetEmployeeId: 'emp-fin-001'
             });
@@ -250,7 +250,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
         });
 
         it('strictly blocks requester from approving own request under 4-eyes principle', () => {
-            const canRequesterApprove = canApproveChangeRequest('head_of_finance', 'Finance Department', {
+            const canRequesterApprove = canApproveChangeRequest('country_finance_director', 'Finance Department', {
                 approverName: 'Jane Doe',
                 requesterName: 'Jane Doe'
             });
@@ -261,14 +261,14 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
             const directorEmployee: Employee = {
                 ...mockEmployee,
                 id: 'emp-dir',
-                role: 'head_of_operations', // Level 95
+                role: 'country_operations_director', // Level 95
                 name: 'Head of Operations'
             };
 
             const result = evaluateEmployeeProfileChanges(
                 directorEmployee,
                 { salary: 45000 },
-                'head_of_hr' // Level 85
+                'country_hr_director' // Level 85
             );
 
             expect(result.requiresApproval).toBe(true);

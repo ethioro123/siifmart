@@ -104,23 +104,14 @@ describe('Regional Operations Manager (SOP-MGT-020, Level 4, Rank 90) Full Opera
     describe('3. Role Hierarchy & Multi-Tier Hiring Authority', () => {
         it('has Rank 90 hierarchy — territorial director outranking facility leadership', () => {
             expect(getRoleHierarchy('regional_operations_manager')).toBe(90);
-            expect(getRoleHierarchy('head_of_operations')).toBeGreaterThan(getRoleHierarchy('regional_operations_manager'));
-            expect(getRoleHierarchy('regional_operations_manager')).toBeGreaterThan(getRoleHierarchy('head_of_finance'));
+            expect(getRoleHierarchy('country_operations_director')).toBeGreaterThan(getRoleHierarchy('regional_operations_manager'));
+            expect(getRoleHierarchy('regional_operations_manager')).toBeGreaterThan(getRoleHierarchy('country_finance_director'));
             expect(getRoleHierarchy('regional_operations_manager')).toBeGreaterThan(getRoleHierarchy('store_manager'));
             expect(getRoleHierarchy('regional_operations_manager')).toBeGreaterThan(getRoleHierarchy('warehouse_manager'));
         });
 
         it('can employ Level 3 Site Leadership across stores and warehouses', () => {
-            const level3Roles = [
-                'store_manager',
-                'warehouse_manager',
-                'logistics_manager',
-                'inventory_manager',
-                'security_manager',
-                'dispatch_manager',
-                'assistant_manager',
-                'shift_lead'
-            ];
+            const level3Roles = ['store_manager', 'warehouse_manager', 'regional_supply_chain_manager', 'inventory_manager', 'regional_security_manager', 'dispatch_supervisor', 'assistant_store_manager', 'shift_supervisor'];
 
             for (const role of level3Roles) {
                 expect(canEmployRole('regional_operations_manager', role)).toBe(true);
@@ -128,20 +119,7 @@ describe('Regional Operations Manager (SOP-MGT-020, Level 4, Rank 90) Full Opera
         });
 
         it('can employ Level 4 Floor Staff across stores and warehouses', () => {
-            const level4Roles = [
-                'cashier',
-                'sales_associate',
-                'stock_clerk',
-                'picker',
-                'packer',
-                'receiver',
-                'driver',
-                'forklift_operator',
-                'customer_service',
-                'auditor',
-                'buyer',
-                'demand_planner'
-            ];
+            const level4Roles = ['cashier', 'sales_associate', 'stock_clerk', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'customer_service', 'auditor', 'buyer', 'demand_planner'];
 
             for (const role of level4Roles) {
                 expect(canEmployRole('regional_operations_manager', role)).toBe(true);
@@ -149,14 +127,14 @@ describe('Regional Operations Manager (SOP-MGT-020, Level 4, Rank 90) Full Opera
         });
 
         it('CANNOT employ CEO, Assistant CEO, or peer corporate directors', () => {
-            expect(canEmployRole('regional_operations_manager', 'super_admin')).toBe(false);
+            expect(canEmployRole('regional_operations_manager', 'group_ceo')).toBe(false);
             expect(canEmployRole('regional_operations_manager', 'CEO')).toBe(false);
             expect(canEmployRole('regional_operations_manager', 'admin')).toBe(false);
-            expect(canEmployRole('regional_operations_manager', 'head_of_operations')).toBe(false);
-            expect(canEmployRole('regional_operations_manager', 'head_of_finance')).toBe(false);
-            expect(canEmployRole('regional_operations_manager', 'head_of_hr')).toBe(false);
-            expect(canEmployRole('regional_operations_manager', 'head_of_procurement')).toBe(false);
-            expect(canEmployRole('regional_operations_manager', 'head_of_supply_chain')).toBe(false);
+            expect(canEmployRole('regional_operations_manager', 'country_operations_director')).toBe(false);
+            expect(canEmployRole('regional_operations_manager', 'country_finance_director')).toBe(false);
+            expect(canEmployRole('regional_operations_manager', 'country_hr_director')).toBe(false);
+            expect(canEmployRole('regional_operations_manager', 'country_commercial_director')).toBe(false);
+            expect(canEmployRole('regional_operations_manager', 'country_supply_chain_director')).toBe(false);
             expect(canEmployRole('regional_operations_manager', 'regional_operations_manager')).toBe(false);
         });
     });

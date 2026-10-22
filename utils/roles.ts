@@ -15,7 +15,7 @@ export function getJobTitleForRole(role?: string | null): string {
    if (normalizedRole === 'group_cio' || normalizedRole === 'cio') return 'Group Chief Information Officer';
    if (normalizedRole === 'group_clco' || normalizedRole === 'clco') return 'Group Chief Legal & Compliance Officer';
    if (normalizedRole === 'group_cae' || normalizedRole === 'cae') return 'Chief Audit Executive';
-   if (normalizedRole === 'ceo') return 'Chief Executive Officer';
+   if (normalizedRole === 'group_ceo') return 'Chief Executive Officer';
 
    const configuredRole = SYSTEM_ROLES.find(item => item.id.toLowerCase() === normalizedRole);
    if (configuredRole) return configuredRole.label;
@@ -37,9 +37,6 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
     const hierarchy: Partial<Record<UserRole | string, number>> = {
         // Level 1: Executive
         'group_ceo': 100,
-        'super_admin': 100,
-        'CEO': 100,
-        'ceo': 100,
         'group_coo': 99,
         'group_cfo': 99,
         'group_cco': 99,
@@ -51,7 +48,6 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'group_clco': 99,
         'group_cae': 99,
         'country_managing_director': 98,
-        'admin': 98, // Country Managing Director (National Executive below Global CEO)
         'country_operations_director': 97,
         'country_finance_director': 97,
         'country_commercial_director': 97,
@@ -61,18 +57,9 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'country_compliance_manager': 97,
 
         // Level 2: Directors & Regional ("Head of...")
-        'head_of_operations': 95,
         'regional_operations_manager': 90,
         'area_operations_manager': 88,
-        'head_of_finance': 85,
-        'head_of_hr': 85,
-        'hr': 85, // Legacy HR
         'regional_supply_chain_manager': 83,
-        'head_of_procurement': 82,
-        'head_of_supply_chain': 82,
-        'head_of_merchandising': 82,
-        'head_of_it': 80,
-        'head_of_audit': 80,
         'regional_procurement_manager': 81,
         'regional_finance_manager': 81,
         'regional_merchandising_manager': 81,
@@ -87,13 +74,9 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'warehouse_manager': 80,
         'warehouse_operations_manager': 78,
         'transport_fleet_manager': 78,
-        'logistics_manager': 80,
         'inventory_manager': 80,
-        'security_manager': 75,
-        'dispatch_manager': 75,
         'cs_manager': 60,
         'assistant_store_manager': 60,
-        'assistant_manager': 60,
         'vendor_relations_manager': 60,
         'fleet_maintenance_supervisor': 58,
         'inventory_control_supervisor': 57,
@@ -108,8 +91,6 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'returns_waste_supervisor': 56,
         'inbound_operations_supervisor': 56,
         'outbound_operations_supervisor': 56,
-        'store_supervisor': 55,
-        'shift_lead': 55,
         'receiving_team_leader': 50,
         'picking_team_leader': 50,
         'packing_team_leader': 50,
@@ -142,7 +123,6 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'cashier': 30,
         'store_associate': 28,
         'sales_associate': 28,
-        'pos': 28, // Legacy POS
         'inventory_controller': 26,
         'stock_counter': 25,
         'merchandiser': 25,
@@ -174,24 +154,13 @@ export const canViewLocation = (
     if (isOwn) return true;
     if (!userRole) return false;
 
-    const isGlobalExecutive = (r?: string) => [
-        'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco',
-        'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
-        'super_admin', 'ceo', 'CEO'
-    ].includes(r || '');
+    const isGlobalExecutive = (r?: string) => ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae'].includes(r || '');
 
     // Global C-Suite executives can see everyone across operational facilities
     if (isGlobalExecutive(userRole)) return true;
 
     // Country Managing Director and HR/Operations leadership can see anyone in their country except Global C-Suite
-    if ([
-        'admin', 'country_managing_director',
-        'country_operations_director', 'country_finance_director',
-        'country_commercial_director', 'country_supply_chain_director',
-        'country_hr_director', 'country_technology_director', 'country_compliance_manager',
-        'hr', 'head_of_hr',
-        'head_of_operations',
-    ].includes(userRole)) {
+    if (['country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager', 'hr_generalist'].includes(userRole)) {
         return !isGlobalExecutive(targetRole);
     }
 
@@ -206,19 +175,7 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
     if (!role) return false;
 
     // Explicitly allow executive, regional/operations directors, finance, procurement, and merchandising leadership
-    if ([
-        'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae',
-        'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
-        'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_compliance_manager',
-        'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager',
-        'head_of_operations',
-        'head_of_finance',
-        'head_of_procurement',
-        'head_of_supply_chain',
-        'head_of_merchandising',
-        'head_of_audit',
-        'vendor_relations_manager'
-    ].includes(role)) {
+    if (['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_compliance_manager', 'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'vendor_relations_manager'].includes(role)) {
         return true;
     }
 
@@ -227,7 +184,7 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
         return false;
     }
 
-    // Disallow anyone with level <= 72 (e.g., cashier, shift_lead, etc.)
+    // Disallow anyone with level <= 72 (e.g., cashier, shift_supervisor, etc.)
     const level = getRoleHierarchy(role);
     if (level <= 72) {
         return false;
@@ -240,78 +197,7 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
 export { canEmployRole } from './roleHiring';
 
 // Canonical list of Levels 1 through 8 managerial & leadership roles for selective egress loading
-export const MANAGERIAL_ROLES: readonly string[] = [
-    'group_ceo',
-    'group_coo',
-    'group_cfo',
-    'group_cco',
-    'group_csco',
-    'group_chro',
-    'group_cto',
-    'group_cio',
-    'group_clco',
-    'group_cae',
-    'super_admin',
-    'admin',
-    'country_managing_director',
-    'country_operations_director',
-    'country_finance_director',
-    'country_commercial_director',
-    'country_supply_chain_director',
-    'country_hr_director',
-    'country_technology_director',
-    'country_compliance_manager',
-    'CEO',
-    'ceo',
-    'regional_operations_manager',
-    'area_operations_manager',
-    'regional_supply_chain_manager',
-    'regional_procurement_manager',
-    'regional_finance_manager',
-    'regional_merchandising_manager',
-    'regional_hr_manager',
-    'regional_logistics_manager',
-    'regional_security_manager',
-    'head_of_operations',
-    'head_of_finance',
-    'head_of_hr',
-    'hr',
-    'head_of_procurement',
-    'head_of_supply_chain',
-    'head_of_merchandising',
-    'head_of_it',
-    'head_of_audit',
-    'store_manager',
-    'warehouse_manager',
-    'warehouse_operations_manager',
-    'transport_fleet_manager',
-    'logistics_manager',
-    'inventory_manager',
-    'security_manager',
-    'dispatch_manager',
-    'assistant_store_manager',
-    'assistant_manager',
-    'vendor_relations_manager',
-    'fleet_maintenance_supervisor',
-    'shift_supervisor',
-    'stock_control_supervisor',
-    'receiving_supervisor',
-    'pos_supervisor',
-    'inventory_control_supervisor',
-    'putaway_replenishment_supervisor',
-    'picking_supervisor',
-    'packing_supervisor',
-    'dispatch_supervisor',
-    'returns_waste_supervisor',
-    'shift_lead',
-    'cs_manager',
-    'store_supervisor',
-    'receiving_team_leader',
-    'picking_team_leader',
-    'packing_team_leader',
-    'dispatch_team_leader',
-    'manager'
-] as const;
+export const MANAGERIAL_ROLES: readonly string[] = ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager', 'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'hr_generalist', 'store_manager', 'warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'inventory_manager', 'dispatch_supervisor', 'assistant_store_manager', 'vendor_relations_manager', 'fleet_maintenance_supervisor', 'shift_supervisor', 'stock_control_supervisor', 'receiving_supervisor', 'pos_supervisor', 'inventory_control_supervisor', 'putaway_replenishment_supervisor', 'picking_supervisor', 'packing_supervisor', 'returns_waste_supervisor', 'cs_manager', 'receiving_team_leader', 'picking_team_leader', 'packing_team_leader', 'dispatch_team_leader'] as const;
 
 export const isManagerialRole = (role?: string): boolean => {
     if (!role) return false;

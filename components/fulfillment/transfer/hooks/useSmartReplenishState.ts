@@ -33,7 +33,7 @@ export const useSmartReplenishState = ({
     settings
 }: UseSmartReplenishStateProps) => {
     const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
-    const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
+    const isRestricted = !['group_ceo', 'country_managing_director'].includes(user?.role || '') && !!user?.siteId;
     const userSiteObj = sites.find(s => s.id === user?.siteId);
     const userZoneId = userSiteObj?.logisticsZoneId || '';
 
@@ -163,7 +163,7 @@ export const useSmartReplenishState = ({
             // Regular managers can only target warehouses in the same zone.
             // CEOs can target any warehouse (with override warnings).
             if (settings?.enforceRegionalZoning) {
-                if (user?.role !== 'super_admin' && targetStore && sourceSiteObj) {
+                if (user?.role !== 'group_ceo' && targetStore && sourceSiteObj) {
                     return (sourceSiteObj.logisticsZoneId || '') === (targetStore.logisticsZoneId || '');
                 }
             }
@@ -386,7 +386,7 @@ export const useSmartReplenishState = ({
             return;
         }
 
-        if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+        if (settings?.enforceRegionalZoning && user?.role !== 'group_ceo') {
             const hasCrossZoneDraft = dbDraftJobs.some(draft => {
                 const sourceSiteObj = sites.find(s => s.id === draft.sourceSiteId);
                 const destSiteObj = sites.find(s => s.id === draft.destSiteId);

@@ -16,16 +16,15 @@ interface EmployeeIDCardProps {
 }
 
 const ROLE_COLORS: Partial<Record<UserRole, string>> = {
-    super_admin: '#FACC15', // yellow-400
-    admin: '#C084FC',       // purple-400
-    hr: '#F472B6',          // pink-400
-    head_of_finance: '#34D399', // emerald-400
-    head_of_procurement: '#818CF8', // indigo-400
+    group_ceo: '#FACC15', // yellow-400
+    country_managing_director: '#C084FC', // purple-400
+    hr_generalist: '#F472B6', // pink-400
+    country_finance_director: '#34D399', // emerald-400
+    country_commercial_director: '#818CF8', // indigo-400
     it_support: '#22D3EE',  // cyan-400
     cs_manager: '#38BDF8',  // sky-400
-    store_supervisor: '#93C5FD', // blue-300
+    shift_supervisor: '#93C5FD', // blue-300
     inventory_specialist: '#FBBF24', // amber-400
-    pos: '#4ADE80',         // green-400
     picker: '#FB923C',      // orange-400
     packer: '#F97316',      // orange-500
     driver: '#2DD4BF',      // teal-400
@@ -35,11 +34,10 @@ const ROLE_COLORS: Partial<Record<UserRole, string>> = {
     // New Warehouse Ops roles
     receiver: '#22D3EE',    // cyan-400
     forklift_operator: '#9CA3AF', // gray-400
-    dispatch_manager: '#A3E635', // lime-400
+    dispatch_supervisor: '#A3E635', // lime-400
     returns_clerk: '#FCA5A5', // red-300
     // New Store Ops roles
     cashier: '#86EFAC',     // green-300
-    shift_lead: '#BFDBFE',  // blue-200
     merchandiser: '#F9A8D4', // pink-300
     loss_prevention: '#F87171', // red-400
     // New Administrative roles

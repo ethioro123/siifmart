@@ -8,7 +8,6 @@ import type { Permission } from './permissions.service';
 export type FrontlineRole =
     | 'cashier'
     | 'sales_associate'
-    | 'pos'
     | 'store_associate'
     | 'merchandiser'
     | 'inventory_specialist'
@@ -37,9 +36,6 @@ export const FRONTLINE_PERMISSIONS: Record<FrontlineRole, Permission[]> = {
     ],
     sales_associate: [
         'dashboard.view', 'pos.view', 'pos.create_sale', 'customers.view', 'customers.create'
-    ],
-    pos: [
-        'dashboard.view', 'pos.view', 'pos.create_sale', 'pos.hold_order', 'customers.view', 'customers.create'
     ],
     store_associate: [
         'dashboard.view', 'pos.view', 'pos.create_sale', 'inventory.view', 'customers.view', 'customers.create'

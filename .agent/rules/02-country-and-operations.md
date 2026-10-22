@@ -6,14 +6,14 @@
 
 | Level | Roles | Access |
 |-------|-------|--------|
-| L1 | `super_admin`, `CEO` | Full system access |
+| L1 | `group_ceo`, `CEO` | Full system access |
 | L2 | `regional_manager`, `operations_manager`, `procurement_manager`, `hr_manager`, `finance_manager` | Department/region-wide |
-| L3 | `store_manager`, `warehouse_manager`, `assistant_manager` | Site-scoped |
+| L3 | `store_manager`, `warehouse_manager`, `assistant_store_manager` | Site-scoped |
 | L4 | `cashier`, `picker`, `driver`, etc. | Task-specific |
 
 ### Approval Pattern
 ```typescript
-const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
+const canApprove = ['group_ceo', 'CEO'].includes(user?.role || '');
 ```
 
 ---
@@ -53,7 +53,7 @@ const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
 - **Zero Cross-Country Data Leakage**: Dashboards, sales KPIs, gross profit, stock counts, orders, shifts, and employee rosters in Kenya must **NEVER** mix, display, or aggregate Ethiopian data (and vice-versa).
 - **Zero Arithmetic Cross-Addition**: Under no circumstances may 1,000 ETB and 1,000 KSh be added together into a single sum.
 - **Non-CEO Staff Lockdown**: Cashiers, store managers, pickers, and drivers are hard-pinned to their assigned site's country via `getUserCountry()`. Any attempt to tamper with client storage, URL parameters, or network payloads to view another country is blocked.
-- **Executive Dual-Oversight (CEO / Super Admin Only)**: Only the `CEO` or `super_admin` can switch country instances (`canSwitchCountry()`). When switching, the entire application context (sites, active facility, products, sales, orders, employees) cleanly re-hydrates to that country.
+- **Executive Dual-Oversight (CEO / Super Admin Only)**: Only the `CEO` or `group_ceo` can switch country instances (`canSwitchCountry()`). When switching, the entire application context (sites, active facility, products, sales, orders, employees) cleanly re-hydrates to that country.
 - **Physical Facility & Intra-Country Movement**: All facilities (Stores, Warehouses, Distribution Centers) are bound to one country. Standard stock movements are intra-country only; cross-border movements require international import/export customs clearance.
 - **Legacy Baseline & New Country Guarantee**: All historical data defaults to Ethiopia (`ET`). Any new country added starts 100% fresh as an isolated tenant with zero code refactoring.
 

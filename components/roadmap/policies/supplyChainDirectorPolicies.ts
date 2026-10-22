@@ -3,8 +3,8 @@ import { KnowledgeEntry } from '../RoadmapTypes';
 export const SUPPLY_CHAIN_DIRECTOR_POLICIES: KnowledgeEntry[] = [
   {
     id: 'policy-procurement-manager-sop-024',
-    title: 'Head of Procurement Sourcing Authority, PO Governance & Supplier Accountability Policy (SOP-MGT-024)',
-    description: 'Defines the purchasing remit of the Head of Procurement (Level 2, Rank 82): Vendor selection, Purchase Order authorization, landed cost margin protection, 3-way match compliance, and supplier fill-rate accountability.',
+    title: 'Country Commercial Director Sourcing Authority, PO Governance & Supplier Accountability Policy (SOP-MGT-024)',
+    description: 'Defines the purchasing remit of the Country Commercial Director (Level 2, Rank 82): Vendor selection, Purchase Order authorization, landed cost margin protection, 3-way match compliance, and supplier fill-rate accountability.',
     department: 'admin',
     type: 'policy',
     priority: 'critical',
@@ -13,7 +13,7 @@ export const SUPPLY_CHAIN_DIRECTOR_POLICIES: KnowledgeEntry[] = [
     createdAt: '2026-10-02T00:00:00.000Z',
     updatedAt: '2026-10-02T00:00:00.000Z',
     tags: [
-      'Head of Procurement',
+      'Country Commercial Director',
       'Sourcing',
       'Purchase Orders',
       'Landed Cost',
@@ -37,7 +37,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Head of Procurement operates at Level 3 (HQ/Procurement Directorate) with a Hierarchy Rank of 82, reporting directly to the CEO.
+    - The Country Commercial Director operates at Level 3 (HQ/Procurement Directorate) with a Hierarchy Rank of 82, reporting directly to the CEO.
     - Serves as the chief sourcing and vendor relationship authority of SIIFMART, governing commercial purchase contracts, purchase orders (PO), landed cost calculations, and supplier delivery performance across all national facilities.
 1.2 Core Mission:
     - Secure dependable, ethical, and cost-effective supply lines for essential consumer goods (cooking oil, infant formula, coffee, tea, honey, grains, fresh meat); maintain supplier fill rates >= 95%; protect enterprise gross margins; and prevent vendor kickback collusion.
@@ -54,9 +54,9 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
     - Configure line-item tax calculations on purchase orders (taxOnPurchasing), distinguishing between formal VAT-registered corporate vendors (15% ERCA / 16% KRA) and exempt local smallholder farmers.
 2.4 Cross-Facility Sourcing & Replenishment Authority:
     - Multi-site purchasing authority (isMultiSiteRole = true) to issue direct-to-store or centralized DC purchase orders based on real-time network stock telemetry.
-    - Authority to adjust reorder triggers and safety stock thresholds (canEditThresholds = true) alongside the Head of Operations.
+    - Authority to adjust reorder triggers and safety stock thresholds (canEditThresholds = true) alongside the Country Operations Director.
 2.5 Vendor Returns & RMA Dispute Resolution:
-    - Review and approve supplier returns and credit requests (approvalRole = 'head_of_procurement') for defective or short-delivered goods identified at receiving docks.
+    - Review and approve supplier returns and credit requests (approvalRole = 'country_commercial_director') for defective or short-delivered goods identified at receiving docks.
 2.6 Staffing & Sourcing Team Management:
     - Direct supervisory authority to hire, onboard, and assign Sourcing Buyers (buyer) and Demand Planners (demand_planner) under canEmployRole().
 
@@ -81,7 +81,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
 --------------------------------------------------------------------------------
 4.1 Supplier Fill Rate & Continuity of Staple Goods (>= 95% SLA):
     - Accountable for maintaining an enterprise-wide supplier order fulfillment rate of >= 95%.
-    - Out-of-stock events on essential high-velocity staples (cooking oil, infant formula, coffee, flour, sugar) due to delinquent purchase orders are directly attributed to the Head of Procurement.
+    - Out-of-stock events on essential high-velocity staples (cooking oil, infant formula, coffee, flour, sugar) due to delinquent purchase orders are directly attributed to the Country Commercial Director.
 4.2 Landed Cost Budget Variance:
     - Held personally accountable for purchase price variance (PPV). Unbudgeted price increases accepted without executive approval trigger formal financial review.
 4.3 Vendor Discrepancy & Credit Note Settlement (7-Day SLA):
@@ -97,8 +97,8 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
   },
   {
     id: 'policy-supply-chain-manager-sop-025',
-    title: 'Head of Supply Chain End-to-End Logistics Authority, Fleet Governance & Network Accountability Policy (SOP-MGT-025)',
-    description: 'Defines the macro logistics remit of the Head of Supply Chain (Level 2, Rank 82): DC network throughput, inter-facility transfer routing, transit loss control, cold-chain compliance, and fleet safety accountability.',
+    title: 'Country Supply Chain Director End-to-End Logistics Authority, Fleet Governance & Network Accountability Policy (SOP-MGT-025)',
+    description: 'Defines the macro logistics remit of the Country Supply Chain Director (Level 2, Rank 82): DC network throughput, inter-facility transfer routing, transit loss control, cold-chain compliance, and fleet safety accountability.',
     department: 'logistics',
     type: 'policy',
     priority: 'critical',
@@ -107,7 +107,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
     createdAt: '2026-10-02T00:00:00.000Z',
     updatedAt: '2026-10-02T00:00:00.000Z',
     tags: [
-      'Head of Supply Chain',
+      'Country Supply Chain Director',
       'Logistics',
       'Fleet Management',
       'Cold Chain',
@@ -131,7 +131,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Rule 16: Ch
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Head of Supply Chain operates at Level 3 (HQ/Supply Chain Directorate) with a Hierarchy Rank of 82, reporting to the Country Managing Director and CEO.
+    - The Country Supply Chain Director operates at Level 3 (HQ/Supply Chain Directorate) with a Hierarchy Rank of 82, reporting to the Country Managing Director and CEO.
     - Serves as the macro supply chain architect and fleet logistics commander of SIIFMART, governing inter-facility freight routes, distribution center staging velocity, vehicle fleet telematics, cold-chain integrity, and transit security across all national logistics corridors.
 1.2 Core Mission:
     - Eliminate stockouts through rapid inter-facility freight deployment; maintain transit shrinkage below 0.1%; safeguard cold-chain integrity for fresh meat, dairy, and perishables; and enforce uncompromising Chain of Custody across every cargo transfer.
@@ -150,7 +150,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Rule 16: Ch
 2.4 Freight Landed Cost Analysis:
     - Full visibility into transportation expenses, fuel surcharges, demurrage fees, and handling cost per kilometer (canViewCostPrice = true).
 2.5 Staffing & Logistics Leadership:
-    - Direct supervisory authority to hire, onboard, and evaluate Logistics Managers (logistics_manager), Dispatch Managers (dispatch_manager), and Fleet Controllers under canEmployRole().
+    - Direct supervisory authority to hire, onboard, and evaluate Logistics Managers (regional_supply_chain_manager), Dispatch Managers (dispatch_supervisor), and Fleet Controllers under canEmployRole().
 
 3. WHAT THE HEAD OF SUPPLY CHAIN CANNOT DO (ZERO-TRUST PROHIBITIONS)
 --------------------------------------------------------------------------------
@@ -172,11 +172,11 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Rule 16: Ch
 4. WHAT THE HEAD OF SUPPLY CHAIN IS ACCOUNTABLE FOR ("CAPTAIN OWNS THE SHIP")
 --------------------------------------------------------------------------------
 4.1 Inter-Facility Transit Loss Ceiling (< 0.1%):
-    - Accountable for maintaining transit shrinkage below 0.1% of shipped cargo value. Shortages or damages occurring between dispatch and receiving are directly investigated under the Head of Supply Chain's supervision.
+    - Accountable for maintaining transit shrinkage below 0.1% of shipped cargo value. Shortages or damages occurring between dispatch and receiving are directly investigated under the Country Supply Chain Director's supervision.
 4.2 Network-Wide Essential Staple Availability (>= 98%):
     - Accountable for ensuring distribution centers maintain active buffer stocks of high-demand staple goods (cooking oil, infant formula, coffee, tea, honey, grains, fresh meat) to guarantee store replenishment.
 4.3 Cold-Chain & Perishable Temperature Compliance (100%):
-    - Held personally liable for cold-chain integrity during transport. Any batch spoiled due to unmonitored reefer breakdowns or delayed transit is co-attributed to the Head of Supply Chain.
+    - Held personally liable for cold-chain integrity during transport. Any batch spoiled due to unmonitored reefer breakdowns or delayed transit is co-attributed to the Country Supply Chain Director.
 4.4 Fleet Roadworthiness & Driver Safety Compliance:
     - Ensures 100% of fleet vehicles have active inspections and commercial transit insurance, and all assigned drivers possess verified commercial licenses.
 4.5 Authenticated Supervisory Audit Footprint:

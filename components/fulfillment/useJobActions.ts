@@ -268,7 +268,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             const eligibleEmployees = employees.filter(e =>
                 e.status?.toLowerCase() === 'active' &&
                 (e.siteId === activeSiteId || e.site_id === activeSiteId) &&
-                !['dispatcher', 'warehouse_manager', 'super_admin', 'admin'].includes((e.role || '').toLowerCase())
+                !['dispatcher', 'warehouse_manager', 'group_ceo', 'country_managing_director'].includes((e.role || '').toLowerCase())
             );
 
             if (eligibleEmployees.length === 0) {

@@ -25,62 +25,11 @@ export const FLOOR_JOB_TYPES = [
 ] as const;
 export type FloorJobType = typeof FLOOR_JOB_TYPES[number];
 
-export const FLOOR_WORKER_ROLES = [
-    'picker',
-    'packer',
-    'receiver',
-    'receiving_operator',
-    'putaway_operator',
-    'replenishment_operator',
-    'inventory_controller',
-    'stock_counter',
-    'dispatch_operator',
-    'returns_operator',
-    'fleet_mechanic',
-    'inventory_specialist',
-    'forklift_operator',
-    'stock_clerk',
-    'inbound_qc_inspector',
-    'returns_clerk'
-] as const;
+export const FLOOR_WORKER_ROLES = ['picker', 'packer', 'receiver', 'receiving_operator', 'putaway_operator', 'replenishment_operator', 'inventory_controller', 'stock_counter', 'dispatch_operator', 'returns_operator', 'fleet_mechanic', 'inventory_specialist', 'forklift_operator', 'stock_clerk', 'inbound_qc_inspector', 'returns_clerk'] as const;
 
-export const DRIVER_ROLES = [
-    'driver'
-] as const;
+export const DRIVER_ROLES = ['driver'] as const;
 
-export const FULFILLMENT_MANAGER_ROLES = [
-    'group_ceo',
-    'group_coo',
-    'group_csco',
-    'super_admin',
-    'admin',
-    'country_managing_director',
-    'country_operations_director',
-    'country_supply_chain_director',
-    'manager',
-    'regional_operations_manager',
-    'area_operations_manager',
-    'regional_supply_chain_manager',
-    'head_of_operations',
-    'head_of_supply_chain',
-    'warehouse_manager',
-    'warehouse_operations_manager',
-    'transport_fleet_manager',
-    'dispatcher',
-    'logistics_manager',
-    'inventory_manager',
-    'fleet_maintenance_supervisor',
-    'inventory_control_supervisor',
-    'putaway_replenishment_supervisor',
-    'picking_supervisor',
-    'packing_supervisor',
-    'dispatch_supervisor',
-    'returns_waste_supervisor',
-    'receiving_team_leader',
-    'picking_team_leader',
-    'packing_team_leader',
-    'dispatch_team_leader'
-] as const;
+export const FULFILLMENT_MANAGER_ROLES = ['group_ceo', 'group_coo', 'group_csco', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'dispatcher', 'inventory_manager', 'fleet_maintenance_supervisor', 'inventory_control_supervisor', 'putaway_replenishment_supervisor', 'picking_supervisor', 'packing_supervisor', 'dispatch_supervisor', 'returns_waste_supervisor', 'receiving_team_leader', 'picking_team_leader', 'packing_team_leader', 'dispatch_team_leader'] as const;
 
 export const ALL_WAREHOUSE_ROLES = [
     ...FULFILLMENT_MANAGER_ROLES,

@@ -33,10 +33,7 @@ export function ProtectedRoute({
   const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
   const isStore = ['Store', 'Retail', 'POS'].includes(siteType);
   const normalizedRole = (user?.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-  const isExecutive = [
-    'super_admin', 'ceo', 'country_managing_director', 'admin',
-    'regional_operations_manager', 'head_of_operations',
-  ].includes(normalizedRole);
+  const isExecutive = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director'].includes(normalizedRole);
 
   // 1. Check authentication
   if (!user) {
@@ -44,7 +41,7 @@ export function ProtectedRoute({
   }
 
   // 1.1 Global CEO has 100% complete access, control, and operation to every module and route
-  if (normalizedRole === 'super_admin' || normalizedRole === 'ceo') {
+  if (normalizedRole === 'group_ceo') {
     return <>{children}</>;
   }
 
@@ -70,9 +67,9 @@ export function ProtectedRoute({
 
     const isSpecialistForModule = (mod: string): boolean => {
       if (isExecutive) return true;
-      if (mod === 'pricing') return ['head_of_merchandising', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser'].includes(normalizedRole);
-      if (mod === 'finance') return ['head_of_finance', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'head_of_audit', 'auditor'].includes(normalizedRole);
-      if (mod === 'procurement') return ['head_of_procurement', 'head_of_supply_chain', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist'].includes(normalizedRole);
+      if (mod === 'pricing') return ['country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser'].includes(normalizedRole);
+      if (mod === 'finance') return ['country_finance_director', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'country_compliance_manager', 'auditor'].includes(normalizedRole);
+      if (mod === 'procurement') return ['country_commercial_director', 'country_supply_chain_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist'].includes(normalizedRole);
       return false;
     };
 

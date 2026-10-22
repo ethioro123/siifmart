@@ -83,7 +83,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const isKenyaPOS = activeSite ? (activeSite.country === 'KE' || activeSite.currency === 'KES' || activeSite.currency === 'KSh') : (settings?.country === 'KE');
     const [cashDenominations, setCashDenominations] = useState<Record<string, number>>(() => (isKenyaPOS ? ({ '1000': 0, '500': 0, '200': 0, '100': 0, '50': 0 } as Record<string, number>) : ({ '200': 0, '100': 0, '50': 0, '10': 0, '5': 0, '1': 0 } as Record<string, number>)));
     const [discrepancyReason, setDiscrepancyReason] = useState(''), [countedCash, setCountedCash] = useState(''), [shiftNotes, setShiftNotes] = useState('');
-    const isCentralHQ = ['super_admin', 'regional_operations_manager', 'head_of_operations', 'inventory_manager', 'store_manager'].includes(user?.role || '');
+    const isCentralHQ = ['group_ceo', 'regional_operations_manager', 'country_operations_director', 'inventory_manager', 'store_manager'].includes(user?.role || '');
     const activeShift = shifts.find((s: ShiftRecord) =>
         (s.cashierId === user?.id || (user?.code && s.cashierId === user?.code) || ((user as any)?.employeeId && s.cashierId === (user as any)?.employeeId)) && s.status === 'Open'
     ) || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
@@ -245,7 +245,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const staleCartPriceChanges = useMemo(() => getStaleCartPriceChanges(cart, products), [cart, products]);
 
     const activeSiteType = activeSite?.type || 'Administrative';
-    const isMultiSiteRole = user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor' || user?.role === 'regional_operations_manager' || user?.role === 'head_of_operations';
+    const isMultiSiteRole = user?.role === 'group_ceo' || user?.role === 'country_managing_director' || user?.role === 'auditor' || user?.role === 'regional_operations_manager' || user?.role === 'country_operations_director';
     const needsStoreSelection = isMultiSiteRole && (activeSiteType === 'Administrative' || activeSiteType === 'Headquarters' || activeSiteType === 'HQ' || activeSiteType === 'Administration');
 
     // --- Hook Initializations ---

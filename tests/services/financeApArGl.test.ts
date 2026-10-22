@@ -159,7 +159,7 @@ describe('SIIFMART Finance - AP, AR & General Ledger Engine', () => {
             await expect(
                 accountsPayableService.overrideDiscrepancy(
                     'INV-AP-002',
-                    { id: 'EMP-FIN-01', name: 'Fatuma Manager', role: 'head_of_finance' },
+                    { id: 'EMP-FIN-01', name: 'Fatuma Manager', role: 'country_finance_director' },
                     'short'
                 )
             ).rejects.toThrow('Mandatory reason required: Provide at least 10 characters');
@@ -185,7 +185,7 @@ describe('SIIFMART Finance - AP, AR & General Ledger Engine', () => {
 
             const overridden = await accountsPayableService.overrideDiscrepancy(
                 'INV-AP-002',
-                { id: 'EMP-FIN-01', name: 'Fatuma Manager', role: 'head_of_finance' },
+                { id: 'EMP-FIN-01', name: 'Fatuma Manager', role: 'country_finance_director' },
                 'Price increase agreed in addendum #3.'
             );
 

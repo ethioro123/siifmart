@@ -104,10 +104,10 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
 
     if (!product) return null;
 
-    const isCEO = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
+    const isCEO = user?.role === 'group_ceo';
     const isWarehouseManager = user?.role === 'warehouse_manager';
     const isStoreManager = user?.role === 'store_manager';
-    const isSeniorOperations = ['country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo', 'regional_operations_manager', 'head_of_operations',].includes(user?.role || '');
+    const isSeniorOperations = ['country_managing_director', 'group_ceo', 'regional_operations_manager', 'country_operations_director'].includes(user?.role || '');
     const showDeleteButton = isCEO || isStoreManager || isWarehouseManager || isSeniorOperations;
     const isDeleteDisabled = (isStoreManager || isWarehouseManager || isSeniorOperations) && product.stock > 0;
     // Only CEO can directly edit. Everyone else submits for CEO approval.

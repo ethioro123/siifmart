@@ -20,7 +20,7 @@ export default function FinanceSettings() {
     const mutation = useFinanceSettingsMutation();
 
     // ── ROLE GATING (RULES.md Zero-Trust §1) ──
-    const isAuthorized = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_finance',].includes(user?.role || '');
+    const isAuthorized = ['group_ceo', 'country_managing_director', 'country_finance_director'].includes(user?.role || '');
 
     // ── INVISIBLE TENANCY & COUNTRY ISOLATION (AGENTS.md Rule 7 & 8) ──
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
@@ -140,7 +140,7 @@ export default function FinanceSettings() {
 
     const handleSaveSection = async (section: FinanceSettingsSection) => {
         if (!isAuthorized) {
-            showToast('Unauthorized: Modifying financial settings requires CEO or Head of Finance role.', 'error');
+            showToast('Unauthorized: Modifying financial settings requires CEO or Country Finance Director role.', 'error');
             return;
         }
 
@@ -238,7 +238,7 @@ export default function FinanceSettings() {
                 <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5">
                     <ShieldAlert className="text-amber-600 dark:text-amber-400 shrink-0" size={18} />
                     <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">
-                        Read-Only View: Modifying corporate financial policies, tax matrices, and drawer caps requires CEO, Super Admin, or Head of Finance authorization.
+                        Read-Only View: Modifying corporate financial policies, tax matrices, and drawer caps requires CEO, Super Admin, or Country Finance Director authorization.
                     </p>
                 </div>
             )}

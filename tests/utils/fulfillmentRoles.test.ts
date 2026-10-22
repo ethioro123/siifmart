@@ -122,7 +122,7 @@ describe('Fulfillment Roles & Job Eligibility Engine', () => {
             expect(canWorkerPerformJob('warehouse_manager', 'DRIVER')).toBe(true);
             expect(canWorkerPerformJob('dispatcher', 'DISPATCH')).toBe(true);
             expect(canWorkerPerformJob('dispatcher', 'PICK')).toBe(true);
-            expect(canWorkerPerformJob('super_admin', 'DRIVER')).toBe(true);
+            expect(canWorkerPerformJob('group_ceo', 'DRIVER')).toBe(true);
         });
     });
 

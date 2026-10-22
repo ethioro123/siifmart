@@ -12,13 +12,7 @@ describe('Regional Operations Architecture & RBAC', () => {
     });
 
     it('routes the 5 regional functional leads to /regional-ops', () => {
-      const regionalLeads: UserRole[] = [
-        'regional_procurement_manager',
-        'regional_finance_manager',
-        'regional_hr_manager',
-        'regional_logistics_manager',
-        'regional_security_manager'
-      ];
+      const regionalLeads: UserRole[] = ['regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'];
 
       regionalLeads.forEach(role => {
         expect(getRoleDashboardRoute(role)).toBe('/regional-ops');
@@ -26,9 +20,9 @@ describe('Regional Operations Architecture & RBAC', () => {
     });
 
     it('routes HQ executives (CEO, super_admin, head_of_operations) to /admin', () => {
-      expect(getRoleDashboardRoute('super_admin')).toBe('/admin');
+      expect(getRoleDashboardRoute('group_ceo')).toBe('/admin');
       expect(getRoleDashboardRoute('CEO')).toBe('/admin');
-      expect(getRoleDashboardRoute('head_of_operations')).toBe('/admin');
+      expect(getRoleDashboardRoute('country_operations_director')).toBe('/admin');
     });
 
     it('routes floor staff to terminal interfaces (POS or WMS)', () => {
@@ -48,8 +42,8 @@ describe('Regional Operations Architecture & RBAC', () => {
     });
 
     it('authorizes super_admin and head_of_operations for regional-ops', () => {
-      expect(canAccessModule('super_admin', 'regional-ops')).toBe(true);
-      expect(canAccessModule('head_of_operations', 'regional-ops')).toBe(true);
+      expect(canAccessModule('group_ceo', 'regional-ops')).toBe(true);
+      expect(canAccessModule('country_operations_director', 'regional-ops')).toBe(true);
     });
 
     it('blocks floor workers from regional-ops command deck', () => {
@@ -63,7 +57,7 @@ describe('Regional Operations Architecture & RBAC', () => {
     it('returns null for HQ staff (unlocked nationwide)', () => {
       const user = {
         id: 'u1',
-        role: 'head_of_operations',
+        role: 'country_operations_director',
         scopeLevel: 'HQ' as const,
         regionCode: 'KE-NRB'
       };

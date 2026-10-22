@@ -40,7 +40,7 @@ export default function Roadmap() {
     tags: []
   });
 
-  const isSuperAdmin = user?.role?.toLowerCase() === 'super_admin' ||
+  const isSuperAdmin = user?.role?.toLowerCase() === 'group_ceo' ||
     user?.role?.toLowerCase().replace('_', ' ') === 'super admin';
 
   // Load data from Supabase with timeout

@@ -293,8 +293,8 @@ export function useFinancialsState() {
       try {
          const approverUser = {
             id: user?.id || user?.employeeId || 'FIN-MGR-001',
-            name: user?.name || 'Head of Finance',
-            role: user?.role || 'head_of_finance'
+            name: user?.name || 'Country Finance Director',
+            role: user?.role || 'country_finance_director'
          };
          const updated = await expensesService.approve(id, approverUser);
          setLocalExpenses(prev => prev.map(e => e.id === id ? updated : e));
@@ -313,8 +313,8 @@ export function useFinancialsState() {
       try {
          const rejectorUser = {
             id: user?.id || user?.employeeId || 'FIN-MGR-001',
-            name: user?.name || 'Head of Finance',
-            role: user?.role || 'head_of_finance',
+            name: user?.name || 'Country Finance Director',
+            role: user?.role || 'country_finance_director',
             reason
          };
          const updated = await expensesService.reject(id, rejectorUser);
@@ -344,7 +344,7 @@ export function useFinancialsState() {
          const voided = await expensesService.voidExpense(expenseToVoid.id, {
             reason,
             voidedById: user?.id || user?.employeeId || 'FIN-MGR-001',
-            voidedByName: user?.name || 'Head of Finance'
+            voidedByName: user?.name || 'Country Finance Director'
          });
          setLocalExpenses(prev => prev.map(e => e.id === expenseToVoid.id ? voided : e));
          setIsVoidExpenseModalOpen(false);

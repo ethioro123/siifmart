@@ -27,7 +27,7 @@ export const getRoleReportingMeta = (role: string): RoleReportingMeta => {
         level: 10,
         levelCategory: 'specialist',
         levelTag: 'L10 Staff',
-        reportsToRole: 'shift_lead',
+        reportsToRole: 'shift_supervisor',
         reportsToLabel: 'Facility Supervisor',
         managesRoles: [],
         isManagerial: false

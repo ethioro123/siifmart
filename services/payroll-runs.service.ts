@@ -177,7 +177,7 @@ export const payrollRunsService = {
     if (
       target.financeApprovedBy &&
       target.financeApprovedBy.trim().toLowerCase() === signatoryName.trim().toLowerCase() &&
-      signatoryRole !== 'super_admin'
+      signatoryRole !== 'group_ceo'
     ) {
       throw new Error(
         'Zero-Trust 4-Eyes Violation: The same person cannot certify as HR and authorize as Finance. Dual control requires distinct department actors.'
@@ -280,7 +280,7 @@ export const payrollRunsService = {
     if (
       target.hrApprovedBy &&
       target.hrApprovedBy.trim().toLowerCase() === signatoryName.trim().toLowerCase() &&
-      signatoryRole !== 'super_admin'
+      signatoryRole !== 'group_ceo'
     ) {
       throw new Error(
         'Zero-Trust 4-Eyes Violation: The same person cannot certify as HR and authorize as Finance. Dual control requires distinct department actors.'

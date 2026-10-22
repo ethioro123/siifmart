@@ -279,7 +279,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                             </button>
                         )}
 
-                        {['super_admin', 'warehouse_manager', 'head_of_operations', 'regional_operations_manager'].includes(user?.role as string) && onDeleteJob && (
+                        {['group_ceo', 'warehouse_manager', 'country_operations_director', 'regional_operations_manager'].includes(user?.role as string) && onDeleteJob && (
                             <button
                                 type="button"
                                 onClick={async () => {

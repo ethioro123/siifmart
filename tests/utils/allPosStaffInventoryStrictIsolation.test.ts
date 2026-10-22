@@ -5,15 +5,7 @@ import type { UserRole } from '../../types';
 
 describe('POS Staff Inventory Access Strict Isolation (WMS Sovereignty)', () => {
     // List of all POS frontline and store supervisory roles
-    const posStaffRoles: UserRole[] = [
-        'cashier',
-        'pos',
-        'sales_associate',
-        'shift_lead',
-        'store_supervisor',
-        'assistant_manager',
-        'store_manager'
-    ];
+    const posStaffRoles: UserRole[] = ['cashier', 'sales_associate', 'shift_supervisor', 'assistant_store_manager', 'store_manager'];
 
     it('strictly forbids all POS staff roles from accessing the inventory module', () => {
         posStaffRoles.forEach(role => {

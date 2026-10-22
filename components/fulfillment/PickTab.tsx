@@ -193,7 +193,7 @@ export const PickTab: React.FC = () => {
         return filteredJobs.filter(j => {
             if (j.type !== 'PICK') return false;
             if ((j.status || '').toLowerCase() === 'completed') return false;
-            if (j.assignedTo && j.assignedTo !== employeeId && !['admin', 'warehouse_manager', 'super_admin'].includes(user?.role || '')) return false;
+            if (j.assignedTo && j.assignedTo !== employeeId && !['country_managing_director', 'warehouse_manager', 'group_ceo'].includes(user?.role || '')) return false;
 
             if (pickSearch) {
                 const q = pickSearch.toLowerCase();

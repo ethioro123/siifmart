@@ -12,9 +12,7 @@ import { IssueNoticeModal } from './IssueNoticeModal';
 import { AppealModal } from './AppealModal';
 import { DisciplinaryDetailModal } from './DisciplinaryDetailModal';
 
-const ADJUDICATION_ROLES = [
-    'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_hr', 'hr', 'regional_operations_manager', 'regional_hr_manager'
-];
+const ADJUDICATION_ROLES = ['group_ceo', 'country_managing_director', 'country_hr_director', 'hr_generalist', 'regional_operations_manager', 'regional_hr_manager'];
 
 export default function DisciplinaryRegisterTab() {
     const { user, showToast } = useStore();
@@ -64,7 +62,7 @@ export default function DisciplinaryRegisterTab() {
                 {
                     id: user?.id || 'hr_dir',
                     name: user?.name || 'HR Officer',
-                    role: user?.role || 'head_of_hr'
+                    role: user?.role || 'country_hr_director'
                 }
             );
             showToast(`Appeal has been ${resolution.toLowerCase()} successfully`, 'info');

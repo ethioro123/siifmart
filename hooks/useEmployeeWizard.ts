@@ -54,14 +54,13 @@ const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
    regional_merchandising_manager: ['merchandising_specialist'],
    regional_procurement_manager: ['vendor_relations_manager', 'buyer', 'demand_planner', 'replenishment_planner', 'customs_import_specialist', 'inbound_qc_inspector', 'merchandiser', 'inventory_specialist'],
    regional_finance_manager: ['accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'payroll_specialist', 'auditor', 'store_operations_auditor'],
-   regional_logistics_manager: ['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'fleet_maintenance_supervisor', 'assistant_manager', 'shift_lead', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
-   regional_security_manager: ['security_manager', 'loss_prevention', 'store_operations_auditor', 'auditor'],
-   store_manager: ['assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'pos', 'cs_manager', 'store_supervisor', 'merchandiser'],
-   warehouse_manager: ['assistant_manager', 'shift_lead', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
-   dispatch_manager: ['driver', 'dispatcher'],
-   logistics_manager: ['assistant_manager', 'shift_lead', 'fleet_maintenance_supervisor', 'driver', 'dispatcher'],
-   inventory_manager: ['assistant_manager', 'shift_lead', 'replenishment_planner', 'inventory_specialist', 'stock_clerk', 'receiver'],
-   security_manager: ['loss_prevention']
+   regional_logistics_manager: ['warehouse_manager', 'regional_supply_chain_manager', 'inventory_manager', 'dispatch_supervisor', 'fleet_maintenance_supervisor', 'assistant_store_manager', 'shift_supervisor', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
+   regional_security_manager: ['regional_security_manager', 'loss_prevention', 'store_operations_auditor', 'auditor'],
+   store_manager: ['assistant_store_manager', 'shift_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'cs_manager', 'merchandiser'],
+   warehouse_manager: ['assistant_store_manager', 'shift_supervisor', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
+   dispatch_supervisor: ['driver', 'dispatcher'],
+   regional_supply_chain_manager: ['assistant_store_manager', 'shift_supervisor', 'fleet_maintenance_supervisor', 'driver', 'dispatcher'],
+   inventory_manager: ['assistant_store_manager', 'shift_supervisor', 'replenishment_planner', 'inventory_specialist', 'stock_clerk', 'receiver'],
 };
 
 export function useEmployeeWizard({
@@ -80,8 +79,8 @@ export function useEmployeeWizard({
    const [newEmpData, setNewEmpData] = useState<NewEmployeeFormData>({
       firstName: '', lastName: '', email: '', phone: '', password: '',
       createAppAccount: true,
-      role: 'pos' as UserRole,
-      jobTitle: getJobTitleForRole('pos'),
+      role: 'cashier' as UserRole,
+      jobTitle: getJobTitleForRole('cashier'),
       department: 'Retail Operations',
       salary: '', specialization: '', address: '',
       emergencyContact: '', joinDate: new Date().toISOString().split('T')[0],
@@ -109,8 +108,8 @@ export function useEmployeeWizard({
 
    const getCreatableRoles = (): UserRole[] => {
       if (!user?.role) return [];
-      if (user.role === 'super_admin' || (user.role as string) === 'CEO') {
-         return SYSTEM_ROLES.map(r => r.id).filter(id => id !== 'super_admin');
+      if (user.role === 'group_ceo' || (user.role as string) === 'CEO') {
+         return SYSTEM_ROLES.map(r => r.id).filter(id => id !== 'group_ceo');
       }
 
       if (ROLE_POOLS[user.role]) {
@@ -129,16 +128,15 @@ export function useEmployeeWizard({
 
    const getAvailableDepartments = () => {
       if (!user?.role) return [];
-      if (isCorporateHqDirectorateRole(user.role) || ['hr', 'talent_recruiter', 'hr_generalist', 'regional_operations_manager', 'regional_hr_manager'].includes(user.role)) return DEPARTMENTS;
+      if (isCorporateHqDirectorateRole(user.role) || ['hr_generalist', 'talent_recruiter', 'regional_operations_manager', 'regional_hr_manager'].includes(user.role)) return DEPARTMENTS;
       if (user.role === 'regional_procurement_manager') return ['Procurement', 'Logistics & Warehouse'];
       if (user.role === 'regional_finance_manager') return ['Finance', 'Management'];
       if (user.role === 'regional_merchandising_manager') return ['Merchandising'];
       if (user.role === 'regional_logistics_manager') return ['Transport', 'Logistics & Warehouse'];
-      if (user.role === 'regional_security_manager') return ['Security'];
       if (user.role === 'store_manager') return ['Retail Operations', 'Logistics & Warehouse', 'Transport'];
-      if (user.role === 'warehouse_manager' || user.role === 'logistics_manager') return ['Transport', 'Logistics & Warehouse'];
+      if (user.role === 'warehouse_manager' || user.role === 'regional_supply_chain_manager') return ['Transport', 'Logistics & Warehouse'];
       if (user.role === 'inventory_manager') return ['Logistics & Warehouse', 'Management'];
-      if (user.role === 'security_manager') return ['Security'];
+      if (user.role === 'regional_security_manager') return ['Security'];
       return [];
    };
 
@@ -153,7 +151,7 @@ export function useEmployeeWizard({
    const openBlankWizard = () => {
       const validRoles = getCreatableRoles();
       const validDepts = getAvailableDepartments();
-      const initialRole = validRoles.length > 0 ? validRoles[0] : 'pos';
+      const initialRole = validRoles.length > 0 ? validRoles[0] : 'cashier';
 
       let initialSiteId = '';
       if (activeSite?.id && sites.some(s => s.id === activeSite.id)) {
@@ -481,7 +479,7 @@ export function useEmployeeWizard({
       }
    };
 
-   const canAdjustPayroll = ['super_admin', 'head_of_hr', 'hr', 'admin'].includes(user?.role || '');
+   const canAdjustPayroll = ['group_ceo', 'country_hr_director', 'hr_generalist', 'country_managing_director'].includes(user?.role || '');
 
    return {
       addStep, setAddStep, isSubmitting, setIsSubmitting, isAddModalOpen, setIsAddModalOpen,

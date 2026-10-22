@@ -38,7 +38,7 @@ export function useGeneralSettingsMutation() {
   return useMutation<void, Error, GeneralSettingsPayload>({
     mutationFn: async ({ section, targetCountry, data }) => {
       // ── 1. ROLE GUARD (RULES.md §1 Zero-Trust & AGENTS.md §1) ──
-      const isAuthorized = ['super_admin', 'CEO'].includes(user?.role || '');
+      const isAuthorized = ['group_ceo'].includes(user?.role || '');
       if (!isAuthorized) {
         throw new Error('Unauthorized: Modifying corporate settings requires CEO or Super Admin credentials.');
       }

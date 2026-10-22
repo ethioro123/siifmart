@@ -33,7 +33,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [dispatchModalTransfer, setDispatchModalTransfer] = useState<TransferRecord | null>(null);
-  const isHQUser = Boolean(user?.role && ['super_admin', 'ceo', 'country_managing_director', 'admin', 'head_of_operations', 'head_of_supply_chain', 'logistics_manager'].includes(user.role));
+  const isHQUser = Boolean(user?.role && ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'regional_supply_chain_manager'].includes(user.role));
 
   // Load regional transfers on mount
   React.useEffect(() => {
@@ -71,7 +71,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
       await transfersService.approve(transferId, {
         approverId: user?.id || user?.employeeId || 'unknown',
         approverName: user?.name || (isHQUser ? 'Corporate Logistics' : 'Regional Operations Manager'),
-        approverRole: user?.role || (isHQUser ? 'head_of_operations' : 'regional_operations_manager'),
+        approverRole: user?.role || (isHQUser ? 'country_operations_director' : 'regional_operations_manager'),
         notes: isInterRegional ? 'HQ Inter-Regional Authorization' : 'Autonomous Regional Approval'
       });
       setTransfers(prev => prev.map(t => t.id === transferId ? { ...t, status: 'Approved', approvedBy: user?.name } : t));

@@ -44,7 +44,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
     - LEVEL 1 (Executive C-Suite): Chief Executive Officer (CEO / Super Admin).
       * Overall strategic vision, multi-country tenancy governance, national capital allocation, and executive approvals.
     - LEVEL 2 (Country Executive): Country Managing Director.
-    - LEVEL 3 (HQ Department Heads): Head of Operations, Head of Finance, Head of Human Resources, Head of Procurement, Head of Supply Chain, Head of Merchandising, Head of IT, Head of Audit.
+    - LEVEL 3 (HQ Department Heads): Country Operations Director, Country Finance Director, Country HR Director, Country Commercial Director, Country Supply Chain Director, Country Commercial Director, Country Technology Director, Head of Audit.
     - LEVEL 4 (Regional Operations): Regional Operations Manager.
     - LEVEL 5 (Regional Departments): Regional Finance, Procurement, HR, Merchandising, Logistics, and Security Managers.
       * Multi-site cluster governance, corporate budget controls, cross-functional policy enforcement, and executive escalations.
@@ -56,15 +56,15 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
 2. AUTHORITATIVE SOLID-LINE REPORTING CHANNELS (CHAIN OF COMMAND)
 --------------------------------------------------------------------------------
 2.1 Executive, HQ and Regional Leadership (L1 -> L5):
-    - CEO (super_admin) directs:
+    - CEO (group_ceo) directs:
       * Country Managing Director (National leadership)
-      * Head of Operations (HQ operations leadership)
-      * Head of Finance (Treasury, accounting, audits, taxation)
-      * Head of Human Resources (Talent, compensation, training, labor compliance)
-      * Head of Procurement (Sourcing, vendor relations, import customs, QC)
-      * Head of Supply Chain (Network logistics, inventory modeling, replenishment)
+      * Country Operations Director (HQ operations leadership)
+      * Country Finance Director (Treasury, accounting, audits, taxation)
+      * Country HR Director (Talent, compensation, training, labor compliance)
+      * Country Commercial Director (Sourcing, vendor relations, import customs, QC)
+      * Country Supply Chain Director (Network logistics, inventory modeling, replenishment)
 2.2 Store Operations Directorate (L3 -> L4 -> L6 -> L10):
-    - Head of Operations directs Store Managers across retail facilities.
+    - Country Operations Director directs Store Managers across retail facilities.
     - Store Manager directs:
       * Assistant Manager (Deputy floor command & supervisory escalations)
       * Store Supervisor (Merchandising, pricing tags, shelf compliance)
@@ -75,14 +75,14 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
       * Cashiers (POS checkout, drawer tenders, receipt issuance)
       * Sales Associates (Customer guidance, queue management, stock replenishment)
 2.3 Warehouse & Distribution Operations (L3 -> L4 -> L6 -> L10):
-    - Head of Operations & Head of Supply Chain direct Warehouse Managers.
+    - Country Operations Director & Country Supply Chain Director direct Warehouse Managers.
     - Warehouse Manager directs warehouse floor specialists:
       * Inbound Receivers (Dock unloading, blind counts, pallet staging)
       * Order Pickers (FEFO batch picking, picking cart assembly)
       * Order Packers (Validation scanning, carton sealing, shipping labels)
       * Forklift Operators (High-bay putaway, pallet replenishment)
 2.4 Logistics & Transport Directorate (L3 -> L5 -> L7):
-    - Head of Supply Chain directs Logistics Manager.
+    - Country Supply Chain Director directs Logistics Manager.
     - Logistics Manager directs:
       * Dispatch Manager (Fleet routing, trip manifests, dock departures)
       * Fleet Maintenance Supervisor (Vehicle health, fuel cards, roadworthiness)
@@ -90,7 +90,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
       * Transport Drivers (External deliveries, branch transfers, custody manifests)
       * Dispatchers (Route sequencing, driver dispatch, live transit monitoring)
 2.5 Supply Chain & Inventory Integrity Directorate (L2 -> L3 -> L4):
-    - Head of Supply Chain directs:
+    - Country Supply Chain Director directs:
       * Demand Planner (AI sales forecasting, seasonal safety stocks)
       * Replenishment Planner (Velocity analysis, DC-to-store transfer triggers)
       * Inventory Manager (Discrepancy audits, shrink mitigation, batch aging)
@@ -98,7 +98,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
       * Inventory Specialists (Cycle counts, zone audits, discrepancy deep-dives)
       * Stock Clerks (Bin labeling, physical consolidation, shelf restocking)
 2.6 Finance Directorate (L2 -> L4):
-    - Head of Finance directs:
+    - Country Finance Director directs:
       * Senior Internal Auditor (Unannounced branch audits, till audits, compliance)
       * Financial Accountant (General ledger, bank reconciliations, vendor payables)
       * Treasury Officer (Liquidity management, cash-in-transit, bank drops)
@@ -106,7 +106,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
       * Credit Control Officer (Corporate debtor aging, credit collections)
       * Data Analyst (Operational KPI telemetry, margin analysis, trend models)
 2.7 Human Resources Directorate (L2 -> L4):
-    - Head of Human Resources directs:
+    - Country HR Director directs:
       * HR Generalist (Employee records, contracts, onboarding)
       * Talent Recruiter (Candidate sourcing, interviews, background checks)
       * Training Coordinator (Floor worker training, safety certifications, onboarding)
@@ -114,7 +114,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
 
 3. DOTTED-LINE FUNCTIONAL GOVERNANCE & 4-EYES ESCALATIONS
 --------------------------------------------------------------------------------
-3.1 Cashiers -> Head of Finance (Fiscal Dotted Line):
+3.1 Cashiers -> Country Finance Director (Fiscal Dotted Line):
     - While daily shift tasks are supervised by the Shift Lead, Cashiers have a strict Dotted Line to Finance.
     - Cash drawer opening floats, mid-shift drops, and EOD Z-Reports sync directly to the Central Finance ledger. Cash variances exceeding $5.00 / 500 ETB / 500 KSh require Finance notification.
 3.2 Inbound Receivers -> Inbound QC / Procurement (Integrity Dotted Line):
@@ -124,8 +124,8 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
     - While dispatched daily by the Dispatch Manager, Drivers report on a Dotted Line to the Fleet Maintenance Supervisor for pre-trip vehicle condition checklists, tire/brake checks, and fuel card logs.
 3.4 Inventory Specialists -> Internal Auditor (Independent Audit Dotted Line):
     - Inventory Specialists execute blind counts under the Inventory Manager, but report variance sheets on a Dotted Line to the Internal Auditor to prevent intra-facility concealment of stock shrink.
-3.5 Payroll Specialist -> Head of Finance (Dual-Sign Compensation Dotted Line):
-    - Under SOP-GOV-024, payroll runs and salary adjustments prepared by HR require co-authorization and release of funds by the Head of Finance before disbursement.
+3.5 Payroll Specialist -> Country Finance Director (Dual-Sign Compensation Dotted Line):
+    - Under SOP-GOV-024, payroll runs and salary adjustments prepared by HR require co-authorization and release of funds by the Country Finance Director before disbursement.
 
 4. THE "CAPTAIN OWNS THE SHIP" DOCTRINE (RULE 18 COMPLIANCE)
 --------------------------------------------------------------------------------

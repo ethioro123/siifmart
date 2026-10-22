@@ -70,7 +70,7 @@ export const ReturnModal: React.FC = () => {
         const hqStaff = (employees || []).filter(e =>
             e.id !== user?.id &&
             (!user?.code || e.code !== user.code) &&
-            ['super_admin', 'admin', 'country_managing_director', 'head_of_operations', 'head_of_finance', 'head_of_audit', 'auditor', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'regional_operations_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
+            ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_compliance_manager', 'auditor', 'store_manager', 'assistant_store_manager', 'shift_supervisor', 'regional_operations_manager'].includes(e.role?.toLowerCase() || '')
         );
         const matchesHqStaff = hqStaff.some(m => m.code?.trim() && matchStaffPin(m.code.trim(), entered));
 

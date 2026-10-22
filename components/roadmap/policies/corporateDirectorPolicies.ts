@@ -34,7 +34,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Regional Operations Manager operates at Level 4 with a Hierarchy Rank of 90, reporting to the Head of Operations.
+    - The Regional Operations Manager operates at Level 4 with a Hierarchy Rank of 90, reporting to the Country Operations Director.
     - Serves as the executive operational leader responsible for all Retail Stores, Warehouses, and Distribution Centers within an assigned national geographic territory (e.g., Addis Ababa Regional Cluster, Oromia Cluster, or Nairobi Metro Cluster).
 1.2 Core Mission:
     - Deliver enterprise profitability, zero stockouts of staple goods, strict adherence to national Halal / non-alcoholic catalog compliance, sub-0.3% shrinkage rates, and uncompromising Zero-Trust security across all regional nodes.
@@ -94,8 +94,8 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
   },
   {
     id: 'policy-operations-manager-sop-021',
-    title: 'Head of Operations Operational Authority, Central Oversight & Facility Accountability Policy (SOP-MGT-021)',
-    description: 'Defines the operational remit of the Head of Operations (Level 3, Rank 95): Central Operations control room leadership, cross-facility fulfillment SLAs, WMS queue balancing, emergency reallocations, and enterprise execution accountability.',
+    title: 'Country Operations Director Operational Authority, Central Oversight & Facility Accountability Policy (SOP-MGT-021)',
+    description: 'Defines the operational remit of the Country Operations Director (Level 3, Rank 95): Central Operations control room leadership, cross-facility fulfillment SLAs, WMS queue balancing, emergency reallocations, and enterprise execution accountability.',
     department: 'admin',
     type: 'policy',
     priority: 'critical',
@@ -104,7 +104,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     createdAt: '2026-10-02T00:00:00.000Z',
     updatedAt: '2026-10-02T00:00:00.000Z',
     tags: [
-      'Head of Operations',
+      'Country Operations Director',
       'HQ Operations',
       'Central Operations',
       'Fulfillment SLAs',
@@ -126,13 +126,13 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Head of Operations operates at Level 3 (HQ/Operations Directorate) with a Hierarchy Rank of 95.
+    - The Country Operations Director operates at Level 3 (HQ/Operations Directorate) with a Hierarchy Rank of 95.
     - Serves as the commanding operational officer of the Central Operations Control Room (/admin), orchestrating day-to-day fulfillment, dock velocity, network inventory flow, and operational continuity across all retail branches and warehouse hubs.
 1.2 Core Mission:
     - Guarantee enterprise execution velocity, sub-hour fulfillment turnaround, zero dock bottlenecks, strict FEFO inventory hygiene, and immediate response to operational exceptions.
 1.3 Central Operations Team Architecture:
     - data_analyst: Central Ops dashboards, shift velocity metrics, gross margin telemetry.
-    - security_manager (Level 3): Loss prevention, CCTV incident reports, security guards dispatch.
+    - regional_security_manager (Level 3): Loss prevention, CCTV incident reports, security guards dispatch.
     - cs_manager (Level 3) & customer_service: Customer complaints, refund reviews, loyalty desk.
     - Direct reporting line to all store_managers and warehouse_managers.
     - store_operations_auditor: Conducts unannounced store walkthroughs, planogram/merchandising checks, and cash handling spot audits.
@@ -178,7 +178,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 --------------------------------------------------------------------------------
 4.1 Enterprise Fulfillment SLA Performance:
     - Accountable for maintaining overall fulfillment SLA compliance (>= 98.5% on-time pick, pack, and dock dispatch).
-    - Every delayed dispatch or staging backlog is logged and co-attributed to the Head of Operations.
+    - Every delayed dispatch or staging backlog is logged and co-attributed to the Country Operations Director.
 4.2 Dock Safety, Quality & Cold-Chain Integrity:
     - Accountable for operational hygiene across receiving docks, pallet racking, and cold storage units.
     - Perishable temperature excursions or handling damage due to neglected putaway queues trigger direct supervisory investigation.
@@ -186,7 +186,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     - Ensures that supervisory overrides across all operational departments do not exceed 3% of total operations. Overriding above 3% triggers an automated executive audit alert.
 4.4 Discrepancy Co-Sign & Escalation Compliance:
     - Enforces the Digital Dual-Handshake (SOP-LOG-007) and Chain of Custody compliance across all transit lines.
-    - Unsigned transfer discrepancies or delayed receipt reporting directly penalize the Head of Operations's operational score.
+    - Unsigned transfer discrepancies or delayed receipt reporting directly penalize the Country Operations Director's operational score.
 4.5 Authenticated Audit Footprint:
     - Every mission reassignment, wave cancellation, or supervisory override must capture:
         * Authenticated managerId and Role
@@ -196,8 +196,8 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
   },
   {
     id: 'policy-finance-manager-sop-022',
-    title: 'Head of Finance Fiscal Authority, Zero-Trust Cash Reconciliation & Financial Accountability Policy (SOP-MGT-022)',
-    description: 'Defines the fiscal and fiduciary remit of the Head of Finance (Level 2, Rank 85): Daily HQ Z-Report sign-offs, tender gateway governance, procurement PO spend approval, tax compliance, and anti-skimming accountability.',
+    title: 'Country Finance Director Fiscal Authority, Zero-Trust Cash Reconciliation & Financial Accountability Policy (SOP-MGT-022)',
+    description: 'Defines the fiscal and fiduciary remit of the Country Finance Director (Level 2, Rank 85): Daily HQ Z-Report sign-offs, tender gateway governance, procurement PO spend approval, tax compliance, and anti-skimming accountability.',
     department: 'finance',
     type: 'policy',
     priority: 'critical',
@@ -206,7 +206,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     createdAt: '2026-10-02T00:00:00.000Z',
     updatedAt: '2026-10-02T00:00:00.000Z',
     tags: [
-      'Head of Finance',
+      'Country Finance Director',
       'Fiscal Governance',
       'Shift Reconciliation',
       'Cash Security',
@@ -229,7 +229,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Head of Finance operates at Level 3 (HQ/Finance Directorate) with a Hierarchy Rank of 85, reporting directly to the CEO.
+    - The Country Finance Director operates at Level 3 (HQ/Finance Directorate) with a Hierarchy Rank of 85, reporting directly to the CEO.
     - Serves as the chief fiduciary and fiscal officer of SIIFMART, governing daily store cash reconciliations, digital payment gateway settlements, procurement payables, tax compliance, and gross margin integrity across all enterprise nodes.
 1.2 Core Mission:
     - Ensure 100% reconciliation of every Birr / Shilling collected, zero uninvestigated cash drawer variances, prompt vendor settlements, accurate tax remittances, and protection of company solvency.
@@ -283,7 +283,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     - Every unverified cash deficit > 50 ETB / 100 KSh must be audited and assigned an incident resolution ticket within 24 hours.
 4.2 National Tax Compliance & Fiscal Integrity:
     - Held personally accountable for enterprise compliance with sovereign tax authorities (ERCA in Ethiopia, KRA in Kenya).
-    - Any tax penalty resulting from uncalibrated POS tax rates or misreported VAT is directly attributed to the Head of Finance.
+    - Any tax penalty resulting from uncalibrated POS tax rates or misreported VAT is directly attributed to the Country Finance Director.
 4.3 Anti-Skimming & Fraud Alert Escalation:
     - Accountable for monitoring cashier void velocities, excessive returns, and digital transaction reference uniqueness to block mobile-money fraud.
 4.4 Override Velocity & Supervisory Accountability:
@@ -296,8 +296,8 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
   },
   {
     id: 'policy-hr-manager-sop-023',
-    title: 'Head of Human Resources Workforce Governance, Guarantor Vetting & Anti-Collusion Accountability Policy (SOP-MGT-023)',
-    description: 'Defines the workforce remit of the Head of Human Resources (Level 2, Rank 85): Institutional Guarantor (Wase) vetting, anti-collusion kinship separation, quarterly branch rotation, staff credentialing, and disciplinary oversight.',
+    title: 'Country HR Director Workforce Governance, Guarantor Vetting & Anti-Collusion Accountability Policy (SOP-MGT-023)',
+    description: 'Defines the workforce remit of the Country HR Director (Level 2, Rank 85): Institutional Guarantor (Wase) vetting, anti-collusion kinship separation, quarterly branch rotation, staff credentialing, and disciplinary oversight.',
     department: 'hr',
     type: 'policy',
     priority: 'critical',
@@ -306,7 +306,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     createdAt: '2026-10-02T00:00:00.000Z',
     updatedAt: '2026-10-02T00:00:00.000Z',
     tags: [
-      'Head of Human Resources',
+      'Country HR Director',
       'Workforce Governance',
       'Guarantor Vetting',
       'Wase Protocol',
@@ -330,7 +330,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Head of Human Resources operates at Level 3 (HQ/HR Directorate) with a Hierarchy Rank of 85, reporting directly to the CEO.
+    - The Country HR Director operates at Level 3 (HQ/HR Directorate) with a Hierarchy Rank of 85, reporting directly to the CEO.
     - Serves as the chief workforce guardian of SIIFMART, responsible for talent acquisition, staff verification, legal guarantor bonding, anti-cartel rotation, performance reviews, and labor compliance across all retail stores, distribution centers, and headquarters.
 1.2 Core Mission:
     - Build a disciplined, honest, and high-performing retail and logistics workforce; enforce mandatory guarantor vetting before custody handover; prevent informal theft syndicates through kinship separation; and guarantee equitable staff welfare.
@@ -350,7 +350,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
 2.5 Total Workforce Transparency & Geolocation Oversight:
     - Authorized to inspect employee work profiles, geofence compliance, and clock-in coordinates across all branches (canViewLocation = true for all roles below CEO).
 2.6 Payroll & Compensation Collaboration:
-    - Co-manage employee salary structures, overtime calculations, emergency advance buffers, and team zero-shrinkage bonus pools in conjunction with the Head of Finance.
+    - Co-manage employee salary structures, overtime calculations, emergency advance buffers, and team zero-shrinkage bonus pools in conjunction with the Country Finance Director.
 
 3. WHAT THE HEAD OF HUMAN RESOURCES CANNOT DO (ZERO-TRUST PROHIBITIONS)
 --------------------------------------------------------------------------------
@@ -365,7 +365,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
 3.5 Zero Cross-Border Deployment:
     - Pinned to the active country domain (country_code). Cannot transfer personnel across international borders without CEO authorization and formal immigration clearance.
 3.6 Zero Unilateral Peer / Superior Actions:
-    - Cannot hire, promote, discipline, or terminate Level 1 leadership (CEO) or fellow HQ department heads (Head of Operations, Head of Finance) or regional operations managers.
+    - Cannot hire, promote, discipline, or terminate Level 1 leadership (CEO) or fellow HQ department heads (Country Operations Director, Country Finance Director) or regional operations managers.
 3.7 Zero Audit Trail Deletion:
     - Cannot modify, purge, or suppress employee disciplinary records or geofence violation logs in system_logs.
 
@@ -373,7 +373,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
 --------------------------------------------------------------------------------
 4.1 100% Guarantor (Wase) File Audit Compliance:
     - Held personally accountable for complete background files (National ID / Passport, verified residence, police clearance, notarized guarantor assets) for every cash-handling and inventory-custody employee.
-    - If an employee absconds with cash or inventory and their guarantor file is discovered incomplete or unverified, the Head of Human Resources is directly liable for negligence.
+    - If an employee absconds with cash or inventory and their guarantor file is discovered incomplete or unverified, the Country HR Director is directly liable for negligence.
 4.2 Anti-Cartel Rotation Execution (Quarterly Cadence):
     - Accountable for maintaining the 90-to-180-day branch rotation schedule for all cashiers and store supervisors. Lapsed rotations trigger automated alerts to Central Operations.
 4.3 Shift Headcount Minimums & Punctuality:

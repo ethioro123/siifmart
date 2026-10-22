@@ -117,7 +117,7 @@ export const ReceiveTab: React.FC = () => {
 
     const filteredReceiveOrders = useMemo(() => {
         const employeeId = employees.find((e: any) => e.email === user?.email || e.name === user?.name || e.id === user?.id)?.id;
-        const isStaffWithLimitedAccess = !['admin', 'warehouse_manager', 'super_admin', 'dispatcher', 'inventory_specialist'].includes(user?.role || '');
+        const isStaffWithLimitedAccess = !['country_managing_director', 'warehouse_manager', 'group_ceo', 'dispatcher', 'inventory_specialist'].includes(user?.role || '');
         const activeReceiveRefs = new Set(jobs
             .filter(job => job.type === 'RECEIVE' && job.status === 'In-Progress')
             .map(job => job.orderRef)

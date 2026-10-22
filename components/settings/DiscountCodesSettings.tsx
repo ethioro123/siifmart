@@ -31,7 +31,7 @@ const DiscountCodesSettings: React.FC = () => {
   const profile = getCountryProfile(activeCountry);
   const currentCurrency = profile.currencySymbol;
 
-  const isHQAdmin = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_finance', 'head_of_operations', 'head_of_merchandising',].includes(user?.role || '') || canSwitchCountry(user);
+  const isHQAdmin = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_finance_director', 'country_operations_director', 'country_commercial_director'].includes(user?.role || '') || canSwitchCountry(user);
   const { createMutation, updateMutation, deleteMutation, isPending } = useDiscountCodeMutations(activeCountry);
 
   const [isModalOpen, setIsModalOpen] = useState(false);

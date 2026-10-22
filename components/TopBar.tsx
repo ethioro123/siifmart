@@ -172,7 +172,7 @@ export default function TopBar() {
    // Notifications & Tasks
    const filteredNotifications = useMemo(() => {
       if (!user) return [];
-      const isPrivileged = user.role === 'super_admin' || user.role === 'admin' || user.role === 'hr' || user.role === 'head_of_hr' || user.role === 'regional_operations_manager' || user.role === 'head_of_operations';
+      const isPrivileged = user.role === 'group_ceo' || user.role === 'country_managing_director' || user.role === 'hr_generalist' || user.role === 'country_hr_director' || user.role === 'regional_operations_manager' || user.role === 'country_operations_director';
       const userId = user.id;
       const employeeId = currentEmployee?.id;
 
@@ -210,7 +210,7 @@ export default function TopBar() {
       const isStore = ['Store', 'Retail', 'POS'].includes(siteType);
       const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
       const isHQ = !isStore && !isWarehouse;
-      const isCeo = ['super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations',].includes(userRole) || (userRole as string)?.toLowerCase() === 'ceo';
+      const isCeo = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director'].includes(userRole);
       const isRegionalLead = userRole.startsWith('regional_');
 
       const navigation = NAVIGATION_TARGETS.filter(nav => {

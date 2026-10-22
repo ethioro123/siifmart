@@ -92,7 +92,7 @@ describe('Zero-Trust Hardened Expenses Service', () => {
             expensesService.approve('EXP-200', {
                 id: 'EMP-MAKER-01', // Same ID as creator!
                 name: 'Abebe Maker',
-                role: 'head_of_finance'
+                role: 'country_finance_director'
             })
         ).rejects.toThrow('Maker-Checker violation: Expense creator cannot approve their own expense (4-Eyes Principle).');
     });
@@ -115,7 +115,7 @@ describe('Zero-Trust Hardened Expenses Service', () => {
             expensesService.approve('EXP-300', {
                 id: 'EMP-FIN-01',
                 name: 'Fatuma Finance',
-                role: 'head_of_finance' // Not CEO!
+                role: 'country_finance_director' // Not CEO!
             })
         ).rejects.toThrow('Executive Authorization required: This expense exceeds the sovereign threshold and requires CEO approval.');
     });

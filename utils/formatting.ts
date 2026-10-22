@@ -190,7 +190,7 @@ export const formatRelativeTime = (date: string | Date | undefined | null): stri
 
 /**
  * Formats a user role for display.
- * Handles specific overrides (e.g. super_admin -> CEO) and general formatting.
+ * Handles specific overrides (e.g. group_ceo -> CEO) and general formatting.
  */
 export const formatRole = (role: string | undefined): string => {
     return getJobTitleForRole(role);

@@ -26,7 +26,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
     onOpenProfile,
     onOpenIdCard
 }) => {
-    const roleKey = employee.role || 'pos';
+    const roleKey = employee.role || 'cashier';
     const roleTitle = getEmployeeJobTitle(employee);
     const meta = getRoleReportingMeta(roleKey);
     const levelConfig = HIERARCHY_LEVEL_CONFIGS[meta.level];

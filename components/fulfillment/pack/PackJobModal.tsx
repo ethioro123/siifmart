@@ -50,7 +50,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     const { t } = useLanguage();
     const { settings, effectiveCountry } = useData();
     const packPolicy = resolveCountAndPackPolicy(settings, effectiveCountry);
-    const canDelete = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'regional_operations_manager'].includes(user?.role || '');
+    const canDelete = ['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_operations_director', 'regional_operations_manager'].includes(user?.role || '');
 
     // Active wizard step - starts on Job Details overview
     const [step, setStep] = useState<PackStep>('DETAILS');

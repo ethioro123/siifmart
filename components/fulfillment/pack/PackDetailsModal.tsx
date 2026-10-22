@@ -33,7 +33,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 }) => {
     const { t } = useLanguage();
     const { user } = useStore();
-    const canDelete = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'regional_operations_manager'].includes(user?.role || '');
+    const canDelete = ['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_operations_director', 'regional_operations_manager'].includes(user?.role || '');
 
     const handleDelete = () => {
         if (!window.confirm(t('warehouse.confirmDeleteJob') || 'Are you sure you want to delete this job? This action cannot be undone.')) return;

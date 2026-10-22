@@ -76,9 +76,9 @@ export const PayrollModal: React.FC = () => {
   const userRole = (user?.role || '').toLowerCase();
   const userName = user?.name || user?.email || 'User';
 
-  const isSuperAdminOrCeo = userRole === 'super_admin' || userRole === 'ceo';
-  const isHR = isSuperAdminOrCeo || ['hr', 'head_of_hr', 'admin'].includes(userRole);
-  const isFinance = isSuperAdminOrCeo || ['head_of_finance', 'accountant', 'country_managing_director', 'admin'].includes(userRole);
+  const isSuperAdminOrCeo = userRole === 'group_ceo';
+  const isHR = isSuperAdminOrCeo || ['hr_generalist', 'country_hr_director', 'country_managing_director'].includes(userRole);
+  const isFinance = isSuperAdminOrCeo || ['country_finance_director', 'accountant', 'country_managing_director'].includes(userRole);
   const isRegionalHR = userRole === 'regional_hr_manager';
 
   const isHrSigned = Boolean(activeRun?.hrApprovedBy);
@@ -129,7 +129,7 @@ export const PayrollModal: React.FC = () => {
       const updated = await payrollRunsService.signAsHR(
         activeRun.id,
         userName,
-        user?.role || 'head_of_hr',
+        user?.role || 'country_hr_director',
         hrNotesInput || 'Headcount, attendance, and leave deductions verified.'
       );
       setActiveRun(updated);
@@ -149,7 +149,7 @@ export const PayrollModal: React.FC = () => {
       const updated = await payrollRunsService.signAsFinance(
         activeRun.id,
         userName,
-        user?.role || 'head_of_finance',
+        user?.role || 'country_finance_director',
         financeNotesInput || 'Bank liquidity and statutory tax withholdings verified.'
       );
       setActiveRun(updated);

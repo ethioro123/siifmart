@@ -143,14 +143,7 @@ describe('Infrastructure & Hardware Settings Isolation & Validation', () => {
   });
 
   describe('Zero-Trust Role Access Boundaries', () => {
-    const allowedRoles = [
-      'super_admin',
-      'CEO',
-      'head_of_operations',
-      'regional_operations_manager',
-      'store_manager',
-      'warehouse_manager',
-    ];
+    const allowedRoles = ['group_ceo', 'country_operations_director', 'regional_operations_manager', 'store_manager', 'warehouse_manager'];
 
     it('should authorize station managers and operations leadership', () => {
       for (const role of allowedRoles) {

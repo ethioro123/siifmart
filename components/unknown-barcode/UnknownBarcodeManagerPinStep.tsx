@@ -31,7 +31,7 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
 
         // 4-Eyes Principle: Any authorized store supervisor/manager staff PIN
         const managerStaff = (employees || []).filter(e =>
-            ['super_admin', 'admin', 'store_manager', 'shift_lead', 'head_of_operations', 'regional_operations_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
+            ['group_ceo', 'country_managing_director', 'store_manager', 'shift_supervisor', 'country_operations_director', 'regional_operations_manager'].includes(e.role?.toLowerCase() || '')
         );
         const matchesStaffPin = managerStaff.some(m => matchStaffPin(m.code, entered));
 

@@ -36,11 +36,7 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
     const [expandedWorker, setExpandedWorker] = useState<string | null>(null);
 
     const activeWorkers = employees
-        .filter(e => [
-            'picker', 'packer', 'dispatcher', 'warehouse_manager', 'driver', 'receiver',
-            'inventory_specialist', 'forklift_operator', 'auditor', 'admin',
-            'regional_operations_manager', 'head_of_operations'
-        ].includes((e.role || '').toLowerCase()) && e.status?.toLowerCase() === 'active')
+        .filter(e => ['picker', 'packer', 'dispatcher', 'warehouse_manager', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor', 'country_managing_director', 'regional_operations_manager', 'country_operations_director'].includes((e.role || '').toLowerCase()) && e.status?.toLowerCase() === 'active')
         .map(employee => {
             const employeeAssignments = jobAssignments.filter(
                 a => a.employeeId === employee.id && ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)

@@ -256,7 +256,7 @@ export const recruitmentService = {
 
     canManageCandidates(userRole: string): boolean {
         // Talent Recruiters and HR staff can source and manage candidate pipelines
-        if (userRole === 'talent_recruiter' || userRole === 'hr') return true;
+        if (userRole === 'talent_recruiter' || userRole === 'hr_generalist') return true;
         return this.canManageHiring(userRole);
     },
 
@@ -277,7 +277,7 @@ export const recruitmentService = {
         notes?: string
     ): Promise<boolean> {
         const normRole = (approver.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-        const isHR = ['head_of_hr', 'regional_hr_manager', 'hr', 'country_managing_director', 'admin', 'super_admin', 'ceo'].includes(normRole);
+        const isHR = ['country_hr_director', 'regional_hr_manager', 'hr_generalist', 'country_managing_director', 'group_ceo'].includes(normRole);
         if (!isHR) {
             throw new Error('4-Eyes Violation: Only HR leadership can perform candidate identity & compliance approval.');
         }
@@ -313,7 +313,7 @@ export const recruitmentService = {
         notes?: string
     ): Promise<boolean> {
         const normRole = (approver.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-        const isFinance = ['head_of_finance', 'regional_finance_manager', 'country_managing_director', 'admin', 'super_admin', 'ceo'].includes(normRole);
+        const isFinance = ['country_finance_director', 'regional_finance_manager', 'country_managing_director', 'group_ceo'].includes(normRole);
         if (!isFinance) {
             throw new Error('4-Eyes Violation: Only Finance leadership can authorize salary and compensation bands.');
         }
@@ -357,7 +357,7 @@ export const recruitmentService = {
         const candidate = getLocalCands().find(c => c.id === candidateId);
         if (!candidate) throw new Error('Candidate not found.');
 
-        const isCEO = actor.role === 'super_admin' || (actor.role as string)?.toLowerCase() === 'ceo';
+        const isCEO = actor.role === 'group_ceo';
         if (!isCEO) {
             if (!candidate.hr_approved_at) {
                 throw new Error('Zero-Trust Guard: Mandatory HR identity verification required before hire activation.');

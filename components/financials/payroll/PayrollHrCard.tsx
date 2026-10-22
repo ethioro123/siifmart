@@ -143,7 +143,7 @@ export const PayrollHrCard: React.FC<PayrollHrCardProps> = ({
             )
           ) : (
             <p className="text-xs text-[var(--theme-text-secondary)] italic">
-              Awaiting certification by Country HQ HR (head_of_hr, hr, or Country Managing Director).
+              Awaiting certification by Country HQ HR (country_hr_director, hr, or Country Managing Director).
             </p>
           )}
         </div>

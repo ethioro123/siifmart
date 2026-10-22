@@ -32,7 +32,7 @@ export const purchaseOrdersApprovalService = {
       throw new Error(`Cannot approve PO with status "${currentPO.status}". Must be Draft or Pending.`);
     }
 
-    if (!['super_admin', 'group_ceo', 'head_of_procurement', 'regional_procurement_manager'].includes(approverRole)) {
+    if (!['group_ceo', 'country_commercial_director', 'regional_procurement_manager'].includes(approverRole)) {
       throw new Error('Final purchase order approval requires a procurement lead.');
     }
 

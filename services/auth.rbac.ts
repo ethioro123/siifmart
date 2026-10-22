@@ -3,7 +3,7 @@
  * Extracted from auth.service.ts to keep file size manageable.
  *
  * ⚠️  SECURITY NOTICE: The canAccessSite multi-site list is intentionally
- * restricted to super_admin only. Do NOT add other roles without explicit
+ * restricted to group_ceo only. Do NOT add other roles without explicit
  * authorisation from the system owner.
  */
 
@@ -46,15 +46,9 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     group_cmo: [
         'dashboard', 'admin', 'sales', 'pricing', 'procurement', 'customers', 'settings', 'profile'
     ],
-    super_admin: ['*'], // Global CEO / Owner - Full Access to EVERYTHING
-    CEO: ['*'],
-    ceo: ['*'],
 
     // ═══ LEVEL 2 - NATIONAL EXECUTIVE BOARD ═══
     country_managing_director: [
-        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
-    ],
-    admin: [
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     country_operations_director: [
@@ -80,30 +74,6 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     ],
 
     // ═══ LEVEL 3 - CORPORATE DIRECTORATES (HQ C-SUITE) ═══
-    head_of_operations: [
-        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
-    ],
-    head_of_finance: [
-        'dashboard', 'finance', 'sales', 'pricing', 'settings', 'profile'
-    ],
-    head_of_hr: [
-        'dashboard', 'employees', 'finance', 'settings', 'profile'
-    ],
-    head_of_procurement: [
-        'dashboard', 'procurement', 'inventory', 'pricing', 'warehouse', 'settings', 'profile'
-    ],
-    head_of_supply_chain: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
-    ],
-    head_of_merchandising: [
-        'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
-    ],
-    head_of_it: [
-        'dashboard', 'settings', 'employees', 'profile'
-    ],
-    head_of_audit: [
-        'dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'pos', 'profile'
-    ],
     auditor: [
         'dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'pos', 'profile'
     ],
@@ -152,9 +122,6 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     warehouse_manager: [
         'dashboard', 'inventory', 'warehouse', 'procurement', 'employees', 'profile'
     ],
-    dispatch_manager: [
-        'dashboard', 'warehouse', 'inventory', 'employees', 'profile'
-    ],
 
     // ═══ LEVEL 7 - FUNCTIONAL & DEPARTMENT MANAGERS ═══
     warehouse_operations_manager: [
@@ -163,12 +130,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     transport_fleet_manager: [
         'dashboard', 'warehouse', 'inventory', 'employees', 'profile'
     ],
-    assistant_manager: [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'
-    ],
-    logistics_manager: ['dashboard', 'regional-ops', 'warehouse', 'inventory', 'employees', 'profile'],
     inventory_manager: ['dashboard', 'regional-ops', 'inventory', 'warehouse', 'profile'],
-    security_manager: ['dashboard', 'regional-ops', 'settings', 'employees', 'profile'],
     vendor_relations_manager: ['dashboard', 'regional-ops', 'procurement', 'pricing', 'inventory', 'profile'],
     cs_manager: ['dashboard', 'regional-ops', 'customers', 'sales', 'profile'],
 
@@ -177,10 +139,6 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'pos', 'inventory', 'sales', 'customers', 'employees', 'profile'
     ],
     shift_supervisor: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
-    shift_lead: [
-        'dashboard', 'pos', 'inventory', 'customers', 'profile'
-    ],
-    store_supervisor: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
     receiving_supervisor: ['dashboard', 'inventory', 'procurement', 'employees', 'profile'],
     stock_control_supervisor: ['dashboard', 'inventory', 'employees', 'profile'],
     pos_supervisor: ['dashboard', 'pos', 'sales', 'customers', 'employees', 'profile'],
@@ -245,9 +203,6 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     customer_service: ['dashboard', 'customers', 'sales', 'profile'],
 
     // ═══ LEGACY ALIASES (backwards compatibility) ═══
-    manager: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
-    hr: ['dashboard', 'regional-ops', 'employees', 'profile'],
-    pos: ['dashboard', 'pos', 'profile']
 };
 
 export function canAccessRoute(userRole: UserRole, route: string): boolean {
@@ -269,23 +224,7 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
  */
 export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
     const basePermissions = ROLE_PERMISSIONS[userRole] || [];
-    if (basePermissions.includes('*') || [
-        'group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'group_cmo',
-        'admin', 'country_managing_director',
-        'country_operations_director', 'country_finance_director', 'country_commercial_director',
-        'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager',
-        'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager',
-        'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
-        'regional_it_manager', 'regional_compliance_manager',
-        'head_of_operations',
-        'head_of_finance',
-        'head_of_hr',
-        'head_of_procurement',
-        'head_of_supply_chain',
-        'head_of_merchandising',
-        'head_of_it',
-        'head_of_audit',
-    ].includes(userRole)) return basePermissions;
+    if (basePermissions.includes('*') || ['group_coo', 'group_cfo', 'group_cco', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'group_cmo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager', 'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_it_manager', 'regional_compliance_manager'].includes(userRole)) return basePermissions;
     if (!siteType) return basePermissions;
 
     if (siteType === 'Store') {
@@ -312,7 +251,7 @@ export function getAvailableSections(userRole: UserRole, siteType?: string): str
  * ============================================================================
  */
 export function canAccessSite(userRole: UserRole, userSiteId: string, targetSiteId: string): boolean {
-    const multiSiteRoles: UserRole[] = ['super_admin', 'group_ceo'];
+    const multiSiteRoles: UserRole[] = ['group_ceo'];
     if (multiSiteRoles.includes(userRole)) return true;
     return userSiteId === targetSiteId;
 }

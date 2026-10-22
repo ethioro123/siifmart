@@ -263,7 +263,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
 
     const renderTransferCenterTabs = () => (
         <div className="flex w-full bg-[var(--theme-bg-subtle)] rounded-xl p-1 gap-1 border border-[var(--theme-border)]">
-            {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'head_of_supply_chain', 'regional_operations_manager'].includes(user?.role || '')) && (
+            {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_operations_director', 'country_supply_chain_director', 'regional_operations_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => { setTransferCenterTab('smart'); }}
                     className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation whitespace-nowrap cursor-pointer ${
@@ -276,7 +276,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                     <span>Smart Replenish</span>
                 </button>
             )}
-            {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center' || ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'head_of_supply_chain', 'regional_operations_manager'].includes(user?.role || '')) && (
+            {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center' || ['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_operations_director', 'country_supply_chain_director', 'regional_operations_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => setTransferCenterTab('bulk')}
                     className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation whitespace-nowrap cursor-pointer ${

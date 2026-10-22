@@ -62,7 +62,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
         const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificTier;
 
         return employees.filter(emp => {
-            const role = emp.role || 'pos';
+            const role = emp.role || 'cashier';
             const dept = getRoleDept(role, emp.department);
             const siteId = emp.siteId || emp.site_id;
             const meta = getRoleReportingMeta(role);
@@ -132,7 +132,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(l => map.set(l, []));
 
         filteredEmployees.forEach(emp => {
-            const meta = getRoleReportingMeta(emp.role || 'pos');
+            const meta = getRoleReportingMeta(emp.role || 'cashier');
             const list = map.get(meta.level) || [];
             list.push(emp);
             map.set(meta.level, list);
@@ -181,7 +181,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
         let l1 = 0, l2 = 0, l3 = 0, l4 = 0;
 
         filteredEmployees.forEach(e => {
-            const meta = getRoleReportingMeta(e.role || 'pos');
+            const meta = getRoleReportingMeta(e.role || 'cashier');
             if (meta.level <= 2) l1++;
             else if (meta.level <= 5) l2++;
             else if (meta.level <= 8) l3++;

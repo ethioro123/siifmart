@@ -243,7 +243,7 @@ export function UserMenu({
                         <span>My Profile</span>
                      </button>
 
-                     {(user.role === 'super_admin' || (user.role as string) === 'CEO') && (
+                     {(user.role === 'group_ceo' || (user.role as string) === 'CEO') && (
                         <button
                            onClick={() => { navigate('/location-select'); setIsUserMenuOpen(false); }}
                            className="w-full min-h-12 flex items-center gap-3 px-3.5 py-3 text-sm font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"

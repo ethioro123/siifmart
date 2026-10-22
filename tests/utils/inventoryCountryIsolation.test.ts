@@ -228,7 +228,7 @@ describe('Inventory Subsystem & Barcode Audit Multi-Country Isolation & Zero-Tru
         it('enforces 4-Eyes Principle: only CEO and Super Admin hold canApprove authority', () => {
             const testRoles = [
                 { role: 'ceo', expected: true },
-                { role: 'super_admin', expected: true },
+                { role: 'group_ceo', expected: true },
                 { role: 'store_manager', expected: false },
                 { role: 'cashier', expected: false },
                 { role: 'warehouse_manager', expected: false },
@@ -236,7 +236,7 @@ describe('Inventory Subsystem & Barcode Audit Multi-Country Isolation & Zero-Tru
             ];
 
             testRoles.forEach(({ role, expected }) => {
-                const canApprove = role === 'super_admin' || role.toLowerCase() === 'ceo';
+                const canApprove = role === 'group_ceo' || role.toLowerCase() === 'group_ceo';
                 expect(canApprove).toBe(expected);
             });
         });

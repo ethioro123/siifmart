@@ -58,11 +58,11 @@ export function useDataInitialization({
   const missingSiteWarningRef = React.useRef<string | null>(null);
 
   useEffect(() => {
-    const canSwitchSites = ['super_admin', 'CEO', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
+    const canSwitchSites = ['group_ceo', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
 
     if (user && sites.length > 0 && !activeSiteId) {
       if (canSwitchSites) {
-        // CEO / super_admin: default to the Administration / Central Operations site for the active country
+        // CEO / group_ceo: default to the Administration / Central Operations site for the active country
         const activeCountry = (settings?.country || 'ET') as Country;
         const countrySites = sites.filter(s => (s.country || 'ET') === activeCountry);
         const adminSite = findCountryAdminSite(countrySites, activeCountry) || countrySites[0];
@@ -211,7 +211,7 @@ export function useDataInitialization({
       // Egress optimization: Only global administrative roles need multi-site global batches on startup.
       // Branch workers only require local activeSite data (fetched via useDataQueries).
       const normalizedRole = (user?.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-      const canSwitchSites = ['super_admin', 'ceo', 'admin', 'auditor', 'head_of_procurement', 'buyer', 'head_of_supply_chain', 'head_of_merchandising'].includes(normalizedRole);
+      const canSwitchSites = ['group_ceo', 'country_managing_director', 'auditor', 'country_commercial_director', 'buyer', 'country_supply_chain_director'].includes(normalizedRole);
 
       // RULE 10: Lists/history default to 25 records on boot
       const [allProds, allSls, allOrds] = await Promise.all([

@@ -102,7 +102,7 @@ describe('Regional Autonomous PO Approval & National HQ Escalation', () => {
             poId: 'po-test-regional-1',
             approverId: 'emp-ceo-1',
             approverName: 'Chief Executive Officer',
-            approverRole: 'super_admin',
+            approverRole: 'group_ceo',
             reasonCode: 'STANDARD_REPLENISHMENT' as any,
             notes: 'Authorized by National HQ executive review'
         });

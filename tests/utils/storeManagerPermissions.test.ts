@@ -50,17 +50,17 @@ describe('Store Manager Role & Retail Governance Engine (SOP-MGT-026)', () => {
 
     describe('Frontline Store Hiring Authority (canEmployRole)', () => {
         it('authorizes store_manager to hire store subordinates strictly below Rank 80', () => {
-            expect(canEmployRole('store_manager', 'assistant_manager')).toBe(true);
-            expect(canEmployRole('store_manager', 'shift_lead')).toBe(true);
+            expect(canEmployRole('store_manager', 'assistant_store_manager')).toBe(true);
+            expect(canEmployRole('store_manager', 'shift_supervisor')).toBe(true);
             expect(canEmployRole('store_manager', 'cashier')).toBe(true);
             expect(canEmployRole('store_manager', 'sales_associate')).toBe(true);
             expect(canEmployRole('store_manager', 'stock_clerk')).toBe(true);
         });
 
         it('blocks store_manager from hiring peer site managers or superiors', () => {
-            expect(canEmployRole('store_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('store_manager', 'head_of_operations')).toBe(false);
-            expect(canEmployRole('store_manager', 'head_of_hr')).toBe(false);
+            expect(canEmployRole('store_manager', 'group_ceo')).toBe(false);
+            expect(canEmployRole('store_manager', 'country_operations_director')).toBe(false);
+            expect(canEmployRole('store_manager', 'country_hr_director')).toBe(false);
             expect(canEmployRole('store_manager', 'warehouse_manager')).toBe(false);
             expect(canEmployRole('store_manager', 'store_manager')).toBe(false);
         });

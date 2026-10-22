@@ -30,8 +30,8 @@ export const AccountsPayableTab: React.FC = () => {
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<string[]>([]);
 
-    const canCreatePaymentRun = ['head_of_finance', 'country_managing_director', 'super_admin', 'CEO', 'ceo', 'admin', 'cfo'].includes(user?.role);
-    const canOverride = ['head_of_finance', 'regional_finance_manager', 'country_managing_director', 'cfo', 'super_admin', 'CEO', 'ceo', 'admin'].includes(user?.role);
+    const canCreatePaymentRun = ['country_finance_director', 'country_managing_director', 'group_ceo', 'cfo'].includes(user?.role);
+    const canOverride = ['country_finance_director', 'regional_finance_manager', 'country_managing_director', 'cfo', 'group_ceo'].includes(user?.role);
 
     const loadInvoices = async () => {
         setLoading(true);
@@ -59,7 +59,7 @@ export const AccountsPayableTab: React.FC = () => {
         try {
             const updated = await accountsPayableService.overrideDiscrepancy(
                 selectedInvoice.id,
-                { id: user?.id || user?.employeeId || 'FIN-001', name: user?.name || 'Finance Staff', role: user?.role || 'head_of_finance' },
+                { id: user?.id || user?.employeeId || 'FIN-001', name: user?.name || 'Finance Staff', role: user?.role || 'country_finance_director' },
                 reason
             );
             setInvoices(prev => prev.map(i => i.id === updated.id ? updated : i));

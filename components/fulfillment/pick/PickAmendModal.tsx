@@ -33,23 +33,7 @@ interface PickAmendModalProps {
     refreshData: () => Promise<void>;
 }
 
-const AUTHORIZED_SUPERVISORY_ROLES = [
-    'super_admin',
-    'admin',
-    'ceo',
-    'regional_operations_manager',
-    'head_of_operations',
-    'warehouse_manager',
-    'store_manager',
-    'inventory_manager',
-    'logistics_manager',
-    'assistant_manager',
-    'shift_lead',
-    'store_supervisor',
-    'dispatch_manager',
-    'head_of_merchandising',
-    'head_of_supply_chain',
-];
+const AUTHORIZED_SUPERVISORY_ROLES = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'warehouse_manager', 'store_manager', 'inventory_manager', 'regional_supply_chain_manager', 'assistant_store_manager', 'shift_supervisor', 'dispatch_supervisor', 'country_commercial_director', 'country_supply_chain_director'];
 
 export const PickAmendModal: React.FC<PickAmendModalProps> = ({
     isOpen,

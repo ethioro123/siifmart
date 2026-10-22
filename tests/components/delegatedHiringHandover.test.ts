@@ -6,38 +6,26 @@ describe('Delegated Hiring & Credential Handover Governance', () => {
     describe('1. Zero-Trust Access: Managers vs. Level 4 Staff', () => {
         it('allows Level 1, 2, and 3 managers to manage hiring and credential handover', () => {
             // Level 1
-            expect(isManagerialRole('super_admin')).toBe(true);
+            expect(isManagerialRole('group_ceo')).toBe(true);
 
             // Level 2
-            expect(isManagerialRole('head_of_operations')).toBe(true);
+            expect(isManagerialRole('country_operations_director')).toBe(true);
             expect(isManagerialRole('regional_operations_manager')).toBe(true);
-            expect(isManagerialRole('head_of_hr')).toBe(true);
+            expect(isManagerialRole('country_hr_director')).toBe(true);
 
             // Level 3 (Site & Operational Leadership)
             expect(isManagerialRole('store_manager')).toBe(true);
             expect(isManagerialRole('warehouse_manager')).toBe(true);
-            expect(isManagerialRole('logistics_manager')).toBe(true);
+            expect(isManagerialRole('regional_supply_chain_manager')).toBe(true);
             expect(isManagerialRole('inventory_manager')).toBe(true);
-            expect(isManagerialRole('dispatch_manager')).toBe(true);
-            expect(isManagerialRole('assistant_manager')).toBe(true);
-            expect(isManagerialRole('shift_lead')).toBe(true);
-            expect(isManagerialRole('store_supervisor')).toBe(true);
+            expect(isManagerialRole('dispatch_supervisor')).toBe(true);
+            expect(isManagerialRole('assistant_store_manager')).toBe(true);
+            expect(isManagerialRole('shift_supervisor')).toBe(true);
+            expect(isManagerialRole('shift_supervisor')).toBe(true);
         });
 
         it('strictly blocks Level 4 floor staff from onboarding and credential handover', () => {
-            const level4Roles = [
-                'cashier',
-                'sales_associate',
-                'stock_clerk',
-                'picker',
-                'packer',
-                'receiver',
-                'driver',
-                'forklift_operator',
-                'inventory_specialist',
-                'customer_service',
-                'pos'
-            ];
+            const level4Roles = ['cashier', 'sales_associate', 'stock_clerk', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'customer_service'];
 
             for (const roleId of level4Roles) {
                 expect(isManagerialRole(roleId)).toBe(false);

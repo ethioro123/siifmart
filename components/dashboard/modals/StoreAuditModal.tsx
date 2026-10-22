@@ -56,7 +56,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
     const siteManagers = useMemo(() => {
         return employees.filter(e => 
             (!e.site_id || e.site_id === selectedSiteId || e.siteId === selectedSiteId) &&
-            ['store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'].includes(e.role || '')
+            ['store_manager', 'assistant_store_manager', 'shift_supervisor'].includes(e.role || '')
         );
     }, [employees, selectedSiteId]);
 

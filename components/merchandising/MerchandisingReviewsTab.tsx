@@ -8,12 +8,8 @@ import { logger } from '../../utils/logger';
 import { useMerchandising } from './MerchandisingContext';
 import { useCreateInventoryRequestMutation } from '../../hooks/useInventoryRequestMutations';
 
-const MERCHANDISING_LEADS = new Set([
-  'super_admin', 'ceo', 'head_of_merchandising', 'regional_merchandising_manager'
-]);
-const FINANCE_LEADS = new Set([
-  'super_admin', 'ceo', 'head_of_finance', 'regional_finance_manager'
-]);
+const MERCHANDISING_LEADS = new Set(['group_ceo', 'country_commercial_director', 'regional_merchandising_manager']);
+const FINANCE_LEADS = new Set(['group_ceo', 'country_finance_director', 'regional_finance_manager']);
 
 export const MerchandisingReviewsTab: React.FC = () => {
   const { user } = useStore();

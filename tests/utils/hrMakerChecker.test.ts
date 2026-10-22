@@ -101,12 +101,12 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
                 const certified = await payrollRunsService.signAsHR(
                     target.id,
                     'Bethelhem Tadesse',
-                    'head_of_hr',
+                    'country_hr_director',
                     'HR verified attendance logs and roster active count'
                 );
 
                 expect(certified.hrApprovedBy).toBe('Bethelhem Tadesse');
-                expect(certified.hrApprovedByRole).toBe('head_of_hr');
+                expect(certified.hrApprovedByRole).toBe('country_hr_director');
                 expect(certified.status).toBe('pending_finance');
             }
         });
@@ -120,7 +120,7 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
                 await payrollRunsService.signAsHR(
                     target.id,
                     'Bethelhem Tadesse',
-                    'head_of_hr',
+                    'country_hr_director',
                     'HR verification'
                 );
 
@@ -129,7 +129,7 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
                     payrollRunsService.signAsFinance(
                         target.id,
                         'Bethelhem Tadesse',
-                        'head_of_finance',
+                        'country_finance_director',
                         'Attempted dual role sign-off'
                     )
                 ).rejects.toThrow(/Zero-Trust 4-Eyes Violation/);
@@ -145,19 +145,19 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
                 await payrollRunsService.signAsHR(
                     target.id,
                     'Bethelhem Tadesse',
-                    'head_of_hr',
+                    'country_hr_director',
                     'HR verification'
                 );
 
                 const authorized = await payrollRunsService.signAsFinance(
                     target.id,
                     'Dawit Kebede',
-                    'head_of_finance',
+                    'country_finance_director',
                     'Disbursement approved against monthly budget'
                 );
 
                 expect(authorized.financeApprovedBy).toBe('Dawit Kebede');
-                expect(authorized.financeApprovedByRole).toBe('head_of_finance');
+                expect(authorized.financeApprovedByRole).toBe('country_finance_director');
                 expect(authorized.status).toBe('approved');
             }
         });
@@ -175,7 +175,7 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
                 description: 'Unexcused absence on shift',
                 action_taken: 'Formal warning issued',
                 issued_by: 'Marta Hailu',
-                issued_by_role: 'head_of_hr'
+                issued_by_role: 'country_hr_director'
             });
 
             await disciplinaryService.fileAppeal(record.id, 'emp-101', 'Medical certificate was submitted');
@@ -185,7 +185,7 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
                 disciplinaryService.resolveAppeal(
                     record.id,
                     'Upheld',
-                    { id: 'usr-1', name: 'Marta Hailu', role: 'head_of_hr' }
+                    { id: 'usr-1', name: 'Marta Hailu', role: 'country_hr_director' }
                 )
             ).rejects.toThrow(/Maker-Checker violation/);
         });
@@ -201,7 +201,7 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
                 description: 'Floor uniform missing badge',
                 action_taken: 'Coaching session logged',
                 issued_by: 'Marta Hailu',
-                issued_by_role: 'head_of_hr'
+                issued_by_role: 'country_hr_director'
             });
 
             await disciplinaryService.fileAppeal(record.id, 'emp-102', 'Replacement badge was on order');
@@ -210,7 +210,7 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
             const resolved = await disciplinaryService.resolveAppeal(
                 record.id,
                 'Overturned',
-                { id: 'usr-2', name: 'Kassahun Desta', role: 'head_of_hr' },
+                { id: 'usr-2', name: 'Kassahun Desta', role: 'country_hr_director' },
                 'Verified replacement request on file.'
             );
 
@@ -233,7 +233,7 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
         });
 
         it('restricts candidate hire approval permissions to authorized roles', () => {
-            expect(hasPermission('head_of_hr', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(hasPermission('country_hr_director', 'APPROVE_EMPLOYEE')).toBe(true);
             expect(hasPermission('talent_recruiter', 'APPROVE_EMPLOYEE')).toBe(false);
             expect(hasPermission('payroll_specialist', 'APPROVE_EMPLOYEE')).toBe(false);
             expect(hasPermission('training_coordinator', 'APPROVE_EMPLOYEE')).toBe(false);
@@ -241,7 +241,7 @@ describe('HR Directorate Maker-Checker Governance & Dual Control', () => {
 
         it('enforces rank hierarchy so recruiters cannot self-activate recruits', () => {
             expect(canEmployRole('talent_recruiter', 'cashier')).toBe(false);
-            expect(canEmployRole('head_of_hr', 'cashier')).toBe(true);
+            expect(canEmployRole('country_hr_director', 'cashier')).toBe(true);
         });
     });
 });

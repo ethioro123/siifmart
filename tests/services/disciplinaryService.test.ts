@@ -72,7 +72,7 @@ describe('Disciplinary Service & Zero-Trust Governance', () => {
             description: 'Tardy by 20 mins',
             action_taken: 'Verbal reminder',
             issued_by: 'Store Lead',
-            issued_by_role: 'store_supervisor'
+            issued_by_role: 'shift_supervisor'
         });
 
         await disciplinaryService.issueDisciplinaryNotice({
@@ -157,7 +157,7 @@ describe('Disciplinary Service & Zero-Trust Governance', () => {
         const resolved = await disciplinaryService.resolveAppeal(
             notice.id,
             'Overturned',
-            { id: 'hr-dir-01', name: 'Helen Mirren', role: 'head_of_hr' },
+            { id: 'hr-dir-01', name: 'Helen Mirren', role: 'country_hr_director' },
             'CCTV reviewed and staff member exonerated.'
         );
 

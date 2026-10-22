@@ -28,10 +28,10 @@ export const useFilteredFulfillmentData = ({
         logger.debug('useFilteredFulfillmentData', 'activeSite:');
         logger.debug('useFilteredFulfillmentData', 'total jobs before filter:');
 
-        // ONLY the CEO (super_admin) can override their site view using the activeSite selector.
+        // ONLY the CEO (group_ceo) can override their site view using the activeSite selector.
         // All other roles are strictly restricted to their assigned warehouse (siteId).
         const fallbackSiteId = user?.siteId || (activeSite?.id || '');
-        const siteToFilterBy = (user?.role === 'super_admin' && activeSite && activeSite.type !== 'Administration')
+        const siteToFilterBy = (user?.role === 'group_ceo' && activeSite && activeSite.type !== 'Administration')
             ? activeSite.id
             : fallbackSiteId;
 
@@ -46,7 +46,7 @@ export const useFilteredFulfillmentData = ({
         );
         const employeeId1 = currentEmployee1?.id || user?.id;
 
-        const siteFiltered = filterBySite(jobs, user?.role || 'pos', siteToFilterBy);
+        const siteFiltered = filterBySite(jobs, user?.role || 'cashier', siteToFilterBy);
         
         const explicitlyAssigned = jobs.filter(j => j.assignedTo === employeeId1 && !siteFiltered.some(sf => sf.id === j.id));
         const baseFiltered = [...siteFiltered, ...explicitlyAssigned];
@@ -66,12 +66,12 @@ export const useFilteredFulfillmentData = ({
         // Dispatchers and Warehouse Managers (and elevated roles) can see ALL jobs for the site.
         // Operational roles (Picker, Packer, etc.) ONLY see jobs specifically assigned to them.
         const canSeeGlobalQueue = [
-            'super_admin', 'admin', 'manager', 'regional_operations_manager',
-            'head_of_operations', 'warehouse_manager', 'dispatcher',
+            'group_ceo', 'admin', 'manager', 'regional_operations_manager',
+            'country_operations_director', 'warehouse_manager', 'dispatcher',
             // Site managers and department heads can see all jobs in their site queue
-            'store_manager', 'logistics_manager', 'inventory_manager',
-            'assistant_manager', 'shift_lead', 'inventory_specialist',
-            'dispatch_manager', 'head_of_supply_chain',
+            'store_manager', 'regional_supply_chain_manager', 'inventory_manager',
+            'assistant_store_manager', 'shift_supervisor', 'inventory_specialist',
+            'dispatch_supervisor', 'country_supply_chain_director',
             'fleet_maintenance_supervisor', 'replenishment_planner'
         ].includes((user?.role || '').toLowerCase());
 
@@ -93,14 +93,14 @@ export const useFilteredFulfillmentData = ({
             logger.debug('useFilteredFulfillmentData', `Role [${user.role}] restricted to ${roleFiltered.length} assigned jobs (${driverJobsAfterRole.length} driver jobs) for employee ${employeeId}.`);
         }
 
-        // If a super_admin has selected a specific site, prune to exactly that site for operational clarity
-        if (user?.role === 'super_admin' && activeSite && activeSite.type !== 'Administration') {
+        // If a group_ceo has selected a specific site, prune to exactly that site for operational clarity
+        if (user?.role === 'group_ceo' && activeSite && activeSite.type !== 'Administration') {
             const pruned = roleFiltered.filter(j => {
                 const siteId = j.siteId || j.site_id;
                 const destSiteId = j.destSiteId || j.dest_site_id;
                 return siteId === activeSite.id || destSiteId === activeSite.id;
             });
-            logger.debug('useFilteredFulfillmentData', 'After super_admin specific site pruning:');
+            logger.debug('useFilteredFulfillmentData', 'After group_ceo specific site pruning:');
             return pruned;
         }
         return roleFiltered;
@@ -109,13 +109,13 @@ export const useFilteredFulfillmentData = ({
     const filteredEmployees = useMemo(() => {
         // Fallback to activeSite.id if user.siteId is undefined (edge case)
         const fallbackSiteId = user?.siteId || (activeSite?.id || '');
-        const siteToFilterBy = (user?.role === 'super_admin' && activeSite && activeSite.type !== 'Administration')
+        const siteToFilterBy = (user?.role === 'group_ceo' && activeSite && activeSite.type !== 'Administration')
             ? activeSite.id
             : fallbackSiteId;
 
-        const baseFiltered = filterBySite(employees, user?.role || 'pos', siteToFilterBy);
+        const baseFiltered = filterBySite(employees, user?.role || 'cashier', siteToFilterBy);
 
-        if (user?.role === 'super_admin' && activeSite && activeSite.type !== 'Administration') {
+        if (user?.role === 'group_ceo' && activeSite && activeSite.type !== 'Administration') {
             return baseFiltered.filter(e => {
                 const eSiteId = e.siteId || e.site_id;
                 return eSiteId === activeSite.id;
@@ -126,13 +126,13 @@ export const useFilteredFulfillmentData = ({
 
     const filteredProducts = useMemo(() => {
         const fallbackSiteId = user?.siteId || (activeSite?.id || '');
-        const siteToFilterBy = (user?.role === 'super_admin' && activeSite && activeSite.type !== 'Administration')
+        const siteToFilterBy = (user?.role === 'group_ceo' && activeSite && activeSite.type !== 'Administration')
             ? activeSite.id
             : fallbackSiteId;
 
-        const baseFiltered = filterBySite(products, user?.role || 'pos', siteToFilterBy);
+        const baseFiltered = filterBySite(products, user?.role || 'cashier', siteToFilterBy);
 
-        if (user?.role === 'super_admin' && activeSite && activeSite.type !== 'Administration') {
+        if (user?.role === 'group_ceo' && activeSite && activeSite.type !== 'Administration') {
             return baseFiltered.filter(p => (p.siteId || p.site_id) === activeSite.id);
         }
         return baseFiltered;
@@ -140,13 +140,13 @@ export const useFilteredFulfillmentData = ({
 
     const filteredMovements = useMemo(() => {
         const fallbackSiteId = user?.siteId || (activeSite?.id || '');
-        const siteToFilterBy = (user?.role === 'super_admin' && activeSite && activeSite.type !== 'Administration')
+        const siteToFilterBy = (user?.role === 'group_ceo' && activeSite && activeSite.type !== 'Administration')
             ? activeSite.id
             : fallbackSiteId;
 
-        const baseFiltered = filterBySite(movements, user?.role || 'pos', siteToFilterBy);
+        const baseFiltered = filterBySite(movements, user?.role || 'cashier', siteToFilterBy);
 
-        if (user?.role === 'super_admin' && activeSite && activeSite.type !== 'Administration') {
+        if (user?.role === 'group_ceo' && activeSite && activeSite.type !== 'Administration') {
             return baseFiltered.filter(m => (m.siteId || (m as any).site_id) === activeSite.id);
         }
         return baseFiltered;

@@ -37,7 +37,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 3, Rule 5, Rule 17, Rule 18)
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Security & LP Manager operates at Level 3 (Functional Site/Regional Security) with Hierarchy Rank 70 and Matrix Rank 35, reporting to the Head of Operations.
+    - The Security & LP Manager operates at Level 3 (Functional Site/Regional Security) with Hierarchy Rank 70 and Matrix Rank 35, reporting to the Country Operations Director.
     - Serves as the chief asset protection and loss prevention authority for retail facilities and warehouse distribution hubs, governing physical security, CCTV surveillance, exit gate passes, and fraud investigations.
 1.2 Core Mission:
     - Maintain an impenetrable physical and digital security perimeter; enforce the Exit Gate Pass verification protocol (SOP-SEC-001); conduct unannounced blind asset audits; investigate cashier override spikes (> 3%); and eliminate internal theft cartels.
@@ -209,7 +209,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 3, Rule 17, Rule 18)
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Customer Service Manager operates at Level 3 (Functional Support Leadership) with Hierarchy Rank 70 and Matrix Rank 36, reporting to the Head of Operations.
+    - The Customer Service Manager operates at Level 3 (Functional Support Leadership) with Hierarchy Rank 70 and Matrix Rank 36, reporting to the Country Operations Director.
     - Governs retail customer support channels, service desk operations, customer return escalations, warranty dispute resolutions, and customer satisfaction SLAs across national retail channels.
 1.2 Core Mission:
     - Maintain customer satisfaction CSAT >= 90%; resolve escalated customer tickets within 4 hours; enforce retail return policies without compromising fraud prevention; and audit return abuse.

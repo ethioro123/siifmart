@@ -28,18 +28,7 @@ export const EmployeesHeader: React.FC<EmployeesHeaderProps> = ({
    pendingSignOffsCount,
    onOpenSignOffQueue
 }) => {
-   const isChecker = [
-      'head_of_hr',
-      'regional_hr_manager',
-      'hr',
-      'head_of_operations',
-      'regional_operations_manager',
-      'country_managing_director',
-      'admin',
-      'super_admin', 
-      'CEO',
-      'ceo'
-   ].includes(userRole || '');
+   const isChecker = ['country_hr_director', 'regional_hr_manager', 'hr_generalist', 'country_operations_director', 'regional_operations_manager', 'country_managing_director', 'group_ceo'].includes(userRole || '');
 
    return (
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

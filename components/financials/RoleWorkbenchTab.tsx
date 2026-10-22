@@ -8,7 +8,7 @@ import { InternalAuditDesk } from './workbenches/InternalAuditDesk';
 
 export const RoleWorkbenchTab: React.FC = () => {
     const { user, currencySymbol, effectiveCountry } = useFinance();
-    const userRole = user?.role || 'head_of_finance';
+    const userRole = user?.role || 'country_finance_director';
 
     const defaultWorkbench =
         userRole === 'treasury_officer' ? 'treasury' :

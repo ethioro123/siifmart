@@ -68,7 +68,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(groupCae.dottedLineRole).toBe('group_ceo');
         expect(groupCae.isManagerial).toBe(true);
 
-        const ceo = getRoleReportingMeta('super_admin');
+        const ceo = getRoleReportingMeta('group_ceo');
         expect(ceo.level).toBe(1);
         expect(ceo.levelCategory).toBe('executive');
         expect(ceo.reportsToRole).toBeNull();
@@ -112,14 +112,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
     });
 
     it('verifies Level 3 Corporate Directorates, Level 4 Regional Directors, and Level 5 Regional Department Managers', () => {
-        const l3Directors = [
-            'head_of_operations',
-            'head_of_finance',
-            'head_of_hr',
-            'head_of_procurement',
-            'head_of_supply_chain',
-            'head_of_merchandising'
-        ];
+        const l3Directors = ['country_operations_director', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director'];
 
         l3Directors.forEach(role => {
             const meta = getRoleReportingMeta(role);
@@ -149,15 +142,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(rscm.dottedLineRole).toBe('regional_operations_manager');
         expect(rscm.isManagerial).toBe(true);
 
-        const l5Leads = [
-            'regional_supply_chain_manager',
-            'regional_procurement_manager',
-            'regional_finance_manager',
-            'regional_merchandising_manager',
-            'regional_hr_manager',
-            'regional_logistics_manager',
-            'regional_security_manager'
-        ];
+        const l5Leads = ['regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'];
 
         l5Leads.forEach(role => {
             const meta = getRoleReportingMeta(role);
@@ -176,16 +161,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
             expect(meta.isManagerial).toBe(true);
         });
 
-        const l7Managers = [
-            'warehouse_operations_manager',
-            'transport_fleet_manager',
-            'logistics_manager',
-            'inventory_manager',
-            'security_manager',
-            'dispatch_manager',
-            'cs_manager',
-            'vendor_relations_manager'
-        ];
+        const l7Managers = ['warehouse_operations_manager', 'transport_fleet_manager', 'regional_supply_chain_manager', 'inventory_manager', 'regional_security_manager', 'dispatch_supervisor', 'cs_manager', 'vendor_relations_manager'];
         l7Managers.forEach(role => {
             const meta = getRoleReportingMeta(role);
             expect(meta.level).toBe(7);
@@ -193,27 +169,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
             expect(meta.isManagerial).toBe(true);
         });
 
-        const l8Supervisors = [
-            'assistant_store_manager',
-            'assistant_manager',
-            'shift_supervisor',
-            'shift_lead',
-            'store_supervisor',
-            'receiving_supervisor',
-            'stock_control_supervisor',
-            'pos_supervisor',
-            'inventory_control_supervisor',
-            'putaway_replenishment_supervisor',
-            'picking_supervisor',
-            'packing_supervisor',
-            'dispatch_supervisor',
-            'returns_waste_supervisor',
-            'fleet_maintenance_supervisor',
-            'receiving_team_leader',
-            'picking_team_leader',
-            'packing_team_leader',
-            'dispatch_team_leader'
-        ];
+        const l8Supervisors = ['assistant_store_manager', 'shift_supervisor', 'receiving_supervisor', 'stock_control_supervisor', 'pos_supervisor', 'inventory_control_supervisor', 'putaway_replenishment_supervisor', 'picking_supervisor', 'packing_supervisor', 'dispatch_supervisor', 'returns_waste_supervisor', 'fleet_maintenance_supervisor', 'receiving_team_leader', 'picking_team_leader', 'packing_team_leader', 'dispatch_team_leader'];
         l8Supervisors.forEach(role => {
             const meta = getRoleReportingMeta(role);
             expect(meta.level).toBe(8);
@@ -252,28 +208,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
             expect(meta.reportsToLabel).toBeTruthy();
         });
 
-        const l10Frontline = [
-            'cashier',
-            'sales_associate',
-            'store_associate',
-            'stock_clerk',
-            'merchandiser',
-            'returns_clerk',
-            'receiver',
-            'receiving_operator',
-            'putaway_operator',
-            'replenishment_operator',
-            'inventory_controller',
-            'stock_counter',
-            'dispatch_operator',
-            'returns_operator',
-            'fleet_mechanic',
-            'picker',
-            'packer',
-            'forklift_operator',
-            'driver',
-            'inventory_specialist'
-        ];
+        const l10Frontline = ['cashier', 'sales_associate', 'store_associate', 'stock_clerk', 'merchandiser', 'returns_clerk', 'receiver', 'receiving_operator', 'putaway_operator', 'replenishment_operator', 'inventory_controller', 'stock_counter', 'dispatch_operator', 'returns_operator', 'fleet_mechanic', 'picker', 'packer', 'forklift_operator', 'driver', 'inventory_specialist'];
 
         l10Frontline.forEach(role => {
             const meta = getRoleReportingMeta(role);
@@ -294,7 +229,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
 
         // Store Merchandiser -> Regional Merchandising Manager
         const storeMerch = getRoleReportingMeta('merchandiser');
-        expect(storeMerch.reportsToRole).toBe('store_supervisor');
+        expect(storeMerch.reportsToRole).toBe('shift_supervisor');
         expect(storeMerch.dottedLineRole).toBe('regional_merchandising_manager');
         expect(storeMerch.dottedLineLabel).toContain('Merchandising');
 
@@ -319,7 +254,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(shiftSup.reportsToRole).toBe('assistant_store_manager');
         expect(shiftSup.dottedLineRole).toBe('store_manager');
 
-        const storeSup = getRoleReportingMeta('store_supervisor');
+        const storeSup = getRoleReportingMeta('shift_supervisor');
         expect(storeSup.reportsToRole).toBe('assistant_store_manager');
         expect(storeSup.dottedLineRole).toBe('store_manager');
 
@@ -372,37 +307,37 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
 
         // Inventory Specialist -> Finance / Internal Auditor
         const invSpec = getRoleReportingMeta('inventory_specialist');
-        expect(invSpec.dottedLineRole).toBe('head_of_finance');
+        expect(invSpec.dottedLineRole).toBe('country_finance_director');
         expect(invSpec.dottedLineLabel).toContain('Auditor');
 
         // Payroll Specialist -> Head of Finance
         const payroll = getRoleReportingMeta('payroll_specialist');
-        expect(payroll.dottedLineRole).toBe('head_of_finance');
+        expect(payroll.dottedLineRole).toBe('country_finance_director');
         expect(payroll.dottedLineLabel).toContain('Finance');
 
         // Head of Finance -> Group CFO (solid) & Country MD (dotted)
-        const hof = getRoleReportingMeta('head_of_finance');
+        const hof = getRoleReportingMeta('country_finance_director');
         expect(hof.reportsToRole).toBe('group_cfo');
         expect(hof.dottedLineRole).toBe('country_managing_director');
 
         // Head of Procurement -> Group CCO (solid)
-        const hop = getRoleReportingMeta('head_of_procurement');
+        const hop = getRoleReportingMeta('country_commercial_director');
         expect(hop.reportsToRole).toBe('group_cco');
 
         // Head of Supply Chain -> Group CSCO (solid)
-        const hosc = getRoleReportingMeta('head_of_supply_chain');
+        const hosc = getRoleReportingMeta('country_supply_chain_director');
         expect(hosc.reportsToRole).toBe('group_csco');
 
         // Head of HR -> Group CHRO (solid)
-        const hohr = getRoleReportingMeta('head_of_hr');
+        const hohr = getRoleReportingMeta('country_hr_director');
         expect(hohr.reportsToRole).toBe('group_chro');
 
         // Head of IT -> Group CTO (solid)
-        const hoit = getRoleReportingMeta('head_of_it');
+        const hoit = getRoleReportingMeta('country_technology_director');
         expect(hoit.reportsToRole).toBe('group_cto');
 
         // Head of Audit -> Group CAE (solid)
-        const hoa = getRoleReportingMeta('head_of_audit');
+        const hoa = getRoleReportingMeta('country_compliance_manager');
         expect(hoa.reportsToRole).toBe('group_cae');
 
         // Regional Finance Manager -> Country Finance Director (solid) & Regional Operations Manager (dotted)

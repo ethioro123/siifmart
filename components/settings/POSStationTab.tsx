@@ -28,7 +28,7 @@ interface POSStationTabProps {
   handleSaveSection: (section: 'workflow' | 'payments' | 'branding') => void;
   /** Currency symbol from active country profile (e.g. 'ETB', 'KSh') */
   currencySymbol?: string;
-  /** Only HQ admin (CEO/super_admin) can disable safety toggles */
+  /** Only HQ admin (CEO/group_ceo) can disable safety toggles */
   isHQAdmin?: boolean;
 }
 

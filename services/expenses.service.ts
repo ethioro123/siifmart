@@ -197,7 +197,7 @@ export const expensesService = {
         }
 
         // CEO Escalation Governance: Exceeds threshold requires CEO or Country Managing Director
-        if (existing.escalatedToCeo && !['CEO', 'ceo', 'super_admin', 'country_managing_director'].includes(approver.role)) {
+        if (existing.escalatedToCeo && !['group_ceo', 'country_managing_director'].includes(approver.role)) {
             throw new Error('Executive Authorization required: This expense exceeds the sovereign threshold and requires CEO approval.');
         }
 

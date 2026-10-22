@@ -65,7 +65,7 @@ export default function GeneralSettings() {
     const { settings, effectiveCountry } = useData();
     const mutation = useGeneralSettingsMutation();
 
-    const isAuthorized = ['super_admin', 'CEO'].includes(user?.role || '');
+    const isAuthorized = ['group_ceo'].includes(user?.role || '');
 
     // Multi-country isolation: country scoped by central global switch
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;

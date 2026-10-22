@@ -35,10 +35,7 @@ export default function SalaryApprovalQueueModal({
     const [rejectError, setRejectError] = useState<string>('');
 
     const country = (effectiveCountry || 'ET').toUpperCase();
-    const canApprove = [
-        'CEO', 'ceo', 'super_admin', 'admin', 'country_managing_director',
-        'head_of_finance', 'cfo'
-    ].includes(user?.role || '');
+    const canApprove = ['group_ceo', 'country_managing_director', 'country_finance_director', 'cfo'].includes(user?.role || '');
 
     const loadRequests = useCallback(async () => {
         setIsLoading(true);
@@ -100,7 +97,7 @@ export default function SalaryApprovalQueueModal({
 
     const handleApprove = async (request: SalaryChangeRequest) => {
         if (!canApprove) {
-            addNotification('alert', 'Only Head of Finance or Executive Office can approve salary adjustments.');
+            addNotification('alert', 'Only Country Finance Director or Executive Office can approve salary adjustments.');
             return;
         }
 
@@ -109,7 +106,7 @@ export default function SalaryApprovalQueueModal({
             return;
         }
 
-        if (request.requestedBy === user?.name && !['CEO', 'ceo', 'super_admin'].includes(user?.role || '')) {
+        if (request.requestedBy === user?.name && !['group_ceo'].includes(user?.role || '')) {
             addNotification('alert', 'Separation of Duties violation: You cannot approve a request you initiated.');
             return;
         }
@@ -119,7 +116,7 @@ export default function SalaryApprovalQueueModal({
             await salaryRequestsService.approve(request.id, {
                 id: user?.id,
                 name: user?.name || 'Approver',
-                role: user?.role || 'head_of_finance'
+                role: user?.role || 'country_finance_director'
             });
 
             addNotification('success', `Approved salary update for ${request.employeeName}.`);
@@ -142,7 +139,7 @@ export default function SalaryApprovalQueueModal({
         try {
             await salaryRequestsService.reject(
                 requestId,
-                { id: user?.id, name: user?.name || 'Reviewer', role: user?.role || 'head_of_finance' },
+                { id: user?.id, name: user?.name || 'Reviewer', role: user?.role || 'country_finance_director' },
                 rejectionReason.trim()
             );
 
@@ -174,7 +171,7 @@ export default function SalaryApprovalQueueModal({
                             </h3>
                         </div>
                         <p className="text-xs text-stone-500 mt-1">
-                            Market: <strong>{country}</strong> • Requires Head of Finance or CEO authorization
+                            Market: <strong>{country}</strong> • Requires Country Finance Director or CEO authorization
                         </p>
                     </div>
 
@@ -240,7 +237,7 @@ export default function SalaryApprovalQueueModal({
                                 : '100.0';
                             const isRequester = req.requestedBy === user?.name;
                             const isOwnRecord = req.employeeId === user?.id;
-                            const isActionDisabled = processingId === req.id || isOwnRecord || (!['CEO', 'ceo', 'super_admin'].includes(user?.role || '') && isRequester);
+                            const isActionDisabled = processingId === req.id || isOwnRecord || (!['group_ceo'].includes(user?.role || '') && isRequester);
 
                             return (
                                 <div

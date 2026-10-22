@@ -103,12 +103,12 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
     const hrSigned = await payrollRunsService.signAsHR(
       run.id,
       'Sarah Jenkins',
-      'head_of_hr',
+      'country_hr_director',
       'Audited Bole Store headcount and October clock-in records.'
     );
 
     expect(hrSigned.hrApprovedBy).toBe('Sarah Jenkins');
-    expect(hrSigned.hrApprovedByRole).toBe('head_of_hr');
+    expect(hrSigned.hrApprovedByRole).toBe('country_hr_director');
     expect(hrSigned.hrApprovedAt).toBeDefined();
     expect(hrSigned.hrNotes).toBe('Audited Bole Store headcount and October clock-in records.');
     expect(hrSigned.status).toBe('pending_finance');
@@ -134,7 +134,7 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
     const fullyApproved = await payrollRunsService.signAsFinance(
       run.id,
       'Peter Omondi',
-      'head_of_finance',
+      'country_finance_director',
       'KCB Operating balance confirmed and statutory withholdings verified.'
     );
 
@@ -159,11 +159,11 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
     });
 
     // Alice Jenkins signs as HR
-    await payrollRunsService.signAsHR(run.id, 'Alice Jenkins', 'head_of_hr');
+    await payrollRunsService.signAsHR(run.id, 'Alice Jenkins', 'country_hr_director');
 
     // Alice Jenkins tries to also authorize as Finance
     await expect(
-      payrollRunsService.signAsFinance(run.id, 'Alice Jenkins', 'head_of_finance')
+      payrollRunsService.signAsFinance(run.id, 'Alice Jenkins', 'country_finance_director')
     ).rejects.toThrow(/Zero-Trust 4-Eyes Violation/);
   });
 
@@ -179,11 +179,11 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
       totalNetPayout: 96000,
       status: 'pending_verification',
       initiatedBy: 'Finance Lead',
-      initiatedByRole: 'head_of_finance'
+      initiatedByRole: 'country_finance_director'
     });
 
     // Finance signed, but HR has not signed
-    await payrollRunsService.signAsFinance(run.id, 'Kebede Michael', 'head_of_finance');
+    await payrollRunsService.signAsFinance(run.id, 'Kebede Michael', 'country_finance_director');
 
     // Attempt to disburse
     await expect(
@@ -207,7 +207,7 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
     });
 
     await payrollRunsService.signAsHR(run.id, 'HR Officer Mary', 'hr');
-    await payrollRunsService.signAsFinance(run.id, 'Head of Finance John', 'head_of_finance');
+    await payrollRunsService.signAsFinance(run.id, 'Head of Finance John', 'country_finance_director');
 
     const disbursed = await payrollRunsService.disburse(run.id, 'Head of Finance John', 'EXP-PAYROLL-01');
 
@@ -295,7 +295,7 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
       totalNetPayout: 192000,
       status: 'pending_verification',
       initiatedBy: 'Accountant Abebe',
-      initiatedByRole: 'head_of_finance'
+      initiatedByRole: 'country_finance_director'
     });
 
     const attested = await payrollRunsService.attestAsRegionalHR(

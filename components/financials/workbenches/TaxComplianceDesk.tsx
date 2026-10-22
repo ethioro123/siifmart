@@ -21,7 +21,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
     effectiveCountry
 }) => {
     const { user, addNotification } = useFinance();
-    const isManager = Boolean(user?.role && ['head_of_finance', 'tax_compliance_officer', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+    const isManager = Boolean(user?.role && ['country_finance_director', 'tax_compliance_officer', 'country_managing_director', 'group_ceo'].includes(user.role));
 
     const [returnStatus, setReturnStatus] = useState<'draft' | 'submitted' | 'certified'>('draft');
 
@@ -31,7 +31,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
 
     const handleStaffSubmitReturn = () => {
         setReturnStatus('submitted');
-        addNotification?.('info', `Monthly ${authorityForm} draft compiled and submitted to Head of Finance for statutory certification.`);
+        addNotification?.('info', `Monthly ${authorityForm} draft compiled and submitted to Country Finance Director for statutory certification.`);
     };
 
     const handleManagerCertifyReturn = () => {
@@ -141,7 +141,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                                         ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 opacity-80 cursor-default'
                                         : 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
                                 }`}
-                                title="Head of Finance supervisory authority to certify statutory sovereign tax filing"
+                                title="Country Finance Director supervisory authority to certify statutory sovereign tax filing"
                             >
                                 <Check size={13} />
                                 {returnStatus === 'certified' ? 'Return Certified (Signed Off)' : 'Certify Return (Manager Sign-Off)'}

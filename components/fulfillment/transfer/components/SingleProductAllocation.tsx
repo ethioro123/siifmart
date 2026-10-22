@@ -60,7 +60,7 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                                     if (s.type !== 'Store') return false;
 
                                     if (settings?.enforceRegionalZoning) {
-                                        if (user?.role !== 'super_admin' && sourceSiteObj) {
+                                        if (user?.role !== 'group_ceo' && sourceSiteObj) {
                                             return (s.logisticsZoneId || '') === (sourceSiteObj.logisticsZoneId || '');
                                         }
                                     }

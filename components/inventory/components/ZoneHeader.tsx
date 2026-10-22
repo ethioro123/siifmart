@@ -43,7 +43,7 @@ export const ZoneHeader: React.FC<ZoneHeaderProps> = ({
                         <span>Initialize Default Zones</span>
                     </button>
                 )}
-                {['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'store_manager', 'head_of_operations', 'regional_operations_manager'].includes(userRole || '') && (
+                {['group_ceo', 'country_managing_director', 'warehouse_manager', 'store_manager', 'country_operations_director', 'regional_operations_manager'].includes(userRole || '') && (
                     <button
                         type="button"
                         onClick={onCreateOpen}

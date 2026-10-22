@@ -187,7 +187,7 @@ describe('Zero-Trust HR Suite Tests', () => {
 
       const approved = await leaveRequestsService.reviewLeave(
         leave.id,
-        { id: 'MGR-KE-01', name: 'Supervisory Manager', role: 'head_of_hr' },
+        { id: 'MGR-KE-01', name: 'Supervisory Manager', role: 'country_hr_director' },
         'Approved'
       );
 
@@ -312,7 +312,7 @@ describe('Zero-Trust HR Suite Tests', () => {
       const approved = await terminationsService.approveTermination(term.id, {
         id: 'HR-DIRECTOR-01',
         name: 'HR Director',
-        role: 'head_of_hr'
+        role: 'country_hr_director'
       });
 
       expect(approved).toBe(true);
@@ -347,11 +347,11 @@ describe('Zero-Trust HR Suite Tests', () => {
   describe('Finding 8: Permission Matrix Hardening', () => {
     it('restricts head_of_hr from executing raw unilateral employee deletion', () => {
       // head_of_hr cannot delete employees directly (requires CEO or dual-control offboarding)
-      const canDelete = hasPermission('head_of_hr', 'employees.delete');
+      const canDelete = hasPermission('country_hr_director', 'employees.delete');
       expect(canDelete).toBe(false);
 
       // super_admin retains root authority
-      const superAdminCanDelete = hasPermission('super_admin', 'employees.delete');
+      const superAdminCanDelete = hasPermission('group_ceo', 'employees.delete');
       expect(superAdminCanDelete).toBe(true);
     });
   });

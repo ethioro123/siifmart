@@ -6,7 +6,7 @@ import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { logger } from '../../utils/logger';
 
-const APPROVERS = new Set(['super_admin', 'ceo', 'head_of_merchandising', 'regional_merchandising_manager']);
+const APPROVERS = new Set(['group_ceo', 'country_commercial_director', 'regional_merchandising_manager']);
 
 export const PromosTab: React.FC = () => {
    const { activeCountry, setIsPromoModalOpen, currencySymbol } = useMerchandising();

@@ -37,7 +37,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 4, Rule 6, Rule 15, Rule 16, Rule 17
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Store Manager operates at Level 3 (Site Leadership) with Hierarchy Rank 80 and Matrix Rank 30, reporting directly to the Head of Operations.
+    - The Store Manager operates at Level 3 (Site Leadership) with Hierarchy Rank 80 and Matrix Rank 30, reporting directly to the Country Operations Director.
     - Serves as the primary operational and fiscal custodian of an individual retail store facility. Holds on-the-ground operational command over cashier lines, customer service, shelf merchandising, blind inbound receiving, cash vaults, and shift reconciliations.
 1.2 Core Mission:
     - Enforce flawless daily retail store execution; maintain retail shrinkage <= 0.50%; ensure 100% daily drawer-to-safe cash balancing; guarantee blind receiving integrity; uphold non-alcoholic/halal catalog purity; and enforce Zero-Trust loss prevention standards under the "Captain Owns the Ship" doctrine.
@@ -77,7 +77,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 4, Rule 6, Rule 15, Rule 16, Rule 17
     - Strictly locked to the single assigned retail site (siteId = user.siteId). Zero access to foreign country tenants or multi-country switches.
 3.2 No Unilateral Inventory Ledger Adjustments or Shrinkage Write-Offs:
     - CANNOT unilaterally write off damaged, expired, or missing stock in the database.
-    - All inventory adjustments must be submitted as an inventory_request with attached photos and reason codes for Central HQ / Head of Operations review and approval.
+    - All inventory adjustments must be submitted as an inventory_request with attached photos and reason codes for Central HQ / Country Operations Director review and approval.
 3.3 No Price Tampering or Custom Discount Creation:
     - CANNOT alter base retail shelf prices, modify system tax/VAT configurations, or create ad-hoc promotional discounts. All retail pricing is centrally deployed by Merchandising & HQ Finance.
 3.4 No Supplier Cost or Central Margin Visibility:
@@ -152,7 +152,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 4, Rule 6, Rule 15, Rule 16, Rule 17
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Warehouse Manager operates at Level 3 (Site Leadership) with Hierarchy Rank 80 and Matrix Rank 31, reporting directly to the Head of Operations.
+    - The Warehouse Manager operates at Level 3 (Site Leadership) with Hierarchy Rank 80 and Matrix Rank 31, reporting directly to the Country Operations Director.
     - Exercises complete on-site operational command over warehouse fulfillment centers and distribution hubs (DCs), governing inbound receiving, inventory storage, FEFO putaway, outbound order picking, pack staging, and inter-facility transfer dispatch.
 1.2 Core Mission:
     - Maintain warehouse inventory accuracy >= 99.0%; enforce blind receiving protocols; ensure strict FEFO rotation to eliminate expired stock; protect goods in custody; enforce floor worker interchangeability; and lock down external vehicle delivery boundaries.
@@ -182,7 +182,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 4, Rule 6, Rule 15, Rule 16, Rule 17
 --------------------------------------------------------------------------------
 3.1 No Single-Party Stock Adjustments or Shrinkage Write-Offs (Rule 1):
     - CANNOT unilaterally write off damaged, stolen, or expired warehouse inventory.
-    - Any discrepancy exceeding tolerance must route through inventory_requests for Head of Operations / Central HQ sign-off.
+    - Any discrepancy exceeding tolerance must route through inventory_requests for Country Operations Director / Central HQ sign-off.
 3.2 Single-Facility Lockdown & Zero Supplier Cost Tampering:
     - Strictly confined to their assigned warehouse facility (siteId = user.siteId). Cannot view or alter other warehouses or retail store balances.
     - Cannot modify supplier contracted prices, vendor invoices, or payment terms.
@@ -250,7 +250,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 6, Rule 15, Rule 16, Rule 17, Rule 1
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Logistics Manager operates at Level 3 (Site/Corridor Leadership) with Hierarchy Rank 80 and Matrix Rank 32, reporting to the Head of Supply Chain.
+    - The Logistics Manager operates at Level 3 (Site/Corridor Leadership) with Hierarchy Rank 80 and Matrix Rank 32, reporting to the Country Supply Chain Director.
     - Governs inter-facility transport logistics, distribution fleet operations, driver route scheduling, vehicle maintenance, and in-transit cargo security across all national supply corridors.
 1.2 Core Mission:
     - Guarantee safe, on-time, and zero-shrinkage transit of enterprise goods between central distribution centers and retail store branches; enforce strict Delivery Lockdown (Rule 15); and execute the Digital Dual-Handshake Chain of Custody (Rule 16).
@@ -343,7 +343,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 4, Rule 6, Rule 15, Rule 16, Rule 17
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Inventory Manager operates at Level 3 (Functional Leadership) with Hierarchy Rank 80 and Matrix Rank 33, reporting to the Head of Operations.
+    - The Inventory Manager operates at Level 3 (Functional Leadership) with Hierarchy Rank 80 and Matrix Rank 33, reporting to the Country Operations Director.
     - Governs enterprisewide physical stock integrity, inventory valuation consistency, weekly blind cycle count schedules (SOP-OPS-017), waste write-off investigations, and safety stock parameter optimization.
 1.2 Core Mission:
     - Maintain enterprise Inventory Record Accuracy (IRA) >= 98.5%; eliminate stockouts through dynamic reorder thresholds; execute rigorous blind stock audits; minimize perishable waste via strict FEFO enforcement; and uphold the Zero-Trust reconciliation model.
@@ -373,7 +373,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1, Rule 4, Rule 6, Rule 15, Rule 16, Rule 17
 --------------------------------------------------------------------------------
 3.1 No Unilateral Stock Adjustments or Write-Off Approvals (Rule 1):
     - CANNOT unilaterally wipe inventory, alter stock balances, or approve their own adjustment requests in the database.
-    - All inventory reconciliations must submit an inventory_request for Head of Operations / Central HQ dual-approval (4-Eyes Principle).
+    - All inventory reconciliations must submit an inventory_request for Country Operations Director / Central HQ dual-approval (4-Eyes Principle).
 3.2 No Disclosing System Expected Quantities (Rule 4):
     - STRICTLY PROHIBITED from printing, sharing, or displaying expected on-hand numbers to counting staff prior to count submission.
 3.3 No Cross-Country Stock Manipulation (Rule 7 & Rule 8):

@@ -39,10 +39,10 @@ export default function AdjustSalaryModal({
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
-    const isExecutive = ['CEO', 'ceo', 'super_admin'].includes(user?.role || '');
+    const isExecutive = ['group_ceo'].includes(user?.role || '');
     const [directOverride, setDirectOverride] = useState<boolean>(isExecutive);
 
-    const isTargetCEO = ['CEO', 'ceo', 'super_admin'].includes(employee.role || '');
+    const isTargetCEO = ['group_ceo'].includes(employee.role || '');
     const isSelf = Boolean(user?.id && user.id === employee.id);
     const actorLevel = user?.role ? getRoleHierarchy(user.role) : 0;
     const targetLevel = getRoleHierarchy(employee.role);
@@ -126,14 +126,14 @@ export default function AdjustSalaryModal({
                     reason: `[Executive Override] ${reason.trim()}`,
                     status: 'pending',
                     requestedBy: user?.name || 'Executive',
-                    requestedByRole: user?.role || 'super_admin',
+                    requestedByRole: user?.role || 'group_ceo',
                     requestedAt: new Date().toISOString()
                 });
 
                 await salaryRequestsService.approve(created.id, {
                     id: user?.id,
                     name: user?.name || 'Executive',
-                    role: user?.role || 'super_admin'
+                    role: user?.role || 'group_ceo'
                 });
 
                 updateEmployee({ ...employee, salary: parsedProposed }, user?.name || 'Executive');
@@ -155,7 +155,7 @@ export default function AdjustSalaryModal({
                     requestedAt: new Date().toISOString()
                 });
 
-                addNotification('info', `Salary adjustment submitted. Awaiting Head of Finance or CEO approval.`);
+                addNotification('info', `Salary adjustment submitted. Awaiting Country Finance Director or CEO approval.`);
             }
 
             if (handleConfirmSalary) handleConfirmSalary();
@@ -275,7 +275,7 @@ export default function AdjustSalaryModal({
                 <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/10 rounded-xl border border-emerald-200/50 dark:border-emerald-800/20 flex items-start gap-2.5 text-[11px] text-stone-600 dark:text-stone-400">
                     <ShieldAlert size={15} className="text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
                     <span>
-                        <strong>SOP-GOV-018 4-Eyes Policy:</strong> Salary adjustments cannot be applied unilaterally by HR. All requests require Head of Finance or CEO co-signature before payroll sync.
+                        <strong>SOP-GOV-018 4-Eyes Policy:</strong> Salary adjustments cannot be applied unilaterally by HR. All requests require Country Finance Director or CEO co-signature before payroll sync.
                     </span>
                 </div>
 

@@ -71,11 +71,7 @@ export default function WMSDashboard() {
   const [warehouseMetrics, setWarehouseMetrics] = React.useState<any>(null);
   const [refreshing, setRefreshing] = React.useState(false);
   const [isOnboardModalOpen, setIsOnboardModalOpen] = React.useState(false);
-  const canOnboard = isManagerialRole(user?.role) && [
-    'warehouse_manager', 'logistics_manager', 'inventory_manager',
-    'dispatch_manager', 'shift_lead', 'super_admin', 'admin',
-    'head_of_operations', 'regional_operations_manager'
-  ].includes(user?.role || '');
+  const canOnboard = isManagerialRole(user?.role) && ['warehouse_manager', 'regional_supply_chain_manager', 'inventory_manager', 'dispatch_supervisor', 'shift_supervisor', 'group_ceo', 'country_managing_director', 'country_operations_director', 'regional_operations_manager'].includes(user?.role || '');
 
   // Translate helper
   const t = (key: string) => {

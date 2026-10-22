@@ -28,7 +28,7 @@ describe('staging session bridge boundaries', () => {
         expect(isStagingTestEmail('admin@staging.siifmart.com')).toBe(true);
         expect(isStagingTestEmail('real@siifmart.com')).toBe(false);
         expect(isStagingTestEmail('test@staging.siifmart.com.evil.example')).toBe(false);
-        expect(isStagingExecutive('super_admin')).toBe(true);
+        expect(isStagingExecutive('group_ceo')).toBe(true);
         expect(isStagingExecutive('warehouse_manager')).toBe(false);
         expect(isStagingExecutive('admin')).toBe(false);
     });

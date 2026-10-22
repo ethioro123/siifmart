@@ -25,31 +25,31 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
 
     describe('isManagerialRole helper', () => {
         it('identifies Level 1 executive roles as managerial', () => {
-            expect(isManagerialRole('super_admin')).toBe(true);
+            expect(isManagerialRole('group_ceo')).toBe(true);
             expect(isManagerialRole('admin')).toBe(true);
             expect(isManagerialRole('CEO')).toBe(true);
         });
 
         it('identifies Level 2 corporate directorates as managerial', () => {
             expect(isManagerialRole('regional_operations_manager')).toBe(true);
-            expect(isManagerialRole('head_of_operations')).toBe(true);
-            expect(isManagerialRole('head_of_finance')).toBe(true);
-            expect(isManagerialRole('head_of_hr')).toBe(true);
-            expect(isManagerialRole('head_of_procurement')).toBe(true);
-            expect(isManagerialRole('head_of_supply_chain')).toBe(true);
-            expect(isManagerialRole('head_of_merchandising')).toBe(true);
+            expect(isManagerialRole('country_operations_director')).toBe(true);
+            expect(isManagerialRole('country_finance_director')).toBe(true);
+            expect(isManagerialRole('country_hr_director')).toBe(true);
+            expect(isManagerialRole('country_commercial_director')).toBe(true);
+            expect(isManagerialRole('country_supply_chain_director')).toBe(true);
+            expect(isManagerialRole('country_commercial_director')).toBe(true);
         });
 
         it('identifies Level 3 site managers and supervisors as managerial', () => {
             expect(isManagerialRole('store_manager')).toBe(true);
             expect(isManagerialRole('warehouse_manager')).toBe(true);
-            expect(isManagerialRole('logistics_manager')).toBe(true);
+            expect(isManagerialRole('regional_supply_chain_manager')).toBe(true);
             expect(isManagerialRole('inventory_manager')).toBe(true);
-            expect(isManagerialRole('security_manager')).toBe(true);
-            expect(isManagerialRole('dispatch_manager')).toBe(true);
-            expect(isManagerialRole('assistant_manager')).toBe(true);
-            expect(isManagerialRole('shift_lead')).toBe(true);
-            expect(isManagerialRole('store_supervisor')).toBe(true);
+            expect(isManagerialRole('regional_security_manager')).toBe(true);
+            expect(isManagerialRole('dispatch_supervisor')).toBe(true);
+            expect(isManagerialRole('assistant_store_manager')).toBe(true);
+            expect(isManagerialRole('shift_supervisor')).toBe(true);
+            expect(isManagerialRole('shift_supervisor')).toBe(true);
         });
 
         it('identifies Level 4 frontline operators as non-managerial', () => {
@@ -70,7 +70,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
         it('filters by MANAGERIAL_ROLES when onlyManagers is true in getAll', async () => {
             const orMock = vi.fn().mockResolvedValue({
                 data: [
-                    { id: '1', role: 'super_admin', name: 'CEO' },
+                    { id: '1', role: 'group_ceo', name: 'CEO' },
                     { id: '2', role: 'store_manager', name: 'Store Lead' }
                 ],
                 error: null
@@ -123,7 +123,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
         it('applies onlyManagers in getPaginated for initial un-filtered view', async () => {
             const orMock = vi.fn().mockResolvedValue({
                 data: [
-                    { id: '1', role: 'super_admin', name: 'CEO', created_at: '2026-01-01' }
+                    { id: '1', role: 'group_ceo', name: 'CEO', created_at: '2026-01-01' }
                 ],
                 error: null,
                 count: 1
@@ -139,7 +139,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
 
             // Mock second query for details
             const inDetailsMock = vi.fn().mockResolvedValue({
-                data: [{ id: '1', role: 'super_admin', name: 'CEO' }],
+                data: [{ id: '1', role: 'group_ceo', name: 'CEO' }],
                 error: null
             });
             const selectDetailsMock = vi.fn().mockReturnValue({

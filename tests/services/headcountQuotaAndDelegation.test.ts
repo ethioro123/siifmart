@@ -25,8 +25,8 @@ describe('Headcount Quota & Frontline Fast-Track Delegation', () => {
       // Supervisory and managerial roles are excluded from Level 4
       expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('store_manager');
       expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('warehouse_manager');
-      expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('assistant_manager');
-      expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('shift_lead');
+      expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('assistant_store_manager');
+      expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('shift_supervisor');
       expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('regional_operations_manager');
     });
   });
@@ -208,9 +208,9 @@ describe('Headcount Quota & Frontline Fast-Track Delegation', () => {
 
   describe('3. Maker-Checker Authority Gating (isDirectOnboardingAuthorized)', () => {
     it('grants unconditional direct onboarding authority to corporate HQ & Executive roles', () => {
-      expect(isDirectOnboardingAuthorized('super_admin')).toBe(true);
+      expect(isDirectOnboardingAuthorized('group_ceo')).toBe(true);
       expect(isDirectOnboardingAuthorized('CEO')).toBe(true);
-      expect(isDirectOnboardingAuthorized('head_of_hr')).toBe(true);
+      expect(isDirectOnboardingAuthorized('country_hr_director')).toBe(true);
       expect(isDirectOnboardingAuthorized('hr')).toBe(true);
     });
 
@@ -227,8 +227,8 @@ describe('Headcount Quota & Frontline Fast-Track Delegation', () => {
     });
 
     it('strictly denies direct activation to site managers for supervisory roles even if quota flag was set', () => {
-      expect(isDirectOnboardingAuthorized('store_manager', 'assistant_manager', false)).toBe(false);
-      expect(isDirectOnboardingAuthorized('store_manager', 'shift_lead', false)).toBe(false);
+      expect(isDirectOnboardingAuthorized('store_manager', 'assistant_store_manager', false)).toBe(false);
+      expect(isDirectOnboardingAuthorized('store_manager', 'shift_supervisor', false)).toBe(false);
     });
   });
 });

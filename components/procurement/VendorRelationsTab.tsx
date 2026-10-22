@@ -14,7 +14,7 @@ interface VendorRelationsTabProps {
 
 export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryCode, suppliers }) => {
   const { user, showToast } = useStore();
-  const isManager = Boolean(user?.role && ['head_of_procurement', 'regional_operations_manager', 'head_of_operations', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+  const isManager = Boolean(user?.role && ['country_commercial_director', 'regional_operations_manager', 'country_operations_director', 'country_managing_director', 'group_ceo'].includes(user.role));
 
   const [subTab, setSubTab] = useState<'scorecards' | 'contracts' | 'farmers'>('scorecards');
   const [scorecards, setScorecards] = useState<VendorScorecard[]>([]);
@@ -90,7 +90,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
       await procurementGovernanceService.authorizeContract({
         contractId: contract.id,
         signedOffBy: user?.name || user?.email || 'Authorized Manager',
-        signedOffRole: user?.role || 'head_of_procurement'
+        signedOffRole: user?.role || 'country_commercial_director'
       });
       showToast(`Master agreement ${contract.contractNumber} authorized and signed off.`, 'success');
       loadData();

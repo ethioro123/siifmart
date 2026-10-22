@@ -195,7 +195,7 @@ export function formatSiteAssignment(
     facilityId?: string;
     isCEO: boolean;
 } {
-    const isCEO = role === 'group_ceo' || role === 'ceo' || role === 'super_admin' || role === 'CEO';
+    const isCEO = role === 'group_ceo';
 
     if (isCEO) {
         const site = siteId ? sites.find(s => s.id === siteId) : null;
@@ -223,17 +223,7 @@ export function formatSiteAssignment(
     }
 
     // Corporate roles without a specific branch assignment fallback
-    const HQ_ROLES = [
-        'country_managing_director', 'admin',
-        'head_of_operations',
-        'head_of_finance',
-        'head_of_hr', 'hr',
-        'head_of_procurement',
-        'head_of_supply_chain',
-        'head_of_merchandising',
-        'head_of_it', 'it_support',
-        'head_of_audit', 'auditor', 'data_analyst'
-    ];
+    const HQ_ROLES = ['country_managing_director', 'country_operations_director', 'country_finance_director', 'country_hr_director', 'hr_generalist', 'country_commercial_director', 'country_supply_chain_director', 'country_technology_director', 'it_support', 'country_compliance_manager', 'auditor', 'data_analyst'];
 
     if (role && HQ_ROLES.includes(role)) {
         return { label: 'Central Operations', facilityId: 'ET-HQ', isWarning: false, isHQ: true, isCEO: false };

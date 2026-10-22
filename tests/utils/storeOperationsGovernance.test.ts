@@ -15,17 +15,17 @@ describe('Store Operations & 4-Eyes Cashier Governance Suite', () => {
 
         it('strictly denies cashier unilateral transaction voids (Zero-Trust Loss Prevention)', () => {
             expect(hasPermission('cashier', 'VOID_SALE')).toBe(false);
-            expect(hasPermission('pos', 'VOID_SALE')).toBe(false);
+            expect(hasPermission('cashier', 'VOID_SALE')).toBe(false);
         });
 
         it('strictly denies cashier customer refunds without supervisory co-sign', () => {
             expect(hasPermission('cashier', 'REFUND_SALE')).toBe(false);
-            expect(hasPermission('pos', 'REFUND_SALE')).toBe(false);
+            expect(hasPermission('cashier', 'REFUND_SALE')).toBe(false);
         });
 
         it('strictly denies cashier discretionary price discounts', () => {
             expect(hasPermission('cashier', 'APPLY_DISCOUNT')).toBe(false);
-            expect(hasPermission('pos', 'APPLY_DISCOUNT')).toBe(false);
+            expect(hasPermission('cashier', 'APPLY_DISCOUNT')).toBe(false);
         });
 
         it('strictly denies cashier access to back-office financial ledgers and payroll', () => {
@@ -65,23 +65,23 @@ describe('Store Operations & 4-Eyes Cashier Governance Suite', () => {
 
     describe('Store Floor Supervisor (store_supervisor / shift_lead)', () => {
         it('authorizes shift floor management and supervisory checkout oversight', () => {
-            expect(hasPermission('store_supervisor', 'ACCESS_POS')).toBe(true);
-            expect(hasPermission('store_supervisor', 'PROCESS_SALE')).toBe(true);
-            expect(hasPermission('store_supervisor', 'VIEW_POS_DASHBOARD')).toBe(true);
-            expect(hasPermission('shift_lead', 'ACCESS_POS')).toBe(true);
-            expect(hasPermission('shift_lead', 'PROCESS_SALE')).toBe(true);
+            expect(hasPermission('shift_supervisor', 'ACCESS_POS')).toBe(true);
+            expect(hasPermission('shift_supervisor', 'PROCESS_SALE')).toBe(true);
+            expect(hasPermission('shift_supervisor', 'VIEW_POS_DASHBOARD')).toBe(true);
+            expect(hasPermission('shift_supervisor', 'ACCESS_POS')).toBe(true);
+            expect(hasPermission('shift_supervisor', 'PROCESS_SALE')).toBe(true);
         });
 
         it('authorizes supervisory void and discount co-signatures on-duty', () => {
-            expect(hasPermission('store_supervisor', 'VOID_SALE')).toBe(true);
-            expect(hasPermission('store_supervisor', 'APPLY_DISCOUNT')).toBe(true);
-            expect(hasPermission('shift_lead', 'APPLY_DISCOUNT')).toBe(true);
+            expect(hasPermission('shift_supervisor', 'VOID_SALE')).toBe(true);
+            expect(hasPermission('shift_supervisor', 'APPLY_DISCOUNT')).toBe(true);
+            expect(hasPermission('shift_supervisor', 'APPLY_DISCOUNT')).toBe(true);
         });
 
         it('denies store floor supervisors access to corporate system configuration', () => {
-            expect(hasPermission('store_supervisor', 'EDIT_SYSTEM_SETTINGS')).toBe(false);
-            expect(hasPermission('shift_lead', 'EDIT_SYSTEM_SETTINGS')).toBe(false);
-            expect(canAccessRoute('store_supervisor', '/settings')).toBe(false);
+            expect(hasPermission('shift_supervisor', 'EDIT_SYSTEM_SETTINGS')).toBe(false);
+            expect(hasPermission('shift_supervisor', 'EDIT_SYSTEM_SETTINGS')).toBe(false);
+            expect(canAccessRoute('shift_supervisor', '/settings')).toBe(false);
         });
     });
 
@@ -92,7 +92,7 @@ describe('Store Operations & 4-Eyes Cashier Governance Suite', () => {
             expect(hasPermission('store_manager', 'VOID_SALE')).toBe(true);
             expect(hasPermission('store_manager', 'REFUND_SALE')).toBe(true);
             expect(hasPermission('store_manager', 'VIEW_ALL_TRANSACTIONS')).toBe(true);
-            expect(hasPermission('assistant_manager', 'REFUND_SALE')).toBe(true);
+            expect(hasPermission('assistant_store_manager', 'REFUND_SALE')).toBe(true);
         });
 
         it('confines store managers to branch operations without global system admin rights', () => {

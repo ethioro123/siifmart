@@ -14,12 +14,7 @@ export const ReceivingForm: React.FC = () => {
     const { jobs } = useFulfillmentData();
 
     // Zero-Trust Rule 4: Branch store managers and supervisors must receive blindly to prevent rubber-stamping
-    const isCentralHQOnly = [
-        'super_admin',
-        'ceo',
-        'head_of_operations',
-        'regional_operations_manager'
-    ].includes(user?.role?.toLowerCase() || '');
+    const isCentralHQOnly = ['group_ceo', 'country_operations_director', 'regional_operations_manager'].includes(user?.role?.toLowerCase() || '');
     const isManagerOrHQ = isCentralHQOnly;
 
     const {

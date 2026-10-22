@@ -39,7 +39,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     renderTabs
 }) => {
     const { settings } = useData();
-    const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
+    const isRestricted = !['group_ceo', 'country_managing_director'].includes(user?.role || '') && !!user?.siteId;
     const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
 
     // --- STATE ---
@@ -109,7 +109,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     const handleCreateDistribution = async () => {
         const actualSourceSite = bulkDistributionSourceSite || activeSite?.id;
 
-        const canOverrideZoning = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_operations', 'head_of_supply_chain',].includes(user?.role || '');
+        const canOverrideZoning = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_supply_chain_director'].includes(user?.role || '');
         if (settings?.enforceRegionalZoning && !canOverrideZoning) {
             if (isCrossZone) {
                 addNotification('alert', 'Cross-zone distribution is restricted. Stores can only receive stock from warehouses in the same Logistics Zone.');
@@ -358,7 +358,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             </select>
                         </div>
 
-                        {isCrossZone && settings?.enforceRegionalZoning && ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'regional_operations_manager', 'head_of_operations', 'head_of_supply_chain',].includes(user?.role || '') && (
+                        {isCrossZone && settings?.enforceRegionalZoning && ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_supply_chain_director'].includes(user?.role || '') && (
                              <div className="bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-4 rounded-xl flex items-start gap-3">
                                  <AlertTriangle className="shrink-0 mt-0.5 text-amber-500" size={18} />
                                  <div>

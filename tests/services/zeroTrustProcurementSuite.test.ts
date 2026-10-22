@@ -28,7 +28,7 @@ describe('Zero-Trust Procurement & 4-Eyes Governance Suite', () => {
           poId: 'po-101',
           approverId: 'EMP-01',
           approverName: 'Dawit Sourcing',
-          approverRole: 'head_of_procurement',
+          approverRole: 'country_commercial_director',
           reasonCode: 'STANDARD_REPLENISHMENT'
         })
       ).rejects.toThrow(/Zero-Trust 4-Eyes Violation: Self-approval is strictly prohibited/);
@@ -72,7 +72,7 @@ describe('Zero-Trust Procurement & 4-Eyes Governance Suite', () => {
           poId: 'po-103',
           approverId: 'PM-01',
           approverName: 'Sara Manager',
-          approverRole: 'head_of_procurement',
+          approverRole: 'country_commercial_director',
           reasonCode: '' as any
         })
       ).rejects.toThrow(/Structured reason code is mandatory for PO approval/);
@@ -94,7 +94,7 @@ describe('Zero-Trust Procurement & 4-Eyes Governance Suite', () => {
           poId: 'po-104',
           rejectorId: 'PM-01',
           rejectorName: 'Sara Manager',
-          rejectorRole: 'head_of_procurement',
+          rejectorRole: 'country_commercial_director',
           reasonCode: '' as any
         })
       ).rejects.toThrow(/Structured reason code is mandatory for PO rejection/);

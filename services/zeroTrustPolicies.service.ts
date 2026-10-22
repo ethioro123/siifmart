@@ -63,21 +63,11 @@ const PERMISSION_TO_ITEM_ID: Record<string, string> = {
 export function mapUserRoleToManagedRole(userRole?: string): ManagedRoleId | null {
     if (!userRole) return null;
     const r = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
+    if (['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director', 'country_technology_director', 'country_compliance_manager', 'regional_operations_manager'].includes(r)) return 'admin';
+    if (['store_manager', 'assistant_store_manager', 'shift_supervisor'].includes(r)) return 'store_manager';
+    if (['cashier', 'shift_supervisor', 'sales_associate', 'customer_service'].includes(r)) return 'cashier';
     if ([
-        'super_admin', 'admin', 'ceo', 'country_managing_director',
-        'head_of_operations',
-        'head_of_finance',
-        'head_of_hr',
-        'head_of_procurement',
-        'head_of_supply_chain',
-        'head_of_merchandising',
-        'head_of_it', 'head_of_audit',
-        'regional_operations_manager'
-    ].includes(r)) return 'admin';
-    if (['store_manager', 'assistant_manager', 'store_supervisor'].includes(r)) return 'store_manager';
-    if (['cashier', 'pos', 'shift_lead', 'sales_associate', 'customer_service'].includes(r)) return 'cashier';
-    if ([
-        'warehouse_manager', 'logistics_manager', 'dispatch_manager',
+        'warehouse_manager', 'regional_supply_chain_manager', 'dispatch_supervisor',
         'fleet_maintenance_supervisor', 'dispatcher', 'picker', 'packer',
         'receiver', 'driver', 'forklift_operator', 'stock_clerk',
         'returns_clerk', 'inbound_qc_inspector', 'inventory_specialist',
@@ -117,8 +107,8 @@ export function checkDynamicRolePermission(userRole?: string, permission?: strin
     if (!userRole || !permission) return undefined;
     const normRole = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
     
-    // CEO / super_admin always has complete sovereign access
-    if (normRole === 'super_admin' || normRole === 'ceo') return true;
+    // CEO / group_ceo always has complete sovereign access
+    if (normRole === 'group_ceo') return true;
 
     const managedRole = mapUserRoleToManagedRole(normRole);
     if (!managedRole || !activeRolePermissions) return undefined;
@@ -176,7 +166,7 @@ export function validatePasswordAgainstPolicy(
 export function checkTimeRestriction(userRole?: string): { allowed: boolean; reason?: string } {
     if (!userRole) return { allowed: true };
     const norm = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
-    if (norm === 'super_admin' || norm === 'ceo') return { allowed: true };
+    if (norm === 'group_ceo' || norm === 'ceo') return { allowed: true };
 
     const policy = getActiveRolePolicy(userRole);
     if (!policy.time_restriction) return { allowed: true };
@@ -200,7 +190,7 @@ export function checkTimeRestriction(userRole?: string): { allowed: boolean; rea
 export function checkIpRestriction(userRole?: string, hostOrIp?: string): { allowed: boolean; reason?: string } {
     if (!userRole) return { allowed: true };
     const norm = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
-    if (norm === 'super_admin' || norm === 'ceo') return { allowed: true };
+    if (norm === 'group_ceo' || norm === 'ceo') return { allowed: true };
 
     const policy = getActiveRolePolicy(userRole);
     if (!policy.ip_restriction) return { allowed: true };

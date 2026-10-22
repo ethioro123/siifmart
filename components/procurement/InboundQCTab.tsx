@@ -12,15 +12,7 @@ interface InboundQCTabProps {
 
 export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
   const { user, showToast } = useStore();
-  const isManager = Boolean(user?.role && [
-    'head_of_procurement',
-    'head_of_supply_chain',
-    'regional_operations_manager',
-    'regional_procurement_manager',
-    'regional_logistics_manager',
-    'head_of_operations',
-    'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'
-  ].includes(user.role));
+  const isManager = Boolean(user?.role && ['country_commercial_director', 'country_supply_chain_director', 'regional_operations_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'country_operations_director', 'country_managing_director', 'group_ceo'].includes(user.role));
 
   const [inspections, setInspections] = useState<InboundQCInspection[]>([]);
   const [loading, setLoading] = useState(false);
@@ -110,7 +102,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
       await procurementGovernanceService.signOffQCWaiver({
         inspectionId: qc.id,
         supervisorName: user?.name || user?.email || 'Authorized Manager',
-        supervisorRole: user?.role || 'head_of_procurement',
+        supervisorRole: user?.role || 'country_commercial_director',
         waiverReason: reason.trim(),
         newDisposition: 'Conditionally Accepted'
       });

@@ -31,9 +31,8 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     { role: 'group_cio', siteType: 'Administration', department: 'Management', description: 'Group CIO - Enterprise business systems, IT operations, and information governance at Global HQ' },
     { role: 'group_clco', siteType: 'Administration', department: 'Management', description: 'Group CLCO - Global legal affairs, regulatory compliance, and risk governance at Global HQ' },
     { role: 'group_cae', siteType: 'Administration', department: 'Management', description: 'Chief Audit Executive - Independent enterprise audit and zero-trust assurance at Global HQ' },
-    { role: 'super_admin', siteType: 'Administration', department: 'Management', description: 'CEO - Executive leadership at headquarters' },
+    { role: 'group_ceo', siteType: 'Administration', department: 'Management', description: 'CEO - Executive leadership at headquarters' },
     { role: 'country_managing_director', siteType: 'Administration', department: 'Management', description: 'Country Managing Director - National executive leadership at Country HQ' },
-    { role: 'admin', siteType: 'Administration', department: 'Management', description: 'Country Managing Director - National executive leadership at Country HQ' },
     { role: 'country_operations_director', siteType: 'Any', department: 'Operations', description: 'Country Operations Director - Retail and store network operational execution' },
     { role: 'country_finance_director', siteType: 'Administration', department: 'Finance', description: 'Country Finance Director - National fiscal governance and tax' },
     { role: 'country_commercial_director', siteType: 'Administration', department: 'Procurement', description: 'Country Commercial Director - Local sourcing and merchandising' },
@@ -41,16 +40,15 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     { role: 'country_hr_director', siteType: 'Administration', department: 'Human Resources', description: 'Country HR Director - National workforce and payroll governance' },
     { role: 'country_technology_director', siteType: 'Administration', department: 'Information Technology', description: 'Country Technology Director - National IT and systems continuity' },
     { role: 'country_compliance_manager', siteType: 'Administration', department: 'Legal & Compliance', description: 'Country Compliance Manager - Statutory and risk governance' },
-    { role: 'head_of_operations', siteType: 'Any', department: 'Management', description: 'Head of Operations - Deploys across all facility types' },
-    { role: 'head_of_finance', siteType: 'Administration', department: 'Finance', description: 'Head of Finance - Financial strategy and fiscal governance at HQ' },
-    { role: 'head_of_hr', siteType: 'Administration', department: 'Human Resources', description: 'Head of Human Resources - People operations and workforce governance at HQ' },
-    { role: 'hr', siteType: 'Administration', department: 'Human Resources', description: 'Head of Human Resources - Workforce management at HQ' },
-    { role: 'head_of_procurement', siteType: 'Administration', department: 'Procurement', description: 'Head of Procurement - Enterprise strategic sourcing and supplier contracts at HQ' },
-    { role: 'head_of_supply_chain', siteType: 'Administration', department: 'Management', description: 'Head of Supply Chain - Enterprise fulfillment networks at HQ' },
-    { role: 'head_of_merchandising', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
+    { role: 'country_operations_director', siteType: 'Any', department: 'Management', description: 'Country Operations Director - Deploys across all facility types' },
+    { role: 'country_finance_director', siteType: 'Administration', department: 'Finance', description: 'Country Finance Director - Financial strategy and fiscal governance at HQ' },
+    { role: 'country_hr_director', siteType: 'Administration', department: 'Human Resources', description: 'Country HR Director - People operations and workforce governance at HQ' },
+    { role: 'country_commercial_director', siteType: 'Administration', department: 'Procurement', description: 'Country Commercial Director - Enterprise strategic sourcing and supplier contracts at HQ' },
+    { role: 'country_supply_chain_director', siteType: 'Administration', department: 'Management', description: 'Country Supply Chain Director - Enterprise fulfillment networks at HQ' },
+    { role: 'country_commercial_director', siteType: 'Administration', department: 'Management', description: 'Country Commercial Director - Corporate pricing, margins & planograms at HQ' },
     { role: 'merchandising_specialist', siteType: 'Administration', department: 'Merchandising', description: 'Merchandising Specialist - Country or regional product and campaign preparation' },
-    { role: 'head_of_it', siteType: 'Administration', department: 'Management', description: 'Head of IT - Enterprise systems and security at HQ' },
-    { role: 'head_of_audit', siteType: 'Administration', department: 'Management', description: 'Head of Internal Audit - Compliance, risk, and fraud governance at HQ' },
+    { role: 'country_technology_director', siteType: 'Administration', department: 'Management', description: 'Country Technology Director - Enterprise systems and security at HQ' },
+    { role: 'country_compliance_manager', siteType: 'Administration', department: 'Management', description: 'Country Compliance Manager - Compliance, risk, and fraud governance at HQ' },
     {
         role: 'accountant',
         siteType: 'Administration',
@@ -134,7 +132,7 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         description: 'Warehouse Manager - Oversees warehouse operations'
     },
     {
-        role: 'dispatch_manager',
+        role: 'dispatch_supervisor',
         siteType: 'Warehouse',
         department: 'Logistics & Warehouse',
         description: 'Dispatch Manager - Oversees dispatch operations'
@@ -186,28 +184,22 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         description: 'Store Manager - Overall store leadership'
     },
     {
-        role: 'store_supervisor',
+        role: 'shift_supervisor',
         siteType: 'Store',
         department: 'Retail Operations',
         description: 'Store Supervisor - Floor management at retail store'
     },
     {
-        role: 'assistant_manager',
+        role: 'assistant_store_manager',
         siteType: 'Store',
         department: 'Retail Operations',
         description: 'Assistant Manager - Store operations'
     },
     {
-        role: 'shift_lead',
+        role: 'shift_supervisor',
         siteType: 'Store',
         department: 'Retail Operations',
         description: 'Shift Lead - Shift supervision'
-    },
-    {
-        role: 'pos',
-        siteType: 'Store',
-        department: 'Retail Operations',
-        description: 'Legacy Cashier - Point of sale'
     },
     {
         role: 'cashier',
@@ -316,7 +308,7 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         description: 'Regional Security Manager - Loss prevention & supervisory audit investigations'
     },
     {
-        role: 'logistics_manager',
+        role: 'regional_supply_chain_manager',
         siteType: 'Any',
         department: 'Transport',
         description: 'Logistics Manager - Oversees transport and fleet'
@@ -328,7 +320,7 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         description: 'Inventory Manager - Stock audit and accuracy control'
     },
     {
-        role: 'security_manager',
+        role: 'regional_security_manager',
         siteType: 'Any',
         department: 'Security',
         description: 'Security & LP Manager - Shrinkage and compliance audit'

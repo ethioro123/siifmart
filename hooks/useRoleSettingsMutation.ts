@@ -56,7 +56,7 @@ export function useRoleSettingsMutation() {
 
       // ── ZERO-TRUST AUTHORIZATION CHECK ──
       const userRole = (user?.role || '').toLowerCase();
-      const isAuthorized = userRole === 'super_admin' || userRole === 'ceo' || userRole === 'admin';
+      const isAuthorized = userRole === 'group_ceo' || userRole === 'country_managing_director';
       if (!isAuthorized) {
         throw new Error('Unauthorized: Only Executive / HQ Admin accounts can alter corporate role policies or permissions.');
       }

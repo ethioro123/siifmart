@@ -177,16 +177,10 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
 
         const loadFulfillmentData = async () => {
             try {
-                // Global-queue roles (super_admin, managers, dispatchers) see ALL site jobs.
+                // Global-queue roles (group_ceo, managers, dispatchers) see ALL site jobs.
                 // Do NOT pass their personal employeeId — it would pollute the DB query with
                 // an auth UUID that may match stale assigned_to records, showing false assignments.
-                const GLOBAL_QUEUE_ROLES = [
-                    'super_admin', 'admin', 'manager', 'regional_operations_manager',
-                    'head_of_operations', 'warehouse_manager', 'dispatcher',
-                    'store_manager', 'logistics_manager', 'inventory_manager',
-                    'assistant_manager', 'shift_lead', 'inventory_specialist',
-                    'dispatch_manager', 'head_of_supply_chain', 'fleet_maintenance_supervisor', 'replenishment_planner'
-                ];
+                const GLOBAL_QUEUE_ROLES = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'warehouse_manager', 'dispatcher', 'store_manager', 'regional_supply_chain_manager', 'inventory_manager', 'assistant_store_manager', 'shift_supervisor', 'inventory_specialist', 'dispatch_supervisor', 'country_supply_chain_director', 'fleet_maintenance_supervisor', 'replenishment_planner'];
                 const isGlobalRole = GLOBAL_QUEUE_ROLES.includes((user?.role || '').toLowerCase());
 
                 // For operational roles (picker, packer, driver etc.) pass their employee ID

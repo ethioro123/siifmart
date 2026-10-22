@@ -30,7 +30,7 @@ export default function StepDetails({
         if (getRoleHierarchy(employee.role) <= getRoleHierarchy(newEmpData.role)) return false;
         const managerSite = sites.find(site => site.id === (employee.siteId || employee.site_id));
         const managerCountry = employee.country || employee.country_code || managerSite?.country;
-        const isGlobalExecutive = ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'super_admin', 'ceo'].includes(employee.role);
+        const isGlobalExecutive = ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae'].includes(employee.role);
         const countryMatches = !targetCountry || (managerCountry
             ? String(managerCountry).toUpperCase() === String(targetCountry).toUpperCase()
             : isGlobalExecutive);

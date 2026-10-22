@@ -116,7 +116,7 @@ describe('Product Edit Compliance & Rule Verification', () => {
     describe('Zero-Trust Authority Enforcement', () => {
         it('requires inventory request when non-CEO edits unit', () => {
             const userRole: string = 'store_manager';
-            const isCEO = userRole === 'super_admin' || userRole.toLowerCase() === 'ceo';
+            const isCEO = userRole === 'group_ceo' || userRole.toLowerCase() === 'group_ceo';
             expect(isCEO).toBe(false);
 
             const proposedUnit = 'KG';
@@ -138,7 +138,7 @@ describe('Product Edit Compliance & Rule Verification', () => {
 
         it('requires inventory request when non-CEO edits stock thresholds', () => {
             const userRole: string = 'inventory_specialist';
-            const isCEO = userRole === 'super_admin' || userRole.toLowerCase() === 'ceo';
+            const isCEO = userRole === 'group_ceo' || userRole.toLowerCase() === 'group_ceo';
             expect(isCEO).toBe(false);
 
             const minStock = 15;
@@ -157,8 +157,8 @@ describe('Product Edit Compliance & Rule Verification', () => {
         });
 
         it('allows direct edit when user is CEO', () => {
-            const userRole: string = 'super_admin';
-            const isCEO = userRole === 'super_admin' || userRole.toLowerCase() === 'ceo';
+            const userRole: string = 'group_ceo';
+            const isCEO = userRole === 'group_ceo' || userRole.toLowerCase() === 'group_ceo';
             expect(isCEO).toBe(true);
 
             const action = isCEO ? 'DIRECT_APPLY' : 'SUBMIT_REQUEST';

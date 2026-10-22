@@ -28,12 +28,12 @@ export function getPoApprovalPolicy({ po, role, actorName, actorRegionCode, regi
         .some(name => name?.trim().toLowerCase() === actorName.trim().toLowerCase()));
     const isOpen = po.status === 'Draft' || po.status === 'Pending';
     const isRegionalProcurement = role === 'regional_procurement_manager';
-    const isHqProcurement = role === 'head_of_procurement' || role === 'super_admin' || role === 'group_ceo';
+    const isHqProcurement = role === 'country_commercial_director' || role === 'group_ceo';
     const canApprove = isOpen && !isCreator && hasConfiguredLimit &&
         ((isRegionalProcurement && regionCode === actorRegionCode && limit != null && !needsFinanceClearance) ||
             (isHqProcurement && (!needsFinanceClearance || financeCleared)));
     const canClearFinance = isOpen && !isCreator && hasConfiguredLimit &&
-        role === 'head_of_finance' && needsFinanceClearance && !financeCleared;
+        role === 'country_finance_director' && needsFinanceClearance && !financeCleared;
 
     return { regionCode, limit, hasConfiguredLimit, needsFinanceClearance,
         financeCleared, isCreator, canApprove, canClearFinance };

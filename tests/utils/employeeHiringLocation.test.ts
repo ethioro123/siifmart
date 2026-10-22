@@ -96,23 +96,23 @@ describe('Employee Mandatory Workplace Location & Segregation Rules', () => {
         });
 
         it('requires executive and director roles to be deployed to Administration facilities', () => {
-            expect(getRequiredSiteType('super_admin')).toBe('Administration');
-            expect(getRequiredSiteType('head_of_hr')).toBe('Administration');
+            expect(getRequiredSiteType('group_ceo')).toBe('Administration');
+            expect(getRequiredSiteType('country_hr_director')).toBe('Administration');
             expect(getRequiredSiteType('payroll_specialist')).toBe('Administration');
             expect(getRequiredSiteType('talent_recruiter')).toBe('Administration');
-            expect(getRequiredSiteType('head_of_finance')).toBe('Administration');
-            expect(getRequiredSiteType('head_of_procurement')).toBe('Administration');
+            expect(getRequiredSiteType('country_finance_director')).toBe('Administration');
+            expect(getRequiredSiteType('country_commercial_director')).toBe('Administration');
 
-            expect(canRoleBeAtSiteType('head_of_hr', 'Administration')).toBe(true);
-            expect(canRoleBeAtSiteType('head_of_hr', 'Store')).toBe(false);
-            expect(canRoleBeAtSiteType('head_of_hr', 'Warehouse')).toBe(false);
+            expect(canRoleBeAtSiteType('country_hr_director', 'Administration')).toBe(true);
+            expect(canRoleBeAtSiteType('country_hr_director', 'Store')).toBe(false);
+            expect(canRoleBeAtSiteType('country_hr_director', 'Warehouse')).toBe(false);
 
-            const invalidHrAssignment = validateRoleSiteAssignment('head_of_hr', 'Store');
+            const invalidHrAssignment = validateRoleSiteAssignment('country_hr_director', 'Store');
             expect(invalidHrAssignment).toContain('must be assigned to a Administration location');
         });
 
         it('auto-selects the appropriate site ID based on the candidates role requirements', () => {
-            const hqSiteId = autoSelectSiteForRole('head_of_hr', mockSites);
+            const hqSiteId = autoSelectSiteForRole('country_hr_director', mockSites);
             expect(hqSiteId).toBe('site-hq-1');
 
             const storeSiteId = autoSelectSiteForRole('cashier', mockSites);

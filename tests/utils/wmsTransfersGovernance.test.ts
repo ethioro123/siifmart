@@ -50,15 +50,15 @@ describe('WMS Logistics & Cross-Border Transfer Quarantine Governance Suite', ()
     describe('Managerial Authority & Harmonized HQ Roles (isTransferManager)', () => {
         it('authorizes Global CEO and Country Managing Director as transfer managers', () => {
             expect(isTransferManager({ id: '1', role: 'ceo', name: 'Global CEO' } as any)).toBe(true);
-            expect(isTransferManager({ id: '2', role: 'super_admin', name: 'Super Admin' } as any)).toBe(true);
+            expect(isTransferManager({ id: '2', role: 'group_ceo', name: 'Super Admin' } as any)).toBe(true);
             expect(isTransferManager({ id: '3', role: 'country_managing_director', name: 'MD' } as any)).toBe(true);
         });
 
         it('authorizes Head of Operations and Head of Supply Chain', () => {
-            expect(isTransferManager({ id: '4', role: 'head_of_operations', name: 'Ops Head' } as any)).toBe(true);
-            expect(isTransferManager({ id: '5', role: 'head_of_operations', name: 'Ops Head' } as any)).toBe(true);
-            expect(isTransferManager({ id: '6', role: 'head_of_supply_chain', name: 'SC Head' } as any)).toBe(true);
-            expect(isTransferManager({ id: '7', role: 'head_of_supply_chain', name: 'SC Head' } as any)).toBe(true);
+            expect(isTransferManager({ id: '4', role: 'country_operations_director', name: 'Ops Head' } as any)).toBe(true);
+            expect(isTransferManager({ id: '5', role: 'country_operations_director', name: 'Ops Head' } as any)).toBe(true);
+            expect(isTransferManager({ id: '6', role: 'country_supply_chain_director', name: 'SC Head' } as any)).toBe(true);
+            expect(isTransferManager({ id: '7', role: 'country_supply_chain_director', name: 'SC Head' } as any)).toBe(true);
         });
 
         it('authorizes field logistics and warehouse managers', () => {
@@ -102,7 +102,7 @@ describe('WMS Logistics & Cross-Border Transfer Quarantine Governance Suite', ()
         });
 
         it('allows an authorized manager to delete an unapproved draft request', () => {
-            const managerUser = { id: 'u-2', name: 'Tamirat Tola', role: 'head_of_supply_chain' };
+            const managerUser = { id: 'u-2', name: 'Tamirat Tola', role: 'country_supply_chain_director' };
             const decision = canDeleteTransferManifest(mockDraftJob as any, managerUser as any);
             expect(decision.canDelete).toBe(true);
             expect(decision.isManager).toBe(true);

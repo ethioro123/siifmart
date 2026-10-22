@@ -12,15 +12,7 @@ export const ShiftProgress: React.FC = () => {
     const { settings } = useData();
     const { totalRevenue, getShiftSummary, shiftTxCount, activeShift, setIsStartShiftModalOpen, dateRange } = usePOSCommand();
 
-    const isCentralHQ = [
-        'super_admin',
-        'ceo',
-        'admin',
-        'regional_operations_manager',
-        'head_of_operations',
-        'head_of_finance',
-        'auditor'
-    ].includes(user?.role?.toLowerCase() || '');
+    const isCentralHQ = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_finance_director', 'auditor'].includes(user?.role?.toLowerCase() || '');
 
     // Inactive drawer zero-state for cashiers without an active shift
     if (!activeShift && !isCentralHQ) {

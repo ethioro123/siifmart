@@ -32,10 +32,10 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
 
   describe('1. Delegated Role Level Hierarchy', () => {
     it('allows Level 1, 2, and 3 managers to initiate hiring, but blocks Level 4 floor staff', () => {
-      expect(recruitmentService.canManageHiring('super_admin')).toBe(true);
+      expect(recruitmentService.canManageHiring('group_ceo')).toBe(true);
       expect(recruitmentService.canManageHiring('warehouse_manager')).toBe(true);
       expect(recruitmentService.canManageHiring('store_manager')).toBe(true);
-      expect(recruitmentService.canManageHiring('head_of_hr')).toBe(true);
+      expect(recruitmentService.canManageHiring('country_hr_director')).toBe(true);
 
       // Floor staff cannot initiate hiring
       expect(recruitmentService.canManageHiring('picker')).toBe(false);
@@ -62,8 +62,8 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       // Cannot hire peers or superiors
       expect(roleIds).not.toContain('warehouse_manager');
       expect(roleIds).not.toContain('store_manager');
-      expect(roleIds).not.toContain('head_of_operations');
-      expect(roleIds).not.toContain('super_admin');
+      expect(roleIds).not.toContain('country_operations_director');
+      expect(roleIds).not.toContain('group_ceo');
     });
   });
 
@@ -97,7 +97,7 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       const res = await recruitmentService.approveCandidateHR(cand.id, {
         id: 'hr-1',
         name: 'Sarah HR',
-        role: 'head_of_hr'
+        role: 'country_hr_director'
       }, 'National ID & Background verified');
 
       expect(res).toBe(true);
@@ -115,7 +115,7 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
         recruitmentService.approveCandidateSalaryFinance(cand.id, {
           id: 'hr-1',
           name: 'Sarah HR',
-          role: 'head_of_hr'
+          role: 'country_hr_director'
         }, 15000)
       ).rejects.toThrow('4-Eyes Violation: Only Finance leadership can authorize salary and compensation bands.');
     });
@@ -131,7 +131,7 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       const res = await recruitmentService.approveCandidateSalaryFinance(cand.id, {
         id: 'fin-1',
         name: 'Ahmed Finance',
-        role: 'head_of_finance'
+        role: 'country_finance_director'
       }, 16500, 'Approved under Addis Ababa distribution budget');
 
       expect(res).toBe(true);
@@ -169,14 +169,14 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       await recruitmentService.approveCandidateHR(cand.id, {
         id: 'hr-1',
         name: 'Sarah HR',
-        role: 'head_of_hr'
+        role: 'country_hr_director'
       });
 
       // 2. Finance approval
       await recruitmentService.approveCandidateSalaryFinance(cand.id, {
         id: 'fin-1',
         name: 'Ahmed Finance',
-        role: 'head_of_finance'
+        role: 'country_finance_director'
       }, 36000);
 
       // Mock employeesService.create

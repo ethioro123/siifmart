@@ -28,7 +28,7 @@ export function isStagingQuickLoginAvailable(
 
 export function mapStagingEmployee(row: StagingEmployeeRow): StagingQuickAccount | null {
     const role = SYSTEM_ROLES.find(item => item.id.toLowerCase() === row.role.toLowerCase());
-    const global = ['super_admin', 'ceo'].includes(row.role.toLowerCase());
+    const global = ['group_ceo'].includes(row.role.toLowerCase());
     const country = global ? 'GLOBAL' : row.site?.country?.toUpperCase();
     if (country !== 'GLOBAL' && country !== 'ET' && country !== 'KE') return null;
     const facility = row.site ? { ...row.site, region_code: row.site.region_code || undefined } : null;

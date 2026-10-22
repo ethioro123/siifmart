@@ -44,7 +44,7 @@ export function FinanceBaselineBanner({
 
     const handleConfirmBaseline = async () => {
         if (!isAuthorized || !mutation) {
-            showToast?.('Unauthorized: Approving financial baseline requires CEO or Head of Finance credentials.', 'error');
+            showToast?.('Unauthorized: Approving financial baseline requires CEO or Country Finance Director credentials.', 'error');
             return;
         }
 

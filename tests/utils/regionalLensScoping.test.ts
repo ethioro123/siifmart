@@ -6,10 +6,10 @@ describe('Regional Authority & Lens Scoping', () => {
     describe('canSwitchRegion', () => {
         it('permits National HQ executive roles to switch regional lenses', () => {
             expect(canSwitchRegion({ role: 'ceo' })).toBe(true);
-            expect(canSwitchRegion({ role: 'super_admin' })).toBe(true);
+            expect(canSwitchRegion({ role: 'group_ceo' })).toBe(true);
             expect(canSwitchRegion({ role: 'admin' })).toBe(true);
-            expect(canSwitchRegion({ role: 'head_of_operations' })).toBe(true);
-            expect(canSwitchRegion({ role: 'head_of_finance' })).toBe(true);
+            expect(canSwitchRegion({ role: 'country_operations_director' })).toBe(true);
+            expect(canSwitchRegion({ role: 'country_finance_director' })).toBe(true);
             expect(canSwitchRegion({ role: 'auditor' })).toBe(true);
             expect(canSwitchRegion({ title: 'Chief Executive Officer' })).toBe(true);
         });

@@ -41,7 +41,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
     const [selectedUnitCode, setSelectedUnitCode] = useState<string>('UNIT');
     const [isSaving, setIsSaving] = useState(false);
 
-    const isCEO = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
+    const isCEO = user?.role === 'group_ceo';
 
     useEffect(() => {
         if (product) {

@@ -239,7 +239,7 @@ export default function App() {
             } />
             <Route path="/pos/terminal" element={<Navigate to="/pos" replace />} />
 
-            {/* POS Command Center - Store staff only, NOT super_admin */}
+            {/* POS Command Center - Store staff only, NOT group_ceo */}
             <Route path="/pos-dashboard" element={
               <ProtectedRoute module="pos">
                 <ModuleErrorBoundary moduleName="POS Command">

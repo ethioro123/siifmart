@@ -32,7 +32,7 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
             ];
 
             for (const mod of modules) {
-                expect(canAccessModule('head_of_operations', mod)).toBe(true);
+                expect(canAccessModule('country_operations_director', mod)).toBe(true);
             }
         });
 
@@ -53,39 +53,39 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
             ];
 
             for (const route of routes) {
-                expect(canAccessRoute('head_of_operations', route)).toBe(true);
+                expect(canAccessRoute('country_operations_director', route)).toBe(true);
             }
         });
 
         it('grants critical supervisory permissions in legacy PERMISSIONS mapping', () => {
-            expect(hasPermission('head_of_operations', 'VIEW_ADMIN_DASHBOARD')).toBe(true);
-            expect(hasPermission('head_of_operations', 'ACCESS_ADMIN_MODULE')).toBe(true);
-            expect(hasPermission('head_of_operations', 'VIEW_WMS_DASHBOARD')).toBe(true);
-            expect(hasPermission('head_of_operations', 'VIEW_POS_DASHBOARD')).toBe(true);
-            expect(hasPermission('head_of_operations', 'ACCESS_POS')).toBe(true);
-            expect(hasPermission('head_of_operations', 'ACCESS_INVENTORY')).toBe(true);
-            expect(hasPermission('head_of_operations', 'ADJUST_STOCK')).toBe(true);
-            expect(hasPermission('head_of_operations', 'TRANSFER_STOCK')).toBe(true);
-            expect(hasPermission('head_of_operations', 'APPROVE_PO')).toBe(true);
-            expect(hasPermission('head_of_operations', 'ACCESS_PROCUREMENT')).toBe(true);
-            expect(hasPermission('head_of_operations', 'ACCESS_FINANCE')).toBe(true);
-            expect(hasPermission('head_of_operations', 'ACCESS_PRICING')).toBe(true);
-            expect(hasPermission('head_of_operations', 'ACCESS_SETTINGS')).toBe(true);
-            expect(hasPermission('head_of_operations', 'APPROVE_EMPLOYEE')).toBe(true);
-            expect(hasPermission('head_of_operations', 'VIEW_COST_PRICE')).toBe(true);
+            expect(hasPermission('country_operations_director', 'VIEW_ADMIN_DASHBOARD')).toBe(true);
+            expect(hasPermission('country_operations_director', 'ACCESS_ADMIN_MODULE')).toBe(true);
+            expect(hasPermission('country_operations_director', 'VIEW_WMS_DASHBOARD')).toBe(true);
+            expect(hasPermission('country_operations_director', 'VIEW_POS_DASHBOARD')).toBe(true);
+            expect(hasPermission('country_operations_director', 'ACCESS_POS')).toBe(true);
+            expect(hasPermission('country_operations_director', 'ACCESS_INVENTORY')).toBe(true);
+            expect(hasPermission('country_operations_director', 'ADJUST_STOCK')).toBe(true);
+            expect(hasPermission('country_operations_director', 'TRANSFER_STOCK')).toBe(true);
+            expect(hasPermission('country_operations_director', 'APPROVE_PO')).toBe(true);
+            expect(hasPermission('country_operations_director', 'ACCESS_PROCUREMENT')).toBe(true);
+            expect(hasPermission('country_operations_director', 'ACCESS_FINANCE')).toBe(true);
+            expect(hasPermission('country_operations_director', 'ACCESS_PRICING')).toBe(true);
+            expect(hasPermission('country_operations_director', 'ACCESS_SETTINGS')).toBe(true);
+            expect(hasPermission('country_operations_director', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(hasPermission('country_operations_director', 'VIEW_COST_PRICE')).toBe(true);
         });
     });
 
     describe('2. Multi-Site Executive Exemption & Navigation Resilience', () => {
         it('preserves all sections regardless of active site type (exempt from section stripping)', () => {
-            const warehouseSections = getAvailableSections('head_of_operations', 'Warehouse');
+            const warehouseSections = getAvailableSections('country_operations_director', 'Warehouse');
             expect(warehouseSections).toContain('admin');
             expect(warehouseSections).toContain('pos');
             expect(warehouseSections).toContain('pricing');
             expect(warehouseSections).toContain('finance');
             expect(warehouseSections).toContain('settings');
 
-            const storeSections = getAvailableSections('head_of_operations', 'Store');
+            const storeSections = getAvailableSections('country_operations_director', 'Store');
             expect(storeSections).toContain('admin');
             expect(storeSections).toContain('warehouse');
             expect(storeSections).toContain('pricing');
@@ -94,50 +94,30 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
         });
 
         it('is recognized as a multi-site role with cross-site view permissions', () => {
-            expect(canViewAllSites('head_of_operations')).toBe(true);
-            expect(canViewAllEmployees('head_of_operations')).toBe(true);
-            expect(shouldFilterBySite('head_of_operations')).toBe(false);
+            expect(canViewAllSites('country_operations_director')).toBe(true);
+            expect(canViewAllEmployees('country_operations_director')).toBe(true);
+            expect(shouldFilterBySite('country_operations_director')).toBe(false);
         });
     });
 
     describe('3. Role Hierarchy & Employment Authority (canEmployRole)', () => {
         it('has Level 2 Hierarchy Rank of 95', () => {
-            expect(getRoleHierarchy('head_of_operations')).toBe(95);
+            expect(getRoleHierarchy('country_operations_director')).toBe(95);
         });
 
         it('can hire Level 3 managers and Level 4 operational personnel', () => {
-            const hireableRoles = [
-                'store_manager',
-                'warehouse_manager',
-                'assistant_manager',
-                'shift_lead',
-                'dispatcher',
-                'picker',
-                'packer',
-                'driver',
-                'receiver',
-                'inventory_specialist',
-                'forklift_operator',
-                'cashier',
-                'pos'
-            ];
+            const hireableRoles = ['store_manager', 'warehouse_manager', 'assistant_store_manager', 'shift_supervisor', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'cashier'];
 
             for (const r of hireableRoles) {
-                expect(canEmployRole('head_of_operations', r as any)).toBe(true);
+                expect(canEmployRole('country_operations_director', r as any)).toBe(true);
             }
         });
 
         it('cannot hire Level 2 peers or executives with higher/equal rank', () => {
-            const nonHireableRoles = [
-                'CEO',
-                'ceo',
-                'super_admin',
-                'regional_operations_manager',
-                'head_of_operations'
-            ];
+            const nonHireableRoles = ['group_ceo', 'regional_operations_manager', 'country_operations_director'];
 
             for (const r of nonHireableRoles) {
-                expect(canEmployRole('head_of_operations', r as any)).toBe(false);
+                expect(canEmployRole('country_operations_director', r as any)).toBe(false);
             }
         });
     });
@@ -145,22 +125,22 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
     describe('4. Approval Workflows & Dual-Control Thresholds', () => {
         it('participates in Purchase Order approval workflows', () => {
             const poRoles = APPROVAL_WORKFLOWS.purchase_order.levels.flatMap(l => l.roles);
-            expect(poRoles).toContain('head_of_operations');
+            expect(poRoles).toContain('country_operations_director');
         });
 
         it('participates in Employee Hire approval workflows', () => {
             const hireRoles = APPROVAL_WORKFLOWS.employee_hire.levels.flatMap(l => l.roles);
-            expect(hireRoles).toContain('head_of_operations');
+            expect(hireRoles).toContain('country_operations_director');
         });
 
         it('participates in Inventory Adjustment approval workflows', () => {
             const invRoles = APPROVAL_WORKFLOWS.inventory_adjustment.levels.flatMap(l => l.roles);
-            expect(invRoles).toContain('head_of_operations');
+            expect(invRoles).toContain('country_operations_director');
         });
 
         it('participates in Refund approval workflows', () => {
             const refundRoles = APPROVAL_WORKFLOWS.refund.levels.flatMap(l => l.roles);
-            expect(refundRoles).toContain('head_of_operations');
+            expect(refundRoles).toContain('country_operations_director');
         });
     });
 
@@ -171,7 +151,7 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
             ];
 
             for (const job of internalJobs) {
-                expect(canWorkerPerformJob('head_of_operations', job)).toBe(true);
+                expect(canWorkerPerformJob('country_operations_director', job)).toBe(true);
             }
         });
 
@@ -190,30 +170,22 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
 
     describe('6. Cost Price Visibility (SOP-MGT-021 §2.5)', () => {
         it('allows head_of_operations full visibility of landed cost and gross margins', () => {
-            expect(canViewCostPrice('head_of_operations')).toBe(true);
+            expect(canViewCostPrice('country_operations_director')).toBe(true);
         });
     });
 
     describe('7. Central Operations Team Hierarchy & Employment (SOP-MGT-021 §1.3)', () => {
         it('allows head_of_operations to employ all Central Operations team roles', () => {
-            const centralOpsRoles = [
-                'data_analyst',
-                'security_manager',
-                'cs_manager',
-                'customer_service',
-                'store_operations_auditor',
-                'store_manager',
-                'warehouse_manager'
-            ];
+            const centralOpsRoles = ['data_analyst', 'regional_security_manager', 'cs_manager', 'customer_service', 'store_operations_auditor', 'store_manager', 'warehouse_manager'];
 
             for (const r of centralOpsRoles) {
-                expect(canEmployRole('head_of_operations', r as any)).toBe(true);
+                expect(canEmployRole('country_operations_director', r as any)).toBe(true);
             }
         });
 
         it('verifies hierarchy ranks for Central Operations Team', () => {
-            expect(getRoleHierarchy('head_of_operations')).toBe(95);
-            expect(getRoleHierarchy('security_manager')).toBe(75);
+            expect(getRoleHierarchy('country_operations_director')).toBe(95);
+            expect(getRoleHierarchy('regional_security_manager')).toBe(75);
             expect(getRoleHierarchy('cs_manager')).toBe(60);
             expect(getRoleHierarchy('store_operations_auditor')).toBe(45);
             expect(getRoleHierarchy('data_analyst')).toBe(35);

@@ -33,19 +33,7 @@ export const NON_DELETABLE_TRANSFER_STATUSES = [
 /**
  * Roles with managerial authority over warehouse transfers.
  */
-export const TRANSFER_MANAGER_ROLES = [
-    'super_admin',
-    'ceo',
-    'country_managing_director',
-    'admin',
-    'head_of_operations',
-    'head_of_supply_chain',
-    'regional_operations_manager',
-    'regional_logistics_manager',
-    'warehouse_manager',
-    'logistics_manager',
-    'inventory_manager'
-] as const;
+export const TRANSFER_MANAGER_ROLES = ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'regional_operations_manager', 'regional_logistics_manager', 'warehouse_manager', 'regional_supply_chain_manager', 'inventory_manager'] as const;
 
 /**
  * Checks whether a transfer manifest's lifecycle status allows deletion.

@@ -65,7 +65,7 @@ export const usePOSShiftActions = ({
         if (!activeShift) return { cash: 0, card: 0, mobile: 0, drops: 0, total: 0, expected: 0 };
         const startTime = new Date(activeShift.startTime).getTime();
         const siteId = activeShift?.siteId || activeSite?.id;
-        const isCentralHQ = ['super_admin', 'regional_operations_manager', 'head_of_operations', 'inventory_manager', 'store_manager'].includes(user?.role || '');
+        const isCentralHQ = ['group_ceo', 'regional_operations_manager', 'country_operations_director', 'inventory_manager', 'store_manager'].includes(user?.role || '');
 
         const currentShiftSales = sales.filter(s => {
             const saleTime = new Date(s.date).getTime();

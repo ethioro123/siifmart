@@ -78,7 +78,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
         // Verify Supervisor PIN
         const enteredPin = supervisorPin.trim();
         const supervisors = (employees || []).filter(e =>
-            ['super_admin', 'admin', 'country_managing_director', 'head_of_operations', 'head_of_finance', 'regional_operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'ceo'].includes(e.role?.toLowerCase() || '')
+            ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'regional_operations_manager', 'store_manager', 'assistant_store_manager', 'shift_supervisor'].includes(e.role?.toLowerCase() || '')
         );
 
         const authorizedSupervisor = supervisors.find(s => s.code?.trim() && matchStaffPin(s.code.trim(), enteredPin));

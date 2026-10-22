@@ -49,9 +49,9 @@ export function ProductForm({
     const { movements, employees, allProducts, sites, activeSite, effectiveCountry, settings, refreshData } = useData();
 
     const showCostPrice = canViewCostPrice(user?.role);
-    const isCEO = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
+    const isCEO = user?.role === 'group_ceo';
     const canEditThresholds = user?.role
-        ? ['super_admin', 'admin', 'warehouse_manager', 'store_manager', 'inventory_manager', 'head_of_procurement', 'head_of_operations', 'regional_operations_manager'].includes(user.role) || getRoleHierarchy(user.role) >= 80
+        ? ['group_ceo', 'country_managing_director', 'warehouse_manager', 'store_manager', 'inventory_manager', 'country_commercial_director', 'country_operations_director', 'regional_operations_manager'].includes(user.role) || getRoleHierarchy(user.role) >= 80
         : false;
     const thresholdsDisabled = !canEditThresholds || isReadOnly;
 

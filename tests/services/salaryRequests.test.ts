@@ -77,31 +77,31 @@ describe('Dual-Control Salary Approval Queue (SOP-GOV-018 & Zero-Trust SoD)', ()
 
     describe('Permissions & Separation of Duties (SoD)', () => {
         it('grants HR propose_salary permission while strictly withholding approve_salary', () => {
-            expect(authService.checkPermission('hr', 'employees.propose_salary')).toBe(true);
-            expect(authService.checkPermission('hr', 'employees.approve_salary')).toBe(false);
-            expect(hasPermission('hr', 'PROPOSE_SALARY')).toBe(true);
-            expect(hasPermission('hr', 'APPROVE_SALARY')).toBe(false);
+            expect(authService.checkPermission('hr_generalist', 'employees.propose_salary')).toBe(true);
+            expect(authService.checkPermission('hr_generalist', 'employees.approve_salary')).toBe(false);
+            expect(hasPermission('hr_generalist', 'PROPOSE_SALARY')).toBe(true);
+            expect(hasPermission('hr_generalist', 'APPROVE_SALARY')).toBe(false);
         });
 
         it('grants Head of Human Resources propose_salary while strictly withholding approve_salary', () => {
-            expect(authService.checkPermission('head_of_hr', 'employees.propose_salary')).toBe(true);
-            expect(authService.checkPermission('head_of_hr', 'employees.approve_salary')).toBe(false);
-            expect(hasPermission('head_of_hr', 'PROPOSE_SALARY')).toBe(true);
-            expect(hasPermission('head_of_hr', 'APPROVE_SALARY')).toBe(false);
+            expect(authService.checkPermission('country_hr_director', 'employees.propose_salary')).toBe(true);
+            expect(authService.checkPermission('country_hr_director', 'employees.approve_salary')).toBe(false);
+            expect(hasPermission('country_hr_director', 'PROPOSE_SALARY')).toBe(true);
+            expect(hasPermission('country_hr_director', 'APPROVE_SALARY')).toBe(false);
         });
 
         it('grants Head of Finance approve_salary permission while withholding direct propose_salary', () => {
-            expect(authService.checkPermission('head_of_finance', 'employees.approve_salary')).toBe(true);
-            expect(authService.checkPermission('head_of_finance', 'employees.propose_salary')).toBe(false);
-            expect(hasPermission('head_of_finance', 'APPROVE_SALARY')).toBe(true);
-            expect(hasPermission('head_of_finance', 'PROPOSE_SALARY')).toBe(false);
+            expect(authService.checkPermission('country_finance_director', 'employees.approve_salary')).toBe(true);
+            expect(authService.checkPermission('country_finance_director', 'employees.propose_salary')).toBe(false);
+            expect(hasPermission('country_finance_director', 'APPROVE_SALARY')).toBe(true);
+            expect(hasPermission('country_finance_director', 'PROPOSE_SALARY')).toBe(false);
         });
 
         it('grants CEO and Super Admin full dual-control permissions including executive override', () => {
-            expect(authService.checkPermission('super_admin', 'employees.propose_salary')).toBe(true);
-            expect(authService.checkPermission('super_admin', 'employees.approve_salary')).toBe(true);
-            expect(authService.checkPermission('CEO', 'employees.propose_salary')).toBe(true);
-            expect(authService.checkPermission('CEO', 'employees.approve_salary')).toBe(true);
+            expect(authService.checkPermission('group_ceo', 'employees.propose_salary')).toBe(true);
+            expect(authService.checkPermission('group_ceo', 'employees.approve_salary')).toBe(true);
+            expect(authService.checkPermission('group_ceo', 'employees.propose_salary')).toBe(true);
+            expect(authService.checkPermission('group_ceo', 'employees.approve_salary')).toBe(true);
         });
 
         it('enforces conflicting duty matrix between propose_salary and approve_salary', () => {
@@ -155,12 +155,12 @@ describe('Dual-Control Salary Approval Queue (SOP-GOV-018 & Zero-Trust SoD)', ()
             const approved = await salaryRequestsService.approve(req.id, {
                 id: 'fin-001',
                 name: 'David Finance',
-                role: 'head_of_finance'
+                role: 'country_finance_director'
             });
 
             expect(approved.status).toBe('approved');
             expect(approved.approvedBy).toBe('David Finance');
-            expect(approved.approvedByRole).toBe('head_of_finance');
+            expect(approved.approvedByRole).toBe('country_finance_director');
             expect(approved.approvedAt).toBeDefined();
 
             // Should no longer appear in pending list
@@ -186,7 +186,7 @@ describe('Dual-Control Salary Approval Queue (SOP-GOV-018 & Zero-Trust SoD)', ()
 
             const rejected = await salaryRequestsService.reject(
                 req.id,
-                { id: 'fin-001', name: 'David Finance', role: 'head_of_finance' },
+                { id: 'fin-001', name: 'David Finance', role: 'country_finance_director' },
                 'Exceeds departmental Q4 compensation budget ceiling'
             );
 

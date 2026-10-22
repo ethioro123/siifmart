@@ -117,19 +117,7 @@ export default function InfrastructureSettings() {
     const mutation = useHardwareSettingsMutation();
 
     // ── ROLE GATING (RULES.md Zero-Trust §1) ──
-    const allowedRoles = [
-        'super_admin',
-        'CEO',
-        'ceo',
-        'country_managing_director',
-        'admin',
-        'head_of_operations',
-        'head_of_it',
-        'it_support',
-        'regional_operations_manager',
-        'store_manager',
-        'warehouse_manager',
-    ];
+    const allowedRoles = ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_technology_director', 'it_support', 'regional_operations_manager', 'store_manager', 'warehouse_manager'];
     const isAuthorized = allowedRoles.includes(user?.role || '');
 
     // ── INVISIBLE TENANCY & COUNTRY ISOLATION (AGENTS.md Rule 7 & 8) ──

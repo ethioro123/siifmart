@@ -97,7 +97,7 @@ export const drawerReconciliationService = {
     },
 
     /**
-     * Head of Finance sign-off on cash drawer shift with supervisor co-attribution
+     * Country Finance Director sign-off on cash drawer shift with supervisor co-attribution
      */
     async signOff(
         shiftId: string,

@@ -130,11 +130,7 @@ describe('Warehouse to POS Command Center Transfer Lifecycle', () => {
                 };
             } else {
                 if (!isDeparted) {
-                    const WAREHOUSE_AUTHORITY = [
-                        'super_admin', 'admin', 'warehouse_manager', 'dispatch_manager',
-                        'head_of_operations', 'regional_operations_manager', 'dispatcher',
-                        'store_manager', 'inventory_manager', 'supervisor'
-                    ];
+                    const WAREHOUSE_AUTHORITY = ['group_ceo', 'country_managing_director', 'warehouse_manager', 'dispatch_supervisor', 'country_operations_director', 'regional_operations_manager', 'dispatcher', 'store_manager', 'inventory_manager', 'supervisor'];
                     const hasAuthority = WAREHOUSE_AUTHORITY.includes(userRole.toLowerCase());
                     return {
                         canReceive: hasAuthority,
@@ -248,7 +244,7 @@ describe('Warehouse to POS Command Center Transfer Lifecycle', () => {
 
     describe('4. Zero-Trust Blind Count & Barcode Verification', () => {
         const isBlindCountActive = (userRole: string) => {
-            const hqRoles = ['super_admin', 'ceo', 'head_of_operations', 'regional_operations_manager'];
+            const hqRoles = ['group_ceo', 'country_operations_director', 'regional_operations_manager'];
             return !hqRoles.includes((userRole || '').toLowerCase());
         };
 
@@ -260,9 +256,9 @@ describe('Warehouse to POS Command Center Transfer Lifecycle', () => {
         });
 
         it('reveals expected count only to Central HQ auditors', () => {
-            expect(isBlindCountActive('super_admin')).toBe(false);
+            expect(isBlindCountActive('group_ceo')).toBe(false);
             expect(isBlindCountActive('ceo')).toBe(false);
-            expect(isBlindCountActive('head_of_operations')).toBe(false);
+            expect(isBlindCountActive('country_operations_director')).toBe(false);
         });
 
         it('verifies scanned barcode increments quantity or flags non-shipment item', () => {

@@ -15,18 +15,6 @@ export const L10_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         managesRoles: [],
         isManagerial: false
     },
-    pos: {
-        role: 'pos',
-        level: 10,
-        levelCategory: 'specialist',
-        levelTag: 'L10 Register Staff',
-        reportsToRole: 'pos_supervisor',
-        reportsToLabel: 'POS Supervisor',
-        dottedLineRole: 'shift_supervisor',
-        dottedLineLabel: 'Shift Supervisor (Till Operations)',
-        managesRoles: [],
-        isManagerial: false
-    },
     store_associate: {
         role: 'store_associate',
         level: 10,
@@ -68,7 +56,7 @@ export const L10_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 10,
         levelCategory: 'specialist',
         levelTag: 'L10 Store Display Specialist',
-        reportsToRole: 'store_supervisor',
+        reportsToRole: 'shift_supervisor',
         reportsToLabel: 'Store Supervisor',
         dottedLineRole: 'regional_merchandising_manager',
         dottedLineLabel: 'Regional Merchandising Manager (Planogram & Promotional Facing)',
@@ -176,7 +164,7 @@ export const L10_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L10 Audit Specialist',
         reportsToRole: 'inventory_control_supervisor',
         reportsToLabel: 'Inventory Control Supervisor / Manager',
-        dottedLineRole: 'head_of_finance',
+        dottedLineRole: 'country_finance_director',
         dottedLineLabel: 'Senior Auditor (Blind Cycle Count Verifications)',
         managesRoles: [],
         isManagerial: false

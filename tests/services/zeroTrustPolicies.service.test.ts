@@ -37,7 +37,7 @@ describe('zeroTrustPolicies.service runtime enforcement', () => {
     describe('checkTimeRestriction', () => {
         it('always allows CEO and super_admin regardless of time', () => {
             expect(checkTimeRestriction('CEO').allowed).toBe(true);
-            expect(checkTimeRestriction('super_admin').allowed).toBe(true);
+            expect(checkTimeRestriction('group_ceo').allowed).toBe(true);
         });
 
         it('evaluates frontline role based on policy time_restriction flag', () => {
@@ -114,7 +114,7 @@ describe('zeroTrustPolicies.service runtime enforcement', () => {
     describe('checkDynamicRolePermission', () => {
         it('sovereign CEO and super_admin bypass dynamic permission restrictions', () => {
             expect(checkDynamicRolePermission('CEO', 'pos.void')).toBe(true);
-            expect(checkDynamicRolePermission('super_admin', 'inventory.adjust')).toBe(true);
+            expect(checkDynamicRolePermission('group_ceo', 'inventory.adjust')).toBe(true);
         });
 
         it('respects explicitly toggled dynamic role permissions', () => {

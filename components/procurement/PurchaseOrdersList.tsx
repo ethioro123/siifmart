@@ -52,9 +52,9 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     const isBulkApproving = bulkApproveMutation.isPending;
 
     const ITEMS_PER_PAGE = 20;
-    const isCEO = user?.role === 'super_admin';
-    const isProcurementManager = ['head_of_procurement', 'regional_procurement_manager', 'super_admin', 'group_ceo'].includes(user?.role || '');
-    const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager', 'head_of_operations',].includes(user?.role || '');
+    const isCEO = user?.role === 'group_ceo';
+    const isProcurementManager = ['country_commercial_director', 'regional_procurement_manager', 'group_ceo'].includes(user?.role || '');
+    const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager', 'country_operations_director'].includes(user?.role || '');
     const canApprove = isProcurementManager;
 
     const approvalPolicy = (po: PurchaseOrder) => getPoApprovalPolicy({
@@ -179,7 +179,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
             </div>
 
             {/* Bulk Actions Bar (CEO Only) */}
-            {user?.role === 'super_admin' && selectedPOIds.length > 0 && (
+            {user?.role === 'group_ceo' && selectedPOIds.length > 0 && (
                 <div className="mx-5 my-3 p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-3">
                         <span className="text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)]">
@@ -206,7 +206,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                 <table className="w-full text-left hidden md:table border-collapse">
                     <thead>
                         <tr className="border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/30">
-                            {user?.role === 'super_admin' && (
+                            {user?.role === 'group_ceo' && (
                                 <th className="px-5 py-3.5 w-12">
                                     <input
                                         type="checkbox"
@@ -244,7 +244,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                         isSelected ? 'bg-[var(--theme-accent-muted)]/30 border-l-2 border-[var(--theme-accent)]' : ''
                                     }`}
                                 >
-                                    {user?.role === 'super_admin' && (
+                                    {user?.role === 'group_ceo' && (
                                         <td className="px-5 py-4 align-middle">
                                             {isDraft ? (
                                                 <input
@@ -336,7 +336,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                 return (
                                                     <span
                                                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                                                        title="Awaiting Head of Procurement Sign-Off"
+                                                        title="Awaiting Country Commercial Director Sign-Off"
                                                     >
                                                         <Clock size={11} /> In Review
                                                     </span>
@@ -344,7 +344,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                             })()}
                                             {(po.status === 'Draft' || po.status === 'Pending') &&
                                               (isCEO || isOperationalDirector || isProcurementManager ||
-                                                (!['head_of_finance', 'regional_finance_manager'].includes(user?.role || '') && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
+                                                (!['country_finance_director', 'regional_finance_manager'].includes(user?.role || '') && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); onEdit(po); }}
                                                     className="w-8 h-8 rounded-full flex items-center justify-center border border-transparent hover:border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all active:scale-[0.95]"
@@ -356,7 +356,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                             {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') || 
                                               (isOperationalDirector && po.status !== 'Received' && po.status !== 'Cancelled') ||
                                               (isProcurementManager && po.status !== 'Received' && po.status !== 'Cancelled') ||
-                                              (po.status === 'Draft' && !['head_of_finance', 'regional_finance_manager'].includes(user?.role || '') &&
+                                              (po.status === 'Draft' && !['country_finance_director', 'regional_finance_manager'].includes(user?.role || '') &&
                                                 (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => handleDeletePO(e, po)}
@@ -373,7 +373,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                         })}
                         {orders.length === 0 && (
                             <tr>
-                                <td colSpan={user?.role === 'super_admin' ? 12 : 11} className="py-16 text-center">
+                                <td colSpan={user?.role === 'group_ceo' ? 12 : 11} className="py-16 text-center">
                                     <div className="flex flex-col items-center justify-center gap-1.5">
                                         <p className="text-sm font-semibold text-[var(--theme-text-primary)]">No purchase orders found</p>
                                         <p className="text-xs text-[var(--theme-text-secondary)]">Try adjusting your filters or create a new purchase order</p>

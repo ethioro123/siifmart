@@ -7,18 +7,7 @@ import { logger } from '../utils/logger';
  * Level 10 Frontline Execution Roles eligible for fast-track onboarding within pre-approved facility quotas.
  * Kept as LEVEL_4_FRONTLINE_ROLES export alias for backward compatibility.
  */
-export const LEVEL_10_FRONTLINE_ROLES: UserRole[] = [
-  'cashier',
-  'sales_associate',
-  'stock_clerk',
-  'picker',
-  'packer',
-  'receiver',
-  'driver',
-  'forklift_operator',
-  'returns_clerk',
-  'customer_service'
-];
+export const LEVEL_10_FRONTLINE_ROLES: UserRole[] = ['cashier', 'sales_associate', 'stock_clerk', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'returns_clerk', 'customer_service'];
 export const LEVEL_4_FRONTLINE_ROLES = LEVEL_10_FRONTLINE_ROLES;
 
 export interface QuotaEvaluationResult {

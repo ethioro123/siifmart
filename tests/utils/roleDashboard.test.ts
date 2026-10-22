@@ -8,11 +8,11 @@ afterEach(() => vi.restoreAllMocks());
 describe('getRoleDashboardRoute Sovereign Navigation', () => {
   it('routes Oscar Kennedy (head_of_procurement) strictly to /procurement and never /admin', () => {
     // When active site is Administration HQ
-    const adminSiteRoute = getRoleDashboardRoute('head_of_procurement', 'Administration');
+    const adminSiteRoute = getRoleDashboardRoute('country_commercial_director', 'Administration');
     expect(adminSiteRoute).toBe('/procurement');
 
     // When active site is unassigned or null
-    const unassignedRoute = getRoleDashboardRoute('head_of_procurement', undefined);
+    const unassignedRoute = getRoleDashboardRoute('country_commercial_director', undefined);
     expect(unassignedRoute).toBe('/procurement');
 
     // Guaranteed to never route to /admin
@@ -20,46 +20,46 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
   });
 
   it('routes Specialized Level 2 Directors to their sovereign domain', () => {
-    expect(getRoleDashboardRoute('head_of_finance', 'Administration')).toBe('/finance');
-    expect(getRoleDashboardRoute('head_of_finance', 'Administration')).toBe('/finance');
-    expect(getRoleDashboardRoute('head_of_hr', 'Administration')).toBe('/employees');
-    expect(getRoleDashboardRoute('head_of_hr', 'Administration')).toBe('/employees');
+    expect(getRoleDashboardRoute('country_finance_director', 'Administration')).toBe('/finance');
+    expect(getRoleDashboardRoute('country_finance_director', 'Administration')).toBe('/finance');
+    expect(getRoleDashboardRoute('country_hr_director', 'Administration')).toBe('/employees');
+    expect(getRoleDashboardRoute('country_hr_director', 'Administration')).toBe('/employees');
     expect(getRoleDashboardRoute('hr', 'Administration')).toBe('/employees');
-    expect(getRoleDashboardRoute('head_of_merchandising', 'Administration')).toBe('/pricing');
-    expect(getRoleDashboardRoute('head_of_merchandising', 'Administration')).toBe('/pricing');
-    expect(getRoleDashboardRoute('head_of_it', 'Administration')).toBe('/settings');
+    expect(getRoleDashboardRoute('country_commercial_director', 'Administration')).toBe('/pricing');
+    expect(getRoleDashboardRoute('country_commercial_director', 'Administration')).toBe('/pricing');
+    expect(getRoleDashboardRoute('country_technology_director', 'Administration')).toBe('/settings');
     expect(getRoleDashboardRoute('it_support', 'Administration')).toBe('/settings');
-    expect(getRoleDashboardRoute('security_manager', 'Administration')).toBe('/settings');
-    expect(getRoleDashboardRoute('head_of_supply_chain', 'Administration')).toBe('/procurement');
-    expect(getRoleDashboardRoute('head_of_supply_chain', 'Administration')).toBe('/procurement');
-    expect(getRoleDashboardRoute('head_of_procurement', 'Administration')).toBe('/procurement');
+    expect(getRoleDashboardRoute('regional_security_manager', 'Administration')).toBe('/settings');
+    expect(getRoleDashboardRoute('country_supply_chain_director', 'Administration')).toBe('/procurement');
+    expect(getRoleDashboardRoute('country_supply_chain_director', 'Administration')).toBe('/procurement');
+    expect(getRoleDashboardRoute('country_commercial_director', 'Administration')).toBe('/procurement');
     expect(getRoleDashboardRoute('buyer', 'Administration')).toBe('/procurement');
-    expect(getRoleDashboardRoute('head_of_audit', 'Administration')).toBe('/finance');
+    expect(getRoleDashboardRoute('country_compliance_manager', 'Administration')).toBe('/finance');
     expect(getRoleDashboardRoute('auditor', 'Administration')).toBe('/finance');
   });
 
   it('routes Executive Leadership to Central Operations (/admin) unless scoped to a physical site', () => {
-    expect(getRoleDashboardRoute('super_admin', 'Administration')).toBe('/admin');
+    expect(getRoleDashboardRoute('group_ceo', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('CEO', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('country_managing_director', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('admin', 'Administration')).toBe('/admin');
-    expect(getRoleDashboardRoute('head_of_operations', 'Administration')).toBe('/admin');
+    expect(getRoleDashboardRoute('country_operations_director', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('regional_operations_manager', 'Administration')).toBe('/regional-ops');
-    expect(getRoleDashboardRoute('head_of_operations', 'Administration')).toBe('/admin');
+    expect(getRoleDashboardRoute('country_operations_director', 'Administration')).toBe('/admin');
 
     // Executive scoped to a Warehouse moves to WMS ops
-    expect(getRoleDashboardRoute('super_admin', 'Warehouse')).toBe('/wms-ops');
-    expect(getRoleDashboardRoute('head_of_operations', 'Distribution Center')).toBe('/wms-ops');
+    expect(getRoleDashboardRoute('group_ceo', 'Warehouse')).toBe('/wms-ops');
+    expect(getRoleDashboardRoute('country_operations_director', 'Distribution Center')).toBe('/wms-ops');
 
     // Executive scoped to a Store moves to POS command
-    expect(getRoleDashboardRoute('super_admin', 'Store')).toBe('/pos-dashboard');
+    expect(getRoleDashboardRoute('group_ceo', 'Store')).toBe('/pos-dashboard');
     expect(getRoleDashboardRoute('regional_operations_manager', 'Retail')).toBe('/regional-ops');
   });
 
   it('routes Warehouse and Floor Operations workers to their specific role landing tab on /wms-ops', () => {
     expect(getRoleDashboardRoute('warehouse_manager', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
-    expect(getRoleDashboardRoute('logistics_manager', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
-    expect(getRoleDashboardRoute('dispatch_manager', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
+    expect(getRoleDashboardRoute('regional_supply_chain_manager', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
+    expect(getRoleDashboardRoute('dispatch_supervisor', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
     expect(getRoleDashboardRoute('picker', 'Warehouse')).toBe('/wms-ops?tab=PICK');
     expect(getRoleDashboardRoute('packer', 'Warehouse')).toBe('/wms-ops?tab=PACK');
     expect(getRoleDashboardRoute('receiver', 'Warehouse')).toBe('/wms-ops?tab=RECEIVE');
@@ -74,9 +74,9 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
 
   it('routes Store Operations staff to POS or POS Dashboard', () => {
     expect(getRoleDashboardRoute('store_manager', 'Store')).toBe('/pos-dashboard');
-    expect(getRoleDashboardRoute('assistant_manager', 'Store')).toBe('/pos-dashboard');
-    expect(getRoleDashboardRoute('shift_lead', 'Store')).toBe('/pos-dashboard');
-    expect(getRoleDashboardRoute('store_supervisor', 'Store')).toBe('/pos-dashboard');
+    expect(getRoleDashboardRoute('assistant_store_manager', 'Store')).toBe('/pos-dashboard');
+    expect(getRoleDashboardRoute('shift_supervisor', 'Store')).toBe('/pos-dashboard');
+    expect(getRoleDashboardRoute('shift_supervisor', 'Store')).toBe('/pos-dashboard');
 
     expect(getRoleDashboardRoute('cashier', 'Store')).toBe('/pos');
     expect(getRoleDashboardRoute('sales_associate', 'Store')).toBe('/pos');

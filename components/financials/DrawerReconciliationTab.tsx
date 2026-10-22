@@ -30,19 +30,9 @@ export const DrawerReconciliationTab: React.FC = () => {
     const [isActionLoading, setIsActionLoading] = useState(false);
 
     const userRole = user?.role?.toLowerCase() || '';
-    const canSignOff = [
-        'head_of_finance',
-        'regional_finance_manager',
-        'head_of_operations',
-        'regional_operations_manager',
-        'country_managing_director', 'managing_director',
-        'admin', 'super_admin', 'CEO', 'ceo'
-    ].includes(userRole);
+    const canSignOff = ['country_finance_director', 'regional_finance_manager', 'country_operations_director', 'regional_operations_manager', 'country_managing_director', 'managing_director', 'group_ceo'].includes(userRole);
 
-    const isRegionalStaff = Boolean(userRole && [
-        'regional_finance_manager',
-        'regional_operations_manager',
-    ].includes(userRole));
+    const isRegionalStaff = Boolean(userRole && ['regional_finance_manager', 'regional_operations_manager'].includes(userRole));
 
     const loadQueue = async () => {
         setLoading(true);

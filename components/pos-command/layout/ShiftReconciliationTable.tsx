@@ -16,15 +16,7 @@ export const ShiftReconciliationTable: React.FC = () => {
     const [filterStatus, setFilterStatus] = useState<'All' | 'Open' | 'Closed' | 'Audited' | 'Flagged'>('All');
     const [reconcilingId, setReconcilingId] = useState<string | null>(null);
 
-    const isHQOrManager = [
-        'super_admin',
-        'ceo',
-        'head_of_finance',
-        'regional_operations_manager',
-        'head_of_operations',
-        'admin',
-        'store_manager'
-    ].includes(user?.role?.toLowerCase() || '');
+    const isHQOrManager = ['group_ceo', 'country_finance_director', 'regional_operations_manager', 'country_operations_director', 'country_managing_director', 'store_manager'].includes(user?.role?.toLowerCase() || '');
 
     // Filter shifts for active store and search term
     const siteShifts = (shifts || []).filter(s => !activeSite?.id || s.siteId === activeSite.id);

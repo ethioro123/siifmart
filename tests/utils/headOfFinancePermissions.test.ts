@@ -6,45 +6,45 @@ import { APPROVAL_WORKFLOWS } from '../../services/permissions.service';
 describe('Head of Finance Role & Fiscal Governance Engine (SOP-MGT-022)', () => {
     describe('Module Access Controls', () => {
         it('allows head_of_finance to access core financial and governance modules', () => {
-            expect(canAccessModule('head_of_finance', 'finance')).toBe(true);
-            expect(canAccessModule('head_of_finance', 'pricing')).toBe(true);
-            expect(canAccessModule('head_of_finance', 'sales')).toBe(true);
+            expect(canAccessModule('country_finance_director', 'finance')).toBe(true);
+            expect(canAccessModule('country_finance_director', 'pricing')).toBe(true);
+            expect(canAccessModule('country_finance_director', 'sales')).toBe(true);
         });
 
         it('strictly blocks head_of_finance from cross-department operations (procurement, warehouse, pos, inventory)', () => {
-            expect(canAccessModule('head_of_finance', 'procurement')).toBe(false);
-            expect(canAccessModule('head_of_finance', 'pos')).toBe(false);
-            expect(canAccessModule('head_of_finance', 'inventory')).toBe(false);
-            expect(canAccessModule('head_of_finance', 'warehouse')).toBe(false);
-            expect(canAccessModule('head_of_finance', 'settings')).toBe(true); // Authorized for Financial & Tax Policy settings
+            expect(canAccessModule('country_finance_director', 'procurement')).toBe(false);
+            expect(canAccessModule('country_finance_director', 'pos')).toBe(false);
+            expect(canAccessModule('country_finance_director', 'inventory')).toBe(false);
+            expect(canAccessModule('country_finance_director', 'warehouse')).toBe(false);
+            expect(canAccessModule('country_finance_director', 'settings')).toBe(true); // Authorized for Financial & Tax Policy settings
         });
     });
 
     describe('Action-Level Granular Permissions (services/permissions.matrix.ts)', () => {
         it('grants pricing governance and margin protection permissions', () => {
-            expect(authService.checkPermission('head_of_finance', 'pricing.view')).toBe(true);
-            expect(authService.checkPermission('head_of_finance', 'pricing.edit')).toBe(true);
-            expect(authService.checkPermission('head_of_finance', 'pricing.approve_promo')).toBe(true);
-            expect(hasPermission('head_of_finance', 'ACCESS_PRICING')).toBe(true);
-            expect(hasPermission('head_of_finance', 'EDIT_PRICE')).toBe(true);
-            expect(hasPermission('head_of_finance', 'APPROVE_PRICE_CHANGE')).toBe(true);
+            expect(authService.checkPermission('country_finance_director', 'pricing.view')).toBe(true);
+            expect(authService.checkPermission('country_finance_director', 'pricing.edit')).toBe(true);
+            expect(authService.checkPermission('country_finance_director', 'pricing.approve_promo')).toBe(true);
+            expect(hasPermission('country_finance_director', 'ACCESS_PRICING')).toBe(true);
+            expect(hasPermission('country_finance_director', 'EDIT_PRICE')).toBe(true);
+            expect(hasPermission('country_finance_director', 'APPROVE_PRICE_CHANGE')).toBe(true);
         });
 
         it('blocks inventory stock view while granting cost price viewing for valuation', () => {
-            expect(authService.checkPermission('head_of_finance', 'inventory.view')).toBe(false);
-            expect(hasPermission('head_of_finance', 'VIEW_COST_PRICE')).toBe(true);
+            expect(authService.checkPermission('country_finance_director', 'inventory.view')).toBe(false);
+            expect(hasPermission('country_finance_director', 'VIEW_COST_PRICE')).toBe(true);
         });
 
         it('blocks till execution and POS store access under departmental isolation', () => {
-            expect(authService.checkPermission('head_of_finance', 'pos.view')).toBe(false);
+            expect(authService.checkPermission('country_finance_director', 'pos.view')).toBe(false);
 
             // Prohibited till operations (Zero Live Till Operation)
-            expect(authService.checkPermission('head_of_finance', 'pos.create_sale')).toBe(false);
-            expect(authService.checkPermission('head_of_finance', 'pos.void_sale')).toBe(false);
-            expect(authService.checkPermission('head_of_finance', 'pos.refund')).toBe(false);
-            expect(hasPermission('head_of_finance', 'PROCESS_SALE')).toBe(false);
-            expect(hasPermission('head_of_finance', 'VOID_SALE')).toBe(false);
-            expect(hasPermission('head_of_finance', 'REFUND_SALE')).toBe(false);
+            expect(authService.checkPermission('country_finance_director', 'pos.create_sale')).toBe(false);
+            expect(authService.checkPermission('country_finance_director', 'pos.void_sale')).toBe(false);
+            expect(authService.checkPermission('country_finance_director', 'pos.refund')).toBe(false);
+            expect(hasPermission('country_finance_director', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('country_finance_director', 'VOID_SALE')).toBe(false);
+            expect(hasPermission('country_finance_director', 'REFUND_SALE')).toBe(false);
         });
 
         it('grants auditor pos monitoring for daily shift review', () => {
@@ -58,19 +58,19 @@ describe('Head of Finance Role & Fiscal Governance Engine (SOP-MGT-022)', () => 
         it('includes head_of_finance in purchase order approval workflows above 10,000 threshold', () => {
             const poWorkflow = APPROVAL_WORKFLOWS.purchase_order;
             const midTier = poWorkflow.levels.find(l => l.threshold === 50000);
-            expect(midTier?.roles).toContain('head_of_finance');
+            expect(midTier?.roles).toContain('country_finance_director');
 
             const highTier = poWorkflow.levels.find(l => l.threshold === Infinity);
-            expect(highTier?.roles).toContain('head_of_finance');
+            expect(highTier?.roles).toContain('country_finance_director');
         });
 
         it('includes head_of_finance in expense approval workflows above 1,000 threshold', () => {
             const expenseWorkflow = APPROVAL_WORKFLOWS.expense;
             const midTier = expenseWorkflow.levels.find(l => l.threshold === 5000);
-            expect(midTier?.roles).toContain('head_of_finance');
+            expect(midTier?.roles).toContain('country_finance_director');
 
             const highTier = expenseWorkflow.levels.find(l => l.threshold === Infinity);
-            expect(highTier?.roles).toContain('head_of_finance');
+            expect(highTier?.roles).toContain('country_finance_director');
         });
     });
 

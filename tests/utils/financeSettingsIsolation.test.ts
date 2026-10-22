@@ -188,14 +188,14 @@ describe('Financial & Tax Control Center Isolation & Validation', () => {
 
   describe('Zero-Trust Role Gating', () => {
     it('should allow L1 CEO / Super Admin and L2 Head of Finance', () => {
-      const allowedRoles = ['super_admin', 'CEO', 'head_of_finance'];
+      const allowedRoles = ['group_ceo', 'country_finance_director'];
       for (const role of allowedRoles) {
         expect(allowedRoles.includes(role)).toBe(true);
       }
     });
 
     it('should reject unprivileged branch roles from modifying finance settings', () => {
-      const allowedRoles = ['super_admin', 'CEO', 'head_of_finance'];
+      const allowedRoles = ['group_ceo', 'country_finance_director'];
       const branchRoles = ['cashier', 'picker', 'driver', 'store_clerk', 'guest'];
       for (const role of branchRoles) {
         expect(allowedRoles.includes(role)).toBe(false);

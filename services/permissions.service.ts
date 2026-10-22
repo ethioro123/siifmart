@@ -123,39 +123,39 @@ export interface ApprovalWorkflow {
 export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     purchase_order: {
         name: 'Purchase Order Approval',
-        levels: [{ roles: ['head_of_procurement', 'regional_procurement_manager', 'super_admin', 'group_ceo'] }]
+        levels: [{ roles: ['country_commercial_director', 'regional_procurement_manager', 'group_ceo'] }]
     },
     expense: {
         name: 'Expense Approval',
         levels: [
-            { roles: ['store_manager', 'warehouse_manager', 'regional_operations_manager', 'head_of_operations', 'regional_finance_manager', 'head_of_finance',], threshold: 1000 },
-            { roles: ['head_of_finance', 'regional_finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 5000 },
-            { roles: ['head_of_finance', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
+            { roles: ['store_manager', 'warehouse_manager', 'regional_operations_manager', 'country_operations_director', 'regional_finance_manager', 'country_finance_director'], threshold: 1000 },
+            { roles: ['country_finance_director', 'regional_finance_manager', 'country_managing_director', 'group_ceo'], threshold: 5000 },
+            { roles: ['country_finance_director', 'country_managing_director', 'group_ceo'], threshold: Infinity }
         ]
     },
     employee_hire: {
         name: 'Employee Hiring Approval',
-        levels: [{ roles: ['head_of_hr', 'hr', 'regional_hr_manager', 'head_of_operations', 'regional_operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'] }]
+        levels: [{ roles: ['country_hr_director', 'hr_generalist', 'regional_hr_manager', 'country_operations_director', 'regional_operations_manager', 'country_managing_director', 'group_ceo'] }]
     },
     inventory_adjustment: {
         name: 'Inventory Adjustment Approval',
         levels: [
-            { roles: ['warehouse_manager', 'inventory_manager', 'head_of_operations', 'head_of_supply_chain', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 100 },
-            { roles: ['warehouse_manager', 'inventory_manager', 'regional_operations_manager', 'head_of_operations', 'head_of_supply_chain', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
+            { roles: ['warehouse_manager', 'inventory_manager', 'country_operations_director', 'country_supply_chain_director', 'country_managing_director', 'group_ceo'], threshold: 100 },
+            { roles: ['warehouse_manager', 'inventory_manager', 'regional_operations_manager', 'country_operations_director', 'country_supply_chain_director', 'country_managing_director', 'group_ceo'], threshold: Infinity }
         ]
     },
     price_change: {
         name: 'Price Change Approval',
         levels: [
-            { roles: ['store_manager', 'regional_merchandising_manager', 'regional_operations_manager', 'head_of_merchandising', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 10 },
-            { roles: ['regional_merchandising_manager', 'regional_operations_manager', 'head_of_merchandising', 'head_of_finance', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
+            { roles: ['store_manager', 'regional_merchandising_manager', 'regional_operations_manager', 'country_commercial_director', 'country_managing_director', 'group_ceo'], threshold: 10 },
+            { roles: ['regional_merchandising_manager', 'regional_operations_manager', 'country_commercial_director', 'country_finance_director', 'country_managing_director', 'group_ceo'], threshold: Infinity }
         ]
     },
     refund: {
         name: 'Refund Approval',
         levels: [
-            { roles: ['store_manager', 'cs_manager', 'assistant_manager', 'shift_lead'], threshold: 500 },
-            { roles: ['store_manager', 'cs_manager', 'regional_operations_manager', 'head_of_operations', 'head_of_finance', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
+            { roles: ['store_manager', 'cs_manager', 'assistant_store_manager', 'shift_supervisor'], threshold: 500 },
+            { roles: ['store_manager', 'cs_manager', 'regional_operations_manager', 'country_operations_director', 'country_finance_director', 'country_managing_director', 'group_ceo'], threshold: Infinity }
         ]
     }
 };
@@ -221,13 +221,13 @@ export function canApprove(
 ): boolean {
     const norm = ((userRole as string) || '').toLowerCase().trim().replace(/[\s-]/g, '_');
     if (workflowName === 'purchase_order') {
-        if (norm === 'head_of_procurement' || norm === 'super_admin' || norm === 'group_ceo') return true;
+        if (norm === 'country_commercial_director' || norm === 'group_ceo') return true;
         return norm === 'regional_procurement_manager' && amount !== undefined &&
             customThreshold !== undefined && Number.isFinite(customThreshold) &&
             amount <= customThreshold;
     }
     // Global CEO and Country Managing Director can sign off any workflow within policy
-    if (norm === 'super_admin' || norm === 'ceo' || norm === 'country_managing_director' || norm === 'admin') {
+    if (norm === 'group_ceo' || norm === 'ceo' || norm === 'country_managing_director' || norm === 'admin') {
         return true;
     }
 

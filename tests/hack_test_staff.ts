@@ -115,11 +115,11 @@ async function main() {
     console.log(`\n${BOLD}── Testing PRIVILEGE ESCALATION (should be BLOCKED) ──${RESET}`);
     
     await testAttack('Promote self to super_admin', 
-        false, () => staffClient.from('employees').update({ role: 'super_admin' }).eq('email', email).select());
+        false, () => staffClient.from('employees').update({ role: 'group_ceo' }).eq('email', email).select());
     
     await testAttack('Create a new admin employee', 
         false, () => staffClient.from('employees').insert({ 
-            name: 'HACKER ADMIN', email: 'hacker@evil.com', role: 'super_admin', status: 'Active' 
+            name: 'HACKER ADMIN', email: 'hacker@evil.com', role: 'group_ceo', status: 'Active' 
         }).select());
 
     // ── DATA THEFT ATTACKS ───────────────────────────────────────

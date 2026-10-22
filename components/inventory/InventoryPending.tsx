@@ -65,13 +65,13 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
         if (requiresFinanceCoApproval(change)) {
             return canApproveBelowFloor(role);
         }
-        // Super admin, admin, warehouse_manager, head_of_procurement, store_manager can approve changes
-        if (['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_procurement', 'store_manager', 'head_of_operations', 'regional_operations_manager'].includes(role)) return true;
+        // Super admin, admin, warehouse_manager, country_commercial_director, store_manager can approve changes
+        if (['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_commercial_director', 'store_manager', 'country_operations_director', 'regional_operations_manager'].includes(role)) return true;
         const requiredRole = change.approvalRole || (change as any).approval_role;
         // No specific role required → use the existing canApprove
         if (!requiredRole) return true;
         // Check if user's role matches the required approval role
-        if ((requiredRole === 'head_of_procurement' || requiredRole === 'head_of_procurement') && (role === 'head_of_procurement' || role === 'head_of_procurement' || role === 'head_of_procurement' || role === 'procurement')) return true;
+        if ((requiredRole === 'country_commercial_director') && (role === 'country_commercial_director' || role === 'procurement')) return true;
         if (requiredRole === 'warehouse_manager' && (role === 'warehouse_manager' || role === 'manager' || role === 'warehouse')) return true;
         if (requiredRole === 'store_manager' && (role === 'store_manager' || role === 'manager')) return true;
         return false;
@@ -80,7 +80,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
     const getAwaitingLabel = (change: PendingInventoryChange): string => {
         if (requiresFinanceCoApproval(change)) return 'Awaiting Finance Co-Approval (< 15% Margin)';
         const requiredRole = change.approvalRole || (change as any).approval_role;
-        if (requiredRole === 'head_of_procurement' || requiredRole === 'head_of_procurement') return 'Awaiting Head of Procurement';
+        if (requiredRole === 'country_commercial_director') return 'Awaiting Country Commercial Director';
         if (requiredRole === 'warehouse_manager') return 'Awaiting Warehouse Manager';
         if (requiredRole === 'store_manager') return 'Awaiting Store Manager';
         return 'Awaiting Manager Approval';

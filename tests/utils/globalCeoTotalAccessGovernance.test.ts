@@ -4,7 +4,7 @@ import { getVisibleFulfillmentTabs } from '../../utils/fulfillmentTabPermissions
 import { canEmployRole, canViewCostPrice, canViewLocation } from '../../utils/roles';
 
 describe('Global CEO Total Access, Control & Sovereignty Engine', () => {
-    const CEO_ROLES = ['super_admin', 'ceo', 'CEO'] as const;
+    const CEO_ROLES = ['group_ceo'] as const;
 
     const ALL_MODULES = [
         'dashboard',
@@ -67,7 +67,7 @@ describe('Global CEO Total Access, Control & Sovereignty Engine', () => {
 
     describe('Sovereign Cross-Border National Switching Authority', () => {
         it('authorizes Global CEO to switch between Kenya (KE) and Ethiopia (ET)', () => {
-            expect(canSwitchCountry({ role: 'super_admin' })).toBe(true);
+            expect(canSwitchCountry({ role: 'group_ceo' })).toBe(true);
             expect(canSwitchCountry({ role: 'ceo' })).toBe(true);
             expect(canSwitchCountry({ role: 'CEO' })).toBe(true);
             expect(canSwitchCountry({ title: 'Chief Executive Officer' })).toBe(true);
@@ -86,26 +86,26 @@ describe('Global CEO Total Access, Control & Sovereignty Engine', () => {
 
     describe('Hiring, Confidential Cost Pricing & Global Telemetry Command', () => {
         it('authorizes Global CEO to onboard any role below CEO level', () => {
-            expect(canEmployRole('super_admin', 'country_managing_director')).toBe(true);
-            expect(canEmployRole('super_admin', 'head_of_operations')).toBe(true);
-            expect(canEmployRole('super_admin', 'regional_operations_manager')).toBe(true);
-            expect(canEmployRole('super_admin', 'store_manager')).toBe(true);
-            expect(canEmployRole('super_admin', 'cashier')).toBe(true);
+            expect(canEmployRole('group_ceo', 'country_managing_director')).toBe(true);
+            expect(canEmployRole('group_ceo', 'country_operations_director')).toBe(true);
+            expect(canEmployRole('group_ceo', 'regional_operations_manager')).toBe(true);
+            expect(canEmployRole('group_ceo', 'store_manager')).toBe(true);
+            expect(canEmployRole('group_ceo', 'cashier')).toBe(true);
 
             expect(canEmployRole('ceo', 'country_managing_director')).toBe(true);
-            expect(canEmployRole('ceo', 'super_admin')).toBe(false);
+            expect(canEmployRole('ceo', 'group_ceo')).toBe(false);
         });
 
         it('grants Global CEO complete visibility into supplier cost prices', () => {
-            expect(canViewCostPrice('super_admin')).toBe(true);
+            expect(canViewCostPrice('group_ceo')).toBe(true);
             expect(canViewCostPrice('ceo')).toBe(true);
             expect(canViewCostPrice('cashier')).toBe(false);
             expect(canViewCostPrice('driver')).toBe(false);
         });
 
         it('authorizes Global CEO to view any location/telemetry globally', () => {
-            expect(canViewLocation('super_admin', 'country_managing_director', false)).toBe(true);
-            expect(canViewLocation('ceo', 'head_of_operations', false)).toBe(true);
+            expect(canViewLocation('group_ceo', 'country_managing_director', false)).toBe(true);
+            expect(canViewLocation('ceo', 'country_operations_director', false)).toBe(true);
         });
     });
 });

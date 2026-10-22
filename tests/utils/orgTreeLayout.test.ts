@@ -5,16 +5,16 @@ import { Employee } from '../../types';
 
 describe('orgTreeLayout helpers', () => {
     it('correctly ranks 10-level hierarchy role levels (L1 CEO to L10 Frontline)', () => {
-        expect(getRoleLevel('super_admin')).toBe(1);
+        expect(getRoleLevel('group_ceo')).toBe(1);
         expect(getRoleLevel('admin')).toBe(2);
-        expect(getRoleLevel('head_of_operations')).toBe(3);
-        expect(getRoleLevel('head_of_finance')).toBe(3);
+        expect(getRoleLevel('country_operations_director')).toBe(3);
+        expect(getRoleLevel('country_finance_director')).toBe(3);
         expect(getRoleLevel('regional_operations_manager')).toBe(4);
         expect(getRoleLevel('regional_procurement_manager')).toBe(5);
         expect(getRoleLevel('store_manager')).toBe(6);
         expect(getRoleLevel('warehouse_manager')).toBe(6);
-        expect(getRoleLevel('logistics_manager')).toBe(7);
-        expect(getRoleLevel('shift_lead')).toBe(8);
+        expect(getRoleLevel('regional_supply_chain_manager')).toBe(7);
+        expect(getRoleLevel('shift_supervisor')).toBe(8);
         expect(getRoleLevel('auditor')).toBe(9);
         expect(getRoleLevel('cashier')).toBe(10);
         expect(getRoleLevel('picker')).toBe(10);
@@ -23,8 +23,8 @@ describe('orgTreeLayout helpers', () => {
 
     it('correctly orders matrix position ranking (Store Mgr < Asst Mgr < Shift Lead < Cashier)', () => {
         const storeMgrRank = getRoleRank('store_manager');
-        const asstMgrRank = getRoleRank('assistant_manager');
-        const shiftLeadRank = getRoleRank('shift_lead');
+        const asstMgrRank = getRoleRank('assistant_store_manager');
+        const shiftLeadRank = getRoleRank('shift_supervisor');
         const cashierRank = getRoleRank('cashier');
 
         expect(storeMgrRank).toBeLessThan(asstMgrRank);
@@ -37,15 +37,15 @@ describe('orgTreeLayout helpers', () => {
     });
 
     it('correctly maps roles to corporate departments', () => {
-        expect(getRoleDept('super_admin')).toBe('executive');
-        expect(getRoleDept('head_of_operations')).toBe('executive');
+        expect(getRoleDept('group_ceo')).toBe('executive');
+        expect(getRoleDept('country_operations_director')).toBe('executive');
         expect(getRoleDept('regional_operations_manager')).toBe('executive');
         expect(getRoleDept('cashier')).toBe('store');
         expect(getRoleDept('store_manager')).toBe('store');
         expect(getRoleDept('picker')).toBe('warehouse');
         expect(getRoleDept('warehouse_manager')).toBe('warehouse');
-        expect(getRoleDept('head_of_finance')).toBe('finance');
-        expect(getRoleDept('head_of_hr')).toBe('hr');
+        expect(getRoleDept('country_finance_director')).toBe('finance');
+        expect(getRoleDept('country_hr_director')).toBe('hr');
         expect(getRoleDept('buyer')).toBe('procurement');
         expect(getRoleDept('vendor_relations_manager')).toBe('procurement');
         expect(getRoleDept('customs_import_specialist')).toBe('procurement');
@@ -63,8 +63,8 @@ import { useOrgTreeLayout } from '../../components/org-chart/hooks/useOrgTreeLay
 
 describe('useOrgTreeLayout hook', () => {
     const mockEmployees: Employee[] = [
-        { id: 'emp-1', name: 'CEO Boss', role: 'super_admin', department: 'Executive', code: 'EMP-01', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
-        { id: 'emp-2', name: 'Ops Director', role: 'head_of_operations', department: 'Operations', code: 'EMP-02', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
+        { id: 'emp-1', name: 'CEO Boss', role: 'group_ceo', department: 'Executive', code: 'EMP-01', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
+        { id: 'emp-2', name: 'Ops Director', role: 'country_operations_director', department: 'Operations', code: 'EMP-02', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
         { id: 'emp-3', name: 'Store Mgr', role: 'store_manager', department: 'Store', code: 'EMP-03', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 88, siteId: 'site-1' },
         { id: 'emp-4', name: 'Cashier Alice', role: 'cashier', department: 'Store', code: 'EMP-04', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 92, siteId: 'site-1' },
     ];
@@ -82,7 +82,7 @@ describe('useOrgTreeLayout hook', () => {
     });
 
     it('handles team without a super_admin (root falls back to highest role)', () => {
-        const teamWithoutCeo = mockEmployees.filter(e => e.role !== 'super_admin');
+        const teamWithoutCeo = mockEmployees.filter(e => e.role !== 'group_ceo');
         const { result } = renderHook(() => useOrgTreeLayout({
             employees: teamWithoutCeo,
             sites: [],
@@ -104,11 +104,11 @@ describe('useOrgTreeLayout hook', () => {
 
     it('wires Central Operations team members to head_of_operations', () => {
         const opsTeamEmployees: Employee[] = [
-            { id: 'ceo-1', name: 'CEO', role: 'super_admin', department: 'Executive', code: 'EMP-01', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
-            { id: 'ops-1', name: 'Ops Director', role: 'head_of_operations', department: 'Operations', code: 'EMP-02', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
+            { id: 'ceo-1', name: 'CEO', role: 'group_ceo', department: 'Executive', code: 'EMP-01', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
+            { id: 'ops-1', name: 'Ops Director', role: 'country_operations_director', department: 'Operations', code: 'EMP-02', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
             { id: 'aud-1', name: 'Store Auditor', role: 'store_operations_auditor', department: 'Executive', code: 'EMP-03', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
             { id: 'da-1', name: 'Data Analyst', role: 'data_analyst', department: 'Executive', code: 'EMP-04', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 88, siteId: 'site-1' },
-            { id: 'sec-1', name: 'Security Mgr', role: 'security_manager', department: 'Security', code: 'EMP-05', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
+            { id: 'sec-1', name: 'Security Mgr', role: 'regional_security_manager', department: 'Security', code: 'EMP-05', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
             { id: 'cs-1', name: 'CS Mgr', role: 'cs_manager', department: 'Store', code: 'EMP-06', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 87, siteId: 'site-1' },
             { id: 'rep-1', name: 'CS Rep', role: 'customer_service', department: 'Store', code: 'EMP-07', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 91, siteId: 'site-1' },
         ];

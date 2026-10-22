@@ -12,16 +12,7 @@ import { matchStaffPin } from '../../../utils/employeeIdGenerator';
 
 type ReasonCode = 'underpack' | 'overpack' | 'wrong_item' | 'damaged' | 'short_picked';
 
-const SUPERVISORY_ROLES = [
-    'super_admin',
-    'ceo',
-    'head_of_operations',
-    'warehouse_manager',
-    'inventory_manager',
-    'store_manager',
-    'shift_supervisor',
-    'inventory_specialist'
-];
+const SUPERVISORY_ROLES = ['group_ceo', 'country_operations_director', 'warehouse_manager', 'inventory_manager', 'store_manager', 'shift_supervisor', 'inventory_specialist'];
 
 interface PackDiscrepLine {
     index: number;

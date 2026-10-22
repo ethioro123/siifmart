@@ -95,7 +95,7 @@ async function main() {
     
     await testAttack('INSERT fake employee', 
         () => hackerClient.from('employees').insert({ 
-            name: 'HACKER', email: 'hacker@evil.com', role: 'super_admin', status: 'Active' 
+            name: 'HACKER', email: 'hacker@evil.com', role: 'group_ceo', status: 'Active' 
         }).select());
     
     await testAttack('INSERT fake product', 

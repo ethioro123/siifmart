@@ -13,7 +13,7 @@ export default function OnlineStoreManagement() {
   const { user } = useStore();
   const { activeSite, sites } = useData();
   const role = user?.role?.toLowerCase() || '';
-  const canManageOrders = ['warehouse_manager', 'head_of_operations', 'logistics_manager', 'regional_logistics_manager', 'admin', 'super_admin', 'ceo'].includes(role);
+  const canManageOrders = ['warehouse_manager', 'country_operations_director', 'regional_supply_chain_manager', 'regional_logistics_manager', 'country_managing_director', 'group_ceo'].includes(role);
   const [notice, setNotice] = useState('');
   const [formError, setFormError] = useState('');
   const [customerName, setCustomerName] = useState('');

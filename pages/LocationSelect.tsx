@@ -88,7 +88,7 @@ export default function LocationSelect() {
                         </div>
 
                         {/* Option to return to HQ View if user is CEO */}
-                        {user?.role === 'super_admin' && (
+                        {user?.role === 'group_ceo' && (
                             <button
                                 onClick={handleBackToCentral}
                                 className="woody-btn-secondary py-2 px-4 flex items-center gap-2 text-sm"

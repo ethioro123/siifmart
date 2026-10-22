@@ -53,7 +53,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                         {pendingSalaryCount} Compensation Adjustment {pendingSalaryCount === 1 ? 'Proposal' : 'Proposals'} Awaiting Authorization
                      </h4>
                      <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
-                        Dual-Control 4-Eyes Governance: Compensation changes proposed by HR require Head of Finance or CEO co-signature.
+                        Dual-Control 4-Eyes Governance: Compensation changes proposed by HR require Country Finance Director or CEO co-signature.
                      </p>
                   </div>
                </div>
@@ -137,7 +137,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                   >
                      Details in Financials
                   </button>
-                  {canViewAll && (userRole === 'head_of_hr' || userRole === 'head_of_hr' || userRole === 'hr' || userRole === 'head_of_hr' || userRole === 'country_managing_director' || userRole === 'admin' || userRole === 'super_admin' || userRole === 'CEO') && (
+                  {canViewAll && (userRole === 'country_hr_director' || userRole === 'hr_generalist' || userRole === 'country_hr_director' || userRole === 'country_managing_director' || userRole === 'group_ceo') && (
                      <button
                         type="button"
                         onClick={onCertifyPayroll}

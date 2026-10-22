@@ -219,11 +219,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                 const isDone = ['delivered', 'completed', 'received'].includes(rawStat);
                                                 const isDeparted = ['shipped', 'intransit', 'dispatched', 'delivered', 'completed', 'received'].includes(rawStat) || !!shippedAt;
 
-                                                const WAREHOUSE_AUTHORITY_ROLES = [
-                                                    'super_admin', 'admin', 'warehouse_manager', 'dispatch_manager',
-                                                    'head_of_operations', 'regional_operations_manager', 'dispatcher',
-                                                    'store_manager', 'inventory_manager', 'supervisor'
-                                                ];
+                                                const WAREHOUSE_AUTHORITY_ROLES = ['group_ceo', 'country_managing_director', 'warehouse_manager', 'dispatch_supervisor', 'country_operations_director', 'regional_operations_manager', 'dispatcher', 'store_manager', 'inventory_manager', 'supervisor'];
                                                 const userRole = (user?.role || '').toLowerCase();
                                                 const hasAuthority = WAREHOUSE_AUTHORITY_ROLES.includes(userRole);
 

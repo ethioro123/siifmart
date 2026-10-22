@@ -69,7 +69,7 @@ export default function Inventory() {
     }, [activeTab]);
 
     // --- READ-ONLY & PERMISSIONS ---
-    const canApprove = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'regional_operations_manager', 'regional_procurement_manager', 'head_of_operations', 'head_of_procurement',].includes(user?.role || '');
+    const canApprove = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'regional_procurement_manager', 'country_operations_director', 'country_commercial_director'].includes(user?.role || '');
     const isReadOnly = useMemo(() => {
         if (!activeSite) return true; // HQ View is Read-Only
         const type = activeSite.type;
@@ -102,7 +102,7 @@ export default function Inventory() {
 
     // Filter products (client-side for charts, might need server-side for large data in future)
     const filteredProducts = useMemo(() => {
-        const base = isReadOnly ? allProducts : filterBySite(products, user?.role || 'pos', activeSite?.id || '');
+        const base = isReadOnly ? allProducts : filterBySite(products, user?.role || 'cashier', activeSite?.id || '');
         return (Array.isArray(base) ? base : []).filter(p => (p.status || (p as any).status) !== 'archived');
     }, [products, allProducts, isReadOnly, user?.role, activeSite]);
 

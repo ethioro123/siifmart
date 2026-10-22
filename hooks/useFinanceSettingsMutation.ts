@@ -4,7 +4,7 @@
  * Mutation hook for updating fiscal policies, tax jurisdictions, drawer limits,
  * exchange rates, and compliance rules.
  * Strictly enforces:
- *  1. Zero-Trust Role Gating (L1 CEO / Super Admin & L2 Head of Finance only).
+ *  1. Zero-Trust Role Gating (L1 CEO / Super Admin & L2 Country Finance Director only).
  *  2. Zod Schema Validation before writing.
  *  3. 100% Country-Level Isolation (settings partitioned by targetCountry).
  *  4. Tamper-Proof Audit Trail (system_logs).
@@ -55,13 +55,9 @@ export function useFinanceSettingsMutation() {
   const settingsMutation = useMutation<void, Error, FinanceSettingsPayload>({
     mutationFn: async ({ section, targetCountry = 'ET', data }) => {
       // ── 1. ROLE GUARD (RULES.md §1 Zero-Trust & AGENTS.md §1) ──
-      const isAuthorized = [
-        'super_admin', 'CEO', 'ceo',
-        'country_managing_director', 'admin',
-        'head_of_finance',
-      ].includes(user?.role || '');
+      const isAuthorized = ['group_ceo', 'country_managing_director', 'country_finance_director'].includes(user?.role || '');
       if (!isAuthorized) {
-        throw new Error('Unauthorized: Modifying financial and tax settings requires CEO, Managing Director, or Head of Finance credentials.');
+        throw new Error('Unauthorized: Modifying financial and tax settings requires CEO, Managing Director, or Country Finance Director credentials.');
       }
 
       // ── 2. ZOD VALIDATION ──
@@ -167,11 +163,7 @@ export function useFinanceSettingsMutation() {
 
   const assignSiteMutation = useMutation<void, Error, AssignSiteJurisdictionPayload>({
     mutationFn: async ({ siteId, taxJurisdictionId }) => {
-      const isAuthorized = [
-        'super_admin', 'CEO', 'ceo',
-        'country_managing_director', 'admin',
-        'head_of_finance',
-      ].includes(user?.role || '');
+      const isAuthorized = ['group_ceo', 'country_managing_director', 'country_finance_director'].includes(user?.role || '');
       if (!isAuthorized) {
         throw new Error('Unauthorized: Assigning sites to tax jurisdictions requires managerial credentials.');
       }
