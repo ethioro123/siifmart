@@ -17,6 +17,7 @@ import { buildPurchaseOrders, resolvePOVendor } from './createPOHelpers';
 import { CreatePOFooter } from './CreatePOFooter';
 import { logger } from '../../utils/logger';
 import { hasPermission } from '../../utils/permissions';
+import { getProcurementScope } from '../../utils/procurementScope';
 import { resolvePOReceivingSelection } from '../../utils/poReceivingSelection';
 
 interface CreatePOModalProps {
@@ -38,8 +39,9 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const activeCountry: Country = (effectiveCountry || (settings?.country as Country) || 'ET');
     const countryProfile = getCountryProfile(activeCountry);
     const currencySymbol = countryProfile.currencySymbol;
-    const isRegionalUser = Boolean(user?.role?.startsWith('regional_') || user?.regionCode);
-    const activeRegionCode = user?.regionCode || null;
+    const procurementScope = getProcurementScope(user, countrySites?.length ? countrySites : sites);
+    const isRegionalUser = procurementScope.kind === 'regional';
+    const activeRegionCode = procurementScope.regionCode;
 
     const isPurchasingTaxEnabled = Boolean(settings?.countryConfigs?.[activeCountry]?.taxOnPurchasing ?? settings?.taxOnPurchasing);
     const defaultTaxRate = isPurchasingTaxEnabled ? (countryProfile.taxRate ?? (activeCountry === 'KE' ? 16 : 15)) : 0;
@@ -76,7 +78,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const pendingDestinationSiteIdsRef = useRef<string[]>([]);
     const { countryWarehouses, allSuppliers, effectiveProducts } = useCreatePOData({
         isOpen, activeCountry, allProducts: allProducts || [], contextSuppliers,
-        sites, countrySites: countrySites || [], destinationSiteIds, isRegionalUser, activeRegionCode
+        sites, countrySites: countrySites || [], destinationSiteIds, isRegionalUser, activeRegionCode, user
     });
 
     const { draftMeta, isRestoredBannerVisible, dismissBanner, saveDraft, readStoredDraft, discardDraft } = usePODraft({

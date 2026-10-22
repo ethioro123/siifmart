@@ -447,3 +447,8 @@
 - New orders default only to the signed-in employee’s eligible receiving hub; HQ and regional staff choose their destination explicitly.
 - Saved and existing orders never fall back silently to the first warehouse when their destination is unavailable.
 - Staging quick login includes every warehouse and distribution center so receiving teams can access the selected facility.
+
+### Procurement assignment boundaries (2026-10-23)
+- Order lists, receiving destinations, and catalog fallback use employee-assigned regional/site scope and deny missing assignments.
+- Database procurement guards prevent regional or site staff from accessing orders beyond their assignment; regional supplier access requires the matching region.
+- Policy persisted in `rules/02-country-and-operations.md`; migration `migrations/20261023_enforce_procurement_assignment_boundaries.sql` (staging).

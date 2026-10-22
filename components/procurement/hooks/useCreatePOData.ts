@@ -5,7 +5,10 @@ import { deduplicateCatalogProducts } from '../createPOHelpers';
 import { logger } from '../../../utils/logger';
 import type { Country } from '../../../utils/localization';
 
+import { getProcurementScope, filterProcurementSites } from '../../../utils/procurementScope';
+
 interface UseCreatePODataParams {
+    user?: Parameters<typeof getProcurementScope>[0];
     isOpen: boolean;
     activeCountry: Country;
     allProducts: Product[];
@@ -26,7 +29,8 @@ export function useCreatePOData({
     countrySites,
     destinationSiteIds,
     isRegionalUser,
-    activeRegionCode
+    activeRegionCode,
+    user
 }: UseCreatePODataParams) {
     const [localSuppliers, setLocalSuppliers] = useState<Supplier[]>([]);
     const [localProducts, setLocalProducts] = useState<Product[]>([]);
@@ -36,10 +40,12 @@ export function useCreatePOData({
         setLocalProducts([]);
     }, [activeCountry]);
 
+    const assignedScope = useMemo(() => getProcurementScope(user, countrySites?.length ? countrySites : sites), [user, countrySites, sites]);
+
     const countrySitePool = useMemo(() => {
         const pool = countrySites?.length ? countrySites : sites;
-        return pool.filter(s => (s.country || 'ET') === activeCountry);
-    }, [countrySites, sites, activeCountry]);
+        return filterProcurementSites(pool, activeCountry, assignedScope);
+    }, [countrySites, sites, activeCountry, assignedScope]);
 
     const countrySiteIds = useMemo(() => new Set(countrySitePool.map(s => s.id)), [countrySitePool]);
 
@@ -47,7 +53,7 @@ export function useCreatePOData({
         return countrySitePool.filter(s =>
             (s.type === 'Warehouse' || s.type === 'Distribution Center') &&
             s.status !== 'Closed' &&
-            (!isRegionalUser || !activeRegionCode || (s.regionCode || (s as any).region_code) === activeRegionCode)
+            (!isRegionalUser || (Boolean(activeRegionCode) && (s.regionCode || s.region_code) === activeRegionCode))
         );
     }, [countrySitePool, isRegionalUser, activeRegionCode]);
 
@@ -62,6 +68,7 @@ export function useCreatePOData({
     useEffect(() => {
         if (isOpen && (!allProducts || allProducts.length === 0) && localProducts.length === 0) {
             const targetSiteId = countryWarehouses[0]?.id;
+            if (!targetSiteId) return;
             productsService.getAll(targetSiteId, 100, 0, undefined, undefined, false).then(res => {
                 setLocalProducts((res.data || []) as Product[]);
             }).catch(err => logger.error('CreatePOModal', 'Direct products fetch failed', err as Error));
@@ -69,12 +76,13 @@ export function useCreatePOData({
     }, [isOpen, allProducts?.length, localProducts.length, countryWarehouses]);
 
     const allSuppliers = useMemo(() => {
+        if (assignedScope.kind === 'none') return [];
         const raw = contextSuppliers.length > 0 ? contextSuppliers : localSuppliers;
         return raw.filter(s =>
             (!s.countryCode || s.countryCode === activeCountry) &&
-            (!isRegionalUser || !activeRegionCode || !s.regionCode || s.regionCode === activeRegionCode)
+            (['global', 'country'].includes(assignedScope.kind) || (Boolean(assignedScope.regionCode) && s.regionCode === assignedScope.regionCode))
         );
-    }, [contextSuppliers, localSuppliers, activeCountry, isRegionalUser, activeRegionCode]);
+    }, [contextSuppliers, localSuppliers, activeCountry, assignedScope]);
 
     const effectiveProducts = useMemo(() => {
         const raw = (allProducts && allProducts.length > 0) ? allProducts : localProducts;

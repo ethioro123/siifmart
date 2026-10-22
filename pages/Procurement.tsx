@@ -1,3 +1,4 @@
+import { getProcurementScope, filterProcurementSites } from '../utils/procurementScope';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Truck, Plus, Filter, Download, RefreshCw, ShieldAlert, Clock } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
@@ -23,24 +24,20 @@ import { useSupplierMutations } from '../hooks/useSupplierMutations';
 export default function Procurement() {
     const { user } = useStore();
     const { createSupplier, verifySupplier } = useSupplierMutations();
-    const { suppliers: allSuppliers, sites, settings, effectiveCountry, isRegionalUser, activeRegionCode, regions } = useData(); // Global suppliers validation & sites
+    const { suppliers: allSuppliers, sites, settings, effectiveCountry, regions } = useData(); // Global suppliers validation & sites
 
-    const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || ['regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager'].includes(user?.role || '');
+    const procurementScope = getProcurementScope(user, sites);
+    const isRegionalStaff = !['global', 'country'].includes(procurementScope.kind);
 
     const activeCountry: Country = (effectiveCountry || (settings?.country as Country) || 'ET');
     const countryProfile = getCountryProfile(activeCountry);
     const currencySymbol = countryProfile.currencySymbol;
-    const targetRegionCode = activeRegionCode || user?.regionCode || (user as any)?.region_code;
+    const targetRegionCode = procurementScope.regionCode;
     const activeRegion = useMemo(() => {
         return (regions || []).find(r => r.code === targetRegionCode);
     }, [regions, targetRegionCode]);
     const regionalAutonomousPoLimit = activeRegion?.autonomous_po_limit ?? (activeCountry === 'KE' ? 500000 : 150000);
-    const countrySiteIds = useMemo(() => {
-        return sites
-            .filter(s => (s.country || 'ET') === activeCountry
-                && (!isRegionalStaff || (targetRegionCode && (s.regionCode === targetRegionCode || (s as any).region_code === targetRegionCode))))
-            .map(s => s.id);
-    }, [sites, activeCountry, isRegionalStaff, targetRegionCode]);
+    const countrySiteIds = filterProcurementSites(sites, activeCountry, procurementScope).map(site => site.id);
     const countrySiteIdsKey = countrySiteIds.join(',');
 
     // UI State

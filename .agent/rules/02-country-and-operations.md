@@ -173,3 +173,10 @@ const canApprove = ['group_ceo', 'CEO'].includes(user?.role || '');
 - Maintain readable contrast, visible focus, zoom/reflow, reduced-motion support, and appropriately sized controls. Validate actual rendered states in light and dark modes.
 - Use glass only where it improves a floating control layer and keep a solid fallback. Avoid blur on dense or frequently updated content.
 - Review the design system when product needs or platform support materially change; do not require speculative redesign on a calendar.
+
+## Procurement assignment boundaries
+
+- Procurement authority follows the employee’s assigned region, area, or operating site. Regional support roles do not grant countrywide access.
+- Regional office staff may handle only their assigned region; operating-site staff may handle only their own site. Missing or mismatched assignments deny access.
+- Countrywide procurement requires an explicit national HQ assignment and authorized role. The active country or region lens cannot expand an employee’s assignment.
+- Apply the same boundary to order lists, receiving destinations, supplier operations, and trusted database policies.
