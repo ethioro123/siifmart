@@ -17,26 +17,24 @@ const SPECIALIST_TAB_ACCESS: Record<string, OpTab[]> = {
     dispatch_manager: ['DOCKS', 'DRIVER', 'TRANSFER', 'ASSIGN'],
     dispatcher: ['DOCKS', 'DRIVER', 'ASSIGN'],
     fleet_maintenance_supervisor: ['DOCKS', 'DRIVER', 'ASSIGN'],
-    regional_logistics_lead: ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER'],
+    regional_logistics_manager: ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER'],
     head_of_supply_chain: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'ASSIGN', 'LABELS'],
-    supply_chain_head: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'ASSIGN', 'LABELS'],
-    supply_chain_manager: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH'],
 };
 
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
-    RECEIVE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    PUTAWAY: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    TRANSFER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'logistics_manager', 'inventory_manager', 'replenishment_planner'],
-    PICK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    PACK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    DOCKS: ['super_admin', 'admin', 'operations_manager', 'regional_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'fleet_maintenance_supervisor'],
-    DRIVER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'driver', 'logistics_manager', 'fleet_maintenance_supervisor'],
-    REPLENISH: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'replenishment_planner', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    COUNT: ['super_admin', 'operations_manager', 'warehouse_manager', 'inventory_manager', 'store_manager', 'inventory_specialist', 'stock_clerk'],
-    WASTE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    RETURNS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'returns_clerk'],
-    ASSIGN: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor'],
-    LABELS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor', 'replenishment_planner', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
+    RECEIVE: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
+    PUTAWAY: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
+    TRANSFER: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'logistics_manager', 'inventory_manager', 'replenishment_planner'],
+    PICK: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
+    PACK: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
+    DOCKS: ['super_admin', 'admin', 'head_of_operations', 'regional_operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'fleet_maintenance_supervisor'],
+    DRIVER: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'driver', 'logistics_manager', 'fleet_maintenance_supervisor'],
+    REPLENISH: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'replenishment_planner', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
+    COUNT: ['super_admin', 'head_of_operations', 'warehouse_manager', 'inventory_manager', 'store_manager', 'inventory_specialist', 'stock_clerk'],
+    WASTE: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
+    RETURNS: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'returns_clerk'],
+    ASSIGN: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor'],
+    LABELS: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor', 'replenishment_planner', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
 };
 
 export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
@@ -48,8 +46,8 @@ export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
         normalizedRole === 'country_managing_director' ||
         normalizedRole === 'admin' ||
         normalizedRole === 'head_of_operations' ||
-        normalizedRole === 'operations_head' ||
-        normalizedRole === 'operations_manager'
+        normalizedRole === 'head_of_operations' ||
+        normalizedRole === 'head_of_operations'
     ) {
         return Object.keys(TAB_PERMISSIONS) as OpTab[];
     }
@@ -86,10 +84,7 @@ export const ROLE_DEFAULT_TABS: Record<string, OpTab> = {
     country_managing_director: 'DOCKS',
     admin: 'DOCKS',
     head_of_operations: 'DOCKS',
-    operations_head: 'DOCKS',
-    operations_manager: 'DOCKS',
     head_of_supply_chain: 'DOCKS',
-    supply_chain_head: 'DOCKS',
 };
 
 export function getDefaultFulfillmentTab(role?: string | null): OpTab {

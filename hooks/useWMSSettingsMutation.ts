@@ -48,8 +48,8 @@ export function useWMSSettingsMutation() {
       const authorizedRoles = [
         'super_admin', 'CEO', 'ceo',
         'country_managing_director', 'admin',
-        'head_of_operations', 'operations_head', 'operations_manager',
-        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+        'head_of_operations',
+        'head_of_supply_chain',
         'warehouse_manager'
       ];
       if (!authorizedRoles.includes(user?.role || '')) {

@@ -31,13 +31,13 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
         });
 
         it('identifies Level 2 corporate directorates as managerial', () => {
-            expect(isManagerialRole('regional_manager')).toBe(true);
-            expect(isManagerialRole('operations_manager')).toBe(true);
-            expect(isManagerialRole('finance_manager')).toBe(true);
-            expect(isManagerialRole('hr_manager')).toBe(true);
-            expect(isManagerialRole('procurement_manager')).toBe(true);
-            expect(isManagerialRole('supply_chain_manager')).toBe(true);
-            expect(isManagerialRole('merchandising_manager')).toBe(true);
+            expect(isManagerialRole('regional_operations_manager')).toBe(true);
+            expect(isManagerialRole('head_of_operations')).toBe(true);
+            expect(isManagerialRole('head_of_finance')).toBe(true);
+            expect(isManagerialRole('head_of_hr')).toBe(true);
+            expect(isManagerialRole('head_of_procurement')).toBe(true);
+            expect(isManagerialRole('head_of_supply_chain')).toBe(true);
+            expect(isManagerialRole('head_of_merchandising')).toBe(true);
         });
 
         it('identifies Level 3 site managers and supervisors as managerial', () => {

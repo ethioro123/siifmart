@@ -3,8 +3,8 @@ import { KnowledgeEntry } from '../RoadmapTypes';
 export const CORPORATE_DIRECTOR_POLICIES: KnowledgeEntry[] = [
   {
     id: 'policy-regional-manager-sop-020',
-    title: 'Regional Manager Operational Authority, Zero-Trust Guardrails & Supervisory Accountability Policy (SOP-MGT-020)',
-    description: 'Defines the legal, operational, and financial scope of the Regional Manager (Level 2, Rank 95): Multi-site oversight, hiring authority, stock transfer approvals, zero-trust prohibitions, and "Captain Owns the Ship" liability.',
+    title: 'Regional Operations Manager Operational Authority, Zero-Trust Guardrails & Supervisory Accountability Policy (SOP-MGT-020)',
+    description: 'Defines the legal, operational, and financial scope of the Regional Operations Manager (Level 4, Rank 90): Multi-site oversight, hiring authority, stock transfer approvals, zero-trust prohibitions, and "Captain Owns the Ship" liability.',
     department: 'admin',
     type: 'policy',
     priority: 'critical',
@@ -13,7 +13,7 @@ export const CORPORATE_DIRECTOR_POLICIES: KnowledgeEntry[] = [
     createdAt: '2026-10-02T00:00:00.000Z',
     updatedAt: '2026-10-02T00:00:00.000Z',
     tags: [
-      'Regional Manager',
+      'Regional Operations Manager',
       'Managerial Roles',
       'Supervisory Accountability',
       'Captain Owns the Ship',
@@ -25,21 +25,21 @@ export const CORPORATE_DIRECTOR_POLICIES: KnowledgeEntry[] = [
     content: `================================================================================
 SIIFMART ENTERPRISE WORKFORCE & MANAGERIAL DIRECTIVE
 STANDARD OPERATING PROCEDURE: SOP-MGT-020
-ROLE: REGIONAL MANAGER (LEVEL 2 — HIERARCHY RANK 95)
-REPORTS TO: CHIEF EXECUTIVE OFFICER (CEO / SUPER_ADMIN)
-SUPERVISES: STORE MANAGERS, WAREHOUSE MANAGERS, REGIONAL LEADS & SITE TEAMS
+ROLE: REGIONAL OPERATIONS MANAGER (LEVEL 4 — HIERARCHY RANK 90)
+REPORTS TO: HEAD OF OPERATIONS
+SUPERVISES: STORE MANAGERS, WAREHOUSE MANAGERS, REGIONAL DEPARTMENT MANAGERS & SITE TEAMS
 TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust Model)
 ================================================================================
 
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Regional Manager operates at Level 2 (Executive/Regional Directorate) with a Hierarchy Rank of 95, reporting directly to the CEO.
+    - The Regional Operations Manager operates at Level 4 with a Hierarchy Rank of 90, reporting to the Head of Operations.
     - Serves as the executive operational leader responsible for all Retail Stores, Warehouses, and Distribution Centers within an assigned national geographic territory (e.g., Addis Ababa Regional Cluster, Oromia Cluster, or Nairobi Metro Cluster).
 1.2 Core Mission:
     - Deliver enterprise profitability, zero stockouts of staple goods, strict adherence to national Halal / non-alcoholic catalog compliance, sub-0.3% shrinkage rates, and uncompromising Zero-Trust security across all regional nodes.
 
-2. WHAT THE REGIONAL MANAGER CAN DO (AUTHORIZED POWERS)
+2. WHAT THE REGIONAL OPERATIONS MANAGER CAN DO (AUTHORIZED POWERS)
 --------------------------------------------------------------------------------
 2.1 Multi-Site Operational Governance:
     - Seamlessly inspect, switch between, and audit all facilities within their assigned territory without requesting permission (isMultiSiteRole = true).
@@ -55,14 +55,14 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 2.5 Dual-Control Sign-Off:
     - Authorize secondary reviews on shift cash variances, large damage write-offs, and contested delivery manifests that exceed site manager thresholds.
 
-3. WHAT THE REGIONAL MANAGER CANNOT DO (ZERO-TRUST PROHIBITIONS)
+3. WHAT THE REGIONAL OPERATIONS MANAGER CANNOT DO (ZERO-TRUST PROHIBITIONS)
 --------------------------------------------------------------------------------
 3.1 Zero Autonomous Retail Price Alterations:
     - Cannot modify retail shelf prices or alter POS barcode pricing. Pricing is strictly centralized under HQ Merchandising.
 3.2 Zero Discretionary Discounts:
     - Cannot create local discount codes, verbal price cuts, or promotional vouchers. All campaigns must be deployed centrally via HQ.
 3.3 Zero Cross-Border Tenant Access:
-    - Hard-pinned to their sovereign country (country_code). A Regional Manager in Ethiopia (ET) has zero technical or operational authority to access Kenya (KE) facilities or data.
+    - Hard-pinned to their sovereign country (country_code). A Regional Operations Manager in Ethiopia (ET) has zero technical or operational authority to access Kenya (KE) facilities or data.
 3.4 Zero Live Cash Skimming / Blind Balance Access:
     - Deliberately blinded from viewing live expected cash drawer totals during active cashier shifts (Anti-Skimming Shield).
 3.5 Zero Unilateral Shrinkage Write-Offs:
@@ -72,17 +72,17 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 3.7 Zero Audit Trail Tampering:
     - Cannot delete, alter, or purge immutable audit records in system_logs.
 
-4. WHAT THE REGIONAL MANAGER IS ACCOUNTABLE FOR ("CAPTAIN OWNS THE SHIP")
+4. WHAT THE REGIONAL OPERATIONS MANAGER IS ACCOUNTABLE FOR ("CAPTAIN OWNS THE SHIP")
 --------------------------------------------------------------------------------
 4.1 The "Captain Owns the Ship" Doctrine (Rule 18):
-    - The Regional Manager is held strictly accountable for all failures, shrinkage, cash shortfalls, and procedural lapses occurring in their region.
-    - If a branch manager or cashier engages in theft, collusion, or unreceipted sales, the Regional Manager's supervisory oversight is formally investigated.
+    - The Regional Operations Manager is held strictly accountable for all failures, shrinkage, cash shortfalls, and procedural lapses occurring in their region.
+    - If a branch manager or cashier engages in theft, collusion, or unreceipted sales, the Regional Operations Manager's supervisory oversight is formally investigated.
 4.2 Mandatory 7-Day Stock Count Enforcement (SOP-OPS-017):
     - Enforces that every store and DC in the region completes its mandatory Tuesday 3-Tier Weekly Blind Cycle Count.
-    - Overdue counts automatically place regional replenishment requests on administrative hold and penalize the Regional Manager's leaderboard score.
+    - Overdue counts automatically place regional replenishment requests on administrative hold and penalize the Regional Operations Manager's leaderboard score.
 4.3 Shift Cash Variance & Daily EOD Reconciliations:
     - Ensures 100% daily submission of End-of-Day (EOD) Z-Reports and blind drawer reconciliations across every POS register in the region.
-    - Any unresolved cash deficit exceeding tolerance triggers direct co-attribution to the Regional Manager.
+    - Any unresolved cash deficit exceeding tolerance triggers direct co-attribution to the Regional Operations Manager.
 4.4 Override Velocity Monitoring (< 3% Ceiling):
     - Ensures managerial override velocity (voids, price checks, returns) remains strictly below 3% of total regional transactions. Override velocities > 3% trigger automated Central HQ alerts.
 4.5 Authenticated Accountability Footprint:
@@ -94,8 +94,8 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
   },
   {
     id: 'policy-operations-manager-sop-021',
-    title: 'Operations Manager Operational Authority, Central Oversight & Facility Accountability Policy (SOP-MGT-021)',
-    description: 'Defines the operational remit of the Operations Manager (Level 2, Rank 90): Central Operations control room leadership, cross-facility fulfillment SLAs, WMS queue balancing, emergency reallocations, and enterprise execution accountability.',
+    title: 'Head of Operations Operational Authority, Central Oversight & Facility Accountability Policy (SOP-MGT-021)',
+    description: 'Defines the operational remit of the Head of Operations (Level 3, Rank 95): Central Operations control room leadership, cross-facility fulfillment SLAs, WMS queue balancing, emergency reallocations, and enterprise execution accountability.',
     department: 'admin',
     type: 'policy',
     priority: 'critical',
@@ -104,7 +104,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     createdAt: '2026-10-02T00:00:00.000Z',
     updatedAt: '2026-10-02T00:00:00.000Z',
     tags: [
-      'Operations Manager',
+      'Head of Operations',
       'HQ Operations',
       'Central Operations',
       'Fulfillment SLAs',
@@ -117,8 +117,8 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     content: `================================================================================
 SIIFMART ENTERPRISE WORKFORCE & MANAGERIAL DIRECTIVE
 STANDARD OPERATING PROCEDURE: SOP-MGT-021
-ROLE: OPERATIONS MANAGER (LEVEL 2 — HIERARCHY RANK 90)
-REPORTS TO: REGIONAL MANAGER & CHIEF EXECUTIVE OFFICER (CEO)
+ROLE: HEAD OF OPERATIONS (LEVEL 3 — HIERARCHY RANK 95)
+REPORTS TO: COUNTRY MANAGING DIRECTOR / CHIEF EXECUTIVE OFFICER (CEO)
 SUPERVISES: CENTRAL OPS TEAM (DATA_ANALYST, SECURITY_MANAGER, CS_MANAGER, STORE_OPERATIONS_AUDITOR) & DIRECT SUPERVISORY LINE TO ALL STORE & WAREHOUSE MANAGERS
 TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust Model)
 ================================================================================
@@ -126,7 +126,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Operations Manager operates at Level 2 (Executive/Operations Directorate) with a Hierarchy Rank of 90.
+    - The Head of Operations operates at Level 3 (HQ/Operations Directorate) with a Hierarchy Rank of 95.
     - Serves as the commanding operational officer of the Central Operations Control Room (/admin), orchestrating day-to-day fulfillment, dock velocity, network inventory flow, and operational continuity across all retail branches and warehouse hubs.
 1.2 Core Mission:
     - Guarantee enterprise execution velocity, sub-hour fulfillment turnaround, zero dock bottlenecks, strict FEFO inventory hygiene, and immediate response to operational exceptions.
@@ -137,7 +137,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     - Direct reporting line to all store_managers and warehouse_managers.
     - store_operations_auditor: Conducts unannounced store walkthroughs, planogram/merchandising checks, and cash handling spot audits.
 
-2. WHAT THE OPERATIONS MANAGER CAN DO (AUTHORIZED POWERS)
+2. WHAT THE HEAD OF OPERATIONS CAN DO (AUTHORIZED POWERS)
 --------------------------------------------------------------------------------
 2.1 Central Operations Control Room Leadership (/admin):
     - Direct command of the enterprise telemetry bridge, live network throughput monitors, and active mission queues.
@@ -157,7 +157,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 2.6 Unannounced Field Audits & Cash Spot Verification:
     - Full authority to dispatch store_operations_auditor for surprise branch inspections, verifying shelf planograms, price tag synchronization, zero-alcohol catalog compliance (Rule 17), and blind register cash counts.
 
-3. WHAT THE OPERATIONS MANAGER CANNOT DO (ZERO-TRUST PROHIBITIONS)
+3. WHAT THE HEAD OF OPERATIONS CANNOT DO (ZERO-TRUST PROHIBITIONS)
 --------------------------------------------------------------------------------
 3.1 Zero Autonomous Shelf Price Alterations:
     - Cannot modify retail selling prices, create custom promos, or alter POS catalog pricing. Pricing is strictly reserved for HQ Merchandising.
@@ -174,11 +174,11 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 3.7 Zero Audit Trail Deletion:
     - Cannot purge, modify, or disable audit records in system_logs.
 
-4. WHAT THE OPERATIONS MANAGER IS ACCOUNTABLE FOR ("CAPTAIN OWNS THE SHIP")
+4. WHAT THE HEAD OF OPERATIONS IS ACCOUNTABLE FOR ("CAPTAIN OWNS THE SHIP")
 --------------------------------------------------------------------------------
 4.1 Enterprise Fulfillment SLA Performance:
     - Accountable for maintaining overall fulfillment SLA compliance (>= 98.5% on-time pick, pack, and dock dispatch).
-    - Every delayed dispatch or staging backlog is logged and co-attributed to the Operations Manager.
+    - Every delayed dispatch or staging backlog is logged and co-attributed to the Head of Operations.
 4.2 Dock Safety, Quality & Cold-Chain Integrity:
     - Accountable for operational hygiene across receiving docks, pallet racking, and cold storage units.
     - Perishable temperature excursions or handling damage due to neglected putaway queues trigger direct supervisory investigation.
@@ -186,7 +186,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     - Ensures that supervisory overrides across all operational departments do not exceed 3% of total operations. Overriding above 3% triggers an automated executive audit alert.
 4.4 Discrepancy Co-Sign & Escalation Compliance:
     - Enforces the Digital Dual-Handshake (SOP-LOG-007) and Chain of Custody compliance across all transit lines.
-    - Unsigned transfer discrepancies or delayed receipt reporting directly penalize the Operations Manager's operational score.
+    - Unsigned transfer discrepancies or delayed receipt reporting directly penalize the Head of Operations's operational score.
 4.5 Authenticated Audit Footprint:
     - Every mission reassignment, wave cancellation, or supervisory override must capture:
         * Authenticated managerId and Role
@@ -196,8 +196,8 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
   },
   {
     id: 'policy-finance-manager-sop-022',
-    title: 'Finance Manager Fiscal Authority, Zero-Trust Cash Reconciliation & Financial Accountability Policy (SOP-MGT-022)',
-    description: 'Defines the fiscal and fiduciary remit of the Finance Manager (Level 2, Rank 85): Daily HQ Z-Report sign-offs, tender gateway governance, procurement PO spend approval, tax compliance, and anti-skimming accountability.',
+    title: 'Head of Finance Fiscal Authority, Zero-Trust Cash Reconciliation & Financial Accountability Policy (SOP-MGT-022)',
+    description: 'Defines the fiscal and fiduciary remit of the Head of Finance (Level 2, Rank 85): Daily HQ Z-Report sign-offs, tender gateway governance, procurement PO spend approval, tax compliance, and anti-skimming accountability.',
     department: 'finance',
     type: 'policy',
     priority: 'critical',
@@ -206,7 +206,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     createdAt: '2026-10-02T00:00:00.000Z',
     updatedAt: '2026-10-02T00:00:00.000Z',
     tags: [
-      'Finance Manager',
+      'Head of Finance',
       'Fiscal Governance',
       'Shift Reconciliation',
       'Cash Security',
@@ -220,7 +220,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     content: `================================================================================
 SIIFMART ENTERPRISE WORKFORCE & MANAGERIAL DIRECTIVE
 STANDARD OPERATING PROCEDURE: SOP-MGT-022
-ROLE: FINANCE MANAGER (LEVEL 2 — HIERARCHY RANK 85)
+ROLE: HEAD OF FINANCE (LEVEL 3 — HIERARCHY RANK 85)
 REPORTS TO: CHIEF EXECUTIVE OFFICER (CEO / SUPER_ADMIN)
 SUPERVISES: ACCOUNTANTS, FINANCIAL AUDITORS, TREASURY OFFICERS, TAX COMPLIANCE OFFICERS, CREDIT CONTROL OFFICERS, PAYROLL SPECIALISTS & SITE CASH CLERKS
 TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust Cash Oversight)
@@ -229,12 +229,12 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Finance Manager operates at Level 2 (Executive/Finance Directorate) with a Hierarchy Rank of 85, reporting directly to the CEO.
+    - The Head of Finance operates at Level 3 (HQ/Finance Directorate) with a Hierarchy Rank of 85, reporting directly to the CEO.
     - Serves as the chief fiduciary and fiscal officer of SIIFMART, governing daily store cash reconciliations, digital payment gateway settlements, procurement payables, tax compliance, and gross margin integrity across all enterprise nodes.
 1.2 Core Mission:
     - Ensure 100% reconciliation of every Birr / Shilling collected, zero uninvestigated cash drawer variances, prompt vendor settlements, accurate tax remittances, and protection of company solvency.
 
-2. WHAT THE FINANCE MANAGER CAN DO (AUTHORIZED POWERS)
+2. WHAT THE HEAD OF FINANCE CAN DO (AUTHORIZED POWERS)
 --------------------------------------------------------------------------------
 2.1 Financial Suite Leadership (/finance):
     - Full access and supervisory command over enterprise financial dashboards: revenue ledgers, operational expenses, gross profit analytics, and financial data exports (EXPORT_FINANCIAL_DATA).
@@ -259,7 +259,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
         * Tax Compliance Officer (tax_compliance_officer): Sovereign VAT filing preparations (ERCA Form 21, KRA VAT 3), withholding tax certificates, and fiscal audit compliance.
         * Credit Control Officer (credit_control_officer): B2B credit accounts, institutional customer limits, aged debtor ledgers, and supplier credit term governance.
 
-3. WHAT THE FINANCE MANAGER CANNOT DO (ZERO-TRUST PROHIBITIONS)
+3. WHAT THE HEAD OF FINANCE CANNOT DO (ZERO-TRUST PROHIBITIONS)
 --------------------------------------------------------------------------------
 3.1 Zero Live Cash Till Operation:
     - Cannot operate an active POS checkout register or kick a cash drawer for personal handling. Cash custody must remain isolated to bonded cashiers.
@@ -276,14 +276,14 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
 3.7 Zero Audit Trail Deletion:
     - Cannot modify, purge, or bypass system_logs.
 
-4. WHAT THE FINANCE MANAGER IS ACCOUNTABLE FOR ("CAPTAIN OWNS THE SHIP")
+4. WHAT THE HEAD OF FINANCE IS ACCOUNTABLE FOR ("CAPTAIN OWNS THE SHIP")
 --------------------------------------------------------------------------------
 4.1 100% Daily Drawer Reconciliation (Zero-Tolerance for Lapsed Audits):
     - Accountable for ensuring every store register completes its daily EOD Z-Report and blind drawer count within 12 hours of store closing.
     - Every unverified cash deficit > 50 ETB / 100 KSh must be audited and assigned an incident resolution ticket within 24 hours.
 4.2 National Tax Compliance & Fiscal Integrity:
     - Held personally accountable for enterprise compliance with sovereign tax authorities (ERCA in Ethiopia, KRA in Kenya).
-    - Any tax penalty resulting from uncalibrated POS tax rates or misreported VAT is directly attributed to the Finance Manager.
+    - Any tax penalty resulting from uncalibrated POS tax rates or misreported VAT is directly attributed to the Head of Finance.
 4.3 Anti-Skimming & Fraud Alert Escalation:
     - Accountable for monitoring cashier void velocities, excessive returns, and digital transaction reference uniqueness to block mobile-money fraud.
 4.4 Override Velocity & Supervisory Accountability:
@@ -296,8 +296,8 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
   },
   {
     id: 'policy-hr-manager-sop-023',
-    title: 'HR Manager Workforce Governance, Guarantor Vetting & Anti-Collusion Accountability Policy (SOP-MGT-023)',
-    description: 'Defines the workforce remit of the HR Manager (Level 2, Rank 85): Institutional Guarantor (Wase) vetting, anti-collusion kinship separation, quarterly branch rotation, staff credentialing, and disciplinary oversight.',
+    title: 'Head of Human Resources Workforce Governance, Guarantor Vetting & Anti-Collusion Accountability Policy (SOP-MGT-023)',
+    description: 'Defines the workforce remit of the Head of Human Resources (Level 2, Rank 85): Institutional Guarantor (Wase) vetting, anti-collusion kinship separation, quarterly branch rotation, staff credentialing, and disciplinary oversight.',
     department: 'hr',
     type: 'policy',
     priority: 'critical',
@@ -306,7 +306,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     createdAt: '2026-10-02T00:00:00.000Z',
     updatedAt: '2026-10-02T00:00:00.000Z',
     tags: [
-      'HR Manager',
+      'Head of Human Resources',
       'Workforce Governance',
       'Guarantor Vetting',
       'Wase Protocol',
@@ -321,7 +321,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Zero-Trust 
     content: `================================================================================
 SIIFMART ENTERPRISE WORKFORCE & MANAGERIAL DIRECTIVE
 STANDARD OPERATING PROCEDURE: SOP-MGT-023
-ROLE: HUMAN RESOURCES MANAGER (LEVEL 2 — HIERARCHY RANK 85)
+ROLE: HEAD OF HUMAN RESOURCES (LEVEL 3 — HIERARCHY RANK 85)
 REPORTS TO: CHIEF EXECUTIVE OFFICER (CEO / SUPER_ADMIN)
 SUPERVISES: HR GENERALISTS, TRAINING COORDINATORS, RECRUITERS & SITE TIMEKEEPERS
 TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collusion Model)
@@ -330,12 +330,12 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
 1. EXECUTIVE MANDATE & ROLE CHARTER
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Human Resources Manager operates at Level 2 (Executive/HR Directorate) with a Hierarchy Rank of 85, reporting directly to the CEO.
+    - The Head of Human Resources operates at Level 3 (HQ/HR Directorate) with a Hierarchy Rank of 85, reporting directly to the CEO.
     - Serves as the chief workforce guardian of SIIFMART, responsible for talent acquisition, staff verification, legal guarantor bonding, anti-cartel rotation, performance reviews, and labor compliance across all retail stores, distribution centers, and headquarters.
 1.2 Core Mission:
     - Build a disciplined, honest, and high-performing retail and logistics workforce; enforce mandatory guarantor vetting before custody handover; prevent informal theft syndicates through kinship separation; and guarantee equitable staff welfare.
 
-2. WHAT THE HR MANAGER CAN DO (AUTHORIZED POWERS)
+2. WHAT THE HEAD OF HUMAN RESOURCES CAN DO (AUTHORIZED POWERS)
 --------------------------------------------------------------------------------
 2.1 Enterprise Workforce Administration (/employees):
     - Full supervisory command over employee records, role assignments, onboarding wizards, and staff status activations (ACCESS_EMPLOYEES, ADD_EMPLOYEE, EDIT_EMPLOYEE).
@@ -350,9 +350,9 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
 2.5 Total Workforce Transparency & Geolocation Oversight:
     - Authorized to inspect employee work profiles, geofence compliance, and clock-in coordinates across all branches (canViewLocation = true for all roles below CEO).
 2.6 Payroll & Compensation Collaboration:
-    - Co-manage employee salary structures, overtime calculations, emergency advance buffers, and team zero-shrinkage bonus pools in conjunction with the Finance Manager.
+    - Co-manage employee salary structures, overtime calculations, emergency advance buffers, and team zero-shrinkage bonus pools in conjunction with the Head of Finance.
 
-3. WHAT THE HR MANAGER CANNOT DO (ZERO-TRUST PROHIBITIONS)
+3. WHAT THE HEAD OF HUMAN RESOURCES CANNOT DO (ZERO-TRUST PROHIBITIONS)
 --------------------------------------------------------------------------------
 3.1 Zero Kinship / Family Collusion Placement:
     - Strictly prohibited from assigning spouses, siblings, parents, or first-degree relatives to the same store, warehouse, or shift roster (Anti-Collusion Law).
@@ -365,15 +365,15 @@ TRACEABILITY: .agent/RULES.md (Rule 18: Supervisory Accountability & Anti-Collus
 3.5 Zero Cross-Border Deployment:
     - Pinned to the active country domain (country_code). Cannot transfer personnel across international borders without CEO authorization and formal immigration clearance.
 3.6 Zero Unilateral Peer / Superior Actions:
-    - Cannot hire, promote, discipline, or terminate Level 1 leadership (CEO) or fellow Level 2 Directors (Regional Manager, Operations Manager, Finance Manager).
+    - Cannot hire, promote, discipline, or terminate Level 1 leadership (CEO) or fellow HQ department heads (Head of Operations, Head of Finance) or regional operations managers.
 3.7 Zero Audit Trail Deletion:
     - Cannot modify, purge, or suppress employee disciplinary records or geofence violation logs in system_logs.
 
-4. WHAT THE HR MANAGER IS ACCOUNTABLE FOR ("CAPTAIN OWNS THE SHIP")
+4. WHAT THE HEAD OF HUMAN RESOURCES IS ACCOUNTABLE FOR ("CAPTAIN OWNS THE SHIP")
 --------------------------------------------------------------------------------
 4.1 100% Guarantor (Wase) File Audit Compliance:
     - Held personally accountable for complete background files (National ID / Passport, verified residence, police clearance, notarized guarantor assets) for every cash-handling and inventory-custody employee.
-    - If an employee absconds with cash or inventory and their guarantor file is discovered incomplete or unverified, the HR Manager is directly liable for negligence.
+    - If an employee absconds with cash or inventory and their guarantor file is discovered incomplete or unverified, the Head of Human Resources is directly liable for negligence.
 4.2 Anti-Cartel Rotation Execution (Quarterly Cadence):
     - Accountable for maintaining the 90-to-180-day branch rotation schedule for all cashiers and store supervisors. Lapsed rotations trigger automated alerts to Central Operations.
 4.3 Shift Headcount Minimums & Punctuality:

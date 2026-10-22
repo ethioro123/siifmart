@@ -19,9 +19,9 @@ export const ShiftReconciliationTable: React.FC = () => {
     const isHQOrManager = [
         'super_admin',
         'ceo',
-        'finance_manager',
-        'regional_manager',
-        'operations_manager',
+        'head_of_finance',
+        'regional_operations_manager',
+        'head_of_operations',
         'admin',
         'store_manager'
     ].includes(user?.role?.toLowerCase() || '');

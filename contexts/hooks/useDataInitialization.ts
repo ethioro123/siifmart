@@ -211,7 +211,7 @@ export function useDataInitialization({
       // Egress optimization: Only global administrative roles need multi-site global batches on startup.
       // Branch workers only require local activeSite data (fetched via useDataQueries).
       const normalizedRole = (user?.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-      const canSwitchSites = ['super_admin', 'ceo', 'admin', 'auditor', 'procurement_manager', 'buyer', 'supply_chain_manager', 'merchandising_manager'].includes(normalizedRole);
+      const canSwitchSites = ['super_admin', 'ceo', 'admin', 'auditor', 'head_of_procurement', 'buyer', 'head_of_supply_chain', 'head_of_merchandising'].includes(normalizedRole);
 
       // RULE 10: Lists/history default to 25 records on boot
       const [allProds, allSls, allOrds] = await Promise.all([

@@ -27,7 +27,7 @@ describe('Headcount Quota & Frontline Fast-Track Delegation', () => {
       expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('warehouse_manager');
       expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('assistant_manager');
       expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('shift_lead');
-      expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('regional_manager');
+      expect(LEVEL_4_FRONTLINE_ROLES).not.toContain('regional_operations_manager');
     });
   });
 
@@ -210,15 +210,15 @@ describe('Headcount Quota & Frontline Fast-Track Delegation', () => {
     it('grants unconditional direct onboarding authority to corporate HQ & Executive roles', () => {
       expect(isDirectOnboardingAuthorized('super_admin')).toBe(true);
       expect(isDirectOnboardingAuthorized('CEO')).toBe(true);
-      expect(isDirectOnboardingAuthorized('hr_manager')).toBe(true);
+      expect(isDirectOnboardingAuthorized('head_of_hr')).toBe(true);
       expect(isDirectOnboardingAuthorized('hr')).toBe(true);
     });
 
     it('grants delegated direct onboarding authority to site/regional managers for Level 4 staff when quota slot is open', () => {
       expect(isDirectOnboardingAuthorized('store_manager', 'cashier', true)).toBe(true);
       expect(isDirectOnboardingAuthorized('warehouse_manager', 'picker', true)).toBe(true);
-      expect(isDirectOnboardingAuthorized('regional_manager', 'driver', true)).toBe(true);
-      expect(isDirectOnboardingAuthorized('regional_hr_officer', 'packer', true)).toBe(true);
+      expect(isDirectOnboardingAuthorized('regional_operations_manager', 'driver', true)).toBe(true);
+      expect(isDirectOnboardingAuthorized('regional_hr_manager', 'packer', true)).toBe(true);
     });
 
     it('denies direct activation to site managers when quota slot is full', () => {

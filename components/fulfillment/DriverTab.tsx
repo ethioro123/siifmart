@@ -89,7 +89,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     const filteredJobs = getDriverMissions(allFilteredJobs, user, currentEmployee?.id, activeSite?.id || user?.siteId);
 
     const handleReportIssue = async (data: { type: string; description: string; priority: 'High' | 'Critical'; jobId?: string }) => {
-        const managerRoles = ['warehouse_manager', 'operations_manager', 'regional_manager', 'admin', 'super_admin'];
+        const managerRoles = ['warehouse_manager', 'head_of_operations', 'regional_operations_manager', 'admin', 'super_admin'];
         const siteManager = employees.find(e =>
             (e.siteId === activeSite?.id || e.site_id === activeSite?.id) &&
             managerRoles.includes((e.role || '').toLowerCase())

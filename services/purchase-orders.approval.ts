@@ -25,12 +25,12 @@ export const purchaseOrdersApprovalService = {
 
     if (![
       'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
-      'head_of_procurement', 'procurement_head', 'procurement_manager',
-      'head_of_finance', 'finance_head', 'finance_manager',
-      'head_of_operations', 'operations_head', 'operations_manager',
-      'regional_manager', 'regional_operations_director', 'regional_director',
-      'regional_procurement_lead', 'regional_procurement_manager',
-      'regional_finance_officer', 'regional_finance_manager'
+      'head_of_procurement',
+      'head_of_finance',
+      'head_of_operations',
+      'regional_operations_manager',
+      'regional_procurement_manager',
+      'regional_finance_manager',
     ].includes(approverRole)) {
       throw new Error('Purchase order approval requires a procurement lead or authorized executive management role.');
     }
@@ -61,15 +61,15 @@ export const purchaseOrdersApprovalService = {
       if (currentPO.totalAmount > autonomousLimit) {
         isEscalatedToHq = true;
         const isRegionalRole = [
-          'regional_manager', 'regional_operations_director', 'regional_director',
-          'regional_procurement_lead', 'regional_procurement_manager',
-          'regional_finance_officer', 'regional_finance_manager'
+          'regional_operations_manager',
+          'regional_procurement_manager',
+          'regional_finance_manager',
         ].includes(approverRole);
         const isHqRole = [
           'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
-          'head_of_procurement', 'procurement_head', 'procurement_manager',
-          'head_of_finance', 'finance_head', 'finance_manager',
-          'head_of_operations', 'operations_head', 'operations_manager'
+          'head_of_procurement',
+          'head_of_finance',
+          'head_of_operations',
         ].includes(approverRole);
 
         if (isRegionalRole && !isHqRole) {

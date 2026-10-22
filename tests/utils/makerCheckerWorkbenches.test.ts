@@ -7,7 +7,7 @@ import { APPROVAL_WORKFLOWS } from '../../services/permissions.service';
 
 describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
     describe('1. Segregation of Duties: Maker vs Checker Roles', () => {
-        const checkerRoles = ['finance_manager', 'super_admin', 'CEO'] as const;
+        const checkerRoles = ['head_of_finance', 'super_admin', 'CEO'] as const;
         const makerStaffRoles = [
             'accountant',
             'treasury_officer',
@@ -17,20 +17,20 @@ describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
 
         it('identifies supervisory sign-off authorities (Checkers)', () => {
             checkerRoles.forEach(role => {
-                const isChecker = ['finance_manager', 'super_admin', 'CEO', 'ceo'].includes(role);
+                const isChecker = ['head_of_finance', 'super_admin', 'CEO', 'ceo'].includes(role);
                 expect(isChecker).toBe(true);
             });
         });
 
         it('identifies operational desks staff as Makers (Draft & Submit)', () => {
             makerStaffRoles.forEach(role => {
-                const isChecker = ['finance_manager', 'super_admin', 'CEO', 'ceo'].includes(role);
+                const isChecker = ['head_of_finance', 'super_admin', 'CEO', 'ceo'].includes(role);
                 expect(isChecker).toBe(false);
             });
         });
 
-        it('enforces hierarchy: Finance Manager outranks operational makers', () => {
-            const managerRank = getRoleHierarchy('finance_manager'); // 85
+        it('enforces hierarchy: Head of Finance outranks operational makers', () => {
+            const managerRank = getRoleHierarchy('head_of_finance'); // 85
             makerStaffRoles.forEach(staffRole => {
                 const staffRank = getRoleHierarchy(staffRole as any);
                 expect(managerRank).toBeGreaterThan(staffRank);
@@ -40,7 +40,7 @@ describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
 
     describe('2. Treasury Desk: Cash Sweeps & Transit Floats', () => {
         const treasuryOfficer = 'treasury_officer' as const;
-        const financeManager = 'finance_manager' as const;
+        const financeManager = 'head_of_finance' as const;
 
         it('allows treasury officer to access finance and pos reconciliation data', () => {
             expect(canAccessModule(treasuryOfficer, 'finance')).toBe(true);
@@ -55,7 +55,7 @@ describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
             expect(hasPermission(treasuryOfficer, 'PROCESS_SALE')).toBe(false);
         });
 
-        it('reserves purchase and expense supervisory approvals to Finance Manager', () => {
+        it('reserves purchase and expense supervisory approvals to Head of Finance', () => {
             expect(hasPermission(financeManager, 'APPROVE_PO')).toBe(true);
             expect(hasPermission(treasuryOfficer, 'APPROVE_PO')).toBe(false);
 
@@ -69,7 +69,7 @@ describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
 
     describe('3. Tax Compliance Desk: Sovereign E-Return Certification', () => {
         const taxOfficer = 'tax_compliance_officer' as const;
-        const financeManager = 'finance_manager' as const;
+        const financeManager = 'head_of_finance' as const;
 
         it('permits tax officer to inspect revenue and export tax data', () => {
             expect(canAccessModule(taxOfficer, 'finance')).toBe(true);
@@ -82,7 +82,7 @@ describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
             expect(hasPermission(taxOfficer, 'EDIT_PRICE')).toBe(false);
         });
 
-        it('gives Finance Manager report and supervisory governance authority', () => {
+        it('gives Head of Finance report and supervisory governance authority', () => {
             expect(authService.checkPermission(financeManager, 'finance.view_reports')).toBe(true);
             expect(hasPermission(financeManager, 'ACCESS_FINANCE')).toBe(true);
             expect(hasPermission(financeManager, 'APPROVE_PO')).toBe(true);
@@ -91,7 +91,7 @@ describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
 
     describe('4. Credit Control Desk: Wholesale B2B Holds & Overrides', () => {
         const creditOfficer = 'credit_control_officer' as const;
-        const financeManager = 'finance_manager' as const;
+        const financeManager = 'head_of_finance' as const;
 
         it('allows credit control officer to track invoices and customer aging', () => {
             expect(canAccessModule(creditOfficer, 'finance')).toBe(true);
@@ -99,7 +99,7 @@ describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
             expect(hasPermission(creditOfficer, 'VIEW_ALL_TRANSACTIONS')).toBe(true);
         });
 
-        it('reserves procurement and expense approvals to Finance Manager', () => {
+        it('reserves procurement and expense approvals to Head of Finance', () => {
             expect(hasPermission(financeManager, 'APPROVE_PO')).toBe(true);
             expect(hasPermission(creditOfficer, 'APPROVE_PO')).toBe(false);
             expect(authService.checkPermission(financeManager, 'pricing.edit')).toBe(true);
@@ -134,16 +134,16 @@ describe('Maker-Checker & Financial Team Desks Segregation of Duties', () => {
                 status: 'Pending'
             };
 
-            const currentUser = { id: 'user-finance-mgr', role: 'finance_manager' };
+            const currentUser = { id: 'user-finance-mgr', role: 'head_of_finance' };
             const isCreator = expenseRecord.createdBy === currentUser.id;
 
             // When isCreator is true, the user CANNOT approve their own voucher
-            const canSelfApprove = currentUser.role === 'finance_manager' && !isCreator;
+            const canSelfApprove = currentUser.role === 'head_of_finance' && !isCreator;
             expect(canSelfApprove).toBe(false);
 
             // A secondary supervisor or CEO can approve it
             const ceoUser = { id: 'user-ceo-01', role: 'CEO' };
-            const canCeoApprove = ['finance_manager', 'CEO'].includes(ceoUser.role) && expenseRecord.createdBy !== ceoUser.id;
+            const canCeoApprove = ['head_of_finance', 'CEO'].includes(ceoUser.role) && expenseRecord.createdBy !== ceoUser.id;
             expect(canCeoApprove).toBe(true);
         });
     });

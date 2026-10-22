@@ -12,7 +12,7 @@ vi.mock('../../lib/supabase', () => ({
         ...inMemoryPayrollDb[index],
         regional_attested_by: 'Verified Regional Officer',
         regional_attested_by_id: 'auth-user-001',
-        regional_attested_by_role: 'regional_hr_officer',
+        regional_attested_by_role: 'regional_hr_manager',
         regional_attested_at: new Date().toISOString(),
         regional_notes: args.p_notes || null
       };
@@ -103,12 +103,12 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
     const hrSigned = await payrollRunsService.signAsHR(
       run.id,
       'Sarah Jenkins',
-      'hr_manager',
+      'head_of_hr',
       'Audited Bole Store headcount and October clock-in records.'
     );
 
     expect(hrSigned.hrApprovedBy).toBe('Sarah Jenkins');
-    expect(hrSigned.hrApprovedByRole).toBe('hr_manager');
+    expect(hrSigned.hrApprovedByRole).toBe('head_of_hr');
     expect(hrSigned.hrApprovedAt).toBeDefined();
     expect(hrSigned.hrNotes).toBe('Audited Bole Store headcount and October clock-in records.');
     expect(hrSigned.status).toBe('pending_finance');
@@ -134,7 +134,7 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
     const fullyApproved = await payrollRunsService.signAsFinance(
       run.id,
       'Peter Omondi',
-      'finance_manager',
+      'head_of_finance',
       'KCB Operating balance confirmed and statutory withholdings verified.'
     );
 
@@ -159,11 +159,11 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
     });
 
     // Alice Jenkins signs as HR
-    await payrollRunsService.signAsHR(run.id, 'Alice Jenkins', 'hr_manager');
+    await payrollRunsService.signAsHR(run.id, 'Alice Jenkins', 'head_of_hr');
 
     // Alice Jenkins tries to also authorize as Finance
     await expect(
-      payrollRunsService.signAsFinance(run.id, 'Alice Jenkins', 'finance_manager')
+      payrollRunsService.signAsFinance(run.id, 'Alice Jenkins', 'head_of_finance')
     ).rejects.toThrow(/Zero-Trust 4-Eyes Violation/);
   });
 
@@ -179,11 +179,11 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
       totalNetPayout: 96000,
       status: 'pending_verification',
       initiatedBy: 'Finance Lead',
-      initiatedByRole: 'finance_manager'
+      initiatedByRole: 'head_of_finance'
     });
 
     // Finance signed, but HR has not signed
-    await payrollRunsService.signAsFinance(run.id, 'Kebede Michael', 'finance_manager');
+    await payrollRunsService.signAsFinance(run.id, 'Kebede Michael', 'head_of_finance');
 
     // Attempt to disburse
     await expect(
@@ -207,12 +207,12 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
     });
 
     await payrollRunsService.signAsHR(run.id, 'HR Officer Mary', 'hr');
-    await payrollRunsService.signAsFinance(run.id, 'Finance Manager John', 'finance_manager');
+    await payrollRunsService.signAsFinance(run.id, 'Head of Finance John', 'head_of_finance');
 
-    const disbursed = await payrollRunsService.disburse(run.id, 'Finance Manager John', 'EXP-PAYROLL-01');
+    const disbursed = await payrollRunsService.disburse(run.id, 'Head of Finance John', 'EXP-PAYROLL-01');
 
     expect(disbursed.status).toBe('disbursed');
-    expect(disbursed.disbursedBy).toBe('Finance Manager John');
+    expect(disbursed.disbursedBy).toBe('Head of Finance John');
     expect(disbursed.disbursedAt).toBeDefined();
     expect(disbursed.expenseId).toBe('EXP-PAYROLL-01');
   });
@@ -295,7 +295,7 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
       totalNetPayout: 192000,
       status: 'pending_verification',
       initiatedBy: 'Accountant Abebe',
-      initiatedByRole: 'finance_manager'
+      initiatedByRole: 'head_of_finance'
     });
 
     const attested = await payrollRunsService.attestAsRegionalHR(
@@ -305,7 +305,7 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
 
     expect(attested.regionalAttestedBy).toBe('Verified Regional Officer');
     expect(attested.regionalAttestedById).toBe('auth-user-001');
-    expect(attested.regionalAttestedByRole).toBe('regional_hr_officer');
+    expect(attested.regionalAttestedByRole).toBe('regional_hr_manager');
     expect(attested.regionalAttestedAt).toBeDefined();
     expect(attested.regionalNotes).toContain('Audited site headcounts');
   });

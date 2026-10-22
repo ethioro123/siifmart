@@ -29,7 +29,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
   const [rejectionReason, setRejectionReason] = useState('');
 
   const canApprove = [
-    'CEO', 'ceo', 'super_admin', 'country_managing_director', 'admin', 'head_of_hr', 'hr_head', 'hr_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager'
+    'CEO', 'ceo', 'super_admin', 'country_managing_director', 'admin', 'head_of_hr', 'head_of_operations', 'regional_operations_manager'
   ].includes(user?.role || '');
 
   const loadRequests = async () => {

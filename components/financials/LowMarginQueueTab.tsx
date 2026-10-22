@@ -28,7 +28,7 @@ export const LowMarginQueueTab: React.FC = () => {
     const [selectedRequest, setSelectedRequest] = useState<MarginApprovalRequest | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const canApproveMargin = ['head_of_finance', 'finance_head', 'finance_manager', 'head_of_audit', 'audit_head', 'auditor', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role?.toLowerCase() || '');
+    const canApproveMargin = ['head_of_finance', 'head_of_audit', 'auditor', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role?.toLowerCase() || '');
 
     const loadData = async () => {
         setLoading(true);

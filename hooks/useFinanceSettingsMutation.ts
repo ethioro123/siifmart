@@ -4,7 +4,7 @@
  * Mutation hook for updating fiscal policies, tax jurisdictions, drawer limits,
  * exchange rates, and compliance rules.
  * Strictly enforces:
- *  1. Zero-Trust Role Gating (L1 CEO / Super Admin & L2 Finance Manager only).
+ *  1. Zero-Trust Role Gating (L1 CEO / Super Admin & L2 Head of Finance only).
  *  2. Zod Schema Validation before writing.
  *  3. 100% Country-Level Isolation (settings partitioned by targetCountry).
  *  4. Tamper-Proof Audit Trail (system_logs).
@@ -58,7 +58,7 @@ export function useFinanceSettingsMutation() {
       const isAuthorized = [
         'super_admin', 'CEO', 'ceo',
         'country_managing_director', 'admin',
-        'head_of_finance', 'finance_head', 'finance_manager'
+        'head_of_finance',
       ].includes(user?.role || '');
       if (!isAuthorized) {
         throw new Error('Unauthorized: Modifying financial and tax settings requires CEO, Managing Director, or Head of Finance credentials.');
@@ -170,7 +170,7 @@ export function useFinanceSettingsMutation() {
       const isAuthorized = [
         'super_admin', 'CEO', 'ceo',
         'country_managing_director', 'admin',
-        'head_of_finance', 'finance_head', 'finance_manager'
+        'head_of_finance',
       ].includes(user?.role || '');
       if (!isAuthorized) {
         throw new Error('Unauthorized: Assigning sites to tax jurisdictions requires managerial credentials.');

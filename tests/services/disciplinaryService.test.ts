@@ -157,7 +157,7 @@ describe('Disciplinary Service & Zero-Trust Governance', () => {
         const resolved = await disciplinaryService.resolveAppeal(
             notice.id,
             'Overturned',
-            { id: 'hr-dir-01', name: 'Helen Mirren', role: 'hr_manager' },
+            { id: 'hr-dir-01', name: 'Helen Mirren', role: 'head_of_hr' },
             'CCTV reviewed and staff member exonerated.'
         );
 

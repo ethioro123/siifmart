@@ -18,9 +18,9 @@ export const POSCommandCharts: React.FC = () => {
         'super_admin',
         'ceo',
         'admin',
-        'regional_manager',
-        'operations_manager',
-        'finance_manager'
+        'regional_operations_manager',
+        'head_of_operations',
+        'head_of_finance'
     ].includes(user?.role?.toLowerCase() || '');
 
     const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'];

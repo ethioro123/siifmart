@@ -51,12 +51,12 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
 
     const ITEMS_PER_PAGE = 20;
     const isCEO = user?.role === 'super_admin';
-    const isProcurementManager = ['head_of_procurement', 'procurement_head', 'procurement_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '');
-    const isOperationalDirector = ['regional_manager', 'regional_procurement_lead', 'operations_manager', 'head_of_operations', 'operations_head'].includes(user?.role || '');
-    const canApprove = isProcurementManager || user?.role === 'regional_procurement_lead' || isCEO;
+    const isProcurementManager = ['head_of_procurement', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '');
+    const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager', 'head_of_operations',].includes(user?.role || '');
+    const canApprove = isProcurementManager || user?.role === 'regional_procurement_manager' || isCEO;
 
     const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
-        'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead'
+        'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager'
     ].includes(user?.role || '');
 
     const isExceedingRegionalLimit = (po: PurchaseOrder) => {
@@ -380,7 +380,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                 return (
                                                     <span
                                                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                                                        title="Awaiting Procurement Manager Sign-Off"
+                                                        title="Awaiting Head of Procurement Sign-Off"
                                                     >
                                                         <Clock size={11} /> In Review
                                                     </span>

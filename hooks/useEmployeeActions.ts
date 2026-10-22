@@ -151,7 +151,7 @@ export function useEmployeeActions({
       }
 
       // Enforce regional boundary for regional approvers
-      const isRegionalUser = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '') || (user as any)?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL';
+      const isRegionalUser = ['regional_operations_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '') || (user as any)?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL';
       const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
       const empRegion = employeeToApprove.regionCode || (employeeToApprove as any).region_code;
       if (isRegionalUser && userRegion && empRegion && empRegion !== userRegion) {

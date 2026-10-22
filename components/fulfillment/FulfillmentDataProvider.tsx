@@ -181,11 +181,11 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 // Do NOT pass their personal employeeId — it would pollute the DB query with
                 // an auth UUID that may match stale assigned_to records, showing false assignments.
                 const GLOBAL_QUEUE_ROLES = [
-                    'super_admin', 'admin', 'manager', 'regional_manager',
-                    'operations_manager', 'warehouse_manager', 'dispatcher',
+                    'super_admin', 'admin', 'manager', 'regional_operations_manager',
+                    'head_of_operations', 'warehouse_manager', 'dispatcher',
                     'store_manager', 'logistics_manager', 'inventory_manager',
                     'assistant_manager', 'shift_lead', 'inventory_specialist',
-                    'dispatch_manager', 'supply_chain_manager', 'fleet_maintenance_supervisor', 'replenishment_planner'
+                    'dispatch_manager', 'head_of_supply_chain', 'fleet_maintenance_supervisor', 'replenishment_planner'
                 ];
                 const isGlobalRole = GLOBAL_QUEUE_ROLES.includes((user?.role || '').toLowerCase());
 

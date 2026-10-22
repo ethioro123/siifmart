@@ -38,12 +38,12 @@ const SETTINGS_TAB_LABELS: Record<SettingsTab, string> = {
 export default function SettingsPage() {
     const { user } = useStore();
     const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
-        'regional_manager',
-        'regional_procurement_lead',
-        'regional_finance_officer',
-        'regional_hr_officer',
-        'regional_logistics_lead',
-        'regional_security_supervisor'
+        'regional_operations_manager',
+        'regional_procurement_manager',
+        'regional_finance_manager',
+        'regional_hr_manager',
+        'regional_logistics_manager',
+        'regional_security_manager'
     ].includes(user?.role || '');
 
     const [activeTab, setActiveTab] = useState<SettingsTab>(isRegionalStaff ? 'regions' : 'general');
@@ -151,7 +151,7 @@ export default function SettingsPage() {
                                 <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
                             </Protected>
 
-                            {(['super_admin', 'admin', 'country_managing_director', 'head_of_it', 'it_head', 'it_support', 'head_of_audit', 'audit_head', 'auditor', 'security_manager', 'head_of_operations', 'operations_head', 'operations_manager'].includes(user?.role || '') || (user?.role || '').toLowerCase() === 'ceo' || canSwitchCountry(user)) && (
+                            {(['super_admin', 'admin', 'country_managing_director', 'head_of_it', 'it_support', 'head_of_audit', 'auditor', 'security_manager', 'head_of_operations',].includes(user?.role || '') || (user?.role || '').toLowerCase() === 'ceo' || canSwitchCountry(user)) && (
                                 <>
                                     <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mt-4 mb-2 px-2">Enterprise Security</p>
                                     <Protected permission="MANAGE_ROLES">

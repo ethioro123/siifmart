@@ -39,7 +39,7 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
         .filter(e => [
             'picker', 'packer', 'dispatcher', 'warehouse_manager', 'driver', 'receiver',
             'inventory_specialist', 'forklift_operator', 'auditor', 'admin',
-            'regional_manager', 'operations_manager'
+            'regional_operations_manager', 'head_of_operations'
         ].includes((e.role || '').toLowerCase()) && e.status?.toLowerCase() === 'active')
         .map(employee => {
             const employeeAssignments = jobAssignments.filter(

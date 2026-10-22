@@ -59,8 +59,8 @@ describe('Store Manager Role & Retail Governance Engine (SOP-MGT-026)', () => {
 
         it('blocks store_manager from hiring peer site managers or superiors', () => {
             expect(canEmployRole('store_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('store_manager', 'operations_manager')).toBe(false);
-            expect(canEmployRole('store_manager', 'hr_manager')).toBe(false);
+            expect(canEmployRole('store_manager', 'head_of_operations')).toBe(false);
+            expect(canEmployRole('store_manager', 'head_of_hr')).toBe(false);
             expect(canEmployRole('store_manager', 'warehouse_manager')).toBe(false);
             expect(canEmployRole('store_manager', 'store_manager')).toBe(false);
         });

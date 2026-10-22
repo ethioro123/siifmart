@@ -69,7 +69,7 @@ const POSCommandContent: React.FC = () => {
   const [isSafeLedgerOpen, setIsSafeLedgerOpen] = useState(false);
   const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'audit' | 'roster' | 'all'>('overview');
-  const canOnboard = isManagerialRole(user?.role) && ['store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'super_admin', 'admin', 'operations_manager', 'regional_manager'].includes(user?.role || '');
+  const canOnboard = isManagerialRole(user?.role) && ['store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'super_admin', 'admin', 'head_of_operations', 'regional_operations_manager'].includes(user?.role || '');
 
   const handleUnlock = () => {
     const userPin = user?.code?.trim();
@@ -89,7 +89,7 @@ const POSCommandContent: React.FC = () => {
     if (window.history.state && typeof window.history.state.idx === 'number' && window.history.state.idx > 0) {
       navigate(-1);
     } else {
-      const isExecutive = ['super_admin', 'regional_manager', 'operations_manager'].includes(user?.role || '');
+      const isExecutive = ['super_admin', 'regional_operations_manager', 'head_of_operations'].includes(user?.role || '');
       navigate(isExecutive ? '/admin' : '/pos');
     }
   };

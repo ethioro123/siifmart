@@ -159,7 +159,7 @@ describe('SIIFMART Finance - AP, AR & General Ledger Engine', () => {
             await expect(
                 accountsPayableService.overrideDiscrepancy(
                     'INV-AP-002',
-                    { id: 'EMP-FIN-01', name: 'Fatuma Manager', role: 'finance_manager' },
+                    { id: 'EMP-FIN-01', name: 'Fatuma Manager', role: 'head_of_finance' },
                     'short'
                 )
             ).rejects.toThrow('Mandatory reason required: Provide at least 10 characters');
@@ -185,7 +185,7 @@ describe('SIIFMART Finance - AP, AR & General Ledger Engine', () => {
 
             const overridden = await accountsPayableService.overrideDiscrepancy(
                 'INV-AP-002',
-                { id: 'EMP-FIN-01', name: 'Fatuma Manager', role: 'finance_manager' },
+                { id: 'EMP-FIN-01', name: 'Fatuma Manager', role: 'head_of_finance' },
                 'Price increase agreed in addendum #3.'
             );
 
@@ -340,7 +340,7 @@ describe('SIIFMART Finance - AP, AR & General Ledger Engine', () => {
                             status: 'Closed',
                             closed_at: '2026-10-31T23:59:59Z',
                             closed_by_id: 'EMP-FIN-01',
-                            closed_by_name: 'Fatuma Finance Manager',
+                            closed_by_name: 'Fatuma Head of Finance',
                             lock_reason: 'End of month audit completed and reconciliation verified.'
                         },
                         error: null
@@ -352,12 +352,12 @@ describe('SIIFMART Finance - AP, AR & General Ledger Engine', () => {
             const period = await generalLedgerService.closeFiscalPeriod(
                 '2026-10',
                 'ET',
-                { id: 'EMP-FIN-01', name: 'Fatuma Finance Manager' },
+                { id: 'EMP-FIN-01', name: 'Fatuma Head of Finance' },
                 'End of month audit completed and reconciliation verified.'
             );
 
             expect(period.status).toBe('Closed');
-            expect(period.closedByName).toBe('Fatuma Finance Manager');
+            expect(period.closedByName).toBe('Fatuma Head of Finance');
             expect(systemLogsService.create).toHaveBeenCalledWith(
                 expect.objectContaining({ action: 'FISCAL_PERIOD_CLOSED' })
             );

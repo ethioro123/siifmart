@@ -54,18 +54,28 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Define role hierarchy from OrgChart
+    // Match the canonical hierarchy in utils/roles.ts.
     const getRoleHierarchy = (role: string): number => {
       const hierarchy: Record<string, number> = {
         'super_admin': 100,
-        'admin': 90,
-        'finance_manager': 80,
+        'country_managing_director': 98,
+        'admin': 98,
+        'head_of_operations': 95,
+        'regional_operations_manager': 90,
+        'head_of_finance': 85,
         'hr': 75,
-        'hr_manager': 75,
-        'procurement_manager': 70,
-        'supply_chain_manager': 70,
-        'operations_manager': 70,
-        'regional_manager': 70,
+        'head_of_hr': 85,
+        'head_of_procurement': 82,
+        'head_of_supply_chain': 82,
+        'head_of_merchandising': 82,
+        'head_of_it': 80,
+        'head_of_audit': 80,
+        'regional_procurement_manager': 81,
+        'regional_finance_manager': 81,
+        'regional_hr_manager': 81,
+        'regional_merchandising_manager': 81,
+        'regional_logistics_manager': 81,
+        'regional_security_manager': 81,
         'auditor': 65,
         'it_support': 60,
         'cs_manager': 55,

@@ -6,8 +6,8 @@ import { getRoleHierarchy, SYSTEM_ROLES } from '../../utils/roles';
 import { getRoleDept, getRoleLevel } from '../../components/org-chart/hooks/orgRoles';
 
 describe('Procurement Directorate Team Roles & Hierarchy', () => {
-    describe('1. Procurement Manager (procurement_manager)', () => {
-        const role = 'procurement_manager' as const;
+    describe('1. Head of Procurement (head_of_procurement)', () => {
+        const role = 'head_of_procurement' as const;
 
         it('has correct route and module access', () => {
             expect(canAccessRoute(role, '/procurement')).toBe(true);

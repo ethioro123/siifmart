@@ -37,7 +37,7 @@ export default function SalaryApprovalQueueModal({
     const country = (effectiveCountry || 'ET').toUpperCase();
     const canApprove = [
         'CEO', 'ceo', 'super_admin', 'admin', 'country_managing_director',
-        'finance_manager', 'head_of_finance', 'finance_head', 'cfo'
+        'head_of_finance', 'cfo'
     ].includes(user?.role || '');
 
     const loadRequests = useCallback(async () => {
@@ -100,7 +100,7 @@ export default function SalaryApprovalQueueModal({
 
     const handleApprove = async (request: SalaryChangeRequest) => {
         if (!canApprove) {
-            addNotification('alert', 'Only Finance Manager or Executive Office can approve salary adjustments.');
+            addNotification('alert', 'Only Head of Finance or Executive Office can approve salary adjustments.');
             return;
         }
 
@@ -119,7 +119,7 @@ export default function SalaryApprovalQueueModal({
             await salaryRequestsService.approve(request.id, {
                 id: user?.id,
                 name: user?.name || 'Approver',
-                role: user?.role || 'finance_manager'
+                role: user?.role || 'head_of_finance'
             });
 
             addNotification('success', `Approved salary update for ${request.employeeName}.`);
@@ -142,7 +142,7 @@ export default function SalaryApprovalQueueModal({
         try {
             await salaryRequestsService.reject(
                 requestId,
-                { id: user?.id, name: user?.name || 'Reviewer', role: user?.role || 'finance_manager' },
+                { id: user?.id, name: user?.name || 'Reviewer', role: user?.role || 'head_of_finance' },
                 rejectionReason.trim()
             );
 
@@ -174,7 +174,7 @@ export default function SalaryApprovalQueueModal({
                             </h3>
                         </div>
                         <p className="text-xs text-stone-500 mt-1">
-                            Market: <strong>{country}</strong> • Requires Finance Manager or CEO authorization
+                            Market: <strong>{country}</strong> • Requires Head of Finance or CEO authorization
                         </p>
                     </div>
 

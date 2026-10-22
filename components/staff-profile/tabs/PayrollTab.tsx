@@ -104,7 +104,7 @@ export default function PayrollTab({
                                 Pending Salary Adjustment: <span className="font-mono tabular-nums">{currencySymbol} {Number(pendingRequest.currentSalary).toLocaleString()}</span> → <span className="font-mono tabular-nums text-amber-500">{currencySymbol} {Number(pendingRequest.proposedSalary).toLocaleString()}</span>
                             </p>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
-                                Proposed by {pendingRequest.requestedBy} ({pendingRequest.requestedByRole}) • Awaiting Finance Manager / CEO Authorization
+                                Proposed by {pendingRequest.requestedBy} ({pendingRequest.requestedByRole}) • Awaiting Head of Finance / CEO Authorization
                             </p>
                         </div>
                     </div>

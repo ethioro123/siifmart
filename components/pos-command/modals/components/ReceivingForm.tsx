@@ -17,8 +17,8 @@ export const ReceivingForm: React.FC = () => {
     const isCentralHQOnly = [
         'super_admin',
         'ceo',
-        'operations_manager',
-        'regional_manager'
+        'head_of_operations',
+        'regional_operations_manager'
     ].includes(user?.role?.toLowerCase() || '');
     const isManagerOrHQ = isCentralHQOnly;
 

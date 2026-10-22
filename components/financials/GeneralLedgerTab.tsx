@@ -30,7 +30,7 @@ export const GeneralLedgerTab: React.FC = () => {
     const currentPeriodKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     const [activePeriod, setActivePeriod] = useState(currentPeriodKey);
 
-    const canLockPeriod = ['head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'admin', 'cfo', 'super_admin', 'CEO', 'ceo'].includes(user?.role);
+    const canLockPeriod = ['head_of_finance', 'country_managing_director', 'admin', 'cfo', 'super_admin', 'CEO', 'ceo'].includes(user?.role);
 
     const loadData = async () => {
         setLoading(true);

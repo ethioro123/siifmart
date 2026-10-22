@@ -146,8 +146,8 @@ describe('Infrastructure & Hardware Settings Isolation & Validation', () => {
     const allowedRoles = [
       'super_admin',
       'CEO',
-      'operations_manager',
-      'regional_manager',
+      'head_of_operations',
+      'regional_operations_manager',
       'store_manager',
       'warehouse_manager',
     ];

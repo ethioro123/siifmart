@@ -42,10 +42,10 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
             const isNationalHq = [
                 'super_admin', 'CEO', 'ceo',
                 'country_managing_director', 'admin',
-                'head_of_operations', 'operations_head', 'operations_manager',
-                'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
-                'head_of_finance', 'finance_head', 'finance_manager',
-                'auditor', 'head_of_audit', 'audit_head'
+                'head_of_operations',
+                'head_of_supply_chain',
+                'head_of_finance',
+                'auditor', 'head_of_audit',
             ].includes(user?.role || '');
             const userRegion = user?.regionCode || (user as any)?.region_code;
             const requestRegion = change.regionCode || (change as any)?.region_code;
@@ -60,9 +60,9 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                 return { success: true, change };
             }
 
-            // SOP-MER-037: price changes below the margin floor need Finance Manager / CEO sign-off
+            // SOP-MER-037: price changes below the margin floor need Head of Finance / CEO sign-off
             if (requiresFinanceCoApproval(change) && !canApproveBelowFloor(user?.role)) {
-                throw new Error(`Price change is below the ${MARGIN_FLOOR_PCT}% margin floor: Finance Manager or CEO approval is required.`);
+                throw new Error(`Price change is below the ${MARGIN_FLOOR_PCT}% margin floor: Head of Finance or CEO approval is required.`);
             }
 
             let success = false;

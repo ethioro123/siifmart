@@ -31,95 +31,53 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     head_of_operations: [
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
-    operations_head: [
-        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
-    ],
-    operations_manager: [
-        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
-    ],
     head_of_finance: [
-        'dashboard', 'finance', 'sales', 'pricing', 'settings', 'profile'
-    ],
-    finance_head: [
-        'dashboard', 'finance', 'sales', 'pricing', 'settings', 'profile'
-    ],
-    finance_manager: [
         'dashboard', 'finance', 'sales', 'pricing', 'settings', 'profile'
     ],
     head_of_hr: [
         'dashboard', 'employees', 'finance', 'settings', 'profile'
     ],
-    hr_head: [
-        'dashboard', 'employees', 'finance', 'settings', 'profile'
-    ],
-    hr_manager: [
-        'dashboard', 'employees', 'finance', 'profile'
-    ],
     head_of_procurement: [
         'dashboard', 'procurement', 'inventory', 'pricing', 'warehouse', 'settings', 'profile'
-    ],
-    procurement_head: [
-        'dashboard', 'procurement', 'inventory', 'pricing', 'warehouse', 'settings', 'profile'
-    ],
-    procurement_manager: [
-        'dashboard', 'procurement', 'inventory', 'pricing', 'warehouse', 'profile'
     ],
     head_of_supply_chain: [
         'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'settings', 'profile'
     ],
-    supply_chain_head: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'settings', 'profile'
-    ],
-    supply_chain_manager: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
-    ],
     head_of_merchandising: [
-        'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
-    ],
-    merchandising_head: [
-        'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
-    ],
-    merchandising_manager: [
         'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
     ],
     head_of_it: [
         'dashboard', 'settings', 'employees', 'profile'
     ],
-    it_head: [
-        'dashboard', 'settings', 'employees', 'profile'
-    ],
     head_of_audit: [
-        'dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'pos', 'profile'
-    ],
-    audit_head: [
         'dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'pos', 'profile'
     ],
     auditor: [
         'dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'pos', 'profile'
     ],
 
-    // ═══ LEVEL 4 - REGIONAL TERRITORY DIRECTORS ═══
-    regional_manager: [
+    // ═══ LEVEL 4 - REGIONAL OPERATIONS MANAGER ═══
+    regional_operations_manager: [
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
 
-    // ═══ LEVEL 5 - REGIONAL DIVISION LEADS ═══
-    regional_procurement_lead: [
+    // ═══ LEVEL 5 - REGIONAL DEPARTMENT MANAGERS ═══
+    regional_procurement_manager: [
         'dashboard', 'regional-ops', 'procurement', 'inventory', 'pricing', 'customers', 'profile'
     ],
-    regional_merchandising_lead: [
+    regional_merchandising_manager: [
         'dashboard', 'regional-ops', 'pricing', 'inventory', 'sales', 'profile'
     ],
-    regional_finance_officer: [
+    regional_finance_manager: [
         'dashboard', 'regional-ops', 'finance', 'sales', 'pos', 'profile'
     ],
-    regional_hr_officer: [
+    regional_hr_manager: [
         'dashboard', 'regional-ops', 'employees', 'profile'
     ],
-    regional_logistics_lead: [
+    regional_logistics_manager: [
         'dashboard', 'regional-ops', 'warehouse', 'inventory', 'procurement', 'employees', 'profile'
     ],
-    regional_security_supervisor: [
+    regional_security_manager: [
         'dashboard', 'regional-ops', 'settings', 'pos', 'inventory', 'sales', 'employees', 'profile'
     ],
 
@@ -213,15 +171,15 @@ export function getAvailableSections(userRole: UserRole, siteType?: string): str
     const basePermissions = ROLE_PERMISSIONS[userRole] || [];
     if (basePermissions.includes('*') || [
         'admin', 'country_managing_director',
-        'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor',
-        'head_of_operations', 'operations_head', 'operations_manager',
-        'head_of_finance', 'finance_head', 'finance_manager',
-        'head_of_hr', 'hr_head', 'hr_manager',
-        'head_of_procurement', 'procurement_head', 'procurement_manager',
-        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
-        'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
-        'head_of_it', 'it_head',
-        'head_of_audit', 'audit_head'
+        'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager',
+        'head_of_operations',
+        'head_of_finance',
+        'head_of_hr',
+        'head_of_procurement',
+        'head_of_supply_chain',
+        'head_of_merchandising',
+        'head_of_it',
+        'head_of_audit',
     ].includes(userRole)) return basePermissions;
     if (!siteType) return basePermissions;
 

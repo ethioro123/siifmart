@@ -16,9 +16,9 @@ export const ShiftProgress: React.FC = () => {
         'super_admin',
         'ceo',
         'admin',
-        'regional_manager',
-        'operations_manager',
-        'finance_manager',
+        'regional_operations_manager',
+        'head_of_operations',
+        'head_of_finance',
         'auditor'
     ].includes(user?.role?.toLowerCase() || '');
 

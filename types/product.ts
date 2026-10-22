@@ -154,8 +154,8 @@ export interface PendingInventoryChange {
   rejected_by?: string; // Supabase compatibility
   rejectedAt?: string;
   rejected_at?: string; // Supabase compatibility
-  approvalRole?: 'warehouse_manager' | 'procurement_manager'; // Role required to approve
-  approval_role?: 'warehouse_manager' | 'procurement_manager'; // Supabase compatibility
+  approvalRole?: 'warehouse_manager' | 'head_of_procurement'; // Role required to approve
+  approval_role?: 'warehouse_manager' | 'head_of_procurement'; // Supabase compatibility
   createdAt?: string;
   created_at?: string; // Supabase compatibility
 }

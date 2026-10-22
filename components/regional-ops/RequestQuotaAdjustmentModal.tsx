@@ -61,7 +61,7 @@ export const RequestQuotaAdjustmentModal: React.FC<RequestQuotaAdjustmentModalPr
         requestType,
         reason: reason.trim(),
         requestedBy: user?.name || 'Regional Manager',
-        requestedByRole: user?.role || 'regional_manager'
+        requestedByRole: user?.role || 'regional_operations_manager'
       });
 
       if (result) {

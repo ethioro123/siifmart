@@ -73,11 +73,11 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
             const hqRoles: UserRole[] = [
                 'super_admin',
                 'admin',
-                'hr_manager',
-                'finance_manager',
-                'procurement_manager',
-                'supply_chain_manager',
-                'merchandising_manager',
+                'head_of_hr',
+                'head_of_finance',
+                'head_of_procurement',
+                'head_of_supply_chain',
+                'head_of_merchandising',
                 'accountant',
                 'treasury_officer',
                 'tax_compliance_officer',
@@ -113,7 +113,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
         });
 
         it('autoSelectSiteForRole automatically selects HQ facility for corporate roles', () => {
-            const selectedHq = autoSelectSiteForRole('finance_manager', mockSites);
+            const selectedHq = autoSelectSiteForRole('head_of_finance', mockSites);
             expect(selectedHq).toBe('site-et-hq');
 
             const selectedWh = autoSelectSiteForRole('forklift_operator', mockSites);
@@ -127,14 +127,14 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
     describe('2. Employment at Zone Administration (Territorial Operational Zones)', () => {
         it('allows Regional & Zone Administration roles flexible deployment across any facility type', () => {
             const zoneAdminRoles: UserRole[] = [
-                'regional_manager',
-                'regional_procurement_lead',
-                'regional_finance_officer',
-                'regional_hr_officer',
-                'regional_logistics_lead',
-                'regional_security_supervisor',
+                'regional_operations_manager',
+                'regional_procurement_manager',
+                'regional_finance_manager',
+                'regional_hr_manager',
+                'regional_logistics_manager',
+                'regional_security_manager',
                 'store_operations_auditor',
-                'operations_manager'
+                'head_of_operations'
             ];
 
             zoneAdminRoles.forEach(role => {
@@ -158,7 +158,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
                             site_id: 'site-et-dire-wh',
                             region_code: 'ET-DIR',
                             name: 'Dire Dawa Regional Lead',
-                            role: 'regional_logistics_lead',
+                            role: 'regional_logistics_manager',
                             email: 'et-siif0050@siifmart.com',
                             phone: '+251911000050',
                             status: 'Active',
@@ -196,7 +196,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
                 code: 'ET-SIIF0050',
                 siteId: 'site-et-dire-wh',
                 name: 'Dire Dawa Regional Lead',
-                role: 'regional_logistics_lead',
+                role: 'regional_logistics_manager',
                 email: 'et-siif0050@siifmart.com',
                 phone: '+251911000050',
                 status: 'Active',
@@ -216,7 +216,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
 
         it('correctly filters employees by territorial region_code for zone governance', async () => {
             const mockRegionalIds = [
-                { id: 'emp-z1', role: 'regional_manager', name: 'Abebe Zone Mgr', created_at: '2026-10-12' },
+                { id: 'emp-z1', role: 'regional_operations_manager', name: 'Abebe Zone Mgr', created_at: '2026-10-12' },
                 { id: 'emp-z2', role: 'cashier', name: 'Almaz Cashier', created_at: '2026-10-12' }
             ];
 
@@ -236,7 +236,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
                             return {
                                 in: vi.fn().mockResolvedValue({
                                     data: [
-                                        { id: 'emp-z1', role: 'regional_manager', name: 'Abebe Zone Mgr', region_code: 'ET-DIR' },
+                                        { id: 'emp-z1', role: 'regional_operations_manager', name: 'Abebe Zone Mgr', region_code: 'ET-DIR' },
                                         { id: 'emp-z2', role: 'cashier', name: 'Almaz Cashier', region_code: 'ET-DIR' }
                                     ],
                                     error: null
@@ -258,7 +258,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
 
             expect(mockQuery.eq).toHaveBeenCalledWith('region_code', 'ET-DIR');
             expect(result.data.length).toBe(2);
-            expect(result.data[0].role).toBe('regional_manager');
+            expect(result.data[0].role).toBe('regional_operations_manager');
         });
     });
 
@@ -268,11 +268,11 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
             expect(canEmployRole('super_admin', 'CEO')).toBe(false);
 
             // Level 2 - Directors & Regional
-            expect(canEmployRole('super_admin', 'regional_manager')).toBe(true);
-            expect(canEmployRole('super_admin', 'operations_manager')).toBe(true);
-            expect(canEmployRole('super_admin', 'finance_manager')).toBe(true);
-            expect(canEmployRole('super_admin', 'hr_manager')).toBe(true);
-            expect(canEmployRole('super_admin', 'procurement_manager')).toBe(true);
+            expect(canEmployRole('super_admin', 'regional_operations_manager')).toBe(true);
+            expect(canEmployRole('super_admin', 'head_of_operations')).toBe(true);
+            expect(canEmployRole('super_admin', 'head_of_finance')).toBe(true);
+            expect(canEmployRole('super_admin', 'head_of_hr')).toBe(true);
+            expect(canEmployRole('super_admin', 'head_of_procurement')).toBe(true);
 
             // Level 3 - Site Managers
             expect(canEmployRole('super_admin', 'store_manager')).toBe(true);
@@ -283,42 +283,42 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
             expect(canEmployRole('super_admin', 'picker')).toBe(true);
         });
 
-        it('HR Manager (Rank 85) cannot hire CEO or peer directors, but can hire Level 3 managers and Level 4 staff', () => {
+        it('Head of Human Resources (Rank 85) cannot hire CEO or peer directors, but can hire Level 3 managers and Level 4 staff', () => {
             // Cannot hire superiors
-            expect(canEmployRole('hr_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('hr_manager', 'regional_manager')).toBe(false);
-            expect(canEmployRole('hr_manager', 'operations_manager')).toBe(false);
+            expect(canEmployRole('head_of_hr', 'super_admin')).toBe(false);
+            expect(canEmployRole('head_of_hr', 'regional_operations_manager')).toBe(false);
+            expect(canEmployRole('head_of_hr', 'head_of_operations')).toBe(false);
 
             // Cannot hire peers (Level 2)
-            expect(canEmployRole('hr_manager', 'hr_manager')).toBe(false);
-            expect(canEmployRole('hr_manager', 'finance_manager')).toBe(false);
-            expect(canEmployRole('hr_manager', 'procurement_manager')).toBe(false);
+            expect(canEmployRole('head_of_hr', 'head_of_hr')).toBe(false);
+            expect(canEmployRole('head_of_hr', 'head_of_finance')).toBe(false);
+            expect(canEmployRole('head_of_hr', 'head_of_procurement')).toBe(false);
 
             // Can hire Level 3 facility managers
-            expect(canEmployRole('hr_manager', 'store_manager')).toBe(true);
-            expect(canEmployRole('hr_manager', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('head_of_hr', 'store_manager')).toBe(true);
+            expect(canEmployRole('head_of_hr', 'warehouse_manager')).toBe(true);
 
             // Can hire Level 4 staff
-            expect(canEmployRole('hr_manager', 'cashier')).toBe(true);
-            expect(canEmployRole('hr_manager', 'picker')).toBe(true);
-            expect(canEmployRole('hr_manager', 'accountant')).toBe(true);
+            expect(canEmployRole('head_of_hr', 'cashier')).toBe(true);
+            expect(canEmployRole('head_of_hr', 'picker')).toBe(true);
+            expect(canEmployRole('head_of_hr', 'accountant')).toBe(true);
         });
 
         it('Regional Manager (Rank 95) can employ territorial managers and staff below Level 2 rank', () => {
-            expect(canEmployRole('regional_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('regional_manager', 'regional_manager')).toBe(false);
+            expect(canEmployRole('regional_operations_manager', 'super_admin')).toBe(false);
+            expect(canEmployRole('regional_operations_manager', 'regional_operations_manager')).toBe(false);
 
-            expect(canEmployRole('regional_manager', 'operations_manager')).toBe(false); // peer L2
-            expect(canEmployRole('regional_manager', 'store_manager')).toBe(true);
-            expect(canEmployRole('regional_manager', 'warehouse_manager')).toBe(true);
-            expect(canEmployRole('regional_manager', 'cashier')).toBe(true);
-            expect(canEmployRole('regional_manager', 'picker')).toBe(true);
+            expect(canEmployRole('regional_operations_manager', 'head_of_operations')).toBe(false); // peer L2
+            expect(canEmployRole('regional_operations_manager', 'store_manager')).toBe(true);
+            expect(canEmployRole('regional_operations_manager', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('regional_operations_manager', 'cashier')).toBe(true);
+            expect(canEmployRole('regional_operations_manager', 'picker')).toBe(true);
         });
 
         it('Site Managers (Rank 80) can only hire within their facility domain and rank below them', () => {
             // Store Manager
             expect(canEmployRole('store_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('store_manager', 'regional_manager')).toBe(false);
+            expect(canEmployRole('store_manager', 'regional_operations_manager')).toBe(false);
             expect(canEmployRole('store_manager', 'store_manager')).toBe(false);
             expect(canEmployRole('store_manager', 'warehouse_manager')).toBe(false);
             expect(canEmployRole('store_manager', 'assistant_manager')).toBe(true);
@@ -347,9 +347,9 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
     describe('4. Directory Hierarchy Sorting & Seniority Rank', () => {
         it('verifies strict descending hierarchy ranks from Executive to Staff', () => {
             const ceoRank = getRoleHierarchy('super_admin');
-            const opsMgrRank = getRoleHierarchy('operations_manager');
-            const regionalMgrRank = getRoleHierarchy('regional_manager');
-            const hrMgrRank = getRoleHierarchy('hr_manager');
+            const opsMgrRank = getRoleHierarchy('head_of_operations');
+            const regionalMgrRank = getRoleHierarchy('regional_operations_manager');
+            const hrMgrRank = getRoleHierarchy('head_of_hr');
             const storeMgrRank = getRoleHierarchy('store_manager');
             const shiftLeadRank = getRoleHierarchy('shift_lead');
             const cashierRank = getRoleHierarchy('cashier');
@@ -381,7 +381,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
                 { id: 'emp-1', role: 'cashier', name: 'Zack Cashier', created_at: '2026-10-12' },
                 { id: 'emp-2', role: 'super_admin', name: 'Executive CEO', created_at: '2026-10-12' },
                 { id: 'emp-3', role: 'store_manager', name: 'Berta Store Mgr', created_at: '2026-10-12' },
-                { id: 'emp-4', role: 'hr_manager', name: 'Charlie HR', created_at: '2026-10-12' }
+                { id: 'emp-4', role: 'head_of_hr', name: 'Charlie HR', created_at: '2026-10-12' }
             ];
 
             const mockQuery = {
@@ -398,7 +398,7 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
                                 in: vi.fn().mockResolvedValue({
                                     data: [
                                         { id: 'emp-2', role: 'super_admin', name: 'Executive CEO' },
-                                        { id: 'emp-4', role: 'hr_manager', name: 'Charlie HR' },
+                                        { id: 'emp-4', role: 'head_of_hr', name: 'Charlie HR' },
                                         { id: 'emp-3', role: 'store_manager', name: 'Berta Store Mgr' },
                                         { id: 'emp-1', role: 'cashier', name: 'Zack Cashier' }
                                     ],
@@ -415,26 +415,26 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
 
             expect(result.data.length).toBe(4);
             expect(result.data[0].role).toBe('super_admin');
-            expect(result.data[1].role).toBe('hr_manager');
+            expect(result.data[1].role).toBe('head_of_hr');
             expect(result.data[2].role).toBe('store_manager');
             expect(result.data[3].role).toBe('cashier');
         });
 
         it('enforces supervisory visibility hierarchy rules via canViewLocation', () => {
             // CEO can view everyone
-            expect(canViewLocation('super_admin', 'hr_manager', false)).toBe(true);
+            expect(canViewLocation('super_admin', 'head_of_hr', false)).toBe(true);
             expect(canViewLocation('super_admin', 'cashier', false)).toBe(true);
 
             // HR can view all except CEO
-            expect(canViewLocation('hr_manager', 'store_manager', false)).toBe(true);
-            expect(canViewLocation('hr_manager', 'cashier', false)).toBe(true);
-            expect(canViewLocation('hr_manager', 'super_admin', false)).toBe(false);
+            expect(canViewLocation('head_of_hr', 'store_manager', false)).toBe(true);
+            expect(canViewLocation('head_of_hr', 'cashier', false)).toBe(true);
+            expect(canViewLocation('head_of_hr', 'super_admin', false)).toBe(false);
 
             // Store Manager can only view below their rank
             expect(canViewLocation('store_manager', 'cashier', false)).toBe(true);
             expect(canViewLocation('store_manager', 'shift_lead', false)).toBe(true);
             expect(canViewLocation('store_manager', 'store_manager', false)).toBe(false);
-            expect(canViewLocation('store_manager', 'hr_manager', false)).toBe(false);
+            expect(canViewLocation('store_manager', 'head_of_hr', false)).toBe(false);
 
             // Self view is always permitted
             expect(canViewLocation('cashier', 'cashier', true)).toBe(true);

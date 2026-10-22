@@ -52,17 +52,17 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     const isExceedingAutonomous = Boolean(poRegionCode && po.totalAmount > autonomousLimit);
 
     const isCEO = user?.role === 'super_admin' || user?.role === 'CEO' || user?.role === 'ceo';
-    const isProcurementManager = ['head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '');
-    const isHQExecutive = isCEO || ['country_managing_director', 'admin'].includes(user?.role || '') || ['head_of_finance', 'finance_head', 'finance_manager'].includes(user?.role || '') || isProcurementManager;
+    const isProcurementManager = ['head_of_procurement', 'regional_procurement_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user?.role || '');
+    const isHQExecutive = isCEO || ['country_managing_director', 'admin'].includes(user?.role || '') || ['head_of_finance',].includes(user?.role || '') || isProcurementManager;
     const isRegionalRole = [
-        'regional_manager', 'regional_operations_director', 'regional_director',
-        'regional_procurement_lead', 'regional_procurement_manager',
-        'regional_finance_officer', 'regional_finance_manager'
+        'regional_operations_manager',
+        'regional_procurement_manager',
+        'regional_finance_manager',
     ].includes(user?.role || '');
-    const isOperationalDirector = isRegionalRole || ['head_of_operations', 'operations_head', 'operations_manager'].includes(user?.role || '');
+    const isOperationalDirector = isRegionalRole || ['head_of_operations',].includes(user?.role || '');
     const isAuthorizedApprover = isExceedingAutonomous
         ? isHQExecutive
-        : (isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO || isOperationalDirector);
+        : (isProcurementManager || user?.role === 'head_of_finance' || user?.role === 'admin' || isCEO || isOperationalDirector);
 
     // Zero-Trust 4-Eyes Check: Creator cannot approve their own PO (Captain Owns the Ship Doctrine)
     const isCreator = Boolean(
@@ -91,7 +91,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                     poId: po.id,
                     approverId: user?.id || (user as any)?.employeeId || 'USR',
                     approverName: user?.name || 'Authorized Manager',
-                    approverRole: user?.role || 'procurement_manager',
+                    approverRole: user?.role || 'head_of_procurement',
                     reasonCode: reasonCode as any,
                     notes: notes || 'Approved via PO Inspector modal'
                 });
@@ -101,7 +101,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                     poId: po.id,
                     rejectorId: user?.id || (user as any)?.employeeId || 'USR',
                     rejectorName: user?.name || 'Authorized Manager',
-                    rejectorRole: user?.role || 'procurement_manager',
+                    rejectorRole: user?.role || 'head_of_procurement',
                     reasonCode: reasonCode as any,
                     notes: notes || 'Rejected via PO Inspector modal'
                 });
@@ -406,7 +406,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         ) : (
                             <div className="p-3.5 px-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-2.5 text-amber-600 dark:text-amber-400 text-xs font-medium">
                                 <Clock size={16} className="shrink-0" />
-                                <span>Maker Draft: PO drafted by {po.createdBy || 'Staff'} • {isExceedingAutonomous ? 'Awaiting National HQ Sign-Off' : 'Awaiting Procurement Manager Sign-Off'}</span>
+                                <span>Maker Draft: PO drafted by {po.createdBy || 'Staff'} • {isExceedingAutonomous ? 'Awaiting National HQ Sign-Off' : 'Awaiting Head of Procurement Sign-Off'}</span>
                             </div>
                         )
                     )}
@@ -436,7 +436,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         </button>
 
                         {/* Edit & Delete Action Logic:
-                            1. CEO/Procurement Manager can Edit/Delete anything NOT fully Received.
+                            1. CEO/Head of Procurement can Edit/Delete anything NOT fully Received.
                             2. Other staff can ONLY Edit/Delete their own Draft POs.
                         */}
                         {((canFullDelete && po.status !== 'Received') || 

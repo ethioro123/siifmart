@@ -15,9 +15,7 @@ export const DIRECT_ONBOARDING_ROLES: readonly string[] = [
     'admin',
     'country_managing_director',
     'hr',
-    'hr_manager',
     'head_of_hr',
-    'hr_head'
 ] as const;
 
 /**
@@ -44,13 +42,13 @@ export const isDirectOnboardingAuthorized = (
     // Regional & Site Managers (L3-L7) can fast-track Level 10 frontline hires if pre-approved quota slot is available
     if (isQuotaApproved && candidateRole) {
         const managerialRoles = [
-            'regional_manager', 'regional_hr_officer', 'regional_logistics_lead',
-            'regional_procurement_lead', 'regional_finance_officer', 'regional_security_supervisor',
-            'regional_merchandising_lead',
+            'regional_operations_manager', 'regional_hr_manager', 'regional_logistics_manager',
+            'regional_procurement_manager', 'regional_finance_manager', 'regional_security_manager',
+            'regional_merchandising_manager',
             'store_manager', 'warehouse_manager', 'dispatch_manager',
             'logistics_manager', 'inventory_manager', 'security_manager',
-            'operations_manager', 'head_of_operations', 'operations_head',
-            'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head'
+            'head_of_operations',
+            'head_of_supply_chain',
         ];
         if (managerialRoles.includes(cleanRole)) {
             return true;

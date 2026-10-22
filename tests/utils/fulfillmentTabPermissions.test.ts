@@ -6,10 +6,10 @@ import { FLOOR_WORKER_ROLES } from '../../utils/fulfillmentRoles';
 import { isTransferManager } from '../../utils/transferGovernance';
 
 const FULFILLMENT_ROUTE_ROLES = [
-    'super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager',
+    'super_admin', 'admin', 'warehouse_manager', 'head_of_operations', 'dispatch_manager',
     'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk',
-    'returns_clerk', 'inventory_specialist', 'regional_manager', 'regional_logistics_lead',
-    'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'inbound_qc_inspector',
+    'returns_clerk', 'inventory_specialist', 'regional_operations_manager', 'regional_logistics_manager',
+    'head_of_supply_chain', 'inventory_manager', 'logistics_manager', 'inbound_qc_inspector',
     'replenishment_planner', 'fleet_maintenance_supervisor',
 ];
 
@@ -18,7 +18,7 @@ describe('Fulfillment tab permissions', () => {
         expect(getVisibleFulfillmentTabs(role)).toEqual(['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']);
     });
 
-    it.each(['picker', 'packer', 'receiver', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'supply_chain_manager'])(
+    it.each(['picker', 'packer', 'receiver', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'head_of_supply_chain'])(
         '%s cannot open site inventory counts without the count role', role => {
             expect(getVisibleFulfillmentTabs(role)).not.toContain('COUNT');
         }
@@ -34,8 +34,8 @@ describe('Fulfillment tab permissions', () => {
         ['replenishment_planner', ['TRANSFER', 'REPLENISH']],
         ['returns_clerk', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'RETURNS']],
         ['dispatcher', ['DOCKS', 'DRIVER', 'ASSIGN']],
-        ['supply_chain_manager', ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH']],
-        ['regional_logistics_lead', ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER']],
+        ['head_of_supply_chain', ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH']],
+        ['regional_logistics_manager', ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER']],
     ])('%s sees its shared floor tabs and authorized specialist tabs', (role, tabs) => {
         expect(getVisibleFulfillmentTabs(role as string)).toEqual(tabs);
     });
@@ -62,7 +62,7 @@ describe('Fulfillment tab permissions', () => {
         expect(getVisibleFulfillmentTabs('picker')).not.toContain('DRIVER');
     });
 
-    it.each(['warehouse_manager', 'dispatch_manager', 'supply_chain_manager', 'regional_logistics_lead', 'replenishment_planner'])('%s retains authorized transfer access', role => {
+    it.each(['warehouse_manager', 'dispatch_manager', 'head_of_supply_chain', 'regional_logistics_manager', 'replenishment_planner'])('%s retains authorized transfer access', role => {
         expect(getVisibleFulfillmentTabs(role)).toContain('TRANSFER');
     });
 

@@ -5,7 +5,7 @@ import { getRecommendedDepartment } from '../../utils/roleSegregation';
 
 describe('Departmental Sovereignty & Segregation of Duties (Zero-Trust Inter-Department Isolation)', () => {
     describe('1. Human Resources (HR) Department Isolation', () => {
-        const hrRoles = ['hr', 'hr_manager'] as const;
+        const hrRoles = ['hr', 'head_of_hr'] as const;
 
         it('strictly blocks HR staff from Financial Command Center (/finance)', () => {
             hrRoles.forEach(role => {
@@ -29,7 +29,7 @@ describe('Departmental Sovereignty & Segregation of Duties (Zero-Trust Inter-Dep
     });
 
     describe('2. Finance & Accounting Department Isolation (Segregation of Duties)', () => {
-        const financeRoles = ['finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer'] as const;
+        const financeRoles = ['head_of_finance', 'accountant', 'treasury_officer', 'tax_compliance_officer'] as const;
 
         it('strictly blocks Finance staff from corporate Procurement operations (/procurement)', () => {
             financeRoles.forEach(role => {
@@ -48,7 +48,7 @@ describe('Departmental Sovereignty & Segregation of Duties (Zero-Trust Inter-Dep
         });
 
         it('maps finance roles to Finance department', () => {
-            expect(getRecommendedDepartment('finance_manager')).toBe('Finance');
+            expect(getRecommendedDepartment('head_of_finance')).toBe('Finance');
             expect(getRecommendedDepartment('accountant')).toBe('Finance');
             expect(getRecommendedDepartment('treasury_officer')).toBe('Finance');
             expect(getRecommendedDepartment('tax_compliance_officer')).toBe('Finance');
@@ -57,7 +57,7 @@ describe('Departmental Sovereignty & Segregation of Duties (Zero-Trust Inter-Dep
     });
 
     describe('3. Procurement Department Isolation', () => {
-        const procurementRoles = ['procurement_manager', 'buyer', 'vendor_relations_manager', 'customs_import_specialist'] as const;
+        const procurementRoles = ['head_of_procurement', 'buyer', 'vendor_relations_manager', 'customs_import_specialist'] as const;
 
         it('strictly blocks Procurement staff from Financial Command Center (/finance)', () => {
             procurementRoles.forEach(role => {

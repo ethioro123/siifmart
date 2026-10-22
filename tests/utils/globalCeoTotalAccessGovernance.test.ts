@@ -75,7 +75,7 @@ describe('Global CEO Total Access, Control & Sovereignty Engine', () => {
 
         it('strictly denies cross-border switching to regional, site, and frontline roles', () => {
             expect(canSwitchCountry({ role: 'country_managing_director' })).toBe(false);
-            expect(canSwitchCountry({ role: 'regional_manager' })).toBe(false);
+            expect(canSwitchCountry({ role: 'regional_operations_manager' })).toBe(false);
             expect(canSwitchCountry({ role: 'store_manager' })).toBe(false);
             expect(canSwitchCountry({ role: 'warehouse_manager' })).toBe(false);
             expect(canSwitchCountry({ role: 'cashier' })).toBe(false);
@@ -88,7 +88,7 @@ describe('Global CEO Total Access, Control & Sovereignty Engine', () => {
         it('authorizes Global CEO to onboard any role below CEO level', () => {
             expect(canEmployRole('super_admin', 'country_managing_director')).toBe(true);
             expect(canEmployRole('super_admin', 'head_of_operations')).toBe(true);
-            expect(canEmployRole('super_admin', 'regional_manager')).toBe(true);
+            expect(canEmployRole('super_admin', 'regional_operations_manager')).toBe(true);
             expect(canEmployRole('super_admin', 'store_manager')).toBe(true);
             expect(canEmployRole('super_admin', 'cashier')).toBe(true);
 

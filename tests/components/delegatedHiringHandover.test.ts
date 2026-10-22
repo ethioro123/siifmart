@@ -9,9 +9,9 @@ describe('Delegated Hiring & Credential Handover Governance', () => {
             expect(isManagerialRole('super_admin')).toBe(true);
 
             // Level 2
-            expect(isManagerialRole('operations_manager')).toBe(true);
-            expect(isManagerialRole('regional_manager')).toBe(true);
-            expect(isManagerialRole('hr_manager')).toBe(true);
+            expect(isManagerialRole('head_of_operations')).toBe(true);
+            expect(isManagerialRole('regional_operations_manager')).toBe(true);
+            expect(isManagerialRole('head_of_hr')).toBe(true);
 
             // Level 3 (Site & Operational Leadership)
             expect(isManagerialRole('store_manager')).toBe(true);

@@ -15,7 +15,7 @@ type ReasonCode = 'underpack' | 'overpack' | 'wrong_item' | 'damaged' | 'short_p
 const SUPERVISORY_ROLES = [
     'super_admin',
     'ceo',
-    'operations_manager',
+    'head_of_operations',
     'warehouse_manager',
     'inventory_manager',
     'store_manager',

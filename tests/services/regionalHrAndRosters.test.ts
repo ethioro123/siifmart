@@ -154,7 +154,7 @@ describe('Step 8: Regional HR & Roster Management', () => {
                 in: vi.fn().mockReturnThis(),
                 then: (resolve: any) => Promise.resolve({
                     data: [
-                        { id: 'emp-reg-1', role: 'regional_manager', name: 'Mombasa RM' }
+                        { id: 'emp-reg-1', role: 'regional_operations_manager', name: 'Mombasa RM' }
                     ],
                     error: null,
                     count: 1

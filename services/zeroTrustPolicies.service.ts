@@ -65,14 +65,14 @@ export function mapUserRoleToManagedRole(userRole?: string): ManagedRoleId | nul
     const r = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
     if ([
         'super_admin', 'admin', 'ceo', 'country_managing_director',
-        'head_of_operations', 'operations_head', 'operations_manager',
-        'head_of_finance', 'finance_head', 'finance_manager',
-        'head_of_hr', 'hr_head', 'hr_manager',
-        'head_of_procurement', 'procurement_head', 'procurement_manager',
-        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
-        'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
-        'head_of_it', 'it_head', 'head_of_audit', 'audit_head',
-        'regional_manager'
+        'head_of_operations',
+        'head_of_finance',
+        'head_of_hr',
+        'head_of_procurement',
+        'head_of_supply_chain',
+        'head_of_merchandising',
+        'head_of_it', 'head_of_audit',
+        'regional_operations_manager'
     ].includes(r)) return 'admin';
     if (['store_manager', 'assistant_manager', 'store_supervisor'].includes(r)) return 'store_manager';
     if (['cashier', 'pos', 'shift_lead', 'sales_associate', 'customer_service'].includes(r)) return 'cashier';

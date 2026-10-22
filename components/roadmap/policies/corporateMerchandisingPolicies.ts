@@ -13,7 +13,7 @@ export const CORPORATE_MERCHANDISING_POLICIES: KnowledgeEntry[] = [
     createdAt: '2026-10-04T00:00:00.000Z',
     updatedAt: '2026-10-04T00:00:00.000Z',
     tags: [
-      'Merchandising Manager',
+      'Head of Merchandising',
       'Corporate Administration',
       'Zero-Trust',
       'Price Sovereignty',
@@ -26,7 +26,7 @@ export const CORPORATE_MERCHANDISING_POLICIES: KnowledgeEntry[] = [
     content: `================================================================================
 SIIFMART ENTERPRISE WORKFORCE & MANAGERIAL DIRECTIVE
 STANDARD OPERATING PROCEDURE: SOP-MER-037
-ROLE: MERCHANDISING MANAGER (LEVEL 2 — HIERARCHY RANK 82, MATRIX RANK 24)
+ROLE: HEAD OF MERCHANDISING (LEVEL 2 — HIERARCHY RANK 82, MATRIX RANK 24)
 GOVERNANCE: CORPORATE ADMINISTRATION / COMMERCIAL DIRECTORATE
 REPORTS TO: CHIEF EXECUTIVE OFFICER (CEO / SUPER_ADMIN)
 TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 2: Merchandising Separation, Rule 10: Synaptic Neural Mesh)
@@ -35,7 +35,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 2: Merchandising Separat
 1. EXECUTIVE MANDATE & CORPORATE ADMINISTRATION PLACEMENT
 --------------------------------------------------------------------------------
 1.1 Position Summary:
-    - The Merchandising Manager operates at Level 2 (Corporate Directorate) within Corporate Administration, reporting directly to the CEO with functional coordination with the Operations Manager and Finance Manager.
+    - The Head of Merchandising operates at Level 2 (Corporate Directorate) within Corporate Administration, reporting directly to the CEO with functional coordination with the Head of Operations and Head of Finance.
     - Serves as the enterprise commercial custodian of product assortment, retail pricing architecture, gross margins, supplier markups, competitor price indexing, promotional campaigns, and master planograms.
 1.2 Strategic Directorate Scope:
     - Merchandising is strictly a CENTRAL CORPORATE ADMINISTRATION function.
@@ -47,7 +47,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 2: Merchandising Separat
     - Branch Managers, Assistant Managers, Shift Leads, Store Supervisors, Cashiers, and Store Merchandisers have ZERO authority to alter base retail prices, modify system landed costs, or create ad-hoc discounts at the point of sale.
     - Any attempt by store-level personnel to edit prices is blocked at the RBAC layer, permissions matrix, and database RLS policy.
 2.2 Clear Separation of Duties:
-    - Corporate Merchandising Manager (HQ): Determines master pricing, gross margins, dynamic price rules, and visual planograms.
+    - Corporate Head of Merchandising (HQ): Determines master pricing, gross margins, dynamic price rules, and visual planograms.
     - Store Supervisor & Visual Merchandisers (Store Floor): Responsible solely for physical shelf execution, FEFO rotation, and printing replacement shelf tags to match HQ prices with 100% parity.
 
 3. DUAL-CONTROL MARGIN GOVERNANCE & 4-EYES SIGN-OFF
@@ -57,7 +57,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 2: Merchandising Separat
       Base Retail = Landed Cost + (Target Category Margin %).
     - Target margin floors (e.g. minimum 18% on staples, 32% on fresh perishables, 40% on personal care) are locked in system config.
 3.2 4-Eyes Dual Approval for Price Overrides:
-    - Any promotional price drop, markdown, or rule modification that causes a product's projected gross margin to dip below the country threshold (< 15%) requires mandatory dual-authorization from the Finance Manager before activation.
+    - Any promotional price drop, markdown, or rule modification that causes a product's projected gross margin to dip below the country threshold (< 15%) requires mandatory dual-authorization from the Head of Finance before activation.
 
 4. SYNAPTIC NEURAL MESH PRICE PROPAGATION (RULE 10)
 --------------------------------------------------------------------------------

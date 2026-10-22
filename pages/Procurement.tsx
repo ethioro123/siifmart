@@ -26,10 +26,10 @@ export default function Procurement() {
     const { suppliers: allSuppliers, sites, settings, effectiveCountry, isRegionalUser, activeRegionCode, regions } = useData(); // Global suppliers validation & sites
 
     const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
-        'regional_manager',
-        'regional_procurement_lead',
-        'regional_finance_officer',
-        'regional_logistics_lead'
+        'regional_operations_manager',
+        'regional_procurement_manager',
+        'regional_finance_manager',
+        'regional_logistics_manager'
     ].includes(user?.role || '');
 
     const activeCountry: Country = (effectiveCountry || (settings?.country as Country) || 'ET');
@@ -242,7 +242,7 @@ export default function Procurement() {
                 <div className="flex items-center gap-3">
                     {/* Maker-Checker Sign-off Hub Badge */}
                     {(() => {
-                        const isApproverRole = Boolean(user?.role && ['head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+                        const isApproverRole = Boolean(user?.role && ['head_of_procurement', 'regional_procurement_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
                         if (pendingSignOffsCount === 0) return null;
 
                         return isApproverRole ? (
@@ -373,7 +373,7 @@ export default function Procurement() {
                             await fetchData();
                         }}
                         canVerify={Boolean(user?.role && ['super_admin', 'ceo', 'CEO', 'country_managing_director', 'admin',
-                            'head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead'].includes(user.role))}
+                            'head_of_procurement', 'regional_procurement_manager'].includes(user.role))}
                         viewerEmployeeId={user?.id}
                         onOpenCreatePO={handleCreatePOOpen}
                     />

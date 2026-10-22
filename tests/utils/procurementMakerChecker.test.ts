@@ -7,10 +7,10 @@ import { getRoleHierarchy } from '../../utils/roles';
 describe('Procurement Maker-Checker & Segregation of Duties', () => {
     describe('1. Role Categorization: Makers vs Checkers', () => {
         const checkerRoles = [
-            'procurement_manager',
-            'finance_manager',
-            'regional_manager',
-            'operations_manager',
+            'head_of_procurement',
+            'head_of_finance',
+            'regional_operations_manager',
+            'head_of_operations',
             'super_admin'
         ] as const;
 
@@ -25,20 +25,20 @@ describe('Procurement Maker-Checker & Segregation of Duties', () => {
 
         it('identifies supervisory PO approvers (Checkers)', () => {
             checkerRoles.forEach(role => {
-                const canSignOff = ['procurement_manager', 'finance_manager', 'regional_manager', 'operations_manager', 'super_admin'].includes(role);
+                const canSignOff = ['head_of_procurement', 'head_of_finance', 'regional_operations_manager', 'head_of_operations', 'super_admin'].includes(role);
                 expect(canSignOff).toBe(true);
             });
         });
 
         it('identifies operational procurement specialists as Makers', () => {
             makerStaffRoles.forEach(role => {
-                const isChecker = ['procurement_manager', 'finance_manager', 'regional_manager', 'operations_manager', 'super_admin'].includes(role as any);
+                const isChecker = ['head_of_procurement', 'head_of_finance', 'regional_operations_manager', 'head_of_operations', 'super_admin'].includes(role as any);
                 expect(isChecker).toBe(false);
             });
         });
 
-        it('enforces hierarchy: Procurement Manager outranks operational makers', () => {
-            const managerRank = getRoleHierarchy('procurement_manager'); // 82
+        it('enforces hierarchy: Head of Procurement outranks operational makers', () => {
+            const managerRank = getRoleHierarchy('head_of_procurement'); // 82
             makerStaffRoles.forEach(staffRole => {
                 const staffRank = getRoleHierarchy(staffRole as any);
                 expect(managerRank).toBeGreaterThan(staffRank);
@@ -49,25 +49,25 @@ describe('Procurement Maker-Checker & Segregation of Duties', () => {
     describe('2. Multi-Tier PO Approval Thresholds (APPROVAL_WORKFLOWS.purchase_order)', () => {
         const poWorkflow = APPROVAL_WORKFLOWS.purchase_order;
 
-        it('requires Procurement Manager sign-off for standard POs (up to 10,000)', () => {
+        it('requires Head of Procurement sign-off for standard POs (up to 10,000)', () => {
             const tier1 = poWorkflow.levels.find(l => l.threshold === 10000);
-            expect(tier1?.roles).toContain('procurement_manager');
+            expect(tier1?.roles).toContain('head_of_procurement');
             expect(tier1?.roles).not.toContain('buyer');
         });
 
-        it('requires dual sign-off (Procurement + Finance Manager) for medium POs (up to 50,000)', () => {
+        it('requires dual sign-off (Procurement + Head of Finance) for medium POs (up to 50,000)', () => {
             const tier2 = poWorkflow.levels.find(l => l.threshold === 50000);
-            expect(tier2?.roles).toContain('procurement_manager');
-            expect(tier2?.roles).toContain('finance_manager');
+            expect(tier2?.roles).toContain('head_of_procurement');
+            expect(tier2?.roles).toContain('head_of_finance');
             expect(tier2?.roles).not.toContain('buyer');
         });
 
         it('requires executive sign-off for large POs (> 50,000)', () => {
             const tier3 = poWorkflow.levels.find(l => l.threshold === Infinity);
-            expect(tier3?.roles).toContain('procurement_manager');
-            expect(tier3?.roles).toContain('finance_manager');
-            expect(tier3?.roles).toContain('regional_manager');
-            expect(tier3?.roles).toContain('operations_manager');
+            expect(tier3?.roles).toContain('head_of_procurement');
+            expect(tier3?.roles).toContain('head_of_finance');
+            expect(tier3?.roles).toContain('regional_operations_manager');
+            expect(tier3?.roles).toContain('head_of_operations');
             expect(tier3?.roles).toContain('super_admin');
         });
     });
@@ -83,7 +83,7 @@ describe('Procurement Maker-Checker & Segregation of Duties', () => {
 
             const user = {
                 name: 'Abebe Bikila',
-                role: 'procurement_manager'
+                role: 'head_of_procurement'
             };
 
             const isCreator = Boolean(
@@ -92,9 +92,9 @@ describe('Procurement Maker-Checker & Segregation of Duties', () => {
             expect(isCreator).toBe(true);
 
             const isCEO = user.role === 'super_admin';
-            const isAuthorizedApprover = ['procurement_manager', 'finance_manager', 'super_admin'].includes(user.role);
+            const isAuthorizedApprover = ['head_of_procurement', 'head_of_finance', 'super_admin'].includes(user.role);
 
-            // Even though the user is a procurement_manager, self-approval is forbidden!
+            // Even though the user is a head_of_procurement, self-approval is forbidden!
             const canApprove = isAuthorizedApprover && (!isCreator || isCEO);
             expect(canApprove).toBe(false);
         });
@@ -109,7 +109,7 @@ describe('Procurement Maker-Checker & Segregation of Duties', () => {
 
             const secondaryManager = {
                 name: 'Sara Worku',
-                role: 'finance_manager'
+                role: 'head_of_finance'
             };
 
             const isCreator = Boolean(
@@ -117,26 +117,26 @@ describe('Procurement Maker-Checker & Segregation of Duties', () => {
             );
             expect(isCreator).toBe(false);
 
-            const canSecondaryApprove = ['procurement_manager', 'finance_manager', 'super_admin'].includes(secondaryManager.role) && !isCreator;
+            const canSecondaryApprove = ['head_of_procurement', 'head_of_finance', 'super_admin'].includes(secondaryManager.role) && !isCreator;
             expect(canSecondaryApprove).toBe(true);
         });
     });
 
     describe('4. Specialized Desks Segregation', () => {
-        it('restricts master agreement ratification to Procurement Manager and CEO', () => {
-            expect(hasPermission('procurement_manager', 'APPROVE_PO')).toBe(true);
+        it('restricts master agreement ratification to Head of Procurement and CEO', () => {
+            expect(hasPermission('head_of_procurement', 'APPROVE_PO')).toBe(true);
             expect(hasPermission('vendor_relations_manager', 'APPROVE_PO')).toBe(false);
         });
 
-        it('reserves customs duty clearance and release sign-off to Procurement Manager and CEO', () => {
-            expect(hasPermission('procurement_manager', 'ACCESS_PROCUREMENT')).toBe(true);
+        it('reserves customs duty clearance and release sign-off to Head of Procurement and CEO', () => {
+            expect(hasPermission('head_of_procurement', 'ACCESS_PROCUREMENT')).toBe(true);
             expect(hasPermission('customs_import_specialist', 'APPROVE_PO')).toBe(false);
         });
 
         it('locks dock QC receiving waivers to supervisory management', () => {
             expect(authService.checkPermission('inbound_qc_inspector', 'warehouse.receive')).toBe(true);
             expect(authService.checkPermission('inbound_qc_inspector', 'procurement.approve_po')).toBe(false);
-            expect(authService.checkPermission('procurement_manager', 'procurement.approve_po')).toBe(true);
+            expect(authService.checkPermission('head_of_procurement', 'procurement.approve_po')).toBe(true);
         });
     });
 });

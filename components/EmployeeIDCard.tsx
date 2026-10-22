@@ -19,8 +19,8 @@ const ROLE_COLORS: Partial<Record<UserRole, string>> = {
     super_admin: '#FACC15', // yellow-400
     admin: '#C084FC',       // purple-400
     hr: '#F472B6',          // pink-400
-    finance_manager: '#34D399', // emerald-400
-    procurement_manager: '#818CF8', // indigo-400
+    head_of_finance: '#34D399', // emerald-400
+    head_of_procurement: '#818CF8', // indigo-400
     it_support: '#22D3EE',  // cyan-400
     cs_manager: '#38BDF8',  // sky-400
     store_supervisor: '#93C5FD', // blue-300

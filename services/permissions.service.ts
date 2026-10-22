@@ -124,42 +124,42 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     purchase_order: {
         name: 'Purchase Order Approval',
         levels: [
-            { roles: ['head_of_procurement', 'procurement_head', 'procurement_manager', 'buyer', 'regional_procurement_lead'], threshold: 10000 },
-            { roles: ['head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead', 'head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer'], threshold: 50000 },
-            { roles: ['head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
+            { roles: ['head_of_procurement', 'buyer', 'regional_procurement_manager'], threshold: 10000 },
+            { roles: ['head_of_procurement', 'regional_procurement_manager', 'head_of_finance', 'regional_finance_manager'], threshold: 50000 },
+            { roles: ['head_of_procurement', 'head_of_finance', 'head_of_operations', 'regional_operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     },
     expense: {
         name: 'Expense Approval',
         levels: [
-            { roles: ['store_manager', 'warehouse_manager', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_finance_officer', 'head_of_finance', 'finance_head', 'finance_manager'], threshold: 1000 },
-            { roles: ['head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 5000 },
-            { roles: ['head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
+            { roles: ['store_manager', 'warehouse_manager', 'regional_operations_manager', 'head_of_operations', 'regional_finance_manager', 'head_of_finance',], threshold: 1000 },
+            { roles: ['head_of_finance', 'regional_finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 5000 },
+            { roles: ['head_of_finance', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     },
     employee_hire: {
         name: 'Employee Hiring Approval',
-        levels: [{ roles: ['head_of_hr', 'hr_head', 'hr_manager', 'hr', 'regional_hr_officer', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'] }]
+        levels: [{ roles: ['head_of_hr', 'hr', 'regional_hr_manager', 'head_of_operations', 'regional_operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'] }]
     },
     inventory_adjustment: {
         name: 'Inventory Adjustment Approval',
         levels: [
-            { roles: ['warehouse_manager', 'inventory_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 100 },
-            { roles: ['warehouse_manager', 'inventory_manager', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
+            { roles: ['warehouse_manager', 'inventory_manager', 'head_of_operations', 'head_of_supply_chain', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 100 },
+            { roles: ['warehouse_manager', 'inventory_manager', 'regional_operations_manager', 'head_of_operations', 'head_of_supply_chain', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     },
     price_change: {
         name: 'Price Change Approval',
         levels: [
-            { roles: ['store_manager', 'regional_merchandising_lead', 'regional_manager', 'head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 10 },
-            { roles: ['regional_merchandising_lead', 'regional_manager', 'head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
+            { roles: ['store_manager', 'regional_merchandising_manager', 'regional_operations_manager', 'head_of_merchandising', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: 10 },
+            { roles: ['regional_merchandising_manager', 'regional_operations_manager', 'head_of_merchandising', 'head_of_finance', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     },
     refund: {
         name: 'Refund Approval',
         levels: [
             { roles: ['store_manager', 'cs_manager', 'assistant_manager', 'shift_lead'], threshold: 500 },
-            { roles: ['store_manager', 'cs_manager', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_finance', 'finance_head', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
+            { roles: ['store_manager', 'cs_manager', 'regional_operations_manager', 'head_of_operations', 'head_of_finance', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'], threshold: Infinity }
         ]
     }
 };
@@ -232,7 +232,7 @@ export function canApprove(
     // Dynamic budget threshold support: if caller provides custom threshold from region/site budget settings,
     // and amount is within that threshold, regional approver can approve directly
     if (customThreshold !== undefined && amount !== undefined && amount <= customThreshold) {
-        if (['regional_manager', 'regional_procurement_lead', 'regional_finance_officer'].includes(userRole)) {
+        if (['regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager'].includes(userRole)) {
             return true;
         }
     }

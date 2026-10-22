@@ -5,25 +5,25 @@ export type { RoleSegregationRule };
 export { ROLE_SEGREGATION_RULES };
 
 export const REGIONAL_WORKFORCE_ROLES = [
-    'regional_manager',
-    'regional_procurement_lead',
-    'regional_finance_officer',
-    'regional_merchandising_lead',
-    'regional_hr_officer',
-    'regional_logistics_lead',
-    'regional_security_supervisor'
+    'regional_operations_manager',
+    'regional_procurement_manager',
+    'regional_finance_manager',
+    'regional_merchandising_manager',
+    'regional_hr_manager',
+    'regional_logistics_manager',
+    'regional_security_manager'
 ] as const;
 
 export const CORPORATE_HQ_DIRECTORATE_ROLES = [
     'super_admin', 'ceo', 'country_managing_director', 'admin',
-    'head_of_operations', 'operations_head', 'operations_manager',
-    'head_of_finance', 'finance_head', 'finance_manager',
-    'head_of_hr', 'hr_head', 'hr_manager',
-    'head_of_procurement', 'procurement_head', 'procurement_manager',
-    'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
-    'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
-    'head_of_it', 'it_head',
-    'head_of_audit', 'audit_head'
+    'head_of_operations',
+    'head_of_finance',
+    'head_of_hr',
+    'head_of_procurement',
+    'head_of_supply_chain',
+    'head_of_merchandising',
+    'head_of_it',
+    'head_of_audit',
 ] as const;
 
 export const SHARED_HQ_REGIONAL_ROLES = [

@@ -7,10 +7,10 @@ describe('orgTreeLayout helpers', () => {
     it('correctly ranks 10-level hierarchy role levels (L1 CEO to L10 Frontline)', () => {
         expect(getRoleLevel('super_admin')).toBe(1);
         expect(getRoleLevel('admin')).toBe(2);
-        expect(getRoleLevel('operations_manager')).toBe(3);
-        expect(getRoleLevel('finance_manager')).toBe(3);
-        expect(getRoleLevel('regional_manager')).toBe(4);
-        expect(getRoleLevel('regional_procurement_lead')).toBe(5);
+        expect(getRoleLevel('head_of_operations')).toBe(3);
+        expect(getRoleLevel('head_of_finance')).toBe(3);
+        expect(getRoleLevel('regional_operations_manager')).toBe(4);
+        expect(getRoleLevel('regional_procurement_manager')).toBe(5);
         expect(getRoleLevel('store_manager')).toBe(6);
         expect(getRoleLevel('warehouse_manager')).toBe(6);
         expect(getRoleLevel('logistics_manager')).toBe(7);
@@ -38,14 +38,14 @@ describe('orgTreeLayout helpers', () => {
 
     it('correctly maps roles to corporate departments', () => {
         expect(getRoleDept('super_admin')).toBe('executive');
-        expect(getRoleDept('operations_manager')).toBe('executive');
-        expect(getRoleDept('regional_manager')).toBe('executive');
+        expect(getRoleDept('head_of_operations')).toBe('executive');
+        expect(getRoleDept('regional_operations_manager')).toBe('executive');
         expect(getRoleDept('cashier')).toBe('store');
         expect(getRoleDept('store_manager')).toBe('store');
         expect(getRoleDept('picker')).toBe('warehouse');
         expect(getRoleDept('warehouse_manager')).toBe('warehouse');
-        expect(getRoleDept('finance_manager')).toBe('finance');
-        expect(getRoleDept('hr_manager')).toBe('hr');
+        expect(getRoleDept('head_of_finance')).toBe('finance');
+        expect(getRoleDept('head_of_hr')).toBe('hr');
         expect(getRoleDept('buyer')).toBe('procurement');
         expect(getRoleDept('vendor_relations_manager')).toBe('procurement');
         expect(getRoleDept('customs_import_specialist')).toBe('procurement');
@@ -64,7 +64,7 @@ import { useOrgTreeLayout } from '../../components/org-chart/hooks/useOrgTreeLay
 describe('useOrgTreeLayout hook', () => {
     const mockEmployees: Employee[] = [
         { id: 'emp-1', name: 'CEO Boss', role: 'super_admin', department: 'Executive', code: 'EMP-01', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
-        { id: 'emp-2', name: 'Ops Director', role: 'operations_manager', department: 'Operations', code: 'EMP-02', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
+        { id: 'emp-2', name: 'Ops Director', role: 'head_of_operations', department: 'Operations', code: 'EMP-02', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
         { id: 'emp-3', name: 'Store Mgr', role: 'store_manager', department: 'Store', code: 'EMP-03', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 88, siteId: 'site-1' },
         { id: 'emp-4', name: 'Cashier Alice', role: 'cashier', department: 'Store', code: 'EMP-04', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 92, siteId: 'site-1' },
     ];
@@ -102,10 +102,10 @@ describe('useOrgTreeLayout hook', () => {
         expect(onlineIds.has(mockEmployees[1].id)).toBe(false);
     });
 
-    it('wires Central Operations team members to operations_manager', () => {
+    it('wires Central Operations team members to head_of_operations', () => {
         const opsTeamEmployees: Employee[] = [
             { id: 'ceo-1', name: 'CEO', role: 'super_admin', department: 'Executive', code: 'EMP-01', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
-            { id: 'ops-1', name: 'Ops Director', role: 'operations_manager', department: 'Operations', code: 'EMP-02', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
+            { id: 'ops-1', name: 'Ops Director', role: 'head_of_operations', department: 'Operations', code: 'EMP-02', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
             { id: 'aud-1', name: 'Store Auditor', role: 'store_operations_auditor', department: 'Executive', code: 'EMP-03', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
             { id: 'da-1', name: 'Data Analyst', role: 'data_analyst', department: 'Executive', code: 'EMP-04', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 88, siteId: 'site-1' },
             { id: 'sec-1', name: 'Security Mgr', role: 'security_manager', department: 'Security', code: 'EMP-05', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },

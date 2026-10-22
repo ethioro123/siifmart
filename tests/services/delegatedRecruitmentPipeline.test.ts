@@ -35,7 +35,7 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       expect(recruitmentService.canManageHiring('super_admin')).toBe(true);
       expect(recruitmentService.canManageHiring('warehouse_manager')).toBe(true);
       expect(recruitmentService.canManageHiring('store_manager')).toBe(true);
-      expect(recruitmentService.canManageHiring('hr_manager')).toBe(true);
+      expect(recruitmentService.canManageHiring('head_of_hr')).toBe(true);
 
       // Floor staff cannot initiate hiring
       expect(recruitmentService.canManageHiring('picker')).toBe(false);
@@ -62,7 +62,7 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       // Cannot hire peers or superiors
       expect(roleIds).not.toContain('warehouse_manager');
       expect(roleIds).not.toContain('store_manager');
-      expect(roleIds).not.toContain('operations_manager');
+      expect(roleIds).not.toContain('head_of_operations');
       expect(roleIds).not.toContain('super_admin');
     });
   });
@@ -86,7 +86,7 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       ).rejects.toThrow('4-Eyes Violation: Only HR leadership can perform candidate identity & compliance approval.');
     });
 
-    it('allows HR Manager to sign off candidate identity and credentials', async () => {
+    it('allows Head of Human Resources to sign off candidate identity and credentials', async () => {
       const cand = await recruitmentService.createCandidate({
         country_code: 'KE',
         name: 'Faith Wanjiku',
@@ -97,7 +97,7 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       const res = await recruitmentService.approveCandidateHR(cand.id, {
         id: 'hr-1',
         name: 'Sarah HR',
-        role: 'hr_manager'
+        role: 'head_of_hr'
       }, 'National ID & Background verified');
 
       expect(res).toBe(true);
@@ -115,12 +115,12 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
         recruitmentService.approveCandidateSalaryFinance(cand.id, {
           id: 'hr-1',
           name: 'Sarah HR',
-          role: 'hr_manager'
+          role: 'head_of_hr'
         }, 15000)
       ).rejects.toThrow('4-Eyes Violation: Only Finance leadership can authorize salary and compensation bands.');
     });
 
-    it('allows Finance Manager to authorize salary and budget', async () => {
+    it('allows Head of Finance to authorize salary and budget', async () => {
       const cand = await recruitmentService.createCandidate({
         country_code: 'ET',
         name: 'Bethlehem Tadesse',
@@ -131,7 +131,7 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       const res = await recruitmentService.approveCandidateSalaryFinance(cand.id, {
         id: 'fin-1',
         name: 'Ahmed Finance',
-        role: 'finance_manager'
+        role: 'head_of_finance'
       }, 16500, 'Approved under Addis Ababa distribution budget');
 
       expect(res).toBe(true);
@@ -169,14 +169,14 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       await recruitmentService.approveCandidateHR(cand.id, {
         id: 'hr-1',
         name: 'Sarah HR',
-        role: 'hr_manager'
+        role: 'head_of_hr'
       });
 
       // 2. Finance approval
       await recruitmentService.approveCandidateSalaryFinance(cand.id, {
         id: 'fin-1',
         name: 'Ahmed Finance',
-        role: 'finance_manager'
+        role: 'head_of_finance'
       }, 36000);
 
       // Mock employeesService.create

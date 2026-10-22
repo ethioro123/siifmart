@@ -25,7 +25,7 @@ export const AccountsReceivableTab: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedInvoice, setSelectedInvoice] = useState<ArInvoice | null>(null);
 
-    const canManageCredit = ['credit_control_officer', 'head_of_finance', 'finance_head', 'finance_manager', 'country_managing_director', 'super_admin', 'CEO', 'ceo', 'admin'].includes(user?.role);
+    const canManageCredit = ['credit_control_officer', 'head_of_finance', 'country_managing_director', 'super_admin', 'CEO', 'ceo', 'admin'].includes(user?.role);
 
     const loadData = async () => {
         setLoading(true);

@@ -74,7 +74,7 @@ export default function WMSDashboard() {
   const canOnboard = isManagerialRole(user?.role) && [
     'warehouse_manager', 'logistics_manager', 'inventory_manager',
     'dispatch_manager', 'shift_lead', 'super_admin', 'admin',
-    'operations_manager', 'regional_manager'
+    'head_of_operations', 'regional_operations_manager'
   ].includes(user?.role || '');
 
   // Translate helper

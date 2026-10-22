@@ -69,7 +69,7 @@ describe('Warehouse Manager Role & WMS Fulfillment Engine (SOP-MGT-027)', () => 
 
         it('blocks warehouse_manager from hiring peer site managers or superiors', () => {
             expect(canEmployRole('warehouse_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('warehouse_manager', 'operations_manager')).toBe(false);
+            expect(canEmployRole('warehouse_manager', 'head_of_operations')).toBe(false);
             expect(canEmployRole('warehouse_manager', 'store_manager')).toBe(false);
             expect(canEmployRole('warehouse_manager', 'warehouse_manager')).toBe(false);
         });

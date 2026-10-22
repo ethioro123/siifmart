@@ -3,10 +3,10 @@ import { User } from '../types';
 export const MOCK_USERS: User[] = [
   // CENTRAL OPS (ADMIN-001) - NOT an operational site
   { id: 'u1', name: 'Shukri Kamal', role: 'super_admin', avatar: 'https://ui-avatars.com/api/?name=Shukri+Kamal&background=0D8ABC&color=fff', title: 'Chief Executive Officer', siteId: 'Administration' },
-  { id: 'u2', name: 'Sara Tesfaye', role: 'operations_manager', avatar: 'https://ui-avatars.com/api/?name=Sara+Tesfaye&background=6366F1&color=fff', title: 'System Administrator', siteId: 'Administration' },
-  { id: 'u3', name: 'Tigist Alemayehu', role: 'hr_manager', avatar: 'https://ui-avatars.com/api/?name=Tigist+Alemayehu&background=EC4899&color=fff', title: 'HR Manager', siteId: 'Administration' },
-  { id: 'u4', name: 'Rahel Tesfaye', role: 'finance_manager', avatar: 'https://ui-avatars.com/api/?name=Rahel+Tesfaye&background=10B981&color=fff', title: 'Finance Manager', siteId: 'Administration' },
-  { id: 'u5', name: 'Yohannes Bekele', role: 'procurement_manager', avatar: 'https://ui-avatars.com/api/?name=Yohannes+Bekele&background=F59E0B&color=fff', title: 'Procurement Manager', siteId: 'Administration' },
+  { id: 'u2', name: 'Sara Tesfaye', role: 'head_of_operations', avatar: 'https://ui-avatars.com/api/?name=Sara+Tesfaye&background=6366F1&color=fff', title: 'System Administrator', siteId: 'Administration' },
+  { id: 'u3', name: 'Tigist Alemayehu', role: 'head_of_hr', avatar: 'https://ui-avatars.com/api/?name=Tigist+Alemayehu&background=EC4899&color=fff', title: 'Head of Human Resources', siteId: 'Administration' },
+  { id: 'u4', name: 'Rahel Tesfaye', role: 'head_of_finance', avatar: 'https://ui-avatars.com/api/?name=Rahel+Tesfaye&background=10B981&color=fff', title: 'Head of Finance', siteId: 'Administration' },
+  { id: 'u5', name: 'Yohannes Bekele', role: 'head_of_procurement', avatar: 'https://ui-avatars.com/api/?name=Yohannes+Bekele&background=F59E0B&color=fff', title: 'Head of Procurement', siteId: 'Administration' },
   { id: 'u6', name: 'Selamawit Girma', role: 'customer_service', avatar: 'https://ui-avatars.com/api/?name=Selamawit+Girma&background=8B5CF6&color=fff', title: 'Customer Service Manager', siteId: 'Administration' },
   { id: 'u7', name: 'Dawit Haile', role: 'auditor', avatar: 'https://ui-avatars.com/api/?name=Dawit+Haile&background=EF4444&color=fff', title: 'Financial Auditor', siteId: 'Administration' },
   { id: 'u8', name: 'Elias Kebede', role: 'it_support', avatar: 'https://ui-avatars.com/api/?name=Elias+Kebede&background=3B82F6&color=fff', title: 'IT Support Specialist', siteId: 'Administration' },

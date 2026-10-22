@@ -11,7 +11,7 @@ interface CustomsImportTabProps {
 
 export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode }) => {
   const { user, showToast } = useStore();
-  const isManager = Boolean(user?.role && ['head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+  const isManager = Boolean(user?.role && ['head_of_procurement', 'head_of_supply_chain', 'regional_operations_manager', 'head_of_operations', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
 
   const [declarations, setDeclarations] = useState<CustomsDeclaration[]>([]);
   const [clearedDeclarationIds, setClearedDeclarationIds] = useState<string[]>([]);
@@ -77,7 +77,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
       await procurementGovernanceService.authorizeCustomsRelease({
         declarationId: declaration.id,
         clearedBy: user?.name || user?.email || 'Authorized Manager',
-        clearedByRole: user?.role || 'procurement_manager'
+        clearedByRole: user?.role || 'head_of_procurement'
       });
       showToast(`Customs clearance for declaration ${declaration.declarationNumber} authorized and released.`, 'success');
       loadData();

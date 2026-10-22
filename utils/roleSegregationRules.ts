@@ -25,29 +25,15 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     { role: 'country_managing_director', siteType: 'Administration', department: 'Management', description: 'Country Managing Director - National executive leadership at Country HQ' },
     { role: 'admin', siteType: 'Administration', department: 'Management', description: 'Country Managing Director - National executive leadership at Country HQ' },
     { role: 'head_of_operations', siteType: 'Any', department: 'Management', description: 'Head of Operations - Deploys across all facility types' },
-    { role: 'operations_head', siteType: 'Any', department: 'Management', description: 'Head of Operations - Deploys across all facility types' },
-    { role: 'operations_manager', siteType: 'Any', department: 'Management', description: 'Head of Operations - Deploys across all facility types' },
     { role: 'head_of_finance', siteType: 'Administration', department: 'Finance', description: 'Head of Finance - Financial strategy and fiscal governance at HQ' },
-    { role: 'finance_head', siteType: 'Administration', department: 'Finance', description: 'Head of Finance - Financial strategy and fiscal governance at HQ' },
-    { role: 'finance_manager', siteType: 'Administration', department: 'Finance', description: 'Head of Finance - Financial oversight at HQ' },
     { role: 'head_of_hr', siteType: 'Administration', department: 'Human Resources', description: 'Head of Human Resources - People operations and workforce governance at HQ' },
-    { role: 'hr_head', siteType: 'Administration', department: 'Human Resources', description: 'Head of Human Resources - People operations and workforce governance at HQ' },
-    { role: 'hr_manager', siteType: 'Administration', department: 'Human Resources', description: 'Head of Human Resources - Workforce governance at HQ' },
-    { role: 'hr', siteType: 'Administration', department: 'Human Resources', description: 'HR Manager - Workforce management at HQ' },
+    { role: 'hr', siteType: 'Administration', department: 'Human Resources', description: 'Head of Human Resources - Workforce management at HQ' },
     { role: 'head_of_procurement', siteType: 'Administration', department: 'Procurement', description: 'Head of Procurement - Enterprise strategic sourcing and supplier contracts at HQ' },
-    { role: 'procurement_head', siteType: 'Administration', department: 'Procurement', description: 'Head of Procurement - Enterprise strategic sourcing and supplier contracts at HQ' },
-    { role: 'procurement_manager', siteType: 'Administration', department: 'Procurement', description: 'Head of Procurement - Strategic sourcing at HQ' },
     { role: 'head_of_supply_chain', siteType: 'Administration', department: 'Management', description: 'Head of Supply Chain - Enterprise fulfillment networks at HQ' },
-    { role: 'supply_chain_head', siteType: 'Administration', department: 'Management', description: 'Head of Supply Chain - Enterprise fulfillment networks at HQ' },
-    { role: 'supply_chain_manager', siteType: 'Administration', department: 'Management', description: 'Head of Supply Chain - Supply chain oversight' },
     { role: 'head_of_merchandising', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
-    { role: 'merchandising_head', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
-    { role: 'merchandising_manager', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
     { role: 'merchandising_specialist', siteType: 'Administration', department: 'Merchandising', description: 'Merchandising Specialist - Country or regional product and campaign preparation' },
     { role: 'head_of_it', siteType: 'Administration', department: 'Management', description: 'Head of IT - Enterprise systems and security at HQ' },
-    { role: 'it_head', siteType: 'Administration', department: 'Management', description: 'Head of IT - Enterprise systems and security at HQ' },
     { role: 'head_of_audit', siteType: 'Administration', department: 'Management', description: 'Head of Internal Audit - Compliance, risk, and fraud governance at HQ' },
-    { role: 'audit_head', siteType: 'Administration', department: 'Management', description: 'Head of Internal Audit - Compliance, risk, and fraud governance at HQ' },
     {
         role: 'accountant',
         siteType: 'Administration',
@@ -71,24 +57,6 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         siteType: 'Administration',
         department: 'Finance',
         description: 'Credit Control Officer - B2B credit terms and institutional accounts'
-    },
-    {
-        role: 'procurement_manager',
-        siteType: 'Administration',
-        department: 'Procurement',
-        description: 'Procurement Manager - Supply chain management at HQ'
-    },
-    {
-        role: 'supply_chain_manager',
-        siteType: 'Administration',
-        department: 'Management',
-        description: 'Supply Chain Manager - Supply chain oversight'
-    },
-    {
-        role: 'merchandising_manager',
-        siteType: 'Administration',
-        department: 'Management',
-        description: 'Merchandising Manager - Corporate pricing, margins & planograms at HQ'
     },
     {
         role: 'cs_manager',
@@ -277,52 +245,46 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     // FLEXIBLE & REGIONAL ROLES - Can be at any location
     // ========================================
     {
-        role: 'regional_manager',
+        role: 'regional_operations_manager',
         siteType: 'Any',
         department: 'Management',
-        description: 'Regional Manager - Oversees multiple locations'
+        description: 'Regional Operations Manager - Oversees multiple locations'
     },
     {
-        role: 'regional_procurement_lead',
+        role: 'regional_procurement_manager',
         siteType: 'Any',
         department: 'Procurement',
-        description: 'Regional Procurement Lead - Territorial sourcing & local farm/port vendor POs'
+        description: 'Regional Procurement Manager - Territorial sourcing & local farm/port vendor POs'
     },
     {
-        role: 'regional_merchandising_lead',
+        role: 'regional_merchandising_manager',
         siteType: 'Administration',
         department: 'Merchandising',
-        description: 'Regional Merchandising Lead - Territory pricing, promotions, and planogram approvals'
+        description: 'Regional Merchandising Manager - Territory pricing, promotions, and planogram approvals'
     },
     {
-        role: 'regional_finance_officer',
+        role: 'regional_finance_manager',
         siteType: 'Any',
         department: 'Finance',
-        description: 'Regional Finance Officer - Branch cash drop audits and regional reconciliations'
+        description: 'Regional Finance Manager - Branch cash drop audits and regional reconciliations'
     },
     {
-        role: 'regional_hr_officer',
+        role: 'regional_hr_manager',
         siteType: 'Any',
         department: 'Human Resources',
-        description: 'Regional HR Officer - Territorial branch hiring and shift rosters'
+        description: 'Regional HR Manager - Territorial branch hiring and shift rosters'
     },
     {
-        role: 'regional_logistics_lead',
+        role: 'regional_logistics_manager',
         siteType: 'Any',
         department: 'Transport',
-        description: 'Regional Logistics Lead - Territorial fleet coordination & inter-store transit'
+        description: 'Regional Logistics Manager - Territorial fleet coordination & inter-store transit'
     },
     {
-        role: 'regional_security_supervisor',
+        role: 'regional_security_manager',
         siteType: 'Any',
         department: 'Security',
-        description: 'Regional Security Supervisor - Loss prevention & supervisory audit investigations'
-    },
-    {
-        role: 'operations_manager',
-        siteType: 'Any',
-        department: 'Management',
-        description: 'Operations Manager - Field operations'
+        description: 'Regional Security Manager - Loss prevention & supervisory audit investigations'
     },
     {
         role: 'logistics_manager',

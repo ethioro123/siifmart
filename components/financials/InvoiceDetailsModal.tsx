@@ -144,7 +144,7 @@ export const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
                         ) : (
                             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 font-medium">
                                 <Clock size={13} className="shrink-0" />
-                                <span>Discrepancy Flagged — Awaiting Finance Manager Supervisory Override</span>
+                                <span>Discrepancy Flagged — Awaiting Head of Finance Supervisory Override</span>
                             </div>
                         )
                     )}

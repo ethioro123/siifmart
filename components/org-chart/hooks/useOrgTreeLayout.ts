@@ -76,12 +76,12 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
         }
 
         // Categorize managers
-        const regionalMgrs = allNodes.filter(n => n.role === 'regional_manager');
+        const regionalMgrs = allNodes.filter(n => n.role === 'regional_operations_manager');
         const regionalMgr = regionalMgrs[0];
-        const opsMgr = allNodes.find(n => n.role === 'operations_manager');
-        const financeMgr = allNodes.find(n => n.role === 'finance_manager');
-        const hrMgr = allNodes.find(n => n.role === 'hr_manager');
-        const procMgr = allNodes.find(n => n.role === 'procurement_manager' || n.role === 'supply_chain_manager');
+        const opsMgr = allNodes.find(n => n.role === 'head_of_operations');
+        const financeMgr = allNodes.find(n => n.role === 'head_of_finance');
+        const hrMgr = allNodes.find(n => n.role === 'head_of_hr');
+        const procMgr = allNodes.find(n => n.role === 'head_of_procurement' || n.role === 'head_of_supply_chain');
         const storeMgrs = allNodes.filter(n => n.role === 'store_manager');
         const whMgrs = allNodes.filter(n => n.role === 'warehouse_manager');
         const shiftLeads = allNodes.filter(n => n.role === 'shift_lead' || n.role === 'assistant_manager');
@@ -93,23 +93,23 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
         const findParent = (node: OrgTreeNode): OrgTreeNode | null => {
             if (node.id === rootNode?.id) return null;
 
-            // Levels 2-5 (Country Executive, HQ Directorate Heads, Regional Directors & Regional Leads)
+            // Levels 2-5 (Country Executive, HQ Department Heads, Regional Operations and Department Managers)
             if (node.level >= 2 && node.level <= 5) {
-                // Operations Manager reports directly to CEO
-                if (node.role === 'operations_manager' || node.role === 'head_of_operations') {
+                // Head of Operations reports directly to CEO
+                if (node.role === 'head_of_operations' || node.role === 'head_of_operations') {
                     return rootNode || null;
                 }
-                // Regional Manager reports to Operations Manager (or CEO if no Ops Mgr)
-                if (node.role === 'regional_manager') {
+                // Regional Operations Manager reports to Head of Operations (or CEO if no HQ operations head)
+                if (node.role === 'regional_operations_manager') {
                     if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                     return rootNode || null;
                 }
-                // Supply Chain Manager reports to Operations Manager (or CEO)
-                if (node.role === 'supply_chain_manager' || node.role === 'head_of_supply_chain') {
+                // Head of Supply Chain reports to Head of Operations (or CEO)
+                if (node.role === 'head_of_supply_chain' || node.role === 'head_of_supply_chain') {
                     if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                     return rootNode || null;
                 }
-                // Regional Functional Leads (Level 5) report to their Regional Manager
+                // Regional Department Managers (Level 5) report to their Regional Operations Manager
                 if (node.level === 5 && regionalMgr && regionalMgr.id !== node.id) {
                     return regionalMgr;
                 }
@@ -129,11 +129,11 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
                     if (sameSiteWhMgr && sameSiteWhMgr.id !== node.id) return sameSiteWhMgr;
                     if (whMgrs.length > 0 && whMgrs[0].id !== node.id) return whMgrs[0];
                 }
-                // Central Ops Managers (Security Manager, CS Manager) report to Operations Manager
+                // Central Ops Managers (Security Manager, CS Manager) report to Head of Operations
                 if (['security_manager', 'cs_manager'].includes(node.role)) {
                     if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                 }
-                // Store/Warehouse managers report to their Regional Manager in the same territory
+                // Store/Warehouse managers report to their Regional Operations Manager in the same territory
                 if (['store_manager', 'warehouse_manager'].includes(node.role)) {
                     const empObj = node.employee as any;
                     const empRegion = empObj?.regionCode || empObj?.region_code;

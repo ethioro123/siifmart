@@ -225,14 +225,14 @@ export function formatSiteAssignment(
     // Corporate roles without a specific branch assignment fallback
     const HQ_ROLES = [
         'country_managing_director', 'admin',
-        'head_of_operations', 'operations_head', 'operations_manager',
-        'head_of_finance', 'finance_head', 'finance_manager',
-        'head_of_hr', 'hr_head', 'hr_manager', 'hr',
-        'head_of_procurement', 'procurement_head', 'procurement_manager',
-        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
-        'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
-        'head_of_it', 'it_head', 'it_support',
-        'head_of_audit', 'audit_head', 'auditor', 'data_analyst'
+        'head_of_operations',
+        'head_of_finance',
+        'head_of_hr', 'hr',
+        'head_of_procurement',
+        'head_of_supply_chain',
+        'head_of_merchandising',
+        'head_of_it', 'it_support',
+        'head_of_audit', 'auditor', 'data_analyst'
     ];
 
     if (role && HQ_ROLES.includes(role)) {

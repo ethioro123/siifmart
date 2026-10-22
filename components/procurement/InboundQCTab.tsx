@@ -13,12 +13,12 @@ interface InboundQCTabProps {
 export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
   const { user, showToast } = useStore();
   const isManager = Boolean(user?.role && [
-    'head_of_procurement', 'procurement_head', 'procurement_manager',
-    'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
-    'regional_manager', 'regional_operations_director',
-    'regional_procurement_lead', 'regional_procurement_manager',
-    'regional_logistics_lead',
-    'head_of_operations', 'operations_head', 'operations_manager',
+    'head_of_procurement',
+    'head_of_supply_chain',
+    'regional_operations_manager',
+    'regional_procurement_manager',
+    'regional_logistics_manager',
+    'head_of_operations',
     'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'
   ].includes(user.role));
 
@@ -110,7 +110,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
       await procurementGovernanceService.signOffQCWaiver({
         inspectionId: qc.id,
         supervisorName: user?.name || user?.email || 'Authorized Manager',
-        supervisorRole: user?.role || 'procurement_manager',
+        supervisorRole: user?.role || 'head_of_procurement',
         waiverReason: reason.trim(),
         newDisposition: 'Conditionally Accepted'
       });

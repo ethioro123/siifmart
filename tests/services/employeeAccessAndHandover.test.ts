@@ -7,13 +7,13 @@ describe('Employee Regional Boundaries & Handover Security Tests', () => {
             const hqResult = validateRegionalBoundary('CEO', undefined, { regionCode: 'ADDIS' });
             expect(hqResult).toBeNull();
 
-            const hrManagerResult = validateRegionalBoundary('hr_manager', undefined, { regionCode: 'OROMIA' });
+            const hrManagerResult = validateRegionalBoundary('head_of_hr', undefined, { regionCode: 'OROMIA' });
             expect(hrManagerResult).toBeNull();
         });
 
         it('blocks regional officers from assigning staff to facilities in other regions', () => {
             const result = validateRegionalBoundary(
-                'regional_hr_officer',
+                'regional_hr_manager',
                 'ADDIS',
                 { regionCode: 'DIRE_DAWA' }
             );
@@ -25,7 +25,7 @@ describe('Employee Regional Boundaries & Handover Security Tests', () => {
 
         it('permits regional officers to assign staff within their assigned region', () => {
             const result = validateRegionalBoundary(
-                'regional_manager',
+                'regional_operations_manager',
                 'OROMIA',
                 { regionCode: 'OROMIA' }
             );
@@ -34,7 +34,7 @@ describe('Employee Regional Boundaries & Handover Security Tests', () => {
 
         it('blocks regional officers if target site is missing or undefined', () => {
             const result = validateRegionalBoundary(
-                'regional_hr_officer',
+                'regional_hr_manager',
                 'OROMIA',
                 undefined
             );

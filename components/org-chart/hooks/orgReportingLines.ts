@@ -70,7 +70,7 @@ export const HIERARCHY_LEVEL_CONFIGS: Record<number, HierarchyLevelConfig> = {
     },
     4: {
         level: 4,
-        title: 'Level 4: Regional Territory Directors',
+        title: 'Level 4: Regional Operations Managers',
         subtitle: 'Multi-site regional command, cluster performance & territorial governance',
         badge: 'L4 Regional Dir',
         color: '#0f766e',
@@ -82,7 +82,7 @@ export const HIERARCHY_LEVEL_CONFIGS: Record<number, HierarchyLevelConfig> = {
     },
     5: {
         level: 5,
-        title: 'Level 5: Regional Functional Leads',
+        title: 'Level 5: Regional Department Managers',
         subtitle: 'Territorial leads for procurement, finance, merchandising, HR, logistics & security',
         badge: 'L5 Regional Lead',
         color: '#0369a1',

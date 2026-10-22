@@ -15,8 +15,8 @@ describe('POS & Sales History Access Governance & Zero-Trust Security', () => {
 
         it('grants store managers and senior executives access to store sales history', () => {
             expect(hasPermission('store_manager', 'ACCESS_SALES')).toBe(true);
-            expect(hasPermission('operations_manager', 'ACCESS_SALES')).toBe(true);
-            expect(hasPermission('finance_manager', 'ACCESS_SALES')).toBe(true);
+            expect(hasPermission('head_of_operations', 'ACCESS_SALES')).toBe(true);
+            expect(hasPermission('head_of_finance', 'ACCESS_SALES')).toBe(true);
             expect(hasPermission('super_admin', 'ACCESS_SALES')).toBe(true);
         });
     });
@@ -168,7 +168,7 @@ describe('POS & Sales History Access Governance & Zero-Trust Security', () => {
         it('verifies store managers do not have access to view central supplier costs', () => {
             expect(hasPermission('store_manager', 'VIEW_COST_PRICE')).toBe(false);
             expect(hasPermission('pos', 'VIEW_COST_PRICE')).toBe(false);
-            expect(hasPermission('finance_manager', 'VIEW_COST_PRICE')).toBe(true);
+            expect(hasPermission('head_of_finance', 'VIEW_COST_PRICE')).toBe(true);
             expect(hasPermission('super_admin', 'VIEW_COST_PRICE')).toBe(true);
         });
     });

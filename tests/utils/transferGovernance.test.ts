@@ -47,12 +47,12 @@ describe('Transfer Manifest Governance & Deletion Lifecycle', () => {
                 'CEO',
                 'admin',
                 'warehouse_manager',
-                'operations_manager',
-                'supply_chain_manager',
+                'head_of_operations',
+                'head_of_supply_chain',
                 'logistics_manager',
-                'regional_manager',
+                'regional_operations_manager',
                 'inventory_manager',
-                'regional_logistics_lead'
+                'regional_logistics_manager'
             ];
 
             for (const role of managerRoles) {

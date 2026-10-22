@@ -9,12 +9,10 @@ import { useMerchandising } from './MerchandisingContext';
 import { useCreateInventoryRequestMutation } from '../../hooks/useInventoryRequestMutations';
 
 const MERCHANDISING_LEADS = new Set([
-  'super_admin', 'ceo', 'head_of_merchandising', 'merchandising_head',
-  'merchandising_manager', 'regional_merchandising_lead'
+  'super_admin', 'ceo', 'head_of_merchandising', 'regional_merchandising_manager'
 ]);
 const FINANCE_LEADS = new Set([
-  'super_admin', 'ceo', 'finance_manager', 'head_of_finance',
-  'finance_head', 'regional_finance_officer'
+  'super_admin', 'ceo', 'head_of_finance', 'regional_finance_manager'
 ]);
 
 export const MerchandisingReviewsTab: React.FC = () => {

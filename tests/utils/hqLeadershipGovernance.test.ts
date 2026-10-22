@@ -53,9 +53,9 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
         });
     });
 
-    describe('Head of Operations (head_of_operations / operations_head / operations_manager)', () => {
+    describe('Head of Operations (head_of_operations / head_of_operations / head_of_operations)', () => {
         it('grants complete access to all 12 fulfillment tabs across all naming aliases', () => {
-            const aliases = ['head_of_operations', 'operations_head', 'operations_manager'];
+            const aliases = ['head_of_operations',];
             for (const alias of aliases) {
                 const tabs = getVisibleFulfillmentTabs(alias);
                 expect(tabs).toHaveLength(13);
@@ -77,8 +77,8 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
 
         it('assigns DOCKS as default fulfillment tab for Head of Operations', () => {
             expect(getDefaultFulfillmentTab('head_of_operations')).toBe('DOCKS');
-            expect(getDefaultFulfillmentTab('operations_head')).toBe('DOCKS');
-            expect(getDefaultFulfillmentTab('operations_manager')).toBe('DOCKS');
+            expect(getDefaultFulfillmentTab('head_of_operations')).toBe('DOCKS');
+            expect(getDefaultFulfillmentTab('head_of_operations')).toBe('DOCKS');
         });
 
         it('authorizes Head of Operations on operational workflows', () => {
@@ -89,11 +89,11 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
         });
     });
 
-    describe('Head of Finance (head_of_finance / finance_head / finance_manager)', () => {
+    describe('Head of Finance (head_of_finance / head_of_finance / head_of_finance)', () => {
         it('authorizes Head of Finance as co-approver for margin floor breaches', () => {
             expect(FINANCE_COAPPROVER_ROLES).toContain('head_of_finance');
-            expect(FINANCE_COAPPROVER_ROLES).toContain('finance_head');
-            expect(FINANCE_COAPPROVER_ROLES).toContain('finance_manager');
+            expect(FINANCE_COAPPROVER_ROLES).toContain('head_of_finance');
+            expect(FINANCE_COAPPROVER_ROLES).toContain('head_of_finance');
             expect(FINANCE_COAPPROVER_ROLES).toContain('country_managing_director');
             expect(FINANCE_COAPPROVER_ROLES).toContain('super_admin');
             expect(FINANCE_COAPPROVER_ROLES).toContain('CEO');
@@ -110,24 +110,24 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
 
         it('grants settings module access for fiscal policy and tax configuration', () => {
             expect(canAccessModule('head_of_finance', 'settings')).toBe(true);
-            expect(canAccessModule('finance_head', 'settings')).toBe(true);
-            expect(canAccessModule('finance_manager', 'settings')).toBe(true);
+            expect(canAccessModule('head_of_finance', 'settings')).toBe(true);
+            expect(canAccessModule('head_of_finance', 'settings')).toBe(true);
             expect(ROLE_PERMISSIONS['head_of_finance']).toContain('settings');
         });
 
         it('denies cashier point-of-sale register checkout mutations (SoD)', () => {
             expect(hasPermission('head_of_finance', 'PROCESS_SALE' as any)).toBe(false);
-            expect(hasPermission('finance_head', 'PROCESS_SALE' as any)).toBe(false);
-            expect(hasPermission('finance_manager', 'PROCESS_SALE' as any)).toBe(false);
+            expect(hasPermission('head_of_finance', 'PROCESS_SALE' as any)).toBe(false);
+            expect(hasPermission('head_of_finance', 'PROCESS_SALE' as any)).toBe(false);
         });
     });
 
-    describe('Head of Procurement (head_of_procurement / procurement_head)', () => {
+    describe('Head of Procurement (head_of_procurement / head_of_procurement)', () => {
         it('authorizes Head of Procurement on purchase orders across all tiers', () => {
             expect(canApprove('head_of_procurement', 'purchase_order', 5000)).toBe(true);
             expect(canApprove('head_of_procurement', 'purchase_order', 25000)).toBe(true);
             expect(canApprove('head_of_procurement', 'purchase_order', 200000)).toBe(true);
-            expect(canApprove('procurement_head', 'purchase_order', 200000)).toBe(true);
+            expect(canApprove('head_of_procurement', 'purchase_order', 200000)).toBe(true);
         });
 
         it('grants procurement and warehouse visibility with settings access', () => {
@@ -137,11 +137,11 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
         });
     });
 
-    describe('Head of Human Resources (head_of_hr / hr_head)', () => {
+    describe('Head of Human Resources (head_of_hr / head_of_hr)', () => {
         it('authorizes Head of HR on employee hiring workflows', () => {
             expect(canApprove('head_of_hr', 'employee_hire')).toBe(true);
-            expect(canApprove('hr_head', 'employee_hire')).toBe(true);
-            expect(canApprove('hr_manager', 'employee_hire')).toBe(true);
+            expect(canApprove('head_of_hr', 'employee_hire')).toBe(true);
+            expect(canApprove('head_of_hr', 'employee_hire')).toBe(true);
         });
 
         it('grants settings module access for HR & Workforce Policy', () => {
@@ -150,7 +150,7 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
         });
     });
 
-    describe('Head of Supply Chain (head_of_supply_chain / supply_chain_head)', () => {
+    describe('Head of Supply Chain (head_of_supply_chain / head_of_supply_chain)', () => {
         it('grants supply chain fulfillment tabs across inbound, outbound, and transit', () => {
             const tabs = getVisibleFulfillmentTabs('head_of_supply_chain');
             expect(tabs).toContain('DOCKS');

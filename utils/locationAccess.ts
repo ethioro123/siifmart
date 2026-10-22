@@ -23,30 +23,16 @@ const MULTI_SITE_ROLES: UserRole[] = [
     'country_managing_director',
     'admin',
     'head_of_operations',
-    'operations_head',
-    'operations_manager',
     'head_of_supply_chain',
-    'supply_chain_head',
-    'supply_chain_manager',
     'head_of_finance',
-    'finance_head',
-    'finance_manager',
     'head_of_hr',
-    'hr_head',
-    'hr_manager',
     'head_of_procurement',
-    'procurement_head',
-    'procurement_manager',
     'head_of_merchandising',
-    'merchandising_head',
-    'merchandising_manager',
     'head_of_audit',
-    'audit_head',
     'auditor',
     'head_of_it',
-    'it_head',
     'it_support',
-    'regional_manager'
+    'regional_operations_manager'
 ];
 
 /**

@@ -40,27 +40,31 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
          * Controls shift rostering, attendance, task assignment, daily physical oversight, floor discipline, and primary performance reviews.
       b) DOTTED LINE (Functional / Governance / Compliance Chain of Command):
          * Controls fiscal integrity, inventory reconciliations, quality assurance, safety standards, anti-theft audits, and statutory compliance.
-1.2 Four-Tier Hierarchy Levels (L1 to L4):
+1.2 Organizational hierarchy (L1 to L10):
     - LEVEL 1 (Executive C-Suite): Chief Executive Officer (CEO / Super Admin).
       * Overall strategic vision, multi-country tenancy governance, national capital allocation, and executive approvals.
-    - LEVEL 2 (Corporate & Regional Directorates): Regional Managers, Operations Managers, Finance Managers, HR Managers, Procurement Managers, Supply Chain Managers.
+    - LEVEL 2 (Country Executive): Country Managing Director.
+    - LEVEL 3 (HQ Department Heads): Head of Operations, Head of Finance, Head of Human Resources, Head of Procurement, Head of Supply Chain, Head of Merchandising, Head of IT, Head of Audit.
+    - LEVEL 4 (Regional Operations): Regional Operations Manager.
+    - LEVEL 5 (Regional Departments): Regional Finance, Procurement, HR, Merchandising, Logistics, and Security Managers.
       * Multi-site cluster governance, corporate budget controls, cross-functional policy enforcement, and executive escalations.
-    - LEVEL 3 (Facility Operations Managers & Floor Supervisors): Store Managers, Warehouse Managers, Logistics Managers, Inventory Managers, Security Managers, Dispatch Managers, Assistant Managers, Shift Leads, Store Supervisors, Fleet Maintenance Supervisors.
+    - LEVELS 6–8 (Facility Managers & Floor Supervisors): Store Managers, Warehouse Managers, Logistics Managers, Inventory Managers, Security Managers, Dispatch Managers, Assistant Managers, Shift Leads, Store Supervisors, Fleet Maintenance Supervisors.
       * Facility-level "Captain of the Ship" accountability, shift opening/closing sign-offs, register overrides, dock handshakes, and team leadership.
-    - LEVEL 4 (Specialists, Frontline Operators & Staff): Cashiers, Pickers, Packers, Receivers, Drivers, Inventory Specialists, Sourcing Buyers, Planners, Accountants, Payroll Specialists.
+    - LEVELS 9–10 (Specialists, Frontline Operators & Staff): Cashiers, Pickers, Packers, Receivers, Drivers, Inventory Specialists, Sourcing Buyers, Planners, Accountants, Payroll Specialists.
       * Task execution, barcode scanning, POS checkout, cycle counts, fleet transit, and transactional data fidelity.
 
 2. AUTHORITATIVE SOLID-LINE REPORTING CHANNELS (CHAIN OF COMMAND)
 --------------------------------------------------------------------------------
-2.1 Executive & Regional Leadership (L1 -> L2):
+2.1 Executive, HQ and Regional Leadership (L1 -> L5):
     - CEO (super_admin) directs:
-      * Regional Manager (Multi-site cluster leadership)
-      * Finance Manager (Treasury, accounting, audits, taxation)
-      * HR Manager (Talent, compensation, training, labor compliance)
-      * Procurement Manager (Sourcing, vendor relations, import customs, QC)
-      * Supply Chain Manager (Network logistics, inventory modeling, replenishment)
-2.2 Store Operations Directorate (L2 -> L3 -> L4):
-    - Operations Manager directs Store Managers across retail facilities.
+      * Country Managing Director (National leadership)
+      * Head of Operations (HQ operations leadership)
+      * Head of Finance (Treasury, accounting, audits, taxation)
+      * Head of Human Resources (Talent, compensation, training, labor compliance)
+      * Head of Procurement (Sourcing, vendor relations, import customs, QC)
+      * Head of Supply Chain (Network logistics, inventory modeling, replenishment)
+2.2 Store Operations Directorate (L3 -> L4 -> L6 -> L10):
+    - Head of Operations directs Store Managers across retail facilities.
     - Store Manager directs:
       * Assistant Manager (Deputy floor command & supervisory escalations)
       * Store Supervisor (Merchandising, pricing tags, shelf compliance)
@@ -70,15 +74,15 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
     - Shift Lead directs frontline retail staff:
       * Cashiers (POS checkout, drawer tenders, receipt issuance)
       * Sales Associates (Customer guidance, queue management, stock replenishment)
-2.3 Warehouse & Distribution Operations (L2 -> L3 -> L4):
-    - Operations Manager & Supply Chain Manager direct Warehouse Managers.
+2.3 Warehouse & Distribution Operations (L3 -> L4 -> L6 -> L10):
+    - Head of Operations & Head of Supply Chain direct Warehouse Managers.
     - Warehouse Manager directs warehouse floor specialists:
       * Inbound Receivers (Dock unloading, blind counts, pallet staging)
       * Order Pickers (FEFO batch picking, picking cart assembly)
       * Order Packers (Validation scanning, carton sealing, shipping labels)
       * Forklift Operators (High-bay putaway, pallet replenishment)
-2.4 Logistics & Transport Directorate (L2 -> L3 -> L4):
-    - Supply Chain Manager directs Logistics Manager.
+2.4 Logistics & Transport Directorate (L3 -> L5 -> L7):
+    - Head of Supply Chain directs Logistics Manager.
     - Logistics Manager directs:
       * Dispatch Manager (Fleet routing, trip manifests, dock departures)
       * Fleet Maintenance Supervisor (Vehicle health, fuel cards, roadworthiness)
@@ -86,7 +90,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
       * Transport Drivers (External deliveries, branch transfers, custody manifests)
       * Dispatchers (Route sequencing, driver dispatch, live transit monitoring)
 2.5 Supply Chain & Inventory Integrity Directorate (L2 -> L3 -> L4):
-    - Supply Chain Manager directs:
+    - Head of Supply Chain directs:
       * Demand Planner (AI sales forecasting, seasonal safety stocks)
       * Replenishment Planner (Velocity analysis, DC-to-store transfer triggers)
       * Inventory Manager (Discrepancy audits, shrink mitigation, batch aging)
@@ -94,7 +98,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
       * Inventory Specialists (Cycle counts, zone audits, discrepancy deep-dives)
       * Stock Clerks (Bin labeling, physical consolidation, shelf restocking)
 2.6 Finance Directorate (L2 -> L4):
-    - Finance Manager directs:
+    - Head of Finance directs:
       * Senior Internal Auditor (Unannounced branch audits, till audits, compliance)
       * Financial Accountant (General ledger, bank reconciliations, vendor payables)
       * Treasury Officer (Liquidity management, cash-in-transit, bank drops)
@@ -102,7 +106,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
       * Credit Control Officer (Corporate debtor aging, credit collections)
       * Data Analyst (Operational KPI telemetry, margin analysis, trend models)
 2.7 Human Resources Directorate (L2 -> L4):
-    - HR Manager directs:
+    - Head of Human Resources directs:
       * HR Generalist (Employee records, contracts, onboarding)
       * Talent Recruiter (Candidate sourcing, interviews, background checks)
       * Training Coordinator (Floor worker training, safety certifications, onboarding)
@@ -110,7 +114,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
 
 3. DOTTED-LINE FUNCTIONAL GOVERNANCE & 4-EYES ESCALATIONS
 --------------------------------------------------------------------------------
-3.1 Cashiers -> Finance Manager (Fiscal Dotted Line):
+3.1 Cashiers -> Head of Finance (Fiscal Dotted Line):
     - While daily shift tasks are supervised by the Shift Lead, Cashiers have a strict Dotted Line to Finance.
     - Cash drawer opening floats, mid-shift drops, and EOD Z-Reports sync directly to the Central Finance ledger. Cash variances exceeding $5.00 / 500 ETB / 500 KSh require Finance notification.
 3.2 Inbound Receivers -> Inbound QC / Procurement (Integrity Dotted Line):
@@ -120,8 +124,8 @@ TRACEABILITY: .agent/RULES.md (Rule 1: Zero-Trust, Rule 18: Supervisory Accounta
     - While dispatched daily by the Dispatch Manager, Drivers report on a Dotted Line to the Fleet Maintenance Supervisor for pre-trip vehicle condition checklists, tire/brake checks, and fuel card logs.
 3.4 Inventory Specialists -> Internal Auditor (Independent Audit Dotted Line):
     - Inventory Specialists execute blind counts under the Inventory Manager, but report variance sheets on a Dotted Line to the Internal Auditor to prevent intra-facility concealment of stock shrink.
-3.5 Payroll Specialist -> Finance Manager (Dual-Sign Compensation Dotted Line):
-    - Under SOP-GOV-024, payroll runs and salary adjustments prepared by HR require co-authorization and release of funds by the Finance Manager before disbursement.
+3.5 Payroll Specialist -> Head of Finance (Dual-Sign Compensation Dotted Line):
+    - Under SOP-GOV-024, payroll runs and salary adjustments prepared by HR require co-authorization and release of funds by the Head of Finance before disbursement.
 
 4. THE "CAPTAIN OWNS THE SHIP" DOCTRINE (RULE 18 COMPLIANCE)
 --------------------------------------------------------------------------------

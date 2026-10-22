@@ -55,8 +55,8 @@ export default function UnknownBarcodeModal({
         'admin',
         'store_manager',
         'warehouse_manager',
-        'operations_manager',
-        'regional_manager',
+        'head_of_operations',
+        'regional_operations_manager',
         'ceo'
     ].includes(user?.role?.toLowerCase() || '');
 

@@ -32,7 +32,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
         return empCountry === activeCountry;
     });
 
-    const opsManager = countryEmployees.find(e => e.role === 'operations_manager');
+    const opsManager = countryEmployees.find(e => e.role === 'head_of_operations');
     const dataAnalysts = countryEmployees.filter(e => e.role === 'data_analyst');
     const securityTeam = countryEmployees.filter(e => e.role === 'security_manager' || e.role === 'loss_prevention');
     const csTeam = countryEmployees.filter(e => e.role === 'cs_manager' || e.role === 'customer_service');
@@ -94,12 +94,12 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                     </div>
                 </div>
 
-                {/* Operations Manager In-Charge Card */}
+                {/* Head of Operations In-Charge Card */}
                 <div className="mt-6 pt-6 border-t border-[var(--theme-border)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
                         <span className="text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Commanding Officer</span>
                         <p className="text-sm font-bold text-[var(--theme-text-primary)] mt-0.5">
-                            {opsManager ? opsManager.name : 'Operations Manager (HQ)'}
+                            {opsManager ? opsManager.name : 'Head of Operations (HQ)'}
                         </p>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Head of Central Operations</p>
                     </div>
@@ -250,7 +250,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                             Direct Field Reporting Doctrine
                         </h4>
                         <p className="text-[11px] text-[var(--theme-text-secondary)]">
-                            All Store Managers ({storeManagers.length}) and Warehouse Managers ({whManagers.length}) report directly to the Operations Manager under Captain Owns the Ship accountability.
+                            All Store Managers ({storeManagers.length}) and Warehouse Managers ({whManagers.length}) report directly to the Head of Operations under Captain Owns the Ship accountability.
                         </p>
                     </div>
                 </div>

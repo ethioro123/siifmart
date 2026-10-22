@@ -33,7 +33,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [dispatchModalTransfer, setDispatchModalTransfer] = useState<TransferRecord | null>(null);
-  const isHQUser = Boolean(user?.role && ['super_admin', 'ceo', 'country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'logistics_manager'].includes(user.role));
+  const isHQUser = Boolean(user?.role && ['super_admin', 'ceo', 'country_managing_director', 'admin', 'head_of_operations', 'head_of_supply_chain', 'logistics_manager'].includes(user.role));
 
   // Load regional transfers on mount
   React.useEffect(() => {
@@ -71,7 +71,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
       await transfersService.approve(transferId, {
         approverId: user?.id || user?.employeeId || 'unknown',
         approverName: user?.name || (isHQUser ? 'Corporate Logistics' : 'Regional Manager'),
-        approverRole: user?.role || (isHQUser ? 'operations_manager' : 'regional_manager'),
+        approverRole: user?.role || (isHQUser ? 'head_of_operations' : 'regional_operations_manager'),
         notes: isInterRegional ? 'HQ Inter-Regional Authorization' : 'Autonomous Regional Approval'
       });
       setTransfers(prev => prev.map(t => t.id === transferId ? { ...t, status: 'Approved', approvedBy: user?.name } : t));
@@ -175,7 +175,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
     }
   };
 
-  // Tier 2: High-Value Discrepancy Escalation to Regional Security Supervisor & Loss Prevention
+  // Tier 2: High-Value Discrepancy Escalation to Regional Security Manager & Loss Prevention
   const handleEscalateLP = async (transfer: TransferRecord) => {
     if (!discrepancyNotes.trim()) {
       addNotification?.('alert', 'Please provide discrepancy notes explaining the missing high-value units.');
@@ -194,8 +194,8 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
         receivedAt: now
       });
 
-      // Automatically create investigation task assigned to regional_security_supervisor
-      const secLead = regionalEmployees.find(e => e.role === 'regional_security_supervisor');
+      // Automatically create investigation task assigned to regional_security_manager
+      const secLead = regionalEmployees.find(e => e.role === 'regional_security_manager');
       const srcSite = regionalSites.find(s => s.id === transfer.sourceSiteId);
       const dstSite = regionalSites.find(s => s.id === transfer.destSiteId);
 
@@ -214,7 +214,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
       setTransfers(prev => prev.map(t => t.id === transfer.id ? { ...t, ...updated } : t));
       setDiscrepancyTransferId(null);
       setDiscrepancyNotes('');
-      addNotification?.('success', `High-value discrepancy escalated to Regional Security Supervisor (${secLead?.name || 'Security Lead'}).`);
+      addNotification?.('success', `High-value discrepancy escalated to Regional Security Manager (${secLead?.name || 'Security Lead'}).`);
     } catch (err: any) {
       logger.error('RegionalTransferDesk', 'Failed to report discrepancy', err);
       addNotification?.('alert', err.message || 'Failed to submit discrepancy');

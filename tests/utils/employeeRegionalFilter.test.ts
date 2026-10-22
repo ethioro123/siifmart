@@ -11,14 +11,14 @@ describe('Employee Regional Filtering & Territorial Organization', () => {
     ];
 
     const mockEmployees: Partial<Employee>[] = [
-        { id: '1', name: 'Sara Tesfaye', role: 'operations_manager', regionCode: 'ET-ADD', siteId: 'site-bole', scopeLevel: 'HQ' },
+        { id: '1', name: 'Sara Tesfaye', role: 'head_of_operations', regionCode: 'ET-ADD', siteId: 'site-bole', scopeLevel: 'HQ' },
         { id: '2', name: 'Tomas Tesfaye', role: 'store_manager', regionCode: 'ET-ADD', siteId: 'site-bole', scopeLevel: 'REGIONAL' },
         { id: '3', name: 'Amina Ali', role: 'picker', regionCode: 'ET-ADD', siteId: 'site-merkato', scopeLevel: 'REGIONAL' },
         { id: '4', name: 'Helen Getachew', role: 'warehouse_manager', regionCode: 'ET-ADA', siteId: 'site-adama-dc', scopeLevel: 'REGIONAL' },
         { id: '5', name: 'Shukri Kamal', role: 'super_admin', regionCode: 'ET-DIR', siteId: 'site-harar', scopeLevel: 'HQ' },
         { id: '6', name: 'Betelhem Bekele', role: 'store_manager', regionCode: 'ET-DIR', siteId: 'site-harar', scopeLevel: 'REGIONAL' },
-        { id: '7', name: 'Kamau Ndenga', role: 'regional_manager', regionCode: 'KE-NRB', siteId: 'site-eastleigh', scopeLevel: 'REGIONAL' },
-        { id: '8', name: 'Omondi Samuel', role: 'operations_manager', regionCode: 'KE-NRB', siteId: 'site-eastleigh', scopeLevel: 'HQ' },
+        { id: '7', name: 'Kamau Ndenga', role: 'regional_operations_manager', regionCode: 'KE-NRB', siteId: 'site-eastleigh', scopeLevel: 'REGIONAL' },
+        { id: '8', name: 'Omondi Samuel', role: 'head_of_operations', regionCode: 'KE-NRB', siteId: 'site-eastleigh', scopeLevel: 'HQ' },
     ];
 
     it('filters sites strictly belonging to the chosen region code', () => {
@@ -39,8 +39,8 @@ describe('Employee Regional Filtering & Territorial Organization', () => {
         const hqStaff = mockEmployees.filter(e => e.scopeLevel === 'HQ');
         const regionalStaff = mockEmployees.filter(e => e.scopeLevel === 'REGIONAL');
 
-        expect(hqStaff.map(e => e.role)).toEqual(['operations_manager', 'super_admin', 'operations_manager']);
-        expect(regionalStaff.map(e => e.role)).toEqual(['store_manager', 'picker', 'warehouse_manager', 'store_manager', 'regional_manager']);
+        expect(hqStaff.map(e => e.role)).toEqual(['head_of_operations', 'super_admin',]);
+        expect(regionalStaff.map(e => e.role)).toEqual(['store_manager', 'picker', 'warehouse_manager', 'store_manager', 'regional_operations_manager']);
     });
 
     it('resets location when changing to a region that does not include the active location', () => {

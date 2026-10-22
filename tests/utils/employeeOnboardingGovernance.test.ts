@@ -10,7 +10,7 @@ import { canEmployRole } from '../../utils/roles';
 describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
     describe('1. Direct Onboarding Authority Check', () => {
         it('authorizes only executive admins and HR leadership for direct activation', () => {
-            const authorizedRoles = ['super_admin', 'CEO', 'ceo', 'admin', 'hr', 'hr_manager'];
+            const authorizedRoles = ['super_admin', 'CEO', 'ceo', 'admin', 'hr', 'head_of_hr'];
             for (const role of authorizedRoles) {
                 expect(isDirectOnboardingAuthorized(role)).toBe(true);
             }
@@ -26,7 +26,7 @@ describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
                 'store_supervisor',
                 'logistics_manager',
                 'inventory_manager',
-                'operations_manager',
+                'head_of_operations',
                 'fleet_maintenance_supervisor'
             ];
 
@@ -80,8 +80,8 @@ describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
     });
 
     describe('4. Dual-Control Supervisory Sign-Off & Authorization (SOP-HR-003)', () => {
-        it('authorizes HR Manager to approve warehouse and store candidate drafts', () => {
-            const hrRoles = ['hr_manager', 'hr', 'super_admin', 'CEO'];
+        it('authorizes Head of Human Resources to approve warehouse and store candidate drafts', () => {
+            const hrRoles = ['head_of_hr', 'hr', 'super_admin', 'CEO'];
             const candidateRoles = ['picker', 'packer', 'receiver', 'cashier', 'driver', 'stock_clerk'];
 
             for (const hrRole of hrRoles) {
@@ -101,7 +101,7 @@ describe('Employee Onboarding Governance & 4-Eyes Maker-Checker Rules', () => {
         it('strictly blocks self-approval or peer manager approval across same hierarchy tier', () => {
             expect(canEmployRole('warehouse_manager', 'warehouse_manager')).toBe(false);
             expect(canEmployRole('store_manager', 'warehouse_manager')).toBe(false);
-            expect(canEmployRole('hr_manager', 'hr_manager')).toBe(false);
+            expect(canEmployRole('head_of_hr', 'head_of_hr')).toBe(false);
         });
     });
 });

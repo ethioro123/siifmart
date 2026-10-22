@@ -57,7 +57,7 @@ describe('HQ Specialists & Directorate Governance Suite', () => {
         });
     });
 
-    describe('Head of Internal Audit (head_of_audit / audit_head / auditor)', () => {
+    describe('Head of Internal Audit (head_of_audit / head_of_audit / auditor)', () => {
         it('authorizes system audit inspection, forensic logs, and financial review', () => {
             expect(hasPermission('head_of_audit', 'VIEW_AUDIT_LOGS')).toBe(true);
             expect(hasPermission('head_of_audit', 'ACCESS_FINANCE')).toBe(true);
@@ -69,13 +69,13 @@ describe('HQ Specialists & Directorate Governance Suite', () => {
         it('authorizes POS Command monitoring while strictly denying cashier checkout (PROCESS_SALE)', () => {
             expect(hasPermission('head_of_audit', 'ACCESS_POS')).toBe(true);
             expect(hasPermission('head_of_audit', 'PROCESS_SALE')).toBe(false);
-            expect(hasPermission('audit_head', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('head_of_audit', 'PROCESS_SALE')).toBe(false);
             expect(hasPermission('auditor', 'PROCESS_SALE')).toBe(false);
         });
 
         it('strictly denies purchase order creation to maintain independent audit integrity', () => {
             expect(hasPermission('head_of_audit', 'CREATE_PO')).toBe(false);
-            expect(hasPermission('audit_head', 'CREATE_PO')).toBe(false);
+            expect(hasPermission('head_of_audit', 'CREATE_PO')).toBe(false);
             expect(hasPermission('auditor', 'CREATE_PO')).toBe(false);
         });
     });

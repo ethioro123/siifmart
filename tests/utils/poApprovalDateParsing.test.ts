@@ -27,7 +27,7 @@ describe('PO Approval Date Parsing & Formatting', () => {
     });
 
     it('handles regex extraction of approval tag with embedded REASON', () => {
-        const notes = '\n[APPROVED_BY:Kamau Ndenga (regional_manager):2026-10-08 14:24:52.236893+00 REASON:STANDARD_REPLENISHMENT]\n[APPROVAL_NOTE: Quick list approval]';
+        const notes = '\n[APPROVED_BY:Kamau Ndenga (regional_operations_manager):2026-10-08 14:24:52.236893+00 REASON:STANDARD_REPLENISHMENT]\n[APPROVAL_NOTE: Quick list approval]';
         
         const approvalMatch = notes.match(/\[APPROVED_BY:(.*?):(.*?)]/);
         expect(approvalMatch).not.toBeNull();
@@ -35,7 +35,7 @@ describe('PO Approval Date Parsing & Formatting', () => {
         const approvedBy = approvalMatch![1].trim();
         const rawDate = approvalMatch![2].replace(/\s+REASON:.*$/i, '').trim();
         
-        expect(approvedBy).toBe('Kamau Ndenga (regional_manager)');
+        expect(approvedBy).toBe('Kamau Ndenga (regional_operations_manager)');
         expect(rawDate).toBe('2026-10-08 14:24:52.236893+00');
         expect(isNaN(new Date(rawDate).getTime())).toBe(false);
     });

@@ -5,25 +5,25 @@ import { APPROVAL_WORKFLOWS } from '../../services/permissions.service';
 import { canEmployRole, canViewCostPrice } from '../../utils/roles';
 import { canWorkerPerformJob } from '../../utils/fulfillmentRoles';
 
-describe('Procurement Manager Role & Sourcing Governance Engine (SOP-MGT-024)', () => {
+describe('Head of Procurement Role & Sourcing Governance Engine (SOP-MGT-024)', () => {
     describe('Module Access Controls', () => {
-        it('allows procurement_manager to access procurement, pricing, and inventory modules', () => {
-            expect(canAccessModule('procurement_manager', 'procurement')).toBe(true);
-            expect(canAccessModule('procurement_manager', 'pricing')).toBe(true);
-            expect(canAccessModule('procurement_manager', 'inventory')).toBe(true);
+        it('allows head_of_procurement to access procurement, pricing, and inventory modules', () => {
+            expect(canAccessModule('head_of_procurement', 'procurement')).toBe(true);
+            expect(canAccessModule('head_of_procurement', 'pricing')).toBe(true);
+            expect(canAccessModule('head_of_procurement', 'inventory')).toBe(true);
         });
 
-        it('blocks procurement_manager from cashier POS and system settings modules', () => {
-            expect(canAccessModule('procurement_manager', 'pos')).toBe(false);
-            expect(canAccessModule('procurement_manager', 'settings')).toBe(false);
+        it('blocks head_of_procurement from cashier POS and system settings modules', () => {
+            expect(canAccessModule('head_of_procurement', 'pos')).toBe(false);
+            expect(canAccessModule('head_of_procurement', 'settings')).toBe(false);
         });
     });
 
     describe('Segregation of Duties & Receiving Prohibitions (Zero Self-Receiving)', () => {
-        it('strictly blocks procurement_manager from physical dock and PO receiving', () => {
-            expect(authService.checkPermission('procurement_manager', 'procurement.receive')).toBe(false);
-            expect(authService.checkPermission('procurement_manager', 'warehouse.receive')).toBe(false);
-            expect(hasPermission('procurement_manager', 'RECEIVE_PO')).toBe(false);
+        it('strictly blocks head_of_procurement from physical dock and PO receiving', () => {
+            expect(authService.checkPermission('head_of_procurement', 'procurement.receive')).toBe(false);
+            expect(authService.checkPermission('head_of_procurement', 'warehouse.receive')).toBe(false);
+            expect(hasPermission('head_of_procurement', 'RECEIVE_PO')).toBe(false);
         });
 
         it('strictly blocks sourcing buyer from physical dock and PO receiving', () => {
@@ -34,55 +34,55 @@ describe('Procurement Manager Role & Sourcing Governance Engine (SOP-MGT-024)', 
 
     describe('Authorized Sourcing & PO Governance Powers', () => {
         it('grants full PO lifecycle management permissions', () => {
-            expect(authService.checkPermission('procurement_manager', 'procurement.view')).toBe(true);
-            expect(authService.checkPermission('procurement_manager', 'procurement.create_po')).toBe(true);
-            expect(authService.checkPermission('procurement_manager', 'procurement.edit_po')).toBe(true);
-            expect(authService.checkPermission('procurement_manager', 'procurement.approve_po')).toBe(true);
-            expect(authService.checkPermission('procurement_manager', 'procurement.delete_po')).toBe(true);
+            expect(authService.checkPermission('head_of_procurement', 'procurement.view')).toBe(true);
+            expect(authService.checkPermission('head_of_procurement', 'procurement.create_po')).toBe(true);
+            expect(authService.checkPermission('head_of_procurement', 'procurement.edit_po')).toBe(true);
+            expect(authService.checkPermission('head_of_procurement', 'procurement.approve_po')).toBe(true);
+            expect(authService.checkPermission('head_of_procurement', 'procurement.delete_po')).toBe(true);
 
-            expect(hasPermission('procurement_manager', 'ACCESS_PROCUREMENT')).toBe(true);
-            expect(hasPermission('procurement_manager', 'CREATE_PO')).toBe(true);
-            expect(hasPermission('procurement_manager', 'APPROVE_PO')).toBe(true);
-            expect(hasPermission('procurement_manager', 'DELETE_PO')).toBe(true);
-            expect(hasPermission('procurement_manager', 'MANAGE_SUPPLIERS')).toBe(true);
+            expect(hasPermission('head_of_procurement', 'ACCESS_PROCUREMENT')).toBe(true);
+            expect(hasPermission('head_of_procurement', 'CREATE_PO')).toBe(true);
+            expect(hasPermission('head_of_procurement', 'APPROVE_PO')).toBe(true);
+            expect(hasPermission('head_of_procurement', 'DELETE_PO')).toBe(true);
+            expect(hasPermission('head_of_procurement', 'MANAGE_SUPPLIERS')).toBe(true);
         });
 
         it('grants cost price transparency and pricing view for margin protection', () => {
-            expect(canViewCostPrice('procurement_manager')).toBe(true);
-            expect(authService.checkPermission('procurement_manager', 'pricing.view')).toBe(true);
-            expect(hasPermission('procurement_manager', 'ACCESS_PRICING')).toBe(true);
-            expect(hasPermission('procurement_manager', 'VIEW_COST_PRICE')).toBe(true);
+            expect(canViewCostPrice('head_of_procurement')).toBe(true);
+            expect(authService.checkPermission('head_of_procurement', 'pricing.view')).toBe(true);
+            expect(hasPermission('head_of_procurement', 'ACCESS_PRICING')).toBe(true);
+            expect(hasPermission('head_of_procurement', 'VIEW_COST_PRICE')).toBe(true);
 
             // Prohibits unilateral retail shelf price alterations (Finance & Merchandising remit)
-            expect(authService.checkPermission('procurement_manager', 'pricing.edit')).toBe(false);
-            expect(authService.checkPermission('procurement_manager', 'pricing.approve_promo')).toBe(false);
-            expect(hasPermission('procurement_manager', 'EDIT_PRICE')).toBe(false);
-            expect(hasPermission('procurement_manager', 'APPROVE_PRICE_CHANGE')).toBe(false);
+            expect(authService.checkPermission('head_of_procurement', 'pricing.edit')).toBe(false);
+            expect(authService.checkPermission('head_of_procurement', 'pricing.approve_promo')).toBe(false);
+            expect(hasPermission('head_of_procurement', 'EDIT_PRICE')).toBe(false);
+            expect(hasPermission('head_of_procurement', 'APPROVE_PRICE_CHANGE')).toBe(false);
         });
 
         it('blocks live cashier till operations (Zero Live Till Operation)', () => {
-            expect(authService.checkPermission('procurement_manager', 'pos.create_sale')).toBe(false);
-            expect(authService.checkPermission('procurement_manager', 'pos.void_sale')).toBe(false);
-            expect(authService.checkPermission('procurement_manager', 'pos.refund')).toBe(false);
-            expect(hasPermission('procurement_manager', 'PROCESS_SALE')).toBe(false);
+            expect(authService.checkPermission('head_of_procurement', 'pos.create_sale')).toBe(false);
+            expect(authService.checkPermission('head_of_procurement', 'pos.void_sale')).toBe(false);
+            expect(authService.checkPermission('head_of_procurement', 'pos.refund')).toBe(false);
+            expect(hasPermission('head_of_procurement', 'PROCESS_SALE')).toBe(false);
         });
     });
 
     describe('Supervisory Sourcing Hiring Authority (canEmployRole)', () => {
-        it('authorizes procurement_manager to hire Buyers, Demand Planners, Vendor Relations Managers, Customs Specialists, and Inbound QC Inspectors', () => {
-            expect(canEmployRole('procurement_manager', 'buyer')).toBe(true);
-            expect(canEmployRole('procurement_manager', 'demand_planner')).toBe(true);
-            expect(canEmployRole('procurement_manager', 'vendor_relations_manager')).toBe(true);
-            expect(canEmployRole('procurement_manager', 'customs_import_specialist')).toBe(true);
-            expect(canEmployRole('procurement_manager', 'inbound_qc_inspector')).toBe(true);
+        it('authorizes head_of_procurement to hire Buyers, Demand Planners, Vendor Relations Managers, Customs Specialists, and Inbound QC Inspectors', () => {
+            expect(canEmployRole('head_of_procurement', 'buyer')).toBe(true);
+            expect(canEmployRole('head_of_procurement', 'demand_planner')).toBe(true);
+            expect(canEmployRole('head_of_procurement', 'vendor_relations_manager')).toBe(true);
+            expect(canEmployRole('head_of_procurement', 'customs_import_specialist')).toBe(true);
+            expect(canEmployRole('head_of_procurement', 'inbound_qc_inspector')).toBe(true);
         });
 
-        it('blocks procurement_manager from hiring superiors or peers', () => {
-            expect(canEmployRole('procurement_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('procurement_manager', 'regional_manager')).toBe(false);
-            expect(canEmployRole('procurement_manager', 'operations_manager')).toBe(false);
-            expect(canEmployRole('procurement_manager', 'finance_manager')).toBe(false);
-            expect(canEmployRole('procurement_manager', 'procurement_manager')).toBe(false);
+        it('blocks head_of_procurement from hiring superiors or peers', () => {
+            expect(canEmployRole('head_of_procurement', 'super_admin')).toBe(false);
+            expect(canEmployRole('head_of_procurement', 'regional_operations_manager')).toBe(false);
+            expect(canEmployRole('head_of_procurement', 'head_of_operations')).toBe(false);
+            expect(canEmployRole('head_of_procurement', 'head_of_finance')).toBe(false);
+            expect(canEmployRole('head_of_procurement', 'head_of_procurement')).toBe(false);
         });
     });
 
@@ -138,16 +138,16 @@ describe('Procurement Manager Role & Sourcing Governance Engine (SOP-MGT-024)', 
     });
 
     describe('Approval Workflow Thresholds (SOP-MGT-024)', () => {
-        it('includes procurement_manager as primary authority for purchase orders', () => {
+        it('includes head_of_procurement as primary authority for purchase orders', () => {
             const poWorkflow = APPROVAL_WORKFLOWS.purchase_order;
             const tier1 = poWorkflow.levels.find(l => l.threshold === 10000);
-            expect(tier1?.roles).toContain('procurement_manager');
+            expect(tier1?.roles).toContain('head_of_procurement');
 
             const tier2 = poWorkflow.levels.find(l => l.threshold === 50000);
-            expect(tier2?.roles).toContain('procurement_manager');
+            expect(tier2?.roles).toContain('head_of_procurement');
 
             const tier3 = poWorkflow.levels.find(l => l.threshold === Infinity);
-            expect(tier3?.roles).toContain('procurement_manager');
+            expect(tier3?.roles).toContain('head_of_procurement');
         });
     });
 

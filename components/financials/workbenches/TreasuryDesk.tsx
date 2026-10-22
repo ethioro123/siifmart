@@ -24,19 +24,19 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
     effectiveCountry
 }) => {
     const { user, addNotification } = useFinance();
-    const isManager = Boolean(user?.role && ['head_of_finance', 'finance_head', 'finance_manager', 'treasury_officer', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+    const isManager = Boolean(user?.role && ['head_of_finance', 'treasury_officer', 'country_managing_director', 'admin', 'super_admin', 'CEO', 'ceo'].includes(user.role));
 
     const [transitStatus, setTransitStatus] = useState<'pending' | 'submitted' | 'authorized'>('pending');
     const [sweepBatchStatus, setSweepBatchStatus] = useState<'draft' | 'submitted' | 'authorized'>('draft');
 
     const handleStaffSubmitSweep = () => {
         setSweepBatchStatus('submitted');
-        addNotification?.('info', 'Daily vault sweep package submitted to Finance Manager for bank clearance sign-off.');
+        addNotification?.('info', 'Daily vault sweep package submitted to Head of Finance for bank clearance sign-off.');
     };
 
     const handleStaffSubmitTransit = () => {
         setTransitStatus('submitted');
-        addNotification?.('info', 'Branch vault replenishment request submitted to Finance Manager for disbursement approval.');
+        addNotification?.('info', 'Branch vault replenishment request submitted to Head of Finance for disbursement approval.');
     };
 
     const handleManagerAuthorizeSweep = () => {

@@ -222,7 +222,7 @@ TRACEABILITY: .agent/RULES.md (Rule 18 & Section 14: Manager Accountability Law)
     - Fulfillment Leadership: warehouse_manager.
     - Logistics Leadership: logistics_manager, dispatch_manager.
     - Inventory Leadership: inventory_manager.
-    - Corporate & Regional Directors: regional_manager, operations_manager, finance_manager, hr_manager, procurement_manager, supply_chain_manager, security_manager, cs_manager.
+    - Corporate & Regional Directors: regional_operations_manager, head_of_operations, head_of_finance, head_of_hr, head_of_procurement, head_of_supply_chain, security_manager, cs_manager.
 
 2. MANDATORY IMMUTABLE SUPERVISORY FOOTPRINT
 --------------------------------------------------------------------------------
@@ -295,7 +295,7 @@ TRACEABILITY: .agent/RULES.md (Rule 17 & Section 13: Non-Alcoholic Catalog Law)
   {
     id: 'policy-dual-control-salary-sop-024',
     title: 'Dual-Control Compensation & Salary Governance Policy (SOP-GOV-024)',
-    description: 'Strict 4-Eyes Separation of Duties for employee compensation: HR proposes adjustments with mandatory business justification, while Finance Manager or Executive Office authorizes before database mutation.',
+    description: 'Strict 4-Eyes Separation of Duties for employee compensation: HR proposes adjustments with mandatory business justification, while Head of Finance or Executive Office authorizes before database mutation.',
     department: 'hr',
     type: 'policy',
     priority: 'critical',
@@ -315,7 +315,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1 & Zero-Trust SoD Mandate)
 1. ZERO UNILATERAL HR AUTHORITY (SEPARATION OF DUTIES)
 --------------------------------------------------------------------------------
 1.1 Absolute Ban on Direct HR Salary Mutation:
-    - Under Zero-Trust and Separation of Duties (SoD), human resources personnel (hr, hr_manager) CANNOT unilaterally edit employee base salaries, bonus structures, or compensation fields directly in the database.
+    - Under Zero-Trust and Separation of Duties (SoD), human resources personnel (hr, head_of_hr) CANNOT unilaterally edit employee base salaries, bonus structures, or compensation fields directly in the database.
     - The legacy permission 'employees.edit_salary' is strictly revoked from HR roles and replaced with 'employees.propose_salary'.
 1.2 4-Eyes Governance Queue:
     - All salary changes proposed by HR must be submitted as a formal SalaryChangeRequest through the central Dual-Control Salary Approval Queue (salary_requests).
@@ -325,7 +325,7 @@ TRACEABILITY: .agent/RULES.md (Rule 1 & Zero-Trust SoD Mandate)
 --------------------------------------------------------------------------------
 2.1 Approver Role Boundaries:
     - Approval authority ('employees.approve_salary') is strictly restricted to:
-        * Finance Manager (finance_manager)
+        * Head of Finance (head_of_finance)
         * Chief Executive Officer (CEO)
         * Super Administrator (super_admin)
 2.2 Mandatory Justification Requirement:

@@ -36,7 +36,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
     currencySymbol = CURRENCY_SYMBOL
 }) => {
     const { user } = useStore();
-    const canViewFullCustomerPII = isAdmin(user?.role) || user?.role === 'finance_manager';
+    const canViewFullCustomerPII = isAdmin(user?.role) || user?.role === 'head_of_finance';
 
     return (
         <Modal

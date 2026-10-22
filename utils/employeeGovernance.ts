@@ -293,7 +293,7 @@ export function canApproveChangeRequest(
     }
 
     // Regional Boundary Guard: Regional managers are locked to their own region
-    if (userRole === 'regional_manager') {
+    if (userRole === 'regional_operations_manager') {
         if (context?.userRegionCode && context?.targetRegionCode) {
             if (context.userRegionCode.toLowerCase().trim() !== context.targetRegionCode.toLowerCase().trim()) {
                 return false;
@@ -303,19 +303,19 @@ export function canApproveChangeRequest(
 
     switch (authority) {
         case 'Human Resources':
-            return ['country_managing_director', 'admin', 'head_of_hr', 'hr_head', 'hr_manager', 'regional_hr_officer', 'hr'].includes(userRole);
+            return ['country_managing_director', 'admin', 'head_of_hr', 'regional_hr_manager', 'hr'].includes(userRole);
         case 'Finance Department':
-            return ['country_managing_director', 'admin', 'head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer', 'cfo'].includes(userRole);
+            return ['country_managing_director', 'admin', 'head_of_finance', 'regional_finance_manager', 'cfo'].includes(userRole);
         case 'Operations Management':
-            return ['country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'store_manager'].includes(userRole);
+            return ['country_managing_director', 'admin', 'head_of_operations', 'regional_operations_manager', 'store_manager'].includes(userRole);
         case 'Logistics & Warehouse':
-            return ['country_managing_director', 'admin', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_logistics_lead', 'regional_manager', 'warehouse_manager', 'logistics_manager'].includes(userRole);
+            return ['country_managing_director', 'admin', 'head_of_supply_chain', 'head_of_operations', 'regional_logistics_manager', 'regional_operations_manager', 'warehouse_manager', 'logistics_manager'].includes(userRole);
         case 'Procurement':
-            return ['country_managing_director', 'admin', 'head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_procurement_lead', 'regional_manager'].includes(userRole);
+            return ['country_managing_director', 'admin', 'head_of_procurement', 'head_of_supply_chain', 'head_of_operations', 'regional_procurement_manager', 'regional_operations_manager'].includes(userRole);
         case 'Security Management':
-            return ['country_managing_director', 'admin', 'head_of_audit', 'audit_head', 'head_of_it', 'it_head', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_security_supervisor', 'regional_manager', 'security_manager'].includes(userRole);
+            return ['country_managing_director', 'admin', 'head_of_audit', 'head_of_it', 'head_of_operations', 'regional_security_manager', 'regional_operations_manager', 'security_manager'].includes(userRole);
         case 'Executive / Compliance':
-            return ['super_admin', 'country_managing_director', 'admin', 'head_of_audit', 'audit_head', 'compliance_officer'].includes(userRole);
+            return ['super_admin', 'country_managing_director', 'admin', 'head_of_audit', 'compliance_officer'].includes(userRole);
         default:
             return false;
     }

@@ -210,7 +210,7 @@ export const headcountQuotaService = {
         reason: params.reason,
         justification_metrics: params.justificationMetrics || {},
         requested_by: params.requestedBy,
-        requested_by_role: params.requestedByRole || 'regional_manager',
+        requested_by_role: params.requestedByRole || 'regional_operations_manager',
         status: 'PENDING'
       };
 

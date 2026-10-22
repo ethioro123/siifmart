@@ -49,11 +49,11 @@ interface UseEmployeeWizardProps {
 const DEPARTMENTS = ['Retail Operations', 'Logistics & Warehouse', 'Finance', 'Management', 'Human Resources', 'Security', 'Transport', 'Procurement', 'Merchandising'];
 
 const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
-   regional_merchandising_lead: ['merchandising_specialist'],
-   regional_procurement_lead: ['vendor_relations_manager', 'buyer', 'demand_planner', 'replenishment_planner', 'customs_import_specialist', 'inbound_qc_inspector', 'merchandiser', 'inventory_specialist'],
-   regional_finance_officer: ['accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'payroll_specialist', 'auditor', 'store_operations_auditor'],
-   regional_logistics_lead: ['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'fleet_maintenance_supervisor', 'assistant_manager', 'shift_lead', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
-   regional_security_supervisor: ['security_manager', 'loss_prevention', 'store_operations_auditor', 'auditor'],
+   regional_merchandising_manager: ['merchandising_specialist'],
+   regional_procurement_manager: ['vendor_relations_manager', 'buyer', 'demand_planner', 'replenishment_planner', 'customs_import_specialist', 'inbound_qc_inspector', 'merchandiser', 'inventory_specialist'],
+   regional_finance_manager: ['accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'payroll_specialist', 'auditor', 'store_operations_auditor'],
+   regional_logistics_manager: ['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'fleet_maintenance_supervisor', 'assistant_manager', 'shift_lead', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
+   regional_security_manager: ['security_manager', 'loss_prevention', 'store_operations_auditor', 'auditor'],
    store_manager: ['assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'pos', 'cs_manager', 'store_supervisor', 'merchandiser'],
    warehouse_manager: ['assistant_manager', 'shift_lead', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
    dispatch_manager: ['driver', 'dispatcher'],
@@ -127,12 +127,12 @@ export function useEmployeeWizard({
 
    const getAvailableDepartments = () => {
       if (!user?.role) return [];
-      if (isCorporateHqDirectorateRole(user.role) || ['hr', 'talent_recruiter', 'hr_generalist', 'regional_manager', 'regional_hr_officer'].includes(user.role)) return DEPARTMENTS;
-      if (user.role === 'regional_procurement_lead') return ['Procurement', 'Logistics & Warehouse'];
-      if (user.role === 'regional_finance_officer') return ['Finance', 'Management'];
-      if (user.role === 'regional_merchandising_lead') return ['Merchandising'];
-      if (user.role === 'regional_logistics_lead') return ['Transport', 'Logistics & Warehouse'];
-      if (user.role === 'regional_security_supervisor') return ['Security'];
+      if (isCorporateHqDirectorateRole(user.role) || ['hr', 'talent_recruiter', 'hr_generalist', 'regional_operations_manager', 'regional_hr_manager'].includes(user.role)) return DEPARTMENTS;
+      if (user.role === 'regional_procurement_manager') return ['Procurement', 'Logistics & Warehouse'];
+      if (user.role === 'regional_finance_manager') return ['Finance', 'Management'];
+      if (user.role === 'regional_merchandising_manager') return ['Merchandising'];
+      if (user.role === 'regional_logistics_manager') return ['Transport', 'Logistics & Warehouse'];
+      if (user.role === 'regional_security_manager') return ['Security'];
       if (user.role === 'store_manager') return ['Retail Operations', 'Logistics & Warehouse', 'Transport'];
       if (user.role === 'warehouse_manager' || user.role === 'logistics_manager') return ['Transport', 'Logistics & Warehouse'];
       if (user.role === 'inventory_manager') return ['Logistics & Warehouse', 'Management'];
@@ -209,7 +209,7 @@ export function useEmployeeWizard({
    };
 
    const handleRoleChange = (newRole: UserRole) => {
-      const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_merchandising_lead', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
+      const isRegional = ['regional_operations_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '');
       const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
       const candidateSites = isRegional && userRegion
          ? sites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion)
@@ -477,7 +477,7 @@ export function useEmployeeWizard({
       }
    };
 
-   const canAdjustPayroll = ['super_admin', 'hr_manager', 'hr', 'admin'].includes(user?.role || '');
+   const canAdjustPayroll = ['super_admin', 'head_of_hr', 'hr', 'admin'].includes(user?.role || '');
 
    return {
       addStep, setAddStep, isSubmitting, setIsSubmitting, isAddModalOpen, setIsAddModalOpen,

@@ -37,8 +37,8 @@ const AUTHORIZED_SUPERVISORY_ROLES = [
     'super_admin',
     'admin',
     'ceo',
-    'regional_manager',
-    'operations_manager',
+    'regional_operations_manager',
+    'head_of_operations',
     'warehouse_manager',
     'store_manager',
     'inventory_manager',
@@ -47,8 +47,8 @@ const AUTHORIZED_SUPERVISORY_ROLES = [
     'shift_lead',
     'store_supervisor',
     'dispatch_manager',
-    'merchandising_manager',
-    'supply_chain_manager',
+    'head_of_merchandising',
+    'head_of_supply_chain',
 ];
 
 export const PickAmendModal: React.FC<PickAmendModalProps> = ({

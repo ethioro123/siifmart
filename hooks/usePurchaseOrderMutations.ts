@@ -57,7 +57,7 @@ export function usePurchaseOrderMutations() {
         poId: po.id,
         approverId: user?.id || (user as any)?.employeeId || 'USR',
         approverName: approvedBy,
-        approverRole: user?.role || 'procurement_manager',
+        approverRole: user?.role || 'head_of_procurement',
         reasonCode: 'STANDARD_REPLENISHMENT',
         notes: 'Quick list approval'
       });
@@ -84,7 +84,7 @@ export function usePurchaseOrderMutations() {
           poId: po.id,
           approverId: user?.id || (user as any)?.employeeId || 'USR',
           approverName: approvedBy,
-          approverRole: user?.role || 'procurement_manager',
+          approverRole: user?.role || 'head_of_procurement',
           reasonCode: 'STANDARD_REPLENISHMENT',
           notes: 'HQ Bulk Action Approval'
         })

@@ -77,9 +77,9 @@ export const PayrollModal: React.FC = () => {
   const userName = user?.name || user?.email || 'User';
 
   const isSuperAdminOrCeo = userRole === 'super_admin' || userRole === 'ceo';
-  const isHR = isSuperAdminOrCeo || ['hr', 'hr_manager', 'admin'].includes(userRole);
-  const isFinance = isSuperAdminOrCeo || ['head_of_finance', 'finance_head', 'finance_manager', 'accountant', 'country_managing_director', 'admin'].includes(userRole);
-  const isRegionalHR = userRole === 'regional_hr_officer';
+  const isHR = isSuperAdminOrCeo || ['hr', 'head_of_hr', 'admin'].includes(userRole);
+  const isFinance = isSuperAdminOrCeo || ['head_of_finance', 'accountant', 'country_managing_director', 'admin'].includes(userRole);
+  const isRegionalHR = userRole === 'regional_hr_manager';
 
   const isHrSigned = Boolean(activeRun?.hrApprovedBy);
   const isFinanceSigned = Boolean(activeRun?.financeApprovedBy);
@@ -129,7 +129,7 @@ export const PayrollModal: React.FC = () => {
       const updated = await payrollRunsService.signAsHR(
         activeRun.id,
         userName,
-        user?.role || 'hr_manager',
+        user?.role || 'head_of_hr',
         hrNotesInput || 'Headcount, attendance, and leave deductions verified.'
       );
       setActiveRun(updated);
@@ -149,7 +149,7 @@ export const PayrollModal: React.FC = () => {
       const updated = await payrollRunsService.signAsFinance(
         activeRun.id,
         userName,
-        user?.role || 'finance_manager',
+        user?.role || 'head_of_finance',
         financeNotesInput || 'Bank liquidity and statutory tax withholdings verified.'
       );
       setActiveRun(updated);
@@ -264,7 +264,7 @@ export const PayrollModal: React.FC = () => {
           </div>
           {isRegionalHR && (
             <p className="text-[11px] text-[#0071E3] dark:text-[#2997FF] font-medium pt-1">
-              Notice: As a Regional HR Officer, your local site attendance and leave logs feed directly into this sovereign cycle. Final country-level certification is centralized at Country HQ / Managing Director.
+              Notice: As a Regional HR Manager, your local site attendance and leave logs feed directly into this sovereign cycle. Final country-level certification is centralized at Country HQ / Managing Director.
             </p>
           )}
         </div>

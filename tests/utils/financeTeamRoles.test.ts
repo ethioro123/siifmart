@@ -161,10 +161,10 @@ describe('Finance Directorate Team Roles Integration', () => {
     });
 
     describe('4. Managerial Authority & Hiring Governance', () => {
-        it('allows finance_manager to employ all three finance team roles', () => {
-            expect(canEmployRole('finance_manager', 'treasury_officer')).toBe(true);
-            expect(canEmployRole('finance_manager', 'tax_compliance_officer')).toBe(true);
-            expect(canEmployRole('finance_manager', 'credit_control_officer')).toBe(true);
+        it('allows head_of_finance to employ all three finance team roles', () => {
+            expect(canEmployRole('head_of_finance', 'treasury_officer')).toBe(true);
+            expect(canEmployRole('head_of_finance', 'tax_compliance_officer')).toBe(true);
+            expect(canEmployRole('head_of_finance', 'credit_control_officer')).toBe(true);
         });
 
         it('blocks Level 4 staff from employing finance team roles', () => {
@@ -187,7 +187,7 @@ describe('Finance Directorate Team Roles Integration', () => {
             expect(getRoleRank('credit_control_officer')).toBe(53);
         });
 
-        it('includes all three roles in HIERARCHY_TREE under finance_manager', () => {
+        it('includes all three roles in HIERARCHY_TREE under head_of_finance', () => {
             const findNode = (nodes: typeof HIERARCHY_TREE, targetRole: string): boolean => {
                 for (const node of nodes) {
                     if (node.role === targetRole) return true;

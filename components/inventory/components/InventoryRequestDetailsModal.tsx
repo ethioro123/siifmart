@@ -85,7 +85,7 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                             </p>
                             <p className="text-[11px] opacity-90 mt-0.5">
                                 {requiresFinanceCoApproval(requestForDetails)
-                                    ? 'SOP-MER-037: This proposed price falls below the 15% gross margin floor. Finance Manager or CEO co-approval is required before activation.'
+                                    ? 'SOP-MER-037: This proposed price falls below the 15% gross margin floor. Head of Finance or CEO co-approval is required before activation.'
                                     : 'SOP-MER-037: Standard price modification request. Proposed within authorized margin threshold.'}
                             </p>
                         </div>

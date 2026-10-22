@@ -277,7 +277,7 @@ export const recruitmentService = {
         notes?: string
     ): Promise<boolean> {
         const normRole = (approver.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-        const isHR = ['head_of_hr', 'hr_head', 'hr_manager', 'regional_hr_officer', 'hr', 'country_managing_director', 'admin', 'super_admin', 'ceo'].includes(normRole);
+        const isHR = ['head_of_hr', 'regional_hr_manager', 'hr', 'country_managing_director', 'admin', 'super_admin', 'ceo'].includes(normRole);
         if (!isHR) {
             throw new Error('4-Eyes Violation: Only HR leadership can perform candidate identity & compliance approval.');
         }
@@ -313,7 +313,7 @@ export const recruitmentService = {
         notes?: string
     ): Promise<boolean> {
         const normRole = (approver.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-        const isFinance = ['head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer', 'country_managing_director', 'admin', 'super_admin', 'ceo'].includes(normRole);
+        const isFinance = ['head_of_finance', 'regional_finance_manager', 'country_managing_director', 'admin', 'super_admin', 'ceo'].includes(normRole);
         if (!isFinance) {
             throw new Error('4-Eyes Violation: Only Finance leadership can authorize salary and compensation bands.');
         }

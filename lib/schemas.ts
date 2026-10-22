@@ -7,15 +7,15 @@ export const optionalNumber = z.number().optional().nullable();
 
 // --- Role Registry ---
 export const UserRoleSchema = z.enum([
-    'super_admin', 'regional_manager', 'operations_manager', 'finance_manager',
-    'hr_manager', 'procurement_manager', 'supply_chain_manager', 'store_manager',
+    'super_admin', 'regional_operations_manager', 'head_of_operations', 'head_of_finance',
+    'head_of_hr', 'head_of_procurement', 'head_of_supply_chain', 'store_manager',
     'warehouse_manager', 'dispatch_manager', 'assistant_manager', 'shift_lead',
     'store_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'picker',
     'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist',
     'customer_service', 'auditor', 'it_support', 'admin', 'hr', 'pos',
     'dispatcher', 'cs_manager', 'returns_clerk', 'merchandiser', 'loss_prevention',
     'accountant', 'data_analyst', 'training_coordinator', 'merchandising_specialist',
-    'regional_merchandising_lead'
+    'regional_merchandising_manager'
 ]);
 
 // --- Core App Entities ---

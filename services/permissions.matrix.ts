@@ -41,12 +41,6 @@ const HEAD_OF_PROCUREMENT_PERMISSIONS: Permission[] = [
     'inventory.view', 'pricing.view', 'settings.view'
 ];
 
-const PROCUREMENT_MANAGER_PERMISSIONS: Permission[] = [
-    'dashboard.view',
-    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po',
-    'inventory.view', 'pricing.view'
-];
-
 const HEAD_OF_OPERATIONS_PERMISSIONS: Permission[] = [
     'dashboard.view', 'admin.view',
     'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
@@ -81,14 +75,6 @@ const HEAD_OF_SUPPLY_CHAIN_PERMISSIONS: Permission[] = [
     'sales.view', 'sales.view_reports', 'settings.view'
 ];
 
-const SUPPLY_CHAIN_MANAGER_PERMISSIONS: Permission[] = [
-    'dashboard.view',
-    'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
-    'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.receive',
-    'sales.view', 'sales.view_reports'
-];
-
 const HEAD_OF_MERCHANDISING_PERMISSIONS: Permission[] = [
     'dashboard.view', 'admin.view',
     'inventory.view',
@@ -115,72 +101,58 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     // ═══ LEVEL 3: CORPORATE HQ DIRECTORATE HEADS ═══
     head_of_finance: HEAD_OF_FINANCE_PERMISSIONS,
-    finance_head: HEAD_OF_FINANCE_PERMISSIONS,
-    finance_manager: HEAD_OF_FINANCE_PERMISSIONS,
 
     head_of_procurement: HEAD_OF_PROCUREMENT_PERMISSIONS,
-    procurement_head: HEAD_OF_PROCUREMENT_PERMISSIONS,
-    procurement_manager: PROCUREMENT_MANAGER_PERMISSIONS,
 
     head_of_it: HEAD_OF_IT_PERMISSIONS,
-    it_head: HEAD_OF_IT_PERMISSIONS,
     it_support: HEAD_OF_IT_PERMISSIONS,
 
     head_of_audit: HEAD_OF_AUDIT_PERMISSIONS,
-    audit_head: HEAD_OF_AUDIT_PERMISSIONS,
     auditor: HEAD_OF_AUDIT_PERMISSIONS,
 
     head_of_operations: HEAD_OF_OPERATIONS_PERMISSIONS,
-    operations_head: HEAD_OF_OPERATIONS_PERMISSIONS,
-    operations_manager: HEAD_OF_OPERATIONS_PERMISSIONS,
 
     head_of_hr: HEAD_OF_HR_PERMISSIONS,
-    hr_head: HEAD_OF_HR_PERMISSIONS,
-    hr_manager: HR_MANAGER_PERMISSIONS,
     hr: HR_MANAGER_PERMISSIONS,
 
     head_of_supply_chain: HEAD_OF_SUPPLY_CHAIN_PERMISSIONS,
-    supply_chain_head: HEAD_OF_SUPPLY_CHAIN_PERMISSIONS,
-    supply_chain_manager: SUPPLY_CHAIN_MANAGER_PERMISSIONS,
 
     head_of_merchandising: HEAD_OF_MERCHANDISING_PERMISSIONS,
-    merchandising_head: HEAD_OF_MERCHANDISING_PERMISSIONS,
-    merchandising_manager: HEAD_OF_MERCHANDISING_PERMISSIONS,
 
-    // ═══ LEVEL 4: REGIONAL TERRITORY DIRECTOR ═══
-    regional_manager: HEAD_OF_OPERATIONS_PERMISSIONS,
+    // ═══ LEVEL 4: REGIONAL OPERATIONS MANAGER ═══
+    regional_operations_manager: HEAD_OF_OPERATIONS_PERMISSIONS,
 
-    // ═══ LEVEL 5: REGIONAL FUNCTIONAL LEADS ═══
-    regional_procurement_lead: [
+    // ═══ LEVEL 5: REGIONAL DEPARTMENT MANAGERS ═══
+    regional_procurement_manager: [
         'dashboard.view', 'admin.view',
         'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
         'inventory.view', 'inventory.transfer',
         'pricing.view',
         'customers.view', 'customers.view_history'
     ],
-    regional_merchandising_lead: [
+    regional_merchandising_manager: [
         'dashboard.view', 'inventory.view', 'pricing.view', 'pricing.edit',
         'pricing.create_promo', 'pricing.approve_promo', 'sales.view', 'sales.view_reports'
     ],
-    regional_finance_officer: [
+    regional_finance_manager: [
         'dashboard.view', 'admin.view',
         'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.reconcile_drawer', 'finance.view_payroll',
         'sales.view', 'sales.view_reports',
         'pos.view'
     ],
-    regional_hr_officer: [
+    regional_hr_manager: [
         'dashboard.view', 'admin.view',
         'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance', 'employees.view_salary', 'employees.propose_salary',
         'finance.view_payroll'
     ],
-    regional_logistics_lead: [
+    regional_logistics_manager: [
         'dashboard.view', 'admin.view',
         'warehouse.view', 'warehouse.view_tasks', 'warehouse.dispatch', 'warehouse.receive', 'warehouse.putaway',
         'inventory.view', 'inventory.transfer',
         'procurement.view', 'procurement.receive',
         'employees.view', 'employees.manage_attendance'
     ],
-    regional_security_supervisor: [
+    regional_security_manager: [
         'dashboard.view', 'admin.view',
         'settings.view', 'settings.view_logs',
         'pos.view',

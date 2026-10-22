@@ -13,7 +13,7 @@ export const PRICE_CHANGE_TAG = 'PRICE_CHANGE';
 
 /** Roles allowed to approve a price change that falls below the margin floor. */
 export const FINANCE_COAPPROVER_ROLES: readonly string[] = [
-    'head_of_finance', 'finance_head', 'finance_manager',
+    'head_of_finance',
     'country_managing_director', 'admin',
     'super_admin', 'CEO', 'ceo'
 ];

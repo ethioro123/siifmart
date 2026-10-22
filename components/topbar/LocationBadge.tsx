@@ -70,7 +70,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
 
    // Role check for regional authority
    const isRegionalOfficer = Boolean(user && (
-      user.role === 'regional_manager' ||
+      user.role === 'regional_operations_manager' ||
       (typeof user.role === 'string' && user.role.startsWith('regional_')) ||
       (isRegionalUser && isSharedHqRegionalRole(user.role))
    ));

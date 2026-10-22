@@ -21,14 +21,14 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(cmd.isManagerial).toBe(true);
     });
 
-    it('verifies Level 3 Corporate Directorates, Level 4 Regional Directors, and Level 5 Regional Functional Leads', () => {
+    it('verifies Level 3 Corporate Directorates, Level 4 Regional Directors, and Level 5 Regional Department Managers', () => {
         const l3Directors = [
-            'operations_manager',
-            'finance_manager',
-            'hr_manager',
-            'procurement_manager',
-            'supply_chain_manager',
-            'merchandising_manager'
+            'head_of_operations',
+            'head_of_finance',
+            'head_of_hr',
+            'head_of_procurement',
+            'head_of_supply_chain',
+            'head_of_merchandising'
         ];
 
         l3Directors.forEach(role => {
@@ -39,18 +39,18 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
             expect(meta.reportsToLabel).toBeTruthy();
         });
 
-        const rm = getRoleReportingMeta('regional_manager');
+        const rm = getRoleReportingMeta('regional_operations_manager');
         expect(rm.level).toBe(4);
         expect(rm.levelCategory).toBe('director');
         expect(rm.isManagerial).toBe(true);
 
         const l5Leads = [
-            'regional_procurement_lead',
-            'regional_finance_officer',
-            'regional_merchandising_lead',
-            'regional_hr_officer',
-            'regional_logistics_lead',
-            'regional_security_supervisor'
+            'regional_procurement_manager',
+            'regional_finance_manager',
+            'regional_merchandising_manager',
+            'regional_hr_manager',
+            'regional_logistics_manager',
+            'regional_security_manager'
         ];
 
         l5Leads.forEach(role => {
@@ -154,14 +154,14 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
     });
 
     it('validates critical Dotted-Line functional compliance connections', () => {
-        // Cashier -> Finance Manager
+        // Cashier -> Head of Finance
         const cashier = getRoleReportingMeta('cashier');
-        expect(cashier.dottedLineRole).toBe('finance_manager');
+        expect(cashier.dottedLineRole).toBe('head_of_finance');
         expect(cashier.dottedLineLabel).toContain('Finance');
 
-        // Receiver -> Procurement Manager / Inbound QC
+        // Receiver -> Head of Procurement / Inbound QC
         const receiver = getRoleReportingMeta('receiver');
-        expect(receiver.dottedLineRole).toBe('procurement_manager');
+        expect(receiver.dottedLineRole).toBe('head_of_procurement');
         expect(receiver.dottedLineLabel).toContain('Procurement');
 
         // Driver -> Fleet Maintenance Supervisor
@@ -171,17 +171,17 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
 
         // Inventory Specialist -> Finance / Internal Auditor
         const invSpec = getRoleReportingMeta('inventory_specialist');
-        expect(invSpec.dottedLineRole).toBe('finance_manager');
+        expect(invSpec.dottedLineRole).toBe('head_of_finance');
         expect(invSpec.dottedLineLabel).toContain('Auditor');
 
-        // Payroll Specialist -> Finance Manager
+        // Payroll Specialist -> Head of Finance
         const payroll = getRoleReportingMeta('payroll_specialist');
-        expect(payroll.dottedLineRole).toBe('finance_manager');
+        expect(payroll.dottedLineRole).toBe('head_of_finance');
         expect(payroll.dottedLineLabel).toContain('Finance');
 
-        // Store Merchandiser -> Corporate Merchandising Manager
+        // Store Merchandiser -> Corporate Head of Merchandising
         const storeMerch = getRoleReportingMeta('merchandiser');
-        expect(storeMerch.dottedLineRole).toBe('merchandising_manager');
+        expect(storeMerch.dottedLineRole).toBe('head_of_merchandising');
         expect(storeMerch.dottedLineLabel).toContain('Merchandising');
     });
 

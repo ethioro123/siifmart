@@ -6,18 +6,18 @@ import type { UserRole } from '../../types';
 
 describe('Regional Operations Architecture & RBAC', () => {
   describe('getRoleDashboardRoute - Sovereign Routing', () => {
-    it('routes regional_manager to /regional-ops by default', () => {
-      const route = getRoleDashboardRoute('regional_manager');
+    it('routes regional_operations_manager to /regional-ops by default', () => {
+      const route = getRoleDashboardRoute('regional_operations_manager');
       expect(route).toBe('/regional-ops');
     });
 
     it('routes the 5 regional functional leads to /regional-ops', () => {
       const regionalLeads: UserRole[] = [
-        'regional_procurement_lead',
-        'regional_finance_officer',
-        'regional_hr_officer',
-        'regional_logistics_lead',
-        'regional_security_supervisor'
+        'regional_procurement_manager',
+        'regional_finance_manager',
+        'regional_hr_manager',
+        'regional_logistics_manager',
+        'regional_security_manager'
       ];
 
       regionalLeads.forEach(role => {
@@ -25,10 +25,10 @@ describe('Regional Operations Architecture & RBAC', () => {
       });
     });
 
-    it('routes HQ executives (CEO, super_admin, operations_manager) to /admin', () => {
+    it('routes HQ executives (CEO, super_admin, head_of_operations) to /admin', () => {
       expect(getRoleDashboardRoute('super_admin')).toBe('/admin');
       expect(getRoleDashboardRoute('CEO')).toBe('/admin');
-      expect(getRoleDashboardRoute('operations_manager')).toBe('/admin');
+      expect(getRoleDashboardRoute('head_of_operations')).toBe('/admin');
     });
 
     it('routes floor staff to terminal interfaces (POS or WMS)', () => {
@@ -39,17 +39,17 @@ describe('Regional Operations Architecture & RBAC', () => {
 
   describe('canAccessModule - Regional Command Authorization', () => {
     it('authorizes regional manager and regional leads for regional-ops', () => {
-      expect(canAccessModule('regional_manager', 'regional-ops')).toBe(true);
-      expect(canAccessModule('regional_procurement_lead', 'regional-ops')).toBe(true);
-      expect(canAccessModule('regional_finance_officer', 'regional-ops')).toBe(true);
-      expect(canAccessModule('regional_hr_officer', 'regional-ops')).toBe(true);
-      expect(canAccessModule('regional_logistics_lead', 'regional-ops')).toBe(true);
-      expect(canAccessModule('regional_security_supervisor', 'regional-ops')).toBe(true);
+      expect(canAccessModule('regional_operations_manager', 'regional-ops')).toBe(true);
+      expect(canAccessModule('regional_procurement_manager', 'regional-ops')).toBe(true);
+      expect(canAccessModule('regional_finance_manager', 'regional-ops')).toBe(true);
+      expect(canAccessModule('regional_hr_manager', 'regional-ops')).toBe(true);
+      expect(canAccessModule('regional_logistics_manager', 'regional-ops')).toBe(true);
+      expect(canAccessModule('regional_security_manager', 'regional-ops')).toBe(true);
     });
 
-    it('authorizes super_admin and operations_manager for regional-ops', () => {
+    it('authorizes super_admin and head_of_operations for regional-ops', () => {
       expect(canAccessModule('super_admin', 'regional-ops')).toBe(true);
-      expect(canAccessModule('operations_manager', 'regional-ops')).toBe(true);
+      expect(canAccessModule('head_of_operations', 'regional-ops')).toBe(true);
     });
 
     it('blocks floor workers from regional-ops command deck', () => {
@@ -63,7 +63,7 @@ describe('Regional Operations Architecture & RBAC', () => {
     it('returns null for HQ staff (unlocked nationwide)', () => {
       const user = {
         id: 'u1',
-        role: 'operations_manager',
+        role: 'head_of_operations',
         scopeLevel: 'HQ' as const,
         regionCode: 'KE-NRB'
       };
@@ -73,7 +73,7 @@ describe('Regional Operations Architecture & RBAC', () => {
     it('returns region_code for REGIONAL scoped workers', () => {
       const user = {
         id: 'u2',
-        role: 'regional_manager',
+        role: 'regional_operations_manager',
         scopeLevel: 'REGIONAL' as const,
         regionCode: 'KE-NRB'
       };
@@ -84,7 +84,7 @@ describe('Regional Operations Architecture & RBAC', () => {
       const user = {
         id: 'u3',
         employeeId: 'emp-100',
-        role: 'regional_procurement_lead'
+        role: 'regional_procurement_manager'
       };
       const employees = [
         {

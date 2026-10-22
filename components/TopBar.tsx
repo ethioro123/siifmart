@@ -172,7 +172,7 @@ export default function TopBar() {
    // Notifications & Tasks
    const filteredNotifications = useMemo(() => {
       if (!user) return [];
-      const isPrivileged = user.role === 'super_admin' || user.role === 'admin' || user.role === 'hr' || user.role === 'hr_manager' || user.role === 'regional_manager' || user.role === 'operations_manager';
+      const isPrivileged = user.role === 'super_admin' || user.role === 'admin' || user.role === 'hr' || user.role === 'head_of_hr' || user.role === 'regional_operations_manager' || user.role === 'head_of_operations';
       const userId = user.id;
       const employeeId = currentEmployee?.id;
 
@@ -210,7 +210,7 @@ export default function TopBar() {
       const isStore = ['Store', 'Retail', 'POS'].includes(siteType);
       const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
       const isHQ = !isStore && !isWarehouse;
-      const isCeo = ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager'].includes(userRole) || (userRole as string)?.toLowerCase() === 'ceo';
+      const isCeo = ['super_admin', 'admin', 'country_managing_director', 'regional_operations_manager', 'head_of_operations',].includes(userRole) || (userRole as string)?.toLowerCase() === 'ceo';
       const isRegionalLead = userRole.startsWith('regional_');
 
       const navigation = NAVIGATION_TARGETS.filter(nav => {
@@ -225,8 +225,8 @@ export default function TopBar() {
             if (nav.path === '/network-inventory' || nav.path === '/roadmap') return false;
             if (nav.module === 'admin' && nav.path === '/admin') return false;
          } else if (isHQ && !isCeo) {
-            if (nav.path === '/pos' || (nav.path === '/wms-ops' && userRole !== 'regional_logistics_lead')) return false;
-            if (nav.path === '/inventory' && !['regional_logistics_lead', 'regional_security_supervisor'].includes(userRole)) return false; // In HQ, local inventory is replaced by Network Inventory
+            if (nav.path === '/pos' || (nav.path === '/wms-ops' && userRole !== 'regional_logistics_manager')) return false;
+            if (nav.path === '/inventory' && !['regional_logistics_manager', 'regional_security_manager'].includes(userRole)) return false; // In HQ, local inventory is replaced by Network Inventory
          }
 
          return nav.title.toLowerCase().includes(query) || nav.keywords.some(k => k.toLowerCase().includes(query));

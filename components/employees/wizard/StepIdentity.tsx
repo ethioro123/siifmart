@@ -25,14 +25,14 @@ export default function StepIdentity({
     const isRegional = Boolean(
         user?.scopeLevel === 'REGIONAL' ||
         (user as any)?.scope_level === 'REGIONAL' ||
-        ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '') ||
+        ['regional_operations_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '') ||
         (['hr', 'talent_recruiter', 'hr_generalist', 'training_coordinator'].includes(user?.role || '') && Boolean(effectiveRegion))
     );
     const isHQ = !isRegional && [
         'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
-        'head_of_hr', 'hr_head', 'hr_manager', 'hr', 'talent_recruiter', 'hr_generalist',
-        'head_of_operations', 'operations_head', 'operations_manager',
-        'head_of_finance', 'finance_head', 'finance_manager'
+        'head_of_hr', 'hr', 'talent_recruiter', 'hr_generalist',
+        'head_of_operations',
+        'head_of_finance',
     ].includes(user?.role || '');
 
     const selectableSites = React.useMemo(() => {

@@ -57,7 +57,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
         const employeeCountry = e.country || e.country_code;
         if (!employeeCountry) return false;
         const empCountry = normalizeCountryCode(employeeCountry);
-        const isRegionalManager = e.role?.toLowerCase().replace(/[\s-]+/g, '_') === 'regional_manager';
+        const isRegionalManager = e.role?.toLowerCase().replace(/[\s-]+/g, '_') === 'regional_operations_manager';
         const isActive = !e.status || ['active', 'enabled'].includes(e.status.toLowerCase());
         return empCountry === normRegionCountry && isRegionalManager && isActive;
     });

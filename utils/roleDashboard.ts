@@ -27,14 +27,14 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     const isWarehouseSite = siteType && ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
     const isStoreSite = siteType && ['Store', 'Retail', 'POS'].includes(siteType);
 
-    // 1. Regional Command: Regional Managers & Functional Leads command from /regional-ops
-    if (role === 'regional_manager' || [
-        'regional_procurement_lead',
-        'regional_finance_officer',
-        'regional_merchandising_lead',
-        'regional_hr_officer',
-        'regional_logistics_lead',
-        'regional_security_supervisor'
+    // 1. Regional Command: Regional Operations and Department Managers command from /regional-ops
+    if (role === 'regional_operations_manager' || [
+        'regional_procurement_manager',
+        'regional_finance_manager',
+        'regional_merchandising_manager',
+        'regional_hr_manager',
+        'regional_logistics_manager',
+        'regional_security_manager'
     ].includes(role)) {
         return '/regional-ops';
     }
@@ -42,7 +42,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     // 1.5. Corporate HQ Executive Deck
     const isHQExecutive = [
         'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
-        'head_of_operations', 'operations_head', 'operations_manager'
+        'head_of_operations',
     ].includes(role);
     if (isHQExecutive) {
         if (isWarehouseSite) return '/wms-ops';
@@ -53,11 +53,11 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     // 2. Level 2 - Specialized Directors & Department Heads
     switch (role) {
         case 'head_of_procurement':
-        case 'procurement_head':
-        case 'procurement_manager':
+        case 'head_of_procurement':
+        case 'head_of_procurement':
         case 'head_of_supply_chain':
-        case 'supply_chain_head':
-        case 'supply_chain_manager':
+        case 'head_of_supply_chain':
+        case 'head_of_supply_chain':
         case 'buyer':
         case 'demand_planner':
         case 'vendor_relations_manager':
@@ -65,10 +65,10 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
             return '/procurement';
 
         case 'head_of_finance':
-        case 'finance_head':
-        case 'finance_manager':
+        case 'head_of_finance':
+        case 'head_of_finance':
         case 'head_of_audit':
-        case 'audit_head':
+        case 'head_of_audit':
         case 'auditor':
         case 'accountant':
         case 'payroll_specialist':
@@ -78,8 +78,8 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
             return '/finance';
 
         case 'head_of_hr':
-        case 'hr_head':
-        case 'hr_manager':
+        case 'head_of_hr':
+        case 'head_of_hr':
         case 'hr':
         case 'hr_generalist':
         case 'talent_recruiter':
@@ -87,15 +87,15 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
             return '/employees';
 
         case 'head_of_merchandising':
-        case 'merchandising_head':
-        case 'merchandising_manager':
+        case 'head_of_merchandising':
+        case 'head_of_merchandising':
         case 'merchandising_specialist':
-        case 'regional_merchandising_lead':
+        case 'regional_merchandising_manager':
         case 'merchandiser':
             return '/pricing';
 
         case 'head_of_it':
-        case 'it_head':
+        case 'head_of_it':
         case 'it_support':
         case 'security_manager':
             return '/settings';

@@ -34,7 +34,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     const { user, jobs, wmsJobsService, addNotification, refreshData } = useFulfillment();
     const [amendModalOpen, setAmendModalOpen] = useState(false);
 
-    const canDelete = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager'].includes(user?.role || '');
+    const canDelete = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'warehouse_manager', 'head_of_operations', 'regional_operations_manager'].includes(user?.role || '');
 
     const handleDelete = () => {
         if (!window.confirm(t('warehouse.confirmDeleteJob') || 'Are you sure you want to delete this job? This action cannot be undone.')) return;

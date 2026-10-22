@@ -87,7 +87,7 @@ describe('Drawer Reconciliation & Supervisory Co-Attribution (Rule 18)', () => {
                             status: 'Flagged',
                             variance_flagged: true,
                             finance_sign_off_by: 'EMP-FIN-01',
-                            finance_sign_off_name: 'Fatuma Finance Manager',
+                            finance_sign_off_name: 'Fatuma Head of Finance',
                             finance_sign_off_at: '2026-10-04T20:00:00Z',
                             hq_notes: 'Excessive cash shortage of 2,000 ETB. Escalated for CCTV audit.'
                         },
@@ -101,14 +101,14 @@ describe('Drawer Reconciliation & Supervisory Co-Attribution (Rule 18)', () => {
 
         const signed = await drawerReconciliationService.signOff(
             'SHIFT-002',
-            { id: 'EMP-FIN-01', name: 'Fatuma Finance Manager' },
+            { id: 'EMP-FIN-01', name: 'Fatuma Head of Finance' },
             'Flagged',
             { hqNotes: 'Excessive cash shortage of 2,000 ETB. Escalated for CCTV audit.' }
         );
 
         expect(signed.reconciliationStatus).toBe('Flagged');
         expect(signed.varianceFlagged).toBe(true);
-        expect(signed.financeSignOffName).toBe('Fatuma Finance Manager');
+        expect(signed.financeSignOffName).toBe('Fatuma Head of Finance');
         expect(systemLogsService.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 action: 'DRAWER_VARIANCE_FLAGGED',

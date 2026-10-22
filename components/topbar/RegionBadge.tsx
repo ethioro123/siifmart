@@ -48,7 +48,7 @@ export function RegionBadge() {
     // shared specialists see RegionBadge. Frontline branch workers (cashiers, store staff, warehouse pickers)
     // have their region cleanly unified inside LocationBadge without a duplicate static pill in the top bar.
     const isRegionalOfficer = Boolean(user && (
-        user.role === 'regional_manager' ||
+        user.role === 'regional_operations_manager' ||
         (typeof user.role === 'string' && user.role.startsWith('regional_')) ||
         (isRegionalUser && isSharedHqRegionalRole(user.role))
     ));

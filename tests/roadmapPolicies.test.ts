@@ -58,13 +58,13 @@ describe('Roadmap Policies Registry', () => {
     expect(regionalManagerPolicy?.isStarred).toBe(true);
   });
 
-  it('includes SOP-MGT-021 Operations Manager Operational Authority & Accountability Policy', () => {
+  it('includes SOP-MGT-021 Head of Operations Operational Authority & Accountability Policy', () => {
     const opsManagerPolicy = DEFAULT_ROADMAP_POLICIES.find(
       p => p.id === 'policy-operations-manager-sop-021'
     );
     expect(opsManagerPolicy).toBeDefined();
     expect(opsManagerPolicy?.title).toContain('SOP-MGT-021');
-    expect(opsManagerPolicy?.title).toContain('Operations Manager');
+    expect(opsManagerPolicy?.title).toContain('Head of Operations');
     expect(opsManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(opsManagerPolicy?.content).toContain('Central Operations Control Room');
     expect(opsManagerPolicy?.content).toContain('Enterprise Fulfillment SLA Performance');
@@ -72,13 +72,13 @@ describe('Roadmap Policies Registry', () => {
     expect(opsManagerPolicy?.isStarred).toBe(true);
   });
 
-  it('includes SOP-MGT-022 Finance Manager Fiscal Authority & Accountability Policy', () => {
+  it('includes SOP-MGT-022 Head of Finance Fiscal Authority & Accountability Policy', () => {
     const finManagerPolicy = DEFAULT_ROADMAP_POLICIES.find(
       p => p.id === 'policy-finance-manager-sop-022'
     );
     expect(finManagerPolicy).toBeDefined();
     expect(finManagerPolicy?.title).toContain('SOP-MGT-022');
-    expect(finManagerPolicy?.title).toContain('Finance Manager');
+    expect(finManagerPolicy?.title).toContain('Head of Finance');
     expect(finManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(finManagerPolicy?.content).toContain('Daily Shift Reconciliation & Z-Report Sign-Off');
     expect(finManagerPolicy?.content).toContain('Procurement PO Financial Authorization');
@@ -87,13 +87,13 @@ describe('Roadmap Policies Registry', () => {
     expect(finManagerPolicy?.isStarred).toBe(true);
   });
 
-  it('includes SOP-MGT-023 HR Manager Workforce Governance & Accountability Policy', () => {
+  it('includes SOP-MGT-023 Head of Human Resources Workforce Governance & Accountability Policy', () => {
     const hrManagerPolicy = DEFAULT_ROADMAP_POLICIES.find(
       p => p.id === 'policy-hr-manager-sop-023'
     );
     expect(hrManagerPolicy).toBeDefined();
     expect(hrManagerPolicy?.title).toContain('SOP-MGT-023');
-    expect(hrManagerPolicy?.title).toContain('HR Manager');
+    expect(hrManagerPolicy?.title).toContain('Head of Human Resources');
     expect(hrManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(hrManagerPolicy?.content).toContain('Wase / Guarantor Bypass');
     expect(hrManagerPolicy?.content).toContain('Anti-Cartel Rotation Execution');
@@ -102,13 +102,13 @@ describe('Roadmap Policies Registry', () => {
     expect(hrManagerPolicy?.isStarred).toBe(true);
   });
 
-  it('includes SOP-MGT-024 Procurement Manager Sourcing Authority & Accountability Policy', () => {
+  it('includes SOP-MGT-024 Head of Procurement Sourcing Authority & Accountability Policy', () => {
     const procManagerPolicy = DEFAULT_ROADMAP_POLICIES.find(
       p => p.id === 'policy-procurement-manager-sop-024'
     );
     expect(procManagerPolicy).toBeDefined();
     expect(procManagerPolicy?.title).toContain('SOP-MGT-024');
-    expect(procManagerPolicy?.title).toContain('Procurement Manager');
+    expect(procManagerPolicy?.title).toContain('Head of Procurement');
     expect(procManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(procManagerPolicy?.content).toContain('Zero Self-Receiving');
     expect(procManagerPolicy?.content).toContain('Supplier Fill Rate');
@@ -116,13 +116,13 @@ describe('Roadmap Policies Registry', () => {
     expect(procManagerPolicy?.isStarred).toBe(true);
   });
 
-  it('includes SOP-MGT-025 Supply Chain Manager Logistics Authority & Accountability Policy', () => {
+  it('includes SOP-MGT-025 Head of Supply Chain Logistics Authority & Accountability Policy', () => {
     const scmPolicy = DEFAULT_ROADMAP_POLICIES.find(
       p => p.id === 'policy-supply-chain-manager-sop-025'
     );
     expect(scmPolicy).toBeDefined();
     expect(scmPolicy?.title).toContain('SOP-MGT-025');
-    expect(scmPolicy?.title).toContain('Supply Chain Manager');
+    expect(scmPolicy?.title).toContain('Head of Supply Chain');
     expect(scmPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(scmPolicy?.content).toContain('Inter-Facility Transit Loss');
     expect(scmPolicy?.content).toContain('Zero Custody Handshake Bypass');

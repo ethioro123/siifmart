@@ -31,10 +31,10 @@ export default function Pricing() {
    const { isRegionalUser } = useData();
 
    const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
-      'regional_manager',
-      'regional_procurement_lead',
-      'regional_finance_officer',
-      'regional_merchandising_lead',
+      'regional_operations_manager',
+      'regional_procurement_manager',
+      'regional_finance_manager',
+      'regional_merchandising_manager',
       'store_manager'
    ].includes(user?.role || '');
 

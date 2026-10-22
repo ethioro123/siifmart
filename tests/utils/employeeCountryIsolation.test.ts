@@ -95,7 +95,7 @@ describe('Zero-Trust Site Scoping & Assignment Formatting', () => {
     });
 
     it('assigns unassigned corporate/HQ executive roles to Central Operations', () => {
-        const hqRoles = ['super_admin', 'ceo', 'operations_manager', 'head_of_operations', 'finance_manager', 'head_of_finance', 'hr_manager', 'head_of_hr', 'procurement_manager', 'head_of_procurement'];
+        const hqRoles = ['super_admin', 'ceo', 'head_of_operations', 'head_of_finance', 'head_of_hr', 'head_of_procurement',];
         for (const role of hqRoles) {
             const result = formatSiteAssignment(undefined, role, sites);
             expect(result.label).toBe('Central Operations');

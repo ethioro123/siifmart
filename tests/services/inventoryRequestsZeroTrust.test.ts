@@ -43,7 +43,7 @@ describe('Zero-Trust Inventory Requests & HQ Approval Governance', () => {
 
     describe('Zero Autonomous Branch Authority & HQ Approval Gating', () => {
         it('verifies that warehouse and store managers cannot directly adjust stock without HQ approval', () => {
-            const HQ_ROLES = ['super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager'];
+            const HQ_ROLES = ['super_admin', 'ceo', 'admin', 'regional_operations_manager', 'head_of_operations'];
             const BRANCH_ROLES = ['warehouse_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'stock_clerk', 'receiver'];
 
             for (const role of BRANCH_ROLES) {

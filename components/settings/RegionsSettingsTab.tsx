@@ -26,7 +26,7 @@ export default function RegionsSettingsTab() {
 
     const isHQExecutive = useMemo(() => {
         const r = (user?.role || '').toLowerCase().trim();
-        return ['super_admin', 'ceo', 'country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_finance', 'finance_head', 'finance_manager'].includes(r);
+        return ['super_admin', 'ceo', 'country_managing_director', 'admin', 'head_of_operations', 'head_of_finance',].includes(r);
     }, [user?.role]);
 
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;

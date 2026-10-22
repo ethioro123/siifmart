@@ -30,7 +30,7 @@ export default function RecruitmentPipelineTab() {
     const isSiteManager = userRoleLevel === 3;
     const canManageHiring = recruitmentService.canManageHiring(user?.role || '');
     const canManageCandidates = recruitmentService.canManageCandidates(user?.role || '');
-    const canApproveRequisition = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_hr', 'hr_head', 'hr_manager', 'hr', 'regional_hr_officer'].includes(user?.role || '');
+    const canApproveRequisition = ['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_hr', 'hr', 'regional_hr_manager'].includes(user?.role || '');
 
     const loadData = async () => {
         setIsLoading(true);
@@ -59,7 +59,7 @@ export default function RecruitmentPipelineTab() {
                 {
                     id: user?.id || 'hq_approver', 
                     name: user?.name || 'Operations Director',
-                    role: user?.role || 'operations_manager'
+                    role: user?.role || 'head_of_operations'
                 }
             );
             showToast('Headcount requisition approved for active hiring', 'success');
@@ -108,7 +108,7 @@ export default function RecruitmentPipelineTab() {
                             <h3 className="text-base font-semibold tracking-tight text-[var(--theme-text-primary)]">
                                 Delegated Recruitment & 4-Eyes Onboarding
                             </h3>
-                            {['head_of_hr', 'hr_head', 'hr_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO'].includes(user?.role || '') ? (
+                            {['head_of_hr', 'head_of_operations', 'regional_operations_manager', 'country_managing_director', 'admin', 'super_admin', 'CEO'].includes(user?.role || '') ? (
                                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                     Checker • HR Compliance Sign-Off
                                 </span>

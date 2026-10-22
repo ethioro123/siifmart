@@ -132,7 +132,7 @@ describe('Warehouse to POS Command Center Transfer Lifecycle', () => {
                 if (!isDeparted) {
                     const WAREHOUSE_AUTHORITY = [
                         'super_admin', 'admin', 'warehouse_manager', 'dispatch_manager',
-                        'operations_manager', 'regional_manager', 'dispatcher',
+                        'head_of_operations', 'regional_operations_manager', 'dispatcher',
                         'store_manager', 'inventory_manager', 'supervisor'
                     ];
                     const hasAuthority = WAREHOUSE_AUTHORITY.includes(userRole.toLowerCase());
@@ -248,7 +248,7 @@ describe('Warehouse to POS Command Center Transfer Lifecycle', () => {
 
     describe('4. Zero-Trust Blind Count & Barcode Verification', () => {
         const isBlindCountActive = (userRole: string) => {
-            const hqRoles = ['super_admin', 'ceo', 'operations_manager', 'regional_manager'];
+            const hqRoles = ['super_admin', 'ceo', 'head_of_operations', 'regional_operations_manager'];
             return !hqRoles.includes((userRole || '').toLowerCase());
         };
 
@@ -262,7 +262,7 @@ describe('Warehouse to POS Command Center Transfer Lifecycle', () => {
         it('reveals expected count only to Central HQ auditors', () => {
             expect(isBlindCountActive('super_admin')).toBe(false);
             expect(isBlindCountActive('ceo')).toBe(false);
-            expect(isBlindCountActive('operations_manager')).toBe(false);
+            expect(isBlindCountActive('head_of_operations')).toBe(false);
         });
 
         it('verifies scanned barcode increments quantity or flags non-shipment item', () => {

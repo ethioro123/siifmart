@@ -47,10 +47,8 @@ export default function Finance() {
    const { isRegionalUser, effectiveCountry, regions, activeRegionCode } = useData();
 
    const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
-      'regional_manager',
-      'regional_operations_director',
-      'regional_finance_officer',
-      'regional_finance_manager'
+      'regional_operations_manager',
+      'regional_finance_manager',
    ].includes(user?.role || '');
 
    const targetRegionCode = activeRegionCode || user?.regionCode || (user as any)?.region_code;
@@ -149,10 +147,10 @@ export default function Finance() {
                      const pendingExpenses = (state.expenses || []).filter(e => e.status === 'Pending').length;
                      const userRole = state.user?.role?.toLowerCase() || '';
                      const isManager = Boolean(userRole && [
-                        'head_of_finance', 'finance_head', 'finance_manager',
-                        'regional_finance_officer', 'regional_finance_manager',
-                        'head_of_operations', 'operations_head', 'operations_manager',
-                        'regional_manager', 'regional_operations_director',
+                        'head_of_finance',
+                        'regional_finance_manager',
+                        'head_of_operations',
+                        'regional_operations_manager',
                         'country_managing_director', 'managing_director',
                         'admin', 'super_admin', 'CEO', 'ceo'
                      ].map(r => r.toLowerCase()).includes(userRole));

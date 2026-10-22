@@ -7,7 +7,7 @@ import type { UserRole } from '../../types';
 describe('HR Compensation & Employee Lifecycle Governance Suite', () => {
     describe('1. Segregation of Duties: PROPOSE_SALARY vs APPROVE_SALARY', () => {
         it('authorizes HR specialists and directors to propose salary adjustments while strictly denying approval', () => {
-            const hrRoles: UserRole[] = ['hr', 'hr_manager', 'head_of_hr', 'payroll_specialist', 'regional_hr_officer'];
+            const hrRoles: UserRole[] = ['hr', 'head_of_hr', 'payroll_specialist', 'regional_hr_manager'];
             for (const role of hrRoles) {
                 expect(hasPermission(role, 'PROPOSE_SALARY')).toBe(true);
                 expect(hasPermission(role, 'APPROVE_SALARY')).toBe(false);
@@ -15,7 +15,7 @@ describe('HR Compensation & Employee Lifecycle Governance Suite', () => {
         });
 
         it('authorizes Finance leadership to approve salary adjustments while strictly denying proposal', () => {
-            const financeRoles: UserRole[] = ['finance_manager', 'head_of_finance', 'finance_head'];
+            const financeRoles: UserRole[] = ['head_of_finance',];
             for (const role of financeRoles) {
                 expect(hasPermission(role, 'APPROVE_SALARY')).toBe(true);
                 expect(hasPermission(role, 'PROPOSE_SALARY')).toBe(false);
@@ -66,7 +66,7 @@ describe('HR Compensation & Employee Lifecycle Governance Suite', () => {
     describe('3. Candidate Onboarding Tiers & Headcount Quota Approval', () => {
         it('restricts candidate hire approval permissions to authorized managerial roles', () => {
             expect(hasPermission('head_of_hr', 'APPROVE_EMPLOYEE')).toBe(true);
-            expect(hasPermission('hr_manager', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(hasPermission('head_of_hr', 'APPROVE_EMPLOYEE')).toBe(true);
             expect(hasPermission('country_managing_director', 'APPROVE_EMPLOYEE')).toBe(true);
             expect(hasPermission('CEO', 'APPROVE_EMPLOYEE')).toBe(true);
 
@@ -77,14 +77,14 @@ describe('HR Compensation & Employee Lifecycle Governance Suite', () => {
 
         it('enforces rank-based employment authority (cannot employ peers or superiors)', () => {
             expect(canEmployRole('talent_recruiter', 'cashier')).toBe(false);
-            expect(canEmployRole('hr_manager', 'cashier')).toBe(true);
+            expect(canEmployRole('head_of_hr', 'cashier')).toBe(true);
             expect(canEmployRole('head_of_hr', 'cashier')).toBe(true);
             expect(canEmployRole('head_of_hr', 'store_manager')).toBe(true);
             // Level 2 Departmental Leadership cannot employ other Level 2 Managers (Executive only)
-            expect(canEmployRole('head_of_hr', 'hr_manager')).toBe(false);
+            expect(canEmployRole('head_of_hr', 'head_of_hr')).toBe(false);
             expect(canEmployRole('head_of_hr', 'country_managing_director')).toBe(false);
             expect(canEmployRole('country_managing_director', 'head_of_hr')).toBe(true);
-            expect(canEmployRole('country_managing_director', 'hr_manager')).toBe(true);
+            expect(canEmployRole('country_managing_director', 'head_of_hr')).toBe(true);
         });
     });
 
@@ -107,7 +107,7 @@ describe('HR Compensation & Employee Lifecycle Governance Suite', () => {
         it('validates that notice issuer and appeal adjudicator must be distinct individuals', () => {
             const issuer = { id: 'usr-101', name: 'Marta Hailu', role: 'head_of_hr' };
             const adjudicatorSelf = { id: 'usr-101', name: 'Marta Hailu', role: 'head_of_hr' };
-            const adjudicatorIndependent = { id: 'usr-102', name: 'Kassahun Desta', role: 'hr_manager' };
+            const adjudicatorIndependent = { id: 'usr-102', name: 'Kassahun Desta', role: 'head_of_hr' };
 
             const isSelfAdjudication = issuer.id === adjudicatorSelf.id || issuer.name === adjudicatorSelf.name;
             const isIndependentAdjudication = issuer.id !== adjudicatorIndependent.id && issuer.name !== adjudicatorIndependent.name;

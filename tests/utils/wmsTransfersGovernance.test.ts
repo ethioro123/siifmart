@@ -56,15 +56,15 @@ describe('WMS Logistics & Cross-Border Transfer Quarantine Governance Suite', ()
 
         it('authorizes Head of Operations and Head of Supply Chain', () => {
             expect(isTransferManager({ id: '4', role: 'head_of_operations', name: 'Ops Head' } as any)).toBe(true);
-            expect(isTransferManager({ id: '5', role: 'operations_head', name: 'Ops Head' } as any)).toBe(true);
+            expect(isTransferManager({ id: '5', role: 'head_of_operations', name: 'Ops Head' } as any)).toBe(true);
             expect(isTransferManager({ id: '6', role: 'head_of_supply_chain', name: 'SC Head' } as any)).toBe(true);
-            expect(isTransferManager({ id: '7', role: 'supply_chain_head', name: 'SC Head' } as any)).toBe(true);
+            expect(isTransferManager({ id: '7', role: 'head_of_supply_chain', name: 'SC Head' } as any)).toBe(true);
         });
 
         it('authorizes field logistics and warehouse managers', () => {
             expect(isTransferManager({ id: '8', role: 'warehouse_manager', name: 'WH Mgr' } as any)).toBe(true);
-            expect(isTransferManager({ id: '9', role: 'regional_manager', name: 'Reg Mgr' } as any)).toBe(true);
-            expect(isTransferManager({ id: '10', role: 'regional_logistics_lead', name: 'Logistics Lead' } as any)).toBe(true);
+            expect(isTransferManager({ id: '9', role: 'regional_operations_manager', name: 'Reg Mgr' } as any)).toBe(true);
+            expect(isTransferManager({ id: '10', role: 'regional_logistics_manager', name: 'Logistics Lead' } as any)).toBe(true);
             expect(isTransferManager({ id: '11', role: 'inventory_manager', name: 'Inv Mgr' } as any)).toBe(true);
         });
 

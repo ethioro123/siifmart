@@ -43,10 +43,10 @@ export const ExpensesTab: React.FC = () => {
     const [inspectingExpense, setInspectingExpense] = useState<ExpenseRecord | null>(null);
 
     const canApproveRole = [
-        'head_of_finance', 'finance_head', 'finance_manager',
-        'regional_finance_officer', 'regional_finance_manager',
-        'head_of_operations', 'operations_head', 'operations_manager',
-        'regional_manager', 'regional_operations_director',
+        'head_of_finance',
+        'regional_finance_manager',
+        'head_of_operations',
+        'regional_operations_manager',
         'country_managing_director', 'managing_director',
         'admin', 'super_admin', 'CEO', 'ceo'
     ].includes(user?.role?.toLowerCase() || '');

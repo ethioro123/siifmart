@@ -30,14 +30,14 @@ export const CARD_SIZES: Record<string, { width: number; height: number; level: 
     super_admin: { width: 200, height: 160, level: 1 },
     admin: { width: 190, height: 152, level: 2 },
     country_managing_director: { width: 190, height: 152, level: 2 },
-    operations_manager: { width: 180, height: 144, level: 3 },
-    finance_manager: { width: 180, height: 144, level: 3 },
-    hr_manager: { width: 180, height: 144, level: 3 },
+    head_of_operations: { width: 180, height: 144, level: 3 },
+    head_of_finance: { width: 180, height: 144, level: 3 },
+    head_of_hr: { width: 180, height: 144, level: 3 },
     hr: { width: 180, height: 144, level: 3 },
-    procurement_manager: { width: 180, height: 144, level: 3 },
-    supply_chain_manager: { width: 180, height: 144, level: 3 },
-    merchandising_manager: { width: 180, height: 144, level: 3 },
-    regional_manager: { width: 176, height: 140, level: 4 },
+    head_of_procurement: { width: 180, height: 144, level: 3 },
+    head_of_supply_chain: { width: 180, height: 144, level: 3 },
+    head_of_merchandising: { width: 180, height: 144, level: 3 },
+    regional_operations_manager: { width: 176, height: 140, level: 4 },
     store_manager: { width: 168, height: 134, level: 6 },
     warehouse_manager: { width: 168, height: 134, level: 6 },
     logistics_manager: { width: 162, height: 130, level: 7 },
@@ -80,12 +80,12 @@ export const CARD_SIZES: Record<string, { width: number; height: number; level: 
 
 export const ROLE_COLORS: Record<string, string> = {
     super_admin: '#6366f1',
-    regional_manager: '#3b82f6',
-    operations_manager: '#3b82f6',
-    finance_manager: '#3b82f6',
-    hr_manager: '#3b82f6',
-    procurement_manager: '#3b82f6',
-    supply_chain_manager: '#3b82f6',
+    regional_operations_manager: '#3b82f6',
+    head_of_operations: '#3b82f6',
+    head_of_finance: '#3b82f6',
+    head_of_hr: '#3b82f6',
+    head_of_procurement: '#3b82f6',
+    head_of_supply_chain: '#3b82f6',
     store_manager: '#14b8a6',
     warehouse_manager: '#14b8a6',
     logistics_manager: '#4f46e5',
@@ -110,26 +110,26 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
         role: 'super_admin', label: 'CEO', dept: 'executive', reportsTo: null,
         children: [
             {
-                role: 'regional_manager', label: 'Regional Manager', dept: 'executive', reportsTo: 'CEO',
+                role: 'regional_operations_manager', label: 'Regional Manager', dept: 'executive', reportsTo: 'CEO',
                 children: [
                     {
-                        role: 'operations_manager', label: 'Operations Manager', dept: 'executive', reportsTo: 'Regional Manager',
+                        role: 'head_of_operations', label: 'Head of Operations', dept: 'executive', reportsTo: 'Regional Manager',
                         children: [
                             // Central Operations Team
-                            { role: 'merchandising_manager', label: 'Merchandising Manager', dept: 'executive', reportsTo: 'Operations Manager' },
-                            { role: 'data_analyst', label: 'Data Analyst', dept: 'executive', reportsTo: 'Operations Manager' },
-                            { role: 'security_manager', label: 'Security & LP Manager', dept: 'support', reportsTo: 'Operations Manager' },
+                            { role: 'head_of_merchandising', label: 'Head of Merchandising', dept: 'executive', reportsTo: 'Head of Operations' },
+                            { role: 'data_analyst', label: 'Data Analyst', dept: 'executive', reportsTo: 'Head of Operations' },
+                            { role: 'security_manager', label: 'Security & LP Manager', dept: 'support', reportsTo: 'Head of Operations' },
                             {
-                                role: 'cs_manager', label: 'CS Manager', dept: 'store', reportsTo: 'Operations Manager',
+                                role: 'cs_manager', label: 'CS Manager', dept: 'store', reportsTo: 'Head of Operations',
                                 children: [
                                     { role: 'customer_service', label: 'Customer Service', dept: 'store', reportsTo: 'CS Manager' }
                                 ]
                             },
-                            { role: 'store_operations_auditor', label: 'Store Operations Auditor', dept: 'executive', reportsTo: 'Operations Manager' },
+                            { role: 'store_operations_auditor', label: 'Store Operations Auditor', dept: 'executive', reportsTo: 'Head of Operations' },
 
                             // Direct Facility Oversight Lines
                             {
-                                role: 'store_manager', label: 'Store Manager', dept: 'store', reportsTo: 'Operations Manager',
+                                role: 'store_manager', label: 'Store Manager', dept: 'store', reportsTo: 'Head of Operations',
                                 children: [
                                     {
                                         role: 'assistant_manager', label: 'Assistant Manager', dept: 'store', reportsTo: 'Store Manager',
@@ -149,7 +149,7 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                                 ]
                             },
                             {
-                                role: 'warehouse_manager', label: 'Warehouse Manager', dept: 'warehouse', reportsTo: 'Operations Manager',
+                                role: 'warehouse_manager', label: 'Warehouse Manager', dept: 'warehouse', reportsTo: 'Head of Operations',
                                 children: [
                                     { role: 'receiver', label: 'Receiver', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
                                     { role: 'picker', label: 'Picker', dept: 'warehouse', reportsTo: 'Warehouse Manager' },
@@ -158,7 +158,7 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                                 ]
                             },
                             {
-                                role: 'logistics_manager', label: 'Logistics Manager', dept: 'warehouse', reportsTo: 'Operations Manager',
+                                role: 'logistics_manager', label: 'Logistics Manager', dept: 'warehouse', reportsTo: 'Head of Operations',
                                 children: [
                                     {
                                         role: 'dispatch_manager', label: 'Dispatch Manager', dept: 'warehouse', reportsTo: 'Logistics Manager',
@@ -171,14 +171,14 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                                 ]
                             },
                             {
-                                role: 'inventory_manager', label: 'Inventory Manager', dept: 'warehouse', reportsTo: 'Operations Manager',
+                                role: 'inventory_manager', label: 'Inventory Manager', dept: 'warehouse', reportsTo: 'Head of Operations',
                                 children: [
                                     { role: 'inventory_specialist', label: 'Inventory Specialist', dept: 'warehouse', reportsTo: 'Inventory Manager' },
                                     { role: 'stock_clerk', label: 'Stock Clerk', dept: 'warehouse', reportsTo: 'Inventory Manager' },
                                 ]
                             },
                             {
-                                role: 'security_manager', label: 'Security & LP Manager', dept: 'support', reportsTo: 'Operations Manager',
+                                role: 'security_manager', label: 'Security & LP Manager', dept: 'support', reportsTo: 'Head of Operations',
                                 children: [
                                     { role: 'loss_prevention', label: 'Loss Prevention', dept: 'store', reportsTo: 'Security & LP Manager' }
                                 ]
@@ -186,39 +186,39 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                         ]
                     },
                     {
-                        role: 'supply_chain_manager', label: 'Supply Chain Manager', dept: 'procurement', reportsTo: 'Regional Manager',
+                        role: 'head_of_supply_chain', label: 'Head of Supply Chain', dept: 'procurement', reportsTo: 'Regional Manager',
                         children: [
-                            { role: 'demand_planner', label: 'Demand Planner', dept: 'procurement', reportsTo: 'Supply Chain Manager' },
-                            { role: 'replenishment_planner', label: 'Replenishment Planner', dept: 'procurement', reportsTo: 'Supply Chain Manager' }
+                            { role: 'demand_planner', label: 'Demand Planner', dept: 'procurement', reportsTo: 'Head of Supply Chain' },
+                            { role: 'replenishment_planner', label: 'Replenishment Planner', dept: 'procurement', reportsTo: 'Head of Supply Chain' }
                         ]
                     },
                 ]
             },
             {
-                role: 'finance_manager', label: 'Finance Manager', dept: 'finance', reportsTo: 'CEO',
+                role: 'head_of_finance', label: 'Head of Finance', dept: 'finance', reportsTo: 'CEO',
                 children: [
-                    { role: 'auditor', label: 'Auditor', dept: 'finance', reportsTo: 'Finance Manager' },
-                    { role: 'accountant', label: 'Accountant', dept: 'finance', reportsTo: 'Finance Manager' },
-                    { role: 'data_analyst', label: 'Data Analyst', dept: 'finance', reportsTo: 'Finance Manager' },
-                    { role: 'treasury_officer', label: 'Treasury Officer', dept: 'finance', reportsTo: 'Finance Manager' },
-                    { role: 'tax_compliance_officer', label: 'Tax Compliance Officer', dept: 'finance', reportsTo: 'Finance Manager' },
-                    { role: 'credit_control_officer', label: 'Credit Control Officer', dept: 'finance', reportsTo: 'Finance Manager' },
+                    { role: 'auditor', label: 'Auditor', dept: 'finance', reportsTo: 'Head of Finance' },
+                    { role: 'accountant', label: 'Accountant', dept: 'finance', reportsTo: 'Head of Finance' },
+                    { role: 'data_analyst', label: 'Data Analyst', dept: 'finance', reportsTo: 'Head of Finance' },
+                    { role: 'treasury_officer', label: 'Treasury Officer', dept: 'finance', reportsTo: 'Head of Finance' },
+                    { role: 'tax_compliance_officer', label: 'Tax Compliance Officer', dept: 'finance', reportsTo: 'Head of Finance' },
+                    { role: 'credit_control_officer', label: 'Credit Control Officer', dept: 'finance', reportsTo: 'Head of Finance' },
                 ]
             },
             {
-                role: 'hr_manager', label: 'HR Manager', dept: 'hr', reportsTo: 'CEO',
+                role: 'head_of_hr', label: 'Head of Human Resources', dept: 'hr', reportsTo: 'CEO',
                 children: [
-                    { role: 'hr', label: 'HR', dept: 'hr', reportsTo: 'HR Manager' },
-                    { role: 'training_coordinator', label: 'Training Coordinator', dept: 'hr', reportsTo: 'HR Manager' },
+                    { role: 'hr', label: 'HR', dept: 'hr', reportsTo: 'Head of Human Resources' },
+                    { role: 'training_coordinator', label: 'Training Coordinator', dept: 'hr', reportsTo: 'Head of Human Resources' },
                 ]
             },
             {
-                role: 'procurement_manager', label: 'Procurement Manager', dept: 'procurement', reportsTo: 'CEO',
+                role: 'head_of_procurement', label: 'Head of Procurement', dept: 'procurement', reportsTo: 'CEO',
                 children: [
-                    { role: 'buyer', label: 'Sourcing Buyer', dept: 'procurement', reportsTo: 'Procurement Manager' },
-                    { role: 'vendor_relations_manager', label: 'Vendor Relations Manager', dept: 'procurement', reportsTo: 'Procurement Manager' },
-                    { role: 'customs_import_specialist', label: 'Customs & Import Specialist', dept: 'procurement', reportsTo: 'Procurement Manager' },
-                    { role: 'inbound_qc_inspector', label: 'Inbound QC Inspector', dept: 'procurement', reportsTo: 'Procurement Manager' }
+                    { role: 'buyer', label: 'Sourcing Buyer', dept: 'procurement', reportsTo: 'Head of Procurement' },
+                    { role: 'vendor_relations_manager', label: 'Vendor Relations Manager', dept: 'procurement', reportsTo: 'Head of Procurement' },
+                    { role: 'customs_import_specialist', label: 'Customs & Import Specialist', dept: 'procurement', reportsTo: 'Head of Procurement' },
+                    { role: 'inbound_qc_inspector', label: 'Inbound QC Inspector', dept: 'procurement', reportsTo: 'Head of Procurement' }
                 ]
             },
             {

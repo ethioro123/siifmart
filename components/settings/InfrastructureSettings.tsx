@@ -124,12 +124,9 @@ export default function InfrastructureSettings() {
         'country_managing_director',
         'admin',
         'head_of_operations',
-        'operations_head',
-        'operations_manager',
         'head_of_it',
-        'it_head',
         'it_support',
-        'regional_manager',
+        'regional_operations_manager',
         'store_manager',
         'warehouse_manager',
     ];

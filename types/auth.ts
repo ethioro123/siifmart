@@ -4,20 +4,15 @@ export type UserRole =
   // Level 2 - Country Executive
   | 'country_managing_director' | 'admin'
   // Level 3 - Corporate HQ Directorate Heads
-  | 'head_of_operations' | 'operations_head' | 'operations_manager'
-  | 'head_of_finance' | 'finance_head' | 'finance_manager'
-  | 'head_of_hr' | 'hr_head' | 'hr_manager'
-  | 'head_of_procurement' | 'procurement_head' | 'procurement_manager'
-  | 'head_of_supply_chain' | 'supply_chain_head' | 'supply_chain_manager'
-  | 'head_of_merchandising' | 'merchandising_head' | 'merchandising_manager'
-  | 'head_of_it' | 'it_head'
-  | 'head_of_audit' | 'audit_head'
-  // Level 4 - Regional Territory Director
-  | 'regional_manager'
-  // Level 5 - Regional Functional Leads
-  | 'regional_procurement_lead' | 'regional_finance_officer' | 'regional_hr_officer'
-  | 'regional_merchandising_lead'
-  | 'regional_logistics_lead' | 'regional_security_supervisor'
+  | 'head_of_operations' | 'head_of_finance' | 'head_of_hr'
+  | 'head_of_procurement' | 'head_of_supply_chain' | 'head_of_merchandising'
+  | 'head_of_it' | 'head_of_audit'
+  // Level 4 - Regional Operations Manager
+  | 'regional_operations_manager'
+  // Level 5 - Regional Department Managers
+  | 'regional_procurement_manager' | 'regional_finance_manager' | 'regional_hr_manager'
+  | 'regional_merchandising_manager'
+  | 'regional_logistics_manager' | 'regional_security_manager'
   // Level 6 - Facility Captains
   | 'store_manager' | 'warehouse_manager'
   // Level 7 - Functional & Department Managers

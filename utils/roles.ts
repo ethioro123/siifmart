@@ -16,38 +16,24 @@ export const SYSTEM_ROLES: {
 
    // ═══ LEVEL 3 - CORPORATE HQ DIRECTORATE HEADS ═══
    { id: 'head_of_operations', label: 'Head of Operations', desc: 'Enterprise Operations Directorate and Network Standards', level: 3, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-50 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },
-   { id: 'operations_head', label: 'Head of Operations', desc: 'Enterprise Operations Directorate and Network Standards', level: 3, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-50 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },
-   { id: 'operations_manager', label: 'Head of Operations', desc: 'Enterprise Operations Directorate and Network Standards', level: 3, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-50 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },
    { id: 'head_of_finance', label: 'Head of Finance', desc: 'Enterprise Financial Strategy and Corporate Accounting', level: 3, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
-   { id: 'finance_head', label: 'Head of Finance', desc: 'Enterprise Financial Strategy and Corporate Accounting', level: 3, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
-   { id: 'finance_manager', label: 'Head of Finance', desc: 'Enterprise Financial Strategy and Corporate Accounting', level: 3, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
    { id: 'head_of_hr', label: 'Head of Human Resources', desc: 'Enterprise People Operations and Payroll Governance', level: 3, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
-   { id: 'hr_head', label: 'Head of Human Resources', desc: 'Enterprise People Operations and Payroll Governance', level: 3, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
-   { id: 'hr_manager', label: 'Head of Human Resources', desc: 'Enterprise People Operations and Payroll Governance', level: 3, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
    { id: 'head_of_procurement', label: 'Head of Procurement', desc: 'Enterprise Strategic Sourcing and Supplier Contracts', level: 3, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
-   { id: 'procurement_head', label: 'Head of Procurement', desc: 'Enterprise Strategic Sourcing and Supplier Contracts', level: 3, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
-   { id: 'procurement_manager', label: 'Head of Procurement', desc: 'Enterprise Strategic Sourcing and Supplier Contracts', level: 3, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
    { id: 'head_of_supply_chain', label: 'Head of Supply Chain', desc: 'Enterprise Logistics and Fulfillment Networks', level: 3, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
-   { id: 'supply_chain_head', label: 'Head of Supply Chain', desc: 'Enterprise Logistics and Fulfillment Networks', level: 3, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
-   { id: 'supply_chain_manager', label: 'Head of Supply Chain', desc: 'Enterprise Logistics and Fulfillment Networks', level: 3, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
    { id: 'head_of_merchandising', label: 'Head of Merchandising', desc: 'Enterprise Product Assortment and Pricing Strategy', level: 3, styles: { text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-400/10', border: 'border-amber-200 dark:border-amber-400/20', badge: 'bg-amber-100 dark:bg-amber-400/20 text-amber-700 dark:text-amber-400' } },
-   { id: 'merchandising_head', label: 'Head of Merchandising', desc: 'Enterprise Product Assortment and Pricing Strategy', level: 3, styles: { text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-400/10', border: 'border-amber-200 dark:border-amber-400/20', badge: 'bg-amber-100 dark:bg-amber-400/20 text-amber-700 dark:text-amber-400' } },
-   { id: 'merchandising_manager', label: 'Head of Merchandising', desc: 'Enterprise Product Assortment and Pricing Strategy', level: 3, styles: { text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-400/10', border: 'border-amber-200 dark:border-amber-400/20', badge: 'bg-amber-100 dark:bg-amber-400/20 text-amber-700 dark:text-amber-400' } },
    { id: 'head_of_it', label: 'Head of IT & Systems', desc: 'Enterprise Technology Infrastructure and Security Policy', level: 3, styles: { text: 'text-purple-600 dark:text-purple-300', bg: 'bg-purple-100 dark:bg-purple-300/10', border: 'border-purple-200 dark:border-purple-300/20', badge: 'bg-purple-100 dark:bg-purple-300/20 text-purple-700 dark:text-purple-300' } },
-   { id: 'it_head', label: 'Head of IT & Systems', desc: 'Enterprise Technology Infrastructure and Security Policy', level: 3, styles: { text: 'text-purple-600 dark:text-purple-300', bg: 'bg-purple-100 dark:bg-purple-300/10', border: 'border-purple-200 dark:border-purple-300/20', badge: 'bg-purple-100 dark:bg-purple-300/20 text-purple-700 dark:text-purple-300' } },
    { id: 'head_of_audit', label: 'Head of Internal Audit', desc: 'Enterprise Risk, Compliance and Zero-Trust Governance', level: 3, styles: { text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-100 dark:bg-rose-400/10', border: 'border-rose-200 dark:border-rose-400/20', badge: 'bg-rose-100 dark:bg-rose-400/20 text-rose-700 dark:text-rose-400' } },
-   { id: 'audit_head', label: 'Head of Internal Audit', desc: 'Enterprise Risk, Compliance and Zero-Trust Governance', level: 3, styles: { text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-100 dark:bg-rose-400/10', border: 'border-rose-200 dark:border-rose-400/20', badge: 'bg-rose-100 dark:bg-rose-400/20 text-rose-700 dark:text-rose-400' } },
 
-   // ═══ LEVEL 4 - REGIONAL TERRITORY DIRECTOR ═══
-   { id: 'regional_manager', label: 'Regional Operations Manager', desc: 'Territorial Multi-Site Leadership and Area Oversight', level: 4, styles: { text: 'text-blue-600 dark:text-blue-500', bg: 'bg-blue-100 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/20', badge: 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-500' } },
+   // ═══ LEVEL 4 - REGIONAL OPERATIONS MANAGER ═══
+   { id: 'regional_operations_manager', label: 'Regional Operations Manager', desc: 'Territorial Multi-Site Leadership and Area Oversight', level: 4, styles: { text: 'text-blue-600 dark:text-blue-500', bg: 'bg-blue-100 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/20', badge: 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-500' } },
 
-   // ═══ LEVEL 5 - REGIONAL FUNCTIONAL LEADS ═══
-   { id: 'regional_procurement_lead', label: 'Regional Procurement Lead', desc: 'Territorial Sourcing and Local Vendor Agreements', level: 5, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
-   { id: 'regional_finance_officer', label: 'Regional Finance Officer', desc: 'Territorial Financial Audits and Till Reconciliations', level: 5, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
-   { id: 'regional_merchandising_lead', label: 'Regional Merchandising Lead', desc: 'Territorial pricing, campaigns, and planogram approvals', level: 5, styles: { text: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-100 dark:bg-amber-300/10', border: 'border-amber-200 dark:border-amber-300/20', badge: 'bg-amber-100 dark:bg-amber-300/20 text-amber-800 dark:text-amber-300' } },
-   { id: 'regional_hr_officer', label: 'Regional Human Resources Officer', desc: 'Territorial Staffing and Workforce Governance', level: 5, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
-   { id: 'regional_logistics_lead', label: 'Regional Logistics Lead', desc: 'Territorial Fleet Transit and Inter-Facility Transfers', level: 5, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
-   { id: 'regional_security_supervisor', label: 'Regional Security Supervisor', desc: 'Territorial Asset Protection and Supervisory Audit Governance', level: 5, styles: { text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-400/10', border: 'border-rose-200 dark:border-rose-400/20', badge: 'bg-rose-50 dark:bg-rose-400/20 text-rose-700 dark:text-rose-400' } },
+   // ═══ LEVEL 5 - REGIONAL DEPARTMENT MANAGERS ═══
+   { id: 'regional_procurement_manager', label: 'Regional Procurement Manager', desc: 'Territorial Sourcing and Local Vendor Agreements', level: 5, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
+   { id: 'regional_finance_manager', label: 'Regional Finance Manager', desc: 'Territorial Financial Audits and Till Reconciliations', level: 5, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
+   { id: 'regional_merchandising_manager', label: 'Regional Merchandising Manager', desc: 'Territorial pricing, campaigns, and planogram approvals', level: 5, styles: { text: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-100 dark:bg-amber-300/10', border: 'border-amber-200 dark:border-amber-300/20', badge: 'bg-amber-100 dark:bg-amber-300/20 text-amber-800 dark:text-amber-300' } },
+   { id: 'regional_hr_manager', label: 'Regional Human Resources Manager', desc: 'Territorial Staffing and Workforce Governance', level: 5, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
+   { id: 'regional_logistics_manager', label: 'Regional Logistics Manager', desc: 'Territorial Fleet Transit and Inter-Facility Transfers', level: 5, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
+   { id: 'regional_security_manager', label: 'Regional Security Manager', desc: 'Territorial Asset Protection and Supervisory Audit Governance', level: 5, styles: { text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-400/10', border: 'border-rose-200 dark:border-rose-400/20', badge: 'bg-rose-50 dark:bg-rose-400/20 text-rose-700 dark:text-rose-400' } },
 
    // ═══ LEVEL 6 - FACILITY CAPTAINS ═══
    { id: 'store_manager', label: 'Store Manager', desc: 'Retail Store Operational Leadership', level: 6, styles: { text: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-400/10', border: 'border-teal-200 dark:border-teal-400/20', badge: 'bg-teal-100 dark:bg-teal-400/20 text-teal-700 dark:text-teal-400' } },
@@ -137,35 +123,21 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
 
         // Level 2: Directors & Regional ("Head of...")
         'head_of_operations': 95,
-        'operations_head': 95,
-        'operations_manager': 95,
-        'regional_manager': 90,
+        'regional_operations_manager': 90,
         'head_of_finance': 85,
-        'finance_head': 85,
-        'finance_manager': 85,
         'head_of_hr': 85,
-        'hr_head': 85,
-        'hr_manager': 85,
         'hr': 85, // Legacy HR
         'head_of_procurement': 82,
-        'procurement_head': 82,
-        'procurement_manager': 82,
         'head_of_supply_chain': 82,
-        'supply_chain_head': 82,
-        'supply_chain_manager': 82,
         'head_of_merchandising': 82,
-        'merchandising_head': 82,
-        'merchandising_manager': 82,
         'head_of_it': 80,
-        'it_head': 80,
         'head_of_audit': 80,
-        'audit_head': 80,
-        'regional_procurement_lead': 81,
-        'regional_finance_officer': 81,
-        'regional_merchandising_lead': 81,
-        'regional_hr_officer': 81,
-        'regional_logistics_lead': 81,
-        'regional_security_supervisor': 81,
+        'regional_procurement_manager': 81,
+        'regional_finance_manager': 81,
+        'regional_merchandising_manager': 81,
+        'regional_hr_manager': 81,
+        'regional_logistics_manager': 81,
+        'regional_security_manager': 81,
 
         // Level 3: Site Managers & Department Heads
         'logistics_manager': 80,
@@ -235,8 +207,8 @@ export const canViewLocation = (
     // Country Managing Director and HR/Operations leadership can see anyone in their country except Global CEO
     if ([
         'admin', 'country_managing_director',
-        'hr', 'hr_manager', 'head_of_hr', 'hr_head',
-        'operations_manager', 'head_of_operations', 'operations_head'
+        'hr', 'head_of_hr',
+        'head_of_operations',
     ].includes(userRole)) {
         return targetRole !== 'super_admin' && targetRole !== 'ceo' && targetRole !== 'CEO';
     }
@@ -254,13 +226,13 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
     // Explicitly allow executive, regional/operations directors, finance, procurement, and merchandising leadership
     if ([
         'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
-        'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_merchandising_lead',
-        'operations_manager', 'head_of_operations', 'operations_head',
-        'finance_manager', 'head_of_finance', 'finance_head',
-        'procurement_manager', 'head_of_procurement', 'procurement_head',
-        'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head',
-        'merchandising_manager', 'head_of_merchandising', 'merchandising_head',
-        'head_of_audit', 'audit_head',
+        'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager',
+        'head_of_operations',
+        'head_of_finance',
+        'head_of_procurement',
+        'head_of_supply_chain',
+        'head_of_merchandising',
+        'head_of_audit',
         'vendor_relations_manager'
     ].includes(role)) {
         return true;
@@ -313,7 +285,7 @@ export const canEmployRole = (
         return false;
     }
 
-    // Corporate HQ Directors (Level 3) and Regional Territory Directors (Level 4) can ONLY be appointed by L1 CEO or L2 Country Managing Director
+    // Corporate HQ Directors (Level 3) and Regional Operations Managers (Level 4) can ONLY be appointed by L1 CEO or L2 Country Managing Director
     if (candidateLevel <= 4 && userLevel > 2) {
         return false;
     }
@@ -323,33 +295,33 @@ export const canEmployRole = (
     if (isFacilityCaptain) {
         return [
             'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
-            'operations_manager', 'head_of_operations', 'operations_head',
-            'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head',
-            'regional_manager', 'regional_hr_officer',
-            'hr_manager', 'head_of_hr', 'hr_head', 'hr'
+            'head_of_operations',
+            'head_of_supply_chain',
+            'regional_operations_manager', 'regional_hr_manager',
+            'head_of_hr', 'hr'
         ].includes(userRole as string);
     }
 
-    // Regional Functional Leads (Level 5, hierarchy 81) can be employed by Executive Leadership, Operations Director, Regional Manager, HR Leadership, or their Corporate Directorate Head
-    const isRegionalFunctionalLead = [
-        'regional_procurement_lead',
-        'regional_merchandising_lead',
-        'regional_finance_officer',
-        'regional_hr_officer',
-        'regional_logistics_lead',
-        'regional_security_supervisor'
+    // Regional Department Managers (Level 5, hierarchy 81) can be employed by Executive Leadership, Operations Director, Regional Manager, HR Leadership, or their Corporate Directorate Head
+    const isRegionalDepartmentManager = [
+        'regional_procurement_manager',
+        'regional_merchandising_manager',
+        'regional_finance_manager',
+        'regional_hr_manager',
+        'regional_logistics_manager',
+        'regional_security_manager'
     ].includes(candidateRole as string);
-    if (isRegionalFunctionalLead) {
+    if (isRegionalDepartmentManager) {
         return [
             'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
-            'operations_manager', 'head_of_operations', 'operations_head',
-            'regional_manager',
-            'hr_manager', 'head_of_hr', 'hr_head', 'hr',
-            'procurement_manager', 'head_of_procurement', 'procurement_head',
-            'finance_manager', 'head_of_finance', 'finance_head',
-            'merchandising_manager', 'head_of_merchandising', 'merchandising_head',
-            'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head',
-            'head_of_audit', 'audit_head', 'head_of_it', 'it_head'
+            'head_of_operations',
+            'regional_operations_manager',
+            'head_of_hr', 'hr',
+            'head_of_procurement',
+            'head_of_finance',
+            'head_of_merchandising',
+            'head_of_supply_chain',
+            'head_of_audit', 'head_of_it',
         ].includes(userRole as string);
     }
 
@@ -368,36 +340,22 @@ export const MANAGERIAL_ROLES: readonly string[] = [
     'country_managing_director',
     'CEO',
     'ceo',
-    'regional_manager',
-    'regional_procurement_lead',
-    'regional_finance_officer',
-    'regional_merchandising_lead',
-    'regional_hr_officer',
-    'regional_logistics_lead',
-    'regional_security_supervisor',
+    'regional_operations_manager',
+    'regional_procurement_manager',
+    'regional_finance_manager',
+    'regional_merchandising_manager',
+    'regional_hr_manager',
+    'regional_logistics_manager',
+    'regional_security_manager',
     'head_of_operations',
-    'operations_head',
-    'operations_manager',
     'head_of_finance',
-    'finance_head',
-    'finance_manager',
     'head_of_hr',
-    'hr_head',
-    'hr_manager',
     'hr',
     'head_of_procurement',
-    'procurement_head',
-    'procurement_manager',
     'head_of_supply_chain',
-    'supply_chain_head',
-    'supply_chain_manager',
     'head_of_merchandising',
-    'merchandising_head',
-    'merchandising_manager',
     'head_of_it',
-    'it_head',
     'head_of_audit',
-    'audit_head',
     'store_manager',
     'warehouse_manager',
     'logistics_manager',

@@ -97,22 +97,22 @@ describe('Employee Mandatory Workplace Location & Segregation Rules', () => {
 
         it('requires executive and director roles to be deployed to Administration facilities', () => {
             expect(getRequiredSiteType('super_admin')).toBe('Administration');
-            expect(getRequiredSiteType('hr_manager')).toBe('Administration');
+            expect(getRequiredSiteType('head_of_hr')).toBe('Administration');
             expect(getRequiredSiteType('payroll_specialist')).toBe('Administration');
             expect(getRequiredSiteType('talent_recruiter')).toBe('Administration');
-            expect(getRequiredSiteType('finance_manager')).toBe('Administration');
-            expect(getRequiredSiteType('procurement_manager')).toBe('Administration');
+            expect(getRequiredSiteType('head_of_finance')).toBe('Administration');
+            expect(getRequiredSiteType('head_of_procurement')).toBe('Administration');
 
-            expect(canRoleBeAtSiteType('hr_manager', 'Administration')).toBe(true);
-            expect(canRoleBeAtSiteType('hr_manager', 'Store')).toBe(false);
-            expect(canRoleBeAtSiteType('hr_manager', 'Warehouse')).toBe(false);
+            expect(canRoleBeAtSiteType('head_of_hr', 'Administration')).toBe(true);
+            expect(canRoleBeAtSiteType('head_of_hr', 'Store')).toBe(false);
+            expect(canRoleBeAtSiteType('head_of_hr', 'Warehouse')).toBe(false);
 
-            const invalidHrAssignment = validateRoleSiteAssignment('hr_manager', 'Store');
+            const invalidHrAssignment = validateRoleSiteAssignment('head_of_hr', 'Store');
             expect(invalidHrAssignment).toContain('must be assigned to a Administration location');
         });
 
         it('auto-selects the appropriate site ID based on the candidates role requirements', () => {
-            const hqSiteId = autoSelectSiteForRole('hr_manager', mockSites);
+            const hqSiteId = autoSelectSiteForRole('head_of_hr', mockSites);
             expect(hqSiteId).toBe('site-hq-1');
 
             const storeSiteId = autoSelectSiteForRole('cashier', mockSites);

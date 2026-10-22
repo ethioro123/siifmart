@@ -5,6 +5,12 @@
 
 ## Active Features
 
+### Canonical HQ and Regional Department Roles (2026-10-22)
+- HQ department leadership uses only `head_of_*` role IDs. Regional leadership uses `regional_operations_manager` and the distinct `regional_*_manager` IDs for each department; active application and Edge Function code has no HQ manager role aliases.
+- Employee roles, Auth metadata, role validation, database authorization functions, and RLS policies use the same canonical IDs. Historic IDs occur only in the one-time migration that converted existing records and policies.
+- **Files**: `types/auth.ts`, `utils/roles.ts`, `utils/roleDisplay.ts`, `services/auth.rbac.ts`, `services/permissions.matrix.ts`, `supabase/functions/admin-reset-password/index.ts`, `migrations/20261022_canonical_hq_and_regional_manager_roles.sql`.
+- **Database**: Migration applied to staging (`utykzifrblpyxlvlknsm`) and production (`zdgzpxvorwinugjufkvb`); the admin password reset function was deployed to both.
+
 ### Database-Assigned Purchase Order Numbers (2026-10-22)
 - PO creation leaves the display number to the existing database sequence trigger and reads the saved number from the insert response. This prevents globally unique PO numbers from colliding when site-scoped reads hide other orders or submissions overlap.
 - **Files**: `services/purchase-orders.service.ts`, `migrations/20261022_atomic_po_number_allocation.sql`.
@@ -14,9 +20,9 @@
 - Upgraded SIIFMART's organizational role hierarchy from the 4-level system (`L1–L4`) to a 10-level enterprise command hierarchy (`L1–L10`):
   - **Level 1 (`L1 Global Exec`)**: Global Executive (`super_admin`, `CEO`, `ceo`)
   - **Level 2 (`L2 Country Exec`)**: Country Executive (`country_managing_director`, `admin`)
-  - **Level 3 (`L3 HQ Director`)**: Corporate HQ Directorate Heads (`head_of_operations`, `operations_manager`, `head_of_finance`, `finance_manager`, `head_of_hr`, `hr_manager`, `hr`, `head_of_procurement`, `procurement_manager`, `head_of_supply_chain`, `supply_chain_manager`, `head_of_merchandising`, `merchandising_manager`, `head_of_it`, `head_of_audit`)
-  - **Level 4 (`L4 Regional Dir`)**: Regional Territory Directors (`regional_manager`)
-  - **Level 5 (`L5 Regional Lead`)**: Regional Functional Leads (`regional_procurement_lead`, `regional_finance_officer`, `regional_merchandising_lead`, `regional_hr_officer`, `regional_logistics_lead`, `regional_security_supervisor`)
+  - **Level 3 (`L3 HQ Heads`)**: Corporate HQ Department Heads (`head_of_operations`, `head_of_finance`, `head_of_hr`, `head_of_procurement`, `head_of_supply_chain`, `head_of_merchandising`, `head_of_it`, `head_of_audit`)
+  - **Level 4 (`L4 Regional Operations`)**: Regional Operations Manager (`regional_operations_manager`)
+  - **Level 5 (`L5 Regional Departments`)**: Regional Department Managers (`regional_procurement_manager`, `regional_finance_manager`, `regional_merchandising_manager`, `regional_hr_manager`, `regional_logistics_manager`, `regional_security_manager`)
   - **Level 6 (`L6 Facility Captain`)**: Facility Captains (`store_manager`, `warehouse_manager`)
   - **Level 7 (`L7 Dept Manager`)**: Functional & Department Managers (`logistics_manager`, `inventory_manager`, `security_manager`, `dispatch_manager`, `cs_manager`, `vendor_relations_manager`, `manager`)
   - **Level 8 (`L8 Supervisor`)**: Deputy & Shift Supervisors (`assistant_manager`, `fleet_maintenance_supervisor`, `store_supervisor`, `shift_lead`)
@@ -51,7 +57,7 @@
 - Files: `pages/SalesHistory.tsx`, `pages/POSTerminal.tsx`, `pages/sales-history/components/SalesToolbar.tsx`, `pages/sales-history/components/SalesDetailModal.tsx`, `pages/sales-history/utils/salesCsv.ts`, `services/sales.service.ts`, `types/sales.ts`.
 
 ### HQ and Regional Merchandising Proposals (2026-10-21)
-- Added Merchandising Specialist and Regional Merchandising Lead to the role hierarchy and administration assignment flow.
+- Added Merchandising Specialist and Regional Merchandising Manager to the role hierarchy and administration assignment flow.
 - Scoped product, price, planogram, and campaign preparation to assigned countries or regions. Merchandising leads approve product and price proposals; Finance independently signs off below-floor prices.
 - Approval RPCs apply product proposals atomically. Campaign approvals record a plan; POS discount activation is a separate workflow.
 - Staging includes one HQ specialist, one regional specialist, and one regional merchandising lead in each country for quick-login testing; these fixtures are excluded from production.

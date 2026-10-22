@@ -34,11 +34,11 @@ import { CORPORATE_MERCHANDISING_POLICIES } from './policies/corporateMerchandis
  * - SOP-GOV-018: Manager & Supervisory Accountability Law ("The Captain Owns the Ship")
  * - SOP-MER-019: Non-Alcoholic / Halal Catalog Compliance Policy
  * - SOP-MGT-020: Regional Manager Operational Authority & Supervisory Accountability Policy
- * - SOP-MGT-021: Operations Manager Operational Authority & Accountability Policy
- * - SOP-MGT-022: Finance Manager Fiscal Authority & Financial Accountability Policy
- * - SOP-MGT-023: HR Manager Workforce Governance & Anti-Collusion Policy
- * - SOP-MGT-024: Procurement Manager Sourcing Authority & Supplier Accountability Policy
- * - SOP-MGT-025: Supply Chain Manager Logistics Authority & Network Accountability Policy
+ * - SOP-MGT-021: Head of Operations Operational Authority & Accountability Policy
+ * - SOP-MGT-022: Head of Finance Fiscal Authority & Financial Accountability Policy
+ * - SOP-MGT-023: Head of Human Resources Workforce Governance & Anti-Collusion Policy
+ * - SOP-MGT-024: Head of Procurement Sourcing Authority & Supplier Accountability Policy
+ * - SOP-MGT-025: Head of Supply Chain Logistics Authority & Network Accountability Policy
  * - SOP-MGT-026: Store Manager Retail Governance & Zero-Trust Accountability Policy
  * - SOP-MGT-027: Warehouse Manager Fulfillment Governance & Inventory Custody Policy
  * - SOP-MGT-028: Logistics Manager Transport Governance & Chain of Custody Policy

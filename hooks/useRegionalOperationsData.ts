@@ -125,13 +125,13 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     return getUserRegion(user, sites, employees);
   }, [user, sites, employees]);
 
-  // 2. HQ Executives (CEO / operations_manager) may inspect territories via URL param or lens
+  // 2. HQ Executives (CEO / head_of_operations) may inspect territories via URL param or lens
   const isHQExecutive = useMemo(() => {
     const role = (user?.role || '').toLowerCase();
     const scope = user?.scopeLevel || user?.scope_level || 'HQ';
     return scope === 'HQ' && [
       'super_admin', 'ceo', 'country_managing_director', 'admin',
-      'head_of_operations', 'operations_head', 'operations_manager'
+      'head_of_operations',
     ].includes(role);
   }, [user]);
 

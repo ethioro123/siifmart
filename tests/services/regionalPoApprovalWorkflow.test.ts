@@ -58,12 +58,12 @@ describe('Regional Autonomous PO Approval & National HQ Escalation', () => {
         } as any);
     });
 
-    it('allows Regional Procurement Lead to approve PO autonomously when total is within dynamic limit', async () => {
+    it('allows Regional Procurement Manager to approve PO autonomously when total is within dynamic limit', async () => {
         const result = await purchaseOrdersApprovalService.approve({
             poId: 'po-test-regional-1',
             approverId: 'emp-rm-1',
             approverName: 'Mombasa Procurement Lead',
-            approverRole: 'regional_procurement_lead',
+            approverRole: 'regional_procurement_manager',
             reasonCode: 'STANDARD_REPLENISHMENT' as any,
             notes: 'Within autonomous limit'
         });
@@ -71,7 +71,7 @@ describe('Regional Autonomous PO Approval & National HQ Escalation', () => {
         expect(result).toBeDefined();
     });
 
-    it('blocks Regional Procurement Lead when order exceeds dynamic autonomous PO limit and demands HQ sign-off', async () => {
+    it('blocks Regional Procurement Manager when order exceeds dynamic autonomous PO limit and demands HQ sign-off', async () => {
         // High-value order exceeding 150,000 KES limit
         const highValuePO: Partial<PurchaseOrder> = {
             ...mockRegionalPO,
@@ -84,7 +84,7 @@ describe('Regional Autonomous PO Approval & National HQ Escalation', () => {
                 poId: 'po-test-regional-1',
                 approverId: 'emp-rm-1',
                 approverName: 'Mombasa Procurement Lead',
-                approverRole: 'regional_procurement_lead',
+                approverRole: 'regional_procurement_manager',
                 reasonCode: 'STANDARD_REPLENISHMENT' as any
             })
         ).rejects.toThrow(/Autonomous Cap Exceeded.*requires National HQ sign-off/);

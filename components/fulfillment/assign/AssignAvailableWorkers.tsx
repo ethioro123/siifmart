@@ -58,7 +58,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                     <span className="bg-primary/10 text-primary font-mono tabular-nums px-2 py-0.5 rounded-full border border-primary/20 ml-1 text-xs">
                         {(() => {
                             let filtered = filteredEmployees.filter(e =>
-                                ['admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
+                                ['admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
                                 e.status?.toLowerCase() === 'active'
                             );
                             if (dispatchEmployeeFilter !== 'ALL') filtered = filtered.filter(e => e.role?.toLowerCase() === dispatchEmployeeFilter.toLowerCase());
@@ -120,7 +120,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
             <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
                 {(() => {
                     let filtered = filteredEmployees.filter(e =>
-                        ['admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
+                        ['admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
                         e.status?.toLowerCase() === 'active'
                     );
                     if (dispatchEmployeeFilter !== 'ALL') filtered = filtered.filter(e => e.role?.toLowerCase() === dispatchEmployeeFilter.toLowerCase());
@@ -288,7 +288,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                     );
                 })()}
                 {filteredEmployees.filter(e =>
-                    ['admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
+                    ['admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
                     e.status?.toLowerCase() === 'active'
                 ).length === 0 && (
                     <div className="text-center py-8 text-[var(--theme-text-muted)] text-sm">

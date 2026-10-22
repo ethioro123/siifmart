@@ -53,7 +53,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                         {pendingSalaryCount} Compensation Adjustment {pendingSalaryCount === 1 ? 'Proposal' : 'Proposals'} Awaiting Authorization
                      </h4>
                      <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
-                        Dual-Control 4-Eyes Governance: Compensation changes proposed by HR require Finance Manager or CEO co-signature.
+                        Dual-Control 4-Eyes Governance: Compensation changes proposed by HR require Head of Finance or CEO co-signature.
                      </p>
                   </div>
                </div>
@@ -105,7 +105,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                         Monthly Payroll Cycle ({pendingPayrollRun.period}) Awaiting HR Certification
                      </h4>
                      <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
-                        {userRole === 'regional_hr_officer'
+                        {userRole === 'regional_hr_manager'
                            ? 'Division of Responsibility: Regional HR continuously audits branch headcount, attendance, and leave. Country-wide payroll cycle certification is finalized at Country HQ / Managing Director.'
                            : 'Zero-Trust Multi-Department Governance: Staff roster, active attendance, and leave deductions must be certified by HQ HR or Managing Director before release.'}
                      </p>
@@ -120,7 +120,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                         <ShieldCheck size={12} />
                         <span>Regional Audit Attested</span>
                      </span>
-                  ) : userRole === 'regional_hr_officer' && onAttestRegionalPayroll ? (
+                  ) : userRole === 'regional_hr_manager' && onAttestRegionalPayroll ? (
                      <button
                         type="button"
                         onClick={onAttestRegionalPayroll}
@@ -137,7 +137,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                   >
                      Details in Financials
                   </button>
-                  {canViewAll && (userRole === 'head_of_hr' || userRole === 'hr_head' || userRole === 'hr' || userRole === 'hr_manager' || userRole === 'country_managing_director' || userRole === 'admin' || userRole === 'super_admin' || userRole === 'CEO') && (
+                  {canViewAll && (userRole === 'head_of_hr' || userRole === 'head_of_hr' || userRole === 'hr' || userRole === 'head_of_hr' || userRole === 'country_managing_director' || userRole === 'admin' || userRole === 'super_admin' || userRole === 'CEO') && (
                      <button
                         type="button"
                         onClick={onCertifyPayroll}

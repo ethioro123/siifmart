@@ -80,8 +80,8 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
     try {
       await expensesService.approve(expense.id, {
         id: user.id,
-        name: user.name || 'Regional Finance Officer',
-        role: user.role || 'regional_finance_officer'
+        name: user.name || 'Regional Finance Manager',
+        role: user.role || 'regional_finance_manager'
       });
       setPendingExpenses(prev => prev.filter(e => e.id !== expense.id));
       addNotification?.('success', `Petty cash request of ${formatCompactNumber(expense.amount, { currency: currencySymbol })} approved autonomously.`);

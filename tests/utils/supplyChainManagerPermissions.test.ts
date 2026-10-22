@@ -4,54 +4,54 @@ import { canAccessModule, canViewAllSites } from '../../utils/permissions';
 import { canEmployRole, canViewCostPrice } from '../../utils/roles';
 import { canWorkerPerformJob } from '../../utils/fulfillmentRoles';
 
-describe('Supply Chain Manager Role & Network Logistics Engine (SOP-MGT-025)', () => {
+describe('Head of Supply Chain Role & Network Logistics Engine (SOP-MGT-025)', () => {
     describe('Module & Network Access Controls', () => {
-        it('allows supply_chain_manager to access warehouse, inventory, and procurement modules', () => {
-            expect(canAccessModule('supply_chain_manager', 'warehouse')).toBe(true);
-            expect(canAccessModule('supply_chain_manager', 'inventory')).toBe(true);
-            expect(canAccessModule('supply_chain_manager', 'procurement')).toBe(true);
+        it('allows head_of_supply_chain to access warehouse, inventory, and procurement modules', () => {
+            expect(canAccessModule('head_of_supply_chain', 'warehouse')).toBe(true);
+            expect(canAccessModule('head_of_supply_chain', 'inventory')).toBe(true);
+            expect(canAccessModule('head_of_supply_chain', 'procurement')).toBe(true);
         });
 
-        it('blocks supply_chain_manager from cashier POS and system settings modules', () => {
-            expect(canAccessModule('supply_chain_manager', 'pos')).toBe(false);
-            expect(canAccessModule('supply_chain_manager', 'settings')).toBe(false);
+        it('blocks head_of_supply_chain from cashier POS and system settings modules', () => {
+            expect(canAccessModule('head_of_supply_chain', 'pos')).toBe(false);
+            expect(canAccessModule('head_of_supply_chain', 'settings')).toBe(false);
         });
 
         it('grants enterprise-wide network visibility across all sites and facilities', () => {
-            expect(canViewAllSites('supply_chain_manager')).toBe(true);
-            expect(canViewCostPrice('supply_chain_manager')).toBe(true);
+            expect(canViewAllSites('head_of_supply_chain')).toBe(true);
+            expect(canViewCostPrice('head_of_supply_chain')).toBe(true);
         });
     });
 
     describe('Logistics & Inventory Flow Permissions', () => {
         it('grants macro inventory transfer, dispatch, and staging permissions', () => {
-            expect(authService.checkPermission('supply_chain_manager', 'inventory.transfer')).toBe(true);
-            expect(authService.checkPermission('supply_chain_manager', 'warehouse.dispatch')).toBe(true);
-            expect(authService.checkPermission('supply_chain_manager', 'warehouse.putaway')).toBe(true);
-            expect(authService.checkPermission('supply_chain_manager', 'inventory.view')).toBe(true);
-            expect(authService.checkPermission('supply_chain_manager', 'warehouse.view')).toBe(true);
+            expect(authService.checkPermission('head_of_supply_chain', 'inventory.transfer')).toBe(true);
+            expect(authService.checkPermission('head_of_supply_chain', 'warehouse.dispatch')).toBe(true);
+            expect(authService.checkPermission('head_of_supply_chain', 'warehouse.putaway')).toBe(true);
+            expect(authService.checkPermission('head_of_supply_chain', 'inventory.view')).toBe(true);
+            expect(authService.checkPermission('head_of_supply_chain', 'warehouse.view')).toBe(true);
         });
 
         it('blocks live cashier till operations (Zero Live Till Operation)', () => {
-            expect(authService.checkPermission('supply_chain_manager', 'pos.create_sale')).toBe(false);
-            expect(authService.checkPermission('supply_chain_manager', 'pos.void_sale')).toBe(false);
-            expect(authService.checkPermission('supply_chain_manager', 'pos.refund')).toBe(false);
+            expect(authService.checkPermission('head_of_supply_chain', 'pos.create_sale')).toBe(false);
+            expect(authService.checkPermission('head_of_supply_chain', 'pos.void_sale')).toBe(false);
+            expect(authService.checkPermission('head_of_supply_chain', 'pos.refund')).toBe(false);
         });
 
         it('blocks unilateral retail shelf price alterations (Merchandising remit)', () => {
-            expect(authService.checkPermission('supply_chain_manager', 'pricing.edit')).toBe(false);
-            expect(authService.checkPermission('supply_chain_manager', 'pricing.approve_promo')).toBe(false);
+            expect(authService.checkPermission('head_of_supply_chain', 'pricing.edit')).toBe(false);
+            expect(authService.checkPermission('head_of_supply_chain', 'pricing.approve_promo')).toBe(false);
         });
     });
 
     describe('Supervisory Sourcing & Logistics Hiring Authority (canEmployRole)', () => {
-        it('authorizes supply_chain_manager to hire Logistics Managers, Dispatch Managers, and fleet staff', () => {
-            expect(canEmployRole('supply_chain_manager', 'logistics_manager')).toBe(true);
-            expect(canEmployRole('supply_chain_manager', 'dispatch_manager')).toBe(true);
-            expect(canEmployRole('supply_chain_manager', 'driver')).toBe(true);
-            expect(canEmployRole('supply_chain_manager', 'forklift_operator')).toBe(true);
-            expect(canEmployRole('supply_chain_manager', 'replenishment_planner')).toBe(true);
-            expect(canEmployRole('supply_chain_manager', 'fleet_maintenance_supervisor')).toBe(true);
+        it('authorizes head_of_supply_chain to hire Logistics Managers, Dispatch Managers, and fleet staff', () => {
+            expect(canEmployRole('head_of_supply_chain', 'logistics_manager')).toBe(true);
+            expect(canEmployRole('head_of_supply_chain', 'dispatch_manager')).toBe(true);
+            expect(canEmployRole('head_of_supply_chain', 'driver')).toBe(true);
+            expect(canEmployRole('head_of_supply_chain', 'forklift_operator')).toBe(true);
+            expect(canEmployRole('head_of_supply_chain', 'replenishment_planner')).toBe(true);
+            expect(canEmployRole('head_of_supply_chain', 'fleet_maintenance_supervisor')).toBe(true);
         });
 
         it('authorizes department managers to hire their specialized team members', () => {
@@ -59,13 +59,13 @@ describe('Supply Chain Manager Role & Network Logistics Engine (SOP-MGT-025)', (
             expect(canEmployRole('inventory_manager', 'replenishment_planner')).toBe(true);
         });
 
-        it('blocks supply_chain_manager from hiring superiors or Level 2 peers', () => {
-            expect(canEmployRole('supply_chain_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('supply_chain_manager', 'regional_manager')).toBe(false);
-            expect(canEmployRole('supply_chain_manager', 'operations_manager')).toBe(false);
-            expect(canEmployRole('supply_chain_manager', 'finance_manager')).toBe(false);
-            expect(canEmployRole('supply_chain_manager', 'hr_manager')).toBe(false);
-            expect(canEmployRole('supply_chain_manager', 'supply_chain_manager')).toBe(false);
+        it('blocks head_of_supply_chain from hiring superiors or Level 2 peers', () => {
+            expect(canEmployRole('head_of_supply_chain', 'super_admin')).toBe(false);
+            expect(canEmployRole('head_of_supply_chain', 'regional_operations_manager')).toBe(false);
+            expect(canEmployRole('head_of_supply_chain', 'head_of_operations')).toBe(false);
+            expect(canEmployRole('head_of_supply_chain', 'head_of_finance')).toBe(false);
+            expect(canEmployRole('head_of_supply_chain', 'head_of_hr')).toBe(false);
+            expect(canEmployRole('head_of_supply_chain', 'head_of_supply_chain')).toBe(false);
         });
     });
 

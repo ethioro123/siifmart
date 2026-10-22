@@ -26,9 +26,9 @@ export default function WMSSettings() {
     // Store-level staff (store_manager, cashier, picker) are unconditionally blocked.
     const WMS_ALLOWED_ROLES = [
         'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
-        'head_of_operations', 'operations_head', 'operations_manager',
-        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
-        'regional_manager', 'warehouse_manager',
+        'head_of_operations',
+        'head_of_supply_chain',
+        'regional_operations_manager', 'warehouse_manager',
     ];
     const canConfigureWMS = WMS_ALLOWED_ROLES.includes(user?.role || '');
     const isHQAdmin = isAdmin(user?.role as Parameters<typeof isAdmin>[0]);

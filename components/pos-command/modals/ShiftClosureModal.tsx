@@ -34,7 +34,7 @@ export const ShiftClosureModal: React.FC = () => {
         'super_admin',
         'admin',
         'store_manager',
-        'operations_manager',
+        'head_of_operations',
         'ceo'
     ].includes(user?.role?.toLowerCase() || '');
 
@@ -89,7 +89,7 @@ export const ShiftClosureModal: React.FC = () => {
 
         // 4-Eyes Principle: Any authorized store supervisor/manager staff PIN
         const managerStaff = (employees || []).filter(e =>
-            ['super_admin', 'admin', 'store_manager', 'shift_lead', 'operations_manager', 'regional_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
+            ['super_admin', 'admin', 'store_manager', 'shift_lead', 'head_of_operations', 'regional_operations_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
         );
         const matchesStaffPin = managerStaff.some(m => matchStaffPin(m.code, entered));
 

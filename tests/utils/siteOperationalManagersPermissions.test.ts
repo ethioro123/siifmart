@@ -32,8 +32,8 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
             expect(canEmployRole('logistics_manager', 'forklift_operator')).toBe(true);
 
             expect(canEmployRole('logistics_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('logistics_manager', 'operations_manager')).toBe(false);
-            expect(canEmployRole('logistics_manager', 'supply_chain_manager')).toBe(false);
+            expect(canEmployRole('logistics_manager', 'head_of_operations')).toBe(false);
+            expect(canEmployRole('logistics_manager', 'head_of_supply_chain')).toBe(false);
             expect(canEmployRole('logistics_manager', 'logistics_manager')).toBe(false);
         });
 
@@ -70,7 +70,7 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
             expect(canEmployRole('inventory_manager', 'stock_clerk')).toBe(true);
 
             expect(canEmployRole('inventory_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('inventory_manager', 'operations_manager')).toBe(false);
+            expect(canEmployRole('inventory_manager', 'head_of_operations')).toBe(false);
             expect(canEmployRole('inventory_manager', 'inventory_manager')).toBe(false);
         });
     });
@@ -95,7 +95,7 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
         it('authorizes hiring of loss prevention staff', () => {
             expect(canEmployRole('security_manager', 'loss_prevention')).toBe(true);
             expect(canEmployRole('security_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('security_manager', 'operations_manager')).toBe(false);
+            expect(canEmployRole('security_manager', 'head_of_operations')).toBe(false);
             expect(canEmployRole('security_manager', 'store_manager')).toBe(false);
         });
     });
@@ -126,7 +126,7 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
             expect(canEmployRole('dispatch_manager', 'dispatcher')).toBe(true);
 
             expect(canEmployRole('dispatch_manager', 'super_admin')).toBe(false);
-            expect(canEmployRole('dispatch_manager', 'operations_manager')).toBe(false);
+            expect(canEmployRole('dispatch_manager', 'head_of_operations')).toBe(false);
             expect(canEmployRole('dispatch_manager', 'logistics_manager')).toBe(false);
             expect(canEmployRole('dispatch_manager', 'dispatch_manager')).toBe(false);
         });
@@ -161,11 +161,11 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
                 if (isWarehouse) {
                     if (['pos', 'sales', 'customers', 'pricing', 'finance', 'settings'].includes(item.section)) isAllowed = false;
                     if (item.to === '/network-inventory' || item.to === '/roadmap') isAllowed = false;
-                    if (item.to === '/admin' && !isSuperAdminOrCeo && !['regional_manager', 'operations_manager'].includes(userRole)) isAllowed = false;
+                    if (item.to === '/admin' && !isSuperAdminOrCeo && !['regional_operations_manager', 'head_of_operations'].includes(userRole)) isAllowed = false;
                 } else if (isStore) {
                     if (['warehouse', 'procurement', 'pricing', 'finance', 'settings'].includes(item.section)) isAllowed = false;
                     if (item.to === '/network-inventory' || item.to === '/roadmap') isAllowed = false;
-                    if (item.to === '/admin' && !isSuperAdminOrCeo && !['regional_manager', 'operations_manager'].includes(userRole)) isAllowed = false;
+                    if (item.to === '/admin' && !isSuperAdminOrCeo && !['regional_operations_manager', 'head_of_operations'].includes(userRole)) isAllowed = false;
                 } else if (isHQ) {
                     if (['warehouse', 'pos', 'procurement'].includes(item.section) || item.to === '/sales') isAllowed = false;
                     if (item.to === '/inventory') isAllowed = false;

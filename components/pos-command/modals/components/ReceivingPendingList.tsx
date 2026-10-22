@@ -221,7 +221,7 @@ export const ReceivingPendingList: React.FC = () => {
 
                                                 const WAREHOUSE_AUTHORITY_ROLES = [
                                                     'super_admin', 'admin', 'warehouse_manager', 'dispatch_manager',
-                                                    'operations_manager', 'regional_manager', 'dispatcher',
+                                                    'head_of_operations', 'regional_operations_manager', 'dispatcher',
                                                     'store_manager', 'inventory_manager', 'supervisor'
                                                 ];
                                                 const userRole = (user?.role || '').toLowerCase();

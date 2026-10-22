@@ -93,7 +93,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         // Map common aliases to internal role keys used in ACTION_PERMISSIONS
         let mappedRole = rawNormalized;
         if (rawNormalized === 'ceo') mappedRole = 'super_admin';
-        else if (rawNormalized === 'procurement') mappedRole = 'procurement_manager';
+        else if (rawNormalized === 'procurement') mappedRole = 'head_of_procurement';
 
         // Resolve location: use preset on explicit login, check sessionStorage/localStorage, or fallback to active session
         let location = presetLocation;
