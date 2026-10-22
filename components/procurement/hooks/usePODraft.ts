@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { POItem } from '../../../types';
+import type { POItemFormDraft } from '../POItemForm';
 import { logger } from '../../../utils/logger';
 
 export interface PODraftPayload {
+    itemForm?: POItemFormDraft | null;
+    editingItemIndex?: number | null;
     isManualVendor: boolean;
     manualVendorName: string;
     newPOSupplier: string;
@@ -25,6 +28,7 @@ export interface PODraftPayload {
 export interface PODraftMeta {
     savedAt: string;
     itemCount: number;
+    itemInProgress?: boolean;
     supplierDisplay: string;
 }
 
@@ -57,7 +61,7 @@ export function usePODraft({
     const storageKey = `siifmart_po_draft_${(countryCode || 'ET').toUpperCase()}_${userId || 'default'}`;
 
     const readStoredDraft = useCallback((): StoredPODraft | null => {
-        if (typeof window === 'undefined' || !enabled || isEditMode) return null;
+        if (typeof window === 'undefined' || isEditMode) return null;
         try {
             const raw = localStorage.getItem(storageKey);
             if (!raw) return null;
@@ -70,7 +74,7 @@ export function usePODraft({
             logger.warn('usePODraft', 'Failed reading PO draft from localStorage', { error: String(err) });
             return null;
         }
-    }, [storageKey, enabled, isEditMode, countryCode]);
+    }, [storageKey, isEditMode, countryCode]);
 
     const discardDraft = useCallback(() => {
         if (typeof window === 'undefined') return;
@@ -85,10 +89,11 @@ export function usePODraft({
         }
     }, [storageKey]);
 
-    const saveDraft = useCallback((payload: PODraftPayload, supplierNameOverride?: string) => {
-        if (typeof window === 'undefined' || !enabled || isEditMode) return;
+    const saveDraft = useCallback((payload: PODraftPayload, supplierNameOverride?: string, force = false): 'saved' | 'empty' | 'failed' => {
+        if (typeof window === 'undefined' || isEditMode) return 'failed';
+        if (!enabled && !force) return 'empty';
 
-        const hasContent =
+        const hasContent = force || Boolean(payload.itemForm) ||
             (payload.newPOItems && payload.newPOItems.length > 0) ||
             Boolean(payload.newPOSupplier) ||
             Boolean(payload.manualVendorName?.trim()) ||
@@ -97,7 +102,7 @@ export function usePODraft({
 
         if (!hasContent) {
             discardDraft();
-            return;
+            return 'empty';
         }
 
         try {
@@ -110,6 +115,7 @@ export function usePODraft({
             const meta: PODraftMeta = {
                 savedAt: new Date().toISOString(),
                 itemCount: payload.newPOItems?.length || 0,
+                itemInProgress: Boolean(payload.itemForm),
                 supplierDisplay
             };
 
@@ -123,14 +129,16 @@ export function usePODraft({
             localStorage.setItem(storageKey, JSON.stringify(draftToStore));
             setHasDraft(true);
             setDraftMeta(meta);
+            return 'saved';
         } catch (err) {
             logger.warn('usePODraft', 'Failed saving PO draft to localStorage', { error: String(err) });
+            return 'failed';
         }
     }, [storageKey, enabled, isEditMode, countryCode, userId, discardDraft]);
 
     // Check for draft when modal opens
     useEffect(() => {
-        if (isOpen && !isEditMode && enabled) {
+        if (isOpen && !isEditMode) {
             const stored = readStoredDraft();
             if (stored) {
                 setHasDraft(true);
@@ -144,7 +152,7 @@ export function usePODraft({
         } else if (!isOpen) {
             setIsRestoredBannerVisible(false);
         }
-    }, [isOpen, isEditMode, enabled, readStoredDraft]);
+    }, [isOpen, isEditMode, readStoredDraft]);
 
     const dismissBanner = useCallback(() => {
         setIsRestoredBannerVisible(false);

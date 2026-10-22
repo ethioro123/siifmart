@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle } from 'react';
 import { POItem, Product } from '../../types';
 import { Plus } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
@@ -25,6 +25,26 @@ const createDefaultCustomAttributes = () => ({
     categorySpecific: {} as Record<string, any>
 });
 
+export interface POItemFormDraft {
+    productType: 'catalog' | 'new';
+    currentProductToAdd: string;
+    searchTerm: string;
+    customItemName: string;
+    customItemBrand: string;
+    selectedMainCategory: string;
+    customItemSize: string;
+    customItemUnit: string;
+    customItemImage: string;
+    customAttributes: ReturnType<typeof createDefaultCustomAttributes>;
+    currentQty: number;
+    currentCost: number;
+    currentRetailPrice: number;
+}
+
+export interface POItemFormHandle {
+    getDraft: () => POItemFormDraft | null;
+}
+
 interface POItemFormProps {
     products: Product[];
     existingItems?: POItem[];
@@ -36,12 +56,14 @@ interface POItemFormProps {
     onCancelEdit: () => void;
     editingItem: POItem | null;
     onDirtyChange?: (isDirty: boolean) => void;
+    restoredDraft?: POItemFormDraft | null;
+    onDraftChange?: () => void;
 }
 
-export const POItemForm: React.FC<POItemFormProps> = ({
+export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
     products, existingItems = [], initialProduct = null, country, currencySymbol = 'ETB',
-    onAdd, onUpdate, onCancelEdit, editingItem, onDirtyChange
-}) => {
+    onAdd, onUpdate, onCancelEdit, editingItem, onDirtyChange, restoredDraft, onDraftChange
+}, ref) => {
     const { showToast } = useStore();
 
     const [productType, setProductType] = useState<'catalog' | 'new'>('catalog');
@@ -61,6 +83,26 @@ export const POItemForm: React.FC<POItemFormProps> = ({
     const [currentCost, setCurrentCost] = useState(0);
     const [currentRetailPrice, setCurrentRetailPrice] = useState(0);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        onDraftChange?.();
+    }, [productType, currentProductToAdd, searchTerm, customItemName, customItemBrand,
+        selectedMainCategory, customItemSize, customItemUnit, customItemImage,
+        customAttributes, currentQty, currentCost, currentRetailPrice, onDraftChange]);
+
+    useImperativeHandle(ref, () => ({
+        getDraft: () => {
+            if (productType === 'catalog' && !currentProductToAdd && !searchTerm.trim() && !customItemName.trim() &&
+                !customItemBrand.trim() && !selectedMainCategory && !customItemSize && !customItemUnit &&
+                currentQty <= 0 && currentCost <= 0 && currentRetailPrice <= 0 &&
+                JSON.stringify(customAttributes) === JSON.stringify(createDefaultCustomAttributes())) return null;
+            return {
+                productType, currentProductToAdd, searchTerm, customItemName, customItemBrand,
+                selectedMainCategory, customItemSize, customItemUnit, customItemImage,
+                customAttributes, currentQty, currentCost, currentRetailPrice
+            };
+        }
+    }));
 
     const selectedCatalogProduct = productType === 'catalog' ? products.find(p => p.id === currentProductToAdd) : null;
     const activePackaging = selectedCatalogProduct?.customAttributes?.packaging || (selectedCatalogProduct as any)?.custom_attributes?.packaging || customAttributes.packaging;
@@ -205,6 +247,23 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             resetForm();
         }
     }, [editingItem]);
+
+    useEffect(() => {
+        if (!restoredDraft) return;
+        setProductType(restoredDraft.productType);
+        setCurrentProductToAdd(restoredDraft.currentProductToAdd);
+        setSearchTerm(restoredDraft.searchTerm);
+        setCustomItemName(restoredDraft.customItemName);
+        setCustomItemBrand(restoredDraft.customItemBrand);
+        setSelectedMainCategory(restoredDraft.selectedMainCategory);
+        setCustomItemSize(restoredDraft.customItemSize);
+        setCustomItemUnit(restoredDraft.customItemUnit);
+        setCustomItemImage(restoredDraft.customItemImage);
+        setCustomAttributes(restoredDraft.customAttributes);
+        setCurrentQty(restoredDraft.currentQty);
+        setCurrentCost(restoredDraft.currentCost);
+        setCurrentRetailPrice(restoredDraft.currentRetailPrice);
+    }, [restoredDraft]);
 
     const handleAddItem = async () => {
         setErrors({});
@@ -395,4 +454,4 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             </div>
         </div>
     );
-};
+});

@@ -6,6 +6,7 @@
 
 | Symptom | Likely Cause | Files to Check | Fix Pattern |
 |---------|-------------|----------------|-------------|
+| Unfinished PO loses recent fields after closing | Debounced browser draft save did not run before the modal closed, or the active item form was omitted | `components/procurement/CreatePOModal.tsx`, `components/procurement/POItemForm.tsx`, `components/procurement/hooks/usePODraft.ts` | Save the current form and active item synchronously on pause; close only after storage succeeds, then restore both when reopened. |
 | Data not refreshing after mutation | Missing query invalidation | Hook in `/hooks/` | Add `queryClient.invalidateQueries()` in `onSuccess` |
 | Stale data showing | React Query cache | `contexts/DataContext.tsx`, hook | Check `staleTime` and invalidation |
 | Data from wrong site/country | Missing or incorrect trusted scope | Query/service and RLS policy | Verify authorized site and country scope at the database/server boundary; client filtering alone is insufficient |

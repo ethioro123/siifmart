@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Modal from '../../components/Modal';
 import { PurchaseOrder, POItem, Product } from '../../types';
 import { getCountryProfile, type Country } from '../../utils/localization';
@@ -6,7 +6,7 @@ import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { purchaseOrdersService } from '../../services/supabase.service';
 import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations';
-import { POItemForm } from './POItemForm';
+import { POItemForm, type POItemFormDraft, type POItemFormHandle } from './POItemForm';
 import { POSupplierLogistics } from './POSupplierLogistics';
 import { POItemsTable } from './POItemsTable';
 import { POTotalsSummary } from './POTotalsSummary';
@@ -65,7 +65,13 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const [poRequestedBy, setPoRequestedBy] = useState('');
     const [newPOItems, setNewPOItems] = useState<POItem[]>([]);
     const [fullEditingIndex, setFullEditingIndex] = useState<number | null>(null);
+    const [restoredItemFormDraft, setRestoredItemFormDraft] = useState<POItemFormDraft | null>(null);
+    const [itemFormKey, setItemFormKey] = useState(0);
+    const [draftRevision, setDraftRevision] = useState(0);
+    const onItemFormChange = useCallback(() => setDraftRevision(revision => revision + 1), []);
+    const itemFormRef = useRef<POItemFormHandle>(null);
     const hydratedKeyRef = useRef<string | null>(null);
+    const pendingDestinationSiteIdsRef = useRef<string[]>([]);
     const { countryWarehouses, allSuppliers, effectiveProducts } = useCreatePOData({
         isOpen, activeCountry, allProducts: allProducts || [], contextSuppliers,
         sites, countrySites: countrySites || [], destinationSiteIds, isRegionalUser, activeRegionCode
@@ -96,11 +102,32 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         setDestinationSiteIds([]); setIsSiteDropdownOpen(false); setExpectedDate('');
         setPoDelivery({ tempReq: 'Ambient', shelfLife: '', dockSlot: '' });
         setQuantityDistribution('per-store'); setFullEditingIndex(null); setHasUnsavedItemDraft(false);
+        setRestoredItemFormDraft(null);
+        pendingDestinationSiteIdsRef.current = [];
+    };
+
+    const handlePause = () => {
+        if (isSubmitting || createPOMutation.isPending || updatePOMutation.isPending) return;
+        if (isEditMode) { onClose(); return; }
+        const supplierName = isManualVendor ? manualVendorName : allSuppliers.find(s => s.id === newPOSupplier)?.name;
+        const result = saveDraft({
+            isManualVendor, manualVendorName, newPOSupplier, destinationSiteIds,
+            expectedDate, ...poDelivery, poPriority, quantityDistribution,
+            newPOItems, poNotes, paymentTerms, incoterms, shippingCost, discountRate, taxRate,
+            itemForm: itemFormRef.current?.getDraft() || null, editingItemIndex: fullEditingIndex
+        }, supplierName, true);
+        if (result !== 'saved') {
+            showToast('Could not save the PO draft. Keep this window open and try again.', 'error');
+            return;
+        }
+        showToast('PO draft saved. You can resume it later.', 'success');
+        onClose();
     };
 
     const handleDiscardDraft = () => {
         discardDraft();
         resetPOForm();
+        setItemFormKey(key => key + 1);
         const defaultSiteId = user?.siteId && countryWarehouses.find(w => w.id === user.siteId)
             ? user.siteId
             : (countryWarehouses[0]?.id || '');
@@ -116,11 +143,12 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             return;
         }
 
-        const sessionKey = `${editingPO?.id || 'create'}-${initialSupplierId || ''}-${initialProduct?.id || ''}-${Boolean(initialDraft)}-${activeCountry}`;
+        const sessionKey = `${editingPO?.id || 'create'}-${initialSupplierId || ''}-${initialProduct?.id || ''}-${Boolean(initialDraft)}-${activeCountry}-${user?.id || ''}`;
         if (hydratedKeyRef.current === sessionKey) {
-            if (destinationSiteIds.length === 0 && countryWarehouses.length > 0) {
-                const defaultSiteId = (user?.siteId && countryWarehouses.find(w => w.id === user.siteId)?.id) || countryWarehouses[0].id;
-                setDestinationSiteIds([defaultSiteId]);
+            if (countryWarehouses.length > 0 && (pendingDestinationSiteIdsRef.current.length > 0 || destinationSiteIds.length === 0)) {
+                const restoredSites = pendingDestinationSiteIdsRef.current.filter(id => countryWarehouses.some(w => w.id === id));
+                pendingDestinationSiteIdsRef.current = [];
+                setDestinationSiteIds(restoredSites.length ? restoredSites : [(user?.siteId && countryWarehouses.find(w => w.id === user.siteId)?.id) || countryWarehouses[0].id]);
             }
             return;
         }
@@ -174,6 +202,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             const storedDraft = readStoredDraft();
             if (storedDraft?.data) {
                 const d = storedDraft.data;
+                pendingDestinationSiteIdsRef.current = countryWarehouses.length ? [] : (d.destinationSiteIds || []);
                 setIsManualVendor(Boolean(d.isManualVendor));
                 setManualVendorName(d.manualVendorName || '');
                 setNewPOSupplier(initialSupplierId || d.newPOSupplier || '');
@@ -184,6 +213,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 setPoPriority(d.poPriority || 'Normal');
                 setQuantityDistribution(d.quantityDistribution || 'per-store');
                 setNewPOItems(d.newPOItems || []);
+                setFullEditingIndex(typeof d.editingItemIndex === 'number' && d.editingItemIndex >= 0 && d.editingItemIndex < (d.newPOItems || []).length ? d.editingItemIndex : null);
+                setRestoredItemFormDraft(d.itemForm || null);
                 setPoNotes(d.poNotes || '');
                 setPaymentTerms(d.paymentTerms || '');
                 setIncoterms(d.incoterms || '');
@@ -217,7 +248,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             saveDraft({
                 isManualVendor, manualVendorName, newPOSupplier, destinationSiteIds,
                 expectedDate, ...poDelivery, poPriority, quantityDistribution,
-                newPOItems, poNotes, paymentTerms, incoterms, shippingCost, discountRate, taxRate
+                newPOItems, poNotes, paymentTerms, incoterms, shippingCost, discountRate, taxRate,
+                itemForm: itemFormRef.current?.getDraft() || null, editingItemIndex: fullEditingIndex
             }, supplierDisplayName);
         }, 350);
         return () => clearTimeout(timer);
@@ -225,7 +257,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         isOpen, isEditMode, enableAutoSave, isManualVendor, manualVendorName,
         newPOSupplier, destinationSiteIds, expectedDate, poDelivery, poPriority,
         quantityDistribution, newPOItems, poNotes, paymentTerms, incoterms,
-        shippingCost, discountRate, taxRate, allSuppliers, saveDraft
+        shippingCost, discountRate, taxRate, fullEditingIndex, draftRevision, allSuppliers, saveDraft
     ]);
 
     const handleAddItem = (item: POItem) => {
@@ -352,14 +384,14 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     return (
         <Modal
             isOpen={isOpen}
-            onClose={onClose}
+            onClose={handlePause}
             title={isEditMode ? "Edit Purchase Order" : "Initiate Purchase Order"}
             size="4xl"
             footer={
                 <CreatePOFooter
                     currencySymbol={currencySymbol}
                     poTotal={poTotal}
-                    onClose={onClose}
+                    onClose={handlePause}
                     onCreatePO={handleCreatePO}
                     isPendingAction={isPendingAction}
                     isEditMode={isEditMode}
@@ -400,6 +432,10 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 <div className="h-[1px] w-full bg-[var(--theme-border-subtle)]" />
 
                 <POItemForm
+                    key={itemFormKey}
+                    ref={itemFormRef}
+                    restoredDraft={restoredItemFormDraft}
+                    onDraftChange={onItemFormChange}
                     products={effectiveProducts}
                     existingItems={newPOItems}
                     initialProduct={initialProduct}

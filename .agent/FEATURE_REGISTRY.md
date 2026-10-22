@@ -5,6 +5,11 @@
 
 ## Active Features
 
+### Purchase Order Pause and Resume (2026-10-22)
+- Closing an unfinished new PO now saves the latest form values immediately, including an item still being entered or edited; the form closes only after the browser confirms storage.
+- Resuming restores the supplier, destinations, quantities, totals, and in-progress item. A failed browser save leaves the form open with an error; explicit draft deletion starts a fresh item form.
+- **Files**: `components/procurement/CreatePOModal.tsx`, `components/procurement/POItemForm.tsx`, `components/procurement/hooks/usePODraft.ts`, `components/procurement/CreatePOFooter.tsx`, `components/procurement/PODraftBanner.tsx`.
+
 ### Canonical HQ and Regional Department Roles (2026-10-22)
 - HQ department leadership uses only `head_of_*` role IDs. Regional leadership uses `regional_operations_manager` and the distinct `regional_*_manager` IDs for each department; active application and Edge Function code has no HQ manager role aliases.
 - Employee roles, Auth metadata, role validation, database authorization functions, and RLS policies use the same canonical IDs. Historic IDs occur only in the one-time migration that converted existing records and policies.

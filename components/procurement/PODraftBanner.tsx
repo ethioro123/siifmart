@@ -44,11 +44,12 @@ export const PODraftBanner: React.FC<PODraftBannerProps> = ({
                             In-Progress Draft Restored
                         </span>
                         <span className="text-[10px] font-semibold font-mono px-2 py-0.5 rounded-full bg-[var(--theme-bg-panel)] text-[var(--theme-text-secondary)] border border-[var(--theme-border-subtle)]">
-                            Auto-Saved
+                            Saved Locally
                         </span>
                     </div>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-0.5 truncate">
-                        Saved {timeAgo} • {meta.itemCount} {meta.itemCount === 1 ? 'item' : 'items'}
+                        Saved {timeAgo} • {meta.itemCount} {meta.itemCount === 1 ? 'added item' : 'added items'}
+                        {meta.itemInProgress ? ' • item in progress' : ''}
                         {meta.supplierDisplay && meta.supplierDisplay !== 'Unspecified' ? ` • ${meta.supplierDisplay}` : ''}
                     </p>
                 </div>

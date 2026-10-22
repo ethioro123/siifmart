@@ -45,7 +45,7 @@ export const CreatePOFooter: React.FC<CreatePOFooterProps> = ({
                     onClick={onClose}
                     className="px-5 py-2.5 rounded-full text-xs font-semibold transition-colors text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-pointer active:scale-[0.98]"
                 >
-                    Cancel
+                    {isEditMode ? 'Cancel' : 'Pause & Save'}
                 </button>
                 <button
                     onClick={onCreatePO}
