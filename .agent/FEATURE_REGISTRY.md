@@ -8,6 +8,7 @@
 ### Functional Reporting and HR-Reviewed Hiring (2026-10-23)
 - Country functional directors report through their Group functional executives and coordinate with the Country Managing Director; regional retail and regional supply chain remain separate lines. The Group CIO owns the technology chain, the Group CMO sits under the Group CCO, and country compliance reports through the Group CLCO while audit remains independent under the Board/CAE.
 - Hiring eligibility follows the candidate role's primary reporting line. Pending onboarding proposals require sign-off from HR roles or the Group CEO; regional HR approvals continue to be checked against the existing regional boundary.
+- Until Board appointments are supported in the app, the Group CEO may appoint all Group C-suite roles, including the Chief Audit Executive.
 - These hiring checks are enforced in the application workflow. No database/RLS policy change is included in this update.
 - **Files**: `components/org-chart/hooks/orgReportingL1L2Data.ts`, `components/org-chart/hooks/orgReportingL3L5Data.ts`, `components/org-chart/hooks/useOrgTreeLayout.ts`, `components/org-chart/types.ts`, `utils/roleHiring.ts`, `hooks/useEmployeeWizard.ts`, `hooks/useEmployeeActions.ts`, `components/employees/modals/ApproveEmployeeModal.tsx`, `components/employees/wizard/StepReview.tsx`.
 

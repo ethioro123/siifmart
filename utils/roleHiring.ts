@@ -15,9 +15,12 @@ export const canEmployRole = (
     const candidate = candidateRole.toLowerCase().trim();
     if (manager === candidate || !SYSTEM_ROLES.some(role => role.id === candidate)) return false;
 
-    // Group CEO is the enterprise-wide appointing authority; the independent
-    // Chief Audit Executive is appointed by the Board, not management.
-    if (manager === 'group_ceo') return candidate !== 'group_cae';
+    // Temporary bridge until Board appointment is available in the app: the
+    // Group CEO may appoint every Group C-suite role, including the CAE.
+    if (manager === 'group_ceo' && [
+        'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco',
+        'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae'
+    ].includes(candidate)) return true;
 
     // All other hiring follows the candidate role's primary reporting line.
     // Dotted-line coordination does not confer appointment authority.
