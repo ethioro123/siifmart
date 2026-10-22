@@ -30,7 +30,7 @@ const POSTerminalContent: React.FC = () => {
     return (
       <div className="h-full flex items-center justify-center p-4">
         <div className="text-center p-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl max-w-md shadow-xl transition-all duration-300">
-          <Logo variant="emblem" size={44} className="mx-auto mb-4 flex justify-center" />
+          <Logo variant="emblem" size={32} className="mx-auto mb-4 flex justify-center" />
           <h2 className="text-xl font-bold text-[var(--theme-text-primary)] mb-2">Select a Store</h2>
           <p className="text-xs text-[var(--theme-text-secondary)] mb-6">
             To access POS, tap your store below or select from the dropdown in the top bar.

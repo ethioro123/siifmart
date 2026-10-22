@@ -39,13 +39,14 @@ function SiifGroceryEmblem({ size }: { size: number }) {
 }
 
 /**
- * SIIFMART Brand Wordmark & SINCE 2026 Subtitle — Pure Dark (#09090B) & White (#FFFFFF)
- * with no background fill.
+ * SIIFMART Brand Wordmark — Pure Dark (#09090B) & White (#FFFFFF)
+ * In horizontal mode, aligns cleanly in a single straight line with the emblem.
+ * In stacked mode, displays the centered title with optional SINCE 2026.
  */
 function SiifWordmark({
   fontSize,
   storeName,
-  showSince = true,
+  showSince = false,
   centered = false,
 }: {
   fontSize: string;
@@ -56,7 +57,7 @@ function SiifWordmark({
   return (
     <span
       aria-label={storeName}
-      className={`inline-flex flex-col ${centered ? 'items-center text-center' : 'items-start'} text-[#09090B] dark:text-[#FFFFFF] leading-none select-none`}
+      className={`inline-flex ${centered ? 'flex-col items-center text-center' : 'items-center'} text-[#09090B] dark:text-[#FFFFFF] leading-none select-none`}
     >
       <span
         style={{
@@ -73,7 +74,8 @@ function SiifWordmark({
           style={{
             fontSize: `calc(${fontSize} * 0.36)`,
             fontFamily: "'Quicksand', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif",
-            marginTop: `calc(${fontSize} * 0.22)`,
+            marginTop: centered ? `calc(${fontSize} * 0.22)` : undefined,
+            marginLeft: centered ? undefined : '0.5em',
           }}
           className="font-medium uppercase tracking-[0.36em] leading-none opacity-90"
         >
@@ -86,12 +88,12 @@ function SiifWordmark({
 
 export default function Logo({
   className = '',
-  size = 32,
+  size = 22,
   showText = true,
   logoUrl: propLogoUrl,
   storeName: propStoreName,
   variant = 'horizontal',
-  showTagline = true,
+  showTagline = false,
 }: LogoProps) {
   let settings: any = null;
   try {
@@ -107,13 +109,13 @@ export default function Logo({
     propLogoUrl !== undefined ? propLogoUrl : settings?.logoUrl || settings?.posReceiptLogo;
   const effectiveStoreName = propStoreName || settings?.storeName || 'SIIFMART';
 
-  const scale = size / 32;
-  const fontSize = `${Math.round(1.12 * scale * 16)}px`;
+  // Balanced proportional typography matching the compact emblem height
+  const fontSize = `${Math.max(13, Math.round(size * 0.73))}px`;
 
   const hasDisplayOverride = /\b(hidden|block|inline-block|flex|inline-flex)\b/.test(className);
   const containerClass = `${hasDisplayOverride ? '' : 'inline-flex '}items-center select-none ${className}`.trim();
 
-  // Wordmark-only variant: brand name without the emblem (e.g. compact top bar)
+  // Wordmark-only variant: brand name without the emblem
   if (variant === 'wordmark') {
     return (
       <div className={containerClass}>
@@ -130,24 +132,33 @@ export default function Logo({
   // If a custom image logo is uploaded by the user and loads successfully, display it in monochrome
   if (effectiveLogoUrl && !imgError) {
     return (
-      <div className={containerClass}>
+      <div className={`${containerClass} gap-2`}>
         <img
           src={effectiveLogoUrl}
           alt={effectiveStoreName}
           style={{ height: `${size}px` }}
-          className="object-contain grayscale contrast-125"
+          className="object-contain grayscale contrast-125 shrink-0"
           onError={() => setImgError(true)}
         />
+        {showText && (
+          <SiifWordmark
+            fontSize={fontSize}
+            storeName={effectiveStoreName}
+            showSince={false}
+            centered={false}
+          />
+        )}
       </div>
     );
   }
 
-  // Stacked variant: Exact match to the uploaded SIIFMART / SINCE 2026 centered layout
+  // Stacked variant: Centered refined emblem + wordmark + SINCE 2026 (login, lock screen, splash)
   if (variant === 'stacked') {
-    const stackedTitleSize = `${Math.round(1.22 * scale * 16)}px`;
+    const stackedEmblemSize = Math.round(size * 1.35);
+    const stackedTitleSize = `${Math.max(14, Math.round(size * 0.65))}px`;
     return (
-      <div className={`inline-flex flex-col items-center gap-2.5 select-none ${className}`.trim()}>
-        <SiifGroceryEmblem size={Math.round(size * 2.15)} />
+      <div className={`inline-flex flex-col items-center gap-2 select-none ${className}`.trim()}>
+        <SiifGroceryEmblem size={stackedEmblemSize} />
         <SiifWordmark
           fontSize={stackedTitleSize}
           storeName={effectiveStoreName}
@@ -167,15 +178,15 @@ export default function Logo({
     );
   }
 
-  // Standard lockup (Sidebar, ID cards): Speed-Bar Cart + SIIFMART / SINCE 2026
+  // Standard lockup (Sidebar, TopBar, ID cards): Speed-Bar Cart & SIIFMART aligned in a single straight line
   return (
-    <div className={`${containerClass} gap-2.5`}>
+    <div className={`${containerClass} gap-2`}>
       <SiifGroceryEmblem size={size} />
       <SiifWordmark
         fontSize={fontSize}
         storeName={effectiveStoreName}
         showSince={showTagline}
-        centered={true}
+        centered={false}
       />
     </div>
   );

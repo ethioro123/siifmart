@@ -172,7 +172,7 @@ export default function App() {
       <div className="min-h-screen bg-white dark:bg-black text-[#09090B] dark:text-white flex flex-col items-center justify-center p-6 select-none transition-colors duration-200">
         {/* Brand Display — Pure, Simple, Elegant Apple Presentation */}
         <div className="flex flex-col items-center text-center">
-          <Logo variant="stacked" size={48} />
+          <Logo variant="stacked" size={36} />
         </div>
 
         {/* Minimal Apple Precision Progress Bar */}

@@ -118,7 +118,7 @@ const POSCommandContent: React.FC = () => {
         <div className="max-w-[400px] w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-10 relative z-10 shadow-lg flex flex-col items-center">
           {/* Logo */}
           <div className="relative mb-6 select-none flex flex-col items-center gap-4">
-            <Logo variant="stacked" size={34} />
+            <Logo variant="stacked" size={28} />
             <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)]">
               <Lock size={22} />
             </div>

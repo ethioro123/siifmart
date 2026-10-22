@@ -313,9 +313,9 @@ export default function Sidebar() {
         }}
       >
         <div className="p-4 sm:p-5 flex items-center justify-between border-b border-[var(--theme-border)]">
-          <Logo size={32} />
+          <Logo size={22} />
           <button ref={closeButtonRef} type="button" onClick={toggleSidebar} className="min-h-11 min-w-11 flex items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label="Close navigation">
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
