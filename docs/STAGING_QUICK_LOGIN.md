@@ -2,7 +2,7 @@
 
 Quick Login reads active staging employees from the database, including the `[TEST]` role-coverage accounts. Country, facility and role filters use the live roster; they do not depend on a fixed account list.
 
-Run `npm run dev:staging` and open `http://localhost:3000`. Search by employee code, role, name or site code, then select an employee. The login uses a normal Supabase session and preserves the selected employee's actual role and site.
+Run `npm run dev:staging` and open `http://localhost:3000`. Production runs separately at `http://localhost:3001`. Search by employee code, role, name or site code, then select an employee. The login uses a normal Supabase session and preserves the selected employee's actual role and site.
 
 ## Private local setup
 

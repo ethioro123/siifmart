@@ -4,7 +4,7 @@ The separate `SIIFMART Staging` Supabase project is on the Free plan in the same
 
 ## Current status
 
-The app's staging environment is connected locally, and `npm run dev:staging` displays a visible staging warning. The new database is still empty. Production has more applied migrations than the repository contains. Before a database change, inspect the target project's live schema and migration history, save the complete SQL in `/migrations/YYYYMMDD_description.sql`, then automatically apply it to the repository-linked project (or staging when the task targets staging). Do not bulk-copy production records; staging test accounts and data must be synthetic.
+The app's staging environment is connected locally. `npm run dev:staging` serves staging at `http://localhost:3000` with a visible warning. `npm run dev` serves production at `http://localhost:3001`. Both servers require their assigned port, so a port conflict fails at startup instead of silently moving either app. Production has more applied migrations than the repository contains. Before a database change, inspect the target project's live schema and migration history, save the complete SQL in `/migrations/YYYYMMDD_description.sql`, then automatically apply it to the repository-linked project (or staging when the task targets staging). Do not bulk-copy production records; staging test accounts and data must be synthetic.
 
 ## After the schema has been installed
 

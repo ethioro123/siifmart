@@ -2,6 +2,49 @@ import { PurchaseOrder, POItem, Supplier, Product } from '../../types';
 import { getEffectiveCountry } from '../../utils/localization';
 import { suppliersService } from '../../services/supabase.service';
 
+function normalizeSellUnitCode(rawCode: string): string {
+    const upper = (rawCode || '').toUpperCase().trim();
+    if (upper === 'EA' || upper === 'EACH' || upper === 'PCS' || upper === 'PC') return 'UNIT';
+    if (upper === 'PK') return 'PACK';
+    if (upper === 'DOZ') return 'DOZEN';
+    return upper;
+}
+
+export function resolveOrderUnitLabels(
+    packagingLevel: string,
+    hasCases: boolean,
+    hasPacks: boolean,
+    caseSize: number,
+    packQty: number
+): { orderUnitName: string; unitSuffix: string } {
+    if (packagingLevel === 'two_tier' || hasCases) {
+        const effCase = Math.max(1, caseSize || 1);
+        const effPack = Math.max(1, packQty || 1);
+        return {
+            orderUnitName: 'Master Case',
+            unitSuffix: `(master cases — ${effCase} inner pack${effCase !== 1 ? 's' : ''} × ${effPack} unit${effPack !== 1 ? 's' : ''} = ${effCase * effPack} units/case)`,
+        };
+    }
+    if (packagingLevel === 'bale') {
+        const effPack = Math.max(2, packQty || 12);
+        return {
+            orderUnitName: 'Bale',
+            unitSuffix: `(bales of ${effPack} units)`,
+        };
+    }
+    if (packagingLevel === 'case' || hasPacks) {
+        const effPack = Math.max(2, packQty || 24);
+        return {
+            orderUnitName: 'Case',
+            unitSuffix: `(cases of ${effPack} units)`,
+        };
+    }
+    return {
+        orderUnitName: 'Unit',
+        unitSuffix: '(1:1 individual units)',
+    };
+}
+
 /**
  * Computes how many sellable units are contained in a single order unit (case/pack/bulk).
  * Handles both count-based units (UNIT, PACK, DOZEN) and physical weight/volume conversions (KG, G, L, ML).
@@ -18,7 +61,7 @@ export function computeSellUnitsPerOrderUnit(
     const packagingUnits = hasCases ? (caseSize * packQty) : (hasPacks ? packQty : 1);
 
     if (!sellUnitCode) return Math.max(1, packagingUnits);
-    const su = sellUnitCode.toUpperCase().trim();
+    const su = normalizeSellUnitCode(sellUnitCode);
 
     let sellCategory = '';
     let sellInBase = 1;
@@ -70,7 +113,7 @@ export function computeCostPerSellUnit(
 ): number | null {
     if (!unitCost || unitCost <= 0 || !sellUnitCode) return null;
 
-    const su = sellUnitCode.toUpperCase().trim();
+    const su = normalizeSellUnitCode(sellUnitCode);
     let sellCategory = '';
     if (su === 'KG' || su === 'G') sellCategory = 'weight';
     else if (su === 'L' || su === 'ML') sellCategory = 'volume';
@@ -88,7 +131,7 @@ export function computeCostPerSellUnit(
         if (!sizeCategory || sizeCategory !== sellCategory) return null;
     }
 
-    const sellUnitsInPackage = computeSellUnitsPerOrderUnit(sizeValue, sizeType, sellUnitCode, packQty, caseSize);
+    const sellUnitsInPackage = computeSellUnitsPerOrderUnit(sizeValue, sizeType, su, packQty, caseSize);
     if (sellUnitsInPackage <= 0) return null;
     return unitCost / sellUnitsInPackage;
 }

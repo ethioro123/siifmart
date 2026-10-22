@@ -80,6 +80,7 @@
 
 | Symptom | Likely Cause | Files to Check | Fix Pattern |
 |---------|-------------|----------------|-------------|
+| Production data appears while checking staging locally | The production dev server is open on port 3001 | `vite.config.ts`, `docs/STAGING_ENVIRONMENT.md` | Start `npm run dev:staging` and open `http://localhost:3000`; confirm the staging warning |
 | PATCH/POST returns **400 Bad Request** | Sending unknown column names (camelCase fields not mapped to snake_case) | Relevant `.service.ts` `update()` method | Switch from `{ ...object }` spread to explicit allowlist. See RULES.md "Service Field Mapping" |
 | POST returns **400** with "null value violates not-null constraint" | Missing a NOT NULL column in the insert payload | `.service.ts` `create()` method, `/schemas/db-schema.md` | Check the schema registry for NOT NULL columns and add them to the insert |
 | "column X does not exist" in logs | New TS field added but service mapper not updated | `.service.ts` mapper function, `update()` allowlist | Add the field to both the `mapRow()` (read) and `update()` allowlist (write) |

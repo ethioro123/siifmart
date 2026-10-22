@@ -3,8 +3,10 @@ import {
     computeSellUnitsPerOrderUnit,
     computeCostPerSellUnit,
     deduplicateCatalogProducts,
-    buildPurchaseOrders
+    buildPurchaseOrders,
+    resolveOrderUnitLabels
 } from '../../components/procurement/createPOHelpers';
+import { buildPOItem } from '../../components/procurement/buildPOItem';
 import type { Product, POItem, PurchaseOrder } from '../../types';
 
 describe('PO Creation Flow Fixes & Helpers', () => {
@@ -143,5 +145,53 @@ describe('PO Creation Flow Fixes & Helpers', () => {
         expect(updated[0].po.status).toBe('Pending');
         expect(updated[0].po.createdBy).toBe('Original Creator');
         expect(updated[0].po.dockSlot).toBeUndefined();
+    });
+
+    it('builds custom PO items with auto-filled GS1/storage defaults and clean order unit labels', async () => {
+        expect(resolveOrderUnitLabels('single', false, false, 0, 1)).toEqual({
+            orderUnitName: 'Unit',
+            unitSuffix: '(1:1 individual units)'
+        });
+        expect(resolveOrderUnitLabels('two_tier', true, false, 4, 6)).toEqual({
+            orderUnitName: 'Master Case',
+            unitSuffix: '(master cases — 4 inner packs × 6 units = 24 units/case)'
+        });
+        // Short label 'ea' should also resolve count-based cost per sell unit
+        expect(computeCostPerSellUnit(1200, '500', 'g', 'ea', 24, 0)).toBe(50);
+
+        const result = await buildPOItem({
+            products: [],
+            existingItems: [],
+            editingItem: null,
+            country: 'ET',
+            productType: 'new',
+            currentProductToAdd: '',
+            currentQty: 10,
+            currentCost: 450,
+            currentRetailPrice: 600,
+            customItemName: 'Basmati Rice',
+            customItemBrand: 'Royal',
+            selectedMainCategory: 'Grains, Pasta & Rice',
+            customItemSize: '500',
+            customItemUnit: 'UNIT',
+            customItemImage: '',
+            customAttributes: {
+                identity: { variant: '', type: '', subcategory: '', modelNumber: '' },
+                physical: { netWeight: '500', grossWeight: '0.55', volume: '', unit: '', sizeType: 'g', dims: '', color: '', form: '', texture: '' },
+                packaging: { unitSize: '', packQty: '1', caseSize: '', packagingLevel: 'single', material: '', isBreakable: false, packageType: '' },
+                storage: { type: '', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false, inboundQcDirective: '', shelfLifeDays: '' },
+                commercial: { isWeighted: false, sellBy: 'Unit', priceType: 'Fixed', isBundleEligible: false, isReturnable: true },
+                descriptive: { usage: '', audience: '', ingredients: '', keyFeatures: '', scent: '', flavor: '', strength: '' },
+                categorySpecific: {}
+            },
+            caseSize: 0,
+            pkgType: ''
+        });
+
+        expect(result.errors).toBeUndefined();
+        expect(result.item).toBeDefined();
+        expect(result.item?.size).toBe('500g');
+        expect(result.item?.customAttributes?.packaging?.material).toBe('Paper / Cardboard');
+        expect(result.item?.customAttributes?.storage?.inboundQcDirective).toBeTruthy();
     });
 });

@@ -10,6 +10,8 @@ export interface PackagingHierarchySectionProps {
     setCustomAttributes: React.Dispatch<React.SetStateAction<any>>;
     multiplier: number;
     selectedMainCategory?: string;
+    errors?: Record<string, string>;
+    setErrors?: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
 export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps> = ({
@@ -18,7 +20,9 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
     customAttributes,
     setCustomAttributes,
     multiplier,
-    selectedMainCategory = ''
+    selectedMainCategory = '',
+    errors = {},
+    setErrors
 }) => {
     const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes.identity?.subcategory);
     const domainId = specGroup.id;
@@ -104,32 +108,44 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                 {packagingLevel !== 'single' && (
                     <div className="col-span-2 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                            Pack Qty <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(units per package)</span>
+                            {packagingLevel === 'two_tier' ? 'Inner Pack Qty' : packagingLevel === 'bale' ? 'Bale Qty' : 'Case Qty'}{' '}
+                            <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">
+                                ({packagingLevel === 'two_tier' ? 'units per inner pack' : packagingLevel === 'bale' ? 'units per bale' : 'units per case'})
+                            </span>{' '}
+                            <span className="text-rose-500">*</span>
                         </label>
                         <input
                             type="number"
                             min="2"
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
+                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.packQty ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                             placeholder="e.g. 12 or 24"
                             value={customAttributes.packaging?.packQty || ''}
-                            onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: e.target.value } }))}
+                            onChange={e => {
+                                if (errors.packQty && setErrors) setErrors(prev => ({ ...prev, packQty: '' }));
+                                setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: e.target.value } }));
+                            }}
                         />
+                        {errors.packQty && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.packQty}</span>}
                     </div>
                 )}
 
                 {packagingLevel === 'two_tier' && (
                     <div className="col-span-2 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                            Case Size <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(inner packs per case)</span>
+                            Case Size <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(inner packs per case)</span> <span className="text-rose-500">*</span>
                         </label>
                         <input
                             type="number"
                             min="1"
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
+                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.caseSize ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                             placeholder="e.g. 4"
                             value={customAttributes.packaging?.caseSize || ''}
-                            onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: e.target.value } }))}
+                            onChange={e => {
+                                if (errors.caseSize && setErrors) setErrors(prev => ({ ...prev, caseSize: '' }));
+                                setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: e.target.value } }));
+                            }}
                         />
+                        {errors.caseSize && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.caseSize}</span>}
                     </div>
                 )}
 

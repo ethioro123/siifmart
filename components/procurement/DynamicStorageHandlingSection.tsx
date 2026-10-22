@@ -87,7 +87,7 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                             value={storageType}
                             onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, type: e.target.value } }))}
                         >
-                            {STORAGE_CONDITIONS.map(s => (
+                            {Array.from(new Set([storageConfig.defaultStorage, ...STORAGE_CONDITIONS])).map(s => (
                                 <option key={s} value={s} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">
                                     {s}
                                 </option>

@@ -1,6 +1,7 @@
 import { POItem, Product } from '../../types';
 import { getSellUnit } from '../../utils/units';
-import { formatProductDisplayName } from './utils';
+import { formatProductDisplayName, isConsumableCategory, getCategorySpecGroup } from './utils';
+import { getCategoryPackagingDefaults, getCategoryStorageDefaults } from './categoryLogistics';
 import { generateSequentialSKU } from '../../utils/skuGenerator';
 import type { Country } from '../../utils/localization';
 
@@ -55,22 +56,65 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
     if (!currentCost || currentCost <= 0) newErrors.cost = 'Unit cost is required';
     if (!currentRetailPrice || currentRetailPrice <= 0) newErrors.retail = 'Retail price is required';
 
+    const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes.identity?.subcategory);
+    const domainId = specGroup.id;
+    const pkgDefaults = getCategoryPackagingDefaults(domainId);
+    const storageDefaults = getCategoryStorageDefaults(domainId);
+
     if (productType === 'new') {
         if (!customItemName.trim()) newErrors.name = 'Product name is required';
         if (!customItemBrand.trim()) newErrors.brand = 'Brand is required';
         if (!selectedMainCategory) newErrors.category = 'Main category is required';
-        if (!customAttributes.identity.subcategory) newErrors.subcategory = 'Sub-category is required';
-        if (!customAttributes.physical.form) newErrors.form = 'Physical form is required';
-        if (!customItemSize.trim()) newErrors.size = 'Measure is required';
-        if (!customItemUnit) newErrors.unit = 'Unit is required';
-        if (!customAttributes.packaging.packageType) newErrors.packageType = 'Primary container is required';
-        if (!customAttributes.packaging.material) newErrors.material = 'Packaging material is required';
-        if (!customAttributes.storage.inboundQcDirective) newErrors.qc = 'Inbound QC directive is required';
+        if (!customItemUnit) newErrors.unit = 'Sell unit is required';
+
+        const requiresSize =
+            isConsumableCategory(selectedMainCategory) ||
+            domainId === 'apparel' ||
+            domainId === 'beverages';
+        if (requiresSize && !customItemSize.trim()) {
+            newErrors.size = domainId === 'apparel' ? 'Size / fitment is required' : 'Net content / measure is required';
+        }
+
+        const packagingLevel =
+            customAttributes.packaging?.packagingLevel ||
+            (parseInt(customAttributes.packaging?.caseSize) > 0
+                ? 'two_tier'
+                : customAttributes.packaging?.packageType === 'Bale'
+                ? 'bale'
+                : parseInt(customAttributes.packaging?.packQty) > 1
+                ? 'case'
+                : 'single');
+
+        if (packagingLevel !== 'single') {
+            const pq = parseInt(customAttributes.packaging?.packQty) || 0;
+            if (pq < 2) {
+                newErrors.packQty = 'Enter at least 2 units per pack/case';
+            }
+        }
+        if (packagingLevel === 'two_tier') {
+            const cs = parseInt(customAttributes.packaging?.caseSize) || 0;
+            if (cs < 1) {
+                newErrors.caseSize = 'Enter at least 1 inner pack per case';
+            }
+        }
+
+        const isPerishable =
+            customAttributes.storage?.isPerishable !== undefined
+                ? Boolean(customAttributes.storage.isPerishable)
+                : storageDefaults.defaultPerishable;
+        if (isPerishable) {
+            const shelfDays = parseInt(customAttributes.storage?.shelfLifeDays) || 0;
+            if (shelfDays <= 0) {
+                newErrors.shelfLifeDays = 'Shelf life (days) is required for perishable items';
+            }
+        }
 
         if (!editingItem && customItemName.trim() && customItemBrand.trim()) {
             const normName = customItemName.trim().toLowerCase();
             const normBrand = customItemBrand.trim().toLowerCase();
-            const normSize = customItemSize.trim().toLowerCase();
+            const sizeType = (customAttributes.physical?.sizeType || '').trim().toLowerCase();
+            const rawSize = customItemSize.trim().toLowerCase();
+            const normSize = sizeType && rawSize && !rawSize.endsWith(sizeType) ? `${rawSize}${sizeType}` : rawSize;
             const catalogCollision = products.find(p => {
                 const pName = (p.name || '').trim().toLowerCase();
                 const pBrand = (p.brand || '').trim().toLowerCase();
@@ -78,11 +122,11 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
                 return (
                     (pName === normName || pName === `${normBrand} ${normName}`) &&
                     (!pBrand || pBrand === normBrand) &&
-                    (!normSize || !pSize || pSize === normSize)
+                    (!normSize || !pSize || pSize === normSize || pSize === rawSize)
                 );
             });
             if (catalogCollision) {
-                newErrors.name = `Matches existing catalog SKU (${catalogCollision.sku}) — use "Existing Item" tab`;
+                newErrors.name = `Matches existing catalog SKU (${catalogCollision.sku}) — use "Catalog Search" tab`;
             }
         }
     } else if (!currentProductToAdd) {
@@ -127,12 +171,53 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         }
     }
 
-    const su = getSellUnit(customItemUnit);
-    const derivedPackQty = parseInt(customAttributes.packaging.packQty) || 1;
+    const su = getSellUnit(customItemUnit || 'UNIT');
+    const derivedPackQty = parseInt(customAttributes.packaging?.packQty) || 1;
     const isCaseOrPack = caseSize >= 1 || derivedPackQty > 1;
     const resolvedPackageType = isCaseOrPack
-        ? pkgType || (caseSize >= 1 ? 'Case' : 'Pack')
-        : pkgType || su.code;
+        ? pkgType || pkgDefaults.containers[0] || (caseSize >= 1 ? 'Case' : 'Pack')
+        : pkgType || pkgDefaults.containers[0] || su.code;
+
+    const rawSize = customItemSize.trim();
+    const sizeType = (customAttributes.physical?.sizeType || '').trim();
+    const formattedSize =
+        rawSize && sizeType && !rawSize.toLowerCase().endsWith(sizeType.toLowerCase())
+            ? `${rawSize}${sizeType}`
+            : rawSize;
+
+    const resolvedCustomAttributes = {
+        ...customAttributes,
+        identity: {
+            ...customAttributes.identity,
+            subcategory: customAttributes.identity?.subcategory || specGroup.label || cat,
+        },
+        physical: {
+            ...customAttributes.physical,
+            netWeight: customAttributes.physical?.netWeight || rawSize,
+            sizeType: sizeType || customAttributes.physical?.sizeType || '',
+            form: customAttributes.physical?.form || (domainId === 'beverages' ? 'Liquid' : 'Solid'),
+        },
+        packaging: {
+            ...customAttributes.packaging,
+            packageType: resolvedPackageType,
+            material: customAttributes.packaging?.material || pkgDefaults.defaultMaterial || 'Paper / Cardboard',
+            unitSize: formattedSize || customAttributes.packaging?.unitSize || '',
+        },
+        storage: {
+            ...customAttributes.storage,
+            type: customAttributes.storage?.type || storageDefaults.defaultStorage || 'Ambient (Dry)',
+            isPerishable:
+                customAttributes.storage?.isPerishable !== undefined
+                    ? customAttributes.storage.isPerishable
+                    : storageDefaults.defaultPerishable,
+            shelfLifeDays:
+                customAttributes.storage?.shelfLifeDays || storageDefaults.defaultShelfLife || '',
+            inboundQcDirective:
+                customAttributes.storage?.inboundQcDirective ||
+                storageDefaults.inboundDirectives[0] ||
+                'Standard Receiving Audit',
+        },
+    };
 
     const itemData: POItem = {
         productId: prod ? prod.id : editingItem?.productId || `CUSTOM-${Date.now()}`,
@@ -145,22 +230,16 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         retailPrice: currentRetailPrice,
         image,
         brand: customItemBrand,
-        size: customItemSize,
-        unit: customItemUnit,
+        size: formattedSize,
+        unit: customItemUnit || 'UNIT',
         packQuantity: derivedPackQty,
         packageType: resolvedPackageType,
         caseSize: caseSize > 0 ? caseSize : undefined,
         identityType: productType === 'catalog' ? 'known' : 'new',
-        description: customAttributes.descriptive.usage,
+        description: customAttributes.descriptive?.usage,
         minStock: 10,
         maxStock: 100,
-        customAttributes: {
-            ...customAttributes,
-            identity: {
-                ...customAttributes.identity,
-                subcategory: customAttributes.identity.subcategory,
-            },
-        },
+        customAttributes: resolvedCustomAttributes,
     };
 
     return { item: itemData };

@@ -12,6 +12,7 @@ import { POItemFormActions } from './POItemFormActions';
 import { formatProductDisplayName } from './utils';
 import { resolveSmartProductAttributes } from '../../utils/groceryAttributes';
 import { buildPOItem } from './buildPOItem';
+import { computeSellUnitsPerOrderUnit, resolveOrderUnitLabels } from './createPOHelpers';
 import type { Country } from '../../utils/localization';
 
 const createDefaultCustomAttributes = () => ({
@@ -63,20 +64,27 @@ export const POItemForm: React.FC<POItemFormProps> = ({
 
     const selectedCatalogProduct = productType === 'catalog' ? products.find(p => p.id === currentProductToAdd) : null;
     const activePackaging = selectedCatalogProduct?.customAttributes?.packaging || (selectedCatalogProduct as any)?.custom_attributes?.packaging || customAttributes.packaging;
-    const packagingLevel = activePackaging?.packagingLevel || (parseInt(activePackaging?.caseSize) > 0 ? 'two_tier' : parseInt(activePackaging?.packQty) > 1 ? 'case' : 'single');
+    const packagingLevel = activePackaging?.packagingLevel || (parseInt(activePackaging?.caseSize) > 0 ? 'two_tier' : activePackaging?.packageType === 'Bale' ? 'bale' : parseInt(activePackaging?.packQty) > 1 ? 'case' : 'single');
     const caseSize = packagingLevel === 'single' ? 0 : (parseInt(activePackaging?.caseSize) || 0);
     const packQty = packagingLevel === 'single' ? 1 : (parseInt(activePackaging?.packQty) || selectedCatalogProduct?.packQuantity || (selectedCatalogProduct as any)?.pack_quantity || 1);
     const pkgType = activePackaging?.packageType || '';
     const hasCases = caseSize >= 1 && caseSize > 0;
     const hasPacks = packQty > 1 && !hasCases;
-    const orderUnitName = pkgType || (hasCases ? 'Case' : hasPacks ? 'Pack' : 'Unit');
-    const unitsPerOrderUnit = hasCases ? caseSize * packQty : hasPacks ? packQty : 1;
-    const totalUnits = currentQty * unitsPerOrderUnit;
+    const { orderUnitName, unitSuffix } = resolveOrderUnitLabels(packagingLevel, hasCases, hasPacks, caseSize, packQty);
+    const unitsPerOrderUnit = computeSellUnitsPerOrderUnit(
+        customAttributes.physical?.netWeight || customItemSize || '',
+        customAttributes.physical?.sizeType || '',
+        customItemUnit || 'UNIT',
+        packQty,
+        caseSize
+    );
+    const totalUnits = Math.round(currentQty * unitsPerOrderUnit * 100) / 100;
     const showConversion = currentQty > 0 && unitsPerOrderUnit > 1;
-    const unitSuffix = hasCases
-        ? `(${pkgType || 'cases'} — ${caseSize} pack${caseSize !== 1 ? 's' : ''} × ${packQty} unit${packQty !== 1 ? 's' : ''})`
-        : hasPacks
-        ? `(${pkgType ? `${pkgType}s of ${packQty}` : `packs of ${packQty}`})`
+    const activeSizeType = customAttributes.physical?.sizeType || '';
+    const formattedCustomSize = customItemSize
+        ? (activeSizeType && !customItemSize.toLowerCase().endsWith(activeSizeType.toLowerCase())
+            ? `${customItemSize}${activeSizeType}`
+            : customItemSize)
         : '';
 
     useEffect(() => {
@@ -262,7 +270,10 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                 </button>
                 <button
                     type="button"
-                    onClick={() => setProductType('new')}
+                    onClick={() => {
+                        setProductType('new');
+                        if (!customItemUnit) setCustomItemUnit('UNIT');
+                    }}
                     className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${productType === 'new' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]'}`}
                 >
                     CUSTOM ITEM
@@ -274,7 +285,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                     <ItemPreviewCard
                         name={productType === 'catalog' && selectedCatalogProduct ? selectedCatalogProduct.name : customItemName}
                         brand={customItemBrand || selectedCatalogProduct?.brand || ''}
-                        size={customItemSize || selectedCatalogProduct?.size || ''}
+                        size={formattedCustomSize || selectedCatalogProduct?.size || ''}
                         unit={customItemUnit || selectedCatalogProduct?.unit || ''}
                         category={selectedMainCategory || selectedCatalogProduct?.category || ''}
                         description={selectedCatalogProduct?.description || ''}

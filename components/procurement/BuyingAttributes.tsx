@@ -6,7 +6,7 @@ import { PackagingHierarchySection } from './PackagingHierarchySection';
 import { DynamicPhysicalAttributesSection } from './DynamicPhysicalAttributesSection';
 import { DynamicStorageHandlingSection } from './DynamicStorageHandlingSection';
 import { getCategorySpecGroup } from './categoryAttributes';
-import { getCategoryStorageDefaults } from './categoryLogistics';
+import { getCategoryStorageDefaults, getCategoryPackagingDefaults } from './categoryLogistics';
 
 export interface BuyingAttributesProps {
     customItemBrand: string;
@@ -77,25 +77,56 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
         }));
     };
 
+    const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes.identity?.subcategory);
+    const storageDefaults = getCategoryStorageDefaults(specGroup.id);
+
     const handleNetWeightChange = (val: string) => {
         setCustomItemSize(val);
+        const fallbackSizeType = sizeType || (specGroup.id === 'beverages' ? 'ml' : 'g');
+        setCustomAttributes((p: any) => {
+            const effSizeType = p.physical?.sizeType || (val ? fallbackSizeType : '');
+            return {
+                ...p,
+                physical: { ...p.physical, netWeight: val, sizeType: effSizeType },
+                packaging: {
+                    ...p.packaging,
+                    unitSize: val && effSizeType ? `${val}${effSizeType}` : p.packaging?.unitSize
+                }
+            };
+        });
+        if (errors.size) setErrors(p => ({ ...p, size: '' }));
+    };
+
+    const handleCategoryChange = (newCategory: string) => {
+        setSelectedMainCategory(newCategory);
+        if (errors.category) setErrors(p => ({ ...p, category: '' }));
+        if (!newCategory) return;
+
+        const nextGroup = getCategorySpecGroup(newCategory, customAttributes.identity?.subcategory);
+        const nextStorageDefaults = getCategoryStorageDefaults(nextGroup.id);
+        const nextPkgDefaults = getCategoryPackagingDefaults(nextGroup.id);
+
         setCustomAttributes((p: any) => ({
             ...p,
-            physical: { ...p.physical, netWeight: val },
             packaging: {
                 ...p.packaging,
-                unitSize: val && sizeType ? `${val}${sizeType}` : p.packaging?.unitSize
+                material: p.packaging?.material || nextPkgDefaults.defaultMaterial || 'Paper / Cardboard',
+                packageType: p.packaging?.packageType || nextPkgDefaults.containers[0] || '',
+            },
+            storage: {
+                ...p.storage,
+                type: nextStorageDefaults.defaultStorage,
+                isPerishable: nextStorageDefaults.defaultPerishable,
+                shelfLifeDays: p.storage?.shelfLifeDays || nextStorageDefaults.defaultShelfLife || '',
+                inboundQcDirective: p.storage?.inboundQcDirective || nextStorageDefaults.inboundDirectives[0] || '',
             }
         }));
-        if (errors.size) setErrors(p => ({ ...p, size: '' }));
     };
 
     const packQtyNum = parseInt(customAttributes.packaging?.packQty) || 1;
     const caseSizeNum = parseInt(customAttributes.packaging?.caseSize) || 0;
     const multiplier = packagingLevel === 'two_tier' ? (packQtyNum * (caseSizeNum || 1)) : packagingLevel === 'single' ? 1 : packQtyNum;
 
-    const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes.identity?.subcategory);
-    const storageDefaults = getCategoryStorageDefaults(specGroup.id);
     const [showStorageSection, setShowStorageSection] = useState(false);
 
     useEffect(() => {
@@ -158,7 +189,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                     title="Category"
                                     className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.category ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer`}
                                     value={selectedMainCategory}
-                                    onChange={e => { setSelectedMainCategory(e.target.value); if (errors.category) setErrors(p => ({ ...p, category: '' })); }}
+                                    onChange={e => handleCategoryChange(e.target.value)}
                                 >
                                     <option value="" className="text-[var(--theme-text-secondary)] bg-[var(--theme-bg-panel)]">Select Category...</option>
                                     {Object.entries(PRODUCT_CATEGORIES).map(([group, items]) => (
@@ -226,6 +257,8 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     setCustomAttributes={setCustomAttributes}
                     multiplier={multiplier}
                     selectedMainCategory={selectedMainCategory}
+                    errors={errors}
+                    setErrors={setErrors}
                 />
 
                 {/* ── 5. STORAGE, INBOUND QC & HANDLING COMPLIANCE (COLLAPSIBLE) ── */}
