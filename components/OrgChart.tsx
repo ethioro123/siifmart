@@ -10,6 +10,8 @@ interface OrgChartProps {
     onSelectEmployee?: (employee: Employee) => void;
     onOpenAddEmployee?: () => void;
     onOpenIdCard?: (employee: Employee) => void;
+    canEditReportingLines?: boolean;
+    onSaveReportingLines?: (employee: Employee) => Promise<void> | void;
 }
 
 export const OrgChart: React.FC<OrgChartProps> = ({
@@ -19,7 +21,9 @@ export const OrgChart: React.FC<OrgChartProps> = ({
     onlineIds,
     onSelectEmployee,
     onOpenAddEmployee,
-    onOpenIdCard
+    onOpenIdCard,
+    canEditReportingLines,
+    onSaveReportingLines
 }) => {
     return (
         <OrgChartContainer
@@ -30,6 +34,8 @@ export const OrgChart: React.FC<OrgChartProps> = ({
             onSelectEmployee={onSelectEmployee}
             onOpenAddEmployee={onOpenAddEmployee}
             onOpenIdCard={onOpenIdCard}
+            canEditReportingLines={canEditReportingLines}
+            onSaveReportingLines={onSaveReportingLines}
         />
     );
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { DollarSign, Star, Calendar, PhoneCall, Building2, GitBranch } from 'lucide-react';
 import type { Employee, Site } from '../../../types';
 import { getRoleHierarchy } from '../../../utils/roles';
+import { isRegionalWorkforceRole } from '../../../utils/roleSegregation';
 
 interface StepDetailsProps {
     newEmpData: any;
@@ -30,9 +31,17 @@ export default function StepDetails({
         const managerSite = sites.find(site => site.id === (employee.siteId || employee.site_id));
         const managerCountry = employee.country || employee.country_code || managerSite?.country;
         const isGlobalExecutive = ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'super_admin', 'ceo'].includes(employee.role);
-        return !targetCountry || (managerCountry
+        const countryMatches = !targetCountry || (managerCountry
             ? String(managerCountry).toUpperCase() === String(targetCountry).toUpperCase()
             : isGlobalExecutive);
+        const targetRegion = selectedSite?.regionCode || selectedSite?.region_code;
+        const managerRegion = employee.regionCode || employee.region_code || managerSite?.regionCode || managerSite?.region_code;
+        const regionMatches = !isRegionalWorkforceRole(newEmpData.role)
+            || employee.scopeLevel !== 'REGIONAL'
+            || !targetRegion
+            || !managerRegion
+            || targetRegion.toLowerCase() === managerRegion.toLowerCase();
+        return countryMatches && regionMatches;
     }).sort((a, b) => a.name.localeCompare(b.name));
 
     const reportingSelect = (label: string, value: string | undefined, key: 'reportsToEmployeeId' | 'functionalManagerEmployeeId') => (

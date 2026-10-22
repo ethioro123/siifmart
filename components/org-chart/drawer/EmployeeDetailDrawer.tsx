@@ -4,11 +4,14 @@ import { DEPT_COLORS } from '../types';
 import { getRoleDept } from '../hooks/useOrgTreeLayout';
 import { X, Mail, Phone, MapPin, Award, Calendar, Shield, ExternalLink, Copy, Check, CreditCard, UserCheck, AlertCircle } from 'lucide-react';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
-import { getEmployeeJobTitle } from '../../../utils/roles';
+import { getEmployeeJobTitle, getRoleHierarchy } from '../../../utils/roles';
 
 interface EmployeeDetailDrawerProps {
     employee: Employee | null;
+    employees?: Employee[];
     sites?: Site[];
+    canEditReportingLines?: boolean;
+    onSaveReportingLines?: (employee: Employee) => Promise<void> | void;
     isDark: boolean;
     onlineIds?: Set<string>;
     onClose: () => void;
@@ -18,7 +21,10 @@ interface EmployeeDetailDrawerProps {
 
 export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
     employee,
+    employees = [],
     sites = [],
+    canEditReportingLines = false,
+    onSaveReportingLines,
     isDark,
     onlineIds,
     onClose,
@@ -27,6 +33,16 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
 }) => {
     const [copiedEmail, setCopiedEmail] = React.useState(false);
     const [copiedPhone, setCopiedPhone] = React.useState(false);
+    const [primaryManagerId, setPrimaryManagerId] = React.useState('');
+    const [functionalManagerId, setFunctionalManagerId] = React.useState('');
+    const [savingReportingLines, setSavingReportingLines] = React.useState(false);
+    const [reportingMessage, setReportingMessage] = React.useState('');
+
+    React.useEffect(() => {
+        setPrimaryManagerId(employee?.reportsToEmployeeId || employee?.reports_to_employee_id || '');
+        setFunctionalManagerId(employee?.functionalManagerEmployeeId || employee?.functional_manager_employee_id || '');
+        setReportingMessage('');
+    }, [employee?.id, employee?.reportsToEmployeeId, employee?.reports_to_employee_id, employee?.functionalManagerEmployeeId, employee?.functional_manager_employee_id]);
 
     if (!employee) return null;
 
@@ -36,6 +52,43 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
     const deptColors = DEPT_COLORS[dept] || DEPT_COLORS.support;
     const siteObj = sites.find(s => s.id === (employee.siteId || employee.site_id));
     const siteName = siteObj?.name || 'Central Operations / HQ';
+    const employeeCountry = employee.country || employee.country_code || siteObj?.country;
+    const reportableEmployees = employees.filter(candidate => {
+        if (candidate.id === employee.id || candidate.status !== 'Active') return false;
+        if (getRoleHierarchy(candidate.role) <= getRoleHierarchy(employee.role)) return false;
+        const candidateSite = sites.find(site => site.id === (candidate.siteId || candidate.site_id));
+        const candidateCountry = candidate.country || candidate.country_code || candidateSite?.country;
+        const globalExecutives = ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'super_admin', 'ceo'];
+        const countryMatches = !employeeCountry || (candidateCountry
+            ? String(candidateCountry).toUpperCase() === String(employeeCountry).toUpperCase()
+            : globalExecutives.includes(candidate.role));
+        const employeeRegion = employee.regionCode || employee.region_code;
+        const candidateRegion = candidate.regionCode || candidate.region_code || candidateSite?.regionCode || candidateSite?.region_code;
+        const regionMatches = employee.scopeLevel !== 'REGIONAL'
+            || candidate.scopeLevel !== 'REGIONAL'
+            || !employeeRegion
+            || !candidateRegion
+            || employeeRegion.toLowerCase() === candidateRegion.toLowerCase();
+        return countryMatches && regionMatches;
+    }).sort((a, b) => a.name.localeCompare(b.name));
+
+    const saveReportingLines = async () => {
+        if (!onSaveReportingLines) return;
+        setSavingReportingLines(true);
+        setReportingMessage('');
+        try {
+            await onSaveReportingLines({
+                ...employee,
+                reportsToEmployeeId: primaryManagerId || undefined,
+                functionalManagerEmployeeId: functionalManagerId || undefined
+            });
+            setReportingMessage('Reporting relationships saved.');
+        } catch {
+            setReportingMessage('Could not save reporting relationships. Check the employee’s country and region scope.');
+        } finally {
+            setSavingReportingLines(false);
+        }
+    };
 
     const avatar = employee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=2C5E3B&color=EAE5D9&size=160`;
 
@@ -169,6 +222,30 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                             </div>
                         </div>
                     </div>
+
+                    {canEditReportingLines && onSaveReportingLines && (
+                        <section className="rounded-xl border border-[#E2DCCE] dark:border-white/10 p-3.5 space-y-3" aria-label="Reporting relationships">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500">Reporting Relationships</h4>
+                            <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-300">
+                                Primary manager
+                                <select value={primaryManagerId} onChange={event => setPrimaryManagerId(event.target.value)} className="mt-1 w-full rounded-lg border border-[#E2DCCE] dark:border-white/10 bg-white dark:bg-black/30 px-3 py-2 text-sm text-stone-900 dark:text-white">
+                                    <option value="">Unassigned</option>
+                                    {reportableEmployees.map(manager => <option key={manager.id} value={manager.id}>{manager.name} · {getEmployeeJobTitle(manager)}</option>)}
+                                </select>
+                            </label>
+                            <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-300">
+                                Functional manager
+                                <select value={functionalManagerId} onChange={event => setFunctionalManagerId(event.target.value)} className="mt-1 w-full rounded-lg border border-[#E2DCCE] dark:border-white/10 bg-white dark:bg-black/30 px-3 py-2 text-sm text-stone-900 dark:text-white">
+                                    <option value="">Unassigned</option>
+                                    {reportableEmployees.map(manager => <option key={manager.id} value={manager.id}>{manager.name} · {getEmployeeJobTitle(manager)}</option>)}
+                                </select>
+                            </label>
+                            {reportingMessage && <p role="status" className="text-[11px] text-stone-500 dark:text-stone-400">{reportingMessage}</p>}
+                            <button type="button" onClick={saveReportingLines} disabled={savingReportingLines} className="w-full rounded-lg bg-[#2C5E3B] px-3 py-2 text-xs font-bold text-white disabled:opacity-50">
+                                {savingReportingLines ? 'Saving…' : 'Save reporting relationships'}
+                            </button>
+                        </section>
+                    )}
 
                     {/* Contact Info */}
                     <div>

@@ -408,6 +408,8 @@ export default function Employees() {
                onSelectEmployee={setSelectedEmployee}
                onOpenAddEmployee={wizard.handleOpenWizard}
                onOpenIdCard={setIdCardEmployee}
+               canEditReportingLines={hasPermission(user?.role, 'EDIT_EMPLOYEE')}
+               onSaveReportingLines={employee => updateEmployee(employee, user?.name || 'System')}
             />
          )}
 
