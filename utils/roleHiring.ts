@@ -54,8 +54,8 @@ export const canEmployRole = (
     const userLevel = SYSTEM_ROLES.find(r => r.id === userRole)?.level || 10;
     const candidateLevel = SYSTEM_ROLES.find(r => r.id === candidateRole)?.level || 10;
 
-    // Specialists & Frontline Staff (Levels 9 & 10) have no hiring authority
-    if (userLevel >= 9 || userHierarchy < 55) {
+    // Specialists, frontline staff, and shift supervisors below Assistant Store Manager (Levels 9-10 or hierarchy < 60) have no hiring authority
+    if (userLevel >= 9 || userHierarchy < 60) {
         return false;
     }
 

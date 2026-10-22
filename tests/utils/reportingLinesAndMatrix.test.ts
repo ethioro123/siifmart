@@ -286,10 +286,42 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
     });
 
     it('validates critical Dotted-Line functional compliance connections', () => {
-        // Cashier -> Head of Finance
+        // Cashier -> Regional Finance Manager (Daily Drawer Reconciliations & Till Limits)
         const cashier = getRoleReportingMeta('cashier');
-        expect(cashier.dottedLineRole).toBe('head_of_finance');
+        expect(cashier.reportsToRole).toBe('pos_supervisor');
+        expect(cashier.dottedLineRole).toBe('regional_finance_manager');
         expect(cashier.dottedLineLabel).toContain('Finance');
+
+        // Store Merchandiser -> Regional Merchandising Manager
+        const storeMerch = getRoleReportingMeta('merchandiser');
+        expect(storeMerch.reportsToRole).toBe('store_supervisor');
+        expect(storeMerch.dottedLineRole).toBe('regional_merchandising_manager');
+        expect(storeMerch.dottedLineLabel).toContain('Merchandising');
+
+        // Store Facility & Floor Supervisors
+        const sm = getRoleReportingMeta('store_manager');
+        expect(sm.reportsToRole).toBe('area_operations_manager');
+        expect(sm.dottedLineRole).toBe('regional_operations_manager');
+
+        const asm = getRoleReportingMeta('assistant_store_manager');
+        expect(asm.reportsToRole).toBe('store_manager');
+        expect(asm.dottedLineRole).toBe('area_operations_manager');
+
+        const posSup = getRoleReportingMeta('pos_supervisor');
+        expect(posSup.reportsToRole).toBe('assistant_store_manager');
+        expect(posSup.dottedLineRole).toBe('regional_finance_manager');
+
+        const stockSup = getRoleReportingMeta('stock_control_supervisor');
+        expect(stockSup.reportsToRole).toBe('assistant_store_manager');
+        expect(stockSup.dottedLineRole).toBe('regional_security_manager');
+
+        const shiftSup = getRoleReportingMeta('shift_supervisor');
+        expect(shiftSup.reportsToRole).toBe('assistant_store_manager');
+        expect(shiftSup.dottedLineRole).toBe('store_manager');
+
+        const storeSup = getRoleReportingMeta('store_supervisor');
+        expect(storeSup.reportsToRole).toBe('assistant_store_manager');
+        expect(storeSup.dottedLineRole).toBe('store_manager');
 
         // Receiver -> Receiving Supervisor / Inbound QC
         const receiver = getRoleReportingMeta('receiver');
@@ -310,11 +342,6 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         const payroll = getRoleReportingMeta('payroll_specialist');
         expect(payroll.dottedLineRole).toBe('head_of_finance');
         expect(payroll.dottedLineLabel).toContain('Finance');
-
-        // Store Merchandiser -> Corporate Head of Merchandising
-        const storeMerch = getRoleReportingMeta('merchandiser');
-        expect(storeMerch.dottedLineRole).toBe('head_of_merchandising');
-        expect(storeMerch.dottedLineLabel).toContain('Merchandising');
 
         // Head of Finance -> Group CFO (solid) & Country MD (dotted)
         const hof = getRoleReportingMeta('head_of_finance');

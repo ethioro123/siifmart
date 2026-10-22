@@ -254,15 +254,52 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
             expect(canEmployRole('store_manager', 'super_admin')).toBe(false);
             expect(canEmployRole('store_manager', 'head_of_operations')).toBe(false);
             expect(canEmployRole('store_manager', 'head_of_hr')).toBe(false);
+            expect(canEmployRole('store_manager', 'area_operations_manager')).toBe(false);
             expect(canEmployRole('store_manager', 'store_manager')).toBe(false);
             expect(canEmployRole('store_manager', 'warehouse_manager')).toBe(false);
         });
 
-        it('can only employ Level 4 roles below them', () => {
+        it('can employ subordinate store leadership and frontline retail staff', () => {
+            expect(canEmployRole('store_manager', 'assistant_store_manager')).toBe(true);
             expect(canEmployRole('store_manager', 'assistant_manager')).toBe(true);
+            expect(canEmployRole('store_manager', 'shift_supervisor')).toBe(true);
+            expect(canEmployRole('store_manager', 'pos_supervisor')).toBe(true);
+            expect(canEmployRole('store_manager', 'stock_control_supervisor')).toBe(true);
+            expect(canEmployRole('store_manager', 'store_supervisor')).toBe(true);
             expect(canEmployRole('store_manager', 'shift_lead')).toBe(true);
             expect(canEmployRole('store_manager', 'cashier')).toBe(true);
             expect(canEmployRole('store_manager', 'sales_associate')).toBe(true);
+            expect(canEmployRole('store_manager', 'store_associate')).toBe(true);
+            expect(canEmployRole('store_manager', 'merchandiser')).toBe(true);
+            expect(canEmployRole('store_manager', 'stock_clerk')).toBe(true);
+            expect(canEmployRole('store_manager', 'returns_clerk')).toBe(true);
+        });
+    });
+
+    describe('Assistant Store Managers & Retail Supervisors (Level 8)', () => {
+        it('assistant_store_manager can hire frontline floor staff', () => {
+            expect(canEmployRole('assistant_store_manager', 'cashier')).toBe(true);
+            expect(canEmployRole('assistant_store_manager', 'store_associate')).toBe(true);
+            expect(canEmployRole('assistant_store_manager', 'sales_associate')).toBe(true);
+            expect(canEmployRole('assistant_store_manager', 'stock_clerk')).toBe(true);
+            expect(canEmployRole('assistant_store_manager', 'merchandiser')).toBe(true);
+            expect(canEmployRole('assistant_store_manager', 'returns_clerk')).toBe(true);
+        });
+
+        it('assistant_store_manager cannot hire supervisors, store managers or superiors', () => {
+            expect(canEmployRole('assistant_store_manager', 'shift_supervisor')).toBe(false);
+            expect(canEmployRole('assistant_store_manager', 'pos_supervisor')).toBe(false);
+            expect(canEmployRole('assistant_store_manager', 'store_manager')).toBe(false);
+            expect(canEmployRole('assistant_store_manager', 'area_operations_manager')).toBe(false);
+        });
+
+        it('retail supervisors (shift_supervisor, pos_supervisor, etc.) have no hiring authority', () => {
+            expect(canEmployRole('shift_supervisor', 'cashier')).toBe(false);
+            expect(canEmployRole('shift_supervisor', 'store_associate')).toBe(false);
+            expect(canEmployRole('pos_supervisor', 'cashier')).toBe(false);
+            expect(canEmployRole('stock_control_supervisor', 'stock_clerk')).toBe(false);
+            expect(canEmployRole('store_supervisor', 'merchandiser')).toBe(false);
+            expect(canEmployRole('shift_lead', 'cashier')).toBe(false);
         });
     });
 
