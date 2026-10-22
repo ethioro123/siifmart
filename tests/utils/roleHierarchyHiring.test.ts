@@ -303,19 +303,40 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
         });
     });
 
-    describe('Other Domain Managers (Level 3)', () => {
+    describe('Warehouse & Fulfillment Leadership (Level 6 & 7)', () => {
         it('warehouse_manager cannot employ peer site managers or superiors', () => {
             expect(canEmployRole('warehouse_manager', 'super_admin')).toBe(false);
+            expect(canEmployRole('warehouse_manager', 'country_supply_chain_director')).toBe(false);
+            expect(canEmployRole('warehouse_manager', 'regional_supply_chain_manager')).toBe(false);
             expect(canEmployRole('warehouse_manager', 'head_of_operations')).toBe(false);
             expect(canEmployRole('warehouse_manager', 'warehouse_manager')).toBe(false);
             expect(canEmployRole('warehouse_manager', 'store_manager')).toBe(false);
         });
 
-        it('warehouse_manager can employ subordinate warehouse staff', () => {
+        it('warehouse_manager can employ department managers, supervisors, and frontline fulfillment staff', () => {
+            expect(canEmployRole('warehouse_manager', 'warehouse_operations_manager')).toBe(true);
+            expect(canEmployRole('warehouse_manager', 'transport_fleet_manager')).toBe(true);
+            expect(canEmployRole('warehouse_manager', 'receiving_supervisor')).toBe(true);
+            expect(canEmployRole('warehouse_manager', 'inventory_control_supervisor')).toBe(true);
+            expect(canEmployRole('warehouse_manager', 'putaway_replenishment_supervisor')).toBe(true);
+            expect(canEmployRole('warehouse_manager', 'picking_supervisor')).toBe(true);
+            expect(canEmployRole('warehouse_manager', 'packing_supervisor')).toBe(true);
+            expect(canEmployRole('warehouse_manager', 'dispatch_supervisor')).toBe(true);
+            expect(canEmployRole('warehouse_manager', 'returns_waste_supervisor')).toBe(true);
             expect(canEmployRole('warehouse_manager', 'picker')).toBe(true);
             expect(canEmployRole('warehouse_manager', 'packer')).toBe(true);
             expect(canEmployRole('warehouse_manager', 'forklift_operator')).toBe(true);
             expect(canEmployRole('warehouse_manager', 'receiver')).toBe(true);
+            expect(canEmployRole('warehouse_manager', 'driver')).toBe(true);
+        });
+
+        it('warehouse supervisors (picking_supervisor, dispatch_supervisor, etc.) have no hiring authority', () => {
+            expect(canEmployRole('receiving_supervisor', 'receiver')).toBe(false);
+            expect(canEmployRole('picking_supervisor', 'picker')).toBe(false);
+            expect(canEmployRole('packing_supervisor', 'packer')).toBe(false);
+            expect(canEmployRole('dispatch_supervisor', 'driver')).toBe(false);
+            expect(canEmployRole('inventory_control_supervisor', 'stock_counter')).toBe(false);
+            expect(canEmployRole('fleet_maintenance_supervisor', 'fleet_mechanic')).toBe(false);
         });
 
         it('security_manager can only employ loss prevention staff', () => {

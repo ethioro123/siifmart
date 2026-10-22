@@ -33,6 +33,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         dottedLineLabel: 'Country Supply Chain Director (National Supply Chain Governance)',
         managesRoles: [
             'warehouse_operations_manager', 'transport_fleet_manager',
+            'inventory_manager', 'logistics_manager',
             'receiving_supervisor', 'inventory_control_supervisor',
             'putaway_replenishment_supervisor', 'picking_supervisor',
             'packing_supervisor', 'dispatch_supervisor', 'returns_waste_supervisor',
@@ -51,7 +52,12 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L7 Warehouse Operations',
         reportsToRole: 'warehouse_manager',
         reportsToLabel: 'Warehouse Manager (Fulfillment Center Lead)',
-        managesRoles: ['putaway_replenishment_supervisor', 'picking_supervisor', 'packing_supervisor'],
+        dottedLineRole: 'regional_supply_chain_manager',
+        dottedLineLabel: 'Regional Supply Chain Manager (Regional Operations & Wave Governance)',
+        managesRoles: [
+            'putaway_replenishment_supervisor', 'picking_supervisor',
+            'packing_supervisor', 'receiving_supervisor'
+        ],
         isManagerial: true
     },
     transport_fleet_manager: {
@@ -252,9 +258,9 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelCategory: 'supervisor',
         levelTag: 'L8 Stock Integrity Supervisor',
         reportsToRole: 'warehouse_manager',
-        reportsToLabel: 'Warehouse Manager',
-        dottedLineRole: 'country_supply_chain_director',
-        dottedLineLabel: 'Supply Chain Governance (Cycle Count Integrity)',
+        reportsToLabel: 'Warehouse Manager (Fulfillment Center Lead)',
+        dottedLineRole: 'country_compliance_manager',
+        dottedLineLabel: 'Country Compliance Manager (Cycle Count Integrity & Shrinkage Governance)',
         managesRoles: ['inventory_controller', 'stock_counter', 'inventory_specialist'],
         isManagerial: true
     },
@@ -266,8 +272,8 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToRole: 'warehouse_operations_manager',
         reportsToLabel: 'Warehouse Operations Manager',
         dottedLineRole: 'warehouse_manager',
-        dottedLineLabel: 'Warehouse Manager',
-        managesRoles: ['putaway_operator', 'replenishment_operator'],
+        dottedLineLabel: 'Warehouse Manager (Storage Allocation & Bin Integrity)',
+        managesRoles: ['putaway_operator', 'replenishment_operator', 'forklift_operator'],
         isManagerial: true
     },
     picking_supervisor: {
@@ -278,7 +284,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToRole: 'warehouse_operations_manager',
         reportsToLabel: 'Warehouse Operations Manager',
         dottedLineRole: 'warehouse_manager',
-        dottedLineLabel: 'Warehouse Manager',
+        dottedLineLabel: 'Warehouse Manager (Wave Execution & Order Accuracy)',
         managesRoles: ['picking_team_leader', 'picker'],
         isManagerial: true
     },
@@ -290,7 +296,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToRole: 'warehouse_operations_manager',
         reportsToLabel: 'Warehouse Operations Manager',
         dottedLineRole: 'warehouse_manager',
-        dottedLineLabel: 'Warehouse Manager',
+        dottedLineLabel: 'Warehouse Manager (Packaging QC & Barcode Sealing)',
         managesRoles: ['packing_team_leader', 'packer'],
         isManagerial: true
     },
@@ -302,7 +308,7 @@ export const L6_L8_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToRole: 'transport_fleet_manager',
         reportsToLabel: 'Transport & Fleet Manager',
         dottedLineRole: 'warehouse_manager',
-        dottedLineLabel: 'Warehouse Manager (Outbound Staging)',
+        dottedLineLabel: 'Warehouse Manager (Outbound Dock Staging & Carrier Manifests)',
         managesRoles: ['dispatch_team_leader', 'dispatch_operator', 'driver'],
         isManagerial: true
     },

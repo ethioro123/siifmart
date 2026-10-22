@@ -90,7 +90,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'procurement', 'inventory', 'pricing', 'warehouse', 'settings', 'profile'
     ],
     head_of_supply_chain: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'settings', 'profile'
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
     ],
     head_of_merchandising: [
         'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'

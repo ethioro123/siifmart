@@ -120,7 +120,6 @@ export const PERMISSIONS = {
         'head_of_finance',
         'head_of_hr',
         'head_of_procurement',
-        'head_of_supply_chain',
         'it_support', 'head_of_it', 'security_manager',
         'auditor', 'head_of_audit', 'regional_security_manager'
     ],

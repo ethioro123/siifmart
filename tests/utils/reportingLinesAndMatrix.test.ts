@@ -323,6 +323,43 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(storeSup.reportsToRole).toBe('assistant_store_manager');
         expect(storeSup.dottedLineRole).toBe('store_manager');
 
+        // Warehouse & Supply Chain Leadership Matrix
+        const wm = getRoleReportingMeta('warehouse_manager');
+        expect(wm.reportsToRole).toBe('regional_supply_chain_manager');
+        expect(wm.dottedLineRole).toBe('country_supply_chain_director');
+
+        const wom = getRoleReportingMeta('warehouse_operations_manager');
+        expect(wom.reportsToRole).toBe('warehouse_manager');
+        expect(wom.dottedLineRole).toBe('regional_supply_chain_manager');
+
+        const tfm = getRoleReportingMeta('transport_fleet_manager');
+        expect(tfm.reportsToRole).toBe('regional_supply_chain_manager');
+        expect(tfm.dottedLineRole).toBe('warehouse_manager');
+
+        const ics = getRoleReportingMeta('inventory_control_supervisor');
+        expect(ics.reportsToRole).toBe('warehouse_manager');
+        expect(ics.dottedLineRole).toBe('country_compliance_manager');
+
+        const prs = getRoleReportingMeta('putaway_replenishment_supervisor');
+        expect(prs.reportsToRole).toBe('warehouse_operations_manager');
+        expect(prs.dottedLineRole).toBe('warehouse_manager');
+
+        const ps = getRoleReportingMeta('picking_supervisor');
+        expect(ps.reportsToRole).toBe('warehouse_operations_manager');
+        expect(ps.dottedLineRole).toBe('warehouse_manager');
+
+        const pks = getRoleReportingMeta('packing_supervisor');
+        expect(pks.reportsToRole).toBe('warehouse_operations_manager');
+        expect(pks.dottedLineRole).toBe('warehouse_manager');
+
+        const ds = getRoleReportingMeta('dispatch_supervisor');
+        expect(ds.reportsToRole).toBe('transport_fleet_manager');
+        expect(ds.dottedLineRole).toBe('warehouse_manager');
+
+        const rws = getRoleReportingMeta('returns_waste_supervisor');
+        expect(rws.reportsToRole).toBe('warehouse_manager');
+        expect(rws.dottedLineRole).toBe('country_compliance_manager');
+
         // Receiver -> Receiving Supervisor / Inbound QC
         const receiver = getRoleReportingMeta('receiver');
         expect(receiver.dottedLineRole).toBe('receiving_supervisor');
