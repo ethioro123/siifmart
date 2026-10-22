@@ -35,13 +35,13 @@ describe('Regional Autonomous PO Approval & National HQ Escalation', () => {
             status: 'active'
         });
 
-        // Mock RPC to trigger fallback direct update for test simplicity
+        // Mock RPC
         vi.spyOn(supabase, 'rpc').mockResolvedValue({
-            data: null,
-            error: { code: '42883', message: 'function public.approve_purchase_order does not exist' } as any,
+            data: { success: true },
+            error: null,
             count: null,
-            status: 400,
-            statusText: 'Bad Request'
+            status: 200,
+            statusText: 'OK'
         } as any);
 
         // Mock supabase update
@@ -87,14 +87,15 @@ describe('Regional Autonomous PO Approval & National HQ Escalation', () => {
                 approverRole: 'regional_procurement_manager',
                 reasonCode: 'STANDARD_REPLENISHMENT' as any
             })
-        ).rejects.toThrow(/Autonomous Cap Exceeded.*requires National HQ sign-off/);
+        ).rejects.toThrow(/exceeds the configured regional PO limit/);
     });
 
     it('permits National HQ Executive (CEO/super_admin) to approve high-value escalated PO', async () => {
         const highValuePO: Partial<PurchaseOrder> = {
             ...mockRegionalPO,
             totalAmount: 450000,
-            requiresHqApproval: true
+            requiresHqApproval: true,
+            finance_cleared_at: '2026-10-10T00:00:00Z'
         };
         vi.spyOn(poReadModule, 'getById').mockResolvedValue(highValuePO as PurchaseOrder);
 

@@ -4,7 +4,8 @@ import { supabase } from '../../lib/supabase';
 
 vi.mock('../../lib/supabase', () => ({
     supabase: {
-        from: vi.fn()
+        from: vi.fn(),
+        rpc: vi.fn()
     }
 }));
 
@@ -31,6 +32,14 @@ describe('regionsService - Dynamic Budget & Operations', () => {
             { total_amount: 380000, status: 'completed' }
         ];
 
+        const poChain: any = {
+            select: vi.fn(() => poChain),
+            in: vi.fn(() => poChain),
+            gte: vi.fn(() => poChain),
+            lt: vi.fn(() => poChain),
+            then: (resolve: any) => Promise.resolve({ data: mockPOs, error: null }).then(resolve)
+        };
+
         // Mock Supabase chained calls
         (supabase.from as any).mockImplementation((table: string) => {
             if (table === 'regions') {
@@ -47,12 +56,7 @@ describe('regionsService - Dynamic Budget & Operations', () => {
                 };
             }
             if (table === 'purchase_orders') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    in: vi.fn().mockReturnThis(),
-                    gte: vi.fn().mockReturnThis(),
-                    not: vi.fn().mockResolvedValue({ data: mockPOs, error: null })
-                };
+                return poChain;
             }
             return {
                 select: vi.fn().mockReturnThis()
@@ -88,6 +92,14 @@ describe('regionsService - Dynamic Budget & Operations', () => {
         const mockSites = [{ id: 'site-hq' }];
         const mockPOs = [{ total_amount: 550000, status: 'approved' }];
 
+        const poChain: any = {
+            select: vi.fn(() => poChain),
+            in: vi.fn(() => poChain),
+            gte: vi.fn(() => poChain),
+            lt: vi.fn(() => poChain),
+            then: (resolve: any) => Promise.resolve({ data: mockPOs, error: null }).then(resolve)
+        };
+
         (supabase.from as any).mockImplementation((table: string) => {
             if (table === 'regions') {
                 return {
@@ -103,12 +115,7 @@ describe('regionsService - Dynamic Budget & Operations', () => {
                 };
             }
             if (table === 'purchase_orders') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    in: vi.fn().mockReturnThis(),
-                    gte: vi.fn().mockReturnThis(),
-                    not: vi.fn().mockResolvedValue({ data: mockPOs, error: null })
-                };
+                return poChain;
             }
             return {};
         });
@@ -176,12 +183,14 @@ describe('regionsService - Dynamic Budget & Operations', () => {
                 };
             }
             if (table === 'purchase_orders') {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    in: vi.fn().mockReturnThis(),
-                    gte: vi.fn().mockReturnThis(),
-                    not: vi.fn().mockResolvedValue({ data: null, error: { message: 'PO query timeout' } })
+                const poErrChain: any = {
+                    select: vi.fn(() => poErrChain),
+                    in: vi.fn(() => poErrChain),
+                    gte: vi.fn(() => poErrChain),
+                    lt: vi.fn(() => poErrChain),
+                    then: (resolve: any, reject: any) => Promise.resolve({ data: null, error: { message: 'PO query timeout' } }).then(resolve, reject)
                 };
+                return poErrChain;
             }
             return {};
         });
@@ -201,17 +210,23 @@ describe('regionsService - Dynamic Budget & Operations', () => {
 
     it('standardizes country name to 2-letter ISO in createRegion', async () => {
         let insertedPayload: any = null;
-        (supabase.from as any).mockReturnValue({
-            insert: vi.fn().mockImplementation((payload) => {
-                insertedPayload = payload[0];
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    single: vi.fn().mockResolvedValue({
-                        data: { ...insertedPayload, code: 'ke_rift', id: '1' },
-                        error: null
-                    })
-                };
-            })
+        (supabase.rpc as any).mockImplementation((proc: string, args: any) => {
+            insertedPayload = args.p_region;
+            return Promise.resolve({
+                data: { ...insertedPayload, code: 'ke_rift', id: '1' },
+                error: null
+            });
+        });
+
+        (supabase.from as any).mockImplementation((table: string) => {
+            return {
+                select: vi.fn().mockReturnThis(),
+                eq: vi.fn().mockReturnThis(),
+                maybeSingle: vi.fn().mockResolvedValue({
+                    data: { code: 'ke_rift', country: 'KE' },
+                    error: null
+                })
+            };
         });
 
         await regionsService.createRegion({

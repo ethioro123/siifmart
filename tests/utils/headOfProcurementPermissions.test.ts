@@ -14,7 +14,7 @@ describe('Head of Procurement Role & Sourcing Governance Engine (SOP-MGT-024)', 
         });
 
         it('blocks head_of_procurement from cashier POS and system settings modules', () => {
-            expect(canAccessModule('country_commercial_director', 'cashier')).toBe(false);
+            expect(canAccessModule('country_commercial_director', 'pos')).toBe(false);
             expect(canAccessModule('country_commercial_director', 'settings')).toBe(false);
         });
     });

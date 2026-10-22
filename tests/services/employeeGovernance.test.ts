@@ -78,7 +78,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                 {
                     salary: 18000
                 },
-                'hr'
+                'hr_generalist'
             );
 
             expect(result.requiresApproval).toBe(true);
@@ -119,7 +119,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                 {
                     role: 'shift_supervisor'
                 },
-                'hr'
+                'hr_generalist'
             );
 
             expect(roleChange.requiresApproval).toBe(true);
@@ -136,7 +136,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                     emergencyContact: 'Brother (+251911001122)',
                     specialization: 'High Shrink Audits'
                 },
-                'hr'
+                'hr_generalist'
             );
 
             expect(contactUpdate.requiresApproval).toBe(false);
@@ -152,7 +152,7 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                     salary: 22000,
                     department: 'Logistics & Warehouse'
                 },
-                'hr'
+                'hr_generalist'
             );
 
             expect(compositeChange.requiresApproval).toBe(true);

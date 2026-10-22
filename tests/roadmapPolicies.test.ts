@@ -49,10 +49,10 @@ describe('Roadmap Policies Registry', () => {
     );
     expect(regionalManagerPolicy).toBeDefined();
     expect(regionalManagerPolicy?.title).toContain('SOP-MGT-020');
-    expect(regionalManagerPolicy?.title).toContain('Regional Manager');
+    expect(regionalManagerPolicy?.title).toContain('Regional Operations Manager');
     expect(regionalManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
-    expect(regionalManagerPolicy?.content).toContain('WHAT THE REGIONAL MANAGER CAN DO');
-    expect(regionalManagerPolicy?.content).toContain('WHAT THE REGIONAL MANAGER CANNOT DO');
+    expect(regionalManagerPolicy?.content).toContain('WHAT THE REGIONAL OPERATIONS MANAGER CAN DO');
+    expect(regionalManagerPolicy?.content).toContain('WHAT THE REGIONAL OPERATIONS MANAGER CANNOT DO');
     expect(regionalManagerPolicy?.content).toContain('isMultiSiteRole = true');
     expect(regionalManagerPolicy?.priority).toBe('critical');
     expect(regionalManagerPolicy?.isStarred).toBe(true);
@@ -64,7 +64,7 @@ describe('Roadmap Policies Registry', () => {
     );
     expect(opsManagerPolicy).toBeDefined();
     expect(opsManagerPolicy?.title).toContain('SOP-MGT-021');
-    expect(opsManagerPolicy?.title).toContain('Head of Operations');
+    expect(opsManagerPolicy?.title).toContain('Country Operations Director');
     expect(opsManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(opsManagerPolicy?.content).toContain('Central Operations Control Room');
     expect(opsManagerPolicy?.content).toContain('Enterprise Fulfillment SLA Performance');
@@ -78,7 +78,7 @@ describe('Roadmap Policies Registry', () => {
     );
     expect(finManagerPolicy).toBeDefined();
     expect(finManagerPolicy?.title).toContain('SOP-MGT-022');
-    expect(finManagerPolicy?.title).toContain('Head of Finance');
+    expect(finManagerPolicy?.title).toContain('Country Finance Director');
     expect(finManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(finManagerPolicy?.content).toContain('Daily Shift Reconciliation & Z-Report Sign-Off');
     expect(finManagerPolicy?.content).toContain('Procurement PO Financial Authorization');
@@ -93,11 +93,11 @@ describe('Roadmap Policies Registry', () => {
     );
     expect(hrManagerPolicy).toBeDefined();
     expect(hrManagerPolicy?.title).toContain('SOP-MGT-023');
-    expect(hrManagerPolicy?.title).toContain('Head of Human Resources');
+    expect(hrManagerPolicy?.title).toContain('Country HR Director');
     expect(hrManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(hrManagerPolicy?.content).toContain('Wase / Guarantor Bypass');
     expect(hrManagerPolicy?.content).toContain('Anti-Cartel Rotation Execution');
-    expect(hrManagerPolicy?.department).toBe('hr_generalist');
+    expect(hrManagerPolicy?.department).toBe('hr');
     expect(hrManagerPolicy?.priority).toBe('critical');
     expect(hrManagerPolicy?.isStarred).toBe(true);
   });
@@ -108,7 +108,7 @@ describe('Roadmap Policies Registry', () => {
     );
     expect(procManagerPolicy).toBeDefined();
     expect(procManagerPolicy?.title).toContain('SOP-MGT-024');
-    expect(procManagerPolicy?.title).toContain('Head of Procurement');
+    expect(procManagerPolicy?.title).toContain('Country Commercial Director');
     expect(procManagerPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(procManagerPolicy?.content).toContain('Zero Self-Receiving');
     expect(procManagerPolicy?.content).toContain('Supplier Fill Rate');
@@ -122,7 +122,7 @@ describe('Roadmap Policies Registry', () => {
     );
     expect(scmPolicy).toBeDefined();
     expect(scmPolicy?.title).toContain('SOP-MGT-025');
-    expect(scmPolicy?.title).toContain('Head of Supply Chain');
+    expect(scmPolicy?.title).toContain('Country Supply Chain Director');
     expect(scmPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(scmPolicy?.content).toContain('Inter-Facility Transit Loss');
     expect(scmPolicy?.content).toContain('Zero Custody Handshake Bypass');
@@ -202,7 +202,7 @@ describe('Roadmap Policies Registry', () => {
     expect(secPolicy?.content).toContain('CAPTAIN OWNS THE SHIP');
     expect(secPolicy?.content).toContain('Exit Gate Pass Protocol');
     expect(secPolicy?.content).toContain('Separation of Duties — Zero Operational Access');
-    expect(secPolicy?.department).toBe('country_managing_director');
+    expect(secPolicy?.department).toBe('admin');
     expect(secPolicy?.priority).toBe('critical');
     expect(secPolicy?.isStarred).toBe(true);
   });
@@ -284,7 +284,7 @@ describe('Roadmap Policies Registry', () => {
       p => p.id === 'policy-dual-control-salary-sop-024'
     );
     expect(salaryPolicy).toBeDefined();
-    expect(salaryPolicy?.department).toBe('hr_generalist');
+    expect(salaryPolicy?.department).toBe('hr');
     expect(salaryPolicy?.priority).toBe('critical');
     expect(salaryPolicy?.content).toContain('DUAL-CONTROL SALARY ADJUSTMENT');
     expect(salaryPolicy?.content).toContain('ZERO UNILATERAL HR AUTHORITY');
@@ -297,7 +297,7 @@ describe('Roadmap Policies Registry', () => {
     expect(reportingPolicy).toBeDefined();
     expect(reportingPolicy?.title).toContain('SOP-ORG-036');
     expect(reportingPolicy?.title).toContain('Enterprise Dual-Control Reporting Lines');
-    expect(reportingPolicy?.department).toBe('country_managing_director');
+    expect(reportingPolicy?.department).toBe('admin');
     expect(reportingPolicy?.priority).toBe('critical');
     expect(reportingPolicy?.isStarred).toBe(true);
     expect(reportingPolicy?.content).toContain('DUAL-MATRIX ARCHITECTURE');
@@ -314,7 +314,7 @@ describe('Roadmap Policies Registry', () => {
     expect(merchPolicy).toBeDefined();
     expect(merchPolicy?.title).toContain('SOP-MER-037');
     expect(merchPolicy?.title).toContain('Corporate Merchandising');
-    expect(merchPolicy?.department).toBe('country_managing_director');
+    expect(merchPolicy?.department).toBe('admin');
     expect(merchPolicy?.priority).toBe('critical');
     expect(merchPolicy?.isStarred).toBe(true);
     expect(merchPolicy?.content).toContain('CORPORATE ADMINISTRATION');

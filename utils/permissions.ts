@@ -113,7 +113,7 @@ export const PERMISSIONS = {
     MANAGE_REPLENISHMENT: ['group_ceo', 'regional_operations_manager', 'regional_logistics_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'replenishment_planner', 'stock_clerk'],
 
     // Settings
-    ACCESS_SETTINGS: ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'it_support', 'country_technology_director', 'regional_security_manager', 'auditor', 'country_compliance_manager', 'regional_it_manager', 'regional_compliance_manager'],
+    ACCESS_SETTINGS: ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'it_support', 'country_technology_director', 'regional_security_manager', 'auditor', 'country_compliance_manager', 'regional_it_manager', 'regional_compliance_manager'],
     EDIT_SYSTEM_SETTINGS: ['group_ceo', 'country_managing_director', 'it_support', 'country_technology_director'],
     EDIT_OPERATIONAL_SETTINGS: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director'],
     EDIT_HR_SETTINGS: ['group_ceo', 'country_managing_director', 'hr_generalist', 'country_hr_director'],
@@ -257,8 +257,10 @@ export function canAccessModule(userRole: UserRole | undefined, module: string):
 
     const modulePermissions: Record<string, keyof typeof PERMISSIONS> = {
         'dashboard': 'VIEW_ADMIN_DASHBOARD',
+        'admin': 'ACCESS_ADMIN_MODULE',
         country_managing_director: 'ACCESS_ADMIN_MODULE',
         'regional-ops': 'ACCESS_REGIONAL_OPS',
+        'pos': 'ACCESS_POS',
         cashier: 'ACCESS_POS',
         'inventory': 'ACCESS_INVENTORY',
         'sales': 'ACCESS_SALES',

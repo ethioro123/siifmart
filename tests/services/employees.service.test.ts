@@ -23,89 +23,63 @@ describe('employeesService - Code Generation & Conflict Resilience', () => {
     });
 
     it('generates next employee code above baseline 39 when DB has codes up to 39 for Ethiopia', async () => {
-        const mockSelect = vi.fn().mockReturnValue({
-            order: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue({
-                    data: [
-                        { code: 'SIIF-0039' },
-                        { code: 'SIIF-0038' },
-                        { code: 'SIIF-0037' }
-                    ],
-                    error: null
-                })
-            })
-        });
-
-        (supabase.from as any).mockReturnValue({
-            select: mockSelect
+        (supabase.rpc as any).mockResolvedValue({
+            data: 'ET-SIIF0040',
+            error: null
         });
 
         const nextCode = await employeesService.getNextCode('ET');
         expect(nextCode).toBe('ET-SIIF0040');
+        expect(supabase.rpc).toHaveBeenCalledWith('reserve_next_employee_code', {
+            p_country_code: 'ET'
+        });
     });
 
     it('falls back to at least ET-SIIF0040 when DB query returns empty data for Ethiopia', async () => {
-        const mockSelect = vi.fn().mockReturnValue({
-            order: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue({
-                    data: [],
-                    error: null
-                })
-            })
-        });
-
-        (supabase.from as any).mockReturnValue({
-            select: mockSelect
+        (supabase.rpc as any).mockResolvedValue({
+            data: 'ET-SIIF0040',
+            error: null
         });
 
         const nextCode = await employeesService.getNextCode();
         expect(nextCode).toBe('ET-SIIF0040');
+        expect(supabase.rpc).toHaveBeenCalledWith('reserve_next_employee_code', {
+            p_country_code: 'ET'
+        });
     });
 
     it('generates KE-SIIF0001 for fresh Kenya tenant with zero cross-country bleed', async () => {
-        const mockSelect = vi.fn().mockReturnValue({
-            order: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue({
-                    data: [
-                        { code: 'SIIF-0039' },
-                        { code: 'ET-SIIF0040' }
-                    ],
-                    error: null
-                })
-            })
-        });
-
-        (supabase.from as any).mockReturnValue({
-            select: mockSelect
+        (supabase.rpc as any).mockResolvedValue({
+            data: 'KE-SIIF0001',
+            error: null
         });
 
         const nextCode = await employeesService.getNextCode('KE');
         expect(nextCode).toBe('KE-SIIF0001');
+        expect(supabase.rpc).toHaveBeenCalledWith('reserve_next_employee_code', {
+            p_country_code: 'KE'
+        });
     });
 
     it('increments Kenya sequence when existing Kenyan workers are present', async () => {
-        const mockSelect = vi.fn().mockReturnValue({
-            order: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue({
-                    data: [
-                        { code: 'KE-SIIF0043' },
-                        { code: 'ET-SIIF0050' }
-                    ],
-                    error: null
-                })
-            })
-        });
-
-        (supabase.from as any).mockReturnValue({
-            select: mockSelect
+        (supabase.rpc as any).mockResolvedValue({
+            data: 'KE-SIIF0044',
+            error: null
         });
 
         const nextCode = await employeesService.getNextCode('KE');
         expect(nextCode).toBe('KE-SIIF0044');
+        expect(supabase.rpc).toHaveBeenCalledWith('reserve_next_employee_code', {
+            p_country_code: 'KE'
+        });
     });
 
     it('retries with incremented code if 23505 unique constraint violation occurs on employees_code_key', async () => {
         let callCount = 0;
+        (supabase.rpc as any).mockResolvedValue({
+            data: 'ET-SIIF0040',
+            error: null
+        });
 
         (supabase.from as any).mockImplementation((table: string) => {
             if (table === 'employees') {

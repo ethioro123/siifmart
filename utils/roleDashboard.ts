@@ -28,7 +28,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     const isStoreSite = siteType && ['Store', 'Retail', 'POS'].includes(siteType);
 
     // 1. Regional Command: Regional Operations and Department Managers command from /regional-ops
-    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(role)) {
+    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(role)) {
         return '/regional-ops';
     }
 
@@ -73,7 +73,6 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'training_coordinator':
             return '/employees';
 
-        case 'country_commercial_director':
         case 'merchandising_specialist':
         case 'regional_merchandising_manager':
         case 'merchandiser':
@@ -103,7 +102,6 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'putaway_replenishment_supervisor':
         case 'picking_supervisor':
         case 'packing_supervisor':
-        case 'dispatch_supervisor':
         case 'returns_waste_supervisor':
         case 'fleet_maintenance_supervisor':
         case 'receiving_team_leader':

@@ -19,6 +19,7 @@ vi.mock('../../services/system-logs.service', () => ({
 describe('Zero-Trust Hardened Expenses Service', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        (supabase.rpc as any).mockResolvedValue({ data: null, error: null });
     });
 
     it('rejects hard deletion and enforces zero-trust soft-voiding', async () => {
