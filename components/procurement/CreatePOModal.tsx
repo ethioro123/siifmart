@@ -372,6 +372,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             onClose={handlePause}
             title={isEditMode ? "Edit Purchase Order" : "Initiate Purchase Order"}
             size="4xl"
+            mobileFullScreen
             footer={
                 <CreatePOFooter
                     currencySymbol={currencySymbol}

@@ -480,3 +480,7 @@
 - New product handling requirements require confirmation, packaging counts require entry, and unbranded identity is explicit. Category preview suggestions are labeled and advanced catalog specifications are read only.
 - Procurement no longer requires retail pricing; catalog snapshots retain approved prices/specifications, and new unpriced products remain pending product approval.
 - Migration: `migrations/20261023_po_item_delivery_and_pricing_integrity.sql` (SIIFMART Staging).
+
+### PO form responsive layout (2026-10-23)
+- Mobile PO editor uses the available screen height, safe-area footer spacing, and independently scrolling content.
+- Total and action buttons stack on narrow screens; physical attributes use readable mobile columns, and supplier cards no longer stretch to match logistics.

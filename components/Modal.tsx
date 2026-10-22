@@ -13,6 +13,7 @@ interface ModalProps {
   variant?: 'center' | 'side';
   closeOnClickOutside?: boolean;
   closeOnEscape?: boolean;
+  mobileFullScreen?: boolean;
 }
 
 export default function Modal({
@@ -25,6 +26,7 @@ export default function Modal({
   zIndex = 'z-[9999]',
   variant = 'center',
   closeOnClickOutside = true,
+  mobileFullScreen = false,
   closeOnEscape = true
 }: ModalProps) {
   // Close on Escape key
@@ -59,7 +61,7 @@ export default function Modal({
   const isSide = variant === 'side';
 
   const modalContent = (
-    <div className={`fixed inset-0 ${zIndex} flex ${isSide ? 'justify-end' : 'items-center justify-center'} p-4 sm:p-6 overflow-hidden print:static print:block print:p-0 print:bg-white`}>
+    <div className={`fixed inset-0 ${zIndex} flex ${isSide ? 'justify-end' : 'items-center justify-center'} ${mobileFullScreen ? 'p-0 sm:p-6' : 'p-4 sm:p-6'} overflow-hidden print:static print:block print:p-0 print:bg-white`}>
       {/* Backdrop with blur and darken */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity print:hidden"
@@ -69,25 +71,25 @@ export default function Modal({
       {/* Modal Content */}
       <div
         style={{ backgroundColor: 'var(--theme-bg-panel)' }}
-        className={`relative w-full max-w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-3xl animate-in fade-in zoom-in duration-200`} bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-[var(--shadow-modal)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}
+        className={`relative w-full max-w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} ${mobileFullScreen ? 'h-[100dvh] sm:h-auto rounded-none sm:rounded-3xl' : 'rounded-3xl'} animate-in fade-in zoom-in duration-200`} bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-[var(--shadow-modal)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : mobileFullScreen ? 'max-h-[100dvh] sm:max-h-[90dvh]' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}
       >
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-panel)] shrink-0 print:hidden">
+        <div className={`flex items-center justify-between gap-3 ${mobileFullScreen ? 'px-4 py-3 sm:px-6 sm:py-5' : 'px-6 py-5'} border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-panel)] shrink-0 print:hidden`}>
           <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2 tracking-tight">
             {title}
           </h3>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="p-2 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-border)] transition-colors cursor-pointer"
+            className={`${mobileFullScreen ? 'min-h-11 min-w-11 flex items-center justify-center shrink-0' : ''} p-2 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-border)] transition-colors cursor-pointer`}
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Body - Scrollable */}
-        <div className="p-6 overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 print:overflow-visible print:px-0 print:py-0 bg-[var(--theme-bg-panel)]">
+        <div className={`${mobileFullScreen ? 'p-4 sm:p-6' : 'p-6'} min-h-0 overscroll-contain overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 print:overflow-visible print:px-0 print:py-0 bg-[var(--theme-bg-panel)]`}>
           {children}
         </div>
 
@@ -95,7 +97,7 @@ export default function Modal({
         {footer && (
           <div
             style={{ backgroundColor: 'var(--theme-bg-panel)' }}
-            className="px-6 py-4 border-t border-[var(--theme-border-subtle)] bg-[var(--theme-bg-panel)] shrink-0"
+            className={`${mobileFullScreen ? 'px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4' : 'px-6 py-4'} border-t border-[var(--theme-border-subtle)] bg-[var(--theme-bg-panel)] shrink-0`}
           >
             {footer}
           </div>

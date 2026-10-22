@@ -24,8 +24,8 @@ export const CreatePOFooter: React.FC<CreatePOFooterProps> = ({
     hasUnsavedItemDraft = false
 }) => {
     return (
-        <div className="flex justify-between items-center w-full px-2">
-            <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center w-full min-w-0">
+            <div className="flex items-center gap-4 min-w-0">
                 <div className="h-8 w-[1px] bg-[var(--theme-border-subtle)] hidden md:block"></div>
                 <div className="flex flex-col">
                     <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider leading-none">Total Value</span>
@@ -34,16 +34,16 @@ export const CreatePOFooter: React.FC<CreatePOFooterProps> = ({
                     </span>
                 </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 {itemsCount === 0 && (
-                    <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-full">
+                    <span className="hidden lg:inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-full">
                         <AlertCircle size={13} />
                         {hasUnsavedItemDraft ? 'Click "Add Item to Order" above first' : 'Add at least 1 item to submit'}
                     </span>
                 )}
                 <button
                     onClick={onClose}
-                    className="px-5 py-2.5 rounded-full text-xs font-semibold transition-colors text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-pointer active:scale-[0.98]"
+                    className="min-h-11 flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-full text-xs font-semibold transition-colors text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-pointer active:scale-[0.98]"
                 >
                     {isEditMode ? 'Cancel' : 'Pause & Save'}
                 </button>
@@ -51,7 +51,7 @@ export const CreatePOFooter: React.FC<CreatePOFooterProps> = ({
                     onClick={onCreatePO}
                     disabled={isPendingAction || itemsCount === 0}
                     title={itemsCount === 0 ? 'Add at least one line item to the order first' : undefined}
-                    className="px-7 py-2.5 rounded-full text-xs font-semibold bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+                    className="min-h-11 flex-1 sm:flex-none justify-center whitespace-nowrap px-4 sm:px-6 py-2.5 rounded-full text-xs font-semibold bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm"
                 >
                     {isPendingAction && <Loader2 size={14} className="animate-spin" />}
                     {isEditMode ? 'Save Changes' : 'Create Purchase Order'}

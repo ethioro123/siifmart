@@ -83,7 +83,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
     const cardBase = "bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 shadow-sm transition-all";
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-4 sm:gap-6">
             {/* Supplier Section */}
             <div className={cardBase}>
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--theme-border-subtle)]">
@@ -192,7 +192,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                 <div className="space-y-4">
                     {/* Destination Dropdown */}
                     <div className="space-y-1.5 relative" ref={siteDropdownRef}>
-                        <div className="flex items-center justify-between ml-1">
+                        <div className="flex flex-col items-start gap-1 xl:flex-row xl:items-center xl:justify-between ml-1">
                             <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block">
                                 Receiving Facility <span className="text-amber-600 dark:text-amber-400 font-bold">(Warehouse / DC Only)</span>
                             </label>

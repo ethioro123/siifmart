@@ -82,7 +82,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
 
     return (
         <div className="space-y-3 pt-3 border-t border-[var(--theme-border-subtle)]">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                     <HeaderIcon size={12} className={header.colorClass} />
                     <span>{header.title}</span>
@@ -94,9 +94,9 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
 
             {/* ═══ APPAREL & FASHION ARCHETYPE ═══ */}
             {domainId === 'apparel' && (
-                <div className="grid grid-cols-6 gap-3.5">
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-3.5">
                     {/* Apparel Size / Fitment */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                             Size / Fitment <span className="text-rose-500">*</span>
                         </label>
@@ -125,7 +125,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Colorway / Pattern */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Colorway / Pattern</label>
                         <input
                             type="text"
@@ -137,7 +137,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Fiber / Composition */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Fiber / Material</label>
                         <input
                             type="text"
@@ -159,9 +159,9 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
 
             {/* ═══ BEVERAGES ARCHETYPE ═══ */}
             {domainId === 'beverages' && (
-                <div className="grid grid-cols-6 gap-3.5">
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-3.5">
                     {/* Net Liquid Volume */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                             Net Volume <span className="text-rose-500">*</span>
                         </label>
@@ -197,7 +197,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Container Format */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Container Type</label>
                         <div className="relative">
                             <select
@@ -221,7 +221,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Gross Packed Weight */}
-                    <div className="col-span-1 space-y-1">
+                    <div className="col-span-1 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Gross Wt (kg)</label>
                         <input
                             type="number"
@@ -235,7 +235,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Bottle Dimensions */}
-                    <div className="col-span-1 space-y-1">
+                    <div className="col-span-1 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Height (cm)</label>
                         <input
                             type="text"
@@ -250,9 +250,9 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
 
             {/* ═══ ELECTRONICS ARCHETYPE ═══ */}
             {domainId === 'electronics' && (
-                <div className="grid grid-cols-6 gap-3.5">
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-3.5">
                     {/* Device Dimensions */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Device Dimensions (L×W×H cm)</label>
                         <input
                             type="text"
@@ -264,7 +264,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Unit Net Weight */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Device Weight</label>
                         <div className="flex gap-1">
                             <input
@@ -294,7 +294,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Colorway / Finish */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Colorway / Finish</label>
                         <input
                             type="text"
@@ -309,9 +309,9 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
 
             {/* ═══ HOMEWARES & KITCHEN ARCHETYPE ═══ */}
             {domainId === 'homewares_kitchen' && (
-                <div className="grid grid-cols-6 gap-3.5">
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-3.5">
                     {/* Item Dimensions */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Dimensions (L×W×H cm / Dia)</label>
                         <input
                             type="text"
@@ -323,7 +323,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Capacity / Volume */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Capacity / Size</label>
                         <input
                             type="text"
@@ -343,7 +343,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Primary Material */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Primary Material</label>
                         <div className="relative">
                             <select
@@ -370,9 +370,9 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
 
             {/* ═══ STANDARD CONSUMABLES & DEFAULT ARCHETYPE ═══ */}
             {!['apparel', 'beverages', 'electronics', 'homewares_kitchen'].includes(domainId) && (
-                <div className="grid grid-cols-6 gap-3.5">
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-3.5">
                     {/* Net Content / Net Weight */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                             Net Content / Weight {isConsumable ? <span className="text-rose-500">*</span> : <span className="text-[9px] text-[var(--theme-text-secondary)] font-normal normal-case">(e.g. 500g, 1kg)</span>}
                         </label>
@@ -407,7 +407,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Gross Weight */}
-                    <div className="col-span-1 space-y-1">
+                    <div className="col-span-1 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Gross Wt (kg)</label>
                         <input
                             type="number"
@@ -421,7 +421,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Dimensions */}
-                    <div className="col-span-2 space-y-1">
+                    <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Dimensions (L×W×H cm)</label>
                         <input
                             type="text"
@@ -433,7 +433,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     </div>
 
                     {/* Physical Form */}
-                    <div className="col-span-1 space-y-1">
+                    <div className="col-span-1 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Physical Form</label>
                         <div className="relative">
                             <select
