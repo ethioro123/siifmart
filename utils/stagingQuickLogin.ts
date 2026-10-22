@@ -52,13 +52,14 @@ const QUICK_LOGIN_SITE_TYPES: StagingSiteType[] = [
     'HQ', 'Regional Administration', 'Store', 'Warehouse', 'Distribution Center'
 ];
 
-/** Show every regional office; keep representative sites for other facility types. */
+/** Show all regional and receiving facilities; keep representative HQ and stores. */
 export function selectRepresentativeStagingAccounts(accounts: StagingQuickAccount[]): StagingQuickAccount[] {
     const selected = new Set<string>();
     const groups = new Map<string, StagingQuickAccount[]>();
 
     for (const account of accounts) {
-        if (account.country === 'GLOBAL' || account.facilityTier === 'Regional Administration') {
+        if (account.country === 'GLOBAL' || account.facilityTier === 'Regional Administration' ||
+            account.siteType === 'Warehouse' || account.siteType === 'Distribution Center') {
             selected.add(account.id);
             continue;
         }

@@ -34,7 +34,7 @@ describe('live staging roster mapping', () => {
     it('excludes unsupported country records rather than classifying them as Ethiopia', () => {
         expect(mapStagingEmployee({ ...row, site: { ...row.site!, country: 'ZZ' } })).toBeNull();
     });
-    it('keeps one representative site per country and facility type, and every regional administration office', () => {
+    it('keeps all regional offices and receiving hubs with representative HQ and stores', () => {
         const makeAccount = (id: string, country: 'ET' | 'KE', code: string, type: string, regionCode: string | null = null, name = type) =>
             mapStagingEmployee({ ...row, id, site: { code, name, type, country, region_code: regionCode } })!;
         const roster = [
@@ -45,6 +45,8 @@ describe('live staging roster mapping', () => {
             makeAccount('et-store-1b', 'ET', 'ET-ADD-STORE-01', 'Store', 'ET-ADD'),
             makeAccount('et-store-2', 'ET', 'ET-ADD-STORE-02', 'Store', 'ET-ADD'),
             makeAccount('et-wh', 'ET', 'ET-ADD-WH-01', 'Warehouse', 'ET-ADD'),
+            makeAccount('et-wh-2', 'ET', 'ET-ADA-WH-01', 'Warehouse', 'ET-ADA'),
+            makeAccount('et-dc-2', 'ET', 'ET-ADA-DC-01', 'Distribution Center', 'ET-ADA'),
             makeAccount('et-dc', 'ET', 'ET-ADD-DC-01', 'Distribution Center', 'ET-ADD'),
             makeAccount('ke-hq', 'KE', 'KE-HQ', 'Administration'),
             makeAccount('ke-region', 'KE', 'KE-NRB', 'Administration', 'KE-NRB', 'Regional Administration'),
@@ -56,7 +58,7 @@ describe('live staging roster mapping', () => {
 
         const selected = selectRepresentativeStagingAccounts(roster);
         expect(selected.map(account => account.id)).toEqual([
-            'et-hq', 'et-region', 'et-region-2', 'et-store-1a', 'et-store-1b', 'et-wh', 'et-dc',
+            'et-hq', 'et-region', 'et-region-2', 'et-store-1a', 'et-store-1b', 'et-wh', 'et-wh-2', 'et-dc-2', 'et-dc',
             'ke-hq', 'ke-region', 'ke-store', 'ke-wh', 'ke-dc', 'global-admin'
         ]);
     });

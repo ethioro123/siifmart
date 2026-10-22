@@ -17,6 +17,7 @@ import { buildPurchaseOrders, resolvePOVendor } from './createPOHelpers';
 import { CreatePOFooter } from './CreatePOFooter';
 import { logger } from '../../utils/logger';
 import { hasPermission } from '../../utils/permissions';
+import { resolvePOReceivingSelection } from '../../utils/poReceivingSelection';
 
 interface CreatePOModalProps {
     isOpen: boolean;
@@ -129,10 +130,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         discardDraft();
         resetPOForm();
         setItemFormKey(key => key + 1);
-        const defaultSiteId = user?.siteId && countryWarehouses.find(w => w.id === user.siteId)
-            ? user.siteId
-            : (countryWarehouses[0]?.id || '');
-        if (defaultSiteId) setDestinationSiteIds([defaultSiteId]);
+        setDestinationSiteIds(resolvePOReceivingSelection(countryWarehouses, user?.siteId));
         showToast("Saved PO draft deleted", "info");
     };
 
@@ -146,10 +144,10 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
         const sessionKey = `${editingPO?.id || 'create'}-${initialSupplierId || ''}-${initialProduct?.id || ''}-${Boolean(initialDraft)}-${activeCountry}-${user?.id || ''}`;
         if (hydratedKeyRef.current === sessionKey) {
-            if (countryWarehouses.length > 0 && (pendingDestinationSiteIdsRef.current.length > 0 || destinationSiteIds.length === 0)) {
-                const restoredSites = pendingDestinationSiteIdsRef.current.filter(id => countryWarehouses.some(w => w.id === id));
+            if (countryWarehouses.length > 0 && pendingDestinationSiteIdsRef.current.length > 0) {
+                const restoredSites = resolvePOReceivingSelection(countryWarehouses, user?.siteId, pendingDestinationSiteIdsRef.current);
                 pendingDestinationSiteIdsRef.current = [];
-                setDestinationSiteIds(restoredSites.length ? restoredSites : [(user?.siteId && countryWarehouses.find(w => w.id === user.siteId)?.id) || countryWarehouses[0].id]);
+                setDestinationSiteIds(restoredSites);
             }
             return;
         }
@@ -177,7 +175,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             setNewPOItems(items);
             setPoNotes(sourcePO.notes || '');
             const validWh = sourcePO.siteId ? countryWarehouses.find(s => s.id === sourcePO.siteId) : undefined;
-            setDestinationSiteIds(validWh ? [validWh.id] : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
+            setDestinationSiteIds(validWh ? [validWh.id] : []);
             setExpectedDate(sourcePO.expectedDelivery ? String(sourcePO.expectedDelivery).split('T')[0] : '');
             setPoDelivery({ tempReq: sourcePO.tempReq || 'Ambient', shelfLife: sourcePO.shelfLife || '', dockSlot: sourcePO.dockSlot || '' });
             setPoPriority((sourcePO.priority as any) || 'Normal');
@@ -207,8 +205,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 setIsManualVendor(Boolean(d.isManualVendor));
                 setManualVendorName(d.manualVendorName || '');
                 setNewPOSupplier(initialSupplierId || d.newPOSupplier || '');
-                const validSites = (d.destinationSiteIds || []).filter(id => countryWarehouses.some(w => w.id === id));
-                setDestinationSiteIds(validSites.length > 0 ? validSites : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
+                setDestinationSiteIds(resolvePOReceivingSelection(countryWarehouses, user?.siteId, d.destinationSiteIds));
                 setExpectedDate(d.expectedDate || '');
                 setPoDelivery({ tempReq: d.tempReq || 'Ambient', shelfLife: d.shelfLife || '', dockSlot: d.dockSlot || '' });
                 setPoPriority(d.poPriority || 'Normal');
@@ -223,8 +220,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 setDiscountRate(d.discountRate || 0);
                 setTaxRate(d.taxRate !== undefined ? d.taxRate : defaultTaxRate);
             } else {
-                const defaultSiteId = (user?.siteId && countryWarehouses.find(w => w.id === user.siteId)?.id) || countryWarehouses[0]?.id || '';
-                setDestinationSiteIds(defaultSiteId ? [defaultSiteId] : []);
+                setDestinationSiteIds(resolvePOReceivingSelection(countryWarehouses, user?.siteId));
                 setTaxRate(defaultTaxRate);
                 setDiscountRate(0);
                 if (initialSupplierId) setNewPOSupplier(initialSupplierId);

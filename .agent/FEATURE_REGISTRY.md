@@ -442,3 +442,8 @@
 - Group CEO has no country facility or region assignment; database constraint prevents reassignment to country facilities.
 - Country employee directory uses the same explicit facility filter for ET and KE, excluding unassigned global leadership.
 - Migration: `migrations/20261023_correct_group_ceo_global_assignment.sql`.
+
+### Procurement receiving facility selection (2026-10-23)
+- New orders default only to the signed-in employee’s eligible receiving hub; HQ and regional staff choose their destination explicitly.
+- Saved and existing orders never fall back silently to the first warehouse when their destination is unavailable.
+- Staging quick login includes every warehouse and distribution center so receiving teams can access the selected facility.
