@@ -7,8 +7,8 @@
 
 ### Database-Assigned Purchase Order Numbers (2026-10-22)
 - PO creation leaves the display number to the existing database sequence trigger and reads the saved number from the insert response. This prevents globally unique PO numbers from colliding when site-scoped reads hide other orders or submissions overlap.
-- **Files**: `services/purchase-orders.service.ts`.
-- **Database**: No schema change; the existing `generate_po_number()` trigger is present on staging and production.
+- **Files**: `services/purchase-orders.service.ts`, `migrations/20261022_atomic_po_number_allocation.sql`.
+- **Database**: The existing `generate_po_number()` trigger now allocates the established `AAAA0000` format from a synchronized sequence on staging and production.
 
 ### 10-Level Organizational Role Hierarchy (`Level 1` to `Level 10`) (2026-10-22)
 - Upgraded SIIFMART's organizational role hierarchy from the 4-level system (`L1–L4`) to a 10-level enterprise command hierarchy (`L1–L10`):
