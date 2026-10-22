@@ -91,4 +91,150 @@ CREATE TRIGGER trg_validate_employee_reporting_relationships
   ON public.employees
   FOR EACH ROW EXECUTE FUNCTION public.validate_employee_reporting_relationships();
 
+-- Make role-based scope fallback recognize the multinational executive roles.
+CREATE OR REPLACE FUNCTION public.get_my_scope_level()
+RETURNS text
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path TO pg_catalog, public, auth, pg_temp
+AS $function$
+DECLARE
+  v_scope text;
+  v_role text;
+  v_normalized_role text;
+  v_uid uuid := auth.uid();
+  v_email text := auth.jwt() ->> 'email';
+BEGIN
+  IF v_uid IS NULL AND coalesce(v_email, '') = '' THEN
+    RETURN NULL;
+  END IF;
+
+  SELECT employee.scope_level, employee.role
+    INTO v_scope, v_role
+    FROM public.employees employee
+   WHERE (v_uid IS NOT NULL AND employee.id = v_uid)
+      OR (v_email IS NOT NULL AND lower(employee.email) = lower(v_email))
+   ORDER BY (employee.id = v_uid) DESC NULLS LAST
+   LIMIT 1;
+
+  v_normalized_role := public.normalize_role(v_role);
+  IF v_normalized_role IN (
+    'super_admin', 'ceo', 'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo',
+    'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco',
+    'group_cae', 'admin', 'country_operations_director',
+    'country_finance_director', 'country_commercial_director',
+    'country_supply_chain_director', 'country_hr_director',
+    'country_technology_director', 'country_compliance_manager',
+    'head_of_operations', 'head_of_finance', 'head_of_procurement',
+    'head_of_supply_chain', 'head_of_hr', 'hr', 'head_of_merchandising',
+    'head_of_it', 'head_of_audit', 'auditor'
+  ) THEN
+    RETURN 'HQ';
+  ELSIF v_normalized_role IN (
+    'regional_operations_manager', 'regional_procurement_manager',
+    'regional_finance_manager', 'regional_merchandising_manager',
+    'regional_hr_manager', 'regional_logistics_manager',
+    'regional_security_manager', 'regional_supply_chain_manager',
+    'regional_it_manager', 'regional_compliance_manager'
+  ) THEN
+    RETURN 'REGIONAL';
+  END IF;
+
+  RETURN coalesce(v_scope, 'SITE');
+EXCEPTION WHEN OTHERS THEN
+  RETURN 'SITE';
+END;
+$function$;
+
+-- Align site authorization with the group / country / region / site model.
+CREATE OR REPLACE FUNCTION public.is_site_in_my_authorized_scope(
+  p_site_id text,
+  p_country_code text DEFAULT NULL::text
+)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path TO pg_catalog, public, auth, pg_temp
+AS $function$
+  SELECT EXISTS (
+    SELECT 1
+      FROM public.employees actor
+      LEFT JOIN public.sites actor_site ON actor_site.id = actor.site_id
+      JOIN public.sites target_site
+        ON target_site.id::text = p_site_id OR target_site.code = p_site_id
+     WHERE actor.id = auth.uid()
+       AND COALESCE(lower(actor.status), 'active') = 'active'
+       AND (p_country_code IS NULL OR upper(p_country_code) = upper(target_site.country))
+       AND (
+         -- Group executives have enterprise-wide site scope.
+         public.normalize_role(actor.role) IN (
+           'super_admin', 'ceo', 'group_ceo', 'group_coo', 'group_cfo', 'group_cco',
+           'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio',
+           'group_clco', 'group_cae'
+         )
+         OR (
+           upper(actor_site.country) = upper(target_site.country)
+           AND (
+             -- Country leadership and functional directors operate throughout their country.
+             public.normalize_role(actor.role) IN (
+               'admin', 'country_operations_director', 'country_finance_director',
+               'country_commercial_director', 'country_supply_chain_director',
+               'country_hr_director', 'country_technology_director',
+               'country_compliance_manager', 'head_of_operations', 'head_of_finance',
+               'head_of_procurement', 'head_of_hr', 'head_of_supply_chain',
+               'head_of_merchandising', 'head_of_it', 'head_of_audit', 'auditor',
+               'inventory_manager', 'logistics_manager'
+             )
+             OR (
+               public.normalize_role(actor.role) IN (
+                 'regional_operations_manager', 'regional_procurement_manager',
+                 'regional_finance_manager', 'regional_merchandising_manager',
+                 'regional_hr_manager', 'regional_logistics_manager',
+                 'regional_security_manager', 'regional_supply_chain_manager',
+                 'regional_it_manager', 'regional_compliance_manager'
+               )
+               AND actor.region_code IS NOT NULL
+               AND lower(actor.region_code) = lower(target_site.region_code)
+             )
+             OR actor.site_id = target_site.id
+           )
+         )
+       )
+  );
+$function$;
+
+CREATE OR REPLACE FUNCTION public.is_hq_executive()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path TO pg_catalog, public, auth
+AS $function$
+  SELECT auth.uid() IS NOT NULL
+     AND (
+       public.normalize_role(public.get_my_role()) IN (
+         'super_admin', 'ceo', 'group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo',
+         'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco',
+         'group_cae', 'admin', 'country_operations_director',
+         'country_finance_director', 'country_commercial_director',
+         'country_supply_chain_director', 'country_hr_director',
+         'country_technology_director', 'country_compliance_manager',
+         'head_of_operations', 'head_of_finance', 'head_of_procurement',
+         'head_of_supply_chain', 'head_of_hr', 'head_of_merchandising',
+         'head_of_it', 'head_of_audit', 'auditor'
+       )
+       OR EXISTS (
+         SELECT 1
+           FROM public.employees e
+           JOIN public.sites site ON site.id = e.site_id
+          WHERE e.id = auth.uid()
+            AND site.type = 'Administration'
+            AND (site.code LIKE '%-HQ' OR site.name ILIKE '%Central Operations%'
+                 OR site.name ILIKE '%National HQ%')
+       )
+     );
+$function$;
+
 COMMIT;
