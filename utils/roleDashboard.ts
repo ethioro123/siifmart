@@ -110,14 +110,34 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'store_operations_auditor':
             return isStoreSite ? '/pos-dashboard' : '/sales';
 
-        // 3. Level 3 & 4 - Warehouse & Logistics Roles (Direct sovereign role landing)
+        // 3. Level 6-10 - Warehouse & Logistics Roles (Direct sovereign role landing)
         case 'warehouse_manager':
+        case 'warehouse_operations_manager':
+        case 'transport_fleet_manager':
         case 'logistics_manager':
         case 'dispatch_manager':
+        case 'inventory_control_supervisor':
+        case 'putaway_replenishment_supervisor':
+        case 'picking_supervisor':
+        case 'packing_supervisor':
+        case 'dispatch_supervisor':
+        case 'returns_waste_supervisor':
         case 'fleet_maintenance_supervisor':
+        case 'receiving_team_leader':
+        case 'picking_team_leader':
+        case 'packing_team_leader':
+        case 'dispatch_team_leader':
         case 'inbound_qc_inspector':
         case 'inventory_specialist':
         case 'stock_clerk':
+        case 'receiving_operator':
+        case 'putaway_operator':
+        case 'replenishment_operator':
+        case 'inventory_controller':
+        case 'stock_counter':
+        case 'dispatch_operator':
+        case 'returns_operator':
+        case 'fleet_mechanic':
         case 'picker':
         case 'packer':
         case 'receiver':
@@ -138,13 +158,19 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
 
         // 4. Store Operations Roles
         case 'store_manager':
+        case 'assistant_store_manager':
         case 'assistant_manager':
-        case 'shift_lead':
+        case 'shift_supervisor':
         case 'store_supervisor':
+        case 'shift_lead':
+        case 'pos_supervisor':
+        case 'stock_control_supervisor':
+        case 'receiving_supervisor':
             return '/pos-dashboard';
 
         case 'cashier':
         case 'sales_associate':
+        case 'store_associate':
         case 'pos':
             return '/pos';
 

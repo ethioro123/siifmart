@@ -5,9 +5,15 @@ const CORE_FLOOR_TABS: OpTab[] = ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'];
 
 const FLOOR_WORKER_EXTRA_TABS: Record<string, OpTab[]> = {
     receiver: ['TRANSFER'],
+    replenishment_operator: ['REPLENISH'],
     inventory_specialist: ['TRANSFER', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS'],
+    inventory_controller: ['REPLENISH', 'COUNT', 'WASTE', 'LABELS'],
     stock_clerk: ['COUNT', 'REPLENISH', 'LABELS'],
+    stock_counter: ['COUNT'],
+    dispatch_operator: ['DOCKS'],
     returns_clerk: ['RETURNS'],
+    returns_operator: ['RETURNS'],
+    fleet_mechanic: ['DOCKS'],
 };
 
 const SPECIALIST_TAB_ACCESS: Record<string, OpTab[]> = {
@@ -18,23 +24,98 @@ const SPECIALIST_TAB_ACCESS: Record<string, OpTab[]> = {
     dispatcher: ['DOCKS', 'DRIVER', 'ASSIGN'],
     fleet_maintenance_supervisor: ['DOCKS', 'DRIVER', 'ASSIGN'],
     regional_logistics_manager: ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER'],
-    head_of_supply_chain: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'ASSIGN', 'LABELS'],
+    head_of_supply_chain: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH'],
+    warehouse_operations_manager: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'ASSIGN', 'LABELS'],
+    transport_fleet_manager: ['DOCKS', 'DRIVER', 'TRANSFER', 'ASSIGN'],
+    inventory_control_supervisor: ['COUNT', 'TRANSFER', 'WASTE', 'LABELS', 'ASSIGN'],
+    putaway_replenishment_supervisor: ['PUTAWAY', 'REPLENISH', 'TRANSFER', 'ASSIGN'],
+    picking_supervisor: ['PICK', 'PACK', 'ASSIGN'],
+    packing_supervisor: ['PACK', 'LABELS', 'ASSIGN'],
+    dispatch_supervisor: ['DOCKS', 'DRIVER', 'ASSIGN'],
+    returns_waste_supervisor: ['RETURNS', 'WASTE', 'COUNT', 'ASSIGN'],
+    receiving_team_leader: ['RECEIVE', 'PUTAWAY', 'TRANSFER', 'ASSIGN'],
+    picking_team_leader: ['PICK', 'PACK', 'ASSIGN'],
+    packing_team_leader: ['PACK', 'LABELS', 'ASSIGN'],
+    dispatch_team_leader: ['DOCKS', 'DRIVER', 'ASSIGN'],
 };
 
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
-    RECEIVE: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    PUTAWAY: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    TRANSFER: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'logistics_manager', 'inventory_manager', 'replenishment_planner'],
-    PICK: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    PACK: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    DOCKS: ['super_admin', 'admin', 'head_of_operations', 'regional_operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'fleet_maintenance_supervisor'],
-    DRIVER: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'driver', 'logistics_manager', 'fleet_maintenance_supervisor'],
-    REPLENISH: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'replenishment_planner', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    COUNT: ['super_admin', 'head_of_operations', 'warehouse_manager', 'inventory_manager', 'store_manager', 'inventory_specialist', 'stock_clerk'],
-    WASTE: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
-    RETURNS: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'returns_clerk'],
-    ASSIGN: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor'],
-    LABELS: ['super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor', 'replenishment_planner', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
+    RECEIVE: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'area_operations_manager',
+        'head_of_operations', 'warehouse_manager', 'warehouse_operations_manager', 'dispatcher',
+        'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'receiving_operator',
+        'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'receiving_team_leader'
+    ],
+    PUTAWAY: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'area_operations_manager',
+        'head_of_operations', 'warehouse_manager', 'warehouse_operations_manager', 'dispatcher',
+        'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'putaway_operator',
+        'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector',
+        'putaway_replenishment_supervisor', 'receiving_team_leader'
+    ],
+    TRANSFER: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'area_operations_manager',
+        'head_of_operations', 'warehouse_manager', 'warehouse_operations_manager', 'logistics_manager',
+        'inventory_manager', 'replenishment_planner', 'inventory_control_supervisor', 'transport_fleet_manager'
+    ],
+    PICK: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'area_operations_manager',
+        'head_of_operations', 'warehouse_manager', 'warehouse_operations_manager', 'dispatcher',
+        'logistics_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator',
+        'driver', 'inbound_qc_inspector', 'picking_supervisor', 'picking_team_leader'
+    ],
+    PACK: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'area_operations_manager',
+        'head_of_operations', 'warehouse_manager', 'warehouse_operations_manager', 'dispatcher',
+        'logistics_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator',
+        'driver', 'inbound_qc_inspector', 'packing_supervisor', 'packing_team_leader'
+    ],
+    DOCKS: [
+        'super_admin', 'admin', 'head_of_operations', 'regional_operations_manager', 'area_operations_manager',
+        'warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'dispatcher',
+        'logistics_manager', 'fleet_maintenance_supervisor', 'dispatch_supervisor', 'dispatch_team_leader', 'dispatch_operator'
+    ],
+    DRIVER: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations',
+        'warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'dispatcher',
+        'driver', 'logistics_manager', 'fleet_maintenance_supervisor', 'dispatch_supervisor'
+    ],
+    REPLENISH: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'area_operations_manager',
+        'head_of_operations', 'warehouse_manager', 'warehouse_operations_manager', 'dispatcher',
+        'logistics_manager', 'inventory_manager', 'replenishment_planner', 'picker', 'packer',
+        'receiver', 'replenishment_operator', 'putaway_replenishment_supervisor', 'inventory_specialist',
+        'forklift_operator', 'driver', 'inbound_qc_inspector'
+    ],
+    COUNT: [
+        'super_admin', 'head_of_operations', 'warehouse_manager', 'warehouse_operations_manager',
+        'inventory_manager', 'store_manager', 'inventory_control_supervisor', 'inventory_controller',
+        'stock_counter', 'inventory_specialist', 'stock_clerk'
+    ],
+    WASTE: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations',
+        'warehouse_manager', 'warehouse_operations_manager', 'logistics_manager', 'inventory_manager',
+        'returns_waste_supervisor', 'inventory_control_supervisor', 'picker', 'packer', 'receiver',
+        'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'
+    ],
+    RETURNS: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations',
+        'warehouse_manager', 'warehouse_operations_manager', 'dispatcher', 'logistics_manager',
+        'inventory_manager', 'returns_waste_supervisor', 'returns_operator', 'picker', 'packer',
+        'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'returns_clerk'
+    ],
+    ASSIGN: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'area_operations_manager',
+        'head_of_operations', 'warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager',
+        'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor',
+        'picking_supervisor', 'packing_supervisor', 'dispatch_supervisor', 'inventory_control_supervisor'
+    ],
+    LABELS: [
+        'super_admin', 'admin', 'manager', 'regional_operations_manager', 'head_of_operations',
+        'warehouse_manager', 'warehouse_operations_manager', 'dispatcher', 'logistics_manager',
+        'inventory_manager', 'fleet_maintenance_supervisor', 'replenishment_planner', 'picker',
+        'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'
+    ],
 };
 
 export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
@@ -43,11 +124,13 @@ export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
     if (
         normalizedRole === 'super_admin' ||
         normalizedRole === 'ceo' ||
+        normalizedRole === 'group_ceo' ||
         normalizedRole === 'country_managing_director' ||
         normalizedRole === 'admin' ||
         normalizedRole === 'head_of_operations' ||
-        normalizedRole === 'head_of_operations' ||
-        normalizedRole === 'head_of_operations'
+        normalizedRole === 'country_operations_director' ||
+        normalizedRole === 'country_supply_chain_director' ||
+        normalizedRole === 'group_csco'
     ) {
         return Object.keys(TAB_PERMISSIONS) as OpTab[];
     }
@@ -78,6 +161,26 @@ export const ROLE_DEFAULT_TABS: Record<string, OpTab> = {
     dispatch_manager: 'DOCKS',
     fleet_maintenance_supervisor: 'DOCKS',
     warehouse_manager: 'DOCKS',
+    warehouse_operations_manager: 'DOCKS',
+    transport_fleet_manager: 'DOCKS',
+    inventory_control_supervisor: 'COUNT',
+    putaway_replenishment_supervisor: 'PUTAWAY',
+    picking_supervisor: 'PICK',
+    packing_supervisor: 'PACK',
+    dispatch_supervisor: 'DOCKS',
+    returns_waste_supervisor: 'RETURNS',
+    receiving_team_leader: 'RECEIVE',
+    picking_team_leader: 'PICK',
+    packing_team_leader: 'PACK',
+    dispatch_team_leader: 'DOCKS',
+    receiving_operator: 'RECEIVE',
+    putaway_operator: 'PUTAWAY',
+    replenishment_operator: 'REPLENISH',
+    inventory_controller: 'COUNT',
+    stock_counter: 'COUNT',
+    dispatch_operator: 'DOCKS',
+    returns_operator: 'RETURNS',
+    fleet_mechanic: 'DOCKS',
     logistics_manager: 'DOCKS',
     wms: 'RECEIVE',
     manager: 'DOCKS',

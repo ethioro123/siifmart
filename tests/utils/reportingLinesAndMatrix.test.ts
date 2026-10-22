@@ -177,6 +177,8 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         });
 
         const l7Managers = [
+            'warehouse_operations_manager',
+            'transport_fleet_manager',
             'logistics_manager',
             'inventory_manager',
             'security_manager',
@@ -192,10 +194,25 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         });
 
         const l8Supervisors = [
+            'assistant_store_manager',
             'assistant_manager',
+            'shift_supervisor',
             'shift_lead',
             'store_supervisor',
-            'fleet_maintenance_supervisor'
+            'receiving_supervisor',
+            'stock_control_supervisor',
+            'pos_supervisor',
+            'inventory_control_supervisor',
+            'putaway_replenishment_supervisor',
+            'picking_supervisor',
+            'packing_supervisor',
+            'dispatch_supervisor',
+            'returns_waste_supervisor',
+            'fleet_maintenance_supervisor',
+            'receiving_team_leader',
+            'picking_team_leader',
+            'packing_team_leader',
+            'dispatch_team_leader'
         ];
         l8Supervisors.forEach(role => {
             const meta = getRoleReportingMeta(role);
@@ -238,10 +255,19 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         const l10Frontline = [
             'cashier',
             'sales_associate',
+            'store_associate',
             'stock_clerk',
             'merchandiser',
             'returns_clerk',
             'receiver',
+            'receiving_operator',
+            'putaway_operator',
+            'replenishment_operator',
+            'inventory_controller',
+            'stock_counter',
+            'dispatch_operator',
+            'returns_operator',
+            'fleet_mechanic',
             'picker',
             'packer',
             'forklift_operator',
