@@ -424,3 +424,10 @@
   - Database: any DB columns/tables involved
   - Root Cause: (for bug fixes) what caused the issue
 ```
+
+
+### Site Product Suggestions and PO Preparation Roles (2026-10-23)
+- Added a site-scoped product suggestion queue for operational employees to report unmet customer or operational demand without supplier or cost details; Procurement/category reviewers can send suitable suggestions to sourcing, decline them, or mark duplicates. Suggestions do not create catalog products or POs.
+- Allowed demand and replenishment planners to prepare scoped draft POs; approval remains a separate, maker-checker controlled action.
+- Removed required price estimates from stock requests so requesters provide item and quantity while Procurement fills sourcing and price during PO preparation.
+- Files: pages/PurchaseRequests.tsx, types/productSuggestion.ts, services/product-suggestions.service.ts, hooks/useProductSuggestions.ts, types/purchaseRequisition.ts, utils/permissions.ts, services/permissions.matrix.ts, components/ProtectedRoute.tsx, migrations/20261023_product_suggestions_and_po_preparer_roles.sql.

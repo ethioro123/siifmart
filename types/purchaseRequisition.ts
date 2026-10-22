@@ -4,7 +4,7 @@ export interface PurchaseRequisitionItem {
   product_name: string;
   sku: string;
   quantity: number;
-  unit_cost: number;
+  unit_cost?: number;
 }
 
 export interface PurchaseRequisition {

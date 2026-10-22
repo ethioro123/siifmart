@@ -69,7 +69,7 @@ export function ProtectedRoute({
       if (isExecutive) return true;
       if (mod === 'pricing') return ['country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser'].includes(normalizedRole);
       if (mod === 'finance') return ['country_finance_director', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'country_compliance_manager', 'auditor'].includes(normalizedRole);
-      if (mod === 'procurement') return ['country_commercial_director', 'country_supply_chain_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist'].includes(normalizedRole);
+      if (mod === 'procurement') return ['country_commercial_director', 'country_supply_chain_director', 'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager', 'customs_import_specialist'].includes(normalizedRole);
       return false;
     };
 

@@ -321,11 +321,11 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'procurement.view', 'procurement.create_po', 'procurement.edit_po'
     ],
     demand_planner: [
-        'dashboard.view', 'inventory.view', 'procurement.view', 'sales.view'
+        'dashboard.view', 'inventory.view', 'procurement.view', 'procurement.create_po', 'sales.view'
     ],
     replenishment_planner: [
         'dashboard.view', 'inventory.view', 'inventory.transfer',
-        'warehouse.view', 'warehouse.view_tasks', 'procurement.view', 'sales.view'
+        'warehouse.view', 'warehouse.view_tasks', 'procurement.view', 'procurement.create_po', 'sales.view'
     ],
     inbound_qc_inspector: [
         'dashboard.view', 'procurement.view',
