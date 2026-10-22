@@ -11,7 +11,7 @@ describe('live staging roster mapping', () => {
         const account = mapStagingEmployee(row)!;
         expect(account.roleId).toBe('picker');
         expect(account.role).toBe('Warehouse Order Picker');
-        expect(account.level).toBe(4);
+        expect(account.level).toBe(10);
         expect(account.facilityTier).toBe('Operation Sites');
         expect(account.siteCode).toBe('ET-ADD-DC-01');
         expect(account.country).toBe('ET');

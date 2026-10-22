@@ -42,7 +42,7 @@ describe('Delegated Hiring & Credential Handover Governance', () => {
             for (const roleId of level4Roles) {
                 expect(isManagerialRole(roleId)).toBe(false);
                 const roleDef = SYSTEM_ROLES.find(r => r.id === roleId);
-                expect(roleDef?.level).toBe(4);
+                expect(roleDef?.level).toBe(10);
             }
         });
     });

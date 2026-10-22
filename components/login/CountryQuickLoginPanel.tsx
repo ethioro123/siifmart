@@ -24,7 +24,7 @@ export function CountryQuickLoginPanel({
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<TierFilter>('ALL');
   const [opsSiteFilter, setOpsSiteFilter] = useState<OpsSiteFilter>('ALL_OPS');
-  const [levelFilter, setLevelFilter] = useState<'ALL' | 1 | 2 | 3 | 4>('ALL');
+  const [levelFilter, setLevelFilter] = useState<'ALL' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10>('ALL');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const isLocalhost = isStagingQuickLoginAvailable();
   const { data: roster = [], isLoading, error, refetch } = useStagingAccounts();
@@ -128,12 +128,19 @@ export function CountryQuickLoginPanel({
   const getLevelBadgeStyle = (level: number) => {
     switch (level) {
       case 1:
-        return 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30';
       case 2:
-        return 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30';
+        return 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30';
       case 3:
-        return 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30';
       case 4:
+      case 5:
+        return 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30';
+      case 6:
+      case 7:
+      case 8:
+        return 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30';
+      case 9:
+        return 'bg-sky-500/10 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30';
+      case 10:
       default:
         return 'bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/30';
     }
@@ -289,30 +296,23 @@ export function CountryQuickLoginPanel({
         })}
       </div>
 
-      {/* Hierarchy Level Filter Tabs */}
-      <div className="grid grid-cols-5 gap-1 mb-2">
-        {(
-          [
-            { key: 'ALL', label: 'All Ranks' },
-            { key: 1, label: 'L1 Exec' },
-            { key: 2, label: 'L2 Director' },
-            { key: 3, label: 'L3 Manager' },
-            { key: 4, label: 'L4 Staff' },
-          ] as const
-        ).map(tab => {
-          const active = levelFilter === tab.key;
+      {/* Hierarchy Level Filter Tabs (L1 - L10) */}
+      <div className="flex items-center gap-1 overflow-x-auto pb-1 mb-2 custom-scrollbar">
+        {(['ALL', 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).map(lvl => {
+          const active = levelFilter === lvl;
+          const label = lvl === 'ALL' ? 'All Ranks' : `L${lvl}`;
           return (
             <button
-              key={tab.key}
+              key={lvl}
               type="button"
-              onClick={() => setLevelFilter(tab.key)}
-              className={`py-0.5 text-[9px] font-semibold rounded-md transition-colors cursor-pointer text-center border ${
+              onClick={() => setLevelFilter(lvl)}
+              className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-colors cursor-pointer text-center shrink-0 border ${
                 active
                   ? 'bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-900 border-transparent'
                   : 'bg-transparent text-stone-500 dark:text-stone-400 border-stone-200 dark:border-white/[0.08] hover:bg-stone-100 dark:hover:bg-white/[0.04]'
               }`}
             >
-              {tab.label}
+              {label}
             </button>
           );
         })}

@@ -43,13 +43,13 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
       expect(recruitmentService.canManageHiring('stock_clerk')).toBe(false);
     });
 
-    it('strictly restricts Level 3 Site Managers to roles below their level (Level 4 only)', () => {
+    it('strictly restricts Level 6 Site Managers to roles below their level (Levels 7-10 only)', () => {
       const allowedForStoreManager = recruitmentService.getAllowedRolesForManager('store_manager');
       
-      // All allowed roles must have level > 3 (i.e. level 4)
+      // All allowed roles must have level > 6 (Levels 7-10)
       expect(allowedForStoreManager.length).toBeGreaterThan(0);
       allowedForStoreManager.forEach(role => {
-        expect(role.level).toBeGreaterThan(3);
+        expect(role.level).toBeGreaterThan(6);
       });
 
       // Must include floor roles

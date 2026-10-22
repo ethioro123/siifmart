@@ -1,9 +1,11 @@
 // Reporting Hierarchy & Supervisory Metadata Types
 // Codified under SOP-ORG-036 & Rule 18 ("The Captain Owns the Ship")
 
+export type HierarchyLevelNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+
 export interface RoleReportingMeta {
     role: string;
-    level: 1 | 2 | 3 | 4;
+    level: HierarchyLevelNumber;
     levelCategory: 'executive' | 'director' | 'supervisor' | 'specialist';
     levelTag: string;
     reportsToRole: string | null;
@@ -15,7 +17,7 @@ export interface RoleReportingMeta {
 }
 
 export interface HierarchyLevelConfig {
-    level: 1 | 2 | 3 | 4;
+    level: HierarchyLevelNumber;
     title: string;
     subtitle: string;
     badge: string;

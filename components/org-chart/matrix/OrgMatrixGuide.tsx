@@ -21,12 +21,18 @@ interface OrgMatrixGuideProps {
 const renderTierIcon = (level: number, color: string) => {
     switch (level) {
         case 1:
-            return <Crown size={15} style={{ color }} />;
         case 2:
-            return <Building2 size={15} style={{ color }} />;
+            return <Crown size={15} style={{ color }} />;
         case 3:
-            return <ShieldCheck size={15} style={{ color }} />;
         case 4:
+        case 5:
+            return <Building2 size={15} style={{ color }} />;
+        case 6:
+        case 7:
+        case 8:
+            return <ShieldCheck size={15} style={{ color }} />;
+        case 9:
+        case 10:
         default:
             return <Zap size={15} style={{ color }} />;
     }
@@ -62,7 +68,7 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                             </span>
                         </div>
                         <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                            4-Tier organizational hierarchy with Solid-Line operational command & Dotted-Line functional compliance.
+                            10-Level organizational hierarchy (L1–L10) with Solid-Line operational command & Dotted-Line functional compliance.
                         </p>
                     </div>
                 </div>
@@ -121,14 +127,14 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                         </div>
                     </div>
 
-                    {/* 4-Tier Hierarchy Breakdown */}
+                    {/* 10-Level Hierarchy Breakdown */}
                     <div className="space-y-2">
                         <h4 className="font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-1.5">
                             <Shield size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                            <span>Enterprise 4-Tier Hierarchy Levels</span>
+                            <span>Enterprise 10-Level Hierarchy Tiers (L1–L10)</span>
                         </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                            {([1, 2, 3, 4] as const).map(lvl => {
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                            {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).map(lvl => {
                                 const cfg = HIERARCHY_LEVEL_CONFIGS[lvl];
                                 return (
                                     <div

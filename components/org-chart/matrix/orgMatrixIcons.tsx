@@ -27,10 +27,21 @@ export const getDeptIcon = (key: string, size = 16) => {
 
 export const getTierIcon = (level: number, size = 16) => {
     switch (level) {
-        case 1: return <Crown size={size} />;
-        case 2: return <Building2 size={size} />;
-        case 3: return <ShieldCheck size={size} />;
-        case 4: default: return <Zap size={size} />;
+        case 1:
+        case 2:
+            return <Crown size={size} />;
+        case 3:
+        case 4:
+        case 5:
+            return <Building2 size={size} />;
+        case 6:
+        case 7:
+        case 8:
+            return <ShieldCheck size={size} />;
+        case 9:
+        case 10:
+        default:
+            return <Zap size={size} />;
     }
 };
 

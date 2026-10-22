@@ -52,10 +52,10 @@ describe('Finance Directorate Team Roles Integration', () => {
             expect(hasPermission(role, 'VOID_SALE')).toBe(false);
         });
 
-        it('has Level 4 ranking and hierarchy rank 38', () => {
+        it('has Level 9 ranking and hierarchy rank 38', () => {
             expect(getRoleHierarchy(role)).toBe(38);
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
-            expect(sysRole?.level).toBe(4);
+            expect(sysRole?.level).toBe(9);
             expect(sysRole?.label).toBe('Treasury Officer');
         });
     });
@@ -99,10 +99,10 @@ describe('Finance Directorate Team Roles Integration', () => {
             expect(hasPermission(role, 'PROCESS_SALE')).toBe(false);
         });
 
-        it('has Level 4 ranking and hierarchy rank 38', () => {
+        it('has Level 9 ranking and hierarchy rank 38', () => {
             expect(getRoleHierarchy(role)).toBe(38);
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
-            expect(sysRole?.level).toBe(4);
+            expect(sysRole?.level).toBe(9);
             expect(sysRole?.label).toBe('Tax Compliance Officer');
         });
     });
@@ -152,10 +152,10 @@ describe('Finance Directorate Team Roles Integration', () => {
             expect(hasPermission(role, 'REFUND_SALE')).toBe(false);
         });
 
-        it('has Level 4 ranking and hierarchy rank 36', () => {
+        it('has Level 9 ranking and hierarchy rank 36', () => {
             expect(getRoleHierarchy(role)).toBe(36);
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
-            expect(sysRole?.level).toBe(4);
+            expect(sysRole?.level).toBe(9);
             expect(sysRole?.label).toBe('Credit Control Officer');
         });
     });
@@ -180,7 +180,7 @@ describe('Finance Directorate Team Roles Integration', () => {
         it('maps all three roles to finance department', () => {
             roles.forEach(role => {
                 expect(getRoleDept(role)).toBe('finance');
-                expect(getRoleLevel(role)).toBe(4);
+                expect(getRoleLevel(role)).toBe(9);
             });
             expect(getRoleRank('treasury_officer')).toBe(51);
             expect(getRoleRank('tax_compliance_officer')).toBe(52);

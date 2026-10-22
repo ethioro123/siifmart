@@ -40,8 +40,8 @@ export function mapStagingEmployee(row: StagingEmployeeRow): StagingQuickAccount
         : row.site?.type as StagingSiteType;
     return {
         id: row.id, name: row.name, role: row.job_title || role?.label || row.role,
-        roleId: row.role, level: role?.level || (global ? 1 : 4),
-        levelTag: `L${role?.level || (global ? 1 : 4)}`,
+        roleId: row.role, level: role?.level || (global ? 1 : 10),
+        levelTag: `L${role?.level || (global ? 1 : 10)}`,
         code: row.code || '', email: row.email, country, facilityTier, siteType,
         siteCode: row.site?.code || 'HQ-GLOBAL', siteName: row.site?.name || 'Global Headquarters'
     };

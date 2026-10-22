@@ -67,7 +67,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
             const siteId = emp.siteId || emp.site_id;
             const meta = getRoleReportingMeta(role);
 
-            if (onlyManagers && meta.level > 3) return false;
+            if (onlyManagers && meta.level > 8) return false;
             if (filters.siteId && siteId !== filters.siteId) return false;
             if (filters.department && dept !== filters.department) return false;
             if (filters.status && emp.status !== filters.status) return false;
@@ -126,10 +126,10 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
         return map;
     }, [filteredEmployees, departments]);
 
-    // Group employees by hierarchy level (L1 to L4)
+    // Group employees by hierarchy level (L1 to L10)
     const levelGroups = useMemo(() => {
         const map = new Map<number, Employee[]>();
-        [1, 2, 3, 4].forEach(l => map.set(l, []));
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(l => map.set(l, []));
 
         filteredEmployees.forEach(emp => {
             const meta = getRoleReportingMeta(emp.role || 'pos');
@@ -182,9 +182,9 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
 
         filteredEmployees.forEach(e => {
             const meta = getRoleReportingMeta(e.role || 'pos');
-            if (meta.level === 1) l1++;
-            else if (meta.level === 2) l2++;
-            else if (meta.level === 3) l3++;
+            if (meta.level <= 2) l1++;
+            else if (meta.level <= 5) l2++;
+            else if (meta.level <= 8) l3++;
             else l4++;
         });
 
@@ -203,7 +203,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
     const handleExpandAll = () => setCollapsedKeys(new Set());
     const handleCollapseAll = () => {
         if (groupBy === 'department') setCollapsedKeys(new Set(departments.map(d => d.key)));
-        else if (groupBy === 'level') setCollapsedKeys(new Set(['1', '2', '3', '4']));
+        else if (groupBy === 'level') setCollapsedKeys(new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']));
         else setCollapsedKeys(new Set([...sites.map(s => s.id), 'unassigned']));
     };
 
@@ -281,7 +281,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                             }`}
                         >
                             <Shield size={13} />
-                            <span>Hierarchy Tiers (L1-L4)</span>
+                            <span>Hierarchy Tiers (L1-L10)</span>
                         </button>
                         <button
                             type="button"
@@ -370,10 +370,10 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                 </div>
             )}
 
-            {/* Hierarchy Level Grouping (L1 to L4) */}
+            {/* Hierarchy Level Grouping (L1 to L10) */}
             {groupBy === 'level' && (
                 <div className="space-y-4">
-                    {([1, 2, 3, 4] as const).map(lvl => {
+                    {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const).map(lvl => {
                         const levelEmps = levelGroups.get(lvl) || [];
                         const cfg = HIERARCHY_LEVEL_CONFIGS[lvl];
 
@@ -417,7 +417,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                                 onSelectEmployee={onSelectEmployee}
                                 onOpenProfile={onOpenProfile}
                                 emptyMessage={
-                                    lvl === 4 && !filters.siteId && !filters.searchTerm.trim()
+                                    lvl >= 9 && !filters.siteId && !filters.searchTerm.trim()
                                         ? "Frontline staff hidden by default to minimize egress. Filter by Facility or search in toolbar to load frontline personnel."
                                         : "No active personnel positioned at this hierarchy tier matching current filters."
                                 }

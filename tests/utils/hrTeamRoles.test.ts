@@ -34,12 +34,12 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
             expect(hasPermission(role, 'TERMINATE_EMPLOYEE')).toBe(true);
         });
 
-        it('has Level 2 ranking and hierarchy rank 85 in hr department', () => {
+        it('has Level 3 ranking and hierarchy rank 85 in hr department', () => {
             expect(getRoleHierarchy(role)).toBe(85);
-            expect(getRoleLevel(role)).toBe(2);
+            expect(getRoleLevel(role)).toBe(3);
             expect(getRoleDept(role)).toBe('hr');
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
-            expect(sysRole?.level).toBe(2);
+            expect(sysRole?.level).toBe(3);
             expect(sysRole?.label).toBe('Head of Human Resources');
         });
 
@@ -78,9 +78,9 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
             expect(hasPermission(role, 'PROPOSE_SALARY')).toBe(true);
         });
 
-        it('has Level 4 ranking and hierarchy rank 40', () => {
+        it('has Level 9 ranking and hierarchy rank 40', () => {
             expect(getRoleHierarchy(role)).toBe(40);
-            expect(getRoleLevel(role)).toBe(4);
+            expect(getRoleLevel(role)).toBe(9);
             expect(getRoleDept(role)).toBe('hr');
         });
 
@@ -114,9 +114,9 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
             expect(recruitmentService.canManageHiring(role)).toBe(false);
         });
 
-        it('has Level 4 ranking and hierarchy rank 35', () => {
+        it('has Level 9 ranking and hierarchy rank 35', () => {
             expect(getRoleHierarchy(role)).toBe(35);
-            expect(getRoleLevel(role)).toBe(4);
+            expect(getRoleLevel(role)).toBe(9);
             expect(getRoleDept(role)).toBe('hr');
         });
     });
@@ -139,9 +139,9 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
             expect(hasPermission(role, 'APPROVE_SALARY')).toBe(false);
         });
 
-        it('has Level 4 ranking and hierarchy rank 35 in hr department', () => {
+        it('has Level 9 ranking and hierarchy rank 35 in hr department', () => {
             expect(getRoleHierarchy(role)).toBe(35);
-            expect(getRoleLevel(role)).toBe(4);
+            expect(getRoleLevel(role)).toBe(9);
             expect(getRoleDept(role)).toBe('hr');
         });
     });

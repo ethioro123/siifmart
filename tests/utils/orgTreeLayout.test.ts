@@ -4,18 +4,21 @@ import { getRoleLevel, getRoleDept, getRoleRank } from '../../components/org-cha
 import { Employee } from '../../types';
 
 describe('orgTreeLayout helpers', () => {
-    it('correctly ranks hierarchy role levels (CEO = 1, Ops Manager = 2, Store Manager = 3, Staff = 4)', () => {
+    it('correctly ranks 10-level hierarchy role levels (L1 CEO to L10 Frontline)', () => {
         expect(getRoleLevel('super_admin')).toBe(1);
-        expect(getRoleLevel('admin')).toBe(1);
-        expect(getRoleLevel('operations_manager')).toBe(2);
-        expect(getRoleLevel('regional_manager')).toBe(2);
-        expect(getRoleLevel('finance_manager')).toBe(2);
-        expect(getRoleLevel('store_manager')).toBe(3);
-        expect(getRoleLevel('warehouse_manager')).toBe(3);
-        expect(getRoleLevel('shift_lead')).toBe(3);
-        expect(getRoleLevel('cashier')).toBe(4);
-        expect(getRoleLevel('picker')).toBe(4);
-        expect(getRoleLevel('unknown_role')).toBe(4);
+        expect(getRoleLevel('admin')).toBe(2);
+        expect(getRoleLevel('operations_manager')).toBe(3);
+        expect(getRoleLevel('finance_manager')).toBe(3);
+        expect(getRoleLevel('regional_manager')).toBe(4);
+        expect(getRoleLevel('regional_procurement_lead')).toBe(5);
+        expect(getRoleLevel('store_manager')).toBe(6);
+        expect(getRoleLevel('warehouse_manager')).toBe(6);
+        expect(getRoleLevel('logistics_manager')).toBe(7);
+        expect(getRoleLevel('shift_lead')).toBe(8);
+        expect(getRoleLevel('auditor')).toBe(9);
+        expect(getRoleLevel('cashier')).toBe(10);
+        expect(getRoleLevel('picker')).toBe(10);
+        expect(getRoleLevel('unknown_role')).toBe(10);
     });
 
     it('correctly orders matrix position ranking (Store Mgr < Asst Mgr < Shift Lead < Cashier)', () => {

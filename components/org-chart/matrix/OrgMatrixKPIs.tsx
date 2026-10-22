@@ -30,38 +30,38 @@ export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark })
                 </div>
             </div>
 
-            {/* L1 Executive */}
+            {/* L1-L2 Executive */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
                 <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-indigo-500">
                     <Crown size={12} />
-                    <span>L1 Executive</span>
+                    <span>L1-L2 Executive</span>
                 </div>
                 <div className="text-lg font-black text-stone-900 dark:text-white mt-1">{metrics.l1}</div>
             </div>
 
-            {/* L2 Directors */}
+            {/* L3-L5 Directors */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
                 <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                     <Building2 size={12} />
-                    <span>L2 Directors</span>
+                    <span>L3-L5 Directors</span>
                 </div>
                 <div className="text-lg font-black text-stone-900 dark:text-white mt-1">{metrics.l2}</div>
             </div>
 
-            {/* L3 Supervisors */}
+            {/* L6-L8 Supervisors */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
                 <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                     <ShieldCheck size={12} />
-                    <span>L3 Supervisors</span>
+                    <span>L6-L8 Managers</span>
                 </div>
                 <div className="text-lg font-black text-stone-900 dark:text-white mt-1">{metrics.l3}</div>
             </div>
 
-            {/* L4 Frontline */}
+            {/* L9-L10 Frontline */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
                 <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-sky-500">
                     <Zap size={12} />
-                    <span>L4 Frontline</span>
+                    <span>L9-L10 Staff</span>
                 </div>
                 <div className="text-lg font-black text-stone-900 dark:text-white mt-1">{metrics.l4}</div>
             </div>

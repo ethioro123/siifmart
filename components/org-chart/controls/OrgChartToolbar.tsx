@@ -168,7 +168,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     ))}
                 </select>
 
-                {/* Hierarchy Level Filter (L1 - L4) */}
+                {/* Hierarchy Level Filter (L1 - L10) */}
                 <select
                     value={filters.hierarchyLevel ? String(filters.hierarchyLevel) : ''}
                     onChange={(e) => setFilters(prev => ({
@@ -183,10 +183,16 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     }`}
                 >
                     <option value="">All Hierarchy Tiers</option>
-                    <option value="1">L1: Executive Leadership</option>
-                    <option value="2">L2: Directorates & Regional</option>
-                    <option value="3">L3: Operations Supervisors</option>
-                    <option value="4">L4: Frontline Specialists</option>
+                    <option value="1">L1: Global Executive</option>
+                    <option value="2">L2: Country Executive</option>
+                    <option value="3">L3: Corporate HQ Directors</option>
+                    <option value="4">L4: Regional Territory Directors</option>
+                    <option value="5">L5: Regional Functional Leads</option>
+                    <option value="6">L6: Facility Captains</option>
+                    <option value="7">L7: Department Managers</option>
+                    <option value="8">L8: Shift Supervisors</option>
+                    <option value="9">L9: Functional Specialists</option>
+                    <option value="10">L10: Frontline Staff</option>
                 </select>
 
                 {/* Status Filter */}

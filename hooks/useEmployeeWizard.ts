@@ -115,10 +115,10 @@ export function useEmployeeWizard({
          return ROLE_POOLS[user.role]!.filter(roleId => canEmployRole(user.role, roleId));
       }
 
-      const userLevel = SYSTEM_ROLES.find(r => r.id === user.role)?.level || 4;
+      const userLevel = SYSTEM_ROLES.find(r => r.id === user.role)?.level || 10;
       const userHierarchy = getRoleHierarchy(user.role);
 
-      if (userLevel <= 2 || userHierarchy >= 81) {
+      if (userLevel <= 5 || userHierarchy >= 81) {
          return SYSTEM_ROLES.filter(r => canEmployRole(user.role, r.id)).map(r => r.id);
       }
 

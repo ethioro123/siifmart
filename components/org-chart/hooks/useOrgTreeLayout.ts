@@ -93,10 +93,10 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
         const findParent = (node: OrgTreeNode): OrgTreeNode | null => {
             if (node.id === rootNode?.id) return null;
 
-            // Level 2 (Executive Leads)
-            if (node.level === 2) {
+            // Levels 2-5 (Country Executive, HQ Directorate Heads, Regional Directors & Regional Leads)
+            if (node.level >= 2 && node.level <= 5) {
                 // Operations Manager reports directly to CEO
-                if (node.role === 'operations_manager') {
+                if (node.role === 'operations_manager' || node.role === 'head_of_operations') {
                     return rootNode || null;
                 }
                 // Regional Manager reports to Operations Manager (or CEO if no Ops Mgr)
@@ -105,15 +105,19 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
                     return rootNode || null;
                 }
                 // Supply Chain Manager reports to Operations Manager (or CEO)
-                if (node.role === 'supply_chain_manager') {
+                if (node.role === 'supply_chain_manager' || node.role === 'head_of_supply_chain') {
                     if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                     return rootNode || null;
+                }
+                // Regional Functional Leads (Level 5) report to their Regional Manager
+                if (node.level === 5 && regionalMgr && regionalMgr.id !== node.id) {
+                    return regionalMgr;
                 }
                 return rootNode || null;
             }
 
-            // Level 3 (Site/Section Managers)
-            if (node.level === 3) {
+            // Levels 6-8 (Facility Captains, Department Managers & Shift Supervisors)
+            if (node.level >= 6 && node.level <= 8) {
                 if (['assistant_manager', 'shift_lead', 'store_supervisor'].includes(node.role)) {
                     // Match store manager at the same site
                     const sameSiteStoreMgr = storeMgrs.find(m => m.siteId && m.siteId === node.siteId);
@@ -145,13 +149,13 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
                     return rootNode || null;
                 }
 
-                // Default Level 3 fallback
+                // Default Levels 6-8 fallback
                 if (regionalMgr && regionalMgr.id !== node.id) return regionalMgr;
                 if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                 return rootNode || null;
             }
 
-            // Level 4 (Staff & Specialists)
+            // Levels 9 & 10 (Specialists & Frontline Staff)
             // Central Operations Team members
             if (['store_operations_auditor', 'data_analyst'].includes(node.role)) {
                 if (opsMgr && opsMgr.id !== node.id) return opsMgr;

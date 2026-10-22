@@ -1,40 +1,45 @@
 export type UserRole =
-  // Level 1 - Executive
+  // Level 1 - Global Executive
   | 'super_admin' | 'CEO' | 'ceo'
+  // Level 2 - Country Executive
   | 'country_managing_director' | 'admin'
-  // Level 2 - Corporate Directorate (Head of... / Direct Titles)
+  // Level 3 - Corporate HQ Directorate Heads
   | 'head_of_operations' | 'operations_head' | 'operations_manager'
   | 'head_of_finance' | 'finance_head' | 'finance_manager'
   | 'head_of_hr' | 'hr_head' | 'hr_manager'
   | 'head_of_procurement' | 'procurement_head' | 'procurement_manager'
   | 'head_of_supply_chain' | 'supply_chain_head' | 'supply_chain_manager'
   | 'head_of_merchandising' | 'merchandising_head' | 'merchandising_manager'
-  | 'head_of_it' | 'it_head' | 'it_support'
-  | 'head_of_audit' | 'audit_head' | 'auditor'
+  | 'head_of_it' | 'it_head'
+  | 'head_of_audit' | 'audit_head'
+  // Level 4 - Regional Territory Director
   | 'regional_manager'
-  // Level 3 - Site Managers & Supervisors
-  | 'store_manager' | 'warehouse_manager' | 'dispatch_manager'
-  | 'assistant_manager' | 'shift_lead' | 'store_supervisor'
-  | 'fleet_maintenance_supervisor'
-  // Level 4 - Staff
-  | 'cashier' | 'sales_associate' | 'stock_clerk' | 'picker' | 'packer'
-  | 'receiver' | 'driver' | 'forklift_operator' | 'inventory_specialist'
-  | 'customer_service' | 'auditor' | 'it_support'
-  // Legacy roles (for backwards compatibility during migration)
-  | 'admin' | 'hr' | 'pos' | 'dispatcher'
-  | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
-  | 'accountant' | 'data_analyst' | 'training_coordinator' | 'hr_generalist'
-  | 'merchandising_specialist'
-  // Regional Administration Roles (Flexible Territorial Team)
+  // Level 5 - Regional Functional Leads
   | 'regional_procurement_lead' | 'regional_finance_officer' | 'regional_hr_officer'
   | 'regional_merchandising_lead'
   | 'regional_logistics_lead' | 'regional_security_supervisor'
-  // New roles
-  | 'buyer' | 'demand_planner' | 'inventory_manager' | 'logistics_manager' | 'security_manager'
-  | 'payroll_specialist' | 'talent_recruiter' | 'replenishment_planner'
-  | 'vendor_relations_manager' | 'customs_import_specialist' | 'inbound_qc_inspector'
+  // Level 6 - Facility Captains
+  | 'store_manager' | 'warehouse_manager'
+  // Level 7 - Functional & Department Managers
+  | 'logistics_manager' | 'inventory_manager' | 'security_manager'
+  | 'dispatch_manager' | 'cs_manager' | 'vendor_relations_manager'
+  // Level 8 - Deputy & Shift Supervisors
+  | 'assistant_manager' | 'fleet_maintenance_supervisor'
+  | 'store_supervisor' | 'shift_lead'
+  // Level 9 - Corporate, Audit & Planning Specialists
+  | 'store_operations_auditor' | 'auditor' | 'payroll_specialist'
   | 'treasury_officer' | 'tax_compliance_officer' | 'credit_control_officer'
-  | 'store_operations_auditor';
+  | 'accountant' | 'data_analyst' | 'training_coordinator' | 'talent_recruiter'
+  | 'hr_generalist' | 'merchandising_specialist' | 'customs_import_specialist'
+  | 'it_support' | 'dispatcher' | 'buyer' | 'demand_planner'
+  | 'replenishment_planner' | 'inbound_qc_inspector' | 'loss_prevention'
+  // Level 10 - Frontline Store, Warehouse & Fleet Staff
+  | 'cashier' | 'sales_associate' | 'pos' | 'merchandiser'
+  | 'inventory_specialist' | 'customer_service' | 'stock_clerk'
+  | 'picker' | 'packer' | 'receiver' | 'returns_clerk'
+  | 'driver' | 'forklift_operator'
+  // Legacy roles (for backwards compatibility during migration)
+  | 'hr';
 
 export type PaymentMethod = 'Cash' | 'Card' | 'Mobile Money';
 

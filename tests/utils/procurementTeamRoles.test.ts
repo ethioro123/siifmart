@@ -32,12 +32,12 @@ describe('Procurement Directorate Team Roles & Hierarchy', () => {
             expect(hasPermission(role, 'APPROVE_PO')).toBe(true);
         });
 
-        it('has Level 2 ranking and hierarchy rank 82', () => {
+        it('has Level 3 ranking and hierarchy rank 82', () => {
             expect(getRoleHierarchy(role)).toBe(82);
-            expect(getRoleLevel(role)).toBe(2);
+            expect(getRoleLevel(role)).toBe(3);
             expect(getRoleDept(role)).toBe('procurement');
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
-            expect(sysRole?.level).toBe(2);
+            expect(sysRole?.level).toBe(3);
             expect(sysRole?.label).toBe('Head of Procurement');
         });
     });
@@ -67,9 +67,9 @@ describe('Procurement Directorate Team Roles & Hierarchy', () => {
             expect(hasPermission(role, 'APPROVE_PO')).toBe(false);
         });
 
-        it('has Level 4 ranking and hierarchy rank 30', () => {
+        it('has Level 9 ranking and hierarchy rank 30', () => {
             expect(getRoleHierarchy(role)).toBe(30);
-            expect(getRoleLevel(role)).toBe(4);
+            expect(getRoleLevel(role)).toBe(9);
             expect(getRoleDept(role)).toBe('procurement');
         });
     });
@@ -84,12 +84,12 @@ describe('Procurement Directorate Team Roles & Hierarchy', () => {
             expect(canAccessModule(role, 'procurement')).toBe(true);
         });
 
-        it('has Level 3 ranking and hierarchy rank 60', () => {
+        it('has Level 7 ranking and hierarchy rank 60', () => {
             expect(getRoleHierarchy(role)).toBe(60);
-            expect(getRoleLevel(role)).toBe(4); // Staff/Specialist tier
+            expect(getRoleLevel(role)).toBe(7); // Functional & Department Manager tier
             expect(getRoleDept(role)).toBe('procurement');
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
-            expect(sysRole?.level).toBe(3);
+            expect(sysRole?.level).toBe(7);
             expect(sysRole?.label).toBe('Vendor Relations Manager');
         });
     });

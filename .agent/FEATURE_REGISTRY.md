@@ -5,6 +5,22 @@
 
 ## Active Features
 
+### 10-Level Organizational Role Hierarchy (`Level 1` to `Level 10`) (2026-10-22)
+- Upgraded SIIFMART's organizational role hierarchy from the 4-level system (`L1–L4`) to a 10-level enterprise command hierarchy (`L1–L10`):
+  - **Level 1 (`L1 Global Exec`)**: Global Executive (`super_admin`, `CEO`, `ceo`)
+  - **Level 2 (`L2 Country Exec`)**: Country Executive (`country_managing_director`, `admin`)
+  - **Level 3 (`L3 HQ Director`)**: Corporate HQ Directorate Heads (`head_of_operations`, `operations_manager`, `head_of_finance`, `finance_manager`, `head_of_hr`, `hr_manager`, `hr`, `head_of_procurement`, `procurement_manager`, `head_of_supply_chain`, `supply_chain_manager`, `head_of_merchandising`, `merchandising_manager`, `head_of_it`, `head_of_audit`)
+  - **Level 4 (`L4 Regional Dir`)**: Regional Territory Directors (`regional_manager`)
+  - **Level 5 (`L5 Regional Lead`)**: Regional Functional Leads (`regional_procurement_lead`, `regional_finance_officer`, `regional_merchandising_lead`, `regional_hr_officer`, `regional_logistics_lead`, `regional_security_supervisor`)
+  - **Level 6 (`L6 Facility Captain`)**: Facility Captains (`store_manager`, `warehouse_manager`)
+  - **Level 7 (`L7 Dept Manager`)**: Functional & Department Managers (`logistics_manager`, `inventory_manager`, `security_manager`, `dispatch_manager`, `cs_manager`, `vendor_relations_manager`, `manager`)
+  - **Level 8 (`L8 Supervisor`)**: Deputy & Shift Supervisors (`assistant_manager`, `fleet_maintenance_supervisor`, `store_supervisor`, `shift_lead`)
+  - **Level 9 (`L9 Specialist`)**: Corporate, Audit & Planning Specialists (`store_operations_auditor`, `auditor`, `payroll_specialist`, `treasury_officer`, `tax_compliance_officer`, `credit_control_officer`, `accountant`, `data_analyst`, `training_coordinator`, `talent_recruiter`, `hr_generalist`, `merchandising_specialist`, `customs_import_specialist`, `it_support`, `dispatcher`, `buyer`, `demand_planner`, `replenishment_planner`, `inbound_qc_inspector`, `loss_prevention`)
+  - **Level 10 (`L10 Frontline`)**: Frontline Store, Warehouse & Fleet Staff (`cashier`, `sales_associate`, `pos`, `merchandiser`, `inventory_specialist`, `customer_service`, `stock_clerk`, `picker`, `packer`, `receiver`, `returns_clerk`, `driver`, `forklift_operator`)
+- Enforced `Levels 1–8` (`level <= 8`) as the managerial/supervisory boundary across `canEmployRole`, `recruitmentService.canManageHiring`, `useEmployeeWizard`, and default egress-optimized Org Matrix loading, while `Levels 9–10` (`level >= 9`) are non-managerial specialists and frontline staff.
+- Updated Org Matrix swimlanes, KPIs, toolbar level filters, and Staging Quick Login panels (`CountryQuickLoginPanel`, `KenyanQuickLogin`) to support `L1` through `L10`.
+- **Files**: `types/auth.ts`, `utils/roles.ts`, `components/org-chart/hooks/orgRoles.ts`, `components/org-chart/hooks/orgReportingTypes.ts`, `components/org-chart/hooks/orgReportingLines.ts`, `components/org-chart/hooks/orgReportingL1L3Data.ts`, `components/org-chart/hooks/orgReportingL4Data.ts`, `components/org-chart/hooks/useOrgTreeLayout.ts`, `components/org-chart/types.ts`, `components/org-chart/matrix/OrgMatrixView.tsx`, `components/org-chart/matrix/OrgMatrixGuide.tsx`, `components/org-chart/matrix/OrgMatrixKPIs.tsx`, `components/org-chart/matrix/orgMatrixIcons.tsx`, `components/org-chart/controls/OrgChartToolbar.tsx`, `services/recruitment.service.ts`, `hooks/useEmployeeWizard.ts`, `utils/stagingQuickLogin.ts`, `components/login/CountryQuickLoginPanel.tsx`, `components/login/KenyanQuickLogin.tsx`.
+
 ### Purchase Order Creation, Pricing & Governance Harmonization (2026-10-22)
 - Fixed PO list header projections (`priority, incoterms, temp_req, shelf_life, dock_slot, destination`) and added on-demand `getById` hydration in `CreatePOModal` so editing a PO from the list never wipes out `po_items` or metadata; preserved original `poNumber`, `date`, `status`, `siteId`, and `createdBy` on edit and restricted inbound dock assignment on unapproved POs.
 - Fixed Supplier Catalog ("Add to Order") and Merchandising AI Forecast ("Create PO") entry points via dedicated `initialProduct` and `initialDraft` props so prefilled orders do not overwrite saved PO drafts or force one-off vendor mode.
