@@ -16,7 +16,7 @@ import { fetchLoginLocation } from '../utils/geolocationHelper';
 import { evaluateGeofence } from '../utils/geofence';
 import { getDeviceDetails } from '../utils/deviceHelper';
 import { formatRole } from '../utils/formatting';
-import { useTheme } from '../hooks/useTheme';
+import { useTheme, type ThemePreference } from '../hooks/useTheme';
 interface ToastMessage {
   id: string; message: string; type: 'info' | 'warning' | 'error' | 'success'; duration?: number; title?: string;
 }
@@ -24,6 +24,7 @@ interface StoreContextType {
   user: User | null; originalUser?: User | null;
   login: (email: string, password: string) => Promise<boolean>; logout: () => void;
   impersonateUser: (user: User) => void; stopImpersonation: () => void;
+  themePreference: ThemePreference; setThemePreference: (preference: ThemePreference) => void;
   theme: 'dark' | 'light'; toggleTheme: () => void; isSidebarOpen: boolean; toggleSidebar: () => void;
   loading: boolean; isOnline: boolean; isServerDown: boolean;
   showToast: (message: string, type?: 'info' | 'warning' | 'error' | 'success', duration?: number, title?: string) => void;
@@ -35,7 +36,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export function StoreProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, themePreference, setThemePreference } = useTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isServerDown, setIsServerDown] = useState(false);
@@ -440,7 +441,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     impersonateUser,
     stopImpersonation,
     theme,
-    toggleTheme,
+    toggleTheme, themePreference, setThemePreference,
     isSidebarOpen,
     toggleSidebar,
     loading,
@@ -449,7 +450,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     showToast,
     updateUserAvatar,
     onlineIds
-  }), [user, originalUser, theme, isSidebarOpen, loading, isOnline, isServerDown, onlineIds]);
+  }), [user, originalUser, theme, themePreference, isSidebarOpen, loading, isOnline, isServerDown, onlineIds]);
 
   return (
     <StoreContext.Provider value={value}>
@@ -462,7 +463,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
 const STORE_FALLBACK: StoreContextType = {
   user: null, originalUser: null, login: async () => false, logout: () => {},
-  impersonateUser: () => {}, stopImpersonation: () => {}, theme: 'light', toggleTheme: () => {},
+  impersonateUser: () => {}, stopImpersonation: () => {}, theme: 'light', toggleTheme: () => {}, themePreference: 'system', setThemePreference: () => {},
   isSidebarOpen: false, toggleSidebar: () => {}, loading: false, isOnline: true, isServerDown: false,
   showToast: () => {}, updateUserAvatar: () => {}, onlineIds: new Set<string>()
 };

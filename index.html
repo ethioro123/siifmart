@@ -7,7 +7,7 @@
   <script>
     let savedTheme = null;
     try {
-      savedTheme = window.localStorage.getItem('siifmart_theme');
+      savedTheme = window.localStorage.getItem('siifmart_theme_preference');
     } catch {}
     const systemPrefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
     const initialTheme = savedTheme === 'dark' || savedTheme === 'light'

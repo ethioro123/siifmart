@@ -1,38 +1,40 @@
 import { useEffect, useState } from 'react';
 
+export type ThemePreference = 'system' | 'dark' | 'light';
 type Theme = 'dark' | 'light';
-const THEME_STORAGE_KEY = 'siifmart_theme';
+// Older toggles saved a permanent override without offering an automatic option.
+const THEME_STORAGE_KEY = 'siifmart_theme_preference';
 
-const getStoredTheme = (): Theme | null => {
+const getStoredPreference = (): ThemePreference => {
   try {
-    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-    return storedTheme === 'dark' || storedTheme === 'light' ? storedTheme : null;
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return stored === 'dark' || stored === 'light' ? stored : 'system';
   } catch {
-    return null;
+    return 'system';
   }
 };
-
 const getSystemTheme = (): Theme => (
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
+    ? 'dark' : 'light'
 );
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => getStoredTheme() ?? getSystemTheme());
-  const [hasThemeOverride, setHasThemeOverride] = useState(() => getStoredTheme() !== null);
+  const [themePreference, setPreference] = useState<ThemePreference>(getStoredPreference);
+  const [systemTheme, setSystemTheme] = useState<Theme>(getSystemTheme);
+  const theme = themePreference === 'system' ? systemTheme : themePreference;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
     if (!mediaQuery) return;
-
-    const handleSystemThemeChange = (event: MediaQueryListEvent) => {
-      if (!hasThemeOverride) setTheme(event.matches ? 'dark' : 'light');
-    };
-
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
-  }, [hasThemeOverride]);
+    const handleChange = (event: MediaQueryListEvent) => setSystemTheme(event.matches ? 'dark' : 'light');
+    setSystemTheme(mediaQuery.matches ? 'dark' : 'light');
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -40,18 +42,14 @@ export function useTheme() {
     document.documentElement.style.colorScheme = theme;
   }, [theme]);
 
-  const toggleTheme = () => {
-    setHasThemeOverride(true);
-    setTheme(previousTheme => {
-      const nextTheme = previousTheme === 'dark' ? 'light' : 'dark';
-      try {
-        window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-      } catch {
-        // Keep the in-memory preference when browser storage is unavailable.
-      }
-      return nextTheme;
-    });
+  const setThemePreference = (preference: ThemePreference) => {
+    setPreference(preference);
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, preference);
+    } catch {
+      // The current session still follows the selected appearance without storage.
+    }
   };
-
-  return { theme, toggleTheme };
+  const toggleTheme = () => setThemePreference(theme === 'dark' ? 'light' : 'dark');
+  return { theme, themePreference, setThemePreference, toggleTheme };
 }

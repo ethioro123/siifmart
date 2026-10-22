@@ -455,3 +455,7 @@
 
 ### Receiving hub region heading (2026-10-23)
 - Procurement receiving dropdown identifies the worker’s assigned region rather than the country HQ label. National/global views derive the visible hubs’ regions; missing names use region codes.
+
+### Device appearance following (2026-10-23)
+- Appearance defaults to the device setting and follows live light/dark changes. Login, header and user menu provide explicit device/light/dark choices.
+- Legacy theme toggles no longer pin users permanently to an old manual choice; explicit new preferences persist with matching first-paint initialization.

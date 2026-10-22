@@ -1,5 +1,6 @@
+import { ThemeSelector } from './ThemeSelector';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Menu, Search, Sun, Moon, RefreshCw } from 'lucide-react';
+import { Menu, Search, RefreshCw } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useGamification } from '../contexts/GamificationContext';
@@ -413,13 +414,7 @@ export default function TopBar() {
             </button>
 
             {/* Dark/Light Toggle */}
-            <button
-               onClick={toggleTheme}
-               className="hidden sm:flex p-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-focus)] transition-all cursor-pointer"
-               aria-label="Toggle Theme"
-            >
-               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
+            <ThemeSelector className="hidden sm:block" />
 
             <ActivityCenter 
                notifRef={notifRef}

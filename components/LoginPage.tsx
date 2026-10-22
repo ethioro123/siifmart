@@ -1,5 +1,6 @@
+import { ThemeSelector } from './ThemeSelector';
 import React, { useState } from 'react';
-import { Lock, Mail, Sun, Moon, AlertCircle, Loader, Eye, EyeOff, ArrowLeft, CheckCircle, Crown } from 'lucide-react';
+import { Lock, Mail, AlertCircle, Loader, Eye, EyeOff, ArrowLeft, CheckCircle, Crown } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { authService } from '../services/auth.service';
@@ -13,7 +14,7 @@ import { isStagingQuickLoginAvailable } from '../utils/stagingQuickLogin';
 type Mode = 'login' | 'forgot';
 
 export default function LoginPage() {
-  const { login, toggleTheme, theme } = useStore();
+  const { login } = useStore();
   const { settings } = useData();
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
@@ -89,14 +90,9 @@ export default function LoginPage() {
     >
 
       {/* Premium Theme Switcher */}
-      <button 
-        onClick={toggleTheme} 
-        aria-label="Toggle Theme"
-        className="absolute right-6 p-2.5 rounded-full bg-black/5 dark:bg-white/10 text-stone-800 dark:text-stone-200 hover:text-black dark:hover:text-white hover:scale-105 active:scale-95 transition-all z-20 cursor-pointer"
-        style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
-      >
-        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
+      <div className="absolute right-6 z-20" style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}>
+        <ThemeSelector />
+      </div>
 
       {/* Main 3-Column Layout: Left (Ethiopia) | Center (Login) | Right (Kenya) */}
       <div className="w-full max-w-[1380px] mx-auto flex flex-col lg:flex-row items-center justify-center gap-4 xl:gap-6 relative z-10 py-4 px-2 sm:px-4">

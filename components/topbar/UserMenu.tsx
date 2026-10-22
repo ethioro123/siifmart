@@ -1,5 +1,6 @@
+import { ThemeSelector } from '../ThemeSelector';
 import React, { useState } from 'react';
-import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut, Sun, Moon, RefreshCw, ShieldCheck, Lock, AlertTriangle, X } from 'lucide-react';
+import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut, RefreshCw, ShieldCheck, Lock, AlertTriangle, X } from 'lucide-react';
 import { formatRole } from '../../utils/formatting';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useData } from '../../contexts/DataContext';
@@ -352,19 +353,7 @@ export function UserMenu({
                      </div>
                       {/* Theme and Refresh shortcuts */}
                       <div className="mt-2 pt-2 border-t border-[var(--theme-border)] space-y-1">
-                         {toggleTheme && (
-                            <button
-                               type="button"
-                               onClick={toggleTheme}
-                               className="w-full min-h-12 flex items-center justify-between px-3.5 py-3 text-sm font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                            >
-                               <div className="flex items-center gap-3">
-                                  {theme === 'dark' ? <Sun size={16} className="text-amber-500" /> : <Moon size={16} className="text-stone-500" />}
-                                  <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-                               </div>
-                               <span className="text-[10px] font-mono text-[var(--theme-text-muted)] uppercase">{theme}</span>
-                            </button>
-                         )}
+                         <ThemeSelector className="w-full" />
 
                          {onRefresh && (
                             <button
