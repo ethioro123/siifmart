@@ -25,6 +25,12 @@ export default function LoginPage() {
   const quickLogin = useStagingQuickLogin();
   const { data: stagingAccounts = [] } = useStagingAccounts();
   const stagingExecutive = stagingAccounts.find(account => account.country === 'GLOBAL');
+  const stagingKeRegionalMgr = stagingAccounts.find(
+    account => account.country === 'KE' && (account.roleId === 'regional_operations_manager' || account.roleId === 'regional_manager')
+  );
+  const stagingEtRegionalMgr = stagingAccounts.find(
+    account => account.country === 'ET' && (account.roleId === 'regional_operations_manager' || account.roleId === 'regional_manager')
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,20 +126,59 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Quick Login for Global CEO on localhost */}
-          {mode === 'login' && isStagingQuickLoginAvailable() && stagingExecutive && (
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => handleQuickLogin(stagingExecutive.email)}
-              className="w-full mb-4 py-2 px-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/40 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Crown size={14} className="text-amber-600 dark:text-amber-400" />
-                <span>Global CEO (All Access)</span>
-              </div>
-              <span className="text-[10px] font-mono opacity-70">{stagingExecutive.email}</span>
-            </button>
+          {/* Quick Login for Staging Key Leadership (CEO & Regional Managers) on localhost */}
+          {mode === 'login' && isStagingQuickLoginAvailable() && (
+            <div className="mb-4 space-y-1.5">
+              {stagingExecutive && (
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleQuickLogin(stagingExecutive.email)}
+                  className="w-full py-2 px-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/40 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Crown size={14} className="text-amber-600 dark:text-amber-400" />
+                    <span>Global CEO (All Access)</span>
+                  </div>
+                  <span className="text-[10px] font-mono opacity-70">{stagingExecutive.email}</span>
+                </button>
+              )}
+
+              {(stagingKeRegionalMgr || stagingEtRegionalMgr) && (
+                <div className="grid grid-cols-2 gap-1.5">
+                  {stagingKeRegionalMgr && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => handleQuickLogin(stagingKeRegionalMgr.email)}
+                      className="py-1.5 px-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 hover:border-blue-500/40 text-blue-800 dark:text-blue-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      title={`Quick Login: ${stagingKeRegionalMgr.name} (${stagingKeRegionalMgr.role})`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-xs">🇰🇪</span>
+                        <span className="truncate">KE Regional Mgr</span>
+                      </div>
+                      <span className="text-[9px] font-mono opacity-70 shrink-0">Kamau</span>
+                    </button>
+                  )}
+                  {stagingEtRegionalMgr && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => handleQuickLogin(stagingEtRegionalMgr.email)}
+                      className="py-1.5 px-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 hover:border-blue-500/40 text-blue-800 dark:text-blue-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      title={`Quick Login: ${stagingEtRegionalMgr.name} (${stagingEtRegionalMgr.role})`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-xs">🇪🇹</span>
+                        <span className="truncate">ET Regional Mgr</span>
+                      </div>
+                      <span className="text-[9px] font-mono opacity-70 shrink-0">Henok</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           )}
 
           {error && (
