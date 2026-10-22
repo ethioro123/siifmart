@@ -165,3 +165,32 @@ describe('employeesService - Code Generation & Conflict Resilience', () => {
         })).rejects.toThrow('Workplace location is mandatory');
     });
 });
+
+describe('country employee directory excludes global leadership', () => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it.each(['ET', 'KE'] as const)('uses only assigned country facilities for %s', async (country) => {
+        const query = {
+            select: vi.fn().mockReturnThis(),
+            in: vi.fn().mockResolvedValue({ data: [], count: 0, error: null }),
+            or: vi.fn(),
+            is: vi.fn()
+        };
+        vi.mocked(supabase.from).mockReturnValue(query as unknown as ReturnType<typeof supabase.from>);
+        const siteIds = [`${country}-HQ`, `${country}-REGION`];
+        const result = await employeesService.getPaginated('All', 1, 50, '', { country, countrySiteIds: siteIds });
+        expect(query.in).toHaveBeenCalledWith('site_id', siteIds);
+        expect(query.or).not.toHaveBeenCalled();
+        expect(query.is).not.toHaveBeenCalled();
+        expect(result).toEqual({ data: [], count: 0 });
+    });
+
+    it.each(['ET', 'KE'] as const)('returns no country employees without authorized facilities for %s', async (country) => {
+        const query = { select: vi.fn().mockReturnThis(), is: vi.fn(), or: vi.fn() };
+        vi.mocked(supabase.from).mockReturnValue(query as unknown as ReturnType<typeof supabase.from>);
+        const result = await employeesService.getPaginated('All', 1, 50, '', { country, countrySiteIds: [] });
+        expect(result).toEqual({ data: [], count: 0 });
+        expect(query.is).not.toHaveBeenCalled();
+        expect(query.or).not.toHaveBeenCalled();
+    });
+});

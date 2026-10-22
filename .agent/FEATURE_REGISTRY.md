@@ -437,3 +437,8 @@
 - Auth identities use random server-side passwords and existing local staging one-time-token quick login.
 - Regional quick login lists every office; other facility types retain representative-site selection.
 - Migration: `migrations/20261023_seed_regional_department_support.sql` (staging only).
+
+### Global Group CEO assignment correction (2026-10-23)
+- Group CEO has no country facility or region assignment; database constraint prevents reassignment to country facilities.
+- Country employee directory uses the same explicit facility filter for ET and KE, excluding unassigned global leadership.
+- Migration: `migrations/20261023_correct_group_ceo_global_assignment.sql`.

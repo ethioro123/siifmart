@@ -189,22 +189,11 @@ export const employeesService = {
             }
             query = query.in('site_id', filters.countrySiteIds);
         } else if (filters?.country) {
-            // Country tenant isolation
-            if (filters.country === 'ET') {
-                // Ethiopia is HQ / legacy baseline: include ET sites and unassigned/HQ corporate staff
-                if (filters.countrySiteIds && filters.countrySiteIds.length > 0) {
-                    query = query.or(`site_id.in.(${filters.countrySiteIds.join(',')}),site_id.is.null`);
-                } else {
-                    query = query.is('site_id', null);
-                }
-            } else {
-                // Non-Ethiopian country (e.g. KE)
-                // Strict isolation: only staff explicitly assigned to facilities in that country
-                if (!filters.countrySiteIds || filters.countrySiteIds.length === 0) {
-                    return { data: [], count: 0 };
-                }
-                query = query.in('site_id', filters.countrySiteIds);
+            // Country directories contain only employees assigned to that country's facilities.
+            if (!filters.countrySiteIds || filters.countrySiteIds.length === 0) {
+                return { data: [], count: 0 };
             }
+            query = query.in('site_id', filters.countrySiteIds);
         }
 
         if (filters?.role && filters.role !== 'All') query = query.eq('role', filters.role);
@@ -333,11 +322,11 @@ export const employeesService = {
             const dbEmployee = {
                 id: employee.id,
                 code: currentCode,
-                site_id: employee.siteId,
+                site_id: isCEO ? null : employee.siteId,
                 reports_to_employee_id: employee.reportsToEmployeeId || employee.reports_to_employee_id || null,
                 functional_manager_employee_id: employee.functionalManagerEmployeeId || employee.functional_manager_employee_id || null,
-                region_code: resolvedRegionCode,
-                scope_level: scopeLevel,
+                region_code: isCEO ? null : resolvedRegionCode,
+                scope_level: isCEO ? 'HQ' : scopeLevel,
                 name: employee.name,
                 job_title: getEmployeeJobTitle(employee),
                 role: employee.role,
