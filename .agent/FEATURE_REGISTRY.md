@@ -466,3 +466,7 @@
 ### Profile dropdown refinement (2026-10-23)
 - Compact identity summary, expandable activity/achievements, consistent preference groups and pinned sign-out action with responsive sizing. Country controls appear only for authorized executives.
 - Close control is available on desktop and mobile; Escape closes the dropdown and returns focus to its trigger.
+
+### Purchase request workspace (2026-10-23)
+- Separate stock/suggestion views, clearer forms and item quantities, assigned-workspace context, next-step guidance, and searchable status-filtered history.
+- Review notes remain separate per request; receiving options stay within the requester’s assigned region and active facilities.
