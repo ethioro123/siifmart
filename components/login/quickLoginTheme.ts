@@ -81,11 +81,12 @@ export function getSiteTheme(type: StagingSiteType): SiteTheme {
 export const POPULAR_ROLE_CHIPS = [
   { id: 'cashier', label: 'Cashier' },
   { id: 'store_manager', label: 'Store Mgr' },
+  { id: 'regional_operations_manager', label: 'Regional Mgr' },
+  { id: 'warehouse_manager', label: 'WH Mgr' },
+  { id: 'admin', label: 'Admin' },
   { id: 'picker', label: 'Picker' },
   { id: 'packer', label: 'Packer' },
-  { id: 'warehouse_manager', label: 'WH Mgr' },
   { id: 'driver', label: 'Driver' },
   { id: 'receiver', label: 'Receiver' },
   { id: 'inventory_specialist', label: 'Inventory' },
-  { id: 'admin', label: 'Admin' },
 ] as const;
