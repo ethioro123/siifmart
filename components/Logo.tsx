@@ -175,7 +175,7 @@ export default function Logo({
         fontSize={fontSize}
         storeName={effectiveStoreName}
         showSince={showTagline}
-        centered={false}
+        centered={true}
       />
     </div>
   );
