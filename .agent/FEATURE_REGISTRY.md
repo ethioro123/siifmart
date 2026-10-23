@@ -491,3 +491,6 @@
 ### HQ finance PO approvals (2026-10-23)
 - Finance has a country-scoped, paginated PO Approvals queue using current regional limits and clearance terms, with on-demand inspection and audited clearance.
 - Draft and Pending POs expose the authorized clearance action; final procurement approval remains separate.
+
+### Sidebar outside dismissal (2026-10-23)
+- Navigation closes on outside mouse/touch/pen interaction at all screen sizes, while internal interactions and the menu toggle retain their behavior.

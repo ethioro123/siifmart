@@ -1,3 +1,4 @@
+import { useSidebarDismiss } from '../hooks/useSidebarDismiss';
 
 import React, { useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -44,6 +45,8 @@ export default function Sidebar() {
   const { user, isSidebarOpen, toggleSidebar } = useStore();
   const { activeSite, sites, setActiveSite, effectiveCountry, regions, activeRegionCode, isRegionalUser } = useData();
   const navigate = useNavigate();
+  const drawerRef = useRef<HTMLElement>(null);
+  useSidebarDismiss(drawerRef, isSidebarOpen, toggleSidebar);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const wasSidebarOpenRef = useRef(false);
 
@@ -261,7 +264,6 @@ export default function Sidebar() {
       <div
         aria-hidden="true"
         className={`fixed inset-0 z-[1000] bg-black/40 transition-opacity duration-200 md:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        onClick={toggleSidebar}
       />
 
       <aside className={`
@@ -271,6 +273,7 @@ export default function Sidebar() {
         flex flex-col
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}
+        ref={drawerRef}
         id="main-navigation-drawer"
         role="dialog"
         aria-label="Navigation menu"
