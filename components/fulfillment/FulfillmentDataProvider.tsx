@@ -200,21 +200,25 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 const [
                     loadedJobs,
                     loadedTransfers,
-                    loadedAssignments,
                     loadedZones,
                     loadedApprovals
                 ] = await Promise.all([
                     // RULE 10: limit=0 → active jobs only, zero history on mount
                     wmsJobsService.getAll(activeSiteId, 0, employeeId, activeCountryCode),
                     transfersService.getAll(activeSiteId),
-                    jobAssignmentsService.getAll(activeSiteId),
                     warehouseZonesService.getAll(activeSiteId),
                     barcodeApprovalsService.getAuditLog(targetSiteId, activeCountryCode)
                 ]);
 
                 setJobs(loadedJobs);
                 setTransfers(loadedTransfers);
-                setJobAssignments(loadedAssignments);
+                try {
+                    setJobAssignments(await jobAssignmentsService.getForJobs(loadedJobs, activeSiteId));
+                } catch (assignmentError) {
+                    setJobAssignments([]);
+                    logger.error('FulfillmentDataProvider', 'Failed to load active job assignments', assignmentError);
+                    addNotification('alert', 'Job assignments could not be loaded.');
+                }
                 setZones(loadedZones);
                 setBarcodeApprovals(loadedApprovals);
 

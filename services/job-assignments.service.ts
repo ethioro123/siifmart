@@ -31,6 +31,25 @@ export const mapJobAssignmentRow = (row: any): JobAssignment => {
 };
 
 export const jobAssignmentsService = {
+    /** Call with IDs from the authorized active-job read; avoid rejoining WMS RLS. */
+    async getForJobs(jobs: readonly { id: string; siteId: string }[], siteId: string): Promise<JobAssignment[]> {
+        if (!siteId) return [];
+        const ids = [...new Set(jobs.filter(job => job.siteId === siteId).map(job => job.id))];
+        const assignments: JobAssignment[] = [];
+        const projection = 'id,job_id,employee_id,employee_name,assigned_at,started_at,completed_at,status,notes,estimated_duration,actual_duration,units_processed,accuracy_rate';
+        for (let start = 0; start < ids.length; start += 50) {
+            const batch = ids.slice(start, start + 50);
+            for (let offset = 0; ; offset += 100) {
+                const { data, error } = await supabase.from('job_assignments').select(projection)
+                    .in('job_id', batch).order('assigned_at', { ascending: false }).order('id')
+                    .range(offset, offset + 99);
+                if (error) throw error;
+                assignments.push(...(data || []).map(mapJobAssignmentRow));
+                if (!data || data.length < 100) break;
+            }
+        }
+        return assignments;
+    },
     async getAll(siteId?: string, employeeId?: string, limit?: number): Promise<JobAssignment[]> {
         let query = supabase
             .from('job_assignments')
