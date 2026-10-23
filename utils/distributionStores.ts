@@ -4,8 +4,9 @@ const ZONE_OVERRIDE_ROLES = new Set(['group_ceo', 'country_managing_director', '
 /** Candidate destinations only; the transfer service still enforces authorization when saving. */
 export function eligibleDistributionStores(sites: Site[], source: Site | undefined, enforceZoning: boolean, role?: User['role']): Site[] {
     if (!source?.country) return [];
+    const sourceCountry = source.country.toUpperCase();
     return sites.filter(site => site.type === 'Store' && site.id !== source.id &&
-        site.country?.toUpperCase() === source.country.toUpperCase() &&
+        site.country?.toUpperCase() === sourceCountry &&
         (!site.status || site.status.toLowerCase() === 'active') &&
         (!enforceZoning || ZONE_OVERRIDE_ROLES.has(role || '') || (site.logisticsZoneId || '') === (source.logisticsZoneId || '')));
 }
