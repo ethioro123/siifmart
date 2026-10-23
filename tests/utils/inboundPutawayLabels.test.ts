@@ -55,17 +55,17 @@ describe('Inbound Putaway & Carton LPN Label Generator', () => {
         expect(html).not.toContain('Retail Price');
     });
 
-    it('supports multiple thermal label sizes (Small, Medium, Large, XL)', async () => {
+    it('uses standard thermal sizes and promotes undersized intake stock to Medium', async () => {
         const smallHtml = await generateInboundPutawayLabelHTML(mockItems, {
             size: 'Small',
             format: 'Barcode'
         });
-        expect(smallHtml).toContain('74.1mm');
+        expect(smallHtml).toContain('76.2mm 50.8mm');
 
         const largeHtml = await generateInboundPutawayLabelHTML(mockItems, {
             size: 'Large',
             format: 'QR'
         });
-        expect(largeHtml).toContain('130mm');
+        expect(largeHtml).toContain('101.6mm 76.2mm');
     });
 });

@@ -1,3 +1,4 @@
+import { inboundLabelStyles } from './inboundLabelStyles';
 import { generateBarcodeSVG } from '../barcodeGenerator';
 import { generateQRCode } from '../qrCodeGenerator';
 import { LabelSize, LabelFormat, SIZE_CSS } from './types';
@@ -31,7 +32,7 @@ export interface InboundPutawayLabelOptions {
 
 const normalizeSize = (s: string): LabelSize => {
     const lower = s.toLowerCase();
-    if (lower === 'small' || lower === 'tiny') return 'Small';
+    if (lower === 'small' || lower === 'tiny') return 'Medium';
     if (lower === 'medium') return 'Medium';
     if (lower === 'large') return 'Large';
     if (lower === 'xl' || lower === 'extra large') return 'XL';
@@ -80,7 +81,7 @@ export const generateInboundPutawayLabelHTML = async (
 
         const cartonText = item.totalCartons && item.totalCartons > 1
             ? `CARTON ${item.cartonIndex || 1} OF ${item.totalCartons}`
-            : (item.packQuantity && item.packQuantity > 1 ? `CASE OF ${item.packQuantity} UNITS` : `QTY: ${item.quantity} ${item.unit || 'UNITS'}`);
+            : (item.packQuantity && item.packQuantity > 1 ? `CASE OF ${item.packQuantity} UNITS` : '');
 
         cardsHtmlArray.push(`
             <div class="lpn-card">
@@ -101,7 +102,7 @@ export const generateInboundPutawayLabelHTML = async (
                     <div class="product-name">${escapeHtml(item.productName)}</div>
                     <div class="sku-row">
                         <span class="sku-pill">SKU: ${escapeHtml(item.sku)}</span>
-                        <span class="pack-pill">${escapeHtml(cartonText)}</span>
+                        <span class="pack-pill">${escapeHtml(`QTY: ${item.quantity} ${item.unit || 'UNITS'}${cartonText ? ` · ${cartonText}` : ''}`)}</span>
                     </div>
                 </div>
 
@@ -135,7 +136,7 @@ export const generateInboundPutawayLabelHTML = async (
                 <!-- PUTAWAY TARGET BAY (High Prominence) -->
                 <div class="lpn-target-bay">
                     <div class="bay-header">
-                        <span>🎯 TARGET PUTAWAY LOCATION</span>
+                        <span>TARGET PUTAWAY LOCATION</span>
                         <span class="zone-pill">${escapeHtml(item.targetZone || 'GENERAL STORAGE')}</span>
                     </div>
                     <div class="bay-code font-mono">${escapeHtml(item.targetLocation || 'STAGE AT RECEIVING DOCK')}</div>
@@ -157,210 +158,7 @@ export const generateInboundPutawayLabelHTML = async (
     <meta charset="utf-8" />
     <title>Inbound Putaway Labels</title>
     <style>
-        @page {
-            size: ${css.page};
-            margin: 0;
-        }
-        * {
-            box-sizing: border-box;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            background: #fff;
-            color: #000;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        .font-mono {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-        .labels-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .lpn-card {
-            width: ${css.width};
-            min-height: ${css.height};
-            padding: 2.2mm 2.8mm;
-            border: 1.5pt solid #000;
-            page-break-after: always;
-            page-break-inside: avoid;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-            background: #fff;
-        }
-        .lpn-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1.2pt solid #000;
-            padding-bottom: 1.2mm;
-            margin-bottom: 1.2mm;
-        }
-        .lpn-title .brand {
-            font-size: 8pt;
-            font-weight: 900;
-            letter-spacing: 0.05em;
-        }
-        .lpn-title .sub {
-            font-size: 7pt;
-            font-weight: 800;
-            background: #000;
-            color: #fff;
-            padding: 0.5pt 3pt;
-            margin-left: 2pt;
-            border-radius: 2pt;
-        }
-        .lpn-meta {
-            display: flex;
-            gap: 2pt;
-        }
-        .meta-tag {
-            font-size: 6.5pt;
-            font-weight: 800;
-            font-family: monospace;
-            border: 0.8pt solid #000;
-            padding: 0.5pt 2.5pt;
-            border-radius: 2pt;
-        }
-        .lpn-product {
-            margin-bottom: 1.5mm;
-        }
-        .product-name {
-            font-size: 10pt;
-            font-weight: 900;
-            line-height: 1.15;
-            text-transform: uppercase;
-            max-height: 9mm;
-            overflow: hidden;
-        }
-        .sku-row {
-            display: flex;
-            gap: 3pt;
-            margin-top: 1mm;
-        }
-        .sku-pill {
-            font-size: 7.5pt;
-            font-weight: 800;
-            font-family: monospace;
-            background: #eee;
-            padding: 0.8pt 3pt;
-            border-radius: 2pt;
-        }
-        .pack-pill {
-            font-size: 7.5pt;
-            font-weight: 900;
-            border: 0.8pt solid #000;
-            padding: 0.8pt 3pt;
-            border-radius: 2pt;
-        }
-        .lpn-symbology {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 2mm;
-            padding: 1mm 0;
-            margin-bottom: 1.5mm;
-            border-top: 0.8pt dashed #888;
-            border-bottom: 0.8pt dashed #888;
-        }
-        .barcode-wrap {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow: hidden;
-        }
-        .barcode-wrap svg {
-            width: 100%;
-            max-height: 12mm;
-        }
-        .barcode-digits {
-            font-size: 6.5pt;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            margin-top: 0.5mm;
-        }
-        .qr-wrap img {
-            width: 14mm;
-            height: 14mm;
-            border: 0.5pt solid #ccc;
-        }
-        .lpn-fefo-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5mm;
-            margin-bottom: 1.5mm;
-        }
-        .fefo-cell {
-            border: 0.8pt solid #000;
-            padding: 1mm 1.5mm;
-            border-radius: 2pt;
-            display: flex;
-            flex-direction: column;
-        }
-        .fefo-cell.exp {
-            background: #f4f4f4;
-        }
-        .fefo-cell .lbl {
-            font-size: 5.5pt;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            color: #444;
-        }
-        .fefo-cell .val {
-            font-size: 7.5pt;
-            font-weight: 900;
-        }
-        .lpn-target-bay {
-            background: #000;
-            color: #fff;
-            padding: 1.2mm 2mm;
-            border-radius: 3pt;
-            margin-bottom: 1.2mm;
-        }
-        .bay-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 5.5pt;
-            font-weight: 900;
-            letter-spacing: 0.05em;
-            color: #ccc;
-            margin-bottom: 0.5mm;
-        }
-        .zone-pill {
-            background: #fff;
-            color: #000;
-            padding: 0.2pt 2pt;
-            border-radius: 1.5pt;
-        }
-        .bay-code {
-            font-size: 13pt;
-            font-weight: 900;
-            letter-spacing: 0.05em;
-            text-align: center;
-        }
-        .lpn-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 6pt;
-            font-weight: 800;
-            padding-top: 1mm;
-            border-top: 0.8pt solid #000;
-        }
-        .status-stamp {
-            background: #000;
-            color: #fff;
-            padding: 0.5pt 3pt;
-            border-radius: 1.5pt;
-            font-size: 5.5pt;
-        }
+        ${inboundLabelStyles(validSize)}
     </style>
 </head>
 <body>

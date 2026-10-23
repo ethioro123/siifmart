@@ -1,6 +1,7 @@
+import { useData } from '../../../contexts/DataContext';
 import React from 'react';
 import { X, Printer, Minus, Plus, RefreshCw, Box, Tags, Eye, EyeOff, LayoutTemplate, ScanLine, QrCode, Info } from 'lucide-react';
-import { BarcodeLabelPreviewCard } from '../assign/BarcodeLabelPreviewCard';
+import { ReceivingLabelOutputPreview } from './ReceivingLabelOutputPreview';
 
 interface ReceiveReprintModalProps {
     reprintItem: {
@@ -51,6 +52,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
     printPriceTagAt,
     t
 }) => {
+    const { effectiveCountry } = useData();
     const sizes: Array<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'XL'> = ['TINY', 'SMALL', 'MEDIUM', 'LARGE', 'XL'];
     const formats: Array<'QR' | 'Barcode' | 'Both'> = ['QR', 'Barcode', 'Both'];
 
@@ -162,6 +164,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                             {sizes.map((size) => (
                                 <button
                                     key={size}
+                                    disabled={labelType !== 'ITEM' && ['TINY', 'SMALL'].includes(size)}
                                     onClick={() => setReprintSize(size)}
                                     className={`py-2.5 min-h-[44px] text-xs font-semibold font-mono rounded-xl border transition-all ${reprintSize === size
                                         ? 'bg-[var(--theme-bg-card)] border-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-sm font-bold'
@@ -174,6 +177,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                         </div>
                     </div>
 
+                    {labelType !== 'ITEM' && <p className="text-xs text-[var(--theme-text-secondary)]">Intake labels require Medium (3 × 2 in) or larger for readable lot details and scannable codes.</p>}
                     {/* Format Selector */}
                     <div className="space-y-2">
                         <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
@@ -231,26 +235,19 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                         )}
                     </div>
 
-                    {/* Live Barcode Preview */}
+                    {/* Live Print Output Preview */}
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
-                                <ScanLine size={14} /> Barcode Preview
+                                <ScanLine size={14} /> Print Output Preview
                             </label>
                             <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                                Ready to Scan
+                                Label layout
                             </span>
                         </div>
                         <div className="bg-[var(--theme-bg-subtle)] p-3 rounded-2xl border border-[var(--theme-border)]">
-                            <BarcodeLabelPreviewCard
-                                type="PRODUCT"
-                                title={reprintItem.name}
-                                code={reprintItem.sku}
-                                format={reprintFormat === 'QR' ? 'QR' : reprintFormat === 'Both' ? 'Both' : 'BARCODE'}
-                                size={reprintSize}
-                                price={reprintOptions.showPrice ? reprintItem.price : undefined}
-                                category={reprintOptions.showCategory ? reprintItem.category : undefined}
-                            />
+                            <ReceivingLabelOutputPreview item={reprintItem} type={labelType || 'LPN'} size={reprintSize} format={reprintFormat} currency={effectiveCountry === 'KE' ? 'KSh' : 'ETB'}
+                                showPrice={printPriceTagAt === 'receive' && reprintOptions.showPrice} showCategory={reprintOptions.showCategory} showName={reprintOptions.showName} />
                         </div>
                     </div>
                 </div>
