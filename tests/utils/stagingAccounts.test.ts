@@ -62,4 +62,24 @@ describe('live staging roster mapping', () => {
             'ke-hq', 'ke-region', 'ke-store', 'ke-wh', 'ke-dc', 'global-admin'
         ]);
     });
+    it('guarantees strictly one employee per role for Addis Ababa DC in quick login selection', () => {
+        const makeDcAccount = (id: string, role: string, email: string, name: string) =>
+            mapStagingEmployee({
+                ...row, id, role, email, name,
+                site: { code: 'ET-ADD-DC-01', name: 'Addis Ababa Distribution Center', type: 'Distribution Center', country: 'ET', region_code: 'ET-ADD' }
+            })!;
+        const duplicateRoster = [
+            makeDcAccount('et-inv-fixture', 'inventory_specialist', 'et-add-dc-01.inventory_specialist@role-coverage.staging.siifmart.invalid', '[TEST] ET-ADD-DC-01 - Inventory Control Specialist'),
+            makeDcAccount('et-inv-named', 'inventory_specialist', 'et.inventoryspecialist@staging.siifmart.com', 'Kalkidan Gezahegn'),
+            makeDcAccount('et-ret-named', 'returns_clerk', 'et.returnsclerk@staging.siifmart.com', 'Diribe Welteji'),
+            makeDcAccount('et-ret-fixture', 'returns_clerk', 'et-add-dc-01.returns_clerk@role-coverage.staging.siifmart.invalid', '[TEST] ET-ADD-DC-01 - Returns Specialist'),
+            makeDcAccount('et-wh-mgr', 'warehouse_manager', 'et-add-dc-01.warehouse_manager@role-coverage.staging.siifmart.invalid', '[TEST] ET-ADD-DC-01 - Warehouse Manager')
+        ];
+
+        const selected = selectRepresentativeStagingAccounts(duplicateRoster);
+        expect(selected.map(a => a.id)).toEqual(['et-inv-named', 'et-ret-named', 'et-wh-mgr']);
+        expect(selected.filter(a => a.roleId === 'inventory_specialist')).toHaveLength(1);
+        expect(selected.filter(a => a.roleId === 'returns_clerk')).toHaveLength(1);
+        expect(selected.filter(a => a.roleId === 'warehouse_manager')).toHaveLength(1);
+    });
 });

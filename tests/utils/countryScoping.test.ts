@@ -191,20 +191,20 @@ describe('useCountryScoping Hook', () => {
         );
 
         // Sites
-        expect(result.current.scopedSites.map(s => s.id)).toEqual(['site-ke-1', 'site-ke-2']);
-        expect(result.current.scopedSites.every(s => s.country === 'KE')).toBe(true);
+        expect(result.current.scopedSites.map((s: any) => s.id)).toEqual(['site-ke-1', 'site-ke-2']);
+        expect(result.current.scopedSites.every((s: any) => s.country === 'KE')).toBe(true);
 
         // Orders
-        expect(result.current.scopedAllOrders.map(o => o.id)).toEqual(['po-ke-1']);
+        expect(result.current.scopedAllOrders.map((o: any) => o.id)).toEqual(['po-ke-1']);
 
         // Sales
-        expect(result.current.scopedAllSales.map(s => s.id)).toEqual(['sale-ke-1']);
+        expect(result.current.scopedAllSales.map((s: any) => s.id)).toEqual(['sale-ke-1']);
 
         // Employees
-        expect(result.current.scopedEmployees.map(e => e.id)).toEqual(['emp-ke-1']);
+        expect(result.current.scopedEmployees.map((e: any) => e.id)).toEqual(['emp-ke-1']);
 
         // Movements
-        expect(result.current.scopedMovements.map(m => m.id)).toEqual(['mov-ke-1']);
+        expect(result.current.scopedMovements.map((m: any) => m.id)).toEqual(['mov-ke-1']);
     });
 
     it('scopes sites, orders, sales, movements, and employees to Ethiopia when country is ET', () => {
@@ -227,20 +227,20 @@ describe('useCountryScoping Hook', () => {
         );
 
         // Sites
-        expect(result.current.scopedSites.map(s => s.id)).toEqual(['site-eth-1', 'site-eth-2']);
-        expect(result.current.scopedSites.every(s => s.country === 'ET')).toBe(true);
+        expect(result.current.scopedSites.map((s: any) => s.id)).toEqual(['site-eth-1', 'site-eth-2']);
+        expect(result.current.scopedSites.every((s: any) => s.country === 'ET')).toBe(true);
 
         // Orders
-        expect(result.current.scopedAllOrders.map(o => o.id)).toEqual(['po-eth-1']);
+        expect(result.current.scopedAllOrders.map((o: any) => o.id)).toEqual(['po-eth-1']);
 
         // Sales
-        expect(result.current.scopedAllSales.map(s => s.id)).toEqual(['sale-eth-1']);
+        expect(result.current.scopedAllSales.map((s: any) => s.id)).toEqual(['sale-eth-1']);
 
         // Employees
-        expect(result.current.scopedEmployees.map(e => e.id)).toEqual(['emp-eth-1']);
+        expect(result.current.scopedEmployees.map((e: any) => e.id)).toEqual(['emp-eth-1']);
 
         // Movements
-        expect(result.current.scopedMovements.map(m => m.id)).toEqual(['mov-eth-1']);
+        expect(result.current.scopedMovements.map((m: any) => m.id)).toEqual(['mov-eth-1']);
     });
 
     it('auto-switches activeSiteId to first matching country site when country switches', () => {
@@ -296,9 +296,9 @@ describe('useCountryScoping Hook', () => {
         // Cashier MUST be locked to Ethiopia
         expect(result.current.effectiveCountry).toBe('ET');
         expect(result.current.isCeo).toBe(false);
-        expect(result.current.scopedSites.map(s => s.id)).toEqual(['site-eth-1', 'site-eth-2']);
-        expect(result.current.scopedAllOrders.map(o => o.id)).toEqual(['po-eth-1']);
-        expect(result.current.scopedAllSales.map(s => s.id)).toEqual(['sale-eth-1']);
+        expect(result.current.scopedSites.map((s: any) => s.id)).toEqual(['site-eth-1', 'site-eth-2']);
+        expect(result.current.scopedAllOrders.map((o: any) => o.id)).toEqual(['po-eth-1']);
+        expect(result.current.scopedAllSales.map((s: any) => s.id)).toEqual(['sale-eth-1']);
     });
 
     it('allows CEO to switch freely between country instances', () => {
@@ -331,8 +331,8 @@ describe('useCountryScoping Hook', () => {
 
         expect(kenyaResult.current.effectiveCountry).toBe('KE');
         expect(kenyaResult.current.isCeo).toBe(true);
-        expect(kenyaResult.current.scopedSites.map(s => s.id)).toEqual(['site-ke-1', 'site-ke-2']);
-        expect(kenyaResult.current.scopedAllOrders.map(o => o.id)).toEqual(['po-ke-1']);
+        expect(kenyaResult.current.scopedSites.map((s: any) => s.id)).toEqual(['site-ke-1', 'site-ke-2']);
+        expect(kenyaResult.current.scopedAllOrders.map((o: any) => o.id)).toEqual(['po-ke-1']);
 
         // When CEO switches to Ethiopia
         const { result: ethResult } = renderHookWithQuery(() =>
@@ -355,8 +355,8 @@ describe('useCountryScoping Hook', () => {
 
         expect(ethResult.current.effectiveCountry).toBe('ET');
         expect(ethResult.current.isCeo).toBe(true);
-        expect(ethResult.current.scopedSites.map(s => s.id)).toEqual(['site-eth-1', 'site-eth-2']);
-        expect(ethResult.current.scopedAllOrders.map(o => o.id)).toEqual(['po-eth-1']);
+        expect(ethResult.current.scopedSites.map((s: any) => s.id)).toEqual(['site-eth-1', 'site-eth-2']);
+        expect(ethResult.current.scopedAllOrders.map((o: any) => o.id)).toEqual(['po-eth-1']);
     });
 
     it('seamlessly isolates any newly added country (e.g. Uganda UG) as its own fresh instance', () => {
@@ -430,9 +430,9 @@ describe('useCountryScoping Hook', () => {
         );
 
         expect(ceoResult.current.effectiveCountry).toBe('UG');
-        expect(ceoResult.current.scopedSites.map(s => s.id)).toEqual(['site-ug-1']);
-        expect(ceoResult.current.scopedAllOrders.map(o => o.id)).toEqual(['po-ug-1']);
-        expect(ceoResult.current.scopedEmployees.map(e => e.id)).toEqual(['emp-ug-1']);
+        expect(ceoResult.current.scopedSites.map((s: any) => s.id)).toEqual(['site-ug-1']);
+        expect(ceoResult.current.scopedAllOrders.map((o: any) => o.id)).toEqual(['po-ug-1']);
+        expect(ceoResult.current.scopedEmployees.map((e: any) => e.id)).toEqual(['emp-ug-1']);
 
         // 2. Ugandan cashier: strictly locked to Uganda
         const ugCashier = { id: 'emp-ug-1', role: 'cashier' as const, siteId: 'site-ug-1' };
@@ -456,8 +456,8 @@ describe('useCountryScoping Hook', () => {
 
         expect(cashierResult.current.effectiveCountry).toBe('UG');
         expect(cashierResult.current.isCeo).toBe(false);
-        expect(cashierResult.current.scopedSites.map(s => s.id)).toEqual(['site-ug-1']);
-        expect(cashierResult.current.scopedAllOrders.map(o => o.id)).toEqual(['po-ug-1']);
-        expect(cashierResult.current.scopedEmployees.map(e => e.id)).toEqual(['emp-ug-1']);
+        expect(cashierResult.current.scopedSites.map((s: any) => s.id)).toEqual(['site-ug-1']);
+        expect(cashierResult.current.scopedAllOrders.map((o: any) => o.id)).toEqual(['po-ug-1']);
+        expect(cashierResult.current.scopedEmployees.map((e: any) => e.id)).toEqual(['emp-ug-1']);
     });
 });

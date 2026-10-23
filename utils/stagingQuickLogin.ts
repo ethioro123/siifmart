@@ -81,5 +81,34 @@ export function selectRepresentativeStagingAccounts(accounts: StagingQuickAccoun
         }
     }
 
-    return accounts.filter(account => selected.has(account.id));
+    const candidateAccounts = accounts.filter(account => selected.has(account.id));
+
+    // Ensure Addis Ababa DC (ET-ADD-DC-01) has strictly one employee per role
+    const addisDcAccounts = candidateAccounts.filter(a => a.siteCode === 'ET-ADD-DC-01');
+    if (addisDcAccounts.length > 0) {
+        const keptIds = new Set<string>();
+        const roleSeen = new Set<string>();
+
+        // Prioritize active named staging staff over synthetic test coverage fixtures
+        const sorted = [...addisDcAccounts].sort((a, b) => {
+            const aInvalid = a.email.endsWith('.invalid');
+            const bInvalid = b.email.endsWith('.invalid');
+            if (aInvalid !== bInvalid) return aInvalid ? 1 : -1;
+            const aTest = a.name.startsWith('[TEST]');
+            const bTest = b.name.startsWith('[TEST]');
+            if (aTest !== bTest) return aTest ? 1 : -1;
+            return a.code.localeCompare(b.code) || a.id.localeCompare(b.id);
+        });
+
+        for (const acc of sorted) {
+            if (!roleSeen.has(acc.roleId)) {
+                roleSeen.add(acc.roleId);
+                keptIds.add(acc.id);
+            }
+        }
+
+        return candidateAccounts.filter(a => a.siteCode !== 'ET-ADD-DC-01' || keptIds.has(a.id));
+    }
+
+    return candidateAccounts;
 }

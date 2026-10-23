@@ -122,54 +122,61 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Quick Login for Staging Key Leadership (CEO & Regional Managers) on localhost */}
+          {/* Quick Login for Staging Key Leadership on localhost */}
           {mode === 'login' && isStagingQuickLoginAvailable() && (
-            <div className="mb-4 space-y-1.5">
+            <div className="mb-5 space-y-2">
               {stagingExecutive && (
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => handleQuickLogin(stagingExecutive.email)}
-                  className="w-full py-2 px-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/40 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                  className="w-full py-2.5 px-3 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/25 hover:border-amber-500/40 text-amber-900 dark:text-amber-100 text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer shadow-xs group"
                 >
-                  <div className="flex items-center gap-2">
-                    <Crown size={14} className="text-amber-600 dark:text-amber-400" />
-                    <span>Group Chief Executive Officer (All Access)</span>
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                      <Crown size={15} />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold leading-tight flex items-center gap-1.5">
+                        <span>Group Chief Executive Officer</span>
+                        <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/30">ALL ACCESS</span>
+                      </div>
+                      <div className="text-[10px] text-amber-700/80 dark:text-amber-300/80 font-medium">Cross-Border Sovereign Executive</div>
+                    </div>
                   </div>
-                  <span className="text-[10px] font-mono opacity-70">{stagingExecutive.email}</span>
+                  <span className="text-[9.5px] font-mono opacity-70 group-hover:opacity-100 shrink-0 font-medium">{stagingExecutive.email}</span>
                 </button>
               )}
 
-              {(stagingKeRegionalMgr || stagingEtRegionalMgr) && (
-                <div className="grid grid-cols-2 gap-1.5">
-                  {stagingKeRegionalMgr && (
-                    <button
-                      type="button"
-                      disabled={loading}
-                      onClick={() => handleQuickLogin(stagingKeRegionalMgr.email)}
-                      className="py-1.5 px-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 hover:border-blue-500/40 text-blue-800 dark:text-blue-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
-                      title={`Quick Login: ${stagingKeRegionalMgr.name} (${stagingKeRegionalMgr.role})`}
-                    >
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-xs">🇰🇪</span>
-                        <span className="truncate">Kenya Regional Operations Manager</span>
-                      </div>
-                      <span className="text-[9px] font-mono opacity-70 shrink-0">Kamau</span>
-                    </button>
-                  )}
+              {/* Mobile / Compact Quick Switches for Regional Leadership */}
+              {(stagingEtRegionalMgr || stagingKeRegionalMgr) && (
+                <div className="grid grid-cols-2 gap-1.5 lg:hidden">
                   {stagingEtRegionalMgr && (
                     <button
                       type="button"
                       disabled={loading}
                       onClick={() => handleQuickLogin(stagingEtRegionalMgr.email)}
-                      className="py-1.5 px-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 hover:border-blue-500/40 text-blue-800 dark:text-blue-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      className="py-1.5 px-2 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/40 text-amber-800 dark:text-amber-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                       title={`Quick Login: ${stagingEtRegionalMgr.name} (${stagingEtRegionalMgr.role})`}
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className="text-xs">🇪🇹</span>
-                        <span className="truncate">Ethiopia Regional Operations Manager</span>
+                        <span className="truncate">Henok (ET Lead)</span>
                       </div>
-                      <span className="text-[9px] font-mono opacity-70 shrink-0">Henok</span>
+                    </button>
+                  )}
+                  {stagingKeRegionalMgr && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => handleQuickLogin(stagingKeRegionalMgr.email)}
+                      className="py-1.5 px-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-800 dark:text-emerald-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      title={`Quick Login: ${stagingKeRegionalMgr.name} (${stagingKeRegionalMgr.role})`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-xs">🇰🇪</span>
+                        <span className="truncate">Kamau (KE Lead)</span>
+                      </div>
                     </button>
                   )}
                 </div>
