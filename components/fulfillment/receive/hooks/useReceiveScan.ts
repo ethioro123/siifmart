@@ -1,8 +1,11 @@
 import { PurchaseOrder, Product } from '../../../../types';
+import { convertToSellableUnits } from '../../useReceiving';
 import { generateBatchNumber } from '../../../../utils/batchNumber';
 
 interface UseReceiveScanDeps {
     user: any;
+    siteId?: string;
+    blind?: boolean;
     employees: any[];
     jobs: any[];
     orders: PurchaseOrder[];
@@ -24,7 +27,7 @@ interface UseReceiveScanDeps {
 
 export const useReceiveScan = (deps: UseReceiveScanDeps) => {
     const {
-        user,
+        user, siteId, blind = true,
         employees,
         jobs,
         orders,
@@ -48,7 +51,7 @@ export const useReceiveScan = (deps: UseReceiveScanDeps) => {
         if (!val || val.trim() === '') return;
         const normalizedVal = val.toUpperCase().trim();
 
-        const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
+        const normSku = (s: string) => s.trim().toUpperCase();
         const getBarcodesArray = (barcodes: any): string[] => {
             if (!barcodes) return [];
             if (Array.isArray(barcodes)) return barcodes.filter(b => typeof b === 'string');
@@ -74,6 +77,7 @@ export const useReceiveScan = (deps: UseReceiveScanDeps) => {
             const normalizedInput = normSku(normalized);
 
             const matchProduct = (p: Product) => {
+                if (!siteId || (p.siteId || p.site_id) !== siteId) return false;
                 const matchSku = p.sku?.toUpperCase().trim() === normalized;
                 const matchBarcode = p.barcode?.toUpperCase().trim() === normalized;
                 
@@ -99,7 +103,7 @@ export const useReceiveScan = (deps: UseReceiveScanDeps) => {
             const scannedProduct = findScannedProduct(val);
 
             const splitItemSku = splitReceivingItem.sku?.trim().toUpperCase();
-            const isSameProduct = scannedProduct?.id === splitReceivingItem.productId ||
+            const isSameProduct = Boolean(scannedProduct && scannedProduct.id === splitReceivingItem.productId) ||
                 normalizedVal === splitItemSku ||
                 splitVariants.some(v => {
                     const vSku = v.sku?.trim().toUpperCase();
@@ -124,9 +128,9 @@ export const useReceiveScan = (deps: UseReceiveScanDeps) => {
                 });
 
                 const totalCurrentlyAllocated = splitVariants.reduce((sum, v) => sum + v.quantity, 0);
-                const maxAllowed = splitReceivingItem.quantity - prevCount;
+                const maxAllowed = convertToSellableUnits(splitReceivingItem.quantity,splitReceivingItem) - prevCount;
 
-                if (totalCurrentlyAllocated < maxAllowed) {
+                if (blind || totalCurrentlyAllocated < maxAllowed) {
                     const targetIdx = splitVariants.findIndex(v => {
                         const vSku = v.sku?.trim().toUpperCase();
                         const vBarcode = v.barcode?.trim().toUpperCase();
@@ -142,7 +146,7 @@ export const useReceiveScan = (deps: UseReceiveScanDeps) => {
                     ));
                     addNotification('success', `Incremented ${splitReceivingItem.productName} to ${totalCurrentlyAllocated + 1} units`);
                 } else {
-                    addNotification('alert', `Cannot exceed remaining PO quantity (${maxAllowed})`);
+                    addNotification('alert', blind ? 'Physical count could not be recorded.' : `Cannot exceed remaining PO quantity (${maxAllowed})`);
                 }
                 setReceiveSearch('');
                 return;
@@ -160,7 +164,7 @@ export const useReceiveScan = (deps: UseReceiveScanDeps) => {
 
         if (product) {
             const relevantPO = orders.find(po => {
-                if (po.status !== 'Approved') return false;
+                if (!siteId || po.siteId !== siteId || !['Approved','Ordered','Partially Received'].includes(po.status)) return false;
                 const matchesProduct = po.lineItems?.some((li: any) => li.productId === product!.id);
                 if (!matchesProduct) return false;
 
@@ -190,7 +194,7 @@ export const useReceiveScan = (deps: UseReceiveScanDeps) => {
                         id: `variant-${Date.now()}`,
                         sku: product.sku,
                         skuType: 'existing',
-                        quantity: 1,
+                        quantity: blind ? 0 : 1,
                         productId: product.id,
                         productName: product.name,
                         barcode: val,
@@ -213,16 +217,16 @@ export const useReceiveScan = (deps: UseReceiveScanDeps) => {
             const scannedBarcode = val.toUpperCase();
             const suggestions: string[] = [];
             const skuMatch = products.find(p => p.sku && (scannedBarcode.includes(p.sku.toUpperCase()) || p.sku.toUpperCase().includes(scannedBarcode)));
-            if (skuMatch) suggestions.push(`💡 Similar to SKU: ${skuMatch.sku} (${skuMatch.name})`);
-            if (/^\d{13}$/.test(scannedBarcode)) suggestions.push(`📊 EAN-13 barcode detected`);
-            else if (/^\d{12}$/.test(scannedBarcode)) suggestions.push(`📊 UPC-A barcode detected`);
-            else if (/^\d{8}$/.test(scannedBarcode)) suggestions.push(`📊 EAN-8 barcode detected`);
-            else if (/^[A-Z0-9]{6,20}$/i.test(scannedBarcode)) suggestions.push(`📊 CODE128 format detected`);
+            if (skuMatch) suggestions.push(`Similar to SKU: ${skuMatch.sku} (${skuMatch.name})`);
+            if (/^\d{13}$/.test(scannedBarcode)) suggestions.push(`EAN-13 barcode detected`);
+            else if (/^\d{12}$/.test(scannedBarcode)) suggestions.push(`UPC-A barcode detected`);
+            else if (/^\d{8}$/.test(scannedBarcode)) suggestions.push(`EAN-8 barcode detected`);
+            else if (/^[A-Z0-9]{6,20}$/i.test(scannedBarcode)) suggestions.push(`CODE128 format detected`);
 
-            const activeReceivePOs = orders.filter(po => po.status === 'Approved');
+            const activeReceivePOs = orders.filter(po => po.siteId === siteId && ['Approved','Ordered','Partially Received'].includes(po.status));
             if (activeReceivePOs.length > 0) {
                 const poLineMatch = activeReceivePOs.flatMap(po => po.lineItems || []).find(li => scannedBarcode.toLowerCase().includes(li.productName.toLowerCase().substring(0, 4)) || li.sku?.toLowerCase() === scannedBarcode.toLowerCase());
-                if (poLineMatch) suggestions.push(`🎯 Might be: ${poLineMatch.productName}`);
+                if (poLineMatch) suggestions.push(`Might be: ${poLineMatch.productName}`);
             }
 
             setUnresolvedScans(prev => [...prev, { barcode: val, scannedAt: new Date(), qty: 1, suggestions }]);

@@ -25,7 +25,7 @@ export const ReceiveTab: React.FC = () => {
         refreshData, historicalJobs, selectedJob, setSelectedJob, isDetailsOpen, setIsDetailsOpen,
         resolveOrderRef, activeTab, finalizePO, user, wmsJobsService, sites, loadHistoricalJobs
     } = useFulfillment();
-    const { settings, effectiveCountry } = useData();
+    const { settings, effectiveCountry, activeSite } = useData();
     const { orders, loadManifest, isLoadingManifest, manifestError } = useReceivingManifestDetails(orderSummaries);
     const receivingPolicy = useMemo(() => resolveReceivingPolicy(settings, effectiveCountry), [settings, effectiveCountry]);
 
@@ -158,7 +158,7 @@ export const ReceiveTab: React.FC = () => {
     }, [filteredReceiveOrders, receiveCurrentPage]);
 
     const { handleGlobalScan } = useReceiveScan({
-        user,
+        user, siteId: activeSite?.id, blind: receivingPolicy.blind,
         employees,
         jobs,
         orders,

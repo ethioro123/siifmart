@@ -1,6 +1,6 @@
 import { loadReceivingPOItem } from '../../utils/receivingPOItem';
 import { hasValidReceivingCounts } from '../../utils/receivingCountValidation';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { PurchaseOrder, WMSJob, Product, SystemConfig } from '../../types';
 import {
     productsService,
@@ -38,6 +38,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
         setProducts, setAllProducts, settings
     } = deps;
 
+    const receiptLock = useRef(false);
     const receivePOSplit = useCallback(async (
         poId: string,
         itemId: string,
@@ -45,6 +46,8 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
         locationId?: string,
         actionUser?: { name: string; email: string }
     ) => {
+        if (receiptLock.current) throw new Error('A receipt is already being saved.');
+        receiptLock.current = true;
         try {
             if (!hasValidReceivingCounts(variants)) throw new Error('Enter a positive physical count for every split.');
             const { po, itemIndex, item } = await loadReceivingPOItem(poId, itemId, activeSite?.id, activeSite?.country);
@@ -87,7 +90,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                 // 1. Handle New Product Creation
                 if (variant.skuType === 'new') {
                     try {
-                        let newProductCheck = allProducts.find(p => p.sku === variant.sku);
+                        let newProductCheck = allProducts.find(p => p.sku === variant.sku && (p.siteId || p.site_id) === po.siteId);
                         if (!newProductCheck && (po.siteId || activeSite?.id)) {
                             try {
                                 newProductCheck = (await productsService.getBySKU(variant.sku, po.siteId || activeSite?.id)) || undefined;
@@ -189,8 +192,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                             const unitsPerOrderUnit = convertToSellableUnits(1, item);
                             updates.costPrice = unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : item.unitCost;
                         }
-                        if (variant.expiryDate) updates.expiryDate = variant.expiryDate;
-                        if (variant.batchNumber) updates.batchNumber = variant.batchNumber;
+                        // Receipt lot identity belongs on the new putaway line, never on existing stock.
 
                         const currentBarcodes = Array.isArray(localProduct.barcodes) 
                             ? [...localProduct.barcodes] 
@@ -356,7 +358,12 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                 return createdJob;
             });
 
-            const newJobs = await Promise.all(jobPromises);
+            const results = await Promise.allSettled(jobPromises);
+            const newJobs = results.flatMap(result => result.status === 'fulfilled' ? [result.value] : []);
+            if (results.some(result => result.status === 'rejected')) {
+                await Promise.allSettled(newJobs.map(job => wmsJobsService.delete(job.id)));
+                throw new Error('Receipt save was not confirmed for every split. Refresh the manifest before retrying; some work may have been saved.');
+            }
 
             // 1. Calculate updated lineItems with receivedQty
             const updatedLineItems = (po.lineItems || []).map((li: any, idx: number) => {
@@ -388,8 +395,8 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
             } catch (err) {
                 // Roll back created jobs so the PO and jobs never diverge (prevents double receive)
                 await Promise.all(newJobs.map(j => j?.id ? wmsJobsService.delete(j.id).catch(() => null) : null));
-                logger.error('useReceivingSplit', 'PO sync failed; rolled back putaway jobs', err as Error);
-                throw new Error('Receive could not be saved. Nothing was recorded — please retry.');
+                logger.error('useReceivingSplit', 'PO sync failed; attempted cleanup of putaway jobs', err as Error);
+                throw new Error('Receipt save was not confirmed. Refresh the manifest before retrying; some work may have been saved.');
             }
 
             // 4. If matching WMS RECEIVE job exists, update its status
@@ -479,7 +486,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
             logger.error('useReceivingSplit', 'caught error', e as Error);
             addNotification('alert', e.message || "Failed to split receive");
             throw e;
-        }
+        } finally { receiptLock.current = false; }
     }, [orders, allOrders, jobs, allProducts, activeSite, setJobs, setOrders, setAllOrders, addNotification, products, setProducts, setAllProducts, settings]);
 
     return { receivePOSplit };

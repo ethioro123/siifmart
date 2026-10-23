@@ -102,7 +102,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
         if (!code) return;
 
         const matchedProduct = allProducts?.find(p => 
-            p.barcode === code || (Array.isArray(p.barcodes) && p.barcodes.includes(code))
+            (p.siteId || p.site_id) === splitReceivingPO.siteId && (p.barcode === code || (Array.isArray(p.barcodes) && p.barcodes.includes(code)))
         );
 
         setSplitVariants(prev => prev.map(v => {
@@ -162,8 +162,9 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
         setSplitVariants(prev => prev.map(v => v.id === id ? { ...v, ...updated } : v));
     };
 
+    const receiptLock = useRef(false);
     const handleConfirmReceipt = async () => {
-        if (isSubmitting || localSubmitting) return;
+        if (isSubmitting || localSubmitting || receiptLock.current) return;
         if (!countsValid) {
             alert('Enter a valid positive physical count for every split, or remove unused splits.');
             return;
@@ -177,6 +178,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
             })
         }));
 
+        receiptLock.current = true;
         setIsSubmitting(true);
         setLocalSubmitting(true);
         try {
@@ -215,6 +217,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
             logger.error('ReceiveSplitModal', 'Split error:', error);
             alert(error.message || 'Failed to receive split: an unexpected error occurred.');
         } finally {
+            receiptLock.current = false;
             setIsSubmitting(false);
             setLocalSubmitting(false);
         }
