@@ -400,6 +400,7 @@ export const purchaseOrdersService = {
         return updated || ({ ...updates, id } as any);
     },
 
+    completeFromPutaway: purchaseOrdersLifecycleService.completeFromPutaway,
     receive: purchaseOrdersLifecycleService.receive,
     delete: purchaseOrdersLifecycleService.delete,
     cancel: purchaseOrdersLifecycleService.cancel

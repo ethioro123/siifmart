@@ -1,5 +1,4 @@
 import { purchaseOrdersService } from '../../../../services/supabase.service';
-import { convertToSellableUnits } from '../../../../components/procurement/utils';
 import { logger } from '../../../../utils/logger';
 import { PurchaseOrder, WMSJob } from '../../../../types';
 
@@ -14,78 +13,30 @@ interface CheckPOCompletionParams {
     getTranslation: (key: string) => string;
 }
 
-/**
- * Validates whether all putaway jobs for a PO are complete AND verifies whether
- * the received quantity covers the entire order before marking the PO as Received.
- * Prevents partial/short shipments from prematurely closing the purchase order.
- */
+/** The server checks all related jobs and audited quantities without exposing the blind PO manifest. */
 export async function checkAndSyncPOCompletion({
-    job,
-    jobs,
-    orders,
-    allOrders,
-    setOrders,
-    setAllOrders,
-    addNotification,
-    getTranslation
+    job, setOrders, setAllOrders, addNotification, getTranslation
 }: CheckPOCompletionParams): Promise<void> {
     if (!job.orderRef) return;
-
-    // Check all PUTAWAY jobs for this PO
-    const allPutawayJobsForPO = jobs
-        .filter(j => j.orderRef === job.orderRef && j.type === 'PUTAWAY')
-        .map(j => j.id === job.id ? { ...j, status: 'Completed' as const } : j);
-
-    const allPutawayJobsComplete = allPutawayJobsForPO.length > 0 &&
-        allPutawayJobsForPO.every(j => j.status === 'Completed');
-
-    if (!allPutawayJobsComplete) return;
-
-    logger.debug('useJobCompletion', `All PUTAWAY jobs for PO ${job.orderRef} are complete. Checking quantities...`);
-
-    // Lookup PO by ID or PO Number
-    let targetPo = allOrders.find(o => o.id === job.orderRef || o.poNumber === job.orderRef || o.po_number === job.orderRef)
-        || orders?.find(o => o.id === job.orderRef || o.poNumber === job.orderRef || o.po_number === job.orderRef);
-
-    if (!targetPo) {
-        try {
-            targetPo = (await purchaseOrdersService.getById(job.orderRef)) || undefined;
-        } catch { }
-    }
-
-    // Check whether the order is fully received or partial/short shipment
-    const lineItems = targetPo?.lineItems || [];
-    const isOrderFullyReceived = lineItems.length > 0 && lineItems.every(li => {
-        const expectedSellable = convertToSellableUnits(li.quantity, li);
-        return (li.receivedQty || 0) >= expectedSellable;
-    });
-
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(job.orderRef || '');
-    const poTargetId = isUUID ? job.orderRef : targetPo?.id;
-
-    if (poTargetId) {
-        try {
-            const updatedPo = await purchaseOrdersService.receive(poTargetId, false);
-            if (updatedPo) {
-                if (setOrders) setOrders(prev => prev.map(o => (o.id === poTargetId || o.id === job.orderRef) ? updatedPo : o));
-                setAllOrders(prev => prev.map(o => (o.id === poTargetId || o.id === job.orderRef) ? updatedPo : o));
-                if (updatedPo.status === 'Received') {
-                    addNotification('success', getTranslation('warehouse.poFullyReceived').replace('{id}', updatedPo.poNumber || job.orderRef || ''));
-                } else {
-                    addNotification('info', `PO ${updatedPo.poNumber || job.orderRef} putaway complete for partial delivery. Status: ${updatedPo.status}.`);
-                }
-            }
-        } catch (err) {
-            logger.error('useJobCompletion', `Failed to update PO status for ${job.orderRef}:`, err as Error);
+    try {
+        const result = await purchaseOrdersService.completeFromPutaway(job.id);
+        if (result.state === 'awaiting_putaway') return;
+        if (result.state !== 'synced' || !result.po_id || !result.status) {
+            addNotification('alert', 'Putaway is saved. The linked PO receiving status needs warehouse review.');
+            return;
         }
-    } else {
-        const newStatus = isOrderFullyReceived ? 'Received' : 'Partially Received';
-        if (setOrders) setOrders(prev => prev.map(o => o.id === job.orderRef ? { ...o, status: newStatus } : o));
-        setAllOrders(prev => prev.map(o => o.id === job.orderRef ? { ...o, status: newStatus } : o));
-        if (newStatus === 'Received') {
-            addNotification('success', getTranslation('warehouse.poReceivedLocalOnly').replace('{id}', job.orderRef || ''));
+        const update = (previous: PurchaseOrder[]) => previous.map(po =>
+            po.id === result.po_id ? { ...po, status: result.status! } : po);
+        setOrders?.(update);
+        setAllOrders(update);
+        if (!result.changed) return;
+        if (result.status === 'Received') {
+            addNotification('success', getTranslation('warehouse.poFullyReceived').replace('{id}', result.po_number || result.po_id));
         } else {
-            addNotification('info', `PO ${job.orderRef} partially received.`);
+            addNotification('info', `PO ${result.po_number || result.po_id} putaway is complete for a partial delivery.`);
         }
+    } catch (error) {
+        logger.error('useJobCompletion', 'Putaway saved; PO receipt synchronization failed', error as Error);
+        addNotification('alert', 'Putaway is saved, but the linked PO receiving status could not be synchronized.');
     }
 }

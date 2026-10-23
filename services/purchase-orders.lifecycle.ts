@@ -5,7 +5,25 @@ import { getById } from './purchase-orders.read';
 import { logger } from '../utils/logger';
 import { convertToSellableUnits } from '../components/procurement/utils';
 
+export interface PutawayPOCompletion {
+    state: 'synced' | 'awaiting_putaway' | 'needs_review' | 'not_found';
+    po_id?: string;
+    po_number?: string;
+    status?: 'Received' | 'Partially Received';
+    changed?: boolean;
+}
+
 export const purchaseOrdersLifecycleService = {
+    async completeFromPutaway(jobId: string): Promise<PutawayPOCompletion> {
+        if (!jobId) throw new Error('A completed Putaway job is required.');
+        const { data, error } = await supabase.rpc('finalize_po_from_putaway', { p_job_id: jobId });
+        if (error) throw error;
+        if (!data || !['synced', 'awaiting_putaway', 'needs_review', 'not_found'].includes(data.state)
+            || (data.state === 'synced' && (!data.po_id || !['Received', 'Partially Received'].includes(data.status)))) {
+            throw new Error('The server did not confirm the PO receiving status.');
+        }
+        return data;
+    },
     async receive(id: string, shouldCreateJob = true): Promise<PurchaseOrder | null> {
         const po = await getById(id);
         if (!po) throw new Error('Purchase Order not found');

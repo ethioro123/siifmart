@@ -257,6 +257,8 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                         addNotification,
                         getTranslation
                     });
+                    queryClient.invalidateQueries({ queryKey: ['orders', job.siteId] });
+                    queryClient.invalidateQueries({ queryKey: ['purchase_orders', job.countryCode || job.country_code] });
                 }
             }
 
