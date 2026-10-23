@@ -1,3 +1,5 @@
+import { StoreAllocationEditor } from './StoreAllocationEditor';
+import { eligibleDistributionStores } from '../../../../utils/distributionStores';
 import React from 'react';
 import { Search, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Product, Site, User } from '../../../../types';
@@ -56,18 +58,7 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                             products={availableProducts}
                             onSelect={(product) => {
                                 setBulkDistributionProductId(product.id);
-                                const warehouseId = bulkDistributionSourceSite || activeSite?.id;
-                                const stores = sites.filter(s => {
-                                    if (s.type !== 'Store' || s.country !== sourceSiteObj?.country || s.id === actualSourceSite) return false;
-
-                                    if (settings?.enforceRegionalZoning) {
-                                        if (user?.role !== 'group_ceo' && sourceSiteObj) {
-                                            return (s.logisticsZoneId || '') === (sourceSiteObj.logisticsZoneId || '');
-                                        }
-                                    }
-                                    return true;
-                                });
-                                setBulkDistributionAllocations(stores.map(s => ({ storeId: s.id, quantity: 0 })));
+                                setBulkDistributionAllocations([]);
                                 setIsSearchingProduct(false);
                             }}
                             onCancel={() => setIsSearchingProduct(false)}
@@ -115,43 +106,7 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                             <span className="text-[var(--theme-text-secondary)] font-mono text-[11px]">Total: {bulkDistributionAllocations.reduce((acc, curr) => acc + curr.quantity, 0)} {(() => { const p = availableProducts.find(item => item.id === bulkDistributionProductId) || products.find(item => item.id === bulkDistributionProductId) || allProducts.find(item => item.id === bulkDistributionProductId); return getTransferQuantityConfig(p).quantityLabel; })()}</span>
                         </div>
                     </div>
-                    <div className="divide-y divide-[var(--theme-border)] max-h-[300px] overflow-y-auto custom-scrollbar">
-                        {bulkDistributionAllocations.length === 0 ? (
-                            <div className="p-6 text-center text-red-500 font-semibold text-xs tracking-wider flex items-center justify-center gap-2">
-                                <AlertTriangle size={16} />
-                                No stores have this warehouse configured as a replenishment source.
-                            </div>
-                        ) : (
-                            bulkDistributionAllocations.map(alloc => {
-                                const site = sites.find(s => s.id === alloc.storeId);
-                                const selectedProduct = availableProducts.find(p => p.id === bulkDistributionProductId)
-                                    || products.find(p => p.id === bulkDistributionProductId)
-                                    || allProducts.find(p => p.id === bulkDistributionProductId);
-                                const sourceProduct = ((selectedProduct?.siteId || selectedProduct?.site_id) === actualSourceSite ? selectedProduct : undefined) || availableProducts.find(p => p.sku === selectedProduct?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
-                                    || products.find(p => p.sku === selectedProduct?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
-                                    || allProducts.find(p => p.sku === selectedProduct?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
-                                    || selectedProduct;
-                                const unitConfig = getTransferQuantityConfig(sourceProduct);
-                                return (
-                                    <div key={alloc.storeId} className="p-3.5 flex items-center justify-between gap-3 hover:bg-[var(--theme-bg-card)] transition-colors">
-                                        <span className="min-w-0 flex-1 break-words text-sm font-medium text-[var(--theme-text-primary)]">{site?.name} <span className="text-[11px] text-[var(--theme-text-secondary)]">({unitConfig.quantityLabel})</span></span>
-                                        <input
-                                            type="number" inputMode="decimal"
-                                            min="0"
-                                            step={unitConfig.step}
-                                            value={alloc.quantity}
-                                            onChange={(e) => {
-                                                const newAllocs = bulkDistributionAllocations.map(a => a.storeId === alloc.storeId ? { ...a, quantity: normalizeTransferEntry(e.target.value, sourceProduct) } : a);
-                                                setBulkDistributionAllocations(newAllocs);
-                                            }}
-                                            className="w-24 shrink-0 min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-right font-mono font-bold text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation tabular-nums"
-                                            aria-label={`Quantity in ${unitConfig.quantityLabel} for ${site?.name}`}
-                                        />
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
+                    <StoreAllocationEditor stores={eligibleDistributionStores(sites, sourceSiteObj, !!settings?.enforceRegionalZoning, user?.role)} allocations={bulkDistributionAllocations} product={availableProducts.find(p => p.id === bulkDistributionProductId)} onChange={setBulkDistributionAllocations} />
                 </div>
             )}
         </div>

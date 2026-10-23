@@ -1,3 +1,5 @@
+import { StoreAllocationEditor } from './StoreAllocationEditor';
+import { eligibleDistributionStores } from '../../../../utils/distributionStores';
 import React from 'react';
 import { AlertOctagon, ArrowRight, AlertTriangle, Plus, X } from 'lucide-react';
 import { Product, Site, User } from '../../../../types';
@@ -57,20 +59,9 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
                     <ProductSelector
                         products={availableProducts.filter(p => !waveProducts.some(row => row.productId === p.id))}
                         onSelect={(product) => {
-                            const warehouseId = bulkDistributionSourceSite || activeSite?.id;
-                            let stores = sites.filter(s => {
-                                if (s.type !== 'Store' || s.country !== sourceSiteObj?.country || s.id === actualSourceSite) return false;
-
-                                if (settings?.enforceRegionalZoning) {
-                                    if (user?.role !== 'group_ceo' && sourceSiteObj) {
-                                        return (s.logisticsZoneId || '') === (sourceSiteObj.logisticsZoneId || '');
-                                    }
-                                }
-                                return true;
-                            });
                             setWaveProducts([...waveProducts, {
                                 productId: product.id,
-                                allocations: stores.map(s => ({ storeId: s.id, quantity: 0 }))
+                                allocations: []
                             }]);
                             setIsSearchingProduct(false);
                         }}
@@ -126,44 +117,7 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
                                     <X size={16} />
                                 </button>
                             </div>
-                            <div className="p-3.5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                                {wp.allocations.length === 0 ? (
-                                    <div className="col-span-full p-4 text-center text-red-500 font-semibold text-xs tracking-wider flex items-center justify-center gap-2">
-                                        <AlertTriangle size={16} />
-                                        No stores have this warehouse configured as a replenishment source.
-                                    </div>
-                                ) : (
-                                    wp.allocations.map(alloc => {
-                                        const site = sites.find(s => s.id === alloc.storeId);
-                                        const sourceStockItem = ((prod?.siteId || prod?.site_id) === actualSourceSite ? prod : undefined) || availableProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
-                                            || products.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
-                                            || allProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
-                                            || prod;
-                                        const unitConfig = getTransferQuantityConfig(sourceStockItem);
-                                        return (
-                                            <div key={alloc.storeId} className="flex items-center justify-between gap-3 text-xs bg-[var(--theme-bg-card)] p-2.5 rounded-xl border border-[var(--theme-border)]">
-                                                <span className="text-[var(--theme-text-secondary)] min-w-0 flex-1 break-words font-medium">{site?.name} ({unitConfig.quantityLabel})</span>
-                                                <input
-                                                    type="number" inputMode="decimal"
-                                                    min="0"
-                                                    step={unitConfig.step}
-                                                    className="w-24 shrink-0 min-h-[44px] bg-transparent border-b border-[var(--theme-border)] text-right font-mono font-bold text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-primary touch-manipulation tabular-nums"
-                                                    value={alloc.quantity}
-                                                    onChange={(e) => {
-                                                        const newWp = [...waveProducts];
-                                                        const targetIndex = newWp[idx].allocations.findIndex(a => a.storeId === alloc.storeId);
-                                                        if (targetIndex !== -1) {
-                                                            newWp[idx].allocations[targetIndex].quantity = normalizeTransferEntry(e.target.value, sourceStockItem);
-                                                            setWaveProducts(newWp);
-                                                        }
-                                                    }}
-                                                    aria-label={`Quantity in ${unitConfig.quantityLabel} for ${site?.name}`}
-                                                />
-                                            </div>
-                                        );
-                                    })
-                                )}
-                            </div>
+                            <StoreAllocationEditor stores={eligibleDistributionStores(sites, sourceSiteObj, !!settings?.enforceRegionalZoning, user?.role)} allocations={wp.allocations} product={prod} onChange={allocations => setWaveProducts(waveProducts.map((row, rowIndex) => rowIndex === idx ? { ...row, allocations } : row))} />
                         </div>
                     );
                 })}

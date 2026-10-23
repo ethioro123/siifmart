@@ -119,6 +119,12 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
             return;
         }
 
+        if (!allocations.length || allocations.some(a => a.quantity <= 0) ||
+            (bulkDistributionMode === 'wave' && waveProducts.some(row => row.allocations.length === 0))) {
+            addNotification('alert', 'Choose receiving stores for each product and enter a positive quantity for every selected store. Uncheck stores that should receive nothing.');
+            return;
+        }
+
         const canOverrideZoning = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_supply_chain_director'].includes(user?.role || '');
         if (settings?.enforceRegionalZoning && !canOverrideZoning) {
             if (isCrossZone) {
