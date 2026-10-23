@@ -9,6 +9,7 @@ import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 import { getSellUnit } from '../../../utils/units';
 import { convertToSellableUnits } from '../useReceiving';
+import { buildPartialReceiveEntries, canViewReceiveVariance } from './partialReceiveHistory';
 
 interface ReceiveHistoryProps {
     orders: PurchaseOrder[];
@@ -200,7 +201,35 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             };
         });
 
-        const combined = [...receivedOrders, ...relevantJobs].sort((a, b) =>
+        // One entry per receive batch for POs still open; ordered qty/variance only for review roles
+        const showVariance = canViewReceiveVariance(user?.role);
+        const partialEntries = buildPartialReceiveEntries(orders, [jobs, historicalJobs], showVariance)
+            .filter(e => !isStaffWithLimitedAccess || [user?.id, user?.email, user?.name].filter(Boolean).includes((e.job as any).createdBy))
+            .map(e => {
+                const w = resolveFulfillmentWorker({
+                    userId: (e.job as any).createdBy, job: e.job, employees, sites, currentUser: user, siteId: e.job.siteId
+                });
+                return {
+                    id: e.job.id,
+                    reference: e.po.poNumber || e.po.po_number || e.po.id.slice(0, 8),
+                    type: 'JOB',
+                    actionType: 'Partial receive',
+                    status: e.job.status,
+                    subtitle: e.job.lineItems?.[0]?.name || 'Inbound Receipt',
+                    date: e.job.createdAt || (e.job as any).created_at || new Date().toISOString(),
+                    resolvedUser: { name: w.name, displayId: w.code || w.displayId },
+                    items: e.job.items || 1,
+                    rawData: e.job,
+                    sku: e.job.lineItems?.[0]?.sku,
+                    displayQty: `${e.countedQty} counted`,
+                    isPartial: true,
+                    varianceText: showVariance && e.orderedQty !== undefined
+                        ? `Ordered ${e.orderedQty} · ${e.variance && e.variance > 0 ? `${e.variance} outstanding` : 'no shortfall'}`
+                        : undefined
+                };
+            });
+
+        const combined = [...receivedOrders, ...relevantJobs, ...partialEntries].sort((a, b) =>
             new Date(b.date).getTime() - new Date(a.date).getTime()
         );
 
@@ -335,6 +364,14 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                 <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">
                                                     {item.sku}
                                                 </span>
+                                            )}
+                                            {item.isPartial && (
+                                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                                    Partial
+                                                </span>
+                                            )}
+                                            {item.varianceText && (
+                                                <span className="text-[11px] text-[var(--theme-text-secondary)]">{item.varianceText}</span>
                                             )}
                                             {item.type === 'JOB' && ((item.rawData as any)?.lineItems || (item.rawData as any)?.line_items || []).some((li: any) => (li.returnedQty || li.returned_qty) > 0) && (
                                                 <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
