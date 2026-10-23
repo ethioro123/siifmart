@@ -16,6 +16,8 @@ import { logger } from '../../utils/logger';
 import { formatJobId } from '../../utils/jobIdFormatter';
 import { sortPickItemsByOptimalRoute } from '../../utils/fulfillmentRoute';
 
+import { isPickLineResolved, remainingPickQuantity, validatePickQuantity, resolvePickProduct } from '../../utils/pickProgress';
+
 const PICK_ITEMS_PER_PAGE = 12;
 
 export const PickTab: React.FC = () => {
@@ -52,13 +54,13 @@ export const PickTab: React.FC = () => {
         if (!selectedJob || selectedJob.type !== 'PICK' || !selectedJob.lineItems) return null;
         const targetSiteId = selectedJob.siteId || (selectedJob as any).site_id;
         const pending = selectedJob.lineItems.filter((i: any) => 
-            (i.status || '').toLowerCase() !== 'completed' && (i.status || '').toLowerCase() !== 'picked'
+            !isPickLineResolved(i)
         );
         if (pending.length === 0) return null;
 
         // Smart Serpentine Pick Path Sequencing (Zone -> Aisle -> S-curve Bay -> Shelf Level)
         const sorted = sortPickItemsByOptimalRoute(pending, (item: any) => {
-            const prod = products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
+            const prod = resolvePickProduct(products, item, targetSiteId);
             return item.location || prod?.location;
         });
         return sorted[0] || null;
@@ -67,10 +69,7 @@ export const PickTab: React.FC = () => {
     const currentScannerProduct = useMemo(() => {
         if (!currentScannerItem || !selectedJob) return undefined;
         const targetSiteId = selectedJob.siteId || (selectedJob as any).site_id;
-        return products.find(p =>
-            (p.id === currentScannerItem.productId || p.sku === currentScannerItem.sku) &&
-            (p.siteId === targetSiteId || p.site_id === targetSiteId)
-        );
+        return resolvePickProduct(products, currentScannerItem, targetSiteId);
     }, [currentScannerItem, selectedJob, products]);
 
     // Handle job click from the List view
@@ -89,8 +88,6 @@ export const PickTab: React.FC = () => {
         // Always use selectedJob (which has the most up-to-date lineItems)
         const latestJob = selectedJob;
         if (!latestJob) return;
-        setIsJobModalOpen(false);
-        setIsScannerOpen(false);
         try {
             await completeJob(latestJob.id, user?.name || 'Worker', false, latestJob.lineItems);
         } catch (error) {
@@ -98,6 +95,8 @@ export const PickTab: React.FC = () => {
             return;
         }
         
+        setIsJobModalOpen(false);
+        setIsScannerOpen(false);
         // Show Success Screen
         setCompletedJobInfo({
             id: latestJob.id,
@@ -125,7 +124,7 @@ export const PickTab: React.FC = () => {
         // Auto-pick full remaining quantity if no specific quantity given
         const expected = currentScannerItem.expectedQty || (currentScannerItem as any).quantity || 1;
         const alreadyPicked = currentScannerItem.pickedQty || 0;
-        const remaining = expected - alreadyPicked;
+        const remaining = remainingPickQuantity(currentScannerItem);
 
         let scanQty = quantity;
         const unit = product.unit;
@@ -140,8 +139,9 @@ export const PickTab: React.FC = () => {
             scanQty = remaining || 1;
         }
 
+        validatePickQuantity(scanQty, remaining);
         const nextPicked = alreadyPicked + scanQty;
-        const newStatus = nextPicked >= expected ? 'Picked' : currentScannerItem.status;
+        const newStatus = nextPicked >= expected - 0.000001 ? 'Picked' : 'Short';
 
         const itemIndex = selectedJob.lineItems?.findIndex((i: any) => i === currentScannerItem) ?? -1;
         if (itemIndex === -1) {
@@ -165,9 +165,10 @@ export const PickTab: React.FC = () => {
 
     const handleUpdateItemPick = async (item: any, qty: number) => {
         if (!selectedJob) return;
-        const itemIndex = selectedJob.lineItems?.findIndex((i: any) => i.id === item.id || i.sku === item.sku || i === item) ?? -1;
+        const itemIndex = selectedJob.lineItems?.findIndex((i: any) => i === item || (item.id && i.id === item.id)) ?? -1;
         if (itemIndex === -1) return;
         const expected = item.expectedQty || (item as any).quantity || 1;
+        validatePickQuantity(qty, expected);
         const newStatus = qty >= expected ? 'Picked' : 'In-Progress';
         await updateJobItem(selectedJob.id, itemIndex, newStatus as any, qty);
         const updatedLineItems = [...(selectedJob.lineItems || [])];
@@ -192,7 +193,7 @@ export const PickTab: React.FC = () => {
 
         return filteredJobs.filter(j => {
             if (j.type !== 'PICK') return false;
-            if ((j.status || '').toLowerCase() === 'completed') return false;
+            if (['completed', 'cancelled'].includes((j.status || '').toLowerCase())) return false;
             if (j.assignedTo && j.assignedTo !== employeeId && !['country_managing_director', 'warehouse_manager', 'group_ceo'].includes(user?.role || '')) return false;
 
             if (pickSearch) {

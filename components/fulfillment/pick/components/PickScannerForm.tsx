@@ -1,7 +1,8 @@
 import React from 'react';
 import { RotateCcw } from 'lucide-react';
-import { SELL_UNITS } from '../../../../utils/units';
+import { SELL_UNITS, getSellUnit } from '../../../../utils/units';
 import { extractLocationBarcodeFromScan, decodeLocation } from '../../../../utils/locationEncoder';
+import { remainingPickQuantity } from '../../../../utils/pickProgress';
 import { PickScannerSubmitButton } from './PickScannerSubmitButton';
 
 interface PickScannerFormProps {
@@ -69,7 +70,9 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                     title="Pick quantity"
                                     value={qtyVal}
                                     onChange={(e) => setQtyVal(e.target.value)}
-                                    className="flex-1 min-h-[68px] bg-[var(--theme-bg-card)] border-2 rounded-2xl py-3 px-3 text-center text-4xl sm:text-5xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-[var(--theme-accent)] border-[var(--theme-border)] shadow-xs"
+                                    disabled={isProcessing}
+                                    step="any"
+                                    className="flex-1 min-w-0 w-0 min-h-[68px] bg-[var(--theme-bg-card)] border-2 rounded-2xl py-3 px-3 text-center text-4xl sm:text-5xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-[var(--theme-accent)] border-[var(--theme-border)] shadow-xs"
                                     placeholder="QTY"
                                     autoFocus
                                     onFocus={(e) => e.target.select()}
@@ -80,7 +83,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                     className="min-h-[64px] bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] text-[var(--theme-text-primary)] font-bold rounded-xl px-3 py-3 text-base uppercase focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
                                     aria-label="Select unit"
                                 >
-                                    {SELL_UNITS.map(u => (
+                                    {SELL_UNITS.filter(u => u.code === getSellUnit(currentProduct?.unit || currentItem?.unit).code).map(u => (
                                         <option key={u.code} value={u.code}>
                                             {u.shortLabel.toUpperCase()}
                                         </option>
@@ -113,12 +116,15 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        const expected = currentItem?.expectedQty || 1;
+                                        const remaining = remainingPickQuantity(currentItem);
+                                        const unit = getSellUnit(currentProduct?.unit || currentItem?.unit);
+                                        const size = Number.parseFloat(currentProduct?.size || currentItem?.size || '0');
+                                        const expected = ['weight', 'volume'].includes(unit.category) && size > 0 ? remaining * size : remaining;
                                         setQtyVal(expected.toString());
                                     }}
                                     className="flex-1 py-2 rounded-xl bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 border border-[var(--theme-accent)]/30 text-[var(--theme-accent)] font-mono text-base font-bold transition-all active:scale-95 touch-manipulation min-h-[44px]"
                                 >
-                                    All ({currentItem?.expectedQty || 1})
+                                    Remaining
                                 </button>
                             </div>
                         </div>

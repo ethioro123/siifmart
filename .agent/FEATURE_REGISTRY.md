@@ -379,7 +379,7 @@
 - **Regression Verification**: Authenticated WMS and assignment reads, update policy planning, and a rollback-only system log insert completed without recursion or RLS rejection.
 
 ### Fulfilment Transfer Units (2026-10-18)
-- Standardized transfer, bulk distribution, Smart Replenish, picking, and receiving quantity labels and precision against product unit and package attributes.
+- Standardized transfer, bulk distribution, Smart Replenish, picking, and receiving quantity labels and precision against product unit and package attributes. Picking now validates remaining quantities, resolves confirmed shortages, resets bay verification per line, excludes cancelled jobs, and keeps failed completion open; mobile quantity inputs shrink without clipping.
 - Kept measured quantities alongside stock-unit quantities through the WMS job line-item JSON and mapper; measured receipts convert back to inventory stock units before applying stock.
 - **Root Cause Fixed**: Transfer allocation screens hardcoded generic integer units, inconsistent package-size conversion mixed stock counts with physical measures, and pick completion used package quantity as the measured-pick denominator.
 - **Files Modified**: `components/fulfillment/transfer/`, `components/fulfillment/useJobCompletion.ts`, `services/wms-jobs.mapper.ts`, `types/product.ts`, `types/wms.ts`

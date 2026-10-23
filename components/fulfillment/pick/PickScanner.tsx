@@ -12,6 +12,7 @@ import { useData } from '../../../contexts/DataContext';
 import { validateCrossBorderSku } from '../../../utils/skuValidation';
 import { matchesExpectedPickItemScan, matchesExpectedPickLocationScan } from '../../../utils/pickScanValidation';
 import { resolveFulfillmentScanningPolicy } from '../../../utils/receivingPolicy';
+import { isPickLineResolved, remainingPickQuantity, resolvePickProduct } from '../../../utils/pickProgress';
 import { PickScannerHeader } from './components/PickScannerHeader';
 import { PickScannerForm } from './components/PickScannerForm';
 
@@ -62,10 +63,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
     const getProduct = (item: any) => {
         const targetSiteId = job.siteId || (job as any).site_id;
-        return products?.find(p =>
-            (p.id === item.productId || p.sku === item.sku) &&
-            (p.siteId === targetSiteId || p.site_id === targetSiteId)
-        ) || currentProduct;
+        return resolvePickProduct(products, item, targetSiteId) || currentProduct;
     };
 
     const getItemMeasureQty = (item: any, productInfo?: Product | null) => {
@@ -104,6 +102,13 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     }, [step, isProcessing]);
 
     useEffect(() => {
+        setStep('LOCATION');
+        setIsItemMatched(false);
+        setMatchedBarcode('');
+        setShortPickMode(false);
+    }, [currentItem]);
+
+    useEffect(() => {
         lastStepChangeRef.current = Date.now();
         setInputVal('');
         setQtyVal('');
@@ -138,7 +143,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
     const totalItems = job.lineItems?.length || 0;
     const completedItems = job.lineItems?.filter((item: any) =>
-        item.status === 'Completed' || item.status === 'Picked'
+        isPickLineResolved(item)
     ).length || 0;
     const currentItemNumber = currentItem ? Math.min(completedItems + 1, totalItems) : totalItems;
 
@@ -159,7 +164,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
         const rawVal = inputVal.trim();
         if (step !== 'QUANTITY' && !rawVal) return;
-        if (isProcessing) return;
+        if (isProcessing || isSubmitting || showSuccess) return;
 
         const val = rawVal.toUpperCase();
         let locationBarcode = '';
@@ -238,41 +243,22 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             if (shortPickMode || requirePickQuantityEntry) {
                 setIsItemMatched(true);
                 setMatchedBarcode(val);
-                setSelectedUnit(prod?.unit || currentItem?.unit || 'UNIT');
+                setSelectedUnit(getSellUnit(prod?.unit || currentItem?.unit).code);
                 setStep('QUANTITY');
             } else {
                 await executePick(val);
             }
         } else if (step === 'QUANTITY') {
             const qty = parseFloat(qtyVal);
-            const maxExpectedCases = currentItem?.expectedQty || 1;
+            const maxExpectedCases = remainingPickQuantity(currentItem);
             const prod = getProduct(currentItem);
             const sizeNum = getEffectivePackageSize(prod?.unit || currentItem?.unit, prod?.size || currentItem?.size);
             const unitDef = prod?.unit ? getSellUnit(prod.unit) : null;
             const isWeightVol = unitDef && (unitDef.category === 'weight' || unitDef.category === 'volume');
-            const expectedMeasureQty = getItemMeasureQty(currentItem, prod) || (sizeNum > 0 ? maxExpectedCases * sizeNum : maxExpectedCases);
+            const expectedMeasureQty = sizeNum > 0 ? maxExpectedCases * sizeNum : maxExpectedCases;
 
-            const selUnitDef = getSellUnit(selectedUnit);
-
-            // Explicit unit conversion based on selectedUnit:
-            let finalQty = qty;
-            if (isWeightVol && sizeNum > 0) {
-                if (selUnitDef.category === 'count') {
-                    // User entered cases/packaging count (e.g. 2.25 cases) -> 2.25 * 20 = 45 kg
-                    finalQty = qty * sizeNum;
-                } else if (selUnitDef.code === 'G' || selUnitDef.code === 'ML' || selUnitDef.code === 'MG') {
-                    // User entered sub-scale units (e.g. 45000 g) -> 45000 / 1000 = 45 kg
-                    const factor = selUnitDef.conversionFactor || 1000;
-                    finalQty = qty / factor;
-                } else {
-                    // User entered direct base measure (e.g. 45 kg) -> 45 kg
-                    finalQty = qty;
-                    // SMART FALLBACK: If they typed the exact case count (e.g. 1.85) but forgot to change unit to cases
-                    if (Math.abs(qty - maxExpectedCases) < 0.005) {
-                        finalQty = maxExpectedCases * sizeNum;
-                    }
-                }
-            }
+            // Quantity is entered in the product's displayed unit; never infer another unit.
+            const finalQty = qty;
 
             const displayMax = isWeightVol && sizeNum > 0 ? expectedMeasureQty : maxExpectedCases;
 
@@ -301,7 +287,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             // and UPCs resolve to the same trusted pick line in the parent.
             await onScanItem(currentItem?.sku || barcode, quantity);
             const itemName = currentItem?.name || 'Item';
-            setSuccessMsg(`Picked ${quantity || 1}x ${itemName}`);
+            setSuccessMsg(`Pick saved: ${itemName}`);
             setShowSuccess(true);
             playBeep('success');
             setInputVal('');
@@ -371,7 +357,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
             {/* Main View */}
             <div className="flex-1 min-h-0 relative w-full overflow-hidden flex flex-col">
-                <div className="flex-1 min-h-0 overflow-hidden flex flex-col items-center justify-center px-2 py-2 sm:p-6 w-full max-w-full">
+                <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center px-2 py-2 sm:p-6 w-full max-w-full">
                     {/* Header & Status Instruction View */}
                     <PickScannerHeader
                         showSuccess={showSuccess}
@@ -405,7 +391,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                             currentProduct={currentProduct}
                             isItemMatched={isItemMatched}
                             isStrictlyValid={isStrictlyValid}
-                            isProcessing={isProcessing || isSubmitting}
+                            isProcessing={isProcessing || isSubmitting || showSuccess}
                             handleScan={handleScan}
                             getItemMeasureQty={getItemMeasureQty}
                             scanOnlyHandlers={scanOnlyHandlers}

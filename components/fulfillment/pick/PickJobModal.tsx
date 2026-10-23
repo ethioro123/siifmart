@@ -6,6 +6,7 @@ import { WMSJob, User, Site, Product, Employee } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { sortPickItemsByOptimalRoute } from '../../../utils/fulfillmentRoute';
+import { isPickLineResolved, resolvePickProduct } from '../../../utils/pickProgress';
 import { PickStepIndicator, PickStep } from './steps/PickStepIndicator';
 import { Step1PickRoute } from './steps/Step1PickRoute';
 import { Step2PickCollect } from './steps/Step2PickCollect';
@@ -88,7 +89,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
 
     const getProduct = (item: any) => {
         const targetSiteId = job?.siteId || (job as any)?.site_id;
-        return products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
+        return resolvePickProduct(products, item, targetSiteId);
     };
 
     const getItemMeasureQty = (item: any, product?: any) => {
@@ -106,10 +107,10 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
         return null;
     };
 
-    const sourceSite = sites.find(s => s.id === job?.sourceSiteId || s.id === (job as any)?.site_id);
+    const sourceSite = sites.find(s => s.id === (job?.sourceSiteId || job?.siteId || (job as any)?.site_id));
     const totalItems = job?.lineItems?.length || 0;
     const completedItems = job?.lineItems?.filter(i => {
-        const isDone = i.status === 'Completed' || i.status === 'Picked';
+        const isDone = isPickLineResolved(i);
         const measureQty = getItemMeasureQty(i);
         const requiredAmount = measureQty || i.expectedQty || 1;
         return isDone || (i.pickedQty || 0) >= requiredAmount;

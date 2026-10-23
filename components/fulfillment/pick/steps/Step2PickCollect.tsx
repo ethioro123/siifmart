@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Barcode, CheckCircle, ArrowRight, Package, AlertTriangle, Sparkles, Scan } from 'lucide-react';
+import { isPickLineResolved } from '../../../../utils/pickProgress';
 import { WMSJob, Product } from '../../../../types';
 import { ProgressBar } from '../../../shared/ProgressBar';
 import { formatBeautifulLocation } from '../PickJobModal';
@@ -56,12 +57,12 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
         }
         const raw = qtyDrafts[idx];
         const entered = raw !== undefined && raw !== '' ? Number(raw) : NaN;
-        if (!Number.isFinite(entered) || entered <= 0) {
-            setScanError(`Enter the physical quantity picked for ${item.name || item.sku || 'item'} before confirming.`);
+        if (!Number.isFinite(entered) || entered <= 0 || entered > expected) {
+            setScanError(`Enter a physical quantity greater than zero and no more than ${expected} for ${item.name || item.sku || 'item'}.`);
             setTimeout(() => setScanError(''), 2500);
             return;
         }
-        onUpdateItemPick(item, Math.min(expected, entered));
+        onUpdateItemPick(item, entered);
         setScanError('');
     };
 
@@ -71,7 +72,7 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
         if (!code) return;
 
         const targetIndex = sortedLineItems.findIndex(item => {
-            const isDone = item.status === 'Completed' || item.status === 'Picked';
+            const isDone = isPickLineResolved(item);
             if (isDone) return false;
             const prod = getProduct(item);
             return (
@@ -195,7 +196,7 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 md:p-5 space-y-2.5">
                 {sortedLineItems.map((item, idx) => {
                     const prod = getProduct(item);
-                    const isDone = item.status === 'Completed' || item.status === 'Picked';
+                    const isDone = isPickLineResolved(item);
                     const expected = item.expectedQty || (item as any).quantity || 1;
                     const picked = item.pickedQty || 0;
                     const loc = item.location || prod?.location;
