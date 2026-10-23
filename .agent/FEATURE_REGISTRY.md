@@ -18,7 +18,6 @@
 - New sessions follow the device's light or dark appearance and update when the system preference changes. A manual theme toggle is saved in browser storage and takes precedence on later visits.
 - The document applies the initial theme before the app loads to avoid a flash of the opposite appearance.
 - **Files**: `hooks/useTheme.ts`, `contexts/CentralStore.tsx`, `index.html`.
-
 ### Functional Reporting and HR-Reviewed Hiring (2026-10-23)
 - Country functional directors report through their Group functional executives and coordinate with the Country Managing Director; regional retail and regional supply chain remain separate lines. The Group CIO owns the technology chain, the Group CMO sits under the Group CCO, and country compliance reports through the Group CLCO while audit remains independent under the Board/CAE.
 - Hiring eligibility follows the candidate role's primary reporting line. Pending onboarding proposals require sign-off from HR roles or the Group CEO; regional HR approvals continue to be checked against the existing regional boundary.
@@ -497,3 +496,4 @@
 - Receiving print preview renders actual generated label HTML; fixed thermal page sizes prevent growing labels and trailing blank pages.
 - Receipt confirmation reloads authoritative PO lines, resolves the exact line ID, checks destination/status, and throws on failed validation so unsaved counts remain open.
 - Receiving creates only zero-stock site placeholders and links existing visible masters; it does not attempt national catalog registration or bypass master-data RLS. Manifest totals count each putaway job once (duplicate client-state jobs no longer double the received units); floor roles can create/read internal site jobs and placeholders under RLS.
+- Mobile Putaway cards open the job modal before start/resume, matching desktop and supporting keyboard activation.

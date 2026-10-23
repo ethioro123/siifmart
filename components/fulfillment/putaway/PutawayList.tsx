@@ -74,16 +74,18 @@ export const PutawayList: React.FC<PutawayListProps> = ({
 
                     if (isMobile) {
                         return (
-                            <div
+                            <button
+                                type="button"
+                                aria-label={`Open putaway job ${formatJobId(job)}`}
                                 key={job.id}
-                                className={`flex items-center gap-2.5 bg-[var(--theme-bg-card)] border rounded-xl p-2.5 min-h-[48px] active:scale-[0.98] transition-transform cursor-pointer shadow-xs ${
+                                className={`w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] flex items-center gap-2.5 bg-[var(--theme-bg-card)] border rounded-xl p-2.5 min-h-[48px] active:scale-[0.98] transition-transform cursor-pointer shadow-xs ${
                                     isCritical 
                                         ? 'border-red-500/40' 
                                         : job.status === 'In-Progress' 
                                             ? 'border-[var(--theme-accent)]/60 bg-[var(--theme-accent)]/5 ring-1 ring-[var(--theme-accent)]/20'
                                             : 'border-[var(--theme-border)]'
                                 }`}
-                                onClick={() => handleStartJob(job)}
+                                onClick={() => onShowDetails(job)}
                             >
                                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold font-mono shrink-0 border ${
                                     progress >= 100 
@@ -116,7 +118,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                     </div>
                                 </div>
                                 <ChevronRight size={15} className="text-[var(--theme-text-secondary)] shrink-0" />
-                            </div>
+                            </button>
                         );
                     }
 
