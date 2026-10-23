@@ -1,3 +1,4 @@
+import { POReceivingHandoff } from './POReceivingHandoff';
 import { useClearPOFinance } from '../../hooks/usePOFinanceReview';
 import React, { useState } from 'react';
 import Modal from '../../components/Modal';
@@ -397,12 +398,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         </div>
                     )}
 
-                    {(po.status === 'Approved' || po.status === 'Pending') && (
-                        <div className="p-3.5 px-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-2.5 text-amber-500 text-xs font-medium">
-                            <Package size={16} />
-                            <span>Receive in WMS → Operations → Receiving</span>
-                        </div>
-                    )}
+                    <POReceivingHandoff po={po} />
 
                     {/* Secondary Actions */}
                     <div className="flex flex-wrap items-center justify-end gap-2.5 pt-1">

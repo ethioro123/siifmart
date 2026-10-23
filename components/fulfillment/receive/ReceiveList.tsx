@@ -15,6 +15,9 @@ import { ItemAttributeBadges } from '../ItemAttributeBadges';
 import { useIsMobile } from '../../../hooks/useIsMobile';
 
 interface ReceiveListProps {
+    loadManifest: (id: string) => void;
+    isLoadingManifest: (id: string) => boolean;
+    manifestError: (id: string) => string | undefined;
     paginatedReceiveOrders: PurchaseOrder[];
     receiveOrdersTotalPages: number;
     filteredReceiveOrdersLength: number;
@@ -41,6 +44,7 @@ interface ReceiveListProps {
 }
 
 export const ReceiveList: React.FC<ReceiveListProps> = ({
+    loadManifest, isLoadingManifest, manifestError,
     paginatedReceiveOrders,
     receiveOrdersTotalPages,
     filteredReceiveOrdersLength,
@@ -80,7 +84,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                         {t('warehouse.noApprovedManifests')}
                     </p>
                     <p className="text-[11px] sm:text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5 sm:mt-1">
-                        {t('warehouse.approvedManifestsWillAppear')}
+                        Approved POs appear at their destination warehouse or DC. Receivers see tasks assigned to them; ask the warehouse manager to assign the RECEIVE task in Fulfillment → Assign.
                     </p>
                 </div>
             </div>
@@ -134,7 +138,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                             </span>
                                             <span className="w-1 h-1 rounded-full bg-[var(--theme-border)]" />
                                             <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">
-                                                {po.lineItems?.length || 0} {t('warehouse.itemPlural')}
+                                                {po.lineItems?.length || po.itemsCount || 0} {t('warehouse.itemPlural')}
                                             </span>
                                             {isActiveReceiveJob && (
                                                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--theme-accent)] uppercase">
@@ -161,6 +165,13 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                 </div>
                             </summary>
 
+                            {!po.lineItems?.length && <div className="mb-4 space-y-2">
+                                <p className="text-sm text-[var(--theme-text-secondary)]">Open this manifest’s items to begin receiving. Stock changes only after you confirm the receipt.</p>
+                                {manifestError(po.id) && <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">{manifestError(po.id)}</p>}
+                                <button type="button" onClick={() => loadManifest(po.id)} disabled={isLoadingManifest(po.id)} className="min-h-11 px-4 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-sm font-semibold disabled:opacity-50">
+                                    {isLoadingManifest(po.id) ? 'Loading items…' : 'Load items to receive'}
+                                </button>
+                            </div>}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 sm:gap-3 md:gap-4">
                                 {(po.lineItems || []).map((item, idx) => {
                                     const progress = resolvePOLineItemProgress(item, receivedMaps, allProducts);

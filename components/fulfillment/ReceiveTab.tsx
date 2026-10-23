@@ -1,3 +1,4 @@
+import { useReceivingManifestDetails } from '../../hooks/useReceivingManifestDetails';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { PurchaseOrder, Product } from '../../types';
 import { generateUnifiedBatchLabelsHTML } from '../../utils/labels/ProductLabelGenerator';
@@ -21,12 +22,13 @@ import { useReceiveScan } from './receive/hooks/useReceiveScan';
 
 export const ReceiveTab: React.FC = () => {
     const {
-        t, jobs, orders, products, allProducts, employees,
+        t, jobs, orders: orderSummaries, products, allProducts, employees,
         isSubmitting, setIsSubmitting, receivePOSplit, addNotification,
         refreshData, historicalJobs, selectedJob, setSelectedJob, isDetailsOpen, setIsDetailsOpen,
         resolveOrderRef, activeTab, finalizePO, user, wmsJobsService, sites, loadHistoricalJobs
     } = useFulfillment();
     const { settings, effectiveCountry } = useData();
+    const { orders, loadManifest, isLoadingManifest, manifestError } = useReceivingManifestDetails(orderSummaries);
     const receivingPolicy = useMemo(() => resolveReceivingPolicy(settings, effectiveCountry), [settings, effectiveCountry]);
 
     // --- STATE ---
@@ -326,6 +328,7 @@ export const ReceiveTab: React.FC = () => {
             {/* CONTENT AREA */}
             {viewMode === 'Process' ? (
                 <ReceiveList
+                    loadManifest={loadManifest} isLoadingManifest={isLoadingManifest} manifestError={manifestError}
                     paginatedReceiveOrders={paginatedReceiveOrders}
                     receiveOrdersTotalPages={receiveOrdersTotalPages}
                     filteredReceiveOrdersLength={filteredReceiveOrders.length}
