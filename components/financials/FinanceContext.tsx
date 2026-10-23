@@ -3,7 +3,7 @@ import type { ExpenseRecord, Employee, Site } from '../../types';
 import type { Country, CountryProfile } from '../../utils/localization';
 import type { CountryTaxConfig, ApAgingSummary } from '../../hooks/financialsHelpers';
 
-export type FinanceTab = 'overview' | 'expenses' | 'drawer' | 'ap' | 'ar' | 'gl' | 'petty_cash' | 'budget' | 'margin' | 'workbenches' | 'payroll' | 'tax';
+export type FinanceTab = 'po_approvals' | 'overview' | 'expenses' | 'drawer' | 'ap' | 'ar' | 'gl' | 'petty_cash' | 'budget' | 'margin' | 'workbenches' | 'payroll' | 'tax';
 
 export interface FinanceContextType {
     user: any;

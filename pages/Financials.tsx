@@ -1,3 +1,4 @@
+import POFinanceApprovalsTab from '../components/financials/POFinanceApprovalsTab';
 import React from 'react';
 import {
    DollarSign,
@@ -215,6 +216,7 @@ export default function Finance() {
                   </>
                ) : (
                   <>
+                     {user?.role === 'country_finance_director' && <TabButton id="po_approvals" label="PO Approvals" icon={ShieldCheck} />}
                      <TabButton id="overview" label="P&L Overview" icon={Activity} />
                      <TabButton id="expenses" label="Expense Ledger" icon={CreditCard} />
                      <TabButton id="drawer" label="Drawer Reconciliation" icon={ShieldCheck} />
@@ -239,6 +241,7 @@ export default function Finance() {
                tabIndex={0}
                className="min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] rounded-xl"
             >
+               {state.activeTab === 'po_approvals' && <POFinanceApprovalsTab key={effectiveCountry} />}
                {state.activeTab === 'overview' && <OverviewTab />}
                {state.activeTab === 'expenses' && <ExpensesTab />}
                {state.activeTab === 'drawer' && <DrawerReconciliationTab />}

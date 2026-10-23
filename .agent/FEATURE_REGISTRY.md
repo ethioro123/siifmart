@@ -487,3 +487,7 @@
 
 ### Procurement validation guidance (2026-10-23)
 - Failed order/item validation lists specific missing fields, links to them, opens collapsed details, and focuses the first issue.
+
+### HQ finance PO approvals (2026-10-23)
+- Finance has a country-scoped, paginated PO Approvals queue using current regional limits and clearance terms, with on-demand inspection and audited clearance.
+- Draft and Pending POs expose the authorized clearance action; final procurement approval remains separate.

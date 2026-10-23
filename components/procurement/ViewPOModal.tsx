@@ -1,3 +1,4 @@
+import { useClearPOFinance } from '../../hooks/usePOFinanceReview';
 import React, { useState } from 'react';
 import Modal from '../../components/Modal';
 import { PurchaseOrder, Product } from '../../types';
@@ -26,6 +27,7 @@ interface ViewPOModalProps {
 }
 
 export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, onEdit, onSuccess }) => {
+    const clearFinance = useClearPOFinance();
     const { allProducts, sites, settings, regions = [] } = useData();
     const { user, showToast } = useStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,7 +86,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 });
                 showToast(`PO ${formatPONumber(po)} approved successfully`, 'success');
             } else if (approvalModal.mode === 'finance') {
-                await purchaseOrdersService.clearFinance(po.id, notes);
+                await clearFinance.mutateAsync({ poId: po.id, reason: notes });
                 showToast(`Finance clearance recorded for PO ${formatPONumber(po)}`, 'success');
             } else {
                 if (!user?.id || !user.role) throw new Error('Signed-in rejector identity is required.');
@@ -364,7 +366,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 {/* Actions */}
                 <div className="pt-4 border-t border-[var(--theme-border)] space-y-3">
                     {/* Primary Actions for Draft POs */}
-                    {po.status === 'Draft' && (
+                    {['Draft', 'Pending'].includes(po.status) && (
                         <div className="space-y-3">
                             {canApprove && <button onClick={handleOpenApprove} disabled={isSubmitting}
                                 className="h-11 px-5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full disabled:opacity-50">
