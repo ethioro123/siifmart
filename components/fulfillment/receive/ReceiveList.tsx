@@ -232,7 +232,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                     }`}>
                                                                         {receivedQty}
                                                                         {isBlindReceiving && !isComplete ? (
-                                                                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">Blind</span>
+                                                                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">received · blind count</span>
                                                                         ) : (
                                                                             <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                         )}
@@ -247,7 +247,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 }`}>
                                                                     {receivedQty}
                                                                     {isBlindReceiving && !isComplete ? (
-                                                                        <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">Blind</span>
+                                                                        <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">received · blind count</span>
                                                                     ) : (
                                                                         <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                     )}
