@@ -4,7 +4,6 @@
 # Update it for new features or significant fixes, and verify the current code before relying on older notes.
 
 ## Active Features
-
 ### PO Creator Permissions Aligned With Database Policy (2026-10-23)
 - PO creation in the application now matches the authenticated insert roles enforced in staging and production. The Group CEO retains creation authority; other Group executives, Area Operations Managers, and Regional Supply Chain Managers no longer see a create permission the database will reject.
 - Country functional roles with database authority keep it. Buyer and regional procurement roles remain role-based, so multiple employees can share the role and provide operational coverage; PO approval still requires a different person from the creator.
@@ -497,3 +496,4 @@
 - Receiving modals use one bottom progression/save action per step, readable step labels, valid counts for every retained split, and unsaved review wording.
 - Receiving printing separates counted quantity from copy count, preserves lot/expiry and condition, marks draft labels unsaved, respects price-tag policy, and retains failed reprints for retry.
 - Receiving print preview renders actual generated label HTML; fixed thermal page sizes prevent growing labels and trailing blank pages.
+- Receipt confirmation reloads authoritative PO lines, resolves the exact line ID, checks destination/status, and throws on failed validation so unsaved counts remain open.

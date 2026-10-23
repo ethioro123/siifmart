@@ -1,3 +1,5 @@
+import { loadReceivingPOItem } from '../../utils/receivingPOItem';
+import { hasValidReceivingCounts } from '../../utils/receivingCountValidation';
 import { useCallback } from 'react';
 import { PurchaseOrder, WMSJob, Product, SystemConfig } from '../../types';
 import {
@@ -44,16 +46,8 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
         actionUser?: { name: string; email: string }
     ) => {
         try {
-            const po = orders.find(o => o.id === poId) || allOrders.find(o => o.id === poId);
-            if (!po) throw new Error('PO not found');
-
-            // Find the line item
-            const itemIndex = po.lineItems?.findIndex((i: any) => i.productId === itemId || i.sku === itemId || i.id === itemId);
-            if (itemIndex === undefined || itemIndex === -1) {
-                logger.error('useReceivingSplit', `Item not found in PO: ${itemId}`, new Error(`Item ${itemId} not found`));
-                return;
-            }
-            const item = po.lineItems![itemIndex];
+            if (!hasValidReceivingCounts(variants)) throw new Error('Enter a positive physical count for every split.');
+            const { po, itemIndex, item } = await loadReceivingPOItem(poId, itemId, activeSite?.id, activeSite?.country);
             const poAttrs = extractProductAttributesFromPOItem(item);
 
             // VALIDATION: Prevent over-receiving (helps avoid accidental duplicates)
@@ -73,17 +67,15 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                 });
             });
             // Server-authoritative: another device may have received since local state loaded
-            const freshPO = await purchaseOrdersService.getById(poId).catch(() => null);
-            totalAlreadyReceived = Math.max(totalAlreadyReceived, (freshPO?.lineItems as any[])?.[itemIndex]?.receivedQty || 0);
+            totalAlreadyReceived = Math.max(totalAlreadyReceived, item.receivedQty || 0);
 
             const newSplitTotal = variants.reduce((sum, v) => sum + v.quantity, 0);
             const allowed = maxReceivable(expectedSellable, policy.overReceiveTolerancePct);
 
             if (totalAlreadyReceived + newSplitTotal > allowed) {
-                addNotification('alert', buildOverReceiveMessage(policy.blind, {
+                throw new Error(buildOverReceiveMessage(policy.blind, {
                     received: totalAlreadyReceived, expected: expectedSellable, attempted: newSplitTotal, allowed
                 }));
-                return;
             }
 
             const jobPromises = variants.map(async (variant, index) => {

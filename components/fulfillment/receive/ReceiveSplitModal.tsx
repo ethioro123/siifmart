@@ -182,7 +182,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
         try {
             await receivePOSplit(
                 splitReceivingPO.id,
-                splitReceivingItem.productId || splitReceivingItem.id,
+                splitReceivingItem.id || splitReceivingItem.productId,
                 processedVariants,
                 undefined,
                 user ? { name: user.name, email: user.email || '' } : undefined
