@@ -1,11 +1,11 @@
-import React from 'react';
-import { Users as UsersIcon, Search, User as UserIcon, ChevronDown, Plus } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 import { Employee, WMSJob } from '../../../types';
 import { Protected } from '../../Protected';
 import { useFulfillment } from '../FulfillmentContext';
 import { logger } from '../../../utils/logger';
-import { canWorkerPerformJob, getJobAssignmentEligibility, isDeliveryJob, isFloorWorkerRole } from '../../../utils/fulfillmentRoles';
+import { canWorkerPerformJob, getJobAssignmentEligibility, isFloorWorkerRole } from '../../../utils/fulfillmentRoles';
 import { getEmployeeJobTitle } from '../../../utils/roles';
+import { formatJobId } from '../../../utils/jobIdFormatter';
 
 interface AssignAvailableWorkersProps {
     filteredEmployees: Employee[];
@@ -28,274 +28,44 @@ interface AssignAvailableWorkersProps {
     t: (key: string) => string;
 }
 
-export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
-    filteredEmployees,
-    dispatchEmployeeFilter,
-    setDispatchEmployeeFilter,
-    dispatchEmployeeSearch,
-    setDispatchEmployeeSearch,
-    isEmployeeRoleDropdownOpen,
-    setIsEmployeeRoleDropdownOpen,
-    jobAssignments,
-    selectedJob,
-    setSelectedJob,
-    setIsSubmitting,
-    refreshData,
-    addNotification,
-    assignCurrentPage,
-    setAssignCurrentPage,
-    ASSIGN_ITEMS_PER_PAGE,
-    t
-}) => {
+export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({ filteredEmployees, dispatchEmployeeFilter, setDispatchEmployeeFilter, dispatchEmployeeSearch, setDispatchEmployeeSearch, jobAssignments, selectedJob, setSelectedJob, setIsSubmitting, refreshData, addNotification, assignCurrentPage, setAssignCurrentPage, ASSIGN_ITEMS_PER_PAGE }) => {
     const { assignJob } = useFulfillment();
-
-    return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] font-semibold text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider flex justify-between items-center relative z-10">
-                <div className="flex items-center gap-2">
-                    <UsersIcon size={16} className="text-primary" />
-                    <span>{t('warehouse.availableStaff')}</span>
-                    <span className="bg-primary/10 text-primary font-mono tabular-nums px-2 py-0.5 rounded-full border border-primary/20 ml-1 text-xs">
-                        {(() => {
-                            let filtered = filteredEmployees.filter(e =>
-                                ['country_managing_director', 'regional_operations_manager', 'country_operations_director', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
-                                e.status?.toLowerCase() === 'active'
-                            );
-                            if (dispatchEmployeeFilter !== 'ALL') filtered = filtered.filter(e => e.role?.toLowerCase() === dispatchEmployeeFilter.toLowerCase());
-                            if (dispatchEmployeeSearch) filtered = filtered.filter(e => e.name?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()) || e.code?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()));
-                            return filtered.length;
-                        })()}
-                    </span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    {/* Staff Search */}
-                    <div className="relative group">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] group-focus-within:text-primary transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search staff..."
-                            value={dispatchEmployeeSearch}
-                            onChange={(e) => setDispatchEmployeeSearch(e.target.value)}
-                            className="woody-input !pl-8 pr-3 py-1.5 text-xs w-36 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] min-h-[38px]"
-                        />
-                    </div>
-
-                    {/* Role Filter Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsEmployeeRoleDropdownOpen(!isEmployeeRoleDropdownOpen)}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[38px] touch-manipulation whitespace-nowrap"
-                        >
-                            <UserIcon size={14} className={dispatchEmployeeFilter !== 'ALL' ? 'text-primary' : ''} />
-                            <span>ROLE: {dispatchEmployeeFilter.toUpperCase()}</span>
-                            <ChevronDown size={14} className={`transition-transform duration-300 ${isEmployeeRoleDropdownOpen ? 'rotate-180' : ''}`} />
-                        </button>
-
-                        {isEmployeeRoleDropdownOpen && (
-                            <>
-                                <div className="fixed inset-0 z-[50]" onClick={() => setIsEmployeeRoleDropdownOpen(false)} />
-                                <div className="absolute top-full right-0 mt-2 w-44 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
-                                    {['ALL', 'picker', 'packer', 'dispatcher', 'driver', 'receiver', 'warehouse_manager', 'inventory_specialist'].map(role => (
-                                        <button
-                                            key={role}
-                                            onClick={() => {
-                                                setDispatchEmployeeFilter(role);
-                                                setIsEmployeeRoleDropdownOpen(false);
-                                            }}
-                                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold min-h-[38px] flex items-center touch-manipulation transition-colors cursor-pointer ${dispatchEmployeeFilter === role
-                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
-                                                : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
-                                                }`}
-                                        >
-                                            {role.toUpperCase()}
-                                        </button>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
-                {(() => {
-                    let filtered = filteredEmployees.filter(e =>
-                        ['country_managing_director', 'regional_operations_manager', 'country_operations_director', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
-                        e.status?.toLowerCase() === 'active'
-                    );
-                    if (dispatchEmployeeFilter !== 'ALL') filtered = filtered.filter(e => e.role?.toLowerCase() === dispatchEmployeeFilter.toLowerCase());
-                    if (dispatchEmployeeSearch) filtered = filtered.filter(e => e.name?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()) || e.code?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()));
-
-                    // Check if selected job matches employee role using fulfillment role rules
-                    const getRoleMatch = (employee: any, job: WMSJob | null) => {
-                        if (!job) return false;
-                        return canWorkerPerformJob(employee.role, job.type);
-                    };
-
-                    // Sort by: role match first, then by workload
-                    filtered.sort((a, b) => {
-                        const aMatch = getRoleMatch(a, selectedJob);
-                        const bMatch = getRoleMatch(b, selectedJob);
-                        if (aMatch !== bMatch) return aMatch ? -1 : 1;
-
-                        const aWorkload = jobAssignments.filter(
-                            ass => ass.employeeId === a.id && ['Assigned', 'Accepted', 'In-Progress'].includes(ass.status)
-                        ).length;
-                        const bWorkload = jobAssignments.filter(
-                            ass => ass.employeeId === b.id && ['Assigned', 'Accepted', 'In-Progress'].includes(ass.status)
-                        ).length;
-                        return aWorkload - bWorkload;
-                    });
-
-                    const assignTotalPages = Math.ceil(filtered.length / ASSIGN_ITEMS_PER_PAGE);
-                    const safeAssignPage = Math.min(Math.max(1, assignCurrentPage), Math.max(1, assignTotalPages));
-                    const paginatedEmployees = filtered.slice((safeAssignPage - 1) * ASSIGN_ITEMS_PER_PAGE, safeAssignPage * ASSIGN_ITEMS_PER_PAGE);
-
-                    return (
-                        <>
-                            {paginatedEmployees.map((employee) => {
-                                // Count active assignments for this employee
-                                const activeAssignments = jobAssignments.filter(
-                                    a => a.employeeId === employee.id &&
-                                        ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)
-                                );
-                                const workloadCount = activeAssignments.length;
-                                const roleMatch = getRoleMatch(employee, selectedJob);
-                                const eligibility = selectedJob ? getJobAssignmentEligibility(employee.role, selectedJob.type) : { eligible: true };
-                                const isDeliveryLockout = selectedJob ? (isDeliveryJob(selectedJob.type) && isFloorWorkerRole(employee.role)) : false;
-
-                                return (
-                                    <div key={employee.id} className={`p-4 rounded-2xl border transition-colors ${roleMatch && selectedJob
-                                        ? 'bg-primary/5 border-primary/30'
-                                        : isDeliveryLockout && selectedJob
-                                            ? 'bg-amber-500/5 border-amber-500/20 opacity-80'
-                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
-                                        }`}>
-                                        <div className="flex items-center gap-4">
-                                            <div className="relative">
-                                                <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center text-sm font-semibold text-[var(--theme-text-primary)] shadow-sm">
-                                                    {employee.name?.charAt(0) || '?'}
-                                                </div>
-                                                <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--theme-bg-card)] ${employee.status?.toLowerCase() === 'active' ? 'bg-emerald-500' : 'bg-[var(--theme-text-muted)]'}`} />
-                                            </div>
-
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <div className="text-sm text-[var(--theme-text-primary)] font-semibold truncate">{employee.name}</div>
-                                                    {roleMatch && selectedJob && (
-                                                        <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20 font-semibold uppercase tracking-wider text-[11px]">
-                                                            Match
-                                                        </span>
-                                                    )}
-                                                    {isDeliveryLockout && selectedJob && (
-                                                        <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/20 font-semibold uppercase tracking-wider text-[11px]">
-                                                            Driver Only
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                {/* Workload Progress Bar */}
-                                                <div className="space-y-1.5">
-                                                    <div className="flex justify-between items-center text-[11px] font-mono tabular-nums uppercase font-semibold tracking-wider">
-                                                        <span className="text-[var(--theme-text-muted)]">{getEmployeeJobTitle(employee)}</span>
-                                                        <span className="text-[var(--theme-text-secondary)]">
-                                                            {workloadCount} {t('warehouse.active')}
-                                                        </span>
-                                                    </div>
-                                                    <div className="w-full h-1.5 bg-[var(--theme-bg-app)] rounded-full overflow-hidden border border-[var(--theme-border)]">
-                                                        <div
-                                                            className="h-full transition-all duration-500 bg-primary"
-                                                            ref={(el) => { if (el) el.style.width = `${Math.min(100, (workloadCount / 5) * 100)}%`; }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <Protected permission="ASSIGN_TASKS">
-                                                <button
-                                                    disabled={!selectedJob || !eligibility.eligible}
-                                                    onClick={async () => {
-                                                        if (!selectedJob) return;
-                                                        if (!eligibility.eligible) {
-                                                            addNotification('alert', eligibility.reason || 'Worker is not eligible for this job type');
-                                                            return;
-                                                        }
-                                                        try {
-                                                            setIsSubmitting(true);
-                                                            await assignJob(selectedJob.id, employee.id);
-                                                            addNotification('success', `Job assigned to ${employee.name}`);
-                                                            setSelectedJob(null);
-                                                            await refreshData();
-                                                        } catch (error) {
-                                                            logger.error('AssignAvailableWorkers', 'Failed to assign job:', error);
-                                                            addNotification('alert', 'Failed to assign job');
-                                                        } finally {
-                                                            setIsSubmitting(false);
-                                                        }
-                                                    }}
-                                                    className={`min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl border transition-colors flex items-center justify-center touch-manipulation ${!selectedJob || !eligibility.eligible
-                                                        ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border-[var(--theme-border)] cursor-not-allowed opacity-50'
-                                                        : roleMatch
-                                                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm hover:opacity-90 active:scale-95 cursor-pointer'
-                                                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] active:scale-95 cursor-pointer'
-                                                        }`}
-                                                    title={
-                                                        !selectedJob
-                                                            ? t('warehouse.selectJobFirst')
-                                                            : !eligibility.eligible
-                                                                ? (eligibility.reason || 'Ineligible for this job')
-                                                                : 'Assign Task'
-                                                    }
-                                                    aria-label="Assign Task"
-                                                >
-                                                    <Plus size={16} />
-                                                </button>
-                                            </Protected>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-
-                            {/* Assign Pagination Controls */}
-                            {assignTotalPages > 1 && (
-                                <div className="flex items-center justify-center gap-4 py-4 border-t border-[var(--theme-border)]">
-                                    <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] p-1.5 rounded-full border border-[var(--theme-border)]">
-                                        <button
-                                            onClick={() => setAssignCurrentPage(prev => Math.max(1, prev - 1))}
-                                            disabled={safeAssignPage === 1}
-                                            title="Previous Page"
-                                            aria-label="Previous Page"
-                                            className="min-h-[44px] min-w-[44px] rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-[var(--theme-bg-card)] transition-colors text-[var(--theme-text-secondary)] touch-manipulation"
-                                        >
-                                            <ChevronDown className="rotate-90" size={14} />
-                                        </button>
-                                        <span className="text-xs font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider px-2">
-                                            Page <span className="text-[var(--theme-text-primary)]">{safeAssignPage}</span> of {assignTotalPages}
-                                        </span>
-                                        <button
-                                            onClick={() => setAssignCurrentPage(prev => Math.min(assignTotalPages, prev + 1))}
-                                            disabled={safeAssignPage === assignTotalPages}
-                                            title="Next Page"
-                                            aria-label="Next Page"
-                                            className="min-h-[44px] min-w-[44px] rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-[var(--theme-bg-card)] transition-colors text-[var(--theme-text-secondary)] touch-manipulation"
-                                        >
-                                            <ChevronDown className="-rotate-90" size={14} />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    );
-                })()}
-                {filteredEmployees.filter(e =>
-                    ['country_managing_director', 'regional_operations_manager', 'country_operations_director', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
-                    e.status?.toLowerCase() === 'active'
-                ).length === 0 && (
-                    <div className="text-center py-8 text-[var(--theme-text-muted)] text-sm">
-                        No warehouse staff available
-                    </div>
-                )}
-            </div>
+    const [busy, setBusy] = useState<string | null>(null);
+    const lock = useRef(false);
+    const team = filteredEmployees.filter(employee => employee.status?.toLowerCase() === 'active' && (isFloorWorkerRole(employee.role) || ['country_managing_director','regional_operations_manager','country_operations_director','warehouse_manager','dispatcher','driver','auditor'].includes(employee.role?.toLowerCase())));
+    const activeCount = (id: string) => jobAssignments.filter(a => a.employeeId === id && ['Assigned','Accepted','In-Progress'].includes(a.status)).length;
+    const matches = team.filter(e => (dispatchEmployeeFilter === 'ALL' || e.role === dispatchEmployeeFilter) && `${e.name} ${e.code || ''}`.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase())).sort((a,b) => {
+        const aMatch = selectedJob && canWorkerPerformJob(a.role, selectedJob.type) ? 1 : 0;
+        const bMatch = selectedJob && canWorkerPerformJob(b.role, selectedJob.type) ? 1 : 0;
+        return bMatch - aMatch || activeCount(a.id) - activeCount(b.id) || a.name.localeCompare(b.name);
+    });
+    const pages = Math.max(1, Math.ceil(matches.length / ASSIGN_ITEMS_PER_PAGE));
+    const page = Math.min(Math.max(1, assignCurrentPage), pages);
+    const visible = matches.slice((page - 1) * ASSIGN_ITEMS_PER_PAGE, page * ASSIGN_ITEMS_PER_PAGE);
+    const assign = async (employee: Employee) => {
+        if (!selectedJob || lock.current || !getJobAssignmentEligibility(employee.role, selectedJob.type).eligible) return;
+        lock.current = true; setBusy(employee.id); setIsSubmitting(true);
+        try { await assignJob(selectedJob.id, employee.id); addNotification('success', `Job assigned to ${employee.name}`); setSelectedJob(null); try { await refreshData(); } catch (refreshError) { logger.warn('AssignAvailableWorkers', 'Assignment saved; refresh failed', { error: refreshError instanceof Error ? refreshError.message : String(refreshError) }); } }
+        catch (error) { logger.error('AssignAvailableWorkers', 'Failed to assign job', error); addNotification('alert', 'Failed to assign job'); }
+        finally { lock.current = false; setBusy(null); setIsSubmitting(false); }
+    };
+    return <section id="assignment-team" aria-label="Assignment team" className="min-w-0 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] overflow-hidden scroll-mt-4">
+        <header className="p-4 border-b border-[var(--theme-border)]"><div className="flex flex-wrap justify-between gap-2"><h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Team <span className="text-[var(--theme-text-secondary)]">{team.length}</span></h3><span className="text-xs text-[var(--theme-text-secondary)]">Eligible first · lowest workload</span></div>
+            <p className="mt-2 text-xs text-[var(--theme-text-secondary)]">{selectedJob ? `Assigning ${selectedJob.type} ${formatJobId(selectedJob)}. Choose a team member below.` : 'Select a job in the queue to see eligible team members.'}</p>
+            <div className="mt-3 flex flex-wrap gap-2"><input type="search" aria-label="Search assignment team" placeholder="Search name or staff code" value={dispatchEmployeeSearch} onChange={e => { setDispatchEmployeeSearch(e.target.value); setAssignCurrentPage(1); }} className="min-w-0 flex-1 basis-full sm:basis-auto min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 text-sm text-[var(--theme-text-primary)]" /><select aria-label="Staff role" value={dispatchEmployeeFilter} onChange={e => { setDispatchEmployeeFilter(e.target.value); setAssignCurrentPage(1); }} className="min-h-[44px] max-w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-2 text-xs text-[var(--theme-text-primary)]"><option value="ALL">All roles</option>{[...new Set(team.map(e => e.role))].map(role => <option key={role} value={role}>{role.replace(/_/g,' ')}</option>)}</select></div>
+        </header>
+        <div className="max-h-[65vh] overflow-y-auto divide-y divide-[var(--theme-border)]">
+            {visible.map(employee => {
+                const eligibility = selectedJob ? getJobAssignmentEligibility(employee.role, selectedJob.type) : null;
+                const initials = employee.name.replace(/^\[TEST\]\s*/,'').trim().split(/\s+/).filter(Boolean).slice(0,2).map(word => word[0]).join('');
+                return <div key={employee.id} className="flex items-start gap-3 p-4">
+                    <div aria-hidden="true" className="h-9 w-9 shrink-0 rounded-full flex items-center justify-center bg-[var(--theme-bg-subtle)] text-xs font-semibold text-[var(--theme-text-secondary)]">{initials}</div>
+                    <div className="min-w-0 flex-1"><p className="text-sm font-medium text-[var(--theme-text-primary)] break-words">{employee.name}</p><p className="mt-1 text-xs text-[var(--theme-text-secondary)] break-words">{getEmployeeJobTitle(employee)} · {activeCount(employee.id)} active jobs</p>{eligibility && !eligibility.eligible && <p className="mt-1 text-xs text-[var(--theme-text-muted)]">{eligibility.reason || 'Not eligible for this job'}</p>}</div>
+                    <Protected permission="ASSIGN_TASKS"><button type="button" disabled={!eligibility?.eligible || !!busy} aria-label={`Assign job to ${employee.name}`} onClick={() => assign(employee)} className="min-h-[44px] shrink-0 rounded-xl border border-[var(--theme-border)] px-3 text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{busy === employee.id ? 'Assigning…' : 'Assign'}</button></Protected>
+                </div>;
+            })}
+            {!visible.length && <p className="p-6 text-sm text-[var(--theme-text-secondary)]">No team members match these filters.</p>}
         </div>
-    );
+        {pages > 1 && <nav aria-label="Team pages" className="flex items-center justify-between gap-2 p-3 border-t border-[var(--theme-border)]"><button type="button" disabled={page === 1} onClick={() => setAssignCurrentPage(page - 1)} className="min-h-[44px] px-3 text-xs text-[var(--theme-text-primary)] disabled:opacity-40">Previous</button><span className="text-xs text-[var(--theme-text-secondary)]">{page} of {pages}</span><button type="button" disabled={page === pages} onClick={() => setAssignCurrentPage(page + 1)} className="min-h-[44px] px-3 text-xs text-[var(--theme-text-primary)] disabled:opacity-40">Next</button></nav>}
+    </section>;
 };

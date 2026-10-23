@@ -1,7 +1,6 @@
-import React from 'react';
-import { Filter, ChevronDown, List, AlertTriangle, Clock, Search, ClipboardList, Sparkles, Undo2 } from 'lucide-react';
-import { SortDropdown } from '../../shared';
+import React, { useState } from 'react';
 import { useFulfillmentData } from '../FulfillmentDataProvider';
+import { logger } from '../../../utils/logger';
 
 interface AssignHeaderProps {
     assignJobFilter: string;
@@ -18,157 +17,29 @@ interface AssignHeaderProps {
     setIsAssignSortDropdownOpen: (val: boolean) => void;
 }
 
-export const AssignHeader: React.FC<AssignHeaderProps> = ({
-    assignJobFilter,
-    setAssignJobFilter,
-    dispatchPriorityFilter,
-    setDispatchPriorityFilter,
-    assignSortBy,
-    setAssignSortBy,
-    dispatchSearch,
-    setDispatchSearch,
-    isAssignFilterDropdownOpen,
-    setIsAssignFilterDropdownOpen,
-    isAssignSortDropdownOpen,
-    setIsAssignSortDropdownOpen
-}) => {
+export const AssignHeader: React.FC<AssignHeaderProps> = ({ assignJobFilter, setAssignJobFilter, dispatchPriorityFilter, setDispatchPriorityFilter, assignSortBy, setAssignSortBy, dispatchSearch, setDispatchSearch }) => {
     const { autoAssignJobs, autoUnassignJobs } = useFulfillmentData();
-    return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 relative z-10 shadow-sm">
-            <div>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 sm:mb-5">
-                    <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5 text-base sm:text-lg tracking-tight">
-                        <div className="p-2 bg-primary/10 rounded-xl border border-primary/20">
-                            <ClipboardList className="text-primary" size={20} />
-                        </div>
-                        Assign Task
-                    </h3>
-
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <button
-                            onClick={() => autoUnassignJobs()}
-                            className="flex-1 sm:flex-none min-h-[44px] flex items-center justify-center gap-2 px-3.5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl font-semibold text-xs uppercase tracking-wider transition-colors active:scale-[0.98] touch-manipulation"
-                            title="Undo all auto-assigned jobs"
-                        >
-                            <Undo2 size={14} />
-                            <span>Undo Auto</span>
-                        </button>
-                        <button
-                            onClick={() => autoAssignJobs()}
-                            className="flex-1 sm:flex-none min-h-[44px] flex items-center justify-center gap-2 px-3.5 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl font-semibold text-xs uppercase tracking-wider transition-colors active:scale-[0.98] shadow-sm touch-manipulation cursor-pointer"
-                        >
-                            <Sparkles size={14} />
-                            <span>Auto-Assign</span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Unified Filters */}
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    {/* Intelligence Filter Dropdown (Type + Priority) */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsAssignFilterDropdownOpen(!isAssignFilterDropdownOpen)}
-                            className="min-h-[44px] flex items-center gap-2 px-3.5 py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors whitespace-nowrap touch-manipulation cursor-pointer"
-                        >
-                            <Filter size={14} className={assignJobFilter !== 'ALL' || dispatchPriorityFilter !== 'ALL' ? 'text-primary' : 'text-[var(--theme-text-muted)]'} />
-                            <span>FILTER: {assignJobFilter === 'ALL' ? 'ALL JOBS' : assignJobFilter} {dispatchPriorityFilter !== 'ALL' ? `(${dispatchPriorityFilter})` : ''}</span>
-                            <ChevronDown size={14} className={`text-[var(--theme-text-muted)] transition-transform duration-200 ${isAssignFilterDropdownOpen ? 'rotate-180' : ''}`} />
-                        </button>
-
-                        {isAssignFilterDropdownOpen && (
-                            <>
-                                <div className="fixed inset-0 z-[50]" onClick={() => setIsAssignFilterDropdownOpen(false)} />
-                                <div className="absolute top-full left-0 mt-2 w-64 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 shadow-xl z-[51] animate-in fade-in slide-in-from-top-2 duration-150">
-                                    <div className="space-y-3">
-                                        {/* Type Section */}
-                                        <div>
-                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider mb-2 px-1">Job Type</p>
-                                            <div className="grid grid-cols-2 gap-1">
-                                                {['ALL', 'RECEIVE', 'PICK', 'PACK', 'PUTAWAY', 'TRANSFER', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS'].map(type => (
-                                                    <button
-                                                        key={type}
-                                                        onClick={() => {
-                                                            setAssignJobFilter(type as any);
-                                                            setIsAssignFilterDropdownOpen(false);
-                                                        }}
-                                                        className={`min-h-[36px] text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors touch-manipulation cursor-pointer ${
-                                                            assignJobFilter === type
-                                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]'
-                                                                : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
-                                                        }`}
-                                                    >
-                                                        {type}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Priority Section */}
-                                        <div className="pt-2 border-t border-[var(--theme-border)]">
-                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider mb-2 px-1">Priority</p>
-                                            <div className="grid grid-cols-2 gap-1">
-                                                {['ALL', 'Critical', 'High', 'Normal'].map(priority => (
-                                                    <button
-                                                        key={priority}
-                                                        onClick={() => {
-                                                            setDispatchPriorityFilter(priority as any);
-                                                            setIsAssignFilterDropdownOpen(false);
-                                                        }}
-                                                        className={`min-h-[36px] text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors touch-manipulation cursor-pointer ${
-                                                            dispatchPriorityFilter === priority
-                                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]'
-                                                                : priority === 'Critical'
-                                                                    ? 'text-red-500 hover:bg-red-500/10'
-                                                                    : priority === 'High'
-                                                                        ? 'text-orange-500 hover:bg-orange-500/10'
-                                                                        : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
-                                                        }`}
-                                                    >
-                                                        {priority.toUpperCase()}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-
-                    {/* Sort By Dropdown */}
-                    <SortDropdown
-                        label="Sort"
-                        options={[
-                            { id: 'priority', label: 'Priority', icon: <AlertTriangle size={12} /> },
-                            { id: 'date', label: 'Date', icon: <Clock size={12} /> },
-                            { id: 'items', label: 'Items', icon: <List size={12} /> }
-                        ]}
-                        value={assignSortBy}
-                        onChange={(val) => setAssignSortBy(val)}
-                        isOpen={isAssignSortDropdownOpen}
-                        setIsOpen={setIsAssignSortDropdownOpen}
-                    />
-
-                    {/* ID Search Input */}
-                    <div className="flex-1 min-w-[180px]">
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Search size={14} className="text-[var(--theme-text-muted)]" />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Search Payload ID..."
-                                aria-label="Search Payload ID"
-                                title="Search Payload ID"
-                                value={dispatchSearch}
-                                onChange={(e) => setDispatchSearch(e.target.value)}
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-primary transition-colors min-h-[44px]"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState('');
+    const run = async (undo: boolean) => {
+        if (busy) return;
+        setBusy(true); setError('');
+        try { await (undo ? autoUnassignJobs() : autoAssignJobs()); }
+        catch (cause) { logger.error('AssignHeader', 'Automatic assignment action failed', cause); setError('Assignment action did not finish. Review the queue before retrying.'); }
+        finally { setBusy(false); }
+    };
+    const inputClass = 'min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]';
+    return <header className="space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+            <div><h2 className="text-xl font-semibold tracking-tight text-[var(--theme-text-primary)]">Task assignment</h2><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">Select a job, then choose an eligible team member.</p></div>
+            <div className="flex flex-wrap gap-2"><button type="button" disabled={busy} onClick={() => run(true)} className={`${inputClass} disabled:opacity-50`}>Undo auto-assignment</button><button type="button" disabled={busy} onClick={() => run(false)} className="min-h-[44px] rounded-xl bg-[var(--theme-btn-primary-bg)] px-4 text-sm font-semibold text-[var(--theme-btn-primary-text)] disabled:opacity-50">{busy ? 'Working…' : 'Auto-assign jobs'}</button></div>
         </div>
-    );
+        {error && <p role="alert" className="text-sm text-[var(--theme-status-error-text)]">{error}</p>}
+        <div className="flex flex-wrap gap-2 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] p-3">
+            <input type="search" aria-label="Search assignment jobs" value={dispatchSearch} onChange={e => setDispatchSearch(e.target.value)} placeholder="Search job, SKU or order…" className={`${inputClass} min-w-0 basis-full sm:basis-auto flex-1`} />
+            <select aria-label="Job type" value={assignJobFilter} onChange={e => setAssignJobFilter(e.target.value)} className={`${inputClass} flex-1 sm:flex-none`}><option value="ALL">All job types</option>{['PICK','PACK','PUTAWAY','RECEIVE','COUNT','REPLENISH','DISPATCH'].map(type => <option key={type}>{type}</option>)}</select>
+            <select aria-label="Job priority" value={dispatchPriorityFilter} onChange={e => setDispatchPriorityFilter(e.target.value)} className={`${inputClass} flex-1 sm:flex-none`}><option value="ALL">All priorities</option>{['Critical','High','Normal'].map(priority => <option key={priority}>{priority}</option>)}</select>
+            <select aria-label="Sort assignment jobs" value={assignSortBy} onChange={e => setAssignSortBy(e.target.value)} className={`${inputClass} flex-1 sm:flex-none`}><option value="priority">Priority first</option><option value="date">Oldest first</option><option value="items">Item count</option><option value="eta">Estimated duration</option></select>
+        </div>
+    </header>;
 };

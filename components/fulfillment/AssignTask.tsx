@@ -70,7 +70,7 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
     const [isEmployeeRoleDropdownOpen, setIsEmployeeRoleDropdownOpen] = useState(false);
 
     return (
-        <div className="flex-1 overflow-y-auto space-y-6">
+        <div className="flex-1 min-w-0 overflow-y-auto space-y-4">
 
             {/* JOB ASSIGNMENT CENTER HEADER */}
             <AssignHeader
@@ -88,7 +88,7 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
                 setIsAssignSortDropdownOpen={setIsAssignSortDropdownOpen}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[1000px] lg:h-[768px]">
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-4 items-start">
                 {/* Pending Jobs */}
                 <AssignPendingJobs
                     filteredJobs={filteredJobs}
@@ -143,13 +143,14 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
             />
 
             {/* LIVE OPERATIONS MATRIX */}
+            <details className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-4"><summary className="min-h-[44px] cursor-pointer text-sm font-medium text-[var(--theme-text-secondary)]">Workload overview</summary>
             <AssignActiveMatrix
                 employees={employees}
                 jobAssignments={jobAssignments}
                 filteredJobs={filteredJobs}
                 selectedJob={selectedJob}
                 setSelectedJob={setSelectedJob}
-            />
+            /></details>
 
         </div>
     );
