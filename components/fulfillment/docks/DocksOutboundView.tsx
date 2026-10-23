@@ -32,7 +32,6 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
     const scoped = jobs.filter(job => isShipment(job) && Boolean(origin) && (job.sourceSiteId || job.siteId) === origin);
     const staged = scoped.filter(job => getShipmentPhase(job) === 'ready');
     const inTransit = scoped.filter(job => getShipmentPhase(job) === 'in-transit');
-    const queue = staged.filter(job => !DOCK_BAYS.some(dock => job.location === 'Dock ' + dock));
     const drivers = employees.filter(employee => employee.role === 'driver' && employee.siteId === origin && employee.status?.toLowerCase() === 'active');
     useEffect(() => { if (viewMode === 'History') void loadHistoricalJobs(); }, [viewMode, loadHistoricalJobs]);
     const open = (job: WMSJob) => { setSelectedJob(job); setIsDetailsOpen(true); };
@@ -50,28 +49,18 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
 
     return <div className="space-y-4 overflow-y-auto">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--theme-text-secondary)]">
-            <p>Pack → Staging → Dock & transport → Dispatch release → Driver arrival → Receiving inspection</p>
+            <p>Pack → Load & assign transport → Release → Driver arrival → Blind receiving</p>
             <button type="button" onClick={() => setActiveTab('DRIVER')} className="flex min-h-11 items-center gap-1 text-[var(--theme-primary)] font-semibold">Driver deliveries <ArrowRight size={14} /></button>
         </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-            {DOCK_BAYS.map(dock => <OutboundDockCard key={dock} dock={dock} job={staged.find(job => job.location === 'Dock ' + dock)}
-                drivers={drivers} canManage={canManage} busy={workflow.isPending} onOpen={open} onAction={run} />)}
-        </div>
-        <section className="space-y-2">
-            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Packed and waiting for a dock ({queue.length})</h3>
-            {queue.length === 0 && <p className="p-3 text-xs text-[var(--theme-text-secondary)]">Completed packing appears here automatically.</p>}
-            {queue.map(job => <div key={job.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3">
-                <button type="button" onClick={() => open(job)} className="min-h-11 text-left text-xs text-[var(--theme-text-primary)]">
-                    <span className="block font-mono font-semibold">#{formatJobId(job)} · {getShipmentUnits(job)} units</span>
-                    <span className="text-[var(--theme-text-secondary)]">{sites.find(site => site.id === job.destSiteId)?.name || 'Customer'}</span>
-                </button>
-                <select aria-label={'Load shipment ' + formatJobId(job)} value="" disabled={!canManage || workflow.isPending}
-                    onChange={event => { if (event.target.value) void run(job, { type: 'load', dock: event.target.value }); }}
-                    className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-3 text-xs text-[var(--theme-text-primary)] disabled:opacity-50">
-                    <option value="" disabled>Load dock</option>
-                    {DOCK_BAYS.map(dock => <option key={dock} disabled={staged.some(candidate => candidate.location === 'Dock ' + dock)}>{dock}</option>)}
-                </select>
-            </div>)}
+        <section className="space-y-3" aria-label="Dispatch queue">
+            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Ready for dispatch ({staged.length})</h3>
+            {staged.length === 0 && <p className="rounded-xl border border-dashed border-[var(--theme-border)] p-5 text-sm text-[var(--theme-text-secondary)]">No packed shipments awaiting dispatch. Complete packing first.</p>}
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
+                {staged.map(job => <OutboundDockCard key={job.id} dock={DOCK_BAYS.find(bay => job.location === `Dock ${bay}`) || 'Staging'} job={job}
+                    destination={sites.find(site => site.id === job.destSiteId)?.name || 'Customer'}
+                    occupiedDocks={staged.filter(other => other.id !== job.id).map(other => other.location || '')}
+                    drivers={drivers} canManage={canManage} busy={workflow.isPending} onOpen={open} onAction={run} />)}
+            </div>
         </section>
         <section className="space-y-2">
             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">On the road ({inTransit.length})</h3>

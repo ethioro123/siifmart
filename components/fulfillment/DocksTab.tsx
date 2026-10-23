@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useFulfillment } from './FulfillmentContext';
 import { OutboundJobModal } from '../OutboundJobModal';
 import { useInboundDockAssignment } from '../../hooks/useInboundDockAssignment';
-import { DOCK_BAYS, getShipmentPhase, isInboundPurchaseOrder } from '../../utils/shipmentWorkflow';
+import { getShipmentPhase, isInboundPurchaseOrder } from '../../utils/shipmentWorkflow';
 import { getVisibleFulfillmentTabs } from '../../utils/fulfillmentTabPermissions';
 import { Upload, Download } from 'lucide-react';
 import { WMSJob, User, Site, PurchaseOrder, Product } from '../../types';
@@ -46,13 +46,11 @@ export const DocksTab: React.FC<DocksTabProps> = ({
     addNotification,
     refreshData,
     setActiveTab,
-    setReceivingPO,
     wmsJobsService,
     generatePackLabelHTML,
     formatJobId,
     setSelectedJob,
     setIsDetailsOpen,
-    completeJob,
     products,
 }) => {
     const [params, setParams] = useSearchParams();
@@ -65,61 +63,18 @@ export const DocksTab: React.FC<DocksTabProps> = ({
         return next;
     }, { replace: true });
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
-    const [selectedQueueVessel, setSelectedQueueVessel] = useState<PurchaseOrder | null>(null);
-    const [selectedDockId, setSelectedDockId] = useState<string | null>(null);
-    const [manifestModalOpen, setManifestModalOpen] = useState(false);
-    const [selectedManifestPO, setSelectedManifestPO] = useState<PurchaseOrder | null>(null);
     const assignment = useInboundDockAssignment(activeSite?.id, refreshData);
     const outstandingOrders = orders.filter(order => isInboundPurchaseOrder(order, activeSite?.id));
-    const inboundQueue = outstandingOrders.filter(order => !DOCK_BAYS.some(dock => order.dockSlot === dock));
-    const dockStatus = Object.fromEntries(DOCK_BAYS.map(dock => {
-        const order = outstandingOrders.find(po => po.dockSlot === dock);
-        return [dock, { status: order ? 'Occupied' as const : 'Empty' as const,
-            assignedPoId: order?.id, vesselName: order?.supplierName || order?.poNumber }];
-    }));
     const incomingTransfers = jobs.filter(job => job.type === 'TRANSFER' && job.destSiteId === activeSite?.id &&
         ['in-transit', 'awaiting-receipt'].includes(getShipmentPhase(job)));
     const assignVesselToDock = async (dockId: string, vessel: PurchaseOrder) => {
         if (assignment.isPending) return;
         try {
             await assignment.mutateAsync({ order: vessel, dock: dockId });
-            setSelectedQueueVessel(null);
-            addNotification('success', `Assigned ${vessel.poNumber || 'PO'} to inbound dock ${dockId}.`);
+
+            addNotification('success', dockId ? `Assigned ${vessel.poNumber || 'PO'} to bay ${dockId}.` : `Cleared bay assignment for ${vessel.poNumber || 'PO'}.`);
         } catch (error) {
             addNotification('alert', error instanceof Error ? error.message : 'Could not assign the inbound dock.');
-        }
-    };
-
-    const handleOpenManifest = (dockId: string) => {
-        const dock = dockStatus[dockId];
-        if (dock?.assignedPoId) {
-            const po = orders.find(o => o.id === dock.assignedPoId);
-            if (po) {
-                setSelectedManifestPO(po);
-                setSelectedDockId(dockId);
-                setManifestModalOpen(true);
-            }
-        }
-    };
-
-    const quickConfirmUnload = (dockId: string) => {
-        const dock = dockStatus[dockId];
-        if (dock?.assignedPoId) {
-            const po = orders.find(o => o.id === dock.assignedPoId);
-            if (po) {
-                setReceivingPO(po);
-                setActiveTab('RECEIVE');
-                addNotification('info', `Unloading ${po.poNumber || 'PO'} at Receiving Dock`);
-            }
-        }
-    };
-
-    const confirmUnloadAndReceive = async () => {
-        if (selectedManifestPO) {
-            setReceivingPO(selectedManifestPO);
-            setActiveTab('RECEIVE');
-            setManifestModalOpen(false);
-            addNotification('info', `Switched to Receiving Terminal for ${selectedManifestPO.poNumber || 'PO'}`);
         }
     };
 
@@ -137,7 +92,7 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                         }`}
                     >
                         <Download size={13} className="sm:w-3.5 sm:h-3.5" />
-                        <span className="hidden sm:inline">Inbound Receiving Docks</span>
+                        <span className="hidden sm:inline">Inbound</span>
                         <span className="sm:hidden">Inbound</span>
                         <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
                             dockCategory === 'INBOUND'
@@ -157,8 +112,8 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                         }`}
                     >
                         <Upload size={13} className="sm:w-3.5 sm:h-3.5" />
-                        <span className="hidden sm:inline">Outbound Shipping Docks</span>
-                        <span className="sm:hidden">Outbound</span>
+                        <span className="hidden sm:inline">Dispatch</span>
+                        <span className="sm:hidden">Dispatch</span>
                     </button>
                 </div>
 
@@ -193,19 +148,11 @@ export const DocksTab: React.FC<DocksTabProps> = ({
             )}
             {dockCategory === 'INBOUND' ? (
                 <DocksInboundView
-                    dockStatus={dockStatus}
                     orders={orders}
-                    inboundQueue={inboundQueue}
-                    selectedQueueVessel={selectedQueueVessel}
-                    setSelectedQueueVessel={setSelectedQueueVessel}
-                    assignVesselToDock={assignVesselToDock}
-                    setSelectedDockId={setSelectedDockId}
-                    quickConfirmUnload={quickConfirmUnload}
-                    handleOpenManifest={handleOpenManifest}
-                    manifestModalOpen={manifestModalOpen}
-                    setManifestModalOpen={setManifestModalOpen}
-                    selectedManifestPO={selectedManifestPO}
-                    confirmUnloadAndReceive={confirmUnloadAndReceive}
+                    arrivals={outstandingOrders}
+                    assignDock={assignVesselToDock}
+                    openReceiving={() => setActiveTab('RECEIVE')}
+                    busy={assignment.isPending}
                     viewMode={viewMode}
                     t={t}
                 />

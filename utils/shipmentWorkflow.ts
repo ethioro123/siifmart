@@ -60,5 +60,5 @@ export function getShipmentDepartureError(job: WMSJob): string | null {
 
 export function isInboundPurchaseOrder(po: PurchaseOrder, siteId?: string): boolean {
     return Boolean(siteId && po.siteId === siteId && ['Approved', 'Ordered', 'Partially Received'].includes(po.status) &&
-        po.lineItems?.some(item => item.quantity > (item.receivedQty || 0)));
+        (po.lineItems?.length ? po.lineItems.some(item => item.quantity > (item.receivedQty || 0)) : Number(po.itemsCount) > 0));
 }

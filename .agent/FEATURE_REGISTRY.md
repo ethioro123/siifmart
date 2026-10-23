@@ -491,9 +491,9 @@
 ### HQ finance PO approvals (2026-10-23)
 - Finance has a country-scoped, paginated PO Approvals queue using current regional limits and clearance terms, with on-demand inspection and audited clearance.
 - Draft and Pending POs expose the authorized clearance action; final procurement approval remains separate.
-
 ### Sidebar outside dismissal (2026-10-23)
 - Navigation closes on outside mouse/touch/pen interaction at all screen sizes, while internal interactions and the menu toggle retain their behavior.
 ### PO receiving manifest handoff (2026-10-23)
 - Receiving loads authoritative PO item details on request instead of treating summary-only orders as empty; read errors offer retry.
 - PO inspection names the receiving facility and workflow, with receiving navigation only for authorized staff at that destination.
+- Dock planning uses one inbound list with optional bay assignment and one Dispatch queue with loading, transport and release controls; blind receiving stays in Receive.

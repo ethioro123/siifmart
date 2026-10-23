@@ -23,6 +23,11 @@ describe('persistent inbound docks', () => {
         expect(purchaseOrdersService.update).toHaveBeenCalledWith(order.id, { dockSlot: 'D2' });
         expect(refresh).toHaveBeenCalledTimes(1);
     });
+    it('allows clearing an optional bay without recording a receipt', async () => {
+        const { result } = setup();
+        await act(async () => { await result.current.mutateAsync({ order, dock: '' }); });
+        expect(purchaseOrdersService.update).toHaveBeenCalledWith(order.id, { dockSlot: '' });
+    });
     it('rejects completed receipts, foreign sites, and unknown docks', async () => {
         const { result } = setup();
         await act(async () => {
