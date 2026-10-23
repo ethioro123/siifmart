@@ -35,11 +35,12 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
 }) => {
     const actualSourceSite = bulkDistributionSourceSite || activeSite?.id;
     const availableProducts = React.useMemo(() => {
-        if (actualSourceSite === activeSite?.id && products.length > 0) return products;
-        const siteSpecific = allProducts.filter(p => (p.siteId || (p as any).site_id) === actualSourceSite);
-        if (siteSpecific.length > 0) return siteSpecific;
-        return products.length > 0 ? products : allProducts;
-    }, [actualSourceSite, activeSite?.id, products, allProducts]);
+        const seen = new Set<string>();
+        return [...allProducts, ...products].filter(p => {
+            if ((p.siteId || p.site_id) !== actualSourceSite || p.stock <= 0 || seen.has(p.id)) return false;
+            seen.add(p.id); return true;
+        });
+    }, [actualSourceSite, products, allProducts]);
 
     return (
         <div className="space-y-4 animate-in fade-in duration-200">
@@ -54,11 +55,11 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
             {isSearchingProduct ? (
                 <div className="mt-2">
                     <ProductSelector
-                        products={availableProducts}
+                        products={availableProducts.filter(p => !waveProducts.some(row => row.productId === p.id))}
                         onSelect={(product) => {
                             const warehouseId = bulkDistributionSourceSite || activeSite?.id;
                             let stores = sites.filter(s => {
-                                if (s.type !== 'Store') return false;
+                                if (s.type !== 'Store' || s.country !== sourceSiteObj?.country || s.id === actualSourceSite) return false;
 
                                 if (settings?.enforceRegionalZoning) {
                                     if (user?.role !== 'group_ceo' && sourceSiteObj) {
@@ -93,11 +94,11 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
                         || allProducts.find(p => p.id === wp.productId);
                     return (
                         <div key={idx} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
-                            <div className="p-3.5 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center">
+                            <div className="p-3.5 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex flex-wrap justify-between items-center gap-3">
                                 <div className="flex items-center gap-3">
                                     <div className="font-bold text-[var(--theme-text-primary)] text-sm">{prod?.name}</div>
                                     {(() => {
-                                        const sourceStockItem = availableProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                        const sourceStockItem = ((prod?.siteId || prod?.site_id) === actualSourceSite ? prod : undefined) || availableProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
                                             || products.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
                                             || allProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
                                             || prod;
@@ -134,19 +135,19 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
                                 ) : (
                                     wp.allocations.map(alloc => {
                                         const site = sites.find(s => s.id === alloc.storeId);
-                                        const sourceStockItem = availableProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                        const sourceStockItem = ((prod?.siteId || prod?.site_id) === actualSourceSite ? prod : undefined) || availableProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
                                             || products.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
                                             || allProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
                                             || prod;
                                         const unitConfig = getTransferQuantityConfig(sourceStockItem);
                                         return (
-                                            <div key={alloc.storeId} className="flex items-center justify-between text-xs bg-[var(--theme-bg-card)] p-2.5 rounded-xl border border-[var(--theme-border)]">
-                                                <span className="text-[var(--theme-text-secondary)] truncate max-w-[110px] font-medium">{site?.name} ({unitConfig.quantityLabel})</span>
+                                            <div key={alloc.storeId} className="flex items-center justify-between gap-3 text-xs bg-[var(--theme-bg-card)] p-2.5 rounded-xl border border-[var(--theme-border)]">
+                                                <span className="text-[var(--theme-text-secondary)] min-w-0 flex-1 break-words font-medium">{site?.name} ({unitConfig.quantityLabel})</span>
                                                 <input
-                                                    type="number"
+                                                    type="number" inputMode="decimal"
                                                     min="0"
                                                     step={unitConfig.step}
-                                                    className="w-16 min-h-[36px] bg-transparent border-b border-[var(--theme-border)] text-right font-mono font-bold text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-primary touch-manipulation tabular-nums"
+                                                    className="w-24 shrink-0 min-h-[44px] bg-transparent border-b border-[var(--theme-border)] text-right font-mono font-bold text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-primary touch-manipulation tabular-nums"
                                                     value={alloc.quantity}
                                                     onChange={(e) => {
                                                         const newWp = [...waveProducts];
