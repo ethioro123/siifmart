@@ -42,11 +42,12 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     const { settings } = useData();
     const isRestricted = !['group_ceo', 'country_managing_director'].includes(user?.role || '') && !!user?.siteId;
     const submitLock = useRef(false);
+    const [gridRevision, setGridRevision] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
 
     // --- STATE ---
-    const [bulkDistributionMode, setBulkDistributionMode] = useState<'single' | 'wave'>('single');
+    const [bulkDistributionMode, setBulkDistributionMode] = useState<'single' | 'wave'>('wave');
     const [bulkDistributionSourceSite, setBulkDistributionSourceSite] = useState('');
     const [bulkDistributionProductId, setBulkDistributionProductId] = useState('');
     const [isSearchingProduct, setIsSearchingProduct] = useState(false);
@@ -59,7 +60,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
             setBulkDistributionProductId('');
             setBulkDistributionAllocations([]);
             setWaveProducts([]);
-            setBulkDistributionMode('single');
+            setBulkDistributionMode('wave');
 
             // Fetch logistics zones
             const fetchZones = async () => {
@@ -119,9 +120,9 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
             return;
         }
 
-        if (!allocations.length || allocations.some(a => a.quantity <= 0) ||
-            (bulkDistributionMode === 'wave' && waveProducts.some(row => row.allocations.length === 0))) {
-            addNotification('alert', 'Choose receiving stores for each product and enter a positive quantity for every selected store. Uncheck stores that should receive nothing.');
+        if (!allocations.length || (bulkDistributionMode === 'single' && allocations.some(a => a.quantity <= 0)) ||
+            (bulkDistributionMode === 'wave' && waveProducts.some(row => !row.allocations.some(a => a.quantity > 0)))) {
+            addNotification('alert', 'Enter at least one positive store quantity for each product. Blank or zero cells receive nothing; remove products you do not want to distribute.');
             return;
         }
 
@@ -320,26 +321,26 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
 
                     <fieldset disabled={isSubmitting} className="min-w-0 min-h-0 p-4 sm:p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar"><legend className="sr-only">Distribution allocation</legend>
                         {/* Mode Selection */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+                        <div className="flex flex-wrap gap-2 mb-2">
                             <button
                                 aria-pressed={bulkDistributionMode === 'single'} disabled={isSubmitting} onClick={() => setBulkDistributionMode('single')}
-                                className={`min-h-[44px] p-4 rounded-xl border transition-all text-left touch-manipulation ${bulkDistributionMode === 'single'
+                                className={`min-h-[44px] px-3 py-2 rounded-xl border transition-all text-left touch-manipulation ${bulkDistributionMode === 'single'
                                     ? 'bg-[var(--theme-bg-card)] border-[var(--theme-accent)] text-[var(--theme-text-primary)] ring-1 ring-[var(--theme-accent)]'
                                     : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                                     }`}
                             >
                                 <div className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">Single product</div>
-                                <div className="text-xs text-[var(--theme-text-secondary)]">Allocate one product across selected stores</div>
+
                             </button>
                             <button
                                 aria-pressed={bulkDistributionMode === 'wave'} disabled={isSubmitting} onClick={() => setBulkDistributionMode('wave')}
-                                className={`min-h-[44px] p-4 rounded-xl border transition-all text-left touch-manipulation ${bulkDistributionMode === 'wave'
+                                className={`min-h-[44px] px-3 py-2 rounded-xl border transition-all text-left touch-manipulation ${bulkDistributionMode === 'wave'
                                     ? 'bg-[var(--theme-bg-card)] border-[var(--theme-accent)] text-[var(--theme-text-primary)] ring-1 ring-[var(--theme-accent)]'
                                     : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                                     }`}
                             >
                                 <div className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">Multiple products</div>
-                                <div className="text-xs text-[var(--theme-text-secondary)]">Allocate several products in one distribution plan</div>
+
                             </button>
                         </div>
 
@@ -410,7 +411,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
 
                         {/* Wave Mode Content */}
                         {bulkDistributionMode === 'wave' && (
-                            <WaveDistributionAllocations
+                            <WaveDistributionAllocations key={`${bulkDistributionSourceSite}:${gridRevision}`}
                                 isSearchingProduct={isSearchingProduct}
                                 setIsSearchingProduct={setIsSearchingProduct}
                                 allProducts={allProducts}
@@ -427,7 +428,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         )}
                     </fieldset>
 
-                    <div className="px-4 pb-4 shrink-0 max-h-[25vh] overflow-y-auto"><DistributionSummary rows={bulkDistributionMode === 'single' ? [{ productId: bulkDistributionProductId, allocations: bulkDistributionAllocations }] : waveProducts} products={[...allProducts, ...products].filter(p => (p.siteId || p.site_id) === bulkDistributionSourceSite)} sites={sites} /></div>
+                    <details className="px-4 pb-3 shrink-0 max-h-[25vh] overflow-y-auto"><summary className="min-h-[44px] cursor-pointer flex items-center text-sm text-[var(--theme-text-secondary)]">Review allocation details</summary><DistributionSummary rows={bulkDistributionMode === 'single' ? [{ productId: bulkDistributionProductId, allocations: bulkDistributionAllocations }] : waveProducts} products={[...allProducts, ...products].filter(p => (p.siteId || p.site_id) === bulkDistributionSourceSite)} sites={sites} /></details>
                     <div className="p-4 md:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex flex-wrap gap-3 justify-end items-center">
                         <div className="mr-auto w-full sm:w-auto text-xs text-[var(--theme-text-secondary)] font-mono font-medium">
                             {bulkDistributionMode === 'single'
@@ -439,6 +440,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             onClick={() => {
                                 setBulkDistributionAllocations([]);
                                 setWaveProducts([]);
+                                setGridRevision(previous => previous + 1);
                             }}
                             className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] rounded-xl transition-colors border border-[var(--theme-border)] touch-manipulation"
                             disabled={isSubmitting} aria-label="Reset allocations" title="Reset Form"

@@ -21,11 +21,11 @@ describe('bulk distribution design',()=>{
   render(<SingleProductAllocation isSearchingProduct={false} setIsSearchingProduct={vi.fn()} allProducts={[product]} products={[]} bulkDistributionProductId="local" setBulkDistributionProductId={vi.fn()} bulkDistributionSourceSite="dc" activeSite={sites[0]} sites={sites} settings={{}} user={null} sourceSiteObj={sites[0]} bulkDistributionAllocations={[{storeId:'store',quantity:10}]} setBulkDistributionAllocations={vi.fn()}/>);
   expect(screen.getByRole('spinbutton',{name:/Quantity.*Local Store/})).toBeTruthy();
  });
- it('keeps receiving-store choices independent for each product in a wave',()=>{
+ it('adds a shared destination column with independent product quantities',()=>{
   const save=vi.fn(); const second={...product,id:'second',name:'Rice',sku:'ET002'};
   render(<WaveDistributionAllocations isSearchingProduct={false} setIsSearchingProduct={vi.fn()} allProducts={[product,second]} products={[]} bulkDistributionSourceSite="dc" activeSite={sites[0]} sites={sites} settings={{}} user={null} sourceSiteObj={sites[0]} waveProducts={[{productId:'local',allocations:[]},{productId:'second',allocations:[]}]} setWaveProducts={save}/>);
-  fireEvent.click(screen.getAllByRole('checkbox',{name:'Supply Local Store'})[1]);
-  expect(save).toHaveBeenCalledWith([{productId:'local',allocations:[]},{productId:'second',allocations:[{storeId:'store',quantity:0}]}]);
+  fireEvent.click(screen.getByRole('checkbox',{name:'Supply Local Store'}));
+  expect(save).toHaveBeenCalledWith([{productId:'local',allocations:[{storeId:'store',quantity:0}]},{productId:'second',allocations:[{storeId:'store',quantity:0}]}]);
  });
  it('offers only stocked products at the selected source and same-country destination stores',()=>{
   const allocations=vi.fn();
