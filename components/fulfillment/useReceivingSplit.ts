@@ -438,7 +438,9 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                     }
                     return j;
                 });
-                return [...updated, ...newJobs];
+                // Realtime/refetch may already have delivered these jobs; never list a job twice
+                const createdIds = new Set(newJobs.map(j => j?.id).filter(Boolean));
+                return [...updated.filter(j => !createdIds.has(j.id)), ...newJobs];
             });
 
             addNotification('success', `Created ${newJobs.length} split putaway jobs`);

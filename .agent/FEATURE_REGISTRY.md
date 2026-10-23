@@ -496,4 +496,4 @@
 - Receiving printing separates counted quantity from copy count, preserves lot/expiry and condition, marks draft labels unsaved, respects price-tag policy, and retains failed reprints for retry.
 - Receiving print preview renders actual generated label HTML; fixed thermal page sizes prevent growing labels and trailing blank pages.
 - Receipt confirmation reloads authoritative PO lines, resolves the exact line ID, checks destination/status, and throws on failed validation so unsaved counts remain open.
-- Receiving creates only zero-stock site placeholders and links existing visible masters; it does not attempt national catalog registration or bypass master-data RLS.
+- Receiving creates only zero-stock site placeholders and links existing visible masters; it does not attempt national catalog registration or bypass master-data RLS. Manifest totals count each putaway job once (duplicate client-state jobs no longer double the received units); floor roles can create/read internal site jobs and placeholders under RLS.

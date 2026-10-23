@@ -33,8 +33,15 @@ export function buildPOJobsReceivedMap(poJobs: WMSJob[]): POJobsReceivedMaps {
     const nameMap: Record<string, number> = {};
     const jobSkuMap: Record<string, string> = {};
 
+    // The same job can appear twice in client state (optimistic add + realtime/refetch);
+    // count each job id once so received totals are never inflated.
+    const seenJobIds = new Set<string>();
     poJobs.forEach(job => {
         if (job.type !== 'PUTAWAY') return;
+        if (job.id) {
+            if (seenJobIds.has(job.id)) return;
+            seenJobIds.add(job.id);
+        }
         job.lineItems?.forEach((ji: any) => {
             const expected = ji.expectedQty || (ji as any).quantity || 0;
             if (expected <= 0) return;
