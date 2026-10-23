@@ -198,8 +198,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             const job = jobs.find(j => j.id === jobId);
             if (!job) {
                 logger.error('useJobActions', `❌ [updateJobItem] Job ${jobId} not found in local state!`, new Error(String(`❌ [updateJobItem] Job ${jobId} not found in local state!`)));
-                addNotification('alert', getTranslation('warehouse.jobNotFoundRefresh'));
-                return;
+                throw new Error('Job not found; refresh the job queue.');
             }
 
             const updatedLineItems = [...job.lineItems];
@@ -218,7 +217,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 logger.debug('useJobActions', `📝 [updateJobItem] Updated item ${itemId}: ${oldStatus} -> ${status}, loc=${updatedLineItems[itemId].location}`);
             } else {
                 logger.error('useJobActions', `❌ [updateJobItem] Item at index ${itemId} not found in job ${jobId}`, new Error(String(`❌ [updateJobItem] Item at index ${itemId} not found in job ${jobId}`)));
-                return;
+                throw new Error('Job line not found; refresh the job queue.');
             }
 
             const jobUpdates: Partial<WMSJob> = { lineItems: updatedLineItems };
@@ -227,9 +226,8 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 logger.debug('useJobActions', `📦 [updateJobItem] Updating job-level location to: ${location} (PUTAWAY)`);
             }
 
-            setJobs(prev => prev.map(j => j.id === jobId ? { ...j, ...jobUpdates } : j));
-
             const result = await wmsJobsService.update(jobId, jobUpdates);
+            setJobs(prev => prev.map(j => j.id === jobId ? result : j));
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
 
             logger.debug('useJobActions', `[updateJobItem] DB update successful. Items count: ${result?.lineItems?.length || 0}`);
@@ -237,6 +235,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
         } catch (error) {
             logger.error('useJobActions', '[updateJobItem] FAILED:', error as Error);
             addNotification('alert', getTranslation('warehouse.failedToUpdateJobItem'));
+            throw error;
         }
     }, [jobs, setJobs, addNotification, queryClient]);
 

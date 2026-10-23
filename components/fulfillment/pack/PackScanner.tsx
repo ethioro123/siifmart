@@ -35,6 +35,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
     const [selectedUnit, setSelectedUnit] = useState<string>('UNIT');
     const [matchedIndex, setMatchedIndex] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const saveLock = useRef(false);
 
     // Overlays
     const [showSuccess, setShowSuccess] = useState(false);
@@ -137,7 +138,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
 
         const rawVal = inputVal.trim();
         if (step === 'SCAN' && !rawVal) return;
-        if (isProcessing || isSubmitting) return;
+        if (isProcessing || isSubmitting || showSuccess || saveLock.current) return;
 
         const val = rawVal.toUpperCase();
 
@@ -203,6 +204,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 return;
             }
 
+            saveLock.current = true;
             setIsSubmitting(true);
             try {
                 await onConfirmPack(matchedIndex, finalQty);
@@ -226,6 +228,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                     scanOnlyHandlers.reset();
                 }, 2500);
             } finally {
+                saveLock.current = false;
                 setIsSubmitting(false);
             }
         }
@@ -268,11 +271,11 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             </div>
 
             {/* Main View */}
-            <div className="flex-1 min-h-0 relative w-full overflow-hidden flex flex-col bg-[var(--theme-bg-app)]">
-                <div className="flex-1 min-h-0 flex flex-col items-center justify-between gap-2 p-2 sm:p-3 md:p-5 overflow-hidden">
+            <div className="flex-1 min-w-0 min-h-0 relative w-full overflow-hidden flex flex-col bg-[var(--theme-bg-app)]">
+                <div className="flex-1 min-w-0 min-h-0 flex flex-col items-center justify-between gap-2 p-2 sm:p-3 md:p-5 overflow-hidden">
 
                     {/* Status / content area */}
-                    <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden">
+                    <div className="flex-1 min-w-0 min-h-0 w-full flex items-center justify-center overflow-y-auto">
                         <PackScannerStatusView
                             step={step}
                             showSuccess={showSuccess}
@@ -304,7 +307,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                                 title="Confirm quantity"
                                                 value={qtyVal}
                                                 onChange={(e) => setQtyVal(e.target.value)}
-                                                className="flex-1 bg-transparent py-2.5 px-3 text-center text-3xl sm:text-4xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 outline-none"
+                                                className="flex-1 min-w-0 bg-transparent py-2.5 px-3 text-center text-3xl sm:text-4xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 outline-none"
                                                 placeholder="QTY"
                                                 autoFocus
                                             />
@@ -336,7 +339,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                         className="w-full bg-[var(--theme-bg-card)] border-2 rounded-2xl py-3 px-4 text-center text-2xl sm:text-3xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 focus:outline-none relative z-10 shadow-sm transition-colors border-[var(--theme-border)] focus:border-[var(--theme-accent)] min-h-[64px] sm:min-h-[72px]"
                                         placeholder="SCAN REQUIRED SKU OR BARCODE"
                                         autoFocus
-                                        disabled={isProcessing}
+                                        disabled={isProcessing || isSubmitting || showSuccess}
                                     />
                                 )}
                             </>
@@ -352,7 +355,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         <button
                             type={isFullyPacked ? 'button' : 'submit'}
                             onClick={isFullyPacked ? onCompleteJob : undefined}
-                            disabled={(!isFullyPacked && step === 'SCAN' && !inputVal.trim()) || isProcessing || isSubmitting}
+                            disabled={(!isFullyPacked && step === 'SCAN' && !inputVal.trim()) || isProcessing || isSubmitting || showSuccess}
                             className={`w-full py-3.5 md:py-4 px-3 min-h-[56px] rounded-2xl flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-sm border relative z-30 font-bold text-sm md:text-base uppercase tracking-wider ${
                                 isProcessing || isSubmitting
                                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/60 cursor-not-allowed'
@@ -373,7 +376,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             {isProcessing || isSubmitting
                                 ? 'Saving...'
                                 : isFullyPacked
-                                    ? t('warehouse.completed')
+                                    ? 'Review carton & seal'
                                     : step === 'CONFIRM_QTY'
                                         ? 'CONFIRM PACK'
                                         : t('warehouse.scanSkuToConfirm')}

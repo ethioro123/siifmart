@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useFulfillment } from '../../FulfillmentContext';
 import { PackJobModal } from '../PackJobModal';
 import { PackScanner } from '../PackScanner';
@@ -71,6 +71,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
     } = useFulfillment();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const completionLock = useRef(false);
 
     const { handlePrintLabel, handleReprintLabel, getLabelQtyAndUnit, isPrinting } = usePackLabelPrint({
         products,
@@ -91,7 +92,8 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         const casesQty = qty;
 
         const expectedQty = item.expectedQty || 1;
-        const isPacked = casesQty >= expectedQty - 0.001;
+        if (!Number.isFinite(casesQty) || casesQty <= 0 || Math.abs(casesQty - expectedQty) > 0.001) throw new Error('Record the exact physical quantity before confirming packing.');
+        const isPacked = true;
         const newStatus = isPacked ? 'Picked' : 'In-Progress';
 
         await updateJobItem(selectedPackJob.id, itemIndex, newStatus, casesQty, undefined, {
@@ -117,7 +119,8 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
     };
 
     const handleCompleteJob = async (boxDetails: any) => {
-        if (!selectedPackJob) return;
+        if (!selectedPackJob || completionLock.current) return;
+        completionLock.current = true;
         setIsSubmitting(true);
         try {
             let trackingNum = selectedPackJob.trackingNumber;
@@ -152,6 +155,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         } catch (err: any) {
             addNotification('alert', err?.message || 'Error');
         } finally {
+            completionLock.current = false;
             setIsSubmitting(false);
         }
     };

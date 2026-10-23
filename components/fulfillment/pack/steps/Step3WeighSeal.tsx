@@ -83,14 +83,7 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                         </span>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => setScaleWeight(expectedWeightKg.toFixed(2))}
-                        className="min-h-[56px] px-4 rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] flex items-center justify-center gap-2 shrink-0 transition-colors cursor-pointer touch-manipulation"
-                    >
-                        <Sparkles size={16} className="text-[var(--theme-accent)]" />
-                        <span>Use Expected ({expectedWeightKg.toFixed(2)} kg)</span>
-                    </button>
+
                 </div>
 
                 {/* Tolerance Status Gauge */}

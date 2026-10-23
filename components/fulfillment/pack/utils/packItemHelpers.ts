@@ -1,20 +1,15 @@
 import { WMSJob, Product } from '../../../../types';
-import { isWeightBased, isVolumeBased } from '../../../../utils/units';
+import { resolvePickProduct } from '../../../../utils/pickProgress';
 
 /**
  * Find a product matching a line item, with robust fallback:
  * 1. productId exact match
  * 2. Site-scoped SKU match
- * 3. Any-site SKU fallback
+ * All candidates remain within the packing facility.
  */
 export const getProductForItem = (item: any, job: WMSJob, products: Product[]): Product | undefined => {
     const targetSiteId = job.siteId || (job as any).site_id;
-    if (item.productId) {
-        const byId = products.find(p => p.id === item.productId);
-        if (byId) return byId;
-    }
-    return products.find(p => p.sku === item.sku && (p.siteId === targetSiteId || p.site_id === targetSiteId))
-        || products.find(p => p.sku === item.sku);
+    return resolvePickProduct(products, item, targetSiteId);
 };
 
 /**
