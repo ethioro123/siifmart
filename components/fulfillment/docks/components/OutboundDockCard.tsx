@@ -24,8 +24,8 @@ export function OutboundDockCard({ dock, job, occupiedDocks = [], destination, d
     return <section className="space-y-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] p-3">
         <h4 className="flex items-center gap-2 text-xs font-semibold text-[var(--theme-text-primary)]"><Truck size={15} /> {dock} <span className="ml-auto text-[var(--theme-text-secondary)]">{job ? (dock === 'Staging' ? 'Awaiting loading' : 'Loading') : 'Open'}</span></h4>
         {!job ? <p className="py-5 text-xs text-[var(--theme-text-secondary)]">Choose this dock from the staging queue.</p> : <>
-            <button type="button" onClick={() => onOpen(job)} className="min-h-11 w-full text-left text-xs font-semibold text-[var(--theme-primary)] underline underline-offset-2">#{formatJobId(job)} · {getShipmentUnits(job)} units · Manifest</button>
-            {destination && <p className="text-xs text-[var(--theme-text-secondary)]">Destination: {destination}</p>}
+            <button type="button" onClick={() => onOpen(job)} className="min-h-11 w-full break-words text-left text-xs font-semibold text-[var(--theme-primary)] underline underline-offset-2">#{formatJobId(job)} · {getShipmentUnits(job)} units · Manifest</button>
+            {destination && <p className="text-xs text-[var(--theme-text-secondary)] break-words">Destination: {destination}</p>}
             <label className="block space-y-1 text-xs text-[var(--theme-text-secondary)]">Loading bay
                 <select aria-label={`Loading bay for ${formatJobId(job)}`} className={inputClass} value={dock === 'Staging' ? '' : dock} disabled={!canManage || busy}
                     onChange={event => { if (event.target.value) void onAction(job, { type: 'load', dock: event.target.value }); }}>
@@ -41,7 +41,7 @@ export function OutboundDockCard({ dock, job, occupiedDocks = [], destination, d
             </label>
             {job.deliveryMethod === 'External' ? <form className="flex gap-1" onSubmit={event => { event.preventDefault(); void onAction(job, { type: 'carrier', name: carrier }); }}>
                 <input aria-label={`Carrier for ${formatJobId(job)}`} placeholder="Carrier name" value={carrier} className={inputClass} disabled={!canManage || busy} onChange={event => setCarrier(event.target.value)} />
-                <button disabled={!canManage || busy || carrier.trim() === job.externalCarrierName} className="min-h-11 px-2 text-xs font-semibold text-[var(--theme-primary)] disabled:opacity-40">Save</button>
+                <button disabled={!canManage || busy || !carrier.trim() || carrier.trim() === job.externalCarrierName} className="min-h-11 px-2 text-xs font-semibold text-[var(--theme-primary)] disabled:opacity-40">Save</button>
             </form> : <label className="block space-y-1 text-xs text-[var(--theme-text-secondary)]">Verified driver
                 <select aria-label={`Driver for ${formatJobId(job)}`} className={inputClass} value={job.assignedTo || ''} disabled={!canManage || busy}
                     onChange={event => void onAction(job, { type: 'assign', driverId: event.target.value })}>

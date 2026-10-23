@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { History as HistoryIcon, Search, Clock, User as UserIcon } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { PurchaseOrder } from '../../../types';
@@ -9,17 +9,19 @@ interface DocksHistoryProps {
     t: (key: string) => string;
 }
 
+import { hasRecordedDockReceipt } from '../../../utils/dockHistory';
+
 const DOCK_HISTORY_PER_PAGE = 12;
 
 export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
-    // DOCK HISTORY Logic (Unloaded POs)
+    // Receipt history uses recorded receipt status, never procurement approval.
     const filteredHistory = useMemo(() => {
         return orders.filter((po: any) => {
-            // Keep POs that have been approved (unloaded)
-            const isUnloaded = (po.status === 'Approved' || po.status === 'Partially Received' || po.status === 'Received') && po.approvedAt;
+            // Approval does not establish that goods arrived.
+            const isUnloaded = hasRecordedDockReceipt(po);
             if (!isUnloaded) return false;
 
             if (!search) return true;
@@ -41,8 +43,10 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                 matchesItems;
 
             return matchesSearch;
-        }).sort((a: any, b: any) => new Date(b.approvedAt).getTime() - new Date(a.approvedAt).getTime());
+        }).sort((a: any, b: any) => new Date(b.receivedAt || b.updatedAt || 0).getTime() - new Date(a.receivedAt || a.updatedAt || 0).getTime());
     }, [orders, search]);
+
+    useEffect(() => setCurrentPage(1), [search]);
 
     const totalPages = Math.ceil(filteredHistory.length / DOCK_HISTORY_PER_PAGE);
     const paginatedHistory = useMemo(() => {
@@ -78,7 +82,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                 <table className="w-full min-w-[640px]">
                     <thead>
                         <tr className="border-b border-[var(--theme-border)]">
-                            <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Unloaded At</th>
+                            <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Receipt recorded at</th>
                             <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">PO Number</th>
                             <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Supplier</th>
                             <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Approved By</th>
@@ -90,7 +94,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                         {paginatedHistory.length === 0 ? (
                             <tr>
                                 <td colSpan={6} className="px-4 py-10 text-center text-[var(--theme-text-muted)] text-xs font-semibold">
-                                    No unloaded POs found.
+                                    No recorded receipts found.
                                 </td>
                             </tr>
                         ) : (
@@ -100,7 +104,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                                         <div className="flex items-center gap-1.5 text-[var(--theme-text-muted)]">
                                             <Clock size={12} />
                                             <span className="text-[11px] font-mono tabular-nums">
-                                                {po.approvedAt ? new Date(po.approvedAt).toLocaleString() : '-'}
+                                                {po.receivedAt ? new Date(po.receivedAt).toLocaleString() : 'Not recorded'}
                                             </span>
                                         </div>
                                     </td>
@@ -113,7 +117,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                                     <td className="px-4 py-3.5">
                                         {(() => {
                                             const approver = resolveFulfillmentWorker({
-                                                userId: po.approvedBy || po.receivedBy || po.createdBy,
+                                                userId: po.receivedBy,
                                                 job: null,
                                                 employees: [],
                                                 sites: [],
@@ -125,7 +129,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                                                         <UserIcon size={11} className="text-primary" />
                                                     </div>
                                                     <span className="text-xs font-medium text-[var(--theme-text-secondary)] break-words leading-tight">
-                                                        {po.approvedBy ? `${approver.name} (${approver.code || approver.displayId})` : '-'}
+                                                        {po.receivedBy ? approver.name : 'Not recorded'}
                                                     </span>
                                                 </div>
                                             );

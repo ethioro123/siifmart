@@ -51,3 +51,12 @@ describe('shipment mutations', () => {
         expect(vi.mocked(wmsJobsService.update).mock.calls[0][1]).not.toHaveProperty('deliveredAt');
     });
 });
+
+ it('keeps confirmed saves successful when the subsequent refresh fails', async () => {
+    const { result, refresh } = setup();
+    refresh.mockRejectedValueOnce(new Error('Refresh unavailable'));
+    await act(async () => {
+        await expect(result.current.mutateAsync({ job: base, action: { type: 'arrive', delivered: [10], note: '' } })).resolves.toBeDefined();
+    });
+    expect(wmsJobsService.update).toHaveBeenCalledTimes(1);
+ });

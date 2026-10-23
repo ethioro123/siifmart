@@ -486,7 +486,7 @@
 ### PO receiving manifest handoff (2026-10-23)
 - Receiving loads authoritative PO item details on request instead of treating summary-only orders as empty; read errors offer retry.
 - PO inspection names the receiving facility and workflow, with receiving navigation only for authorized staff at that destination.
-- Dock planning uses one inbound list with optional bay assignment and one Dispatch queue with loading, transport and release controls; blind receiving stays in Receive.
+- Dock planning uses one inbound list with optional bay assignment and one Dispatch queue with loading, transport and release controls; blind receiving stays in Receive. Inbound history is facility-scoped and uses receipt status rather than approval as arrival evidence. Dock mutations reject overlapping saves, distinguish persisted actions from refresh errors, and use 44px mobile controls.
 - Fulfillment assignment reads use paginated active-job IDs without the WMS join; assignment failures no longer discard the loaded operational queues.
 - Receiving modals use one bottom progression/save action per step, readable step labels, valid counts for every retained split, and unsaved review wording.
 - Receiving printing separates counted quantity from copy count, preserves lot/expiry and condition, marks draft labels unsaved, respects price-tag policy, and retains failed reprints for retry.

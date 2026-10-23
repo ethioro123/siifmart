@@ -68,7 +68,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
             {inTransit.map(job => <button key={job.id} type="button" onClick={() => open(job)}
                 className="flex min-h-14 w-full items-center gap-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 text-left text-xs text-[var(--theme-text-primary)]">
                 <Truck size={18} className="text-[var(--theme-primary)]" />
-                <span className="flex-1"><span className="block font-mono font-semibold">#{formatJobId(job)}</span><span className="text-[var(--theme-text-secondary)]">{sites.find(site => site.id === job.destSiteId)?.name || 'Customer'} · {job.deliveryMethod === 'External' ? job.externalCarrierName : employees.find(employee => employee.id === job.assignedTo)?.name || 'Assigned driver'}</span></span>
+                <span className="flex-1 min-w-0 break-words"><span className="block font-mono font-semibold">#{formatJobId(job)}</span><span className="text-[var(--theme-text-secondary)]">{sites.find(site => site.id === job.destSiteId)?.name || 'Customer'} · {job.deliveryMethod === 'External' ? job.externalCarrierName : employees.find(employee => employee.id === job.assignedTo)?.name || 'Assigned driver'}</span></span>
                 <ArrowRight size={16} />
             </button>)}
         </section>

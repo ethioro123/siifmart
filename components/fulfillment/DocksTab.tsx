@@ -64,7 +64,8 @@ export const DocksTab: React.FC<DocksTabProps> = ({
     }, { replace: true });
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
     const assignment = useInboundDockAssignment(activeSite?.id, refreshData);
-    const outstandingOrders = orders.filter(order => isInboundPurchaseOrder(order, activeSite?.id));
+    const siteOrders = orders.filter(order => Boolean(activeSite?.id) && order.siteId === activeSite?.id);
+    const outstandingOrders = siteOrders.filter(order => isInboundPurchaseOrder(order, activeSite?.id));
     const incomingTransfers = jobs.filter(job => job.type === 'TRANSFER' && job.destSiteId === activeSite?.id &&
         ['in-transit', 'awaiting-receipt'].includes(getShipmentPhase(job)));
     const assignVesselToDock = async (dockId: string, vessel: PurchaseOrder) => {
@@ -85,7 +86,7 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                 <div className="flex items-center gap-1 bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-xl sm:rounded-2xl border border-[var(--theme-border)] shadow-xs">
                     {canInbound && <button
                         onClick={() => setDockCategory('INBOUND')}
-                        className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 min-h-[34px] sm:min-h-[44px] rounded-lg sm:rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
+                        className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 min-h-[44px] sm:min-h-[44px] rounded-lg sm:rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
                             dockCategory === 'INBOUND'
                                 ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                 : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
@@ -105,7 +106,7 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                     </button>}
                     <button
                         onClick={() => setDockCategory('OUTBOUND')}
-                        className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 min-h-[34px] sm:min-h-[44px] rounded-lg sm:rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
+                        className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 min-h-[44px] sm:min-h-[44px] rounded-lg sm:rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
                             dockCategory === 'OUTBOUND'
                                 ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                 : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
@@ -121,13 +122,13 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                 <div className="bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-lg sm:rounded-xl border border-[var(--theme-border)] flex shadow-xs self-end sm:self-auto w-full sm:w-auto">
                     <button
                         onClick={() => setViewMode('Process')}
-                        className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1 sm:py-1.5 min-h-[30px] sm:min-h-[38px] rounded-md sm:rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer flex items-center justify-center ${viewMode === 'Process' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
+                        className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1 sm:py-1.5 min-h-[44px] sm:min-h-[38px] rounded-md sm:rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer flex items-center justify-center ${viewMode === 'Process' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                     >
                         Process
                     </button>
                     <button
                         onClick={() => setViewMode('History')}
-                        className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1 sm:py-1.5 min-h-[30px] sm:min-h-[38px] rounded-md sm:rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer flex items-center justify-center ${viewMode === 'History' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
+                        className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1 sm:py-1.5 min-h-[44px] sm:min-h-[38px] rounded-md sm:rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer flex items-center justify-center ${viewMode === 'History' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                     >
                         History
                     </button>
@@ -148,7 +149,7 @@ export const DocksTab: React.FC<DocksTabProps> = ({
             )}
             {dockCategory === 'INBOUND' ? (
                 <DocksInboundView
-                    orders={orders}
+                    orders={siteOrders}
                     arrivals={outstandingOrders}
                     assignDock={assignVesselToDock}
                     openReceiving={() => setActiveTab('RECEIVE')}

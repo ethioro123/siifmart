@@ -38,3 +38,26 @@ describe('persistent inbound docks', () => {
         expect(purchaseOrdersService.update).not.toHaveBeenCalled();
     });
 });
+
+ it('keeps confirmed saves successful when the subsequent refresh fails', async () => {
+    const { result, refresh } = setup();
+    refresh.mockRejectedValueOnce(new Error('Refresh unavailable'));
+    await act(async () => {
+        await expect(result.current.mutateAsync({ order, dock: 'D2' })).resolves.toBeDefined();
+    });
+    expect(purchaseOrdersService.update).toHaveBeenCalledTimes(1);
+ });
+
+ it('rejects a simultaneous dock save before a second persistence call', async () => {
+    let release: (value: PurchaseOrder) => void = () => {};
+    vi.mocked(purchaseOrdersService.update).mockImplementationOnce(() => new Promise(resolve => { release = resolve; }));
+    const { result } = setup();
+    await act(async () => {
+        const first = result.current.mutateAsync({ order, dock: 'D1' });
+        await vi.waitFor(() => expect(purchaseOrdersService.update).toHaveBeenCalledTimes(1));
+        await expect(result.current.mutateAsync({ order, dock: 'D2' })).rejects.toThrow('already being saved');
+        release(order);
+        await first;
+    });
+    expect(purchaseOrdersService.update).toHaveBeenCalledTimes(1);
+ });
