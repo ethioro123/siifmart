@@ -83,6 +83,12 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
         }
     ) => {
         try {
+            if (type === 'JOB_COMPLETE') {
+                if (!jobId) throw new Error('A completed job is required for automatic points');
+                const persisted = await workerPointsService.awardCompletedJob(jobId);
+                if (persisted) setWorkerPoints(prev => [...prev.filter(wp => wp.employeeId !== persisted.employeeId), persisted]);
+                return;
+            }
             const currentPoints = workerPoints.find(wp => wp.employeeId === employeeId);
             const empRecord = employees.find(e => e.id === employeeId || e.name === meta?.employeeName);
             const employeeName = meta?.employeeName || empRecord?.name || currentPoints?.employeeName || 'Warehouse Worker';
@@ -104,9 +110,7 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
 
             // 2. Total points calculation including streak bonus
             const baseAndStreakPoints = points + streakInfo.streakBonus;
-            const newTotalJobs = type === 'JOB_COMPLETE'
-                ? (currentPoints?.totalJobsCompleted || 0) + 1
-                : (currentPoints?.totalJobsCompleted || 0);
+            const newTotalJobs = currentPoints?.totalJobsCompleted || 0;
 
             // 3. Evaluate achievements
             const accuracyVal = meta?.accuracy !== undefined ? meta.accuracy : (currentPoints?.averageAccuracy || 100);
@@ -155,7 +159,7 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
                     estimatedBonus: bonusInfo.bonus,
                     bonusPeriodPoints: newMonthly,
                     achievements: achResult.allAchievements,
-                    lastJobCompletedAt: type === 'JOB_COMPLETE' ? timestamp : currentPoints.lastJobCompletedAt,
+                    lastJobCompletedAt: currentPoints.lastJobCompletedAt,
                     lastUpdated: timestamp
                 };
             } else {
@@ -182,7 +186,7 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
                     currentBonusTier: bonusInfo.tier.tierName,
                     estimatedBonus: bonusInfo.bonus,
                     bonusPeriodPoints: newMonthly,
-                    lastJobCompletedAt: type === 'JOB_COMPLETE' ? timestamp : undefined,
+                    lastJobCompletedAt: undefined,
                     lastUpdated: timestamp
                 };
             }

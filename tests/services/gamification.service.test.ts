@@ -20,6 +20,24 @@ const transaction: PointsTransaction = {
 describe('atomic worker points awards', () => {
     beforeEach(() => vi.clearAllMocks());
 
+    it('claims automatic points using only the completed job ID', async () => {
+        vi.mocked(supabase.rpc).mockResolvedValue({ data: {
+            id: 'persisted', employee_id: 'assigned-worker', total_points: 85
+        }, error: null } as Awaited<ReturnType<typeof supabase.rpc>>);
+        const saved = await workerPointsService.awardCompletedJob('putaway-job');
+        expect(saved?.totalPoints).toBe(85);
+        expect(supabase.rpc).toHaveBeenCalledWith('award_completed_warehouse_job', { p_job_id: 'putaway-job' });
+        expect(supabase.from).not.toHaveBeenCalled();
+    });
+
+    it('propagates automatic award rejection and accepts disabled bonuses without inventing a record', async () => {
+        const error = { code: '42501', message: 'Not the completing worker' };
+        vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, error } as Awaited<ReturnType<typeof supabase.rpc>>);
+        await expect(workerPointsService.awardCompletedJob('another-job')).rejects.toEqual(error);
+        vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, error: null } as Awaited<ReturnType<typeof supabase.rpc>>);
+        expect(await workerPointsService.awardCompletedJob('disabled-job')).toBeNull();
+    });
+
     it('uses one database transaction and returns persisted totals, including a deduplicated replay', async () => {
         vi.mocked(supabase.rpc).mockResolvedValue({ data: {
             id: 'persisted', employee_id: worker.employeeId, site_id: worker.siteId,
