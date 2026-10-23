@@ -141,8 +141,12 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
     }, [setSelectedIds]);
 
     return (
-        <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col" aria-busy={isLoading}>
             <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col rounded-2xl isolate overflow-hidden shadow-xs">
+                <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--theme-border)] px-4 py-5 sm:px-6">
+                    <div className="min-w-0"><h2 className="text-lg font-semibold tracking-tight text-[var(--theme-text-primary)]">Stock list</h2><p className="mt-1 text-sm text-[var(--theme-text-secondary)] break-words">{activeSite?.name || 'Authorized facilities'} · Browse quantities, storage bins and pricing.</p></div>
+                    <div className="rounded-xl bg-[var(--theme-bg-subtle)] px-3 py-2 text-sm tabular-nums text-[var(--theme-text-primary)]" role="status">{isLoading ? 'Updating stock…' : `${formatCompactNumber(totalCount)} matching records`}</div>
+                </header>
                 {/* Search, Filter Toolbar & Bulk Indicators */}
                 <InventoryToolbar
                     products={visibleProducts}
@@ -197,7 +201,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                         currencySymbol={currencySymbol}
                     />
 
-                    {visibleProducts.length === 0 && (
+                    {visibleProducts.length === 0 && !isLoading && (
                         <div className="text-center py-12 text-[var(--theme-text-muted)]">
                             <Box size={48} className="mx-auto mb-4 opacity-50" />
                             <p className="font-semibold text-sm text-[var(--theme-text-secondary)]">No products found</p>
@@ -209,8 +213,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                 {/* Product Pagination Controls */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-b-2xl">
                     <div className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-2.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Displays: <span className="text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{products.length}</span> <span className="text-[var(--theme-text-muted)]">/</span> <span className="text-[var(--theme-text-secondary)] font-mono tabular-nums">{formatCompactNumber(totalCount)}</span> Records
+                        This page: <span className="text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{visibleProducts.length}</span> <span className="text-[var(--theme-text-muted)]">/</span> <span className="text-[var(--theme-text-secondary)] font-mono tabular-nums">{formatCompactNumber(totalCount)}</span> Records
                     </div>
                     <div className="flex items-center gap-3">
                         <button

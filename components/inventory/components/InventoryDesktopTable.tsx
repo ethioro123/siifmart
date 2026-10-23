@@ -101,7 +101,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
 
                     <th className="py-3 px-3.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('price')}>
                         <div className="flex items-center justify-end gap-1.5">
-                            Price
+                            Selling price
                             <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'price' ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={11} className={sortConfig?.key === 'price' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
@@ -153,10 +153,10 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                     const isOutOfStock = stockVal <= 0;
                     const isLowStock = stockVal < threshold;
                     const stockColor = isOutOfStock
-                        ? 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/25'
+                        ? 'bg-[#FF3B30]/10 text-[var(--theme-status-error-text)] border-[#FF3B30]/25'
                         : isLowStock
-                        ? 'bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/25'
-                        : 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/25';
+                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[#FF9F0A]/25'
+                        : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[#34C759]/25';
                     const packDesc = formatPackagingDescription(product, stockVal);
 
                     return (
@@ -166,7 +166,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             className={`group hover:bg-[var(--theme-bg-subtle)] transition-colors duration-150 cursor-pointer ${isSelected ? 'bg-[var(--theme-bg-subtle)]' : ''}`}
                         >
                             {/* Checkbox */}
-                            <td className="py-2.5 px-3.5" onClick={(e) => e.stopPropagation()}>
+                            <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
                                 <div className="relative flex items-center justify-center">
                                     <input
                                         type="checkbox"
@@ -180,7 +180,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             </td>
 
                             {/* Product Name & SKU */}
-                            <td className="py-2.5 px-3.5">
+                            <td className="py-4 px-4">
                                 <div className="flex items-center space-x-3">
                                     <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center flex-shrink-0 overflow-hidden shadow-2xs group-hover:border-[var(--theme-accent)]/40 transition-colors">
                                         {product.image && !product.image.includes('placeholder.com') ? (
@@ -198,11 +198,11 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                         )}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight group-hover:text-[var(--theme-accent)] transition-colors duration-150 truncate max-w-[280px]">
+                                        <p className="text-sm font-semibold text-[var(--theme-text-primary)] leading-relaxed tracking-tight group-hover:text-[var(--theme-accent)] transition-colors duration-150 break-words max-w-[280px]">
                                             {formatProductDisplayName(product) || product.name}
                                         </p>
                                         <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-                                            <span className="text-[11px] font-semibold font-mono text-[#34C759] bg-[#34C759]/10 px-1.5 py-0.5 rounded border border-[#34C759]/20 tracking-tight">
+                                            <span className="text-[11px] font-semibold font-mono text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-1.5 py-0.5 rounded border border-[var(--theme-status-success-border)] tracking-tight">
                                                 {product.sku}
                                             </span>
                                             <span className="text-[11px] text-[var(--theme-text-muted)] font-medium truncate max-w-[140px]">
@@ -215,7 +215,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             </td>
 
                             {/* Location */}
-                            <td className="py-2.5 px-3.5">
+                            <td className="py-4 px-4">
                                 {(!activeSite || isReadOnly) ? (
                                     (() => {
                                         const site = sites.find(s => s.id === product.siteId || s.id === (product as any).site_id);
@@ -259,26 +259,23 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                                 )}
                                             </div>
                                         ) : (
-                                            <span className="text-[11px] font-medium text-[#FF3B30] bg-[#FF3B30]/10 px-2 py-0.5 rounded border border-[#FF3B30]/20">No Cell</span>
+                                            <span className="text-[11px] font-medium text-[var(--theme-status-error-text)] bg-[#FF3B30]/10 px-2 py-0.5 rounded border border-[#FF3B30]/20">Not assigned</span>
                                         );
                                     })()
                                 )}
                             </td>
 
                             {/* Stock Level */}
-                            <td className="py-2.5 px-3.5 text-center">
-                                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold font-mono tabular-nums border ${stockColor}`}>
-                                    <span>{formatStockDisplay(stockVal, product)}</span>
-                                    {packDesc && (
-                                        <span className="text-[10px] font-sans font-normal opacity-80 border-l border-current/20 pl-1.5">
-                                            {packDesc}
-                                        </span>
-                                    )}
+                            <td className="py-4 px-4 text-center">
+                                <div className="min-w-[150px] max-w-[220px] space-y-1.5 text-left">
+                                    <p className="text-base font-semibold tabular-nums text-[var(--theme-text-primary)]">{formatStockDisplay(stockVal, product)}</p>
+                                    {packDesc && <p className="text-xs leading-relaxed text-[var(--theme-text-secondary)] break-words">{packDesc}</p>}
+                                    <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${stockColor}`}>{isOutOfStock ? 'Out of stock' : isLowStock ? 'Low stock' : 'In stock'}</span>
                                 </div>
                             </td>
 
                             {/* Retail Price */}
-                            <td className="py-2.5 px-3.5 text-right">
+                            <td className="py-4 px-4 text-right">
                                 <span className="text-sm font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums group-hover:text-[var(--theme-accent)] transition-colors">
                                     {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: currencySymbol }) : '—'}
                                     {product.unit && product.price > 0 && getSellUnit(product.unit).code !== 'UNIT' && (
@@ -289,7 +286,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
 
                             {/* Cost Price (privileged) */}
                             {showCostPrice && (
-                                <td className="py-2.5 px-3.5 text-right">
+                                <td className="py-4 px-4 text-right">
                                     <span className="text-sm font-medium text-[var(--theme-text-secondary)] font-mono tabular-nums">
                                         {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: currencySymbol }) : '—'}
                                         {product.costPrice !== undefined && product.costPrice !== null && product.costPrice > 0 && getSellUnit(product.unit || '').code !== 'UNIT' && (
@@ -300,16 +297,16 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             )}
 
                             {/* Total Inventory Value */}
-                            <td className="py-2.5 px-3.5 text-right">
-                                <span className="text-sm font-bold text-[#34C759] font-mono tabular-nums">
+                            <td className="py-4 px-4 text-right">
+                                <span className="text-sm font-bold text-[var(--theme-status-success-text)] font-mono tabular-nums">
                                     {product.price && product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: currencySymbol }) : '—'}
                                 </span>
                             </td>
 
                             {/* Class */}
-                            <td className="py-2.5 px-3.5 text-center">
+                            <td className="py-4 px-4 text-center">
                                 <div className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold border transition-all ${
-                                    abc === 'A' ? 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/30' :
+                                    abc === 'A' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[#34C759]/30' :
                                     abc === 'B' ? 'bg-[#2997FF]/10 text-[#2997FF] border-[#2997FF]/30' :
                                     'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                 }`}>
@@ -318,7 +315,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             </td>
 
                             {/* Date Added */}
-                            <td className="py-2.5 px-3.5 text-right">
+                            <td className="py-4 px-4 text-right">
                                 <span className="text-xs font-mono text-[var(--theme-text-muted)] tabular-nums">
                                     {(() => {
                                         const dateVal = product.createdAt || (product as any).created_at;
@@ -331,12 +328,12 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             </td>
 
                             {/* Actions */}
-                            <td className="py-2.5 px-3.5 text-right">
-                                <div className="flex items-center justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                            <td className="py-4 px-4 text-right">
+                                <div className="flex items-center justify-end gap-1 opacity-100" onClick={(e) => e.stopPropagation()}>
                                     <button
                                         onClick={() => setSelectedViewProduct(product)}
-                                        className="p-1.5 hover:bg-[var(--theme-accent)]/10 hover:text-[var(--theme-accent)] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
-                                        title="View Product Details"
+                                        className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 hover:bg-[var(--theme-accent)]/10 hover:text-[var(--theme-accent)] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
+                                        aria-label="View Product Details" title="View Product Details"
                                     >
                                         <Eye size={14} />
                                     </button>
@@ -346,23 +343,23 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                                 <Protected permission="ADJUST_STOCK">
                                                     <button
                                                         onClick={() => handleOpenAdjust(product)}
-                                                        className="p-1.5 hover:bg-[var(--theme-bg-card-hover)] hover:text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
-                                                        title="Adjust Stock"
+                                                        className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 hover:bg-[var(--theme-bg-card-hover)] hover:text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
+                                                        aria-label="Adjust Stock" title="Adjust Stock"
                                                     >
                                                         <RefreshCw size={14} />
                                                     </button>
                                                 </Protected>
                                                 <button
                                                     onClick={() => handleOpenEditProduct(product)}
-                                                    className="p-1.5 hover:bg-[var(--theme-accent)]/10 hover:text-[var(--theme-accent)] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
-                                                    title="Edit Product"
+                                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 hover:bg-[var(--theme-accent)]/10 hover:text-[var(--theme-accent)] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
+                                                    aria-label="Edit Product" title="Edit Product"
                                                 >
                                                     <Edit size={14} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteProduct(product.id)}
-                                                    className="p-1.5 hover:bg-[#FF3B30]/10 hover:text-[#FF3B30] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
-                                                    title="Delete Product"
+                                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 hover:bg-[#FF3B30]/10 hover:text-[var(--theme-status-error-text)] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
+                                                    aria-label="Delete Product" title="Delete Product"
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>

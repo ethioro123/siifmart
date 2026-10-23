@@ -1,11 +1,10 @@
 import { InventoryPriceReadiness } from './InventoryPriceReadiness';
 import React from 'react';
-import { Package, CheckCircle, Eye } from 'lucide-react';
 import { Product, Site } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatCompactNumber } from '../../../utils/formatting';
-import { getABCClass, getInventoryValue } from '../utils/inventoryHelpers';
-import { getSellUnit, formatStockDisplay, formatPackagingDescription } from '../../../utils/units';
+import { getInventoryValue } from '../utils/inventoryHelpers';
+import { formatStockDisplay, formatPackagingDescription } from '../../../utils/units';
 import { useStore } from '../../../contexts/CentralStore';
 import { canViewCostPrice } from '../../../utils/roles';
 import { Protected } from '../../Protected';
@@ -45,142 +44,46 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
     const { user } = useStore();
     const showCostPrice = canViewCostPrice(user?.role);
 
-    return (
-        <div className="block md:hidden divide-y divide-[var(--theme-border)]">
-            {products.map((product) => {
-                const isSelected = selectedIds.has(product.id);
-                const stockVal = product.stock || 0;
-                const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
-                const isOutOfStock = stockVal <= 0;
-                const isLowStock = stockVal < threshold;
-                const colorClasses = isOutOfStock
-                    ? 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/25'
-                    : isLowStock
-                    ? 'bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/25'
-                    : 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/25';
-
-                return (
-                    <div
-                        key={product.id}
-                        onClick={() => setSelectedViewProduct(product)}
-                        className={`p-3.5 space-y-2.5 hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer ${isSelected ? 'bg-[var(--theme-bg-subtle)]' : ''}`}
-                    >
-                        {/* Top Row: Select, Image, Name, SKU, Stock */}
-                        <div className="flex items-center gap-3">
-                            <div onClick={(e) => e.stopPropagation()}>
-                                <div className="relative flex items-center justify-center">
-                                    <input
-                                        type="checkbox"
-                                        aria-label="Select row"
-                                        className="peer appearance-none w-4 h-4 border border-[var(--theme-border)] rounded-md bg-[var(--theme-bg-card)] checked:bg-[var(--theme-accent)] checked:border-[var(--theme-accent)] transition-all cursor-pointer"
-                                        checked={isSelected}
-                                        onChange={() => toggleSelection(product.id)}
-                                    />
-                                    <CheckCircle size={12} className="absolute text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
-                                </div>
-                            </div>
-                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center flex-shrink-0 overflow-hidden shadow-2xs">
-                                {product.image && !product.image.includes('placeholder.com') ? (
-                                    <img src={product.image} alt="" className="w-full h-full object-cover" />
-                                ) : (
-                                    <Package size={18} className="text-[var(--theme-text-muted)]" />
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">
-                                    {formatProductDisplayName(product) || product.name}
-                                </p>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className="text-[11px] font-semibold font-mono text-[#34C759] bg-[#34C759]/10 px-1.5 py-0.5 rounded border border-[#34C759]/20 tracking-tight">
-                                        {product.sku}
-                                    </span>
-                                    <span className="text-[11px] text-[var(--theme-text-muted)] font-medium truncate">
-                                        {product.category}
-                                    </span>
-                                </div>
-                                <InventoryPriceReadiness price={product.price} />
-                            </div>
-                            {/* Stock Badge */}
-                            <div className={`flex flex-col items-end text-xs font-bold font-mono tabular-nums px-2.5 py-1 rounded-lg border ${colorClasses}`}>
-                                <span>{formatStockDisplay(stockVal, product)}</span>
-                                {formatPackagingDescription(product, stockVal) && (
-                                    <span className="text-[10px] font-sans font-normal opacity-80 mt-0.5">
-                                        {formatPackagingDescription(product, stockVal)}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Middle details: Location, Price, Total Value */}
-                        <div className={`grid ${showCostPrice ? 'grid-cols-4' : 'grid-cols-3'} gap-2 text-left bg-[var(--theme-bg-subtle)] p-2.5 rounded-xl border border-[var(--theme-border)]`}>
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-[10px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Location</span>
-                                {(() => {
-                                    const site = sites.find(s => s.id === product.siteId || s.id === (product as any).site_id);
-                                    return (
-                                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium truncate mt-0.5">
-                                            {site ? site.name : product.location || 'No Loc'}
-                                        </span>
-                                    );
-                                })()}
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <span className="text-[10px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Price</span>
-                                <span className="text-xs text-[var(--theme-text-primary)] font-mono font-semibold tabular-nums mt-0.5">
-                                    {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: currencySymbol }) : '—'}
-                                </span>
-                            </div>
-                            {showCostPrice && (
-                                <div className="flex flex-col items-center">
-                                    <span className="text-[10px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Cost</span>
-                                    <span className="text-xs text-[var(--theme-text-primary)] font-mono font-medium tabular-nums mt-0.5">
-                                        {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: currencySymbol }) : '—'}
-                                    </span>
-                                </div>
-                            )}
-                            <div className="flex flex-col items-end">
-                                <span className="text-[10px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Value</span>
-                                <span className="text-xs text-[#34C759] font-mono font-semibold tabular-nums mt-0.5">
-                                    {product.price && product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: currencySymbol }) : '—'}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Bottom row: Actions & View Details */}
-                        <div className="flex items-center justify-between pt-0.5">
-                            <span className="text-[11px] text-[var(--theme-accent)] font-medium flex items-center gap-1">
-                                <Eye size={12} /> Tap for details
-                            </span>
-                            {!isReadOnly && (
-                                <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                                    <Protected permission="ADJUST_STOCK">
-                                        <button
-                                            onClick={() => handleOpenAdjust(product)}
-                                            className="px-2.5 py-1 text-[11px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-lg transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
-                                        >
-                                            Adjust
-                                        </button>
-                                    </Protected>
-                                    <Protected permission="EDIT_PRODUCT">
-                                        <button
-                                            onClick={() => handleOpenEditProduct(product)}
-                                            className="px-2.5 py-1 text-[11px] font-semibold bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 rounded-lg transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteProduct(product.id)}
-                                            className="px-2.5 py-1 text-[11px] font-semibold bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 text-[#FF3B30] border border-[#FF3B30]/20 rounded-lg transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
-                                        >
-                                            Delete
-                                        </button>
-                                    </Protected>
-                                </div>
-                            )}
-                        </div>
+    return <div className="md:hidden space-y-3 bg-[var(--theme-bg-app)] p-3">
+        {products.map(product => {
+            const stock = product.stock || 0;
+            const low = stock > 0 && stock < (product.minStock && product.minStock > 0 ? product.minStock : 10);
+            const health = stock <= 0 ? 'Out of stock' : low ? 'Low stock' : 'In stock';
+            const tone = stock <= 0 ? 'text-[var(--theme-status-error-text)] bg-[var(--theme-status-error-bg)]' : low ? 'text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]' : 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)]';
+            const site = sites.find(s => s.id === (product.siteId || product.site_id));
+            return <article key={product.id} className={`min-w-0 rounded-2xl border bg-[var(--theme-bg-card)] p-4 ${selectedIds.has(product.id) ? 'border-[var(--theme-accent)]' : 'border-[var(--theme-border)]'}`}>
+                <div className="flex items-start gap-3">
+                    <label className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-[var(--theme-bg-subtle)]">
+                        <input type="checkbox" aria-label={`Select ${product.name}`} checked={selectedIds.has(product.id)} onChange={() => toggleSelection(product.id)} className="h-5 w-5 accent-[var(--theme-accent)]" />
+                    </label>
+                    <div className="min-w-0 flex-1">
+                        <button type="button" onClick={() => setSelectedViewProduct(product)} className="min-h-[44px] text-left text-sm font-semibold leading-relaxed text-[var(--theme-text-primary)] break-words focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{formatProductDisplayName(product) || product.name}</button>
+                        <p className="text-xs font-mono text-[var(--theme-text-secondary)] break-all">{product.sku}</p>
+                        <p className="mt-1 text-xs text-[var(--theme-text-muted)] break-words">{product.category}</p>
                     </div>
-                );
-            })}
-        </div>
-    );
+                </div>
+                <div className="mt-4 flex flex-wrap items-start justify-between gap-3 border-t border-[var(--theme-border)] pt-4">
+                    <div className="min-w-0 flex-1">
+                        <p className="text-xs text-[var(--theme-text-secondary)]">On hand</p>
+                        <p className="mt-1 text-xl font-semibold tabular-nums text-[var(--theme-text-primary)] break-words">{formatStockDisplay(stock, product)}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--theme-text-secondary)] break-words">{formatPackagingDescription(product, stock)}</p>
+                    </div>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${tone}`}>{health}</span>
+                </div>
+                <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    <div className="min-w-0"><dt className="text-xs text-[var(--theme-text-secondary)]">Storage bin</dt><dd className="mt-1 break-words font-mono font-medium text-[var(--theme-text-primary)]">{product.location || 'Not assigned'}</dd><dd className="mt-0.5 break-words text-xs text-[var(--theme-text-muted)]">{site?.name || 'Facility unavailable'}</dd></div>
+                    <div className="min-w-0"><dt className="text-xs text-[var(--theme-text-secondary)]">Selling price</dt><dd className="mt-1 font-medium tabular-nums text-[var(--theme-text-primary)] break-words">{product.price > 0 ? formatCompactNumber(product.price, { currency: currencySymbol }) : '—'}</dd><InventoryPriceReadiness price={product.price} /></div>
+                    {showCostPrice && <div className="min-w-0"><dt className="text-xs text-[var(--theme-text-secondary)]">Unit cost</dt><dd className="mt-1 tabular-nums text-[var(--theme-text-primary)] break-words">{product.costPrice ? formatCompactNumber(product.costPrice, { currency: currencySymbol }) : '—'}</dd></div>}
+                    <div className="min-w-0"><dt className="text-xs text-[var(--theme-text-secondary)]">Retail stock value</dt><dd className="mt-1 tabular-nums text-[var(--theme-text-primary)] break-words">{product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: currencySymbol }) : '—'}</dd></div>
+                </dl>
+                <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--theme-border)] pt-3">
+                    <button type="button" onClick={() => setSelectedViewProduct(product)} className="min-h-[44px] rounded-xl border border-[var(--theme-border)] px-3 text-xs font-semibold text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">View details</button>
+                    {!isReadOnly && <>
+                        <Protected permission="ADJUST_STOCK"><button type="button" onClick={() => handleOpenAdjust(product)} className="min-h-[44px] rounded-xl bg-[var(--theme-accent)] px-3 text-xs font-semibold text-[var(--theme-btn-primary-text)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Adjust stock</button></Protected>
+                        <Protected permission="EDIT_PRODUCT"><button type="button" onClick={() => handleOpenEditProduct(product)} className="min-h-[44px] rounded-xl border border-[var(--theme-border)] px-3 text-xs text-[var(--theme-text-primary)]">Edit</button><button type="button" onClick={() => handleDeleteProduct(product.id)} className="min-h-[44px] rounded-xl px-3 text-xs text-[var(--theme-status-error-text)]">Delete</button></Protected>
+                    </>}
+                </div>
+            </article>;
+        })}
+    </div>;
 };

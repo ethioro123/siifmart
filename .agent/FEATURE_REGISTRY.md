@@ -471,7 +471,7 @@
 ### PO attribute consistency and pricing handoff (2026-10-23)
 - Live delivery checks align order temperature and minimum remaining days with item storage and total product shelf life; conflicting temperature groups require separate orders.
 - New product handling requirements require confirmation, packaging counts require entry, and unbranded identity is explicit. Category preview suggestions are labeled and advanced catalog specifications are read only.
-- Procurement no longer requires retail pricing; catalog snapshots retain approved prices/specifications. Inventory Stock Reviews excludes new-product approvals and merchandising proposals, preserves stock requests/history and existing product edits, and removes synthetic product decisions. Catalog readiness remains separate from physical stock; stock lists show missing selling prices instead of obsolete product-review badges.
+- Procurement no longer requires retail pricing; catalog snapshots retain approved prices/specifications. Inventory Stock Reviews excludes new-product approvals and merchandising proposals, preserves stock requests/history and existing product edits, and removes synthetic product decisions. Catalog readiness remains separate from physical stock; stock lists show missing selling prices instead of obsolete product-review badges. Stock browsing uses readable mobile cards, explicit bin/facility labels, touch-sized actions, clearer search/filter controls and a scoped results heading.
 - Migration: `migrations/20261023_po_item_delivery_and_pricing_integrity.sql` (SIIFMART Staging).
 ### PO form responsive layout (2026-10-23)
 - Mobile PO editor uses the available screen height, safe-area footer spacing, and independently scrolling content.
