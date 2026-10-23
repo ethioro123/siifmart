@@ -15,7 +15,7 @@ import { normalizeLocation, parseLocation } from '../../utils/locationTracking';
 import { extractSitePrefix, extractPrefixFromBarcode } from '../../utils/locationEncoder';
 import { logger } from '../../utils/logger';
 import { usePutawayScanning } from './putaway/hooks/usePutawayScanning';
-import { usePutawayAutoRepair } from './putaway/hooks/usePutawayAutoRepair';
+import { resolvePickProduct } from '../../utils/pickProgress';
 import { formatJobId } from '../../utils/jobIdFormatter';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePutawayRouting } from './putaway/hooks/usePutawayRouting';
@@ -79,7 +79,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     } = useFulfillment();
 
     // --- AUTO-REPAIR MISSING PRODUCTS FOR PUTAWAY JOBS ---
-    usePutawayAutoRepair(filteredJobs, activeSite, allProducts, refreshData);
+    // Missing catalog records require supervised receiving repair, never page-load product creation.
 
     // --- SORTED/FILTERED PUTAWAY JOBS ---
     const sortedPutawayJobs = useMemo(() => {
@@ -140,10 +140,10 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             if (activeOrder !== 0) return activeOrder;
             if (putawaySortBy === 'priority') {
                 const priorityOrder: Record<string, number> = { 'Critical': 0, 'High': 1, 'Normal': 2 };
-                return (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
+                return (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2);
             }
             if (putawaySortBy === 'items') return b.items - a.items;
-            return new Date(b.id).getTime() - new Date(a.id).getTime();
+            return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
         });
     }, [filteredJobs, putawayStatusFilter, putawaySearch, putawaySortBy, orders, employees]);
 
@@ -178,11 +178,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     const currentProduct = useMemo(() => {
         if (!currentItem) return undefined;
         const targetSiteId = activeSite?.id;
-        let prod = allProducts.find(p =>
-            (p.id === currentItem.productId || p.sku === currentItem.sku) &&
-            (p.siteId === targetSiteId || p.site_id === targetSiteId)
-        );
-        return prod;
+        return resolvePickProduct(allProducts,currentItem,targetSiteId);
     }, [currentItem, allProducts, activeSite]);
 
     const routing = usePutawayRouting({
@@ -270,7 +266,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     };
 
     const handleCompleteJobFromModal = async (job: WMSJob) => {
-        if (isSubmitting || !job.lineItems.length || !job.lineItems.every(item => ['Picked', 'Completed'].includes(item.status))) return;
+        if (isSubmitting || !job.lineItems.length || !job.lineItems.every(item => ['Picked', 'Completed', 'Short'].includes(item.status))) return;
         setIsSubmitting(true);
         try {
             await completeJob(job.id, user?.id || 'Driver', false, job.lineItems);

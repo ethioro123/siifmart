@@ -84,11 +84,17 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     }, [step, isProcessing]);
 
     useEffect(() => {
+        setStep('LOCATION');
+        setScannedSku('');
+        setIsOverflowMode(false);
+    }, [currentItem]);
+
+    useEffect(() => {
         setInputVal('');
         setAwaitingOccupancyConfirmation(false);
         setAwaitingMismatchConfirmation(false);
         setLastCheckedLocation(null);
-    }, [currentItem?.id, step]);
+    }, [currentItem, step]);
 
     useEffect(() => {
         const normalized = normalizeLocation(inputVal);
@@ -149,7 +155,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     const handleScan = async (e: React.FormEvent) => {
         e.preventDefault();
         const rawVal = inputVal.trim();
-        if (!rawVal || isProcessing || scanLockRef.current) return;
+        if (!rawVal || isProcessing || showSuccess || scanLockRef.current) return;
         const val = rawVal.toUpperCase();
 
         if (step === 'LOCATION') {
@@ -220,11 +226,19 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     return;
                 }
 
+                const codes = [currentItem?.sku, currentProduct?.barcode, ...(Array.isArray(currentProduct?.barcodes) ? currentProduct.barcodes : [])];
+                if (!codes.some(code => typeof code === 'string' && code.trim().toUpperCase() === decodedSku.trim().toUpperCase())) {
+                    setErrorMsg('Wrong item scanned. Scan the product on this putaway line.');
+                    setShowError(true);
+                    setInputVal('');
+                    return;
+                }
+
                 // Zero-Trust physical quantity verification config gate
                 if (scanningPolicy.requirePutawayQuantityEntry) {
                     setScannedSku(decodedSku);
                     setStep('QUANTITY');
-                    setInputVal(String(currentItem?.expectedQty || 1));
+                    setInputVal('');
                     playBeep('success');
                     return;
                 }
@@ -234,7 +248,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     await onScanItem(decodedSku, currentItem?.expectedQty);
                 } catch (err: any) {
                     playBeep('error');
-                    setErrorMsg('Incorrect Item Scanned');
+                    setErrorMsg(err?.message || 'Putaway placement was not confirmed');
                     setShowError(true);
                     setInputVal('');
                     setTimeout(() => setShowError(false), 2500);
@@ -250,8 +264,8 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                 }, 2000);
             } else if (step === 'QUANTITY') {
                 const itemName = currentItem?.name || 'Item';
-                const enteredQty = parseInt(rawVal, 10);
-                if (isNaN(enteredQty) || enteredQty <= 0) {
+                const enteredQty = Number(rawVal);
+                if (!Number.isFinite(enteredQty) || enteredQty <= 0) {
                     playBeep('error');
                     setErrorMsg('Enter valid count > 0');
                     setShowError(true);
@@ -272,7 +286,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     await onScanItem(scannedSku || currentItem?.sku, enteredQty);
                 } catch (err: any) {
                     playBeep('error');
-                    setErrorMsg('Error confirming putaway');
+                    setErrorMsg(err?.message || 'Putaway placement was not confirmed');
                     setShowError(true);
                     setTimeout(() => setShowError(false), 2500);
                     return;
@@ -380,7 +394,8 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                             <input
                                 ref={inputRef}
                                 type={step === 'QUANTITY' ? 'number' : 'text'}
-                                min={step === 'QUANTITY' ? '1' : undefined}
+                                min={step === 'QUANTITY' ? '0' : undefined}
+                                step={step === 'QUANTITY' ? 'any' : undefined}
                                 max={step === 'QUANTITY' ? (currentItem?.expectedQty || 1) : undefined}
                                 aria-label="Scan location or SKU barcode"
                                 title="Scan location or SKU barcode"
@@ -401,7 +416,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                             : `Enter count (max ${currentItem?.expectedQty || 1})`
                                 }
                                 autoFocus
-                                disabled={isProcessing}
+                                disabled={isProcessing || showSuccess}
                             />
                         </div>
 
@@ -424,7 +439,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         {/* Action Button */}
                         <button
                             type="submit"
-                            disabled={!inputVal.trim() || isProcessing || isPlacementBlocked}
+                            disabled={!inputVal.trim() || isProcessing || showSuccess || isPlacementBlocked}
                             className={`w-full py-3.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 transition-colors min-h-[48px] border ${
                                 !inputVal.trim() || isProcessing
                                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] cursor-not-allowed opacity-60'

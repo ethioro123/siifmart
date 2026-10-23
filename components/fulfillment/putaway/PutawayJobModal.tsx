@@ -83,7 +83,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
 
     const sourceSite = sites.find(s => s.id === job?.sourceSiteId || s.id === (job as any)?.site_id);
     const totalItems = job?.lineItems?.length || 0;
-    const completedItems = job?.lineItems?.filter(i => i.status === 'Completed' || i.status === 'Picked').length || 0;
+    const completedItems = job?.lineItems?.filter(i => ['Completed', 'Picked', 'Short'].includes(i.status)).length || 0;
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
     const isFullySlotted = completedItems === totalItems && totalItems > 0;
     const isCompleted = job?.status === 'Completed';

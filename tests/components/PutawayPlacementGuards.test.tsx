@@ -21,3 +21,28 @@ describe('putaway placement preflight',()=>{
   const{result,stock}=setup({activeSite:{id:'other'}});await expect(result.current.handleScanItem('ET001',3)).rejects.toThrow('facility');expect(stock).not.toHaveBeenCalled();
  });
 });
+
+it('preserves a committed placement when completion fails and never asks to place it again',async()=>{
+ const setSelectedJob=vi.fn(),setIsScannerOpen=vi.fn(),notify=vi.fn();
+ const completeJob=vi.fn().mockRejectedValue(new Error('Completion unavailable'));
+ const {result,stock}=setup({setSelectedJob,setIsScannerOpen,addNotification:notify,completeJob});
+ await expect(result.current.handleScanItem('ET001',10)).resolves.toBeUndefined();
+ expect(stock).toHaveBeenCalledTimes(1);
+ expect(setSelectedJob).toHaveBeenCalledWith(expect.objectContaining({lineItems:[expect.objectContaining({status:'Picked',pickedQty:10,location:'A-01-01'})]}));
+ expect(setIsScannerOpen).toHaveBeenCalledWith(false);
+ expect(notify).toHaveBeenCalledWith('alert',expect.stringContaining('Stock placement was saved'));
+ expect(notify).not.toHaveBeenCalledWith('success','All items put away — Job completed!');
+});
+it('rejects duplicate submission instead of returning a false success',async()=>{
+ const {result,stock}=setup({isSubmittingRef:{current:true}});
+ await expect(result.current.handleScanItem('ET001',10)).rejects.toThrow('already being saved');
+ expect(stock).not.toHaveBeenCalled();
+});
+it('preserves decimal physical quantities through placement',async()=>{
+ const {result,stock}=setup();await result.current.handleScanItem('ET001',1.25);
+ expect(stock).toHaveBeenCalledWith(expect.objectContaining({quantity:1.25}));
+});
+it('does not accept a different SKU just because punctuation was removed',async()=>{
+ const {result,stock}=setup();await expect(result.current.handleScanItem('ET-001',10)).rejects.toThrow('Wrong item');
+ expect(stock).not.toHaveBeenCalled();
+});

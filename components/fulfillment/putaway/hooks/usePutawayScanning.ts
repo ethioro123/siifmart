@@ -53,14 +53,14 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
             throw new Error('Invalid location format');
         }
 
-        addNotification('success', `Location ${normalized} ready`);
+        addNotification('info', `Location ${normalized} scanned`);
     };
 
     const handleScanItem = async (barcode: string, quantityToPutaway?: number) => {
-        if (!selectedJob || !currentItem) return;
+        if (!selectedJob || !currentItem) throw new Error('No pending putaway line. Refresh the job.');
         if (isSubmitting || isSubmittingRef.current) {
             logger.warn('PutawayTab', "⚠️ Already submitting putaway. Ignoring duplicate scan.");
-            return;
+            throw new Error('A placement is already being saved.');
         }
 
         // [NEW] Enforce location scan first
@@ -73,7 +73,7 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
         const product = currentProduct;
 
         // Normalize SKU for matching: strip hyphens, slashes, and whitespace
-        const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
+        const normSku = (s: string) => s.trim().toUpperCase();
         const normalizedInput = normSku(normalized);
 
         const getBarcodesArray = (barcodes: any): string[] => {
@@ -173,13 +173,25 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
             const nextItems = [...selectedJob.lineItems];
             nextItems[itemIndex] = { ...currentItem, status: itemStatus, pickedQty: qty, location: scannedLocation };
 
+            // Placement is committed independently of completion: preserve it before any follow-up.
+            setSelectedJob({ ...selectedJob, lineItems: nextItems });
+            setScannedLocation('');
+            setLocationOccupants([]);
+
             // 4. Auto-Complete: If all items are done, complete the job automatically
             const allDone = nextItems.every(i => !i || i.status === 'Picked' || i.status === 'Short' || i.status === 'Completed');
             logger.debug('PutawayTab', '📍 [PUTAWAY] allDone');
 
             if (allDone) {
                 logger.debug('PutawayTab', '🏁 [PUTAWAY] Auto-completing job');
-                await completeJob(selectedJob.id, user?.id || 'Driver', false, nextItems, putawayTimestamp);
+                try {
+                    await completeJob(selectedJob.id, user?.id || 'Worker', false, nextItems, putawayTimestamp);
+                } catch (error) {
+                    logger.error('PutawayTab', 'Stock placed but job completion was not confirmed', error);
+                    addNotification('alert', 'Stock placement was saved. Job completion was not confirmed; reopen the job to finish without placing stock again.');
+                    setIsScannerOpen(false);
+                    return;
+                }
                 addNotification('success', 'All items put away — Job completed!');
                 setIsScannerOpen(false);
                 setSelectedJob(null);

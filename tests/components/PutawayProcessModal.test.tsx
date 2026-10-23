@@ -29,3 +29,10 @@ describe('putaway progression',()=>{
   expect((screen.getByRole('button',{name:'Complete Putaway'}) as HTMLButtonElement).disabled).toBe(true);
  });
 });
+
+it('allows completion retry after an already-recorded short placement without rescanning stock',()=>{
+ render(<PutawayJobModal {...props} job={{...job,lineItems:job.lineItems.map(item=>({...item,status:'Short',pickedQty:4,location:'A-01-01'}))}}/>);
+ const complete=screen.getByRole('button',{name:'Complete Putaway'}) as HTMLButtonElement;
+ expect(complete.disabled).toBe(false);
+ expect(screen.queryByRole('button',{name:'Start scanning'})).toBeNull();
+});
