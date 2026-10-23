@@ -71,10 +71,16 @@ export const InventoryProductModal: React.FC<InventoryProductModalProps> = ({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={editingProduct ? "Edit Product Profile & Inventory Console" : "New Product Profile & Inventory Console"}
+            title={editingProduct ? "Edit Product Profile & Inventory Console" : "Create Product"}
             size="xl"
         >
             <div className="max-h-[85vh] overflow-y-auto custom-scrollbar p-1">
+                {!editingProduct && (
+                    <p className="mb-4 text-sm text-[var(--theme-text-secondary)]">
+                        Check Stock List for an existing product before creating one. To receive an existing product,
+                        use the receiving workflow; to correct its stock, use a stock adjustment.
+                    </p>
+                )}
                 <ProductForm
                     initialData={editingProduct || undefined}
                     onSubmit={onSave}

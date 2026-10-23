@@ -56,7 +56,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                         className="min-h-11 px-4 rounded-xl bg-[var(--theme-btn-primary-bg)] text-[var(--theme-btn-primary-text)] hover:opacity-90 font-semibold text-xs transition-colors flex items-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <Plus size={16} />
-                        Add Product
+                        Create Product
                     </ProtectedButton>}
                     <Button
                         onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }}
@@ -64,7 +64,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                         icon={<Printer size={16} />}
                         className="min-h-11 px-4 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] font-semibold text-xs transition-colors flex items-center gap-2 shadow-xs cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
-                        Print Hub
+                        Print Labels
                     </Button>
                 </div>
             </div>

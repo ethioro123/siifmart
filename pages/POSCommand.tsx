@@ -329,8 +329,8 @@ const POSCommandContent: React.FC = () => {
                         <Tags size={13} />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">Price Tags & Barcodes</p>
-                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">Thermal label hub</p>
+                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">Print Labels</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">Price tags and barcodes</p>
                       </div>
                     </button>
                   </div>

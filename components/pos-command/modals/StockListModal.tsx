@@ -171,8 +171,8 @@ export const StockListModal: React.FC = () => {
                             {availableCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                     )}
-                    <button type="button" onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }} title="Open print hub for barcode labels" aria-label="Open print hub for barcode labels" className="px-3.5 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer shadow-xs">
-                        <Printer size={13} className="opacity-90" /><span>Print Hub</span>
+                    <button type="button" onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }} title="Print product barcode and price labels" aria-label="Print product barcode and price labels" className="px-3.5 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer shadow-xs">
+                        <Printer size={13} className="opacity-90" /><span>Print Labels</span>
                     </button>
                 </div>
 
