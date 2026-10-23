@@ -1,3 +1,4 @@
+import { hasValidReceivingCounts } from '../../../utils/receivingCountValidation';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { X, Box, Check, ArrowRight, ArrowLeft, Loader2, Package, Lock } from 'lucide-react';
 import { Product, PurchaseOrder, WMSJob } from '../../../types';
@@ -92,7 +93,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     }, [splitReceivingPO, splitReceivingItem, jobs]);
 
     const totalScanned = splitVariants.reduce((acc, v) => acc + (v.quantity || 0), 0);
-    const countsValid = splitVariants.length > 0 && splitVariants.every(v => Number.isFinite(v.quantity) && v.quantity > 0);
+    const countsValid = hasValidReceivingCounts(splitVariants);
     const remaining = Math.max(0, expectedSellable - previouslyReceived - totalScanned);
     const progress = Math.min(100, expectedSellable > 0 ? ((previouslyReceived + totalScanned) / expectedSellable) * 100 : 0);
 
@@ -163,7 +164,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 
     const handleConfirmReceipt = async () => {
         if (isSubmitting || localSubmitting) return;
-        if (!splitVariants.length || splitVariants.some(v => !Number.isFinite(v.quantity) || v.quantity <= 0)) {
+        if (!countsValid) {
             alert('Enter a valid positive physical count for every split, or remove unused splits.');
             return;
         }
@@ -339,6 +340,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                     )}
                 </div>
 
+                {step === 'QUALITY' && !countsValid && <p role="status" className="px-4 py-2 text-xs text-[var(--theme-text-secondary)]">Enter a positive physical count for each split, or remove unused splits, before continuing.</p>}
                 {/* Bottom Navigation Toolbar */}
                 <div className="p-3 md:p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex items-center justify-between gap-3 shrink-0">
                     <div>
@@ -388,8 +390,8 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                         : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
                                 }`}
                             >
-                                {totalScanned <= 0 && <Lock size={14} className="text-[var(--theme-text-muted)]" />}
-                                <span>{totalScanned > 0 ? 'Dock Handover' : 'Count Items to Proceed'}</span>
+                                {!countsValid && <Lock size={14} className="text-[var(--theme-text-muted)]" />}
+                                <span>{countsValid ? 'Review & Handover' : 'Count Items to Proceed'}</span>
                                 <ArrowRight size={16} />
                             </button>
                         )}

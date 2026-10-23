@@ -496,3 +496,4 @@
 - PO inspection names the receiving facility and workflow, with receiving navigation only for authorized staff at that destination.
 - Dock planning uses one inbound list with optional bay assignment and one Dispatch queue with loading, transport and release controls; blind receiving stays in Receive.
 - Fulfillment assignment reads use paginated active-job IDs without the WMS join; assignment failures no longer discard the loaded operational queues.
+- Receiving modals use one bottom progression/save action per step, readable step labels, valid counts for every retained split, and unsaved review wording.
