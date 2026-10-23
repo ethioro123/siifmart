@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     X, Truck, CheckCircle, Loader2,
     Package, ArrowRight, ArrowLeft
@@ -6,6 +6,7 @@ import {
 import { WMSJob, User, Product, Site } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useShipmentWorkflow } from '../../../hooks/useShipmentWorkflow';
+import { resolvePickProduct } from '../../../utils/pickProgress';
 import { getShipmentQuantity } from '../../../utils/shipmentWorkflow';
 
 type RejectReason = 'customer_refused' | 'damaged_in_transit' | 'address_not_found' | 'partial_acceptance' | 'other';
@@ -53,6 +54,8 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
     refreshData,
     refreshJobs,
 }) => {
+    const saveLock = useRef(false);
+    const initializedJob = useRef<string | null>(null);
     const workflow = useShipmentWorkflow(refreshData);
     const dynamicReasons = [
         { id: 'customer_refused', label: t('warehouse.driverHub.rejectReasonCustomerRefused'), desc: t('warehouse.driverHub.rejectReasonCustomerRefusedDesc') },
@@ -71,13 +74,15 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
     const destSite = sites.find(s => s.id === (job?.destSiteId || (job as any)?.dest_site_id));
 
     useEffect(() => {
-        if (!isOpen || !job?.lineItems) return;
+        if (!isOpen) { initializedJob.current = null; return; }
+        if (!job?.lineItems || initializedJob.current === job.id) return;
+        initializedJob.current = job.id;
         setStep('QUANTITIES');
         setNotes('');
         setRejectReason('partial_acceptance');
         setLines(
             (job.lineItems as any[]).map((item: any, idx: number) => {
-                const templateProduct = products.find(p => p.sku === item.sku || p.id === item.productId);
+                const templateProduct = resolvePickProduct(products,item,job.sourceSiteId || job.siteId);
                 const qty = getShipmentQuantity(item);
                 return {
                     index: idx,
@@ -107,6 +112,8 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
     };
 
     const handleConfirm = async () => {
+        if (saveLock.current) return;
+        saveLock.current = true;
         setIsSubmitting(true);
         try {
             const hasUndelivered = lines.some(l => {
@@ -128,17 +135,18 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                 refreshJobs();
             }
             setStep('DONE');
-            addNotification('info', `${hasUndelivered ? 'Partial delivery' : 'Delivery'} logged for ${formatJobId(job)}. ${totalDelivered}/${totalDispatched} units arrived at dock. Awaiting store receiving inspection.`);
+            addNotification('info', `${hasUndelivered ? 'Partial delivery' : 'Delivery'} logged for ${formatJobId(job)}. ${totalDelivered}/${totalDispatched} units arrived at dock. Awaiting destination receiving inspection.`);
         } catch (err: any) {
             addNotification('alert', 'Delivery failed: ' + (err?.message || 'Unknown error'));
         } finally {
+            saveLock.current = false;
             setIsSubmitting(false);
         }
     };
 
     return (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[400] p-3 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] isolate overflow-hidden relative">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90dvh] isolate overflow-hidden relative">
 
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)] shrink-0">

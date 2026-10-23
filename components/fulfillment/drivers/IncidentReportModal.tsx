@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
     X, AlertTriangle, Clock, Truck, ShieldAlert, 
     MessageSquare, Send, CheckCircle, Navigation
@@ -30,6 +30,8 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
 }) => {
     const [issueType, setIssueType] = useState('Traffic / Delay');
     const [description, setDescription] = useState('');
+    const saveLock = useRef(false);
+    const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
@@ -45,12 +47,14 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
     ];
 
     const handleSubmit = async () => {
-        if (!description) return;
+        if (!description.trim() || saveLock.current) return;
+        saveLock.current = true;
+        setError('');
         setIsSubmitting(true);
         try {
             await onReport({
                 type: issueType,
-                description,
+                description: description.trim(),
                 priority: issueType.includes('Security') || issueType.includes('Damage') ? 'Critical' : 'High',
                 jobId: activeJob?.id
             });
@@ -62,7 +66,9 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
             }, 2000);
         } catch (err) {
             logger.error('IncidentReportModal', 'caught error', err as Error);
+            setError(err instanceof Error ? err.message : 'Incident save was not confirmed.');
         } finally {
+            saveLock.current = false;
             setIsSubmitting(false);
         }
     };
@@ -147,9 +153,10 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                             </div>
 
                             {/* Submit */}
-                            <button
+                            {error && <p role="alert" className="text-sm text-[var(--theme-text-primary)]">{error}</p>}
+                        <button
                                 onClick={handleSubmit}
-                                disabled={isSubmitting || !description}
+                                disabled={isSubmitting || !description.trim()}
                                 className="w-full min-h-[44px] py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] touch-manipulation shrink-0"
                             >
                                 <Send size={14} />

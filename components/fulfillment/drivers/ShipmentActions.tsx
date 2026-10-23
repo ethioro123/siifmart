@@ -43,5 +43,5 @@ export function ShipmentActions({ job, user, onRefresh, onArrival, onNavigate, o
         <button type="button" onClick={onNavigate} className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--theme-border)] px-3 text-xs text-[var(--theme-text-primary)]"><Navigation size={14} /> Navigate</button>
         <button type="button" onClick={onArrival} disabled={!canArrive} className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--theme-primary)] px-3 text-xs font-semibold text-[var(--theme-primary-text)] disabled:opacity-40"><CheckCircle size={16} /> Record arrival</button>
     </>;
-    return <p className="flex-1 text-xs text-[var(--theme-text-secondary)]" role="status">{phase === 'awaiting-receipt' ? 'Arrival logged · awaiting destination receiving inspection' : phase === 'closed' ? 'Receiving accepted' : 'Shipment is not ready for transport.'}</p>;
+    return <p className="flex-1 text-xs text-[var(--theme-text-secondary)]" role="status">{phase === 'awaiting-receipt' ? 'Arrival logged · awaiting destination receiving inspection' : phase === 'closed' ? 'Transport job closed' : 'Shipment is not ready for transport.'}</p>;
 }

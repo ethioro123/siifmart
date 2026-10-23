@@ -16,7 +16,7 @@ import { DriverScanner } from './drivers/DriverScanner';
 import { OutboundJobModal } from '../OutboundJobModal';
 import { IncidentReportModal } from './drivers/IncidentReportModal';
 import { authService } from '../../services/auth.service';
-import { tasksService } from '../../services/tasks.service';
+import { useDriverIncident } from '../../hooks/useDriverIncident';
 import { logger } from '../../utils/logger';
 import { canManageDispatch, getDriverMissions } from '../../utils/shipmentWorkflow';
 
@@ -88,16 +88,22 @@ export const DriverTab: React.FC<DriverTabProps> = ({
         (user?.email && employee.email?.toLowerCase() === user.email.toLowerCase()));
     const filteredJobs = getDriverMissions(allFilteredJobs, user, currentEmployee?.id, activeSite?.id || user?.siteId);
 
+    const historyOrigin = activeSite?.id || user?.siteId;
+    const scopedHistory = historicalJobs.filter(job => Boolean(historyOrigin) && (job.sourceSiteId || job.siteId) === historyOrigin);
+
+    const incident = useDriverIncident();
     const handleReportIssue = async (data: { type: string; description: string; priority: 'High' | 'Critical'; jobId?: string }) => {
         const managerRoles = ['warehouse_manager', 'country_operations_director', 'regional_operations_manager', 'country_managing_director', 'group_ceo'];
         const siteManager = employees.find(e =>
             (e.siteId === activeSite?.id || e.site_id === activeSite?.id) &&
             managerRoles.includes((e.role || '').toLowerCase())
-        ) || employees.find(e => managerRoles.includes((e.role || '').toLowerCase()));
+            && (e.status || '').toLowerCase() === 'active'
+        );
 
-        const targetAssignee = siteManager?.id || user?.id;
+        if (!siteManager || !activeSite?.id) throw new Error('No active manager was found at this facility. The incident was not saved.');
+        const targetAssignee = siteManager.id;
 
-        await tasksService.create({
+        const saved = await incident.mutateAsync({
             title: `INCIDENT: ${data.type}`,
             description: `Driver Report (${user?.name || 'Driver'}): ${data.description}${data.jobId ? ` (Job: ${data.jobId})` : ''}`,
             assignedTo: targetAssignee,
@@ -106,7 +112,8 @@ export const DriverTab: React.FC<DriverTabProps> = ({
             dueDate: new Date().toISOString(),
         } as any);
 
-        addNotification('success', 'Incident reported to Warehouse Manager.');
+        if (!saved?.id) throw new Error('Incident save was not confirmed. Please retry.');
+        addNotification('success', 'Incident report saved for the facility manager.');
     };
 
     const handleViewDocs = () => {
@@ -155,7 +162,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                     {/* MOBILE COLLAPSIBLE TOGGLE */}
                     <button
                         onClick={() => setShowControlCenter(!showControlCenter)}
-                        className="flex md:hidden items-center justify-between w-full p-2.5 sm:p-3.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xs hover:bg-[var(--theme-bg-subtle)] transition-colors text-xs font-semibold text-[var(--theme-text-primary)] min-h-[36px] touch-manipulation"
+                        className="flex md:hidden items-center justify-between w-full p-2.5 sm:p-3.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xs hover:bg-[var(--theme-bg-subtle)] transition-colors text-xs font-semibold text-[var(--theme-text-primary)] min-h-[44px] touch-manipulation"
                     >
                         <div className="flex items-center gap-2">
                             <Activity size={14} className="text-[var(--theme-primary)]" />
@@ -170,7 +177,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                         <DriverMetrics
                             t={t}
                             filteredJobs={filteredJobs}
-                            historicalJobs={historicalJobs}
+                            historicalJobs={scopedHistory}
                             employees={employees}
                             user={user}
                         />
@@ -244,7 +251,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                 /* FULL WIDTH SECTION: MISSION LOG (History) */
                 <DriversHistory
                     t={t}
-                    historicalJobs={historicalJobs}
+                    historicalJobs={scopedHistory}
                     sites={sites}
                     employees={employees}
                     resolveOrderRef={resolveOrderRef}
@@ -289,7 +296,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                 isOpen={isIncidentModalOpen}
                 onClose={() => setIsIncidentModalOpen(false)}
                 user={user}
-                activeJob={selectedJob}
+                activeJob={filteredJobs.find(job => job.id === selectedJob?.id) || filteredJobs.find(job => job.transferStatus === 'Shipped' || job.transferStatus === 'In-Transit') || null}
                 onReport={handleReportIssue}
             />
         </div>

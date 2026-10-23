@@ -1,4 +1,5 @@
 import React from 'react';
+import { summarizeDriverDeliveries } from '../../../utils/driverDeliverySummary';
 import { WMSJob, User } from '../../../types';
 import { canManageDispatch, getShipmentUnits, isShipment } from '../../../utils/shipmentWorkflow';
 
@@ -32,14 +33,7 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
         return canSeeGlobalQueue ? !!j.assignedTo : j.assignedTo === employeeId;
     };
 
-    const stats = {
-        completed: historicalJobs.filter(j => shouldInclude(j) && j.status === 'Completed').length,
-        active: filteredJobs.filter(j => shouldInclude(j) && j.status !== 'Completed').length,
-        items: [...filteredJobs, ...historicalJobs].filter(j => shouldInclude(j)).reduce((sum, j) => {
-            const units = getShipmentUnits(j);
-            return sum + units;
-        }, 0)
-    };
+    const stats = summarizeDriverDeliveries(filteredJobs.filter(shouldInclude), historicalJobs.filter(shouldInclude));
 
     const totalJobs = stats.completed + stats.active;
     const progressPct = totalJobs > 0 ? Math.round((stats.completed / totalJobs) * 100) : 0;
@@ -48,7 +42,7 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs overflow-hidden">
             <div className="grid grid-cols-3 gap-3 md:gap-6 w-full sm:w-auto">
                 <div className="text-center px-2">
-                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium mb-1">{t('warehouse.driverHub.totalJobs')}</p>
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium mb-1">Loaded missions</p>
                     <p className="text-base sm:text-xl font-bold font-mono text-[var(--theme-text-primary)] tabular-nums leading-none">{totalJobs}</p>
                 </div>
                 <div className="text-center px-2 border-x border-[var(--theme-border)]">
@@ -64,7 +58,7 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
             <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 pt-3 sm:pt-0 border-t sm:border-none border-[var(--theme-border)]">
                 <div className="text-left sm:text-right">
                     <div className="flex items-center gap-2 mb-1.5 justify-start sm:justify-end">
-                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">{t('warehouse.driverHub.shiftProgress')}</span>
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Loaded delivery progress</span>
                         <span className="text-xs font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">{progressPct}%</span>
                     </div>
                     <div className="h-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full w-24 sm:w-32 overflow-hidden">

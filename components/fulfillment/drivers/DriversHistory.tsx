@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { History as HistoryIcon, Search, Package, Archive, Undo2, UserCheck } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { WMSJob, Site, Product } from '../../../types';
@@ -6,7 +6,7 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
-import { canManageDispatch, isShipment } from '../../../utils/shipmentWorkflow';
+import { canManageDispatch, isShipment, getShipmentPhase } from '../../../utils/shipmentWorkflow';
 import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface DriversHistoryProps {
@@ -25,6 +25,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    useEffect(() => setCurrentPage(1), [searchQuery]);
     const [returnJob, setReturnJob] = useState<WMSJob | null>(null);
 
     const currentEmployee = useMemo(() => employees.find(e => (user?.email && e.email === user.email) || (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && e.id === (user as any).employeeId) || e.id === user?.id), [employees, user]);
@@ -33,7 +34,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
         const employeeId = currentEmployee?.id || user?.id;
         
         const filteredByTypeAndRole = historicalJobs.filter((j: WMSJob) => {
-            if (!isShipment(j) || j.deliveryMethod === 'External') return false;
+            if (!isShipment(j) || j.deliveryMethod === 'External' || !['awaiting-receipt','closed'].includes(getShipmentPhase(j))) return false;
             if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
             const isRoleMatch = canSeeGlobalQueue ? true : j.assignedTo === employeeId;
             return isRoleMatch;
