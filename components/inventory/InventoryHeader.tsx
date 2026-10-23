@@ -7,6 +7,7 @@ export type InventoryTab = 'overview' | 'stock' | 'zones' | 'movements' | 'pendi
 
 interface InventoryHeaderProps {
     isReadOnly: boolean;
+    canCreateProduct?: boolean;
     handleOpenAddProduct: () => void;
     setIsPrintHubOpen: (val: boolean) => void;
     setLabelsToPrint: (val: any[]) => void;
@@ -18,7 +19,7 @@ interface InventoryHeaderProps {
 }
 
 export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
-    isReadOnly,
+    isReadOnly, canCreateProduct = false,
     handleOpenAddProduct,
     setIsPrintHubOpen,
     setLabelsToPrint,
@@ -48,7 +49,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <ProtectedButton
+                    {canCreateProduct && <ProtectedButton
                         permission="ADD_PRODUCT"
                         onClick={handleOpenAddProduct}
                         disabled={isReadOnly}
@@ -56,7 +57,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                     >
                         <Plus size={16} />
                         Add Product
-                    </ProtectedButton>
+                    </ProtectedButton>}
                     <Button
                         onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }}
                         variant="secondary"
@@ -76,7 +77,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                     { id: 'zones', label: 'Zones', icon: Map },
                     { id: 'movements', label: 'Movements', icon: TrendingUp },
                     { id: 'barcode_audit', label: 'Barcode Audit', icon: Barcode, count: hasViewedBarcodeAudit ? 0 : barcodeApprovalsCount },
-                    { id: 'pending', label: 'Pending', icon: Clock, count: pendingCount }
+                    { id: 'pending', label: 'Stock Reviews', icon: Clock, count: pendingCount }
                 ].map((tab) => {
                     const isSelected = activeTab === tab.id;
                     return (

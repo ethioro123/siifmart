@@ -50,10 +50,10 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                         </div>
                         <div>
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight">
-                                Inventory Edit & Change History Log
+                                Stock Review History
                             </h3>
                             <p className="text-[12px] text-[var(--theme-text-secondary)]">
-                                Audit trail of reviewed product modifications, field edits, and approvals
+                                Audit trail of stock corrections, removal requests, and existing product changes
                             </p>
                         </div>
                     </div>

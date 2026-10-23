@@ -1,3 +1,4 @@
+import { isStockReview } from '../utils/inventoryReviewRouting';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -15,7 +16,7 @@ import { useSaveProductMutation } from '../hooks/useSaveProductMutation';
 import { useDeleteProductMutation } from '../hooks/useDeleteProductMutation';
 import { useAdjustStockMutation } from '../hooks/useAdjustStockMutation';
 import { useApproveBarcodeMutation, useRejectBarcodeMutation } from '../hooks/useBarcodeApprovalMutations';
-import { useApproveInventoryRequestMutation, useRejectInventoryRequestMutation, useBulkCleanupRequestsMutation } from '../hooks/useInventoryRequestMutations';
+import { useApproveInventoryRequestMutation, useRejectInventoryRequestMutation } from '../hooks/useInventoryRequestMutations';
 
 // --- SUB-COMPONENTS ---
 import { InventoryHeader, InventoryTab } from '../components/inventory/InventoryHeader';
@@ -52,7 +53,6 @@ export default function Inventory() {
     const rejectBarcodeMutation = useRejectBarcodeMutation();
     const approveRequestMutation = useApproveInventoryRequestMutation(createPutawayJob);
     const rejectRequestMutation = useRejectInventoryRequestMutation();
-    const bulkCleanupMutation = useBulkCleanupRequestsMutation();
     const saveProductMutation = useSaveProductMutation();
 
     // --- TAB STATE ---
@@ -108,8 +108,8 @@ export default function Inventory() {
 
     // Pending & History Requests (needed for Badge & Audit Log)
     const [allRequests, setAllRequests] = useState<PendingInventoryChange[]>([]);
-    const pendingChanges = useMemo(() => allRequests.filter(r => r.status === 'pending'), [allRequests]);
-    const historyChanges = useMemo(() => allRequests.filter(r => r.status === 'approved' || r.status === 'rejected'), [allRequests]);
+    const pendingChanges = useMemo(() => allRequests.filter(r => r.status === 'pending' && isStockReview(r)), [allRequests]);
+    const historyChanges = useMemo(() => allRequests.filter(r => (r.status === 'approved' || r.status === 'rejected') && isStockReview(r)), [allRequests]);
     const loadPendingRequests = useCallback(async () => {
         try {
             const isHqOrApprover = isAdminSite(activeSite) || canApprove;
@@ -126,14 +126,7 @@ export default function Inventory() {
         loadPendingRequests();
     }, [loadPendingRequests, activeTab]); // Reload occasionally
 
-    const pendingProducts = useMemo(() => {
-        const sourceProducts = (isAdminSite(activeSite) || canApprove) ? allProducts : filteredProducts;
-        return (Array.isArray(sourceProducts) ? sourceProducts : []).filter(
-            p => (p.status || (p as any).status) !== 'archived' &&
-                 (p.approvalStatus === 'pending' || (p as any).approval_status === 'pending')
-        );
-    }, [allProducts, filteredProducts, activeSite, canApprove]);
-    const pendingCount = pendingProducts.length + pendingChanges.length;
+    const pendingCount = pendingChanges.length;
 
 
     // --- STOCK LIST STATE ---
@@ -316,30 +309,13 @@ export default function Inventory() {
     };
 
     // Pending Handlers
-    const makePendingChange = (product: Product): PendingInventoryChange => ({
-        id: 'view-only', productId: product.id, changeType: 'create', proposedChanges: product,
-        productName: product.name, productSku: product.sku, requestedBy: product.createdBy || 'Unknown',
-        requestedAt: product.createdAt || new Date().toISOString(), status: 'pending', siteId: product.siteId || ''
-    });
-
-    const handleApproveProduct = async (product: Product) => {
-        try { await approveRequestMutation.mutateAsync(makePendingChange(product)); refreshData(['products', 'movements']); } catch (e) { }
-    };
-    const handleRejectProduct = async (product: Product, reason: string) => {
-        try { await rejectRequestMutation.mutateAsync({ change: makePendingChange(product), reason }); refreshData(['products', 'movements']); } catch (e) { }
-    };
     const handleApproveChange = async (change: PendingInventoryChange) => {
         try { await approveRequestMutation.mutateAsync(change); loadPendingRequests(); refreshData(['products', 'movements']); } catch (e) { }
     };
     const handleRejectChange = async (change: PendingInventoryChange, reason: string) => {
         try { await rejectRequestMutation.mutateAsync({ change, reason }); loadPendingRequests(); refreshData(['products', 'movements']); } catch (e) { }
     };
-    const handleBulkCleanup = () => {
-        if (confirm(`Reject all ${pendingChanges.length} pending requests?`)) {
-            bulkCleanupMutation.mutate(pendingChanges);
-            setTimeout(loadPendingRequests, 1000);
-        }
-    };
+
 
     const handleDeleteAuditRecord = (record: BarcodeApproval) => {
         if (confirm('Remove this barcode mapping?')) {
@@ -356,6 +332,7 @@ export default function Inventory() {
             {/* --- HEADER --- */}
             <InventoryHeader
                 isReadOnly={isReadOnly}
+                canCreateProduct={canApprove}
                 handleOpenAddProduct={handleOpenAddProduct}
                 setIsPrintHubOpen={setIsPrintHubOpen}
                 setLabelsToPrint={setLabelsToPrint}
@@ -407,11 +384,11 @@ export default function Inventory() {
                 )}
                 {activeTab === 'pending' && (
                     <InventoryPending
-                        pendingProducts={pendingProducts} pendingChanges={pendingChanges} historyChanges={historyChanges}
+                        pendingChanges={pendingChanges} historyChanges={historyChanges}
                         allProducts={allProducts} canApprove={canApprove} userRole={user?.role} currencySymbol={currencySymbol}
                         isSubmitting={approveRequestMutation.isPending || rejectRequestMutation.isPending}
-                        onApproveProduct={handleApproveProduct} onApproveChange={handleApproveChange}
-                        onRejectProduct={handleRejectProduct} onRejectChange={handleRejectChange} onBulkCleanup={handleBulkCleanup}
+                        onApproveChange={handleApproveChange}
+                        onRejectChange={handleRejectChange}
                     />
                 )}
             </div>
