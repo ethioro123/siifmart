@@ -309,7 +309,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     )}
                 </div>
                 <label className="flex min-h-11 items-start gap-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] p-3 text-sm text-[var(--theme-text-primary)]">
-                    <input type="checkbox" className="mt-1" checked={Boolean(customAttributes.storage?.requirementsConfirmed)} onChange={event => {
+                    <input data-po-field="storageConfirmation" type="checkbox" className="mt-1" checked={Boolean(customAttributes.storage?.requirementsConfirmed)} onChange={event => {
                         const requirementsConfirmed = event.target.checked;
                         setCustomAttributes((previous: POItemFormDraft['customAttributes']) => ({ ...previous, storage: { ...previous.storage, requirementsConfirmed } }));
                         setErrors(previous => ({ ...previous, storageConfirmation: '' }));

@@ -102,7 +102,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                         </label>
                         <div className="relative">
                             <select
-                                title="Apparel Size"
+                                data-po-field="size" title="Apparel Size"
                                 className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer`}
                                 value={customAttributes.identity?.variant || customAttributes.categorySpecific?.apparelSize || ''}
                                 onChange={e => {
@@ -173,7 +173,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                                 title="Net Liquid Volume"
                                 placeholder="e.g. 500"
                                 className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none`}
-                                value={customItemSize}
+                                data-po-field="size" value={customItemSize}
                                 onChange={e => handleNetWeightChange(e.target.value)}
                             />
                             <div className="relative min-w-[70px]">
@@ -274,7 +274,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                                 title="Device Weight"
                                 placeholder="e.g. 172"
                                 className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold outline-none"
-                                value={customItemSize}
+                                data-po-field="size" value={customItemSize}
                                 onChange={e => handleNetWeightChange(e.target.value)}
                             />
                             <div className="relative min-w-[65px]">
@@ -384,7 +384,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                                 title="Net Content Value"
                                 placeholder="e.g. 500"
                                 className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all`}
-                                value={customItemSize}
+                                data-po-field="size" value={customItemSize}
                                 onChange={e => handleNetWeightChange(e.target.value)}
                             />
                             <div className="relative min-w-[75px]">

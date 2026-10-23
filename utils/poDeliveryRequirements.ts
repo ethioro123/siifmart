@@ -22,13 +22,16 @@ export function getPODeliveryRequirements(items: readonly DeliveryRequirementIte
     const shelfLives = perishables.map(item => parseShelfLifeDays(item.customAttributes?.storage?.shelfLifeDays)).filter((value): value is number => value !== null);
     return { temperatures, hasPerishables: perishables.length > 0, shortestShelfLife: shelfLives.length ? Math.min(...shelfLives) : null };
 }
-export function validatePODelivery(items: readonly DeliveryRequirementItem[], temperature?: string, shelfLife?: string | number): string | null {
+export function getPODeliveryIssue(items: readonly DeliveryRequirementItem[], temperature?: string, shelfLife?: string | number): { message: string; selector: string } | null {
     const requirements = getPODeliveryRequirements(items);
-    if (requirements.temperatures.length > 1) return 'Items require different delivery temperatures. Create separate purchase orders for each temperature group.';
-    if (requirements.temperatures.length === 1 && requirements.temperatures[0] !== temperature) return `Set required delivery temperature to ${requirements.temperatures[0]} to match the items.`;
+    if (requirements.temperatures.length > 1) return { message: 'Items require different delivery temperatures. Create separate purchase orders for each temperature group.', selector: '#po-temperature' };
+    if (requirements.temperatures.length === 1 && requirements.temperatures[0] !== temperature) return { message: `Set required delivery temperature to ${requirements.temperatures[0]} to match the items.`, selector: '#po-temperature' };
     const days = parseShelfLifeDays(shelfLife);
-    if (String(shelfLife ?? '').trim() && days === null) return 'Minimum remaining shelf life must be a positive whole number of days.';
-    if (requirements.hasPerishables && days === null) return 'Enter minimum remaining shelf life at delivery for perishable items.';
-    if (days !== null && requirements.shortestShelfLife !== null && days > requirements.shortestShelfLife) return `Minimum remaining shelf life cannot exceed the shortest total product shelf life (${requirements.shortestShelfLife} days).`;
+    if (String(shelfLife ?? '').trim() && days === null) return { message: 'Minimum remaining shelf life must be a positive whole number of days.', selector: '#po-shelf-life' };
+    if (requirements.hasPerishables && days === null) return { message: 'Enter minimum remaining shelf life at delivery for perishable items.', selector: '#po-shelf-life' };
+    if (days !== null && requirements.shortestShelfLife !== null && days > requirements.shortestShelfLife) return { message: `Minimum remaining shelf life cannot exceed the shortest total product shelf life (${requirements.shortestShelfLife} days).`, selector: '#po-shelf-life' };
     return null;
+}
+export function validatePODelivery(items: readonly DeliveryRequirementItem[], temperature?: string, shelfLife?: string | number): string | null {
+    return getPODeliveryIssue(items, temperature, shelfLife)?.message ?? null;
 }

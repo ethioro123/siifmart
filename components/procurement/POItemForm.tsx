@@ -1,3 +1,4 @@
+import { POValidationFeedback, itemFieldSelectors } from './POValidationFeedback';
 import React, { useState, useEffect, useImperativeHandle } from 'react';
 import { POItem, Product } from '../../types';
 import { Plus } from 'lucide-react';
@@ -292,13 +293,7 @@ export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
 
         if (result.errors) {
             setErrors(result.errors);
-            if (result.errors.search) {
-                showToast(result.errors.search, 'error');
-            } else if (productType === 'new') {
-                showToast("Please fill in all required product specifications and pricing fields.", 'error');
-            } else {
-                showToast("Please select a product and enter valid quantity, cost, and retail price.", 'error');
-            }
+            showToast(Object.values(result.errors)[0], 'error');
             return;
         }
 
@@ -313,7 +308,8 @@ export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
     };
 
     return (
-        <div id="po-item-form-container" className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-sm relative overflow-hidden group">
+        <div id="po-item-form-container" tabIndex={-1} className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-sm relative overflow-hidden group">
+            <POValidationFeedback issues={React.useMemo(() => Object.entries(errors).filter(([, message]) => message).map(([key, message]) => ({ message, selector: itemFieldSelectors[key] || '#po-item-form-container' })), [errors])} />
             <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2 relative z-10">
                 <div className="p-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
                     <Plus size={15} />

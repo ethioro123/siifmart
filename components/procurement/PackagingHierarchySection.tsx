@@ -119,7 +119,7 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                             min="2"
                             className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.packQty ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                             placeholder="e.g. 12 or 24"
-                            value={customAttributes.packaging?.packQty || ''}
+                            data-po-field="packQty" value={customAttributes.packaging?.packQty || ''}
                             onChange={e => {
                                 if (errors.packQty && setErrors) setErrors(prev => ({ ...prev, packQty: '' }));
                                 setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: e.target.value } }));
@@ -139,7 +139,7 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                             min="1"
                             className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.caseSize ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                             placeholder="e.g. 4"
-                            value={customAttributes.packaging?.caseSize || ''}
+                            data-po-field="caseSize" value={customAttributes.packaging?.caseSize || ''}
                             onChange={e => {
                                 if (errors.caseSize && setErrors) setErrors(prev => ({ ...prev, caseSize: '' }));
                                 setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: e.target.value } }));

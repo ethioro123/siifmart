@@ -122,7 +122,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                     className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all appearance-none cursor-pointer font-semibold"
                                     value={newPOSupplier}
                                     onChange={(e) => handleSupplierSelect(e.target.value)}
-                                    title="Select Supplier"
+                                    id="po-supplier" title="Select Supplier"
                                 >
                                     <option value="" className="text-[var(--theme-text-secondary)] bg-[var(--theme-bg-panel)]">Choose from vendor directory...</option>
                                     {allSuppliers.map(s => (
@@ -139,7 +139,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                             <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Vendor Name</label>
                             <input
                                 type="text"
-                                placeholder="Enter external vendor name..."
+                                id="po-vendor-name" placeholder="Enter external vendor name..."
                                 className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-muted)] font-semibold"
                                 value={manualVendorName}
                                 onChange={(e) => setManualVendorName(e.target.value)}
@@ -205,6 +205,8 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                             className={`w-full h-11 bg-[var(--theme-bg-subtle)] border rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] flex justify-between items-center transition-all ${
                                 isEditMode ? 'opacity-75 cursor-not-allowed border-[var(--theme-border)]' : isSiteDropdownOpen ? 'border-[var(--theme-accent)] cursor-pointer' : 'border-[var(--theme-border)] cursor-pointer'
                             }`}
+                            id="po-receiving" role="button" tabIndex={0}
+                            onKeyDown={event => { if (!isEditMode && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setIsSiteDropdownOpen(!isSiteDropdownOpen); } }}
                             onClick={() => { if (!isEditMode) setIsSiteDropdownOpen(!isSiteDropdownOpen); }}
                         >
                             <span className={destinationSiteIds.length === 0 ? 'text-[var(--theme-text-secondary)] text-xs font-medium' : 'font-bold text-[var(--theme-text-primary)]'}>
@@ -394,7 +396,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                             <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Required temperature</label>
                             <select
                                 className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none"
-                                value={poDelivery.tempReq}
+                                id="po-temperature" value={poDelivery.tempReq}
                                 onChange={e => setPoDelivery(prev => ({ ...prev, tempReq: e.target.value as typeof prev.tempReq }))}
                             >
                                 <option value="Ambient">Ambient</option>
@@ -406,7 +408,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                             <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Minimum remaining days at delivery</label>
                             <input
                                 type="number"
-                                placeholder="e.g. 7"
+                                id="po-shelf-life" placeholder="e.g. 7"
                                 min="1" step="1" aria-label="Minimum remaining shelf life at delivery (days)"
                                 className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none"
                                 value={parseShelfLifeDays(poDelivery.shelfLife) ?? poDelivery.shelfLife}

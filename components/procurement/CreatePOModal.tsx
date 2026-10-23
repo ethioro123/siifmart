@@ -1,5 +1,6 @@
-import { validatePOCreation } from '../../utils/poCreationValidation';
-import { validatePODelivery } from '../../utils/poDeliveryRequirements';
+import { POValidationFeedback, type POFieldIssue } from './POValidationFeedback';
+import { getPOCreationIssue } from '../../utils/poCreationValidation';
+import { getPODeliveryIssue } from '../../utils/poDeliveryRequirements';
 import { PODeliveryRequirementsSummary } from './PODeliveryRequirementsSummary';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Modal from '../../components/Modal';
@@ -311,19 +312,25 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         if (formElement) formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
 
+    const [validationIssues, setValidationIssues] = useState<POFieldIssue[]>([]);
+    useEffect(() => { if (!isOpen) setValidationIssues([]); }, [isOpen]);
+    useEffect(() => setValidationIssues([]), [destinationSiteIds, newPOSupplier, manualVendorName, isManualVendor, poDelivery, newPOItems]);
     const handleCreatePO = async () => {
-        const validationError = validatePOCreation({
+        const creationIssue = getPOCreationIssue({
             isEditMode, canCreate: hasPermission(user?.role, 'CREATE_PO'), hasUnsavedItem: hasUnsavedItemDraft,
             itemCount: newPOItems.length, destinations: destinationSiteIds, receivingSites: countryWarehouses,
             fromRequest: Boolean(initialDraft?.purchaseRequisitionId), manualVendor: isManualVendor,
             vendorName: manualVendorName, supplierId: newPOSupplier
-        }) || validatePODelivery(newPOItems, poDelivery.tempReq, poDelivery.shelfLife);
+        });
+        const deliveryIssue = getPODeliveryIssue(newPOItems, poDelivery.tempReq, poDelivery.shelfLife);
+        const validationError = creationIssue?.message || deliveryIssue?.message;
         if (validationError) {
             showToast(validationError, !isEditMode && !hasPermission(user?.role, 'CREATE_PO') ? 'error' : 'warning');
-            if (hasUnsavedItemDraft) document.getElementById('po-item-form-container')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setValidationIssues([creationIssue || deliveryIssue!]);
             return;
         }
 
+        setValidationIssues([]);
         setIsSubmitting(true);
         try {
             const firstSite = sites.find(s => s.id === destinationSiteIds[0]);
@@ -386,7 +393,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 />
             }
         >
-            <div className="relative space-y-8 pb-4 overflow-x-hidden">
+            <div className="relative space-y-8 pb-4 overflow-x-hidden" onChangeCapture={() => setValidationIssues([])}>
+                <POValidationFeedback issues={validationIssues} />
                 {isRestoredBannerVisible && draftMeta && (
                     <PODraftBanner meta={draftMeta} onDismiss={dismissBanner} onDiscard={handleDiscardDraft} />
                 )}

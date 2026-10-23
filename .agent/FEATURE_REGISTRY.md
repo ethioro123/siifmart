@@ -484,3 +484,6 @@
 ### PO form responsive layout (2026-10-23)
 - Mobile PO editor uses the available screen height, safe-area footer spacing, and independently scrolling content.
 - Total and action buttons stack on narrow screens; physical attributes use readable mobile columns, and supplier cards no longer stretch to match logistics.
+
+### Procurement validation guidance (2026-10-23)
+- Failed order/item validation lists specific missing fields, links to them, opens collapsed details, and focuses the first issue.
