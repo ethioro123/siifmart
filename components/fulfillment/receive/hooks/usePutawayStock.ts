@@ -1,307 +1,35 @@
-import { productsService, stockMovementsService } from '../../../../services/supabase.service';
-import { useStore } from '../../../../contexts/CentralStore';
-import { useData } from '../../../../contexts/DataContext';
-import { logger } from '../../../../utils/logger';
-import { convertToSellableUnits } from '../../useReceiving';
-import { resolveReceivingPolicy } from '../../../../utils/receivingPolicy';
-import { Product } from '../../../../types';
-import { mergeCustomAttributes } from '../../../../utils/productAttributes';
+import { putawayPlacementService } from '../../../../services/putaway-placement.service';
 
+/** Stock, movement audit, and job-line placement are committed together by the server. */
 export function usePutawayStock() {
-    const { user } = useStore();
-    const { orders, addNotification, refreshData, settings } = useData();
-
-    const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id.trim());
-
-    const putawayStock = async (params: { 
-        sku: string, 
-        location: string, 
-        quantity: number, 
-        siteId: string, 
-        type: 'IN' | 'TRANSFER', 
-        expiryDate?: string, 
-        batchNumber?: string, 
-        sourceProductId?: string, 
-        timestamp?: string, 
-        size?: string, 
-        brand?: string, 
-        unit?: string, 
+    const putawayStock = async (params: {
+        jobId?: string;
+        itemIndex?: number;
+        sku: string,
+        location: string,
+        quantity: number,
+        siteId: string,
+        type: 'IN' | 'TRANSFER',
+        expiryDate?: string,
+        batchNumber?: string,
+        sourceProductId?: string,
+        timestamp?: string,
+        size?: string,
+        brand?: string,
+        unit?: string,
         image?: string,
-        packQuantity?: number, 
+        packQuantity?: number,
         packageType?: string,
         caseSize?: number,
-        category?: string, 
-        retailPrice?: number, 
-        customAttributes?: any, 
-        description?: string, 
-        minStock?: number, 
-        maxStock?: number 
+        category?: string,
+        retailPrice?: number,
+        customAttributes?: unknown,
+        description?: string,
+        minStock?: number,
+        maxStock?: number
     }) => {
-        try {
-            const ts = params.timestamp || new Date().toISOString();
-            logger.debug('Fulfillment', 'putawayStock called:');
-
-            // Country policy: PO retail price goes live only when stock reaches the shelf (default)
-            if (params.type === 'IN' && params.retailPrice && params.retailPrice > 0
-                && resolveReceivingPolicy(settings).poPriceApplyAt === 'putaway') {
-                productsService.updatePriceBySku(params.sku, params.siteId, params.retailPrice).catch(e => {
-                    logger.warn('Fulfillment', `Failed to apply PO price at putaway for ${params.sku}`, e);
-                });
-            }
-
-            // 1. Check if product exists at destination
-            let destProduct = await productsService.getBySkuAndLocation(params.sku, params.location, params.siteId);
-            let destProductId = destProduct?.id;
-
-            if (destProduct) {
-                logger.debug('Fulfillment', `Found existing product at ${params.location} (ID: ${destProduct.id}). Updating stock...`);
-                // Update existing
-                await productsService.adjustStock(destProduct.id, params.quantity, 'IN', `Putaway to ${params.location}`, user?.name || 'System', params.expiryDate, params.batchNumber, ts);
-            } else {
-                logger.debug('Fulfillment', `No product found at ${params.location}. Creating or recycling record...`);
-                // Create new
-                // Need source details. Use sourceProductId if available, or fetch by SKU.
-                let sourceProduct: any;
-                if (params.sourceProductId) {
-                    try { sourceProduct = await productsService.getById(params.sourceProductId); } catch (e) { }
-                }
-
-                if (!sourceProduct) {
-                    // Fetch master record or any record for this SKU to copy details
-                    sourceProduct = await productsService.getBySKU(params.sku, params.siteId);
-                }
-
-                if (!sourceProduct || !sourceProduct.price || sourceProduct.price <= 0) {
-                    try {
-                        const template = await productsService.getBySKU(params.sku);
-                        if (template && (template.price > 0 || !sourceProduct)) {
-                            sourceProduct = sourceProduct
-                                ? { ...template, ...sourceProduct, price: template.price || sourceProduct.price, costPrice: template.costPrice || sourceProduct.costPrice, category: (template.category && template.category !== 'Uncategorized') ? template.category : sourceProduct.category }
-                                : template;
-                        }
-                    } catch (e) { }
-                }
-
-                // [FIX] Handle custom products that only exist as PO Items
-                if (!sourceProduct && params.sourceProductId) {
-                    const poItem = orders?.flatMap(o => o.lineItems || []).find(i => i.id === params.sourceProductId || i.productId === params.sourceProductId);
-                    if (poItem) {
-                        logger.debug('Fulfillment', `Found PO Item matching ID. Creating initial product definition for ${params.sku}`);
-                        sourceProduct = {
-                            name: poItem.productName || params.sku,
-                            sku: poItem.sku || params.sku,
-                            price: poItem.retailPrice || 0,
-                            costPrice: (() => {
-                                const unitsPerOrderUnit = convertToSellableUnits(1, poItem);
-                                return unitsPerOrderUnit > 0 ? (poItem.unitCost / unitsPerOrderUnit) : (poItem.unitCost || 0);
-                            })(),
-                            category: poItem.category || 'Uncategorized',
-                            brand: poItem.brand || '',
-                            size: poItem.size || '',
-                            unit: poItem.unit || 'UNIT',
-                            packQuantity: poItem.packQuantity || 1,
-                            description: poItem.description || '',
-                            minStock: poItem.minStock || 0,
-                            maxStock: poItem.maxStock || 0,
-                            customAttributes: poItem.customAttributes || null,
-                            stock: 0,
-                            location: 'On Order', // Will be overridden to actual location below
-                            status: 'active',
-                            siteId: params.siteId,
-                            approvalStatus: 'approved'
-                        };
-                    }
-                }
-
-                if (!sourceProduct) {
-                    throw new Error(`Product definition for SKU ${params.sku} not found`);
-                }
-
-                // [FIX] Check if target site has a "ghost" placeholder (On Order/Empty & 0 Stock)
-                // If so, MOVE/RECYCLE it instead of creating a duplicate.
-                let placeholderRecord = (sourceProduct?.location === 'On Order' || !sourceProduct?.location) && (!sourceProduct?.stock || sourceProduct?.stock === 0) && (sourceProduct?.siteId === params.siteId || (sourceProduct as any)?.site_id === params.siteId) ? sourceProduct : null;
-                
-                if (!placeholderRecord) {
-                    try {
-                        const existingPlaceholder = await productsService.getBySkuAndLocation(params.sku, 'On Order', params.siteId);
-                        if (existingPlaceholder && (!existingPlaceholder.stock || existingPlaceholder.stock === 0)) {
-                            placeholderRecord = existingPlaceholder;
-                        }
-                    } catch (e) { }
-                }
-
-                if (placeholderRecord) {
-                    logger.debug('Fulfillment', `Recycling placeholder product ${placeholderRecord.id} from '${placeholderRecord.location}' to '${params.location}'`);
-
-                    // Update the existing placeholder to be the real record
-                    const updates: Partial<Product> = {
-                        location: params.location,
-                        stock: params.quantity,
-                        status: 'active'
-                    };
-                    if (params.expiryDate || placeholderRecord.expiryDate) updates.expiryDate = params.expiryDate || placeholderRecord.expiryDate;
-                    if (params.batchNumber || placeholderRecord.batchNumber) updates.batchNumber = params.batchNumber || placeholderRecord.batchNumber;
-
-                    // Sync pricing and category if missing or zero on placeholder
-                    if ((!placeholderRecord.price || placeholderRecord.price <= 0) && (params.retailPrice || sourceProduct?.price)) {
-                        updates.price = params.retailPrice || sourceProduct?.price;
-                    }
-                    if ((!placeholderRecord.costPrice || placeholderRecord.costPrice <= 0) && (sourceProduct?.costPrice)) {
-                        updates.costPrice = sourceProduct.costPrice;
-                    }
-                    if ((!placeholderRecord.category || placeholderRecord.category === 'Uncategorized') && (params.category || sourceProduct?.category) && (params.category !== 'Uncategorized' || sourceProduct?.category !== 'Uncategorized')) {
-                        updates.category = (params.category && params.category !== 'Uncategorized') ? params.category : sourceProduct?.category;
-                    }
-
-                    // Sync PO line item details if missing on placeholder
-                    if (!placeholderRecord.size && params.size) updates.size = params.size;
-                    if (!placeholderRecord.brand && params.brand) updates.brand = params.brand;
-                    if (!placeholderRecord.unit && params.unit) updates.unit = params.unit;
-                    if (!placeholderRecord.image && params.image) updates.image = params.image;
-                    if ((!placeholderRecord.packQuantity || placeholderRecord.packQuantity === 1) && (params.packQuantity && params.packQuantity > 1)) {
-                        updates.packQuantity = params.packQuantity;
-                    }
-                    if (!placeholderRecord.packageType && params.packageType) updates.packageType = params.packageType;
-                    if (!placeholderRecord.caseSize && params.caseSize) updates.caseSize = params.caseSize;
-                    if (!placeholderRecord.category && params.category) updates.category = params.category;
-                    if (!placeholderRecord.description && params.description) updates.description = params.description;
-                    if (!placeholderRecord.minStock && params.minStock) updates.minStock = params.minStock;
-                    if (!placeholderRecord.maxStock && params.maxStock) updates.maxStock = params.maxStock;
-                    if (params.customAttributes) {
-                        const mergedAttrs = mergeCustomAttributes(placeholderRecord.customAttributes, params.customAttributes);
-                        if (JSON.stringify(mergedAttrs) !== JSON.stringify(placeholderRecord.customAttributes)) {
-                            updates.customAttributes = mergedAttrs;
-                        }
-                    }
-
-                    const updated = await productsService.update(placeholderRecord.id, updates);
-                    destProductId = updated.id;
-
-                    // [FIX] Log Movement for Recycled Record
-                    await stockMovementsService.create({
-                        site_id: params.siteId,
-                        product_id: updated.id,
-                        product_name: updated.name,
-                        type: 'IN',
-                        quantity: params.quantity,
-                        movement_date: ts,
-                        performed_by: user?.name || 'System',
-                        reason: `Putaway to ${params.location} (Recycled)`
-                    } as any);
-
-                } else {
-                    // Standard Logic: Create clone for new location
-
-                    // [FIX] Try to fetch PO Item explicitly to carry over deep attributes if they exist
-                    let poAttribs = {};
-                    if (params.sourceProductId) {
-                        const poItem = orders?.flatMap(o => o.lineItems || []).find(i => i.id === params.sourceProductId || i.productId === params.sourceProductId);
-                        if (poItem) {
-                            poAttribs = {
-                                brand: poItem.brand || sourceProduct.brand,
-                                size: poItem.size || sourceProduct.size,
-                                unit: poItem.unit || sourceProduct.unit,
-                                image: poItem.image || sourceProduct.image,
-                                packQuantity: poItem.packQuantity || sourceProduct.packQuantity,
-                                packageType: poItem.packageType || sourceProduct.packageType,
-                                caseSize: poItem.caseSize || sourceProduct.caseSize,
-                                description: poItem.description || sourceProduct.description,
-                                minStock: poItem.minStock || sourceProduct.minStock,
-                                maxStock: poItem.maxStock || sourceProduct.maxStock,
-                                customAttributes: mergeCustomAttributes(sourceProduct.customAttributes, poItem.customAttributes)
-                            };
-                        }
-                    }
-
-                    const newProduct = {
-                        ...sourceProduct,
-                        ...poAttribs,
-                        location: params.location,
-                        stock: params.quantity,
-                        status: 'active', // Ensure product shows in inventory
-                        siteId: params.siteId, // [FIX] Override siteId to match destination
-                        // Ensure we don't copy ID or other specific fields
-                        id: undefined,
-                        created_at: ts,
-                        updated_at: undefined,
-                        createdAt: ts,
-                        updatedAt: undefined,
-                        // Keep expiry/batch if provided, else use source
-                        expiryDate: params.expiryDate || sourceProduct.expiryDate,
-                        batchNumber: params.batchNumber || sourceProduct.batchNumber,
-                        // Reset approval for new location? Or keep? Usually keep if moving approved stock.
-                        approvalStatus: 'approved',
-                    };
-
-                    // Remove ID from object explicitly to avoid Supabase errors if spread didn't work as expected with types
-                    delete (newProduct as any).id;
-
-                    const newProductPayload = newProduct; // Rename for clarity in closure
-
-                    try {
-                        const created = await productsService.create(newProductPayload);
-                        destProductId = created.id;
-                        logger.debug('Fulfillment', `✅ Created new product record at ${params.location}`);
-
-                        // [FIX] Log Movement for New Location Record
-                        await stockMovementsService.create({
-                            site_id: params.siteId,
-                            product_id: created.id,
-                            product_name: created.name,
-                            type: 'IN',
-                            quantity: params.quantity,
-                            movement_date: ts,
-                            performed_by: user?.name || 'System',
-                            reason: `Putaway to ${params.location} (New Location)`
-                        } as any);
-
-                    } catch (err: any) {
-                        // [SAFETY] Handle Unique Constraint Violation (Race condition or hidden record)
-                        if (err.code === '23505') {
-                            logger.warn('Fulfillment', `⚠️ Product creation collision (already exists) at ${params.location}. Recovering...`);
-                            // Fetch the existing record that caused the collision
-                            const existing = await productsService.getBySkuAndLocation(params.sku, params.location, params.siteId);
-                            if (existing) {
-                                logger.debug('Fulfillment', `🔄 Recovered: Found existing product ${existing.id}. Updating stock...`);
-                                destProductId = existing.id;
-                                // Force status to active and update stock
-                                await productsService.update(existing.id, { status: 'active', updated_at: ts } as any);
-                                await productsService.adjustStock(existing.id, params.quantity, 'IN', `Putaway to ${params.location} (Recovered)`, user?.name || 'System', params.expiryDate, params.batchNumber, ts);
-                            } else {
-                                // Should not happen if constraint fired, but just in case re-throw
-                                throw err;
-                            }
-                        } else {
-                            throw err;
-                        }
-                    }
-                }
-            }
-
-            // [CLEANUP] Evict old tenants: If we put a new product here, ensure old 0-stock products don't claim this location
-            try {
-                await productsService.clearLocationForEmptyProducts(params.location, params.siteId, params.sku);
-                logger.debug('Fulfillment', `🧹 Location ${params.location} cleanup complete (evicted 0-stock ghosts)`);
-            } catch (cleanupErr) {
-                logger.warn('Fulfillment', '⚠️ Manual cleanup of old location tenants failed (non-critical)');
-            }
-
-            // [CLEANUP] Purge any orphaned 0-stock 'On Order' ghost placeholders for this SKU at target site
-            try {
-                await productsService.deleteGhostPlaceholders(params.sku, params.siteId);
-                logger.debug('Fulfillment', `🧹 Purged any 0-stock On Order ghost placeholders for SKU ${params.sku}`);
-            } catch (ghostErr) {
-                logger.warn('Fulfillment', '⚠️ Ghost placeholder cleanup failed (non-critical)');
-            }
-
-            addNotification('success', `Stock putaway to ${params.location}`);
-            refreshData(); // Refresh to show new location
-        } catch (e) {
-            logger.error('Fulfillment', '❌ putawayStock failed:', e);
-            addNotification('alert', 'Putaway failed');
-            throw e;
-        }
+        if (!params.jobId || params.itemIndex === undefined) throw new Error('Open the assigned Putaway job before placing stock.');
+        await putawayPlacementService.place(params.jobId, params.itemIndex, params.quantity, params.location);
     };
-
     return { putawayStock };
 }

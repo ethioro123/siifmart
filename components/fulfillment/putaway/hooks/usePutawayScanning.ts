@@ -137,6 +137,7 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
 
             // 2. Putaway Stock Logic (Replaces adjustStock + relocate)
             await putawayStock({
+                jobId: selectedJob.id, itemIndex,
                 sku: currentItem.sku || '',
                 location: scannedLocation,
                 quantity: qty,
@@ -164,7 +165,7 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
 
             // 1. Update Job Item Status — use findIndex (not indexOf) to avoid reference mismatch
             const itemStatus = qty < currentItem.expectedQty ? 'Short' : 'Picked';
-            await updateJobItem(selectedJob.id, itemIndex, itemStatus, qty, scannedLocation);
+            // The placement RPC already saved the job line with the stock movement.
 
             addNotification('success', 'Item put away successfully');
 
