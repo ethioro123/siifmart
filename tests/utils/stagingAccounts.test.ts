@@ -82,4 +82,43 @@ describe('live staging roster mapping', () => {
         expect(selected.filter(a => a.roleId === 'returns_clerk')).toHaveLength(1);
         expect(selected.filter(a => a.roleId === 'warehouse_manager')).toHaveLength(1);
     });
+
+    it('excludes Bishoftu and includes Piassa Heritage and CMC Summit supermarkets in quick login', () => {
+        const makeStoreAccount = (id: string, siteCode: string, siteName: string, role = 'cashier', email = `${id}@staging.siifmart.com`, name = id) =>
+            mapStagingEmployee({
+                ...row, id, role, email, name,
+                site: { code: siteCode, name: siteName, type: 'Store', country: 'ET', region_code: siteCode.slice(0, 6) }
+            })!;
+
+        const mixedRoster = [
+            // Bishoftu Lakefront Supermarket (should be excluded)
+            makeStoreAccount('bishoftu-mgr', 'ET-ADA-STR-02', 'Bishoftu Lakefront Supermarket', 'store_manager'),
+            makeStoreAccount('bishoftu-cashier', 'ET-ADA-STR-02', 'Bishoftu Lakefront Supermarket', 'cashier'),
+
+            // Piassa Heritage Supermarket (should be included, deduplicating duplicate roles)
+            makeStoreAccount('piassa-cashier-named', 'ET-ADD-STR-02', 'Piassa Heritage Supermarket', 'cashier', 'et.add.str02.cashier@staging.siifmart.com', 'Eden Haile'),
+            makeStoreAccount('piassa-cashier-fixture', 'ET-ADD-STR-02', 'Piassa Heritage Supermarket', 'cashier', 'et-add-str-02.cashier@role-coverage.staging.siifmart.invalid', '[TEST] Cashier'),
+            makeStoreAccount('piassa-mgr', 'ET-ADD-STR-02', 'Piassa Heritage Supermarket', 'store_manager', 'et.add.str02.storemanager@staging.siifmart.com', 'Tewodros Assefa'),
+
+            // CMC Summit Supermarket (should be included)
+            makeStoreAccount('cmc-cashier', 'ET-ADD-STR-03', 'CMC Summit Supermarket', 'cashier', 'et.add.str03.cashier@staging.siifmart.com', 'Betelhem Hailu'),
+            makeStoreAccount('cmc-mgr', 'ET-ADD-STR-03', 'CMC Summit Supermarket', 'store_manager', 'et.add.str03.storemanager@staging.siifmart.com', 'Ermias Desta'),
+        ];
+
+        const selected = selectRepresentativeStagingAccounts(mixedRoster);
+        const selectedIds = selected.map(a => a.id);
+
+        // Bishoftu must be completely excluded
+        expect(selectedIds).not.toContain('bishoftu-mgr');
+        expect(selectedIds).not.toContain('bishoftu-cashier');
+
+        // Piassa Heritage must be included and role-deduplicated
+        expect(selectedIds).toContain('piassa-cashier-named');
+        expect(selectedIds).not.toContain('piassa-cashier-fixture');
+        expect(selectedIds).toContain('piassa-mgr');
+
+        // CMC Summit must be included
+        expect(selectedIds).toContain('cmc-cashier');
+        expect(selectedIds).toContain('cmc-mgr');
+    });
 });

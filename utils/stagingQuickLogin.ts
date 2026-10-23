@@ -52,17 +52,60 @@ const QUICK_LOGIN_SITE_TYPES: StagingSiteType[] = [
     'HQ', 'Regional Administration', 'Store', 'Warehouse', 'Distribution Center'
 ];
 
+/** Explicitly excluded sites from staging quick login (e.g. Bishoftu Lakefront Supermarket) */
+export const EXCLUDED_STAGING_QUICK_LOGIN_SITE_CODES = new Set(['ET-ADA-STR-02']);
+
+/** Preferred operational store sites for Ethiopia staging quick login */
+export const PREFERRED_STAGING_STORE_SITE_CODES = new Set(['ET-ADD-STR-02', 'ET-ADD-STR-03']);
+
+/** Sites with synthetic coverage fixtures where roles should be deduplicated to 1 employee per role */
+const DEDUPLICATE_ROLE_SITE_CODES = new Set(['ET-ADD-DC-01', 'ET-ADD-STR-02', 'ET-ADD-STR-03']);
+
+function deduplicateSiteRoleIds(siteAccounts: StagingQuickAccount[]): Set<string> {
+    const keptIds = new Set<string>();
+    const roleSeen = new Set<string>();
+
+    const sorted = [...siteAccounts].sort((a, b) => {
+        const aInvalid = a.email.endsWith('.invalid');
+        const bInvalid = b.email.endsWith('.invalid');
+        if (aInvalid !== bInvalid) return aInvalid ? 1 : -1;
+        const aTest = a.name.startsWith('[TEST]');
+        const bTest = b.name.startsWith('[TEST]');
+        if (aTest !== bTest) return aTest ? 1 : -1;
+        return a.code.localeCompare(b.code) || a.id.localeCompare(b.id);
+    });
+
+    for (const acc of sorted) {
+        if (!roleSeen.has(acc.roleId)) {
+            roleSeen.add(acc.roleId);
+            keptIds.add(acc.id);
+        }
+    }
+    return keptIds;
+}
+
 /** Show all regional and receiving facilities; keep representative HQ and stores. */
 export function selectRepresentativeStagingAccounts(accounts: StagingQuickAccount[]): StagingQuickAccount[] {
     const selected = new Set<string>();
     const groups = new Map<string, StagingQuickAccount[]>();
 
     for (const account of accounts) {
+        if (EXCLUDED_STAGING_QUICK_LOGIN_SITE_CODES.has(account.siteCode) ||
+            account.siteName.toLowerCase().includes('bishoftu')) {
+            continue;
+        }
+
         if (account.country === 'GLOBAL' || account.facilityTier === 'Regional Administration' ||
             account.siteType === 'Warehouse' || account.siteType === 'Distribution Center') {
             selected.add(account.id);
             continue;
         }
+
+        if (PREFERRED_STAGING_STORE_SITE_CODES.has(account.siteCode)) {
+            selected.add(account.id);
+            continue;
+        }
+
         if (!QUICK_LOGIN_SITE_TYPES.includes(account.siteType)) continue;
         const key = `${account.country}:${account.siteType}:${account.siteCode}`;
         const group = groups.get(key) || [];
@@ -70,8 +113,14 @@ export function selectRepresentativeStagingAccounts(accounts: StagingQuickAccoun
         groups.set(key, group);
     }
 
+    const hasPreferredEtStores = accounts.some(a => PREFERRED_STAGING_STORE_SITE_CODES.has(a.siteCode));
+
     for (const country of ['ET', 'KE'] as const) {
         for (const siteType of QUICK_LOGIN_SITE_TYPES) {
+            if (country === 'ET' && siteType === 'Store' && hasPreferredEtStores) {
+                continue;
+            }
+
             const candidates = [...groups.entries()]
                 .filter(([key]) => key.startsWith(`${country}:${siteType}:`))
                 .sort(([keyA, accountsA], [keyB, accountsB]) =>
@@ -81,33 +130,15 @@ export function selectRepresentativeStagingAccounts(accounts: StagingQuickAccoun
         }
     }
 
-    const candidateAccounts = accounts.filter(account => selected.has(account.id));
+    let candidateAccounts = accounts.filter(account => selected.has(account.id));
 
-    // Ensure Addis Ababa DC (ET-ADD-DC-01) has strictly one employee per role
-    const addisDcAccounts = candidateAccounts.filter(a => a.siteCode === 'ET-ADD-DC-01');
-    if (addisDcAccounts.length > 0) {
-        const keptIds = new Set<string>();
-        const roleSeen = new Set<string>();
-
-        // Prioritize active named staging staff over synthetic test coverage fixtures
-        const sorted = [...addisDcAccounts].sort((a, b) => {
-            const aInvalid = a.email.endsWith('.invalid');
-            const bInvalid = b.email.endsWith('.invalid');
-            if (aInvalid !== bInvalid) return aInvalid ? 1 : -1;
-            const aTest = a.name.startsWith('[TEST]');
-            const bTest = b.name.startsWith('[TEST]');
-            if (aTest !== bTest) return aTest ? 1 : -1;
-            return a.code.localeCompare(b.code) || a.id.localeCompare(b.id);
-        });
-
-        for (const acc of sorted) {
-            if (!roleSeen.has(acc.roleId)) {
-                roleSeen.add(acc.roleId);
-                keptIds.add(acc.id);
-            }
+    // Deduplicate roles at high-density sites with test fixtures so each role has strictly 1 employee
+    for (const siteCode of DEDUPLICATE_ROLE_SITE_CODES) {
+        const siteAccounts = candidateAccounts.filter(a => a.siteCode === siteCode);
+        if (siteAccounts.length > 0) {
+            const keptIds = deduplicateSiteRoleIds(siteAccounts);
+            candidateAccounts = candidateAccounts.filter(a => a.siteCode !== siteCode || keptIds.has(a.id));
         }
-
-        return candidateAccounts.filter(a => a.siteCode !== 'ET-ADD-DC-01' || keptIds.has(a.id));
     }
 
     return candidateAccounts;

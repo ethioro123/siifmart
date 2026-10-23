@@ -402,41 +402,7 @@ export const useSmartReplenishState = ({
         try {
             let successCount = 0;
             for (const draft of dbDraftJobs) {
-                // 1. Update the TRANSFER job's status to 'Approved'
-                await wmsJobsService.update(draft.id, {
-                    transferStatus: 'Approved',
-                    approvedBy: user?.name || user?.email || 'HQ Manager'
-                });
-
-                // 2. Create the matching PICK job in the source site (warehouse)
-                const pickJob: any = {
-                    site_id: draft.sourceSiteId,
-                    siteId: draft.sourceSiteId,
-                    type: 'PICK',
-                    sourceSiteId: draft.sourceSiteId,
-                    destSiteId: draft.destSiteId,
-                    priority: 'Normal',
-                    status: 'Pending',
-                    orderRef: draft.jobNumber || draft.id,
-                    items: draft.lineItems.length,
-                    lineItems: draft.lineItems.map((item: any) => ({
-                        productId: item.productId,
-                        sku: item.sku,
-                        name: item.name,
-                        expectedQty: item.expectedQty,
-                        unit: item.unit,
-                        size: item.size,
-                        packQuantity: item.packQuantity,
-                        packageType: item.packageType,
-                        customAttributes: item.customAttributes,
-                        pickedQty: 0,
-                        status: 'Pending',
-                        requestedMeasureQty: (item as any).requestedMeasureQty
-                    })),
-                    jobNumber: draft.jobNumber
-                };
-
-                await wmsJobsService.create(pickJob);
+                await wmsJobsService.approveTransferForPicking(draft.id);
                 successCount++;
             }
 

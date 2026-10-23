@@ -30,6 +30,13 @@ export const generateTransferId = (): string => {
 const WMS_JOB_COLUMNS = 'id, country_code, site_id, type, priority, status, items_count, assigned_to, location, order_ref, completed_at, completed_by, created_at, updated_at, line_items, source_site_id, dest_site_id, transfer_status, requested_by, approved_by, job_number, delivery_method, tracking_number, external_carrier_name, assigned_by, notes, has_discrepancy, discrepancy_details, shipped_at, delivered_at, received_at, received_by, pack_security_seal_serial';
 
 export const wmsJobsService = {
+    async approveTransferForPicking(transferId: string): Promise<WMSJob> {
+        if (!transferId) throw new Error('A transfer is required for picking approval.');
+        const { data, error } = await supabase.rpc('approve_transfer_for_picking', { p_transfer_id: transferId });
+        if (error) throw error;
+        if (!data?.id || data.type !== 'PICK') throw new Error('Server did not confirm a PICK job.');
+        return mapWmsJobRow(data);
+    },
     async createPackAfterCompletedPick(pickJobId: string): Promise<WMSJob> {
         const { data, error } = await supabase
             .rpc('create_pack_job_after_completed_pick', { p_pick_job_id: pickJobId })

@@ -1,3 +1,4 @@
+import { useApproveTransferPicking } from '../../../hooks/useApproveTransferPicking';
 import { canInspectTransferArrival } from '../../../utils/shipmentWorkflow';
 import React, { useState } from 'react';
 import { X, Package, CheckCircle, XCircle, Trash2, Truck, Clock, ArrowRight, Loader2 } from 'lucide-react';
@@ -50,6 +51,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     const { t } = useLanguage();
     const { settings, effectiveCountry } = useData();
     const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
+    const approval = useApproveTransferPicking();
     const [loading, setLoading] = useState<'approve' | 'reject' | 'delete' | null>(null);
 
     if (!selectedJob || !isDetailsOpen || ['PICK', 'PACK', 'DISPATCH'].includes(selectedJob.type)) return null;
@@ -64,27 +66,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     const handleApprove = async () => {
         setLoading('approve');
         try {
-            const sourceSiteId = selectedJob.sourceSiteId || selectedJob.siteId;
-            if (!sourceSiteId) throw new Error('Missing source');
-            const lineItems = selectedJob.lineItems || (selectedJob as any).line_items || [];
-            if (lineItems.length === 0) throw new Error('No items');
-            const pickJob: any = {
-                siteId: sourceSiteId,
-                site_id: sourceSiteId,
-                type: 'PICK',
-                sourceSiteId,
-                destSiteId: selectedJob.destSiteId,
-                status: 'Pending',
-                priority: selectedJob.priority || 'Normal',
-                items: lineItems.length,
-                lineItems: lineItems.map((item: any) => ({ ...item, status: 'Pending', pickedQty: 0 })),
-                orderRef: selectedJob.id,
-                createdBy: user,
-                createdAt: new Date().toISOString(),
-                jobNumber: selectedJob.jobNumber
-            };
-            await wmsJobsService.create(pickJob);
-            await wmsJobsService.update(selectedJob.id, { transferStatus: 'Picking', approvedBy: user?.name } as any);
+            await approval.mutateAsync(selectedJob.id);
             addNotification('success', 'Transfer approved');
             await refreshData();
             setSelectedJob(null);
