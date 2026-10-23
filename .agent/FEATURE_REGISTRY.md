@@ -16,7 +16,6 @@
 - The request is transactionally marked converted when the linked draft PO is inserted; existing PO approval controls require a separate approver.
 - `migrations/20261023_purchase_requisitions.sql` adds RLS, review RPC, request/PO linking and server-side insert validation.
 - PO creation roles remain aligned with the live purchase-order insert policy; `CreatePOModal` checks the same allowlist before creating.
-
 ### Device-Aware Appearance (2026-10-23)
 - New sessions follow the device's light or dark appearance and update when the system preference changes. A manual theme toggle is saved in browser storage and takes precedence on later visits.
 - The document applies the initial theme before the app loads to avoid a flash of the opposite appearance.
@@ -497,3 +496,4 @@
 - Dock planning uses one inbound list with optional bay assignment and one Dispatch queue with loading, transport and release controls; blind receiving stays in Receive.
 - Fulfillment assignment reads use paginated active-job IDs without the WMS join; assignment failures no longer discard the loaded operational queues.
 - Receiving modals use one bottom progression/save action per step, readable step labels, valid counts for every retained split, and unsaved review wording.
+- Receiving printing separates counted quantity from copy count, preserves lot/expiry and condition, marks draft labels unsaved, respects price-tag policy, and retains failed reprints for retry.

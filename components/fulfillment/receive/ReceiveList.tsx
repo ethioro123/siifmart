@@ -281,7 +281,9 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                         onClick={() => setReprintItem({
                                                             sku: resolvedSku || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'UNKNOWN',
                                                             name: item.productName,
-                                                            qty: 1,
+                                                            qty: receivedQty,
+                                                            copies: 1,
+                                                            receiptSaved: true,
                                                             price: product?.retailPrice,
                                                             category: product?.category,
                                                             expiry: product?.expiryDate || '',

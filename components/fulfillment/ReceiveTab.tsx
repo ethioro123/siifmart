@@ -1,9 +1,8 @@
+import { useReceivingLabelPrinting } from '../../hooks/useReceivingLabelPrinting';
+import type { ReceivingPrintItem } from '../../utils/receivingLabelData';
 import { useReceivingManifestDetails } from '../../hooks/useReceivingManifestDetails';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { PurchaseOrder, Product } from '../../types';
-import { generateUnifiedBatchLabelsHTML } from '../../utils/labels/ProductLabelGenerator';
-import { generateInboundPutawayLabelHTML, InboundPutawayLabelItem } from '../../utils/labels/InboundPutawayLabelGenerator';
-import { LabelSize, LabelFormat } from '../../utils/labels/types';
 import { useFulfillment } from './FulfillmentContext';
 import { useData } from '../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../utils/receivingPolicy';
@@ -17,7 +16,6 @@ import { ReceiveReprintModal } from './receive/ReceiveReprintModal';
 import { ReceiveDetailsModal } from './receive/ReceiveDetailsModal';
 import { inventoryRequestsService } from '../../services/supabase.service';
 import { logger } from '../../utils/logger';
-import { printHtmlContent } from '../../utils/printHelper';
 import { useReceiveScan } from './receive/hooks/useReceiveScan';
 
 export const ReceiveTab: React.FC = () => {
@@ -69,14 +67,7 @@ export const ReceiveTab: React.FC = () => {
     const [reviewPO, setReviewPO] = useState<PurchaseOrder | null>(null);
     const [showReviewModal, setShowReviewModal] = useState(false);
 
-    const [reprintItem, setReprintItem] = useState<{
-        sku: string;
-        name: string;
-        qty: number;
-        price?: string | number;
-        category?: string;
-        expiry?: string;
-    } | null>(null);
+    const [reprintItem, setReprintItem] = useState<ReceivingPrintItem | null>(null);
     const [reprintSize, setReprintSize] = useState<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'XL'>('MEDIUM');
     const [reprintFormat, setReprintFormat] = useState<'QR' | 'Barcode' | 'Both'>('Both');
     const [reprintOptions, setReprintOptions] = useState({
@@ -186,108 +177,14 @@ export const ReceiveTab: React.FC = () => {
         splitVariants,
         splitReceivingPO
     });
-    const handlePrintBatch = async (
-        printItems: Array<{
-            sku: string;
-            name: string;
-            qty: number;
-            barcode?: string;
-            barcodeType?: string;
-            price?: string | number;
-            category?: string;
-            expiry?: string;
-            batchNumber?: string;
-            targetLocation?: string;
-            targetZone?: string;
-            poNumber?: string;
-            packQuantity?: number;
-        }>,
-        targetType: 'LPN' | 'ITEM' = reprintLabelType
-    ) => {
-        setIsSubmitting(true);
-        const activeCurrency = effectiveCountry === 'KE' || settings?.country === 'KE' ? 'KSh' : 'ETB';
-        try {
-            if (targetType === 'LPN') {
-                const lpnItems: InboundPutawayLabelItem[] = printItems.map(item => {
-                    const matchedProd = (products || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku) ||
-                                        (allProducts || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku);
-                    const canonicalBarcode = item.sku || matchedProd?.sku || '';
-                    return {
-                        sku: item.sku,
-                        productName: item.name,
-                        barcode: canonicalBarcode,
-                        poNumber: item.poNumber || receivingPO?.poNumber || (receivingPO as any)?.po_number,
-                        quantity: item.qty,
-                        packQuantity: item.packQuantity || 1,
-                        batchNumber: item.batchNumber,
-                        expiryDate: item.expiry,
-                        targetLocation: item.targetLocation,
-                        targetZone: item.targetZone || item.category || 'General',
-                        receivedBy: user?.name,
-                        receiverCode: (user as any)?.employeeCode || (user as any)?.employee_code,
-                        receivedDate: new Date().toISOString().slice(0, 10),
-                        condition: 'QC-PASSED'
-                    };
-                });
-                const html = await generateInboundPutawayLabelHTML(lpnItems, {
-                    size: reprintSize as LabelSize,
-                    format: reprintFormat as LabelFormat
-                });
-                const res = await printHtmlContent(html);
-                if (res && !res.success && res.error) {
-                    addNotification('alert', `Printing alert: ${res.error}`);
-                } else {
-                    addNotification('success', `Dispatched ${lpnItems.length} putaway label${lpnItems.length > 1 ? 's' : ''} to printer`);
-                }
-            } else {
-                const labelsToPrint = printItems.map(item => {
-                    const matchedProd = (products || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku) ||
-                                        (allProducts || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku);
-                    const canonicalBarcode = item.sku || matchedProd?.sku || '';
-                    const canonicalFormat = item.barcodeType || matchedProd?.barcodeType;
-                    return {
-                        value: canonicalBarcode,
-                        label: item.name,
-                        sku: item.sku,
-                        barcode: canonicalBarcode,
-                        barcodeType: canonicalFormat,
-                        quantity: item.qty,
-                        price: (item.price ?? matchedProd?.price ?? '0.00').toString(),
-                        currency: activeCurrency,
-                        category: item.category || matchedProd?.category || 'General',
-                        date: item.expiry || ''
-                    };
-                });
-                const printOptions = {
-                    size: reprintSize as LabelSize,
-                    format: reprintFormat as LabelFormat,
-                    currency: activeCurrency,
-                    showPrice: reprintOptions.showPrice,
-                    showCategory: reprintOptions.showCategory,
-                    showName: reprintOptions.showName
-                };
-
-                const html = await generateUnifiedBatchLabelsHTML(labelsToPrint, printOptions);
-                const res = await printHtmlContent(html);
-                if (res && !res.success && res.error) {
-                    addNotification('alert', `Printing alert: ${res.error}`);
-                } else {
-                    addNotification('success', `Dispatched ${labelsToPrint.length} item label${labelsToPrint.length > 1 ? 's' : ''} to printer`);
-                }
-            }
-        } catch (e) {
-            logger.error('ReceiveTab', 'caught error', e as Error);
-            addNotification('alert', 'Failed to generate labels');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
+    const handlePrintBatch = useReceivingLabelPrinting({
+        products, allProducts, country: effectiveCountry, user, receivingPO,
+        size: reprintSize, format: reprintFormat, options: reprintOptions,
+        allowPrice: receivingPolicy.printPriceTagAt === 'receive', setIsSubmitting, addNotification
+    });
     const handleReprintLabels = async () => {
         if (!reprintItem || isSubmitting) return;
-        logger.debug('ReceiveTab', '[REPRINT_ITEM]');
-        await handlePrintBatch([reprintItem], reprintLabelType);
-        setReprintItem(null);
+        if (await handlePrintBatch([reprintItem], reprintLabelType)) setReprintItem(null);
     };
 
     const receiveStats = useMemo(() => {

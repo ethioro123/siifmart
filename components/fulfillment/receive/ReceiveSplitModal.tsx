@@ -28,7 +28,7 @@ interface ReceiveSplitModalProps {
     setSplitReceivingPO: (val: any) => void;
     allProducts: Product[];
     receivePOSplit: (poId: string, lineItemId: string, variants: any[], locationId?: string, user?: { name: string; email: string }) => Promise<void>;
-    handlePrintBatch: (items: any[]) => Promise<void>;
+    handlePrintBatch: (items: any[]) => Promise<boolean>;
     setReprintItem: (item: any) => void;
     isSubmitting: boolean;
     setIsSubmitting: (val: boolean) => void;
@@ -195,7 +195,10 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
             setReprintItem({
                 sku: reprintSku,
                 name: reprintName,
-                qty: 1,
+                qty: firstVariant.quantity,
+                copies: 1,
+                receiptSaved: true,
+                condition: firstVariant.condition,
                 price: splitReceivingItem.retailPrice,
                 category: splitReceivingItem.category,
                 batchNumber: firstVariant?.batchNumber,
@@ -222,6 +225,10 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
             sku: v.sku || splitReceivingItem.sku,
             name: v.productName || splitReceivingItem.name || splitReceivingItem.productName,
             qty: v.quantity,
+            copies: 1,
+            receiptSaved: false,
+            condition: v.condition,
+            packQuantity: splitReceivingItem.packQuantity,
             batchNumber: v.batchNumber,
             expiry: v.expiryDate,
             poNumber: splitReceivingPO.poNumber || (splitReceivingPO as any).po_number

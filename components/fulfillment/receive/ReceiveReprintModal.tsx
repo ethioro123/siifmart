@@ -7,6 +7,7 @@ interface ReceiveReprintModalProps {
         sku: string;
         name: string;
         qty: number;
+        copies?: number;
         price?: string | number;
         category?: string;
         expiry?: string;
@@ -121,10 +122,10 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                         </div>
 
                         <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col justify-between shadow-sm">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-2">{t('warehouse.printQuantity')}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-2">Label copies</p>
                             <div className="flex items-center justify-center gap-3">
                                 <button
-                                    onClick={() => setReprintItem({ ...reprintItem, qty: Math.max(1, reprintItem.qty - 1) })}
+                                    onClick={() => setReprintItem({ ...reprintItem, copies: Math.max(1, (reprintItem.copies ?? 1) - 1) })}
                                     title={t('warehouse.decreaseQuantity')}
                                     className="w-10 h-10 min-h-[40px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] flex items-center justify-center transition-colors shadow-sm shrink-0"
                                 >
@@ -134,14 +135,14 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                     type="number"
                                     inputMode="decimal"
                                     pattern="[0-9]*"
-                                    title={t('warehouse.quantityToPrint')}
-                                    aria-label={t('warehouse.quantityToPrint')}
-                                    value={reprintItem.qty}
-                                    onChange={(e) => setReprintItem({ ...reprintItem, qty: Math.max(1, parseInt(e.target.value) || 1) })}
+                                    title="Label copies"
+                                    aria-label="Label copies"
+                                    value={reprintItem.copies ?? 1}
+                                    onChange={(e) => setReprintItem({ ...reprintItem, copies: Math.min(500, Math.max(1, parseInt(e.target.value) || 1)) })}
                                     className="w-20 bg-transparent border-none text-center text-xl font-bold text-[var(--theme-text-primary)] focus:outline-none tabular-nums font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                                 <button
-                                    onClick={() => setReprintItem({ ...reprintItem, qty: reprintItem.qty + 1 })}
+                                    onClick={() => setReprintItem({ ...reprintItem, copies: Math.min(500, (reprintItem.copies ?? 1) + 1) })}
                                     title={t('warehouse.increaseQuantity')}
                                     className="w-10 h-10 min-h-[40px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] flex items-center justify-center transition-colors shadow-sm shrink-0"
                                 >
@@ -151,6 +152,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                         </div>
                     </div>
 
+                    <p className="text-xs text-[var(--theme-text-secondary)]">Counted quantity on this label: {reprintItem.qty} units. Copies do not change the received quantity.</p>
                     {/* Size Selector */}
                     <div className="space-y-2">
                         <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
@@ -205,6 +207,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                             {(Object.keys(reprintOptions) as Array<keyof typeof reprintOptions>).map((opt) => (
                                 <button
                                     key={opt}
+                                    disabled={opt === 'showPrice' && printPriceTagAt !== 'receive'}
                                     onClick={() => toggleOption(opt)}
                                     className={`flex items-center justify-between px-4 py-2.5 min-h-[44px] rounded-xl border transition-all ${reprintOptions[opt]
                                         ? 'bg-[var(--theme-bg-card)] border-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-sm font-semibold'
@@ -264,7 +267,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                         ) : (
                             <Printer size={18} />
                         )}
-                        <span>{t('warehouse.generateLabels').toUpperCase()} ({reprintItem.qty})</span>
+                        <span>{t('warehouse.generateLabels').toUpperCase()} ({reprintItem.copies ?? 1})</span>
                     </button>
                     <p className="text-[11px] text-center text-[var(--theme-text-secondary)] mt-3 font-mono">Unified Template System v2.4</p>
                 </div>
