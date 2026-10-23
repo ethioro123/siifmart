@@ -20,7 +20,7 @@ export const PutawayScannerItemCard: React.FC<PutawayScannerItemCardProps> = ({
                 {t('warehouse.putaway.itemVerification')}
             </p>
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-sm">
-                <p className="text-xl sm:text-2xl text-[var(--theme-text-primary)] font-bold uppercase tracking-tight leading-snug mb-3">
+                <p className="text-xl sm:text-2xl text-[var(--theme-text-primary)] font-bold uppercase tracking-tight break-words leading-snug mb-3">
                     {currentItem?.name || currentItem?.productName}
                 </p>
                 <div className="inline-block px-3.5 py-1.5 bg-[var(--theme-accent)] text-white font-semibold font-mono text-sm rounded-xl tracking-wider mb-2">
@@ -40,7 +40,7 @@ export const PutawayScannerItemCard: React.FC<PutawayScannerItemCardProps> = ({
                                     <Box size={13} className="text-[var(--theme-accent)]" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate uppercase tracking-tight">
+                                    <p className="text-xs font-semibold text-[var(--theme-text-primary)] break-words uppercase tracking-tight">
                                         {occ.name}
                                     </p>
                                 </div>

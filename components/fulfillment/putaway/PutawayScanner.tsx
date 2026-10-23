@@ -324,7 +324,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     return (
         <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col transition-colors overflow-hidden">
             {/* Top Navigation Bar */}
-            <div className="p-3.5 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center shrink-0">
+            <div className="p-3.5 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center gap-2 shrink-0">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <button
                         onClick={onClose}
@@ -337,7 +337,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         <h3 className="font-bold text-[var(--theme-text-primary)] text-base sm:text-lg uppercase tracking-tight truncate">
                             {step === 'LOCATION' ? t('warehouse.scanLocation') : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : 'Enter Shelved Quantity'}
                         </h3>
-                        <p className="text-[11px] text-[var(--theme-accent)] font-semibold uppercase tracking-wider font-mono">
+                        <p className="text-[11px] text-[var(--theme-accent)] font-semibold uppercase tracking-wider font-mono break-all">
                             JOB: {formatJobId(job)}
                         </p>
                     </div>
@@ -350,8 +350,8 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
             </div>
 
             {/* Main View Area */}
-            <div className="flex-1 relative w-full overflow-y-auto custom-scrollbar">
-                <div className="relative min-h-full flex flex-col items-center justify-start p-4 sm:p-6 pb-32 max-w-lg mx-auto">
+            <div className="flex-1 min-h-0 relative w-full overflow-x-hidden overflow-y-auto custom-scrollbar">
+                <div className="relative w-full min-w-0 min-h-full flex flex-col items-center justify-start p-4 sm:p-6 pb-32 max-w-lg mx-auto">
                     {/* Status Orb */}
                     <PutawayScannerStatusOrb
                         showSuccess={showSuccess}
@@ -359,17 +359,17 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         step={step}
                     />
 
-                    <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight mb-3 sm:mb-4 transition-colors ${isStrictlyValid ? 'text-[var(--theme-accent)]' : showError ? 'text-rose-500' : ''}`}>
+                    <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight break-words mb-3 sm:mb-4 transition-colors ${isStrictlyValid ? 'text-[var(--theme-accent)]' : showError ? 'text-rose-500' : ''}`}>
                         {showSuccess ? 'Success!' : showError ? 'Scan Error' : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : 'Enter Shelved Quantity'}
                     </h1>
 
                     {showSuccess ? (
                         <div className="text-center mb-6 animate-in fade-in duration-200">
-                            <p className="text-emerald-500 text-lg font-bold uppercase tracking-wider">{successMsg}</p>
+                            <p className="text-emerald-500 text-sm sm:text-lg break-words font-bold uppercase tracking-wider">{successMsg}</p>
                         </div>
                     ) : showError ? (
                         <div className="text-center mb-6 animate-in fade-in duration-200">
-                            <p className="text-rose-500 text-lg font-bold uppercase tracking-wider">{errorMsg}</p>
+                            <p className="text-rose-500 text-sm sm:text-lg break-words font-bold uppercase tracking-wider">{errorMsg}</p>
                         </div>
                     ) : step === 'LOCATION' ? (
                         <div className="w-full mb-6">

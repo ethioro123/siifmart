@@ -123,7 +123,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
         <div className="fixed inset-0 z-[160] flex items-center justify-center p-2 sm:p-4 bg-black/70 overflow-x-hidden">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-4xl h-[92dvh] md:h-[88vh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
                 {/* Header */}
-                <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10 flex justify-between items-start">
+                <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10 flex justify-between items-start gap-2">
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                         <div className={`w-11 h-11 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center shrink-0 border ${
                             isFullySlotted
@@ -134,7 +134,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                         </div>
                         <div className="min-w-0">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <h2 className="text-base sm:text-xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase truncate font-mono">
+                                <h2 className="text-base sm:text-xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase break-all font-mono">
                                     {formatJobId(job)}
                                 </h2>
                                 <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)]">
@@ -142,12 +142,12 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 </span>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 text-xs text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider flex-wrap">
-                                <span className="flex items-center gap-1 text-[var(--theme-text-primary)]">
+                                <span className="flex items-start gap-1 min-w-0 break-words text-[var(--theme-text-primary)]">
                                     <MapPin size={12} className="text-[var(--theme-accent)]" />
                                     {sourceSite?.name || 'Warehouse Floor'}
                                 </span>
                                 {job.orderRef && (
-                                    <span className="font-mono text-[11px]">
+                                    <span className="font-mono text-[11px] break-all">
                                         Ref: {resolveOrderRef(job.orderRef)}
                                     </span>
                                 )}
@@ -221,8 +221,8 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                 </div>
 
                 {/* Bottom Navigation Toolbar */}
-                <div className="p-3 md:p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex items-center justify-between gap-3 shrink-0">
-                    <div className="flex items-center gap-2">
+                <div className="px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 shrink-0">
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         {step === 'INTAKE' ? (
                             <button
                                 type="button"
@@ -263,13 +263,13 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         {step === 'INTAKE' && (
                             <button
                                 type="button"
                                 onClick={() => onStartPutaway(job)}
                                 disabled={isSubmitting || isCompleted || !totalItems}
-                                className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
+                                className="min-h-[44px] w-full sm:w-auto justify-center px-3 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 <span>Start scanning</span>
                                 <ArrowRight size={16} />
@@ -281,7 +281,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 type="button"
                                 disabled={isSubmitting || isCompleted || !totalItems}
                                 onClick={() => isFullySlotted ? setStep('PLACEMENT') : onStartPutaway(job)}
-                                className={`min-h-[44px] px-5 md:px-7 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
+                                className={`min-h-[44px] w-full sm:w-auto justify-center px-3 sm:px-5 md:px-7 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
                                     isFullySlotted
                                         ? 'bg-[var(--theme-accent)] hover:opacity-90 text-white cursor-pointer active:scale-95'
                                         : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
@@ -298,7 +298,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 type="button"
                                 onClick={() => onCompleteJob(job)}
                                 disabled={isSubmitting || !isFullySlotted || isCompleted}
-                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                                className="min-h-[44px] w-full sm:w-auto justify-center px-3 sm:px-6 md:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <Loader2 size={16} className="animate-spin" />

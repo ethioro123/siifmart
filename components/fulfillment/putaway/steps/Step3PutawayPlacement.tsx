@@ -28,7 +28,7 @@ export const Step3PutawayPlacement: React.FC<Step3PutawayPlacementProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 md:p-6 space-y-4 md:space-y-6 bg-[var(--theme-bg-app)]">
             {/* Handover Summary Card */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-4 md:p-6 shadow-sm space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
+                <div className="flex flex-wrap items-start justify-between gap-2 pb-3 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center">
                             <ShieldCheck size={22} />
@@ -64,7 +64,7 @@ export const Step3PutawayPlacement: React.FC<Step3PutawayPlacementProps> = ({
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
                             Job Reference
                         </span>
-                        <div className="flex items-center gap-1.5 mt-1 text-xs font-bold text-[var(--theme-text-primary)] truncate font-mono">
+                        <div className="flex items-center gap-1.5 mt-1 text-xs font-bold text-[var(--theme-text-primary)] truncate font-mono break-all">
                             <Box size={13} className="text-[var(--theme-accent)] shrink-0" />
                             <span className="truncate">#{formatJobId(job)}</span>
                         </div>
@@ -74,7 +74,7 @@ export const Step3PutawayPlacement: React.FC<Step3PutawayPlacementProps> = ({
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
                             Origin / PO Ref
                         </span>
-                        <div className="flex items-center gap-1.5 mt-1 text-xs font-bold text-[var(--theme-accent)] truncate font-mono">
+                        <div className="flex items-center gap-1.5 mt-1 text-xs font-bold text-[var(--theme-accent)] truncate font-mono break-all">
                             <Tag size={13} className="shrink-0" />
                             <span className="truncate">{resolveOrderRef(job.orderRef) || 'Direct Intake'}</span>
                         </div>

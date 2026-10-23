@@ -33,11 +33,11 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 md:p-6 space-y-4 md:space-y-6 bg-[var(--theme-bg-app)]">
             {/* Intake Overview Card */}
             <div className="p-4 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 w-full">
                     <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0">
                         <Package size={20} />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)]">
                                 Inbound Staging Intake
@@ -51,7 +51,7 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
                                 </span>
                             )}
                         </div>
-                        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 truncate">
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 break-words">
                             Verify cargo at inbound dock staging before routing to warehouse storage bins.
                         </p>
                     </div>
@@ -84,7 +84,7 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
                                 key={idx}
                                 className="p-3.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                             >
-                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="flex items-center gap-3 min-w-0 w-full flex-1">
                                     <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 overflow-hidden">
                                         {prod?.image ? (
                                             <img src={prod.image} alt={item.name} className="w-full h-full object-cover" />
@@ -93,11 +93,11 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
                                         )}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <h4 className="text-xs font-bold uppercase truncate text-[var(--theme-text-primary)]">
+                                        <h4 className="text-xs font-bold uppercase break-words text-[var(--theme-text-primary)]">
                                             {item.name || prod?.name || 'Unknown SKU'}
                                         </h4>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">
+                                        <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                                            <span className="text-[11px] font-mono break-all text-[var(--theme-text-secondary)]">
                                                 {item.sku || prod?.sku}
                                             </span>
                                             {formatProductSize(prod || item) && (
