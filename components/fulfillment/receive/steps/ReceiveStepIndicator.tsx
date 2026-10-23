@@ -16,6 +16,7 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
     hasQuantityEntered,
     t,
 }) => {
+    const label = (key: string, fallback: string) => { const value = t(key); return value && value !== key ? value : fallback; };
     const isStepAccessible = (stepId: ReceiveStep): boolean => {
         if (stepId === 'INTAKE' || stepId === 'QUALITY') return true;
         // Non-skippable: At least one item quantity & lot verification must be recorded before Dock Handover
@@ -34,7 +35,7 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
         {
             id: 'INTAKE',
             stepNum: 1,
-            label: t('warehouse.manifestIntake') || 'Manifest Intake',
+            label: label('warehouse.manifestIntake', 'Manifest Intake'),
             sublabel: 'PO & Origin',
             icon: Package,
             isComplete: true,
@@ -42,7 +43,7 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
         {
             id: 'QUALITY',
             stepNum: 2,
-            label: t('warehouse.qualityBatch') || 'Quality & Batch',
+            label: label('warehouse.qualityBatch', 'Quality & Count'),
             sublabel: hasQuantityEntered ? 'Counted' : 'Lot, Expiry & Qty',
             icon: ShieldAlert,
             isComplete: hasQuantityEntered,
@@ -50,7 +51,7 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
         {
             id: 'HANDOVER',
             stepNum: 3,
-            label: t('warehouse.dockHandover') || 'Dock Handover',
+            label: label('warehouse.dockHandover', 'Review & Handover'),
             sublabel: !hasQuantityEntered ? 'Locked (Count Req)' : 'Print & Putaway',
             icon: CheckCircle,
             isComplete: false,

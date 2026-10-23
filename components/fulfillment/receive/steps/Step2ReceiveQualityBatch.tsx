@@ -23,7 +23,6 @@ interface Step2ReceiveQualityBatchProps {
     handleUpdateVariant: (id: string, updated: Partial<SplitVariant>) => void;
     handleAddBarcode: (variantId: string) => void;
     handleRemoveBarcode: (variantId: string, code: string) => void;
-    onAdvanceToHandover: () => void;
     t: (key: string) => string;
 }
 
@@ -44,7 +43,6 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
     handleUpdateVariant,
     handleAddBarcode,
     handleRemoveBarcode,
-    onAdvanceToHandover,
     t,
 }) => {
     return (
@@ -131,17 +129,7 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
                 ))}
             </div>
 
-            {/* Bottom Proceed Action */}
-            <div className="p-3 md:p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-end shrink-0">
-                <button
-                    type="button"
-                    onClick={onAdvanceToHandover}
-                    className="min-h-[44px] px-6 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
-                >
-                    <span>Step 3: Dock Handover</span>
-                    <ArrowRight size={16} />
-                </button>
-            </div>
+
         </div>
     );
 };

@@ -10,7 +10,6 @@ interface Step3ReceiveHandoverProps {
     totalScanned: number;
     isSubmitting: boolean;
     onPrintLabels: () => void;
-    onConfirmReceive: () => void;
     t: (key: string) => string;
 }
 
@@ -21,7 +20,6 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
     totalScanned,
     isSubmitting,
     onPrintLabels,
-    onConfirmReceive,
     t,
 }) => {
     return (
@@ -35,7 +33,7 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                         </div>
                         <div>
                             <h3 className="text-sm md:text-base font-bold uppercase tracking-tight text-[var(--theme-text-primary)]">
-                                Intake Ready for Dock Handover
+                                Review before saving receipt
                             </h3>
                             <span className="text-xs text-[var(--theme-text-secondary)]">
                                 PO #{splitReceivingPO.poNumber || splitReceivingPO.id} · {splitReceivingPO.supplierName}
@@ -44,7 +42,7 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                     </div>
 
                     <span className="px-3 py-1 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 font-mono font-bold text-xs uppercase">
-                        {totalScanned} Total Received
+                        {totalScanned} Counted · Not saved
                     </span>
                 </div>
 
@@ -108,21 +106,7 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                         <span>Print Pallet & Intake Labels</span>
                     </button>
 
-                    <button
-                        type="button"
-                        onClick={onConfirmReceive}
-                        disabled={isSubmitting || totalScanned <= 0}
-                        className="flex-1 min-h-[52px] px-6 py-3 rounded-2xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
-                    >
-                        {isSubmitting ? (
-                            <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                            <>
-                                <CheckCircle size={18} />
-                                <span>Confirm Receipt & Create Putaway</span>
-                            </>
-                        )}
-                    </button>
+
                 </div>
             </div>
         </div>

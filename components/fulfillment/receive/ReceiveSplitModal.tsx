@@ -92,6 +92,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     }, [splitReceivingPO, splitReceivingItem, jobs]);
 
     const totalScanned = splitVariants.reduce((acc, v) => acc + (v.quantity || 0), 0);
+    const countsValid = splitVariants.length > 0 && splitVariants.every(v => Number.isFinite(v.quantity) && v.quantity > 0);
     const remaining = Math.max(0, expectedSellable - previouslyReceived - totalScanned);
     const progress = Math.min(100, expectedSellable > 0 ? ((previouslyReceived + totalScanned) / expectedSellable) * 100 : 0);
 
@@ -161,8 +162,9 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     };
 
     const handleConfirmReceipt = async () => {
-        if (totalScanned <= 0) {
-            alert('Please specify quantity received before confirming.');
+        if (isSubmitting || localSubmitting) return;
+        if (!splitVariants.length || splitVariants.some(v => !Number.isFinite(v.quantity) || v.quantity <= 0)) {
+            alert('Enter a valid positive physical count for every split, or remove unused splits.');
             return;
         }
 
@@ -283,7 +285,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                 <ReceiveStepIndicator
                     currentStep={step}
                     setStep={setStep}
-                    hasQuantityEntered={totalScanned > 0}
+                    hasQuantityEntered={countsValid}
                     t={t}
                 />
 
@@ -297,7 +299,6 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             isBlindReceiving={isBlindReceiving}
                             expectedSellable={expectedSellable}
                             previouslyReceived={previouslyReceived}
-                            onAdvanceToQuality={() => setStep('QUALITY')}
                             t={t}
                         />
                     )}
@@ -321,7 +322,6 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             handleUpdateVariant={handleUpdateVariant}
                             handleAddBarcode={handleAddBarcode}
                             handleRemoveBarcode={handleRemoveBarcode}
-                            onAdvanceToHandover={() => setStep('HANDOVER')}
                             t={t}
                         />
                     )}
@@ -334,7 +334,6 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             totalScanned={totalScanned}
                             isSubmitting={isSubmitting || localSubmitting}
                             onPrintLabels={handlePrintPalletLabels}
-                            onConfirmReceive={handleConfirmReceipt}
                             t={t}
                         />
                     )}
@@ -381,10 +380,10 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                         {step === 'QUALITY' && (
                             <button
                                 type="button"
-                                disabled={totalScanned <= 0}
+                                disabled={!countsValid}
                                 onClick={() => setStep('HANDOVER')}
                                 className={`min-h-[44px] px-5 md:px-7 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
-                                    totalScanned > 0
+                                    countsValid
                                         ? 'bg-[var(--theme-accent)] hover:opacity-90 text-white cursor-pointer active:scale-95'
                                         : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
                                 }`}
@@ -399,7 +398,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             <button
                                 type="button"
                                 onClick={handleConfirmReceipt}
-                                disabled={isSubmitting || localSubmitting || totalScanned <= 0}
+                                disabled={isSubmitting || localSubmitting || !countsValid}
                                 className="min-h-[44px] px-6 md:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting || localSubmitting ? (
