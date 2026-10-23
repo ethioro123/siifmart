@@ -21,9 +21,9 @@ describe('picking quantity controls',()=>{
         expect(screen.getAllByRole('option')).toHaveLength(1);
         expect((screen.getByRole('spinbutton') as HTMLInputElement).step).toBe('any');
     });
-    it('expresses the outstanding quantity in the displayed product measure',()=>{
+    it('keeps remaining quantity in the manifest stock units rather than multiplying package size',()=>{
         const setQty=renderForm('KG','20');
         fireEvent.click(screen.getByRole('button',{name:'Remaining'}));
-        expect(setQty).toHaveBeenCalledWith('120');
+        expect(setQty).toHaveBeenCalledWith('6');
     });
 });

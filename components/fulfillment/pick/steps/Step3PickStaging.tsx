@@ -28,23 +28,23 @@ export const Step3PickStaging: React.FC<Step3PickStagingProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 md:p-6 space-y-4 md:space-y-6 bg-[var(--theme-bg-app)]">
             {/* Handover Summary Card */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-4 md:p-6 shadow-sm space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
+                <div className="flex flex-wrap gap-3 items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center">
                             <ShieldCheck size={22} />
                         </div>
                         <div>
                             <h3 className="text-sm md:text-base font-bold uppercase tracking-tight text-[var(--theme-text-primary)]">
-                                Pick Mission Complete
+                                Picking review
                             </h3>
                             <span className="text-xs text-[var(--theme-text-secondary)]">
-                                All requested items collected and verified
+                                Review verified quantities and shortages before completion
                             </span>
                         </div>
                     </div>
 
                     <span className="px-3 py-1 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 font-mono font-bold text-xs uppercase">
-                        {completedItems} / {totalItems} Items Verified
+                        {completedItems} / {totalItems} Lines Verified
                     </span>
                 </div>
 
@@ -87,33 +87,12 @@ export const Step3PickStaging: React.FC<Step3PickStagingProps> = ({
                         <Package size={16} />
                     </div>
                     <p className="text-xs text-[var(--theme-text-secondary)]">
-                        Deliver tote cart to packing intake conveyor. Package carton will be prepared at station.
+                        Only picked quantities go to packing. If all lines are short, no packing job is created and the order needs supervisor review.
                     </p>
                 </div>
             </div>
 
-            {/* Complete Action Button */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-4 md:p-6 shadow-sm space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                    Final Station Handover
-                </h4>
 
-                <button
-                    type="button"
-                    onClick={() => onCompleteJob(job)}
-                    disabled={isSubmitting}
-                    className="w-full min-h-[52px] px-6 py-3 rounded-2xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
-                >
-                    {isSubmitting ? (
-                        <Loader2 size={18} className="animate-spin" />
-                    ) : (
-                        <>
-                            <CheckCircle size={18} />
-                            <span>Complete Pick Mission & Handover</span>
-                        </>
-                    )}
-                </button>
-            </div>
         </div>
     );
 };

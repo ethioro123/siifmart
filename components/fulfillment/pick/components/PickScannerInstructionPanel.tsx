@@ -2,6 +2,8 @@ import React from 'react';
 import { AlertTriangle, Package } from 'lucide-react';
 import { Product } from '../../../../types';
 import { extractLocationBarcodeFromScan, decodeLocation } from '../../../../utils/locationEncoder';
+import { getTransferQuantityConfig } from '../../transfer/transferQuantity';
+import { remainingPickQuantity } from '../../../../utils/pickProgress';
 import { normalizeLocation } from '../../../../utils/locationTracking';
 import { getSellUnit, formatProductSize, formatPackagingDescription } from '../../../../utils/units';
 
@@ -54,14 +56,14 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
     if (step === 'QUANTITY') {
         return (
             <div className="text-center z-10 mb-1 sm:mb-6 w-full max-w-2xl px-2">
-                <p className="text-amber-600 dark:text-amber-400 text-xs sm:text-base uppercase tracking-wider font-bold">{t('warehouse.picking.shortPickEnterQty')}</p>
+                <p className="text-amber-600 dark:text-amber-400 text-xs sm:text-base uppercase tracking-wider font-bold">Enter the physical quantity picked</p>
                 <ProductIdentity item={currentItem} product={currentProduct} />
                 <p className="text-[var(--theme-text-secondary)] text-sm sm:text-base mt-2">{t('warehouse.expected')}: <span className="text-[var(--theme-text-primary)] font-bold text-xl sm:text-3xl tabular-nums">
                     {(() => {
-                        const expected = currentItem?.expectedQty || 1;
+                        const expected = remainingPickQuantity(currentItem);
                         const packDesc = formatPackagingDescription(currentProduct, expected);
                         const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
-                        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+                        const unitLabel = getTransferQuantityConfig(currentProduct || currentItem).quantityLabel;
                         return <>{expected} {unitLabel} {packDesc ? <span className="text-xs sm:text-sm font-mono font-medium text-[var(--theme-text-secondary)]">({packDesc})</span> : null}</>;
                     })()}
                 </span></p>
@@ -76,14 +78,14 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
             <div className="mt-2 inline-flex flex-wrap items-center justify-center gap-x-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 py-1.5 shadow-sm">
                 <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.expected')}</span>
                 <span className="font-bold text-[var(--theme-text-primary)] text-xl sm:text-3xl tabular-nums">{(() => {
-                const expected = currentItem?.expectedQty || 1;
+                const expected = remainingPickQuantity(currentItem);
                 const packDesc = formatPackagingDescription(currentProduct, expected);
                 const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
-                const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+                const unitLabel = getTransferQuantityConfig(currentProduct || currentItem).quantityLabel;
                 return <>{expected} <span className="text-base uppercase text-[var(--theme-text-secondary)] font-semibold ml-0.5">{unitLabel}</span></>;
             })()}</span>
                 {(() => {
-                    const expected = currentItem?.expectedQty || 1;
+                    const expected = remainingPickQuantity(currentItem);
                     return formatPackagingDescription(currentProduct, expected)
                         ? <span className="text-xs sm:text-sm font-mono text-[var(--theme-text-secondary)]">{formatPackagingDescription(currentProduct, expected)}</span>
                         : null;

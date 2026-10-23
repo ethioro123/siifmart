@@ -6,7 +6,7 @@ import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { decodeLocation, extractLocationBarcodeFromScan, extractPrefixFromBarcode, extractSkuFromScan } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
-import { isWeightBased, isVolumeBased, getSellUnit, getEffectivePackageSize, SELL_UNITS } from '../../../utils/units';
+import { getSellUnit } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useData } from '../../../contexts/DataContext';
 import { validateCrossBorderSku } from '../../../utils/skuValidation';
@@ -23,7 +23,7 @@ interface PickScannerProps {
     products?: Product[];
     onClose: () => void;
     onScanLocation: (location: string) => void;
-    onScanItem: (barcode: string, quantity?: number) => void;
+    onScanItem: (barcode: string, quantity?: number, shortageReason?: string) => Promise<void>;
     onCompleteJob?: (job: WMSJob) => void;
     isProcessing: boolean;
     expectedPrefix?: string;
@@ -49,6 +49,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     const [qtyVal, setQtyVal] = useState('');
     const [selectedUnit, setSelectedUnit] = useState<string>('UNIT');
     const [shortPickMode, setShortPickMode] = useState(false);
+    const [shortageReason, setShortageReason] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
@@ -106,13 +107,14 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         setIsItemMatched(false);
         setMatchedBarcode('');
         setShortPickMode(false);
+        setShortageReason('');
+        setQtyVal('');
     }, [currentItem]);
 
     useEffect(() => {
         lastStepChangeRef.current = Date.now();
         setInputVal('');
-        setQtyVal('');
-    }, [currentItem?.id, step]);
+    }, [currentItem, step]);
 
     useEffect(() => {
         if (step !== 'LOCATION' || !inputVal || isProcessing || !expectedPrefix) return;
@@ -132,7 +134,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     }, [inputVal, step, expectedPrefix, isProcessing]);
 
     const isStrictlyValid = useMemo(() => {
-        if (step === 'QUANTITY') return /^(?:\d+(?:\.\d*)?|\.\d+)$/.test(qtyVal.trim()) && Number.isFinite(Number(qtyVal)) && Number(qtyVal) > 0;
+        if (step === 'QUANTITY') return /^(?:\d+(?:\.\d*)?|\.\d+)$/.test(qtyVal.trim()) && Number.isFinite(Number(qtyVal)) && Number(qtyVal) >= 0;
         if (step === 'ITEM') {
             const product = currentItem ? getProduct(currentItem) : undefined;
             return !!currentItem && matchesExpectedPickItemScan(inputVal, currentItem.sku, product?.barcode);
@@ -209,7 +211,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                 return;
             }
 
-            await onScanLocation(decodedScanned);
+            await onScanLocation(locationBarcode);
             setStep('ITEM');
             setInputVal('');
             playBeep('success');
@@ -250,19 +252,10 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             }
         } else if (step === 'QUANTITY') {
             const qty = parseFloat(qtyVal);
-            const maxExpectedCases = remainingPickQuantity(currentItem);
-            const prod = getProduct(currentItem);
-            const sizeNum = getEffectivePackageSize(prod?.unit || currentItem?.unit, prod?.size || currentItem?.size);
-            const unitDef = prod?.unit ? getSellUnit(prod.unit) : null;
-            const isWeightVol = unitDef && (unitDef.category === 'weight' || unitDef.category === 'volume');
-            const expectedMeasureQty = sizeNum > 0 ? maxExpectedCases * sizeNum : maxExpectedCases;
-
-            // Quantity is entered in the product's displayed unit; never infer another unit.
+            const displayMax = remainingPickQuantity(currentItem);
             const finalQty = qty;
 
-            const displayMax = isWeightVol && sizeNum > 0 ? expectedMeasureQty : maxExpectedCases;
-
-            if (isNaN(finalQty) || finalQty <= 0 || finalQty > displayMax + 0.001) {
+            if (isNaN(finalQty) || finalQty < 0 || finalQty > displayMax + 0.001) {
                 playBeep('error');
                 setErrorMsg(t('warehouse.picking.invalidQuantityRange').replace('{max}', String(displayMax)));
                 setShowError(true);
@@ -271,6 +264,11 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             }
 
             if (finalQty < displayMax - 0.001) {
+                if (shortageReason.trim().length < 3) {
+                    setErrorMsg('Enter a shortage reason before saving a partial or zero pick.');
+                    setShowError(true);
+                    return;
+                }
                 const confirmed = window.confirm(t('warehouse.picking.shortPickConfirmPrompt').replace('{qty}', String(finalQty)).replace('{expected}', String(displayMax)));
                 if (!confirmed) return;
             }
@@ -283,9 +281,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         if (isSubmitting) return;
         setIsSubmitting(true);
         try {
-            // Pass the catalog SKU after barcode validation so encoded labels
-            // and UPCs resolve to the same trusted pick line in the parent.
-            await onScanItem(currentItem?.sku || barcode, quantity);
+            if (quantity !== 0 && !barcode) throw new Error('Scan the product before recording a positive quantity.');
+            await onScanItem(quantity === 0 ? '' : extractSkuFromScan(barcode), quantity, quantity !== undefined && quantity < remainingPickQuantity(currentItem) ? shortageReason.trim() : undefined);
             const itemName = currentItem?.name || 'Item';
             setSuccessMsg(`Pick saved: ${itemName}`);
             setShowSuccess(true);
@@ -401,6 +398,9 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                             playBeep={playBeep}
                             setErrorMsg={setErrorMsg}
                             setShowError={setShowError}
+                            shortageReason={shortageReason}
+                            setShortageReason={setShortageReason}
+                            onRecordEmptyBin={step === 'ITEM' ? () => { setQtyVal('0'); setMatchedBarcode(''); setStep('QUANTITY'); setIsItemMatched(true); } : undefined}
                             t={t}
                         />
                     </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { RotateCcw } from 'lucide-react';
 import { SELL_UNITS, getSellUnit } from '../../../../utils/units';
 import { extractLocationBarcodeFromScan, decodeLocation } from '../../../../utils/locationEncoder';
+import { getTransferQuantityConfig } from '../../transfer/transferQuantity';
 import { remainingPickQuantity } from '../../../../utils/pickProgress';
 import { PickScannerSubmitButton } from './PickScannerSubmitButton';
 
@@ -27,6 +28,9 @@ interface PickScannerFormProps {
     playBeep: (type: 'success' | 'error') => void;
     setErrorMsg: (msg: string) => void;
     setShowError: (val: boolean) => void;
+    shortageReason?: string;
+    setShortageReason?: (reason: string) => void;
+    onRecordEmptyBin?: () => void;
     t: (key: string) => string;
 }
 
@@ -52,6 +56,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
     playBeep,
     setErrorMsg,
     setShowError,
+    shortageReason = '', setShortageReason, onRecordEmptyBin,
     t,
 }) => {
     return (
@@ -85,12 +90,16 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                 >
                                     {SELL_UNITS.filter(u => u.code === getSellUnit(currentProduct?.unit || currentItem?.unit).code).map(u => (
                                         <option key={u.code} value={u.code}>
-                                            {u.shortLabel.toUpperCase()}
+                                            {getTransferQuantityConfig(currentProduct || currentItem).quantityLabel.toUpperCase()}
                                         </option>
                                     ))}
                                 </select>
                             </div>
 
+                            <label className="block text-sm text-[var(--theme-text-secondary)]">
+                                Shortage reason (required for partial or zero picks)
+                                <textarea aria-label="Shortage reason" value={shortageReason} onChange={event=>setShortageReason?.(event.target.value)} maxLength={500} disabled={isProcessing} className="mt-1 block w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 text-[var(--theme-text-primary)]" rows={2}/>
+                            </label>
                             {/* Rapid Thumb Stepper Pills */}
                             <div className="flex items-center gap-2">
                                 <button
@@ -116,10 +125,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        const remaining = remainingPickQuantity(currentItem);
-                                        const unit = getSellUnit(currentProduct?.unit || currentItem?.unit);
-                                        const size = Number.parseFloat(currentProduct?.size || currentItem?.size || '0');
-                                        const expected = ['weight', 'volume'].includes(unit.category) && size > 0 ? remaining * size : remaining;
+                                        const expected = remainingPickQuantity(currentItem);
                                         setQtyVal(expected.toString());
                                     }}
                                     className="flex-1 py-2 rounded-xl bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 border border-[var(--theme-accent)]/30 text-[var(--theme-accent)] font-mono text-base font-bold transition-all active:scale-95 touch-manipulation min-h-[44px]"
@@ -162,6 +168,8 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
 
                 </>
             )}
+
+            {onRecordEmptyBin && <button type="button" disabled={isProcessing} onClick={onRecordEmptyBin} className="w-full min-h-11 rounded-xl border border-[var(--theme-border)] px-3 py-2 text-[var(--theme-text-primary)]">No stock in this bay</button>}
 
             {isProcessing && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2">

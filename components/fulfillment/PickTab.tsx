@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useFulfillment } from './FulfillmentContext';
 import { PickHistory } from './pick/PickHistory';
@@ -11,12 +11,13 @@ import { PickDetailsModal } from './pick/PickDetailsModal';
 import { ReturnToWarehouseModal } from './returns/ReturnToWarehouseModal';
 import { inventoryRequestsService } from '../../services/supabase.service';
 import { FulfillmentSuccessScreen } from './FulfillmentSuccessScreen';
-import { isWeightBased, isVolumeBased } from '../../utils/units';
 import { logger } from '../../utils/logger';
 import { formatJobId } from '../../utils/jobIdFormatter';
 import { sortPickItemsByOptimalRoute } from '../../utils/fulfillmentRoute';
 
-import { isPickLineResolved, remainingPickQuantity, validatePickQuantity, resolvePickProduct } from '../../utils/pickProgress';
+import { isPickLineResolved, remainingPickQuantity, resolvePickProduct } from '../../utils/pickProgress';
+
+import { usePickExecution } from '../../hooks/usePickExecution';
 
 const PICK_ITEMS_PER_PAGE = 12;
 
@@ -24,8 +25,8 @@ export const PickTab: React.FC = () => {
     const {
         filteredJobs, user, historicalJobs, employees, sites, products, jobs,
         resolveOrderRef, handleStartJob, setSelectedJob, selectedJob, setIsDetailsOpen, isDetailsOpen,
-        completeJob, updateJobItem, isSubmitting, addNotification, wmsJobsService, loadHistoricalJobs,
-        deleteJob
+        completeJob, isSubmitting, addNotification, wmsJobsService, loadHistoricalJobs,
+        deleteJob, refreshJobs
     } = useFulfillment();
 
     const { t } = useLanguage();
@@ -84,17 +85,21 @@ export const PickTab: React.FC = () => {
         setIsScannerOpen(true);
     };
 
+    const [isCompletingPick, setIsCompletingPick] = useState(false);
+    const completionLock = useRef(false);
     const handleCompleteJob = async (jobOrIgnored?: WMSJob) => {
         // Always use selectedJob (which has the most up-to-date lineItems)
         const latestJob = selectedJob;
-        if (!latestJob) return;
+        if (!latestJob || completionLock.current) return;
+        completionLock.current = true;
+        setIsCompletingPick(true);
         try {
             await completeJob(latestJob.id, user?.name || 'Worker', false, latestJob.lineItems);
         } catch (error) {
             logger.error('PickTab', 'PICK completion follow-up failed; see the completion notification for next steps.', error);
             return;
-        }
-        
+        } finally { completionLock.current = false; setIsCompletingPick(false); }
+        refreshJobs();
         setIsJobModalOpen(false);
         setIsScannerOpen(false);
         // Show Success Screen
@@ -108,76 +113,33 @@ export const PickTab: React.FC = () => {
         setSelectedJob(null);
     };
 
-    const handleScanLocation = async (location: string) => {
-        // Just verify location. Do nothing to DB yet.
+    const pickExecution = usePickExecution();
+    const verifiedLocation = useRef('');
+    const pickSaveLock = useRef(false);
+    useEffect(() => { verifiedLocation.current = ''; }, [selectedJob?.id, currentScannerItem]);
+
+    const handleScanLocation = async (barcode: string) => {
+        verifiedLocation.current = barcode;
     };
 
-    const handleScanItem = async (barcode: string, quantity?: number) => {
-        if (!selectedJob || !currentScannerItem) return;
-        const targetSiteId = selectedJob.siteId || (selectedJob as any).site_id;
-        const product = products.find(p => (p.barcode === barcode || p.sku === barcode) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
-
-        if (!product || (product.sku !== currentScannerItem.sku)) {
-            throw new Error("Invalid Item");
-        }
-
-        // Auto-pick full remaining quantity if no specific quantity given
-        const expected = currentScannerItem.expectedQty || (currentScannerItem as any).quantity || 1;
-        const alreadyPicked = currentScannerItem.pickedQty || 0;
+    const handleScanItem = async (barcode: string, quantity?: number, shortageReason?: string) => {
+        if (!selectedJob || !currentScannerItem) throw new Error('Refresh the picking job.');
+        if (pickSaveLock.current) throw new Error('A picking line is already being saved.');
+        const index = selectedJob.lineItems.indexOf(currentScannerItem);
+        if (index < 0) throw new Error('Picking line changed; refresh the job.');
         const remaining = remainingPickQuantity(currentScannerItem);
-
-        let scanQty = quantity;
-        const unit = product.unit;
-        const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-        const sizeNum = product.size ? parseFloat(product.size as string) : 0;
-
-        if (scanQty !== undefined) {
-            if (isWeightVol && sizeNum > 0) {
-                scanQty = scanQty / sizeNum;
-            }
-        } else {
-            scanQty = remaining || 1;
-        }
-
-        validatePickQuantity(scanQty, remaining);
-        const nextPicked = alreadyPicked + scanQty;
-        const newStatus = nextPicked >= expected - 0.000001 ? 'Picked' : 'Short';
-
-        const itemIndex = selectedJob.lineItems?.findIndex((i: any) => i === currentScannerItem) ?? -1;
-        if (itemIndex === -1) {
-            logger.error('PickTab', "Scanner item not found in job line items", new Error(String("Scanner item not found in job line items")));
-            throw new Error("Scanner item reference lost");
-        }
-
-        await updateJobItem(selectedJob.id, itemIndex, newStatus as any, nextPicked);
-
-        // Build the updated lineItems directly from the current selectedJob (not from global `jobs` which may be stale)
-        const updatedLineItems = [...(selectedJob.lineItems || [])];
-        updatedLineItems[itemIndex] = {
-            ...updatedLineItems[itemIndex],
-            status: newStatus as any,
-            pickedQty: nextPicked
-        };
-
-        // Update selectedJob immediately so currentScannerItem useMemo advances to the next item
-        setSelectedJob({ ...selectedJob, lineItems: updatedLineItems });
-    };
-
-    const handleUpdateItemPick = async (item: any, qty: number) => {
-        if (!selectedJob) return;
-        const itemIndex = selectedJob.lineItems?.findIndex((i: any) => i === item || (item.id && i.id === item.id)) ?? -1;
-        if (itemIndex === -1) return;
-        const expected = item.expectedQty || (item as any).quantity || 1;
-        validatePickQuantity(qty, expected);
-        const newStatus = qty >= expected ? 'Picked' : 'In-Progress';
-        await updateJobItem(selectedJob.id, itemIndex, newStatus as any, qty);
-        const updatedLineItems = [...(selectedJob.lineItems || [])];
-        updatedLineItems[itemIndex] = {
-            ...updatedLineItems[itemIndex],
-            status: newStatus as any,
-            pickedQty: qty
-        };
-        setSelectedJob({ ...selectedJob, lineItems: updatedLineItems });
+        const scanned = quantity ?? remaining;
+        if (!Number.isFinite(scanned) || scanned < 0 || scanned > remaining) throw new Error(`Enter a quantity between zero and ${remaining}.`);
+        pickSaveLock.current = true;
+        try {
+            const saved = await pickExecution.mutateAsync({
+                jobId: selectedJob.id, itemIndex: index,
+                quantity: (currentScannerItem.pickedQty || 0) + scanned,
+                locationBarcode: verifiedLocation.current, itemBarcode: barcode, shortageReason
+            });
+            setSelectedJob(saved);
+            refreshJobs();
+        } finally { pickSaveLock.current = false; }
     };
 
     const filteredPickJobs = useMemo(() => {
@@ -321,10 +283,9 @@ export const PickTab: React.FC = () => {
                         employees={employees}
                         onStartPick={handleStartPick}
                         onCompleteJob={handleCompleteJob}
-                        isSubmitting={isSubmitting}
+                        isSubmitting={isSubmitting || isCompletingPick}
                         currentItem={currentScannerItem}
                         resolveOrderRef={resolveOrderRef}
-                        onUpdateItemPick={handleUpdateItemPick}
                         onDeleteJob={deleteJob}
                     />
 
@@ -338,7 +299,7 @@ export const PickTab: React.FC = () => {
                             onScanLocation={handleScanLocation}
                             onScanItem={handleScanItem}
                             onCompleteJob={handleCompleteJob}
-                            isProcessing={isSubmitting}
+                            isProcessing={isSubmitting || pickExecution.isPending || isCompletingPick}
                             expectedPrefix={sites.find(s => s.id === (selectedJob.siteId || (selectedJob as any).site_id))?.barcodePrefix}
                         />
                     )}

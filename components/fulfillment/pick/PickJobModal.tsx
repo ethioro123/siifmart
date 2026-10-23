@@ -313,16 +313,11 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                         {step === 'COLLECT' && (
                             <button
                                 type="button"
-                                disabled={!isFullyPicked}
-                                onClick={() => setStep('STAGING')}
-                                className={`min-h-[44px] px-4 sm:px-7 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
-                                    isFullyPicked
-                                        ? 'bg-[var(--theme-accent)] hover:opacity-90 text-white cursor-pointer active:scale-95'
-                                        : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
-                                }`}
+                                disabled={isSubmitting}
+                                onClick={() => isFullyPicked ? setStep('STAGING') : onStartPick(job)}
+                                className="min-h-[44px] px-4 sm:px-7 rounded-xl font-semibold text-xs md:text-sm flex items-center gap-2 bg-[var(--theme-accent)] text-white disabled:opacity-50"
                             >
-                                {!isFullyPicked && <Lock size={14} className="text-[var(--theme-text-muted)]" />}
-                                <span>{isFullyPicked ? 'Staging Handover' : 'Pick All Items to Proceed'}</span>
+                                <span>{isFullyPicked ? 'Review handover' : 'Start scanning'}</span>
                                 <ArrowRight size={16} />
                             </button>
                         )}
@@ -339,7 +334,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 ) : (
                                     <>
                                         <CheckCircle size={16} />
-                                        <span>Complete Mission</span>
+                                        <span>Complete picking</span>
                                     </>
                                 )}
                             </button>

@@ -9,6 +9,8 @@ interface PickScannerSummaryProps {
 
 export const PickScannerSummary: React.FC<PickScannerSummaryProps> = ({ job, t }) => {
     const totalItems = job.lineItems?.length || 0;
+    const picked = job.lineItems?.filter(line => (line.pickedQty || 0) > 0).length || 0;
+    const short = job.lineItems?.filter(line => line.status === 'Short').length || 0;
 
     return (
         <div className="w-full max-w-lg mx-auto z-10 text-center animate-in fade-in duration-200">
@@ -16,13 +18,13 @@ export const PickScannerSummary: React.FC<PickScannerSummaryProps> = ({ job, t }
                 <PackageCheck size={30} />
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight">
-                {t('warehouse.picking.missionComplete') || 'Mission Complete'}
+                Ready to complete
             </h2>
             <div className="mt-3 sm:mt-5 inline-flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3">
                 <span className="text-4xl sm:text-5xl leading-none font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{totalItems}</span>
                 <span className="text-left text-sm sm:text-base font-semibold text-[var(--theme-text-primary)]">
-                    {totalItems === 1 ? 'item picked' : 'items picked'}
-                    <span className="block text-xs sm:text-sm font-medium text-[var(--theme-text-secondary)]">Ready for packing</span>
+                    {totalItems === 1 ? 'line verified' : 'lines verified'}
+                    <span className="block text-xs sm:text-sm font-medium text-[var(--theme-text-secondary)]">{picked ? `${picked} lines for packing · ${short} shortages` : 'No stock picked · no packing job will be created'}</span>
                 </span>
             </div>
         </div>

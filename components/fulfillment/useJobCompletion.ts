@@ -14,8 +14,8 @@ import { QueryClient } from '@tanstack/react-query';
 import { logger } from '../../utils/logger';
 import { calculateWarehousePoints } from '../../utils/warehouseGamification';
 import { checkAndSyncPOCompletion } from './receive/utils/poCompletionHelper';
-import { toTransferStockQuantity } from './transfer/transferQuantity';
-import { onlineStoreService } from '../../services/online-store.service';
+import { useCompletePickJob } from '../../hooks/useCompletePickJob';
+
 
 // Helper for translations
 const getTranslation = (path: string): string => {
@@ -56,9 +56,10 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
         addNotification, adjustStock, queryClient
     } = deps;
 
+    const completePick = useCompletePickJob({ setJobs, queryClient, addNotification });
+
     const completeJob = useCallback(async (jobId: string, employeeName: string, skipValidation = false, optimisticLineItems?: any[], timestamp?: string) => {
         let pointsResult = null;
-        let completionPersisted = false;
         let isPickCompletion = false;
         const stage = (name: string) => logger.debug('useJobCompletion', `[ST-PACK] 🕒 Stage: ${name} (Job: ${jobId})`);
         console.time(`completeJob-${jobId}`);
@@ -84,12 +85,10 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
             if (!job) {
                 logger.error('useJobCompletion', `❌ Job ${jobId} not found in local state`, new Error(String(`❌ Job ${jobId} not found in local state`)));
-                return;
+                throw new Error('Job not found; refresh the job queue.');
             }
 
-            const isOnlinePick = job.type === 'PICK' && Boolean(job.orderRef)
-                ? await onlineStoreService.isOnlinePickJob(job.id, job.siteId, job.countryCode || job.country_code || 'ET')
-                : false;
+            if (job.type === 'PICK') return await completePick(job.id);
 
             if (job.type === 'DISPATCH' || job.type === 'DRIVER') {
                 throw new Error('Release shipments from Outbound dispatch and record arrival from Driver deliveries.');
@@ -111,7 +110,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                             logger.warn('useJobCompletion', `   ❌ Blocking Item: ${i.name} [${i.status}]`);
                         }
                     });
-                    return;
+                    throw new Error('Verify every job line before completion.');
                 }
             }
 
@@ -154,7 +153,6 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 });
             }
             logger.debug('useJobCompletion', `💾 Database updated for job ${jobId}`);
-            completionPersisted = true;
 
             // CLEANUP: Update assignment record to 'Completed' so it drops from active workload matrix
             try {
@@ -264,83 +262,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
             // --- JOB CHAINING LOGIC ---
             stage('Job Chaining');
-            if (job && job.type === 'PICK' && job.orderRef) {
-                stage('Chaining: PICK -> PACK');
-                const packItems = itemsToValidate
-                    .filter((item: any) => (item.pickedQty || 0) > 0)
-                    .map((item: any) => ({
-                        ...item,
-                        orderedQty: item.orderedQty || item.expectedQty,
-                        expectedQty: item.pickedQty,
-                        pickedQty: item.pickedQty,
-                        packedQty: 0,
-                        packed: false,
-                        status: 'Pending' as JobItem['status']
-                    }));
-
-                if (packItems.length > 0) {
-                    const existingPackJob = jobs.find(j => j.orderRef === job!.orderRef && j.type === 'PACK' && j.status !== 'Cancelled');
-                    if (existingPackJob) {
-                        logger.warn('useJobCompletion', `⚠️ PACK job already exists for ${job.orderRef}. Skipping creation.`);
-                    } else {
-                        const packJob = await wmsJobsService.createPackAfterCompletedPick(job.id);
-                        setJobs(prev => prev.find(j => j.id === packJob.id) ? prev : [packJob, ...prev]);
-                    }
-                } else {
-                    logger.warn('useJobCompletion', `⚠️ Skipped creation of PACK job for ${job.orderRef} because no items were picked.`);
-                }
-
-                const sale = sales.find(s => s.id === job!.orderRef);
-                const transfer = jobs.find(j => (j.id === job!.orderRef || j.jobNumber === job!.orderRef) && j.type === 'TRANSFER');
-                const isTransfer = !!transfer || (job.orderRef && (job.orderRef.startsWith('TRF-')));
-
-                if (sale) {
-                    await salesService.update(sale.id, { fulfillmentStatus: 'Packing' });
-                    setSales(prev => prev.map(s => s.id === sale.id ? { ...s, fulfillmentStatus: 'Packing' } : s));
-                } else if (isTransfer) {
-                    const tId = transfer?.id || job.orderRef;
-                    setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Picked' } : j));
-                    setTransfers((prev: any[]) => prev.map(t => t.id === tId ? { ...t, transferStatus: 'Picked' } : t));
-                    await wmsJobsService.update(tId, { transferStatus: 'Picked' });
-                }
-
-                // --- INVENTORY DEDUCTION (Internal & Sales) ---
-                if (!isOnlinePick && itemsToValidate && itemsToValidate.length > 0) {
-                    const sourceSiteId = job.sourceSiteId || (job as any).source_site_id || job.siteId;
-                    for (const item of itemsToValidate) {
-                        if ((item.pickedQty || 0) > 0) {
-                            // For transfer PICK jobs, resolve the product at the source site by SKU
-                            // to ensure we always deduct from the correct warehouse record
-                            let productId = item.productId || item.id;
-                            if (isTransfer && sourceSiteId && item.sku) {
-                                const sourceProduct = allProducts.find((p: Product) =>
-                                    p.sku === item.sku &&
-                                    (p.siteId === sourceSiteId || (p as any).site_id === sourceSiteId)
-                                );
-                                if (sourceProduct) productId = sourceProduct.id;
-                            }
-
-                            if (productId) {
-                                let deductUnits = item.pickedQty;
-
-                                // EXACT MEASURE DEDUCTION OVERRIDE
-                                if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
-                                    const product = allProducts.find((p: Product) => p.id === productId);
-                                    if (product) deductUnits = toTransferStockQuantity(item.pickedQty || 0, product, true);
-                                }
-
-                                await adjustStock(
-                                    productId,
-                                    deductUnits,
-                                    'OUT',
-                                    `Pick Job ${job.jobNumber || job.id} completed`,
-                                    user?.name || 'System'
-                                );
-                            }
-                        }
-                    }
-                }
-            } else if (job && job.type === 'PACK' && job.orderRef) {
+            if (job && job.type === 'PACK' && job.orderRef) {
                 stage('Chaining: PACK -> DISPATCH');
                 const sale = sales.find(s => s.id === job!.orderRef);
                 const transfer = jobs.find(j => (j.id === job!.orderRef || j.jobNumber === job!.orderRef) && j.type === 'TRANSFER');
@@ -422,18 +344,17 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             }
 
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
-            if (isOnlinePick) queryClient.invalidateQueries({ queryKey: ['products'] });
             console.timeEnd(`completeJob-${jobId}`);
             return pointsResult;
         } catch (error) {
             logger.error('useJobCompletion', `❌ completeJob failed for ${jobId}:`, error);
             console.timeEnd(`completeJob-${jobId}`);
-            addNotification('alert', completionPersisted && isPickCompletion
-                ? 'Picking is saved, but the packing job could not be created. A warehouse manager needs to create the PACK job before fulfillment continues.'
+            addNotification('alert', isPickCompletion
+                ? (error instanceof Error ? error.message : 'Picking completion was not confirmed. Refresh the job before retrying.')
                 : getTranslation('warehouse.jobCompleteFailed'));
             throw error;
         }
-    }, [jobs, sales, employees, user, allOrders, allProducts, setJobs, setTransfers, setOrders, setAllOrders, setSales, addNotification, adjustStock, queryClient]);
+    }, [jobs, sales, employees, user, allOrders, allProducts, setJobs, setTransfers, setOrders, setAllOrders, setSales, addNotification, adjustStock, queryClient, completePick]);
 
     return { completeJob };
 };
