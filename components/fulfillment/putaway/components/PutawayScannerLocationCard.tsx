@@ -2,7 +2,6 @@ import React from 'react';
 import { Product } from '../../../../types';
 import { decodeLocation, parseLocationParts } from '../../../../utils/locationEncoder';
 import { normalizeLocation } from '../../../../utils/locationTracking';
-import { PutawayScannerOverflowPanel } from './PutawayScannerOverflowPanel';
 
 interface PutawayScannerLocationCardProps {
     isStrictlyValid: boolean;
@@ -14,11 +13,6 @@ interface PutawayScannerLocationCardProps {
     } | null;
     currentProduct?: Product;
     currentItem?: any;
-    isOverflowMode: boolean;
-    setIsOverflowMode: (v: boolean) => void;
-    setAwaitingMismatchConfirmation: (v: boolean) => void;
-    existingSkuLocations: Product[];
-    handleSelectLocation: (loc: string) => void;
     currentOccupants: Product[];
     t: (key: string) => string;
 }
@@ -29,17 +23,12 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
     recommendation,
     currentProduct,
     currentItem,
-    isOverflowMode,
-    setIsOverflowMode,
-    setAwaitingMismatchConfirmation,
-    existingSkuLocations,
-    handleSelectLocation,
     currentOccupants,
     t
 }) => {
     const rawLoc = isStrictlyValid
         ? decodeLocation(inputVal.trim().toUpperCase())
-        : (normalizeLocation(inputVal) || recommendation?.location || currentProduct?.location || '—');
+        : (normalizeLocation(inputVal) || recommendation?.location || '—');
     const locStr = rawLoc || '—';
 
     const parts = parseLocationParts(locStr !== '—' ? locStr : '');
@@ -102,19 +91,7 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
                 )}
             </div>
 
-            {/* Alternate Bay / Overflow panel */}
-            <div className="mt-4">
-                <PutawayScannerOverflowPanel
-                    isOverflowMode={isOverflowMode}
-                    setIsOverflowMode={setIsOverflowMode}
-                    setAwaitingMismatchConfirmation={setAwaitingMismatchConfirmation}
-                    existingSkuLocations={existingSkuLocations}
-                    handleSelectLocation={handleSelectLocation}
-                    currentItem={currentItem}
-                    currentOccupants={currentOccupants}
-                    t={t}
-                />
-            </div>
+
         </div>
     );
 };

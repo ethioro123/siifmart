@@ -17,6 +17,8 @@ import { logger } from '../../utils/logger';
 import { usePutawayScanning } from './putaway/hooks/usePutawayScanning';
 import { usePutawayAutoRepair } from './putaway/hooks/usePutawayAutoRepair';
 import { formatJobId } from '../../utils/jobIdFormatter';
+import { useQueryClient } from '@tanstack/react-query';
+import { usePutawayRouting } from './putaway/hooks/usePutawayRouting';
 
 interface PutawayTabProps {
     filteredJobs: WMSJob[]; historicalJobs: WMSJob[]; employees: Employee[]; user: any; orders: any[];
@@ -35,6 +37,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     loadHistoricalJobs
 }) => {
     const isSubmittingRef = useRef(false);
+    const queryClient = useQueryClient();
 
     // --- PUTAWAY-SPECIFIC STATE ---
     const [putawaySearch, setPutawaySearch] = useState('');
@@ -169,7 +172,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     // --- ACTIVE JOB HELPERS ---
     const currentItem = useMemo(() => {
         if (!selectedJob) return undefined;
-        return selectedJob.lineItems?.find(i => i.status !== 'Completed' && i.status !== 'Picked');
+        return selectedJob.lineItems?.find(i => !['Completed', 'Picked', 'Short', 'Discontinued'].includes(i.status));
     }, [selectedJob]);
 
     const currentProduct = useMemo(() => {
@@ -179,111 +182,17 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             (p.id === currentItem.productId || p.sku === currentItem.sku) &&
             (p.siteId === targetSiteId || p.site_id === targetSiteId)
         );
-        if (!prod) {
-            prod = allProducts.find(p =>
-                p.id === currentItem.productId || p.sku === currentItem.sku
-            );
-        }
         return prod;
     }, [currentItem, allProducts, activeSite]);
 
-    const recommendation = useMemo(() => {
-        if (!currentItem) return null;
-        const targetSku = currentItem.sku;
-        const targetSiteId = activeSite?.id;
-
-        // 0. EXPLICIT: Smart Routing engine from Receiving
-        if (currentItem.suggestedLocation) {
-            return {
-                location: currentItem.suggestedLocation,
-                type: 'ASSIGNED' as const,
-                label: 'Smart Routing Suggestion'
-            };
-        }
-
-        // 1. PRIMARY: Consolidation (Same SKU already in this warehouse)
-        // Check if this SKU exists in ANY bay in the current site
-        const existingStock = allProducts.filter(p =>
-            p.sku === targetSku &&
-            (p.siteId === targetSiteId || p.site_id === targetSiteId) &&
-            p.location &&
-            p.location !== 'On Order' &&
-            p.location !== 'Populating...'
-        );
-
-        if (existingStock.length > 0) {
-            // Pick the first/main location
-            return {
-                location: existingStock[0].location!,
-                type: 'ASSIGNED' as const,
-                label: 'Existing Stock Bay'
-            };
-        }
-
-        // 2. SECONDARY: Local Category Hub (Cluster nearby similar items)
-        if (currentProduct?.category) {
-            const categoryItems = allProducts.filter(p =>
-                p.category === currentProduct.category &&
-                p.location &&
-                (p.siteId === targetSiteId || p.site_id === targetSiteId)
-            );
-
-            if (categoryItems.length > 0) {
-                const freq: Record<string, number> = {};
-                categoryItems.forEach(p => {
-                    const loc = p.location!;
-                    // Use normalizeLocation for consistent parsing of verbose/strict formats
-                    const strictLoc = normalizeLocation(loc);
-                    if (strictLoc) {
-                        const parts = strictLoc.split('-');
-                        const zoneAisle = `${parts[0]}-${parts[1]}`;
-                        freq[zoneAisle] = (freq[zoneAisle] || 0) + 1;
-                    }
-                });
-
-                const sortedFreq = Object.entries(freq).sort((a, b) => b[1] - a[1]);
-                if (sortedFreq.length > 0) {
-                    const [zone, aisle] = sortedFreq[0][0].split('-');
-                    return {
-                        location: `ZONE ${zone} / AISLE ${aisle}`,
-                        type: 'SUGGESTED' as const,
-                        label: 'Local Category Hub'
-                    };
-                }
-            }
-        }
-
-        // 3. TERTIARY: Global Category Hint (Peeking at other site layouts)
-        if (currentProduct?.category) {
-            const globalCategoryItems = allProducts.filter(p =>
-                p.category === currentProduct.category &&
-                p.location &&
-                p.location !== 'On Order'
-            );
-
-            if (globalCategoryItems.length > 0) {
-                const globalFreq: Record<string, number> = {};
-                globalCategoryItems.forEach(p => {
-                    const parsed = parseLocation(p.location!);
-                    if (parsed.isValid) {
-                        const zoneGroup = `ZONE ${parsed.zone}`;
-                        globalFreq[zoneGroup] = (globalFreq[zoneGroup] || 0) + 1;
-                    }
-                });
-
-                const sortedGlobal = Object.entries(globalFreq).sort((a, b) => b[1] - a[1]);
-                if (sortedGlobal.length > 0) {
-                    return {
-                        location: sortedGlobal[0][0],
-                        type: 'SUGGESTED' as const,
-                        label: 'Global Standard Area'
-                    };
-                }
-            }
-        }
-
-        return null;
-    }, [currentItem, currentProduct, allProducts, activeSite]);
+    const routing = usePutawayRouting({
+        siteId: selectedJob?.siteId || activeSite?.id || '', sku: currentItem?.sku || '',
+        category: currentItem?.category || currentProduct?.category, quantity: currentItem?.expectedQty || 0,
+        batchNumber: currentItem?.batchNumber, expiryDate: currentItem?.expiryDate,
+        storageType: currentItem?.customAttributes?.storage?.type || currentProduct?.customAttributes?.storage?.type,
+        suggestedLocation: currentItem?.suggestedLocation, condition: currentItem?.condition
+    }, selectedJob?.countryCode || selectedJob?.country_code || activeSite?.country || '', isScannerOpen, selectedJob?.id, user?.id);
+    const recommendation = routing.suggestions[0] || null;
 
     // --- MANAGE SCANNING LOGIC ---
     const { handleScanLocation, handleScanItem } = usePutawayScanning({
@@ -340,6 +249,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
 
     const onScanItemWrapper = async (barcode: string, quantity?: number) => {
         await handleScanItem(barcode, quantity);
+        await queryClient.invalidateQueries({ queryKey: ['putawayRouting'] });
         // Clean up
         setScannedLocation(''); // Reset for next item
         setLocationOccupants([]);
@@ -439,6 +349,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                     currentItem={currentItem}
                     currentProduct={currentProduct}
                     recommendation={recommendation}
+                    routing={routing}
                     occupants={locationOccupants}
                     allProducts={allProducts}
                     activeSiteId={activeSite?.id}

@@ -16,6 +16,8 @@ import { PutawayScannerStatusOrb } from './components/PutawayScannerStatusOrb';
 import { PutawayScannerWarnings } from './components/PutawayScannerWarnings';
 import { resolveFulfillmentScanningPolicy } from '../../../utils/receivingPolicy';
 
+import { PutawayRoutingSuggestions, PutawayRoutingState } from './components/PutawayRoutingSuggestions';
+
 const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
 interface PutawayScannerProps {
@@ -27,6 +29,7 @@ interface PutawayScannerProps {
     onScanItem: (barcode: string, quantity?: number) => void | Promise<void>;
     isProcessing: boolean;
     recommendation?: { location: string; type: 'ASSIGNED' | 'SUGGESTED'; label: string } | null;
+    routing?: PutawayRoutingState;
     occupants?: Product[];
     allProducts: Product[];
     activeSiteId?: string;
@@ -42,7 +45,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     onScanLocation,
     onScanItem,
     isProcessing,
-    recommendation,
+    recommendation, routing,
     occupants = [],
     allProducts,
     activeSiteId,
@@ -64,33 +67,6 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     const [lastCheckedLocation, setLastCheckedLocation] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const scanLockRef = useRef(false);
-
-    const existingSkuLocations = useMemo(() => {
-        if (!currentItem?.sku) return [];
-        const targetSiteId = activeSiteId || job.siteId || (job as any).site_id;
-        const normSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
-        const targetNormSku = normSku(currentItem.sku);
-
-        return allProducts.filter(p => 
-            p.sku && normSku(p.sku) === targetNormSku &&
-            (p.siteId === targetSiteId || p.site_id === targetSiteId) &&
-            p.location &&
-            p.location !== 'On Order' &&
-            p.location !== 'Receiving Dock'
-        );
-    }, [currentItem, allProducts, activeSiteId, job]);
-
-    const handleSelectLocation = async (loc: string) => {
-        const norm = normalizeLocation(loc) || loc.trim().toUpperCase();
-        await onScanLocation(norm);
-        setStep('ITEM');
-        setInputVal('');
-        setIsOverflowMode(false);
-        setAwaitingOccupancyConfirmation(false);
-        setAwaitingMismatchConfirmation(false);
-        setLastCheckedLocation(null);
-        playBeep('success');
-    };
 
     const scanOnlyHandlers = useScanOnly(setInputVal, {
         onReject: (reason) => {
@@ -373,17 +349,13 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         </div>
                     ) : step === 'LOCATION' ? (
                         <div className="w-full mb-6">
+                            {routing && <PutawayRoutingSuggestions routing={routing} />}
                             <PutawayScannerLocationCard
                                 isStrictlyValid={isStrictlyValid}
                                 inputVal={inputVal}
                                 recommendation={recommendation}
                                 currentProduct={currentProduct}
                                 currentItem={currentItem}
-                                isOverflowMode={isOverflowMode}
-                                setIsOverflowMode={setIsOverflowMode}
-                                setAwaitingMismatchConfirmation={setAwaitingMismatchConfirmation}
-                                existingSkuLocations={existingSkuLocations}
-                                handleSelectLocation={handleSelectLocation}
                                 currentOccupants={currentOccupants}
                                 t={t}
                             />
