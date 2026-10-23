@@ -44,7 +44,10 @@ export async function checkBarcodeConflicts(sku: string | undefined, barcodes: s
     }
 }
 
-export async function createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) {
+export async function createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>, masterMode: 'register' | 'lookup-only' = 'register') {
+    if (masterMode === 'lookup-only' && ((product.stock || 0) !== 0 || product.location !== 'On Order' || product.approvedBy)) {
+        throw new Error('Receiving placeholders must have zero stock and cannot approve catalog data.');
+    }
     const barcodesToCheck: string[] = [];
     if (product.barcode && product.barcode.trim()) {
         barcodesToCheck.push(product.barcode.trim());
@@ -138,7 +141,7 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
             costPrice: dbProduct.cost_price,
             approved: Boolean(product.approvedBy),
             createdBy: product.approvedBy ?? null
-        });
+        }, masterMode);
         if (masterId) dbProduct.master_id = masterId;
     }
 

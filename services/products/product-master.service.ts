@@ -85,7 +85,7 @@ export interface EnsureMasterInput {
  * New masters start PENDING unless an HQ approver created them.
  * Returns null (with a warning) only while the migration is not yet applied.
  */
-export async function ensureMaster(input: EnsureMasterInput): Promise<string | null> {
+export async function ensureMaster(input: EnsureMasterInput, mode: 'register' | 'lookup-only' = 'register'): Promise<string | null> {
     const { data: site, error: siteError } = await supabase
         .from('sites')
         .select('country, region_code')
@@ -108,6 +108,8 @@ export async function ensureMaster(input: EnsureMasterInput): Promise<string | n
         throw lookupError;
     }
     if (existing?.id) return existing.id as string;
+    // Receiving can link a visible master, but never register or approve national catalog data.
+    if (mode === 'lookup-only') return null;
 
     const { data: created, error: insertError } = await supabase
         .from('product_master')

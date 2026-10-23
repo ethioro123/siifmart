@@ -96,7 +96,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         if (newProductCheck) {
                             targetProductId = newProductCheck.id;
                         } else {
-                            const created = await productsService.create({
+                            const created = await productsService.createReceivingPlaceholder({
                                 siteId: po.siteId || activeSite?.id || '',
                                 name: variant.productName || item.productName || `New Item ${variant.sku}`,
                                 sku: variant.sku,
@@ -241,7 +241,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         // Create product placeholder record in DB
                         const candidateSku = cleanSku(globalProduct?.sku || prodSku || variant.sku || item.sku || '');
                         try {
-                            const created = await productsService.create({
+                            const created = await productsService.createReceivingPlaceholder({
                                 siteId: targetSiteId,
                                 name: variant.productName || item.productName || globalProduct?.name || `Item ${candidateSku}`,
                                 sku: candidateSku || variant.sku || item.sku || productSku,

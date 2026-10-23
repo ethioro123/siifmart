@@ -9,7 +9,6 @@
 - Country functional roles with database authority keep it. Buyer and regional procurement roles remain role-based, so multiple employees can share the role and provide operational coverage; PO approval still requires a different person from the creator.
 - **Files**: `services/permissions.matrix.ts`, `services/permissions.matrix-base.ts`, `utils/permissions.ts`.
 - **Database**: Read-only checked staging and production; both already use the same role and authorized-scope checks for PO inserts.
-
 ### Purchase Request to PO Workflow (2026-10-23)
 - Added country/region-scoped purchase requests for employees, Buyer review with request-owner separation, and handoff to a draft PO.
 - The request is transactionally marked converted when the linked draft PO is inserted; existing PO approval controls require a separate approver.
@@ -497,3 +496,4 @@
 - Receiving printing separates counted quantity from copy count, preserves lot/expiry and condition, marks draft labels unsaved, respects price-tag policy, and retains failed reprints for retry.
 - Receiving print preview renders actual generated label HTML; fixed thermal page sizes prevent growing labels and trailing blank pages.
 - Receipt confirmation reloads authoritative PO lines, resolves the exact line ID, checks destination/status, and throws on failed validation so unsaved counts remain open.
+- Receiving creates only zero-stock site placeholders and links existing visible masters; it does not attempt national catalog registration or bypass master-data RLS.

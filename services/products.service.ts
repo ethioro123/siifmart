@@ -300,6 +300,7 @@ export const productsService = {
 
     // Mutations - delegating implementation
     create: createProduct,
+    createReceivingPlaceholder: (product: Parameters<typeof createProduct>[0]) => createProduct(product, 'lookup-only'),
     update: updateProduct,
     delete: deleteProduct,
     cascadeDelete: cascadeDeleteProduct,
