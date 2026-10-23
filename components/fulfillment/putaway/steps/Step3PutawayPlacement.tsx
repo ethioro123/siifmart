@@ -87,33 +87,12 @@ export const Step3PutawayPlacement: React.FC<Step3PutawayPlacementProps> = ({
                         <Layers size={16} />
                     </div>
                     <p className="text-xs text-[var(--theme-text-secondary)]">
-                        Completing this mission will immediately update available inventory balances for POS sale, pick waves, and B2B orders.
+                        Review the recorded placements. Stock is updated when each placement is saved; completing the job closes its workflow.
                     </p>
                 </div>
             </div>
 
-            {/* Complete Action Button */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-4 md:p-6 shadow-sm space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                    Final Putaway Confirmation
-                </h4>
 
-                <button
-                    type="button"
-                    onClick={() => onCompleteJob(job)}
-                    disabled={isSubmitting}
-                    className="w-full min-h-[52px] px-6 py-3 rounded-2xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
-                >
-                    {isSubmitting ? (
-                        <Loader2 size={18} className="animate-spin" />
-                    ) : (
-                        <>
-                            <CheckCircle size={18} />
-                            <span>Complete Putaway Mission & Lock Stock</span>
-                        </>
-                    )}
-                </button>
-            </div>
         </div>
     );
 };

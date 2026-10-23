@@ -114,6 +114,17 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
             throw new Error('Wrong item');
         }
 
+        const exactIndex = selectedJob.lineItems.indexOf(currentItem);
+        const itemIndex = exactIndex >= 0 && !['Picked', 'Completed', 'Short'].includes(currentItem.status) ? exactIndex :
+            selectedJob.lineItems.findIndex(item => !['Picked', 'Completed', 'Short'].includes(item.status) &&
+                item.productId === currentItem.productId && item.sku === currentItem.sku);
+        if (itemIndex < 0) throw new Error('This item is no longer pending. Reopen the job before placing stock.');
+        const requestedQty = quantityToPutaway ?? currentItem.expectedQty;
+        if (!Number.isFinite(requestedQty) || requestedQty <= 0 || requestedQty > currentItem.expectedQty) {
+            throw new Error('Enter a positive physical quantity no greater than this job item quantity.');
+        }
+        if (selectedJob.siteId !== activeSite?.id || !['Pending', 'In-Progress'].includes(selectedJob.status)) throw new Error('Select an active job at this receiving facility.');
+
         if (isSubmittingRef.current !== undefined) {
             (isSubmittingRef as any).current = true;
         }
@@ -122,9 +133,7 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
             // Capture a single timestamp for consistency across inventory and putaway history
             const putawayTimestamp = new Date().toISOString();
 
-            const qty = (quantityToPutaway !== undefined && quantityToPutaway > 0)
-                ? quantityToPutaway
-                : currentItem.expectedQty;
+            const qty = requestedQty;
 
             // 2. Putaway Stock Logic (Replaces adjustStock + relocate)
             await putawayStock({
@@ -154,18 +163,6 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
             });
 
             // 1. Update Job Item Status — use findIndex (not indexOf) to avoid reference mismatch
-            const itemIndex = selectedJob.lineItems.findIndex(i =>
-                (i.productId === currentItem.productId || i.sku === currentItem.sku) &&
-                i.status !== 'Picked' && i.status !== 'Completed'
-            );
-            logger.debug('PutawayTab', '📍 [PUTAWAY] itemIndex:');
-
-            if (itemIndex === -1) {
-                logger.error('PutawayTab', '❌ [PUTAWAY] Could not find current item in lineItems!', currentItem);
-                addNotification('alert', 'Error: item not found in job');
-                return;
-            }
-
             const itemStatus = qty < currentItem.expectedQty ? 'Short' : 'Picked';
             await updateJobItem(selectedJob.id, itemIndex, itemStatus, qty, scannedLocation);
 

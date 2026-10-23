@@ -360,6 +360,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     };
 
     const handleCompleteJobFromModal = async (job: WMSJob) => {
+        if (isSubmitting || !job.lineItems.length || !job.lineItems.every(item => ['Picked', 'Completed'].includes(item.status))) return;
         setIsSubmitting(true);
         try {
             await completeJob(job.id, user?.id || 'Driver', false, job.lineItems);

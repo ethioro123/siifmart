@@ -24,7 +24,6 @@
 - Until Board appointments are supported in the app, the Group CEO may appoint all Group C-suite roles, including the Chief Audit Executive.
 - These hiring checks are enforced in the application workflow. No database/RLS policy change is included in this update.
 - **Files**: `components/org-chart/hooks/orgReportingL1L2Data.ts`, `components/org-chart/hooks/orgReportingL3L5Data.ts`, `components/org-chart/hooks/useOrgTreeLayout.ts`, `components/org-chart/types.ts`, `utils/roleHiring.ts`, `hooks/useEmployeeWizard.ts`, `hooks/useEmployeeActions.ts`, `components/employees/modals/ApproveEmployeeModal.tsx`, `components/employees/wizard/StepReview.tsx`.
-
 ### Configurable Purchase Order Approval Authority (2026-10-22)
 - Regional PO approval uses each region's saved autonomous limit, including zero. Country leadership sets that limit with a recorded reason; procurement managers cannot change their own authority.
 - Regional Procurement Managers may approve another person's PO within their region's limit. Above it, HQ Finance records clearance of the current amount and terms before the Country Commercial Director completes final approval. Finance can view POs but does not issue final procurement approval.
@@ -497,3 +496,4 @@
 - Receipt confirmation reloads authoritative PO lines, resolves the exact line ID, checks destination/status, and throws on failed validation so unsaved counts remain open.
 - Receiving creates only zero-stock site placeholders and links existing visible masters; it does not attempt national catalog registration or bypass master-data RLS. Manifest totals count each putaway job once (duplicate client-state jobs no longer double the received units); floor roles can create/read internal site jobs and placeholders under RLS.
 - Mobile Putaway cards open the job modal before start/resume, matching desktop and supporting keyboard activation.
+- Putaway uses one bottom scan/completion action; routing is review-only, step labels have readable fallbacks, and stale items/invalid quantities are rejected before stock posting.

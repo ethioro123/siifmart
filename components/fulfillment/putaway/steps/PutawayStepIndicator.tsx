@@ -16,6 +16,7 @@ export const PutawayStepIndicator: React.FC<PutawayStepIndicatorProps> = ({
     isFullySlotted,
     t,
 }) => {
+    const label = (key: string, fallback: string) => { const value = t(key); return value && value !== key ? value : fallback; };
     const isStepAccessible = (stepId: PutawayStep): boolean => {
         if (stepId === 'INTAKE' || stepId === 'SLOTTING') return true;
         // Non-skippable: All items must be scanned into destination bins before Shelf Placement Lock
@@ -34,7 +35,7 @@ export const PutawayStepIndicator: React.FC<PutawayStepIndicatorProps> = ({
         {
             id: 'INTAKE',
             stepNum: 1,
-            label: t('warehouse.inboundIntake') || 'Cargo Intake',
+            label: label('warehouse.inboundIntake', 'Cargo Intake'),
             sublabel: 'Staging & Origin',
             icon: Package,
             isComplete: true,
@@ -42,7 +43,7 @@ export const PutawayStepIndicator: React.FC<PutawayStepIndicatorProps> = ({
         {
             id: 'SLOTTING',
             stepNum: 2,
-            label: t('warehouse.binSlotting') || 'Bin Routing',
+            label: label('warehouse.binSlotting', 'Bin Routing'),
             sublabel: isFullySlotted ? 'All Slotted' : 'Scan & Slot',
             icon: MapPin,
             isComplete: isFullySlotted,
@@ -50,7 +51,7 @@ export const PutawayStepIndicator: React.FC<PutawayStepIndicatorProps> = ({
         {
             id: 'PLACEMENT',
             stepNum: 3,
-            label: t('warehouse.shelfLock') || 'Shelf Lock',
+            label: label('warehouse.shelfLock', 'Review completion'),
             sublabel: !isFullySlotted ? 'Locked (Slot All)' : 'Verify & Stock',
             icon: CheckCircle,
             isComplete: false,

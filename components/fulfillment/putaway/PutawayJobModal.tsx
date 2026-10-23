@@ -267,10 +267,11 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                         {step === 'INTAKE' && (
                             <button
                                 type="button"
-                                onClick={() => setStep('SLOTTING')}
+                                onClick={() => onStartPutaway(job)}
+                                disabled={isSubmitting || isCompleted || !totalItems}
                                 className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                             >
-                                <span>Start Scanning & Route</span>
+                                <span>Start scanning</span>
                                 <ArrowRight size={16} />
                             </button>
                         )}
@@ -278,8 +279,8 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                         {step === 'SLOTTING' && (
                             <button
                                 type="button"
-                                disabled={!isFullySlotted}
-                                onClick={() => setStep('PLACEMENT')}
+                                disabled={isSubmitting || isCompleted || !totalItems}
+                                onClick={() => isFullySlotted ? setStep('PLACEMENT') : onStartPutaway(job)}
                                 className={`min-h-[44px] px-5 md:px-7 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
                                     isFullySlotted
                                         ? 'bg-[var(--theme-accent)] hover:opacity-90 text-white cursor-pointer active:scale-95'
@@ -287,7 +288,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 }`}
                             >
                                 {!isFullySlotted && <Lock size={14} className="text-[var(--theme-text-muted)]" />}
-                                <span>{isFullySlotted ? 'Shelf Lock' : 'Slot All Items to Proceed'}</span>
+                                <span>{isFullySlotted ? 'Review completion' : 'Start scanning'}</span>
                                 <ArrowRight size={16} />
                             </button>
                         )}
@@ -296,7 +297,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                             <button
                                 type="button"
                                 onClick={() => onCompleteJob(job)}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || !isFullySlotted || isCompleted}
                                 className="min-h-[44px] px-6 md:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting ? (

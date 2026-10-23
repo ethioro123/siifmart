@@ -58,14 +58,7 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-                    <button
-                        type="button"
-                        onClick={onAdvanceToRouting}
-                        className="w-full sm:w-auto min-h-[44px] px-6 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
-                    >
-                        <span>Start Scanning & Route</span>
-                        <ArrowRight size={16} />
-                    </button>
+
                 </div>
             </div>
 
@@ -127,17 +120,7 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
                 </div>
             </div>
 
-            {/* Advance Button */}
-            <div className="flex justify-end pt-2">
-                <button
-                    type="button"
-                    onClick={onAdvanceToRouting}
-                    className="min-h-[44px] px-6 py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
-                >
-                    <span>Step 2: Bin Allocation</span>
-                    <ArrowRight size={16} />
-                </button>
-            </div>
+
         </div>
     );
 };
