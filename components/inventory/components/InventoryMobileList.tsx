@@ -1,3 +1,4 @@
+import { InventoryPriceReadiness } from './InventoryPriceReadiness';
 import React from 'react';
 import { Package, CheckCircle, Eye } from 'lucide-react';
 import { Product, Site } from '../../../types';
@@ -97,6 +98,7 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                                         {product.category}
                                     </span>
                                 </div>
+                                <InventoryPriceReadiness price={product.price} />
                             </div>
                             {/* Stock Badge */}
                             <div className={`flex flex-col items-end text-xs font-bold font-mono tabular-nums px-2.5 py-1 rounded-lg border ${colorClasses}`}>

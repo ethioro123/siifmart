@@ -1,6 +1,7 @@
+import { InventoryPriceReadiness } from './InventoryPriceReadiness';
 import React from 'react';
 import {
-    ArrowUpDown, CheckCircle, Package, RefreshCw, Edit, Trash2, Clock, Eye
+    ArrowUpDown, CheckCircle, Package, RefreshCw, Edit, Trash2, Eye
 } from 'lucide-react';
 import { Product, Site } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
@@ -200,18 +201,14 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                         <p className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight group-hover:text-[var(--theme-accent)] transition-colors duration-150 truncate max-w-[280px]">
                                             {formatProductDisplayName(product) || product.name}
                                         </p>
-                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                        <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
                                             <span className="text-[11px] font-semibold font-mono text-[#34C759] bg-[#34C759]/10 px-1.5 py-0.5 rounded border border-[#34C759]/20 tracking-tight">
                                                 {product.sku}
                                             </span>
                                             <span className="text-[11px] text-[var(--theme-text-muted)] font-medium truncate max-w-[140px]">
                                                 {product.category}
                                             </span>
-                                            {product.approvalStatus === 'pending' && (
-                                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#FF9F0A]/10 text-[#FF9F0A] px-1.5 py-0.5 rounded border border-[#FF9F0A]/20 uppercase tracking-wider">
-                                                    <Clock size={10} className="shrink-0" /> Review
-                                                </span>
-                                            )}
+                                            <InventoryPriceReadiness price={product.price} />
                                         </div>
                                     </div>
                                 </div>

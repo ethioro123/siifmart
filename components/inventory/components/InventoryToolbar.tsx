@@ -141,15 +141,6 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                 ...prev,
                 locationStatus: prev.locationStatus === 'missing' ? 'All' : 'missing'
             }))
-        },
-        {
-            id: 'pending',
-            label: 'Review',
-            isActive: filters.approvalStatus === 'pending',
-            onClick: () => setFilters((prev: any) => ({
-                ...prev,
-                approvalStatus: prev.approvalStatus === 'pending' ? 'All' : 'pending'
-            }))
         }
     ];
 
