@@ -11,7 +11,6 @@ import LabelPrintModal from '../../LabelPrintModal';
 import { getSellUnit, formatStockDisplay } from '../../../utils/units';
 import { formatProductDisplayName } from '../../procurement/utils';
 import { resolveSmartProductAttributes } from '../../../utils/groceryAttributes';
-import { SmartProductAttributeStrip } from '../../SmartProductAttributeStrip';
 import {
     Printer, TrendingUp, Package, CheckCheck,
     AlertTriangle, AlertCircle, Sparkles, X, Search, Tag, Scale
@@ -43,10 +42,9 @@ export const StockListModal: React.FC = () => {
     const [activeFilter, setActiveFilter] = React.useState<StockFilterMode>('ALL');
     const [selectedCategory, setSelectedCategory] = React.useState<string>('ALL_CATEGORIES');
     const [selectedProduct, setSelectedProduct] = React.useState<any>(null);
-    const [selectedSmartUnitProduct, setSelectedSmartUnitProduct] = React.useState<any>(null);
     const [isPrintHubOpen, setIsPrintHubOpen] = React.useState(false);
     const [labelsToPrint, setLabelsToPrint] = React.useState<any[]>([]);
-    const { products, activeSite, employees, movements, orders } = useData();
+    const { products, activeSite } = useData();
     const { user } = useStore();
     const pageSize = 20;
 
@@ -181,138 +179,39 @@ export const StockListModal: React.FC = () => {
                         <thead className="text-[var(--theme-thead-text)] bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                             <tr>
                                 <th className="text-left p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.product')}</th>
-                                <th className="text-left p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.category')}</th>
                                 <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.price')}</th>
                                 <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.stock')}</th>
-                                <th className="text-center p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.unit')}</th>
-                                <th className="text-center p-3 font-semibold uppercase tracking-wider text-[10px]">{t('common.status')}</th>
-                                <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">Last Updated</th>
-                                <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">Added By</th>
-                                <th className="text-center p-3 font-semibold uppercase tracking-wider text-[10px]">Actions</th>
+                                <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--theme-border)]">
                             {paginatedProducts.map(product => {
-                                const flags = getUpdateFlags(product, lastSeenUpdates);
-                                const profile = resolveSmartProductAttributes(product, undefined, CURRENCY_SYMBOL);
-                                return (
-                                    <tr key={product.id} onClick={() => setSelectedProduct(product)} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer">
-                                        <td className="p-3">
-                                            <div className="flex items-start gap-2">
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-semibold text-[var(--theme-text-primary)] truncate">{formatProductDisplayName(product) || product.name}</p>
-                                                        {flags.isUnseen && <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase shrink-0"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" />Updated</span>}
-                                                    </div>
-                                                    <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono font-bold bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-full border border-[var(--theme-border)]">{product.sku}</span>
-                                                        <SmartProductAttributeStrip item={product} maxPills={5} showDomainSpecs={true} />
-                                                    </div>
-                                                </div>
-                                                {(flags.priceUpdated || flags.stockUpdated) && (
-                                                    <div className="flex flex-col gap-1 items-end shrink-0">
-                                                        {flags.priceUpdated && <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-1.5 py-0.5 bg-blue-500/15 text-blue-500 border border-blue-400/30 rounded-md whitespace-nowrap"><TrendingUp size={9} />Price</span>}
-                                                        {flags.stockUpdated && <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-1.5 py-0.5 bg-emerald-500/15 text-emerald-500 border border-emerald-400/30 rounded-md whitespace-nowrap"><Package size={9} />Stock</span>}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="p-3">
-                                            <div className="text-xs font-semibold text-[var(--theme-text-primary)]">{product.category || t('posCommand.uncategorized')}</div>
-                                            {profile.subcategory && profile.subcategory.toLowerCase() !== (product.category || '').toLowerCase() && (
-                                                <div className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">{profile.subcategory}</div>
-                                            )}
-                                        </td>
-                                        <td className="p-3 text-right">
-                                            <div className="font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</div>
-                                            {profile.unitPriceEquivalent && (
-                                                <div className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums mt-0.5">{profile.unitPriceEquivalent}</div>
-                                            )}
-                                        </td>
-                                        <td className="p-3 text-right">
-                                            {(() => {
-                                                const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
-                                                const stockVal = product.stock || 0;
-                                                const isOutOfStock = stockVal <= 0; const isLowStock = stockVal < threshold;
-                                                let colorClass = 'text-[var(--theme-text-primary)]';
-                                                if (isOutOfStock) colorClass = 'text-rose-500';
-                                                else if (isLowStock) colorClass = 'text-amber-500';
-                                                return (
-                                                    <div>
-                                                        <div className={`font-mono font-bold text-xs tabular-nums ${colorClass}`}>{formatStockDisplay(stockVal, product)}</div>
-                                                        {profile.stockBreakdown && (
-                                                            <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-0.5 whitespace-nowrap">({profile.stockBreakdown})</div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })()}
-                                        </td>
-                                        <td className="p-3 text-center"><span className="text-[10px] font-bold font-mono text-[var(--theme-text-secondary)] uppercase bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded border border-[var(--theme-border)]">{getSellUnit(product.unit).shortLabel}</span></td>
-                                        <td className="p-3 text-center">
-                                            {(() => {
-                                                const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
-                                                const isOutOfStock = product.stock <= 0; const isLowStock = product.stock < threshold;
-                                                if (isOutOfStock) return <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border bg-rose-500/10 text-rose-500 border-rose-500/20">{t('common.outOfStock')}</span>;
-                                                if (isLowStock) return <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border bg-amber-500/10 text-amber-500 border-amber-500/20">{t('common.low')}</span>;
-                                                return <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">{t('common.active')}</span>;
-                                            })()}
-                                        </td>
-                                        <td className="p-3 text-right text-[var(--theme-text-secondary)] text-xs whitespace-nowrap font-mono">
-                                            {(() => {
-                                                const dateStr = product.posReceivedAt || product.pos_received_at || (product as any).updatedAt || (product as any).updated_at || product.createdAt || (product as any).created_at;
-                                                if (!dateStr) return '—';
-                                                try { const d = new Date(dateStr); return isNaN(d.getTime()) ? '—' : d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return '—'; }
-                                            })()}
-                                        </td>
-                                        <td className="p-3 text-right text-[var(--theme-text-secondary)] text-[11px] whitespace-nowrap font-medium tracking-wide">
-                                             {(() => {
-                                                 // 1. Direct Creator / Receiver on product record
-                                                 const directUser = product.posReceivedBy || product.pos_received_by || (product as any).receivedBy || (product as any).received_by || product.createdBy || product.created_by || product.approvedBy || product.approved_by || (product as any).author || (product as any).updatedBy || (product as any).updated_by;
-                                                 if (directUser && !['system admin', 'system', 'admin', 'unknown'].includes(directUser.toLowerCase())) {
-                                                     const emp = employees?.find(e => e.id === directUser || e.email === directUser || e.code === directUser || e.name?.toLowerCase() === directUser.toLowerCase());
-                                                     if (emp?.name) return emp.name;
-                                                     if (!directUser.includes('-') && directUser.length < 30) return directUser;
-                                                 }
-
-                                                 // 2. Stock Movement History for this product/SKU
-                                                 const prodMovements = movements?.filter(m => m.productId === product.id || m.productId === product.productId || (m as any).sku === product.sku);
-                                                 if (prodMovements && prodMovements.length > 0) {
-                                                     const inMove = prodMovements.find(m => (m.type === 'IN' || (m.reason && m.reason.toLowerCase().includes('receiv'))) && m.performedBy && !['system admin', 'system', 'admin', 'unknown'].includes(m.performedBy.toLowerCase()));
-                                                     const target = inMove || prodMovements.find(m => m.performedBy && !['system admin', 'system', 'admin', 'unknown'].includes(m.performedBy.toLowerCase()));
-                                                     if (target?.performedBy) {
-                                                         const emp = employees?.find(e => e.id === target.performedBy || e.email === target.performedBy || e.code === target.performedBy || e.name?.toLowerCase() === target.performedBy.toLowerCase());
-                                                         if (emp?.name) return emp.name;
-                                                         if (!target.performedBy.includes('-')) return target.performedBy;
-                                                     }
-                                                 }
-
-                                                 // 3. Purchase Order Receiving
-                                                 const matchingPO = orders?.find((po: any) => po.items?.some((i: any) => i.productId === product.id || i.sku === product.sku) && (po as any).receivedBy);
-                                                 if (matchingPO && (matchingPO as any).receivedBy) {
-                                                     const rec = (matchingPO as any).receivedBy;
-                                                     const emp = employees?.find(e => e.id === rec || e.email === rec || e.code === rec || e.name?.toLowerCase() === rec.toLowerCase());
-                                                     if (emp?.name) return emp.name;
-                                                     if (!rec.includes('-')) return rec;
-                                                 }
-
-                                                 // 4. Current Logged-in Operator or Explicit Fallback
-                                                 if (user?.name) return user.name;
-                                                 return 'HQ Operations';
-                                             })()}
-                                         </td>
-                                        <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex items-center justify-center gap-1">
-                                                <button type="button" onClick={() => { setLabelsToPrint([{ product, quantity: 1 }]); setIsPrintHubOpen(true); }} title="Print Price Tag / Barcode Label" aria-label="Print Price Tag / Barcode Label" className="p-1.5 rounded-lg bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] cursor-pointer">
-                                                    <Printer size={14} className="text-purple-500" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
+                                const stock = product.stock || 0;
+                                const minimum = product.minStock && product.minStock > 0 ? product.minStock : 10;
+                                const stockLabel = stock <= 0 ? 'Out of stock' : stock < minimum ? 'Low stock' : '';
+                                return <tr key={product.id} onClick={() => setSelectedProduct(product)} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer">
+                                    <td className="p-3 max-w-[22rem]">
+                                        <button type="button" onClick={() => setSelectedProduct(product)} className="text-left rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={`View details for ${product.name}`}>
+                                            <span className="block font-medium text-[var(--theme-text-primary)]">{formatProductDisplayName(product) || product.name}</span>
+                                            <span className="block mt-1 text-xs font-mono text-[var(--theme-text-secondary)]">{product.sku}</span>
+                                        </button>
+                                    </td>
+                                    <td className="p-3 text-right whitespace-nowrap font-mono tabular-nums text-[var(--theme-text-primary)]">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</td>
+                                    <td className="p-3 text-right whitespace-nowrap">
+                                        <span className="font-mono tabular-nums text-[var(--theme-text-primary)]">{formatStockDisplay(stock, product)}</span>
+                                        {stockLabel && <span className="block mt-1 text-xs text-[var(--theme-text-secondary)]">{stockLabel}</span>}
+                                    </td>
+                                    <td className="p-3" onClick={event => event.stopPropagation()}>
+                                        <div className="flex justify-end items-center gap-2">
+                                            <button type="button" onClick={() => setSelectedProduct(product)} className="min-h-[44px] px-3 rounded-lg border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Details</button>
+                                            <button type="button" onClick={() => { setLabelsToPrint([{ product, quantity: 1 }]); setIsPrintHubOpen(true); }} aria-label={`Print label for ${product.name}`} title="Print label" className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"><Printer size={16}/></button>
+                                        </div>
+                                    </td>
+                                </tr>;
                             })}
                             {filteredProducts.length === 0 && (
                                 <tr>
-                                    <td colSpan={9} className="p-8 text-center text-[var(--theme-text-secondary)] font-medium">
+                                    <td colSpan={4} className="p-8 text-center text-[var(--theme-text-secondary)] font-medium">
                                         {activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' ? `No products found matching active filters` : t('posCommand.noProductsLocation')}
                                     </td>
                                 </tr>
