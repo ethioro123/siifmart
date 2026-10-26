@@ -1,10 +1,34 @@
 {
-  "auto-commit-on-stop": {
+  "ai-reload-gate": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "../scripts/ai-work-start.sh",
+        "timeout": 5
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "write_file|edit_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "../scripts/ai-work-start.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "type": "command",
         "command": "../scripts/auto-commit-on-stop.sh",
         "timeout": 15
+      },
+      {
+        "type": "command",
+        "command": "../scripts/ai-work-stop.sh",
+        "timeout": 5
       }
     ]
   }

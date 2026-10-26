@@ -27,6 +27,8 @@ interface PickScannerProps {
     onCompleteJob?: (job: WMSJob) => void;
     isProcessing: boolean;
     expectedPrefix?: string;
+    onCountDiscrepancy?: (count: number) => void;
+    onReportDiscrepancy?: () => void;
 }
 
 export const PickScanner: React.FC<PickScannerProps> = ({
@@ -39,7 +41,9 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     onScanItem,
     onCompleteJob,
     isProcessing,
-    expectedPrefix
+    expectedPrefix,
+    onCountDiscrepancy,
+    onReportDiscrepancy
 }) => {
     const { t } = useLanguage();
     const { effectiveCountry, settings } = useData();
@@ -255,6 +259,9 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             const displayMax = remainingPickQuantity(currentItem);
             const finalQty = qty;
 
+            if (Number.isFinite(finalQty) && finalQty > displayMax + 0.001 && onCountDiscrepancy) {
+                onCountDiscrepancy(finalQty); return;
+            }
             if (isNaN(finalQty) || finalQty < 0 || finalQty > displayMax + 0.001) {
                 playBeep('error');
                 setErrorMsg(t('warehouse.picking.invalidQuantityRange').replace('{max}', String(displayMax)));
@@ -269,8 +276,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                     setShowError(true);
                     return;
                 }
-                const confirmed = window.confirm(t('warehouse.picking.shortPickConfirmPrompt').replace('{qty}', String(finalQty)).replace('{expected}', String(displayMax)));
-                if (!confirmed) return;
+
             }
 
             await executePick(matchedBarcode, finalQty);
@@ -352,6 +358,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                 </div>
             </div>
 
+            {onReportDiscrepancy && <button type="button" onClick={onReportDiscrepancy} className="min-h-[44px] border-b border-[var(--theme-border)] px-4 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Physical discrepancy / reconciliation</button>}
             {/* Main View */}
             <div className="flex-1 min-h-0 relative w-full overflow-hidden flex flex-col">
                 <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center px-2 py-2 sm:p-6 w-full max-w-full">

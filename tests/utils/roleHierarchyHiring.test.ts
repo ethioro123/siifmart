@@ -171,9 +171,9 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
     });
 
     describe('Head of Operations (Level 2, Rank 90)', () => {
-        it('cannot employ CEO or superior Level 2 (super_admin, regional_operations_manager)', () => {
+        it('cannot employ CEO or superior Level 2 (super_admin, country_managing_director)', () => {
             expect(canEmployRole('country_operations_director', 'group_ceo')).toBe(false);
-            expect(canEmployRole('country_operations_director', 'regional_operations_manager')).toBe(false);
+            expect(canEmployRole('country_operations_director', 'country_managing_director')).toBe(false);
         });
 
         it('cannot employ their own level or peers (head_of_operations, head_of_hr, head_of_finance)', () => {
@@ -362,10 +362,10 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
         });
 
         it('supports legacy roles (hr, admin)', () => {
-            expect(canEmployRole('hr_generalist', 'group_ceo')).toBe(false);
-            expect(canEmployRole('hr_generalist', 'store_manager')).toBe(true);
-            expect(canEmployRole('country_managing_director', 'group_ceo')).toBe(false);
-            expect(canEmployRole('country_managing_director', 'store_manager')).toBe(true);
+            expect(canEmployRole('hr', 'group_ceo')).toBe(false);
+            expect(canEmployRole('hr', 'store_manager')).toBe(true);
+            expect(canEmployRole('admin', 'group_ceo')).toBe(false);
+            expect(canEmployRole('admin', 'store_manager')).toBe(true);
         });
     });
 
@@ -374,7 +374,7 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
             expect(canEmployRole('group_ceo', 'store_manager')).toBe(true);
             expect(canEmployRole('country_managing_director', 'store_manager')).toBe(true);
             expect(canEmployRole('country_hr_director', 'store_manager')).toBe(true);
-            expect(canEmployRole('hr_generalist', 'store_manager')).toBe(true);
+            expect(canEmployRole('hr', 'store_manager')).toBe(true);
             expect(canEmployRole('regional_operations_manager', 'store_manager')).toBe(true);
         });
 

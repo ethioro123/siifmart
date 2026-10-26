@@ -17,7 +17,8 @@ import { sortPickItemsByOptimalRoute } from '../../utils/fulfillmentRoute';
 
 import { isPickLineResolved, remainingPickQuantity, resolvePickProduct } from '../../utils/pickProgress';
 
-import { usePickExecution } from '../../hooks/usePickExecution';
+import { FloorDiscrepancyModal } from './discrepancies/FloorDiscrepancyModal';
+import { usePickExecution, PickRecountRequiredError } from '../../hooks/usePickExecution';
 
 const PICK_ITEMS_PER_PAGE = 12;
 
@@ -113,6 +114,7 @@ export const PickTab: React.FC = () => {
         setSelectedJob(null);
     };
 
+    const [discrepancy, setDiscrepancy] = useState<{ line: number; count?: number } | null>(null);
     const pickExecution = usePickExecution();
     const verifiedLocation = useRef('');
     const pickSaveLock = useRef(false);
@@ -125,7 +127,7 @@ export const PickTab: React.FC = () => {
     const handleScanItem = async (barcode: string, quantity?: number, shortageReason?: string) => {
         if (!selectedJob || !currentScannerItem) throw new Error('Refresh the picking job.');
         if (pickSaveLock.current) throw new Error('A picking line is already being saved.');
-        const index = selectedJob.lineItems.indexOf(currentScannerItem);
+        const index = (currentScannerItem ? selectedJob.lineItems.indexOf(currentScannerItem) : 0);
         if (index < 0) throw new Error('Picking line changed; refresh the job.');
         const remaining = remainingPickQuantity(currentScannerItem);
         const scanned = quantity ?? remaining;
@@ -134,11 +136,14 @@ export const PickTab: React.FC = () => {
         try {
             const saved = await pickExecution.mutateAsync({
                 jobId: selectedJob.id, itemIndex: index,
-                quantity: (currentScannerItem.pickedQty || 0) + scanned,
+                quantity: (currentScannerItem.pickedQty || 0) + scanned, expectedQuantity: currentScannerItem.expectedQty,
                 locationBarcode: verifiedLocation.current, itemBarcode: barcode, shortageReason
             });
             setSelectedJob(saved);
             refreshJobs();
+        } catch (error) {
+            if (error instanceof PickRecountRequiredError) setDiscrepancy({ line: index, count: scanned });
+            throw error;
         } finally { pickSaveLock.current = false; }
     };
 
@@ -156,7 +161,7 @@ export const PickTab: React.FC = () => {
         return filteredJobs.filter(j => {
             if (j.type !== 'PICK') return false;
             if (['completed', 'cancelled'].includes((j.status || '').toLowerCase())) return false;
-            if (j.assignedTo && j.assignedTo !== employeeId && !['country_managing_director', 'warehouse_manager', 'group_ceo'].includes(user?.role || '')) return false;
+            if (j.assignedTo && j.assignedTo !== employeeId && !['country_managing_director','warehouse_manager','group_ceo','inventory_manager','country_operations_director','regional_operations_manager','regional_supply_chain_manager'].includes(user?.role || '')) return false;
 
             if (pickSearch) {
                 const q = pickSearch.toLowerCase();
@@ -287,6 +292,7 @@ export const PickTab: React.FC = () => {
                         currentItem={currentScannerItem}
                         resolveOrderRef={resolveOrderRef}
                         onDeleteJob={deleteJob}
+                        onReportDiscrepancy={() => setDiscrepancy({ line: Math.max(0, (currentScannerItem ? selectedJob.lineItems?.indexOf(currentScannerItem) : 0) ?? 0) })}
                     />
 
                     {isScannerOpen && (
@@ -296,6 +302,8 @@ export const PickTab: React.FC = () => {
                             currentProduct={currentScannerProduct}
                             products={products}
                             onClose={() => setIsScannerOpen(false)}
+                            onCountDiscrepancy={(count) => setDiscrepancy({ line: (currentScannerItem ? selectedJob.lineItems.indexOf(currentScannerItem) : 0), count })}
+                            onReportDiscrepancy={() => setDiscrepancy({ line: Math.max(0, (currentScannerItem ? selectedJob.lineItems.indexOf(currentScannerItem) : 0)) })}
                             onScanLocation={handleScanLocation}
                             onScanItem={handleScanItem}
                             onCompleteJob={handleCompleteJob}
@@ -304,6 +312,8 @@ export const PickTab: React.FC = () => {
                         />
                     )}
 
+                    {discrepancy && <FloorDiscrepancyModal isOpen onClose={() => setDiscrepancy(null)} job={selectedJob} user={user}
+                        initialLine={discrepancy.line} initialCount={discrepancy.count} addNotification={addNotification} onSaved={async () => { await refreshJobs(); }} />}
                     {/* HISTORY DETAILS MODAL */}
                     {isDetailsOpen && ((selectedJob.status || '').toLowerCase() === 'completed' || (selectedJob.status || '').toLowerCase() === 'cancelled') && (
                         <PickDetailsModal

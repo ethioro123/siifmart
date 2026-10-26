@@ -16,6 +16,7 @@ interface PackScannerProps {
     onConfirmPack: (itemIndex: number, qty: number) => Promise<void>;
     onCompleteJob: () => void;
     isProcessing: boolean;
+    onFlagDiscrepancy?: (index: number, quantity: number) => void;
 }
 
 export const PackScanner: React.FC<PackScannerProps> = ({
@@ -24,7 +25,8 @@ export const PackScanner: React.FC<PackScannerProps> = ({
     onClose,
     onConfirmPack,
     onCompleteJob,
-    isProcessing
+    isProcessing,
+    onFlagDiscrepancy
 }) => {
     const { t } = useLanguage();
 
@@ -188,7 +190,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             const matchedItem = job.lineItems![matchedIndex];
             const expectedCases = matchedItem.expectedQty || 1;
             const finalQty = qty;
-            if (!Number.isFinite(finalQty) || finalQty <= 0) {
+            if (!Number.isFinite(finalQty) || finalQty < 0) {
                 playBeep('error');
                 setErrorMsg('Enter the quantity physically packed.');
                 setShowError(true);
@@ -197,6 +199,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             }
 
             if (!isExactPackQuantity(finalQty, expectedCases)) {
+                if (onFlagDiscrepancy) { onFlagDiscrepancy(matchedIndex, finalQty); return; }
                 playBeep('error');
                 setErrorMsg('The packed quantity does not match this job. Report the difference to a supervisor.');
                 setShowError(true);

@@ -8,6 +8,7 @@ import tailwindcss from '@tailwindcss/vite';
 import electron from 'vite-plugin-electron';
 import renderer from 'vite-plugin-electron-renderer';
 import { stagingQuickLoginPlugin } from './dev/stagingQuickLoginPlugin';
+import { aiReloadGatePlugin } from './dev/aiReloadGatePlugin';
 
 // Custom HTTPS agent that resolves Supabase to its reachable Cloudflare IPv4 edge (172.64.149.246)
 // when the local mobile hotspot / ISP DNS64 returns unreachable IPv6 addresses.
@@ -88,7 +89,7 @@ export default defineConfig(({ mode }) => {
       watch: {
         // Use polling to prevent rapid file change detection
         usePolling: true,
-        interval: 5000, // Check every 5 seconds instead of instantly
+        interval: 1000,
         ignored: [
           '**/node_modules/**',
           '**/.git/**',
@@ -96,7 +97,9 @@ export default defineConfig(({ mode }) => {
           '**/dist-electron/**',
           '**/scratch/**',
           '**/release/**',
-          '**/build/**'
+          '**/build/**',
+          '**/.backups/**',
+          '**/.ai-working.lock'
         ],
       },
       hmr: {
@@ -104,6 +107,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      aiReloadGatePlugin(),
       stagingQuickLoginPlugin({
         url: supabaseUrl, publicKey: modeEnv.VITE_SUPABASE_ANON_KEY,
         email: privateStagingEnv.SIIFMART_STAGING_ADMIN_EMAIL,

@@ -8,7 +8,8 @@ import { isCorporateHqDirectorateRole, isSharedHqRegionalRole } from './roleSegr
 export function canSwitchCountry(user: { role?: string; title?: string } | null | undefined): boolean {
     if (!user) return false;
     const role = (user.role || '').toLowerCase();
-    return role === 'group_ceo';
+    const title = (user.title || '').toLowerCase();
+    return role === 'group_ceo' || title.includes('chief executive officer') || title.includes('group ceo');
 }
 
 /**

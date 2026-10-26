@@ -143,6 +143,9 @@ BEGIN
    RAISE EXCEPTION 'Job on discrepancy hold: a separate supervisor must reconcile it before work continues'; END IF;
   NEW.has_discrepancy:=true;
  END IF;
+ IF OLD.type='PACK' AND (NEW.type IS DISTINCT FROM OLD.type OR NEW.site_id IS DISTINCT FROM OLD.site_id
+  OR NEW.country_code IS DISTINCT FROM OLD.country_code OR NEW.order_ref IS DISTINCT FROM OLD.order_ref) THEN
+  RAISE EXCEPTION 'Packing stage identity is immutable'; END IF;
  IF OLD.type='PACK' AND NEW.line_items IS DISTINCT FROM OLD.line_items THEN
   IF jsonb_array_length(NEW.line_items) IS DISTINCT FROM jsonb_array_length(OLD.line_items) THEN RAISE EXCEPTION 'Packing cannot replace the picked manifest'; END IF;
   FOR line IN SELECT value FROM jsonb_array_elements(NEW.line_items) LOOP

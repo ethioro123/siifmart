@@ -24,6 +24,8 @@ describe('isExactPackQuantity', () => {
         expect(isExactPackQuantity(11, 12)).toBe(false);
         expect(isExactPackQuantity(13, 12)).toBe(false);
         expect(isExactPackQuantity(0, 12)).toBe(false);
+        expect(isExactPackQuantity(12.0001, 12)).toBe(false);
+        expect(isExactPackQuantity(11.9999, 12)).toBe(false);
         expect(isExactPackQuantity(Number.NaN, 12)).toBe(false);
     });
 });

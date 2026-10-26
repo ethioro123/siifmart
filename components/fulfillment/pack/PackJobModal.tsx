@@ -198,6 +198,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     t={t}
                 />
 
+                {onFlagDiscrepancy && <button type="button" onClick={onFlagDiscrepancy} className="min-h-[44px] border-b border-[var(--theme-border)] px-4 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Physical discrepancy / supervisor reconciliation</button>}
                 {/* Step Indicator */}
                 <PackStepIndicator
                     currentStep={step}

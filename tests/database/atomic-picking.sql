@@ -25,6 +25,7 @@ BEGIN
  SELECT private.pick_location_barcode('SITE-'||s.barcode_prefix,p.location) INTO bin
  FROM public.sites s WHERE s.id=p.site_id;
  IF left(bin,4)<>'7654' THEN RAISE EXCEPTION 'TEST: configured facility prefix was ignored'; END IF;
+ PERFORM set_config('test.pick_supervisor',(SELECT id::text FROM public.employees WHERE role='warehouse_manager' AND site_id=p.site_id LIMIT 1),true);
  PERFORM set_config('test.pick_actor',actor::text,true);PERFORM set_config('test.pick_job',j.id::text,true);
  PERFORM set_config('test.pick_product',p.id::text,true);PERFORM set_config('test.pick_sku',p.sku,true);PERFORM set_config('test.pick_bin',bin,true);
  PERFORM set_config('test.pick_parent',parent_id::text,true);
@@ -97,7 +98,7 @@ BEGIN
 END; $$;
 SET LOCAL ROLE authenticated;
 DO $$
-DECLARE result jsonb; qty numeric; actor uuid:=current_setting('test.pick_actor')::uuid;
+DECLARE result jsonb; qty numeric; actor uuid:=current_setting('test.pick_actor')::uuid; d jsonb; target uuid; supervisor uuid:=current_setting('test.pick_supervisor')::uuid;
 BEGIN
  BEGIN
   PERFORM public.complete_pick_job(current_setting('test.pick_cross_country')::uuid); RAISE EXCEPTION 'TEST: cross-country picking accepted';
@@ -108,6 +109,16 @@ BEGIN
  EXCEPTION WHEN OTHERS THEN IF SQLERRM LIKE 'TEST:%' THEN RAISE; END IF; END;
  result:=public.record_pick_line(current_setting('test.pick_insufficient')::uuid,0,6,current_setting('test.pick_bin'),current_setting('test.pick_sku'),NULL);
  IF result->>'status'<>'In-Progress' THEN RAISE EXCEPTION 'TEST: failed transaction leaked job completion'; END IF;
+ -- Shortages now require an independent recount and supervisor approval.
+ FOREACH target IN ARRAY ARRAY[current_setting('test.pick_zero')::uuid,current_setting('test.pick_partial')::uuid] LOOP
+  qty:=CASE WHEN target=current_setting('test.pick_zero')::uuid THEN 0 ELSE 1 END;
+  d:=public.report_floor_discrepancy(target,0,qty,qty,'Physical shortage confirmed on recount');
+  PERFORM set_config('request.jwt.claim.sub',supervisor::text,true);
+  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',supervisor,'role','authenticated')::text,true);
+  PERFORM public.resolve_floor_discrepancy(target,(d->>'id')::uuid,'short_pick',qty,'Independent supervisor verified shortage');
+  PERFORM set_config('request.jwt.claim.sub',actor::text,true);
+  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',actor,'role','authenticated')::text,true);
+ END LOOP;
  PERFORM public.record_pick_line(current_setting('test.pick_zero')::uuid,0,0,current_setting('test.pick_bin'),'','Bin physically empty');
  result:=public.complete_pick_job(current_setting('test.pick_zero')::uuid);
  IF result->'job'->>'status'<>'Completed' OR result->'pack'<>'null'::jsonb THEN RAISE EXCEPTION 'TEST: zero shortage created packing'; END IF;

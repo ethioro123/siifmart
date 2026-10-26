@@ -97,6 +97,7 @@ import { systemConfigService } from './services/supabase.service';
 import { initializeAvatarsBucket } from './services/imageStorage.service';
 import StagingEnvironmentBanner from './components/StagingEnvironmentBanner';
 import Logo from './components/Logo';
+import { AiReloadIndicator } from './components/dev/AiReloadIndicator';
 
 export default function App() {
   useCapacitor();
@@ -410,6 +411,7 @@ export default function App() {
         </Suspense>
       </Layout>
       )}
+      {import.meta.env.DEV && <AiReloadIndicator />}
     </Router>
   );
 }

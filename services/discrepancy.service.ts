@@ -1,7 +1,35 @@
+import { z } from 'zod';
+import { floorReportInput, floorResolutionInput, floorDiscrepancy, type FloorReportInput, type FloorResolutionInput } from '../types/floor-discrepancy';
 import { supabase } from '../lib/supabase';
 import type { DiscrepancyResolution, DiscrepancyClaim } from '../types';
 
 export const discrepancyService = {
+    async getFloorHistory(jobId: string) {
+        z.string().uuid().parse(jobId);
+        const { data, error } = await supabase.rpc('floor_discrepancy_history', { p_job_id: jobId });
+        if (error) throw error;
+        return z.array(floorDiscrepancy).max(100).parse(data);
+    },
+    async reportFloor(input: FloorReportInput) {
+        const value = floorReportInput.parse(input);
+        const { data, error } = await supabase.rpc('report_floor_discrepancy', {
+            p_job_id: value.jobId, p_item_index: value.itemIndex, p_first_count: value.firstCount, p_recount: value.recount, p_reason: value.reason
+        });
+        if (error) throw error;
+        const saved = floorDiscrepancy.parse(data);
+        if (saved.job_id !== value.jobId || saved.item_index !== value.itemIndex || saved.resolved_at !== null) throw new Error('Server did not confirm the discrepancy hold.');
+        return saved;
+    },
+    async resolveFloor(input: FloorResolutionInput) {
+        const value = floorResolutionInput.parse(input);
+        const { data, error } = await supabase.rpc('resolve_floor_discrepancy', {
+            p_job_id: value.jobId, p_discrepancy_id: value.discrepancyId, p_resolution: value.resolution, p_quantity: value.quantity, p_notes: value.notes
+        });
+        if (error) throw error;
+        const saved = floorDiscrepancy.parse(data);
+        if (saved.id !== value.discrepancyId || saved.job_id !== value.jobId || !saved.resolved_at) throw new Error('Server did not confirm reconciliation.');
+        return saved;
+    },
     async createResolution(
         resolution: Omit<DiscrepancyResolution, 'id' | 'createdAt' | 'resolvedAt'>
     ): Promise<DiscrepancyResolution> {

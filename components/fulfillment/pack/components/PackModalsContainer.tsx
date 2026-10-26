@@ -1,3 +1,4 @@
+import { isExactPackQuantity } from '../../../../utils/packScanValidation';
 import React, { useState, useRef } from 'react';
 import { useFulfillment } from '../../FulfillmentContext';
 import { PackJobModal } from '../PackJobModal';
@@ -72,6 +73,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const completionLock = useRef(false);
+    const [discrepancyCount, setDiscrepancyCount] = useState<{ line: number; count: number } | null>(null);
 
     const { handlePrintLabel, handleReprintLabel, getLabelQtyAndUnit, isPrinting } = usePackLabelPrint({
         products,
@@ -92,7 +94,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         const casesQty = qty;
 
         const expectedQty = item.expectedQty || 1;
-        if (!Number.isFinite(casesQty) || casesQty <= 0 || Math.abs(casesQty - expectedQty) > 0.001) throw new Error('Record the exact physical quantity before confirming packing.');
+        if (!isExactPackQuantity(casesQty, expectedQty)) throw new Error('Record the exact physical quantity before confirming packing.');
         const isPacked = true;
         const newStatus = isPacked ? 'Picked' : 'In-Progress';
 
@@ -204,6 +206,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                                 setIsScannerOpen(false);
                                 setIsPackModalOpen(true);
                             }}
+                            onFlagDiscrepancy={(line, count) => { setDiscrepancyCount({ line, count }); setIsDiscrepancyModalOpen(true); }}
                             onConfirmPack={handleScanConfirmPack}
                             onCompleteJob={handleScannerComplete}
                             isProcessing={isSubmitting || isPrinting}
@@ -213,15 +216,15 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                     {/* Pack Discrepancy Modal */}
                     <PackDiscrepancyModal
                         isOpen={isDiscrepancyModalOpen}
-                        onClose={() => setIsDiscrepancyModalOpen(false)}
+                        onClose={() => { setIsDiscrepancyModalOpen(false); setDiscrepancyCount(null); }}
+                        initialLine={discrepancyCount?.line}
+                        initialCount={discrepancyCount?.count}
                         job={selectedPackJob}
                         currentUser={user}
                         wmsJobsService={wmsJobsService}
                         addNotification={addNotification}
                         refreshData={refreshData}
-                        onAcceptCount={(updatedLineItems) => {
-                            setSelectedPackJob(prev => prev ? { ...prev, lineItems: updatedLineItems } : prev);
-                        }}
+
                     />
                 </>
             )}

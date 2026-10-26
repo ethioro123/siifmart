@@ -15,4 +15,4 @@ export const matchesPackItemScan = (
 };
 
 export const isExactPackQuantity = (quantity: number, required: number): boolean =>
-    Number.isFinite(quantity) && quantity > 0 && Number.isFinite(required) && required > 0 && Math.abs(quantity - required) <= 0.001;
+    Number.isFinite(quantity) && quantity > 0 && Number.isFinite(required) && required > 0 && quantity === required;

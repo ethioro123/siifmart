@@ -206,7 +206,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     dispatch_supervisor: [
         'dashboard.view',
         'warehouse.view', 'warehouse.view_tasks', 'warehouse.dispatch',
-        'inventory.view',
+        'inventory.view', 'inventory.transfer',
         'employees.view', 'employees.manage_attendance'
     ],
     inbound_operations_supervisor: [

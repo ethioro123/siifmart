@@ -65,6 +65,7 @@ interface PickJobModalProps {
     resolveOrderRef: (ref?: string) => string;
     onUpdateItemPick?: (item: any, qty: number) => void;
     onDeleteJob?: (jobId: string) => void;
+    onReportDiscrepancy?: () => void;
 }
 
 export const PickJobModal: React.FC<PickJobModalProps> = ({
@@ -82,6 +83,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
     resolveOrderRef,
     onUpdateItemPick,
     onDeleteJob,
+    onReportDiscrepancy,
 }) => {
     const { t } = useLanguage();
 
@@ -201,6 +203,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                 </div>
 
                 {/* Step Indicator */}
+                {onReportDiscrepancy && <button type="button" onClick={onReportDiscrepancy} className="min-h-[44px] border-b border-[var(--theme-border)] px-4 py-2 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Physical discrepancy / supervisor reconciliation</button>}
                 <PickStepIndicator
                     currentStep={step}
                     setStep={setStep}
