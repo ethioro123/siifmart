@@ -27,7 +27,8 @@ const mockSites: Site[] = [
         name: 'Nairobi Central DC',
         code: 'NBO-DC',
         type: 'Warehouse',
-        country_code: 'KE',
+        address: 'Enterprise Road, Nairobi',
+        country: 'KE',
         status: 'Active',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -38,7 +39,10 @@ const mockJobs: WMSJob[] = [
     {
         id: 'job-pack-1',
         type: 'PACK',
+        priority: 'Normal',
         status: 'Completed',
+        items: 1,
+        location: 'Zone A',
         siteId: 'site-1',
         jobNumber: 'PK-001',
         orderRef: 'ORD-1001',
@@ -64,7 +68,10 @@ const mockJobs: WMSJob[] = [
     {
         id: 'job-pack-2',
         type: 'PACK',
+        priority: 'Normal',
         status: 'Completed',
+        items: 1,
+        location: 'Zone A',
         siteId: 'site-1',
         jobNumber: 'PK-002',
         orderRef: 'ORD-1002',
