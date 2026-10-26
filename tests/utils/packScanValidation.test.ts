@@ -8,6 +8,7 @@ describe('matchesPackItemScan', () => {
     it('accepts only the scanned job line SKU or its matching catalog barcode', () => {
         expect(matchesPackItemScan('ET-MILK-001', item, product)).toBe(true);
         expect(matchesPackItemScan('6001000001016', item, product)).toBe(true);
+        expect(matchesPackItemScan('6001000001099', item, { ...product, barcodes: ['6001000001099'] })).toBe(true);
         expect(matchesPackItemScan('UNRELATED-ITEM', item, product)).toBe(false);
     });
 

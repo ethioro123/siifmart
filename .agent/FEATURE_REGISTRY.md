@@ -1,14 +1,12 @@
 # Feature Registry
+- Pack mobile scanner UX & blind count (2026-10-27): mobile-first header with progress bar, prominent scan/error status banners, blind-count thumb steppers (`-1`, `+1`, `+5`, `+10`, `Clear`), one-tap rescan, and unpacked/packed tote queue without revealing expected quantities.
 - Picking prefix correction (2026-10-27): migration applied to staging `utykzifrblpyxlvlknsm`; server validation honors configured facility prefixes. Rollback-only database regression passed.
 # This file records selected implementation history; it is not a source of current policy.
 # Update it for new features or significant fixes, and verify the current code before relying on older notes.
 - Assign workload (2026-10-27): server counts show active jobs and calendar-day completions in the configured timezone; 100 active jobs per person enforced by a serialized database trigger. Scoped reads refresh every 15 seconds. Applied to staging `utykzifrblpyxlvlknsm`; rollback-only capacity, midnight and scope checks passed.
 ## Active Features
 ### PO Creator Permissions Aligned With Database Policy (2026-10-23)
-- PO creation in the application now matches the authenticated insert roles enforced in staging and production. The Group CEO retains creation authority; other Group executives, Area Operations Managers, and Regional Supply Chain Managers no longer see a create permission the database will reject.
-- Country functional roles with database authority keep it. Buyer and regional procurement roles remain role-based, so multiple employees can share the role and provide operational coverage; PO approval still requires a different person from the creator.
-- **Files**: `services/permissions.matrix.ts`, `services/permissions.matrix-base.ts`, `utils/permissions.ts`.
-- **Database**: Read-only checked staging and production; both already use the same role and authorized-scope checks for PO inserts.
+- PO creation in the application matches the authenticated insert roles enforced in staging and production (`services/permissions.matrix.ts`, `services/permissions.matrix-base.ts`, `utils/permissions.ts`).
 ### Purchase Request to PO Workflow (2026-10-23)
 - Added country/region-scoped purchase requests for employees, Buyer review with request-owner separation, and handoff to a draft PO.
 - The request is transactionally marked converted when the linked draft PO is inserted; existing PO approval controls require a separate approver.

@@ -182,7 +182,7 @@ describe('Procurement Packaging & Sellable Units', () => {
             const phys = getPOItemPhysicalSummary(kindle);
             expect(phys.netWeightFormatted).toBe('217 g');
             expect(phys.grossWeightFormatted).toBe('0.28 kg');
-            expect(phys.specBadge).toBe('Net: 217 g • Gross: 0.28 kg • Dims: 16.0 × 11.5 × 0.8 cm');
+            expect(phys.specBadge).toBe('Dims: 16.0 × 11.5 × 0.8 cm • 217 g');
         });
 
         it('handles single unit with no packageType as Single Unit (1 ea)', () => {
