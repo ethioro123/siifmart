@@ -130,3 +130,7 @@ git status --short
 - New products need confirmed handling requirements and explicit packaging counts. Choose Unbranded only when the product has no brand.
 - Procurement does not set catalog selling prices. Catalog attributes/prices are snapshotted from approved master data; new unpriced records remain pending product approval.
 - Regression checks: `tests/utils/poDeliveryRequirements.test.ts`, `tests/components/buildPOItem.test.ts`, and rollback-only `tests/database/po-delivery-and-pricing-integrity.sql`.
+
+### Picking rejects the facility bin label
+
+`record_pick_line` can reject a label accepted by the scanner when server validation derives the prefix from `sites.code` instead of using `sites.barcode_prefix`. Migration `20261027_picking_configured_site_prefix.sql` aligns validation with printed labels. Verify the request barcode, configured prefix and live migration status before attributing an individual rejection to this mismatch.

@@ -20,7 +20,11 @@ BEGIN
  VALUES(p.site_id,p.site_id,'c1111111-1111-4000-8000-000000000106','ET','PICK','In-Progress','Normal',actor::text,
   jsonb_build_array(jsonb_build_object('productId',p.id,'sku',p.sku,'name',p.name,'expectedQty',2,'pickedQty',0,'status','Pending')),1,parent_id::text) RETURNING * INTO j;
  INSERT INTO public.job_assignments(job_id,employee_id,employee_name,status) VALUES(j.id,actor,'Picking test','In-Progress');
- SELECT private.pick_location_barcode(s.code,p.location) INTO bin FROM public.sites s WHERE s.id=p.site_id;
+ -- Exercise a configured prefix that differs from the site-code hash.
+ UPDATE public.sites SET barcode_prefix='7654' WHERE id=p.site_id;
+ SELECT private.pick_location_barcode('SITE-'||s.barcode_prefix,p.location) INTO bin
+ FROM public.sites s WHERE s.id=p.site_id;
+ IF left(bin,4)<>'7654' THEN RAISE EXCEPTION 'TEST: configured facility prefix was ignored'; END IF;
  PERFORM set_config('test.pick_actor',actor::text,true);PERFORM set_config('test.pick_job',j.id::text,true);
  PERFORM set_config('test.pick_product',p.id::text,true);PERFORM set_config('test.pick_sku',p.sku,true);PERFORM set_config('test.pick_bin',bin,true);
  PERFORM set_config('test.pick_parent',parent_id::text,true);

@@ -1,5 +1,5 @@
 # Feature Registry
-
+- Picking prefix correction (2026-10-27): saved migration aligns server scan validation with configured facility label prefixes; application/live regression pending database access.
 # This file records selected implementation history; it is not a source of current policy.
 # Update it for new features or significant fixes, and verify the current code before relying on older notes.
 
