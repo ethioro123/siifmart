@@ -131,6 +131,10 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
                     if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                     return rootNode || null;
                 }
+                // Central Ops Managers (Security Manager, CS Manager) report to Country Operations Director
+                if (['regional_security_manager', 'cs_manager'].includes(node.role)) {
+                    if (opsMgr && opsMgr.id !== node.id) return opsMgr;
+                }
                 // The Country Supply Chain Director reports to the Group CSCO.
                 if (node.role === 'country_supply_chain_director') {
                     return rootNode || null;

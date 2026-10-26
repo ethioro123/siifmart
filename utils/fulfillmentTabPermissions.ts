@@ -30,7 +30,7 @@ const SPECIALIST_TAB_ACCESS: Record<string, OpTab[]> = {
     putaway_replenishment_supervisor: ['PUTAWAY', 'REPLENISH', 'TRANSFER', 'ASSIGN'],
     picking_supervisor: ['PICK', 'PACK', 'ASSIGN'],
     packing_supervisor: ['PACK', 'LABELS', 'ASSIGN'],
-    dispatch_supervisor: ['DOCKS', 'DRIVER', 'ASSIGN'],
+    dispatch_supervisor: ['DOCKS', 'DRIVER', 'TRANSFER', 'ASSIGN'],
     returns_waste_supervisor: ['RETURNS', 'WASTE', 'COUNT', 'ASSIGN'],
     receiving_team_leader: ['RECEIVE', 'PUTAWAY', 'TRANSFER', 'ASSIGN'],
     picking_team_leader: ['PICK', 'PACK', 'ASSIGN'],
@@ -41,7 +41,7 @@ const SPECIALIST_TAB_ACCESS: Record<string, OpTab[]> = {
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
     RECEIVE: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'area_operations_manager', 'country_operations_director', 'warehouse_manager', 'warehouse_operations_manager', 'dispatcher', 'regional_supply_chain_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'receiving_operator', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'receiving_team_leader'],
     PUTAWAY: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'area_operations_manager', 'country_operations_director', 'warehouse_manager', 'warehouse_operations_manager', 'dispatcher', 'regional_supply_chain_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'putaway_operator', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'putaway_replenishment_supervisor', 'receiving_team_leader'],
-    TRANSFER: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'area_operations_manager', 'country_operations_director', 'warehouse_manager', 'warehouse_operations_manager', 'regional_supply_chain_manager', 'inventory_manager', 'replenishment_planner', 'inventory_control_supervisor', 'transport_fleet_manager'],
+    TRANSFER: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'area_operations_manager', 'country_operations_director', 'warehouse_manager', 'warehouse_operations_manager', 'regional_supply_chain_manager', 'inventory_manager', 'replenishment_planner', 'inventory_control_supervisor', 'transport_fleet_manager', 'dispatch_supervisor'],
     PICK: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'area_operations_manager', 'country_operations_director', 'warehouse_manager', 'warehouse_operations_manager', 'dispatcher', 'regional_supply_chain_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'picking_supervisor', 'picking_team_leader'],
     PACK: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'area_operations_manager', 'country_operations_director', 'warehouse_manager', 'warehouse_operations_manager', 'dispatcher', 'regional_supply_chain_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'packing_supervisor', 'packing_team_leader'],
     DOCKS: ['group_ceo', 'country_managing_director', 'country_operations_director', 'regional_operations_manager', 'area_operations_manager', 'warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'dispatcher', 'regional_supply_chain_manager', 'fleet_maintenance_supervisor', 'dispatch_supervisor', 'dispatch_team_leader', 'dispatch_operator'],
@@ -60,9 +60,7 @@ export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
     if (
         normalizedRole === 'group_ceo' ||
         normalizedRole === 'country_managing_director' ||
-        normalizedRole === 'country_operations_director' ||
-        normalizedRole === 'country_supply_chain_director' ||
-        normalizedRole === 'group_csco'
+        normalizedRole === 'country_operations_director'
     ) {
         return Object.keys(TAB_PERMISSIONS) as OpTab[];
     }

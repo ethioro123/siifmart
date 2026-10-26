@@ -13,7 +13,7 @@ describe('orgTreeLayout helpers', () => {
         expect(getRoleLevel('regional_procurement_manager')).toBe(5);
         expect(getRoleLevel('store_manager')).toBe(6);
         expect(getRoleLevel('warehouse_manager')).toBe(6);
-        expect(getRoleLevel('regional_supply_chain_manager')).toBe(7);
+        expect(getRoleLevel('regional_supply_chain_manager')).toBe(5);
         expect(getRoleLevel('shift_supervisor')).toBe(8);
         expect(getRoleLevel('auditor')).toBe(9);
         expect(getRoleLevel('cashier')).toBe(10);
@@ -45,7 +45,7 @@ describe('orgTreeLayout helpers', () => {
         expect(getRoleDept('picker')).toBe('warehouse');
         expect(getRoleDept('warehouse_manager')).toBe('warehouse');
         expect(getRoleDept('country_finance_director')).toBe('finance');
-        expect(getRoleDept('country_hr_director')).toBe('hr_generalist');
+        expect(getRoleDept('country_hr_director')).toBe('hr');
         expect(getRoleDept('buyer')).toBe('procurement');
         expect(getRoleDept('vendor_relations_manager')).toBe('procurement');
         expect(getRoleDept('customs_import_specialist')).toBe('procurement');

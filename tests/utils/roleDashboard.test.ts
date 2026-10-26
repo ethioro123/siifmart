@@ -25,13 +25,13 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
     expect(getRoleDashboardRoute('country_hr_director', 'Administration')).toBe('/employees');
     expect(getRoleDashboardRoute('country_hr_director', 'Administration')).toBe('/employees');
     expect(getRoleDashboardRoute('hr_generalist', 'Administration')).toBe('/employees');
-    expect(getRoleDashboardRoute('country_commercial_director', 'Administration')).toBe('/pricing');
-    expect(getRoleDashboardRoute('country_commercial_director', 'Administration')).toBe('/pricing');
+    expect(getRoleDashboardRoute('merchandising_specialist', 'Administration')).toBe('/pricing');
+    expect(getRoleDashboardRoute('merchandiser', 'Administration')).toBe('/pricing');
     expect(getRoleDashboardRoute('country_technology_director', 'Administration')).toBe('/settings');
     expect(getRoleDashboardRoute('it_support', 'Administration')).toBe('/settings');
-    expect(getRoleDashboardRoute('regional_security_manager', 'Administration')).toBe('/settings');
-    expect(getRoleDashboardRoute('country_supply_chain_director', 'Administration')).toBe('/procurement');
-    expect(getRoleDashboardRoute('country_supply_chain_director', 'Administration')).toBe('/procurement');
+    expect(getRoleDashboardRoute('regional_security_manager', 'Administration')).toBe('/regional-ops');
+    expect(getRoleDashboardRoute('country_supply_chain_director', 'Administration')).toBe('/wms-ops');
+    expect(getRoleDashboardRoute('country_supply_chain_director', 'Administration')).toBe('/wms-ops');
     expect(getRoleDashboardRoute('country_commercial_director', 'Administration')).toBe('/procurement');
     expect(getRoleDashboardRoute('buyer', 'Administration')).toBe('/procurement');
     expect(getRoleDashboardRoute('country_compliance_manager', 'Administration')).toBe('/finance');

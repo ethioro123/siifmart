@@ -33,7 +33,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     }
 
     // 1.5. Corporate HQ Executive Deck
-    const isHQExecutive = ['group_ceo', 'group_coo', 'group_clco', 'group_cae', 'country_managing_director', 'country_operations_director', 'country_compliance_manager'].includes(role);
+    const isHQExecutive = ['group_ceo', 'group_coo', 'group_clco', 'group_cae', 'country_managing_director', 'country_operations_director'].includes(role);
     if (isHQExecutive) {
         if (isWarehouseSite) return '/wms-ops';
         if (isStoreSite) return '/pos-dashboard';
