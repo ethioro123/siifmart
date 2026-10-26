@@ -150,45 +150,45 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                 </div>
 
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-px bg-[var(--theme-border)] border-b border-[var(--theme-border)] shrink-0">
-                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 lg:col-span-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-px bg-[var(--theme-border)] border-b border-[var(--theme-border)] shrink-0">
+                    <div className="bg-[var(--theme-bg-card)] p-3 md:p-4 flex items-center gap-2.5 md:gap-3">
                         <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
                             <Calendar size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.completed')}</p>
+                            <p className="text-[10px] md:text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.completed')}</p>
                             <p className="text-xs text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight break-words leading-tight">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
                     
-                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 lg:col-span-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3 md:p-4 flex items-center gap-2.5 md:gap-3">
                         <div className="w-8 h-8 shrink-0 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shadow-xs">
                             <span className="text-xs font-semibold">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{workerLabel}</p>
+                            <p className="text-[10px] md:text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{workerLabel}</p>
                             <p className="text-xs text-[var(--theme-text-primary)] font-semibold break-words leading-tight">
                                 {data.userName} {data.userDisplayId && <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({data.userDisplayId})</span>}
                             </p>
                         </div>
                     </div>
 
-                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 col-span-2 lg:col-span-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3 md:p-4 flex items-center gap-2.5 md:gap-3 col-span-2 sm:col-span-1">
                         <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
                             <Printer size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.labelSize').split(' ')[0]}</p>
+                            <p className="text-[10px] md:text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.packing.trackingNumber') || 'Tracking #'}</p>
                             <p className="text-xs text-[var(--theme-accent)] font-mono tracking-tight font-semibold break-words leading-tight">{data.trackingNumber}</p>
                         </div>
                     </div>
 
-                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 lg:col-span-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3 md:p-4 flex items-center gap-2.5 md:gap-3">
                         <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
                             <MapPin size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.from')}</p>
+                            <p className="text-[10px] md:text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.from')}</p>
                             <p className="text-xs text-[var(--theme-text-primary)] font-semibold break-words leading-tight">
                                 {data.sourceSite ? (
                                     <>
@@ -199,12 +199,12 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                         </div>
                     </div>
                     
-                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 lg:col-span-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3 md:p-4 flex items-center gap-2.5 md:gap-3 col-span-2 sm:col-span-1">
                         <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
                             <ArrowRight size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.to')}</p>
+                            <p className="text-[10px] md:text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.to')}</p>
                             <p className="text-xs text-[var(--theme-text-primary)] font-semibold break-words leading-tight">
                                 {data.destSite ? (
                                     <>
@@ -279,22 +279,22 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-4 sm:gap-6 ml-11 sm:ml-0 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)] justify-end">
+                                    <div className="flex items-center gap-3 sm:gap-6 ml-0 sm:ml-0 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)]/60 justify-between sm:justify-end">
                                         {item.returnedQty > 0 && (
                                             <div className="text-right">
-                                                <p className="text-[11px] text-red-500 uppercase font-semibold tracking-wider">{t('warehouse.packing.returned')}</p>
-                                                <p className="text-base md:text-lg font-bold text-red-600 dark:text-red-400 tabular-nums font-mono leading-none">
+                                                <p className="text-[10px] md:text-[11px] text-red-500 uppercase font-semibold tracking-wider">{t('warehouse.packing.returned')}</p>
+                                                <p className="text-sm md:text-lg font-bold text-red-600 dark:text-red-400 tabular-nums font-mono leading-none">
                                                     {item.returnedQty}
                                                 </p>
                                             </div>
                                         )}
                                         <div className="text-right">
-                                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">{t('warehouse.packing.reqPkd')}</p>
+                                            <p className="text-[10px] md:text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">{t('warehouse.packing.reqPkd')}</p>
                                             <div className="flex items-center gap-1.5 md:gap-2 justify-end">
                                                 {isShortPicked && (
                                                     <span className="text-xs font-mono font-semibold text-red-500 line-through opacity-80 leading-none" title={t('warehouse.packing.shortPicked')}>{item.orderedQty}</span>
                                                 )}
-                                                <div className="text-base md:text-lg font-bold text-[var(--theme-text-primary)] tabular-nums font-mono leading-none">
+                                                <div className="text-sm md:text-lg font-bold text-[var(--theme-text-primary)] tabular-nums font-mono leading-none">
                                                     {(() => {
                                                         const packDesc = formatPackagingDescription(productInfo, expected);
                                                         const unitDef = getSellUnit(productInfo?.unit || item.unit);
@@ -302,11 +302,11 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                                                         return (
                                                             <div className="flex flex-col items-end">
-                                                                <span className={`text-base md:text-lg font-mono font-bold ${isUnderpacked ? 'text-amber-500' : 'text-[var(--theme-accent)]'}`}>
-                                                                    {packed} / {expected} <span className="text-[11px] font-semibold uppercase">{unitLabel}</span>
+                                                                <span className={`text-sm md:text-lg font-mono font-bold ${isUnderpacked ? 'text-amber-500' : 'text-[var(--theme-accent)]'}`}>
+                                                                    {packed} / {expected} <span className="text-[10px] md:text-[11px] font-semibold uppercase">{unitLabel}</span>
                                                                 </span>
                                                                 {packDesc && (
-                                                                    <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] uppercase">
+                                                                    <span className="text-[10px] md:text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] uppercase">
                                                                         ({packDesc})
                                                                     </span>
                                                                 )}
@@ -324,38 +324,44 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center gap-3 shrink-0">
-                    <div className="flex gap-2">
+                <div className="p-3 sm:p-4 md:p-6 pb-[max(env(safe-area-inset-bottom),0.75rem)] border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center gap-2 sm:gap-3 shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                         {data.status === 'Completed' && (
                             <button
                                 onClick={() => onReturn?.(selectedItem)}
-                                className="flex items-center gap-1.5 md:gap-2 px-3.5 md:px-4 py-2.5 min-h-[44px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors"
+                                className="flex items-center gap-1.5 px-3 md:px-4 py-2 min-h-[44px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors active:scale-95 touch-manipulation"
                             >
                                 <Undo2 size={14} />
-                                <span className="hidden sm:inline">{t('warehouse.packing.returnItems')}</span><span className="sm:hidden">{t('warehouse.driverHub.return')}</span>
+                                <span className="hidden sm:inline">{t('warehouse.packing.returnItems') || 'Return Items'}</span>
+                                <span className="sm:hidden">{t('warehouse.driverHub.return') || 'Return'}</span>
                             </button>
                         )}
                         <div className="relative">
                             <button
                                 onClick={() => setIsPrintMenuOpen(!isPrintMenuOpen)}
-                                className="flex items-center gap-1.5 md:gap-2 px-3.5 md:px-4 py-2.5 min-h-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors"
+                                className="flex items-center gap-1.5 px-3 md:px-4 py-2 min-h-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors active:scale-95 touch-manipulation"
                             >
-                                <Printer size={14} />
-                                <span className="hidden sm:inline">{t('warehouse.reprintPackLabel')}</span><span className="sm:hidden">{t('warehouse.reprintPackLabel').split(' ').slice(-1)[0]}</span>
+                                <Printer size={14} className="text-[var(--theme-accent)]" />
+                                <span className="hidden sm:inline">{t('warehouse.reprintPackLabel') || 'Reprint Label'}</span>
+                                <span className="sm:hidden">Print</span>
                             </button>
 
                             {isPrintMenuOpen && (
-                                <div className="absolute bottom-full left-0 mb-2 w-36 md:w-44 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl overflow-hidden p-1.5 z-50 animate-in slide-in-from-bottom-2 duration-150">
-                                    {(['SMALL', 'MEDIUM', 'LARGE', 'XL'] as const).map(size => (
+                                <div className="absolute bottom-full left-0 mb-2 w-40 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl overflow-hidden p-1.5 z-50 animate-in slide-in-from-bottom-2 duration-150">
+                                    <div className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider px-2 py-1 border-b border-[var(--theme-border)]">
+                                        {t('warehouse.labelSize') || 'Label Size'}
+                                    </div>
+                                    {(['XL', 'LARGE', 'MEDIUM', 'SMALL'] as const).map(size => (
                                         <button
                                             key={size}
                                             onClick={() => {
                                                 onReprintLabel?.(selectedItem, size);
                                                 setIsPrintMenuOpen(false);
                                             }}
-                                            className="w-full text-left px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)] rounded-lg transition-colors"
+                                            className="w-full text-left px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)] rounded-lg transition-colors min-h-[36px] flex items-center justify-between"
                                         >
-                                            {size}
+                                            <span>{size} {size === 'XL' ? '(4×6)' : ''}</span>
+                                            <Printer size={12} className="text-[var(--theme-accent)] opacity-70" />
                                         </button>
                                     ))}
                                 </div>
@@ -364,7 +370,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                         {canDelete && onDeleteJob && (
                             <button
                                 onClick={handleDelete}
-                                className="flex items-center gap-1.5 md:gap-2 px-3.5 md:px-4 py-2.5 min-h-[44px] bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors"
+                                className="flex items-center gap-1.5 px-3 md:px-4 py-2 min-h-[44px] bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors active:scale-95 touch-manipulation"
                                 title={t('common.delete') || 'Delete Job'}
                             >
                                 <Trash2 size={14} />
@@ -375,7 +381,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                     <button
                         onClick={onClose}
-                        className="px-6 md:px-8 py-2.5 min-h-[44px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-app)] font-semibold uppercase tracking-wider text-xs rounded-xl transition-colors border border-[var(--theme-border)]"
+                        className="px-5 sm:px-8 py-2 min-h-[44px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-app)] font-semibold uppercase tracking-wider text-xs rounded-xl transition-colors border border-[var(--theme-border)] active:scale-95 touch-manipulation"
                     >
                         {t('warehouse.dismiss')}
                     </button>

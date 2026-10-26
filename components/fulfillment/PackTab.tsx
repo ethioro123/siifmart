@@ -9,6 +9,7 @@ import { playBeep } from '../../utils/audioUtils';
 
 // --- Subcomponents ---
 import { PackModalsContainer } from './pack/components/PackModalsContainer';
+import { usePackLabelPrint } from './pack/hooks/usePackLabelPrint';
 
 export const PackTab: React.FC = () => {
     const {
@@ -46,6 +47,14 @@ export const PackTab: React.FC = () => {
     const [isDiscrepancyModalOpen, setIsDiscrepancyModalOpen] = useState(false);
 
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
+
+    const { handleReprintLabel } = usePackLabelPrint({
+        products,
+        sites,
+        resolveOrderRef,
+        generateTrackingNumber,
+        addNotification
+    });
 
     // RULE 10: Fetch history on demand when user switches to History view
     useEffect(() => {
@@ -347,6 +356,7 @@ export const PackTab: React.FC = () => {
                             wmsJobsService={wmsJobsService}
                             jobs={jobs}
                             formatJobIdFn={formatJobId}
+                            onReprintLabel={handleReprintLabel}
                             onJobSelect={(job) => {
                                 setSelectedPackJob(job);
                                 setIsDetailsOpen(true);

@@ -102,7 +102,7 @@ export const PERMISSIONS = {
     APPROVE_PRICE_CHANGE: ['group_ceo', 'country_managing_director', 'regional_merchandising_manager', 'country_finance_director'],
 
     // Warehouse
-    ACCESS_WAREHOUSE: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'warehouse_manager', 'dispatch_supervisor', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'regional_supply_chain_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner', 'regional_logistics_manager', 'country_supply_chain_director'],
+    ACCESS_WAREHOUSE: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_commercial_director', 'warehouse_manager', 'dispatch_supervisor', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'regional_supply_chain_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner', 'regional_logistics_manager', 'country_supply_chain_director'],
     MANAGE_WAREHOUSE: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'regional_logistics_manager', 'country_operations_director', 'warehouse_manager', 'inventory_specialist'],
     ASSIGN_TASKS: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'regional_logistics_manager', 'warehouse_manager', 'regional_supply_chain_manager', 'dispatch_supervisor', 'dispatcher', 'inventory_specialist', 'fleet_maintenance_supervisor'],
     COMPLETE_TASKS: ['group_ceo', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'packer', 'receiver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector'],
@@ -113,7 +113,7 @@ export const PERMISSIONS = {
     MANAGE_REPLENISHMENT: ['group_ceo', 'regional_operations_manager', 'regional_logistics_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'replenishment_planner', 'stock_clerk'],
 
     // Settings
-    ACCESS_SETTINGS: ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'it_support', 'country_technology_director', 'regional_security_manager', 'auditor', 'country_compliance_manager', 'regional_it_manager', 'regional_compliance_manager'],
+    ACCESS_SETTINGS: ['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_hr_director', 'it_support', 'country_technology_director', 'regional_security_manager', 'auditor', 'country_compliance_manager', 'regional_it_manager', 'regional_compliance_manager'],
     EDIT_SYSTEM_SETTINGS: ['group_ceo', 'country_managing_director', 'it_support', 'country_technology_director'],
     EDIT_OPERATIONAL_SETTINGS: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director'],
     EDIT_HR_SETTINGS: ['group_ceo', 'country_managing_director', 'hr_generalist', 'country_hr_director'],

@@ -1,12 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Calendar, Box, Package, Printer, History as HistoryIcon, Barcode, Undo2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, Calendar, Box, Package, Printer, History as HistoryIcon, Barcode, Undo2, ChevronRight, MapPin, X, User as UserIcon } from 'lucide-react';
 import { Pagination } from '../../shared';
 import { WMSJob, Site, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
-import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
-
 
 interface PackHistoryProps {
     historicalJobs: WMSJob[];
@@ -36,26 +34,15 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
     employees = [],
     products,
     user,
-    addNotification,
-    inventoryRequestsService,
-    wmsJobsService,
-    jobs = [],
     onJobSelect,
     formatJobIdFn = formatJobId,
     onReturn,
     t
 }) => {
     const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'returned'>('all');
     const [currentPage, setCurrentPage] = useState(1);
-    const [openPrintMenuId, setOpenPrintMenuId] = useState<string | null>(null);
-    const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
-
-    useEffect(() => {
-        const mq = window.matchMedia('(max-width: 767px)');
-        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-        mq.addEventListener('change', handler);
-        return () => mq.removeEventListener('change', handler);
-    }, []);
+    const [openPrintJob, setOpenPrintJob] = useState<WMSJob | null>(null);
 
     const filteredHistory = useMemo(() => {
         const mapped = historicalJobs.filter((j: WMSJob) => j.type === 'PACK').map(j => {
@@ -69,17 +56,38 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                 siteId: j.siteId || (j as any).site_id
             });
 
+            const rawItems = j.lineItems || (j as any).line_items || [];
+            let itemsArr: any[] = [];
+            if (Array.isArray(rawItems)) itemsArr = rawItems;
+            else if (typeof rawItems === 'string') {
+                try { itemsArr = JSON.parse(rawItems); } catch { itemsArr = []; }
+            }
+
+            const hasReturns = itemsArr.some((li: any) => (li.returnedQty || 0) > 0);
+            const destSite = sites.find(s => s.id === (j.destSiteId || (j as any).dest_site_id));
+            const customerName = (j as any).customerName || (j as any).customer_name;
+            const destName = destSite?.name || customerName || '';
+
             return {
                 ...j,
                 resolvedUser: {
                     name: resolvedWorker.name,
                     displayId: resolvedWorker.code || resolvedWorker.displayId
-                }
+                },
+                parsedLineItems: itemsArr,
+                hasReturns,
+                destName
             };
         });
 
+        const statusFiltered = mapped.filter(j => {
+            if (statusFilter === 'completed') return j.status === 'Completed';
+            if (statusFilter === 'returned') return j.hasReturns;
+            return true;
+        });
+
         if (!search) {
-            return mapped.sort((a, b) => {
+            return statusFiltered.sort((a, b) => {
                 const dateA = new Date(a.completedAt || a.updatedAt || a.createdAt || 0).getTime();
                 const dateB = new Date(b.completedAt || b.updatedAt || b.createdAt || 0).getTime();
                 return dateB - dateA;
@@ -87,7 +95,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
         }
 
         const q = search.toLowerCase();
-        return mapped.filter(j => {
+        return statusFiltered.filter(j => {
             const cleanJobId = formatJobId(j).toLowerCase();
             const orderRefStr = (j.orderRef || '').toLowerCase();
             const orderRefResolvedStr = resolveOrderRef ? resolveOrderRef(j.orderRef).toLowerCase() : '';
@@ -96,10 +104,10 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
             const noteStr = (j.notes || '').toLowerCase();
             const statusStr = (j.status || '').toLowerCase();
             const jobNum = (j.jobNumber || (j as any).job_number || '').toLowerCase();
+            const destStr = j.destName.toLowerCase();
+            const trackingStr = (j.trackingNumber || '').toLowerCase();
 
-            // Search product names and SKUs
-            const items = j.lineItems || (j as any).line_items || [];
-            const matchesItems = items.some((item: any) => 
+            const matchesItems = j.parsedLineItems.some((item: any) =>
                 (item.name || '').toLowerCase().includes(q) ||
                 (item.productName || '').toLowerCase().includes(q) ||
                 (item.sku || '').toLowerCase().includes(q)
@@ -115,7 +123,8 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                 noteStr.includes(q) ||
                 statusStr.includes(q) ||
                 jobNum.includes(q) ||
-                (j.trackingNumber || '').toLowerCase().includes(q) ||
+                destStr.includes(q) ||
+                trackingStr.includes(q) ||
                 matchesItems
             );
         }).sort((a, b) => {
@@ -123,7 +132,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
             const dateB = new Date(b.completedAt || b.updatedAt || b.createdAt || 0).getTime();
             return dateB - dateA;
         });
-    }, [historicalJobs, search, resolveOrderRef, employees, user]);
+    }, [historicalJobs, search, statusFilter, resolveOrderRef, employees, user, sites]);
 
     const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
     const paginatedHistory = useMemo(() => {
@@ -131,206 +140,256 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
         return filteredHistory.slice(start, start + ITEMS_PER_PAGE);
     }, [filteredHistory, currentPage]);
 
-    return (
-        <div className="border-t border-[var(--theme-border)] mt-8 pt-8 relative overflow-hidden group/history">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <h4 className="text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-3 uppercase tracking-tight">
-                    <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] text-[var(--theme-accent)]">
-                        <HistoryIcon size={20} />
-                    </div>
-                    {t('warehouse.history') || 'History'}
-                </h4>
+    const completedCount = useMemo(() =>
+        historicalJobs.filter((j: WMSJob) => j.type === 'PACK' && j.status === 'Completed').length,
+        [historicalJobs]
+    );
 
-                {/* History Search */}
-                <div className="relative w-full sm:w-80">
-                    <div className="relative flex items-center bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl focus-within:border-[var(--theme-accent)] transition-colors shadow-sm min-h-[44px]">
-                        <Search className="absolute left-3.5 text-[var(--theme-text-secondary)] pointer-events-none" size={16} />
+    const returnedCount = useMemo(() =>
+        historicalJobs.filter((j: WMSJob) => {
+            if (j.type !== 'PACK') return false;
+            const items = j.lineItems || (j as any).line_items || [];
+            return Array.isArray(items) && items.some((li: any) => (li.returnedQty || 0) > 0);
+        }).length,
+        [historicalJobs]
+    );
+
+    return (
+        <div className="flex flex-col h-full bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-200 overflow-hidden">
+            {/* Header, Search & Filter Controls */}
+            <div className="shrink-0 p-2 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] space-y-2.5">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+                    <div className="flex items-center gap-2">
+                        <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-[var(--theme-accent)]">
+                            <HistoryIcon size={18} />
+                        </div>
+                        <div>
+                            <h4 className="text-sm sm:text-base font-bold uppercase tracking-tight leading-tight">
+                                {t('warehouse.history') || 'Pack History'}
+                            </h4>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
+                                {filteredHistory.length} {filteredHistory.length === 1 ? 'record' : 'records'}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Search Field */}
+                    <div className="relative w-full sm:w-80">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" size={15} />
                         <input
                             type="text"
-                            placeholder={t('warehouse.searchByIdOrOrder') || 'Search ID, order, worker...'}
+                            placeholder={t('warehouse.searchByIdOrOrder') || 'Search ID, order, worker, SKU...'}
                             aria-label={t('warehouse.searchByIdOrOrder')}
                             title={t('warehouse.searchByIdOrOrder')}
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none placeholder:text-[var(--theme-text-secondary)]"
+                            onChange={(e) => {
+                                setSearch(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl pl-9 pr-8 py-2 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none placeholder:text-[var(--theme-text-secondary)] min-h-[40px] transition-colors"
                         />
+                        {search && (
+                            <button
+                                onClick={() => setSearch('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]"
+                                aria-label="Clear search"
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
                     </div>
+                </div>
+
+                {/* Filter Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+                    <button
+                        type="button"
+                        onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all min-h-[34px] shrink-0 border ${
+                            statusFilter === 'all'
+                                ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)]'
+                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30'
+                        }`}
+                    >
+                        All ({historicalJobs.filter((j: WMSJob) => j.type === 'PACK').length})
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => { setStatusFilter('completed'); setCurrentPage(1); }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all min-h-[34px] shrink-0 border ${
+                            statusFilter === 'completed'
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : 'bg-[var(--theme-bg-subtle)] text-emerald-600 dark:text-emerald-400 border-[var(--theme-border)] hover:border-emerald-500/30'
+                        }`}
+                    >
+                        Completed ({completedCount})
+                    </button>
+                    {returnedCount > 0 && (
+                        <button
+                            type="button"
+                            onClick={() => { setStatusFilter('returned'); setCurrentPage(1); }}
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all min-h-[34px] shrink-0 border ${
+                                statusFilter === 'returned'
+                                    ? 'bg-red-600 text-white border-red-600'
+                                    : 'bg-[var(--theme-bg-subtle)] text-red-600 dark:text-red-400 border-[var(--theme-border)] hover:border-red-500/30'
+                            }`}
+                        >
+                            With Returns ({returnedCount})
+                        </button>
+                    )}
                 </div>
             </div>
 
-            {paginatedHistory.length > 0 ? (
-                <>
-                    <div className={`grid pb-12 ${isMobile ? 'grid-cols-1 gap-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'}`}>
+            {/* Scrollable History List */}
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-2 sm:p-4">
+                {paginatedHistory.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4 pb-6">
                         {paginatedHistory.map((job) => {
                             const formattedId = formatJobIdFn(job);
-                            const totalItems = job.items || job.lineItems?.length || 0;
-                            let rawItems = job.lineItems || [];
-                            if (typeof rawItems === 'string') { try { rawItems = JSON.parse(rawItems); } catch { rawItems = []; } }
-                            if (typeof rawItems === 'number') rawItems = [];
-                            const itemsArr = Array.isArray(rawItems) ? rawItems : [];
-                            const productNames = itemsArr.map((li: any) => li.name || li.product?.name || li.sku || 'Unknown').filter(Boolean);
-
-                            if (isMobile) {
-                                return (
-                                    <div
-                                        key={job.id}
-                                        onClick={() => onJobSelect && onJobSelect(job)}
-                                        className="bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)]/40 border border-[var(--theme-border)] rounded-2xl p-3.5 transition-colors overflow-hidden cursor-pointer active:scale-[0.99] shadow-sm touch-manipulation"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3 min-w-0">
-                                                <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] flex items-center justify-center shrink-0 border border-[var(--theme-border)] text-[var(--theme-accent)]">
-                                                    <Package size={18} />
-                                                </div>
-                                                <div className="flex flex-col min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-semibold font-mono text-[var(--theme-text-primary)]">{formattedId}</span>
-                                                        <span className="text-[11px] px-2 py-0.5 rounded-full uppercase font-semibold tracking-wider bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
-                                                            {job.status}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center flex-wrap gap-1.5 text-[11px] text-[var(--theme-text-secondary)] mt-0.5 font-medium">
-                                                        <span>{formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true })}</span>
-                                                        <span className="w-1 h-1 rounded-full bg-[var(--theme-text-secondary)]/40" />
-                                                        <span className="font-mono tabular-nums">{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="w-8 h-8 rounded-full bg-[var(--theme-accent)]/10 flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
-                                                <span className="text-[11px] font-semibold text-[var(--theme-accent)]">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            }
+                            const itemsArr = job.parsedLineItems || [];
+                            const totalItems = job.items || itemsArr.length || 0;
+                            const productNames = itemsArr.map((li: any) => li.name || li.product?.name || li.sku).filter(Boolean);
+                            const isCompleted = (job.status || '').toLowerCase() === 'completed';
+                            const orderRef = resolveOrderRef ? resolveOrderRef(job.orderRef) : job.orderRef;
 
                             return (
                                 <div
                                     key={job.id}
                                     onClick={() => onJobSelect && onJobSelect(job)}
-                                    className="bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] border border-[var(--theme-border)] rounded-2xl p-4.5 transition-all cursor-pointer overflow-hidden shadow-sm active:scale-[0.99] touch-manipulation"
+                                    className="bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)]/50 border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 transition-all overflow-hidden cursor-pointer active:scale-[0.99] shadow-xs touch-manipulation flex flex-col justify-between gap-2.5"
                                 >
-                                    <div className="flex justify-between items-start mb-3.5">
-                                        <div className="flex items-center gap-2">
-                                            <div className="p-1.5 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]">
-                                                <Package size={14} />
+                                    {/* Top Row: Icon, Job ID, Statuses, Chevron */}
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
+                                                <Package size={16} />
                                             </div>
-                                            <span className="text-[11px] uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)]">
-                                                {t('warehouse.tabs.pack')}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="text-[11px] px-2 py-0.5 rounded-full uppercase font-semibold tracking-wider bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
-                                                {job.status}
-                                            </span>
-                                            {(job.lineItems || []).some((li: any) => li.returnedQty > 0) && (
-                                                <span className="text-[11px] px-2 py-0.5 rounded-full uppercase font-semibold tracking-wider bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
-                                                    {(job.lineItems || []).filter((li: any) => li.returnedQty > 0).length} {t('warehouse.packing.returned')}
+                                            <div className="min-w-0">
+                                                <span className="text-xs sm:text-sm font-bold font-mono text-[var(--theme-text-primary)] uppercase tracking-wide truncate block">
+                                                    {formattedId}
                                                 </span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="mb-3.5">
-                                        <h5 className="text-[var(--theme-text-primary)] font-semibold font-mono text-sm break-words pr-2 tracking-tight">
-                                            {formattedId}
-                                        </h5>
-                                        <div className="flex flex-col gap-1.5 mt-2">
-                                            <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)]">
-                                                <Calendar size={12} className="text-[var(--theme-accent)]" />
-                                                <span className="font-mono tabular-nums">
-                                                    {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true })}
-                                                </span>
-                                            </div>
-                                            {job.trackingNumber && (
-                                                <div className="flex items-center gap-1.5">
-                                                    <Barcode size={12} className="text-[var(--theme-text-secondary)]" />
-                                                    <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] break-all">
-                                                        {job.trackingNumber}
+                                                {orderRef && (
+                                                    <span className="text-[10px] text-[var(--theme-text-secondary)] font-mono truncate block">
+                                                        Ref: {orderRef}
                                                     </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {productNames.length > 0 && (
-                                        <div className="mb-3.5">
-                                            <p className="text-[11px] text-[var(--theme-text-secondary)] line-clamp-2 break-words leading-relaxed">
-                                                {productNames.slice(0, 2).join(', ')}
-                                                {productNames.length > 2 && <span className="text-[var(--theme-accent)]"> +{productNames.length - 2} {t('warehouse.remaining')}</span>}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-3.5">
-                                        <div className="flex items-center gap-2 min-w-0 pr-2">
-                                            <div className="w-7 h-7 rounded-full bg-[var(--theme-bg-subtle)] flex items-center justify-center border border-[var(--theme-border)] shrink-0">
-                                                <span className="text-[11px] font-semibold text-[var(--theme-accent)]">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
-                                            </div>
-                                            <div className="flex flex-col min-w-0">
-                                                <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider leading-tight">
-                                                    {t('warehouse.completedBy') || 'Completed By'}
-                                                </span>
-                                                <span className="text-xs font-semibold text-[var(--theme-text-primary)] break-words leading-tight">
-                                                    {job.resolvedUser?.name} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({job.resolvedUser?.displayId})</span>
-                                                </span>
+                                                )}
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-1.5 shrink-0">
-                                            <div className="flex items-center gap-1 bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-xl border border-[var(--theme-border)]">
-                                                <Box size={12} className="text-[var(--theme-accent)]" />
-                                                <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] tabular-nums font-mono">{totalItems}</span>
+                                            <span className={`text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border ${
+                                                isCompleted
+                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                    : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+                                            }`}>
+                                                {job.status}
+                                            </span>
+                                            {job.hasReturns && (
+                                                <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                                                    Returned
+                                                </span>
+                                            )}
+                                            <ChevronRight size={16} className="text-[var(--theme-text-secondary)] sm:hidden" />
+                                        </div>
+                                    </div>
+
+                                    {/* Middle Row: Meta details */}
+                                    <div className="space-y-1.5 text-xs text-[var(--theme-text-secondary)]">
+                                        {job.destName && (
+                                            <div className="flex items-center gap-1.5 font-medium truncate text-[var(--theme-text-primary)]">
+                                                <MapPin size={12} className="text-[var(--theme-accent)] shrink-0" />
+                                                <span className="truncate">To: {job.destName}</span>
                                             </div>
-                                            {job.status === 'Completed' && (
+                                        )}
+
+                                        <div className="flex items-center flex-wrap gap-2 text-[11px] font-mono">
+                                            <span className="flex items-center gap-1">
+                                                <Calendar size={11} className="text-[var(--theme-accent)]" />
+                                                {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true })}
+                                            </span>
+                                            <span className="opacity-40">•</span>
+                                            <span className="flex items-center gap-1">
+                                                <Box size={11} className="text-[var(--theme-accent)]" />
+                                                {totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}
+                                            </span>
+                                        </div>
+
+                                        {job.trackingNumber && (
+                                            <div className="flex items-center gap-1.5 pt-0.5">
+                                                <Barcode size={12} className="text-[var(--theme-text-secondary)] shrink-0" />
+                                                <span className="text-[10px] font-mono font-semibold text-[var(--theme-accent)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] break-all">
+                                                    {job.trackingNumber}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {productNames.length > 0 && (
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] line-clamp-1 break-words pt-0.5">
+                                                {productNames.slice(0, 2).join(', ')}
+                                                {productNames.length > 2 && <span className="text-[var(--theme-accent)] font-semibold"> +{productNames.length - 2} more</span>}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Bottom Row: Worker Info & Mobile Action Buttons */}
+                                    <div className="flex items-center justify-between border-t border-[var(--theme-border)]/60 pt-2.5 mt-1 gap-2">
+                                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                                            <div className="w-6 h-6 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[10px] font-bold text-[var(--theme-accent)] shrink-0">
+                                                {(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}
+                                            </div>
+                                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium truncate">
+                                                {job.resolvedUser?.name || 'Staff'} {job.resolvedUser?.displayId && <span className="font-mono opacity-80">({job.resolvedUser.displayId})</span>}
+                                            </span>
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                            {isCompleted && onReturn && (
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); onReturn?.(job); }}
-                                                    className="flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1.5 rounded-xl border border-amber-500/20 text-amber-600 dark:text-amber-400 min-h-[36px] transition-colors"
-                                                    title={t('warehouse.packing.returnItemsToWarehouse')}
+                                                    type="button"
+                                                    onClick={() => onReturn(job)}
+                                                    className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold uppercase tracking-wider flex items-center gap-1 min-h-[36px] transition-colors active:scale-95 touch-manipulation"
+                                                    title={t('warehouse.packing.returnItemsToWarehouse') || 'Return to warehouse'}
                                                 >
                                                     <Undo2 size={12} />
-                                                    <span className="text-[11px] font-semibold uppercase tracking-wider">{t('warehouse.driverHub.return')}</span>
+                                                    <span className="hidden sm:inline">Return</span>
                                                 </button>
                                             )}
-                                            <div className="relative">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setOpenPrintMenuId(openPrintMenuId === job.id ? null : job.id);
-                                                    }}
-                                                    className={`w-9 h-9 min-h-[36px] min-w-[36px] rounded-xl transition-colors border flex items-center justify-center ${openPrintMenuId === job.id ? 'bg-[var(--theme-accent)]/15 border-[var(--theme-accent)] text-[var(--theme-accent)]' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border-[var(--theme-border)]'}`}
-                                                    title={t('warehouse.packing.reprintPackLabel')}
-                                                >
-                                                    <Printer size={14} />
-                                                </button>
-                                                {openPrintMenuId === job.id && (
-                                                    <div
-                                                        className="absolute bottom-[calc(100%+8px)] right-0 w-36 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-1.5 shadow-xl z-[100] flex flex-col gap-1"
-                                                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                                                    >
-                                                        <div className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider px-2 py-1 border-b border-[var(--theme-border)]">{t('warehouse.labelSize')}</div>
-                                                        {(['Small', 'Medium', 'Large', 'XL'] as const).map(size => (
-                                                            <button
-                                                                key={size}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    if (onReprintLabel) onReprintLabel(job as WMSJob, size);
-                                                                    setOpenPrintMenuId(null);
-                                                                }}
-                                                                className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors"
-                                                            >
-                                                                {size}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setOpenPrintJob(job)}
+                                                className="px-2.5 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold uppercase tracking-wider flex items-center gap-1 min-h-[36px] transition-colors active:scale-95 touch-manipulation"
+                                                title={t('warehouse.packing.reprintPackLabel') || 'Reprint Shipping Label'}
+                                            >
+                                                <Printer size={13} className="text-[var(--theme-accent)]" />
+                                                <span className="hidden sm:inline">Print</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-16 text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-6 text-center space-y-2">
+                        <HistoryIcon size={32} className="opacity-40 text-[var(--theme-accent)]" />
+                        <p className="font-bold tracking-wider uppercase text-xs">{t('warehouse.noHistoryFound') || 'No Pack History Found'}</p>
+                        {search && (
+                            <button
+                                onClick={() => setSearch('')}
+                                className="text-xs text-[var(--theme-accent)] font-semibold uppercase tracking-wider hover:underline pt-1"
+                            >
+                                Clear search query
+                            </button>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Pagination Controls */}
+            {filteredHistory.length > ITEMS_PER_PAGE && (
+                <div className="shrink-0 p-2 sm:p-3 bg-[var(--theme-bg-card)] border-t border-[var(--theme-border)]">
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
@@ -338,15 +397,59 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                         itemsPerPage={ITEMS_PER_PAGE}
                         onPageChange={setCurrentPage}
                         isLoading={false}
-                        itemName={t('warehouse.packing.records')}
+                        itemName={t('warehouse.packing.records') || 'pack jobs'}
                     />
-                </>
-            ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
-                    <HistoryIcon size={32} className="mb-3 opacity-40 text-[var(--theme-accent)]" />
-                    <p className="font-semibold tracking-wider uppercase text-xs">{t('warehouse.noHistoryFound')}</p>
+                </div>
+            )}
+
+            {/* Mobile-Friendly Label Size Selector Modal */}
+            {openPrintJob && (
+                <div
+                    className="fixed inset-0 z-[300] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150"
+                    onClick={() => setOpenPrintJob(null)}
+                >
+                    <div
+                        className="w-full sm:max-w-xs bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-t-3xl sm:rounded-2xl p-4 shadow-2xl flex flex-col gap-2.5 pb-[max(env(safe-area-inset-bottom),1rem)]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
+                            <div>
+                                <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)] block">
+                                    {t('warehouse.reprintPackLabel') || 'Reprint Shipping Label'}
+                                </span>
+                                <span className="text-[11px] font-mono text-[var(--theme-accent)]">
+                                    {formatJobIdFn(openPrintJob)}
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => setOpenPrintJob(null)}
+                                className="p-1.5 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]"
+                                aria-label="Close"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-1.5">
+                            {(['XL', 'Large', 'Medium', 'Small'] as const).map(size => (
+                                <button
+                                    key={size}
+                                    type="button"
+                                    onClick={() => {
+                                        if (onReprintLabel) onReprintLabel(openPrintJob, size);
+                                        setOpenPrintJob(null);
+                                    }}
+                                    className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent)]/10 hover:text-[var(--theme-accent)] active:scale-[0.98] transition-all min-h-[44px] flex items-center justify-between border border-[var(--theme-border)]"
+                                >
+                                    <span>{size} {size === 'XL' ? '(4 × 6 Standard)' : ''}</span>
+                                    <Printer size={14} className="text-[var(--theme-accent)]" />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
     );
 };
+
+export default PackHistory;

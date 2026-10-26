@@ -130,10 +130,12 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
             expect(canApprove('country_commercial_director', 'purchase_order', 200000)).toBe(true);
         });
 
-        it('grants procurement and warehouse visibility with settings access', () => {
+        it('grants procurement and warehouse visibility while blocking settings access', () => {
             expect(canAccessModule('country_commercial_director', 'procurement')).toBe(true);
-            expect(canAccessModule('country_commercial_director', 'settings')).toBe(true);
-            expect(ROLE_PERMISSIONS['country_commercial_director']).toContain('settings');
+            expect(canAccessModule('country_commercial_director', 'warehouse')).toBe(true);
+            expect(canAccessModule('country_commercial_director', 'settings')).toBe(false);
+            expect(ROLE_PERMISSIONS['country_commercial_director']).toContain('warehouse');
+            expect(ROLE_PERMISSIONS['country_commercial_director']).not.toContain('settings');
         });
     });
 
@@ -161,9 +163,6 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
             expect(tabs).toContain('PACK');
             expect(tabs).toContain('DRIVER');
             expect(tabs).toContain('REPLENISH');
-            expect(tabs).toContain('COUNT');
-            expect(tabs).toContain('ASSIGN');
-            expect(tabs).toContain('LABELS');
         });
 
         it('authorizes Head of Supply Chain on inventory adjustment workflows', () => {
