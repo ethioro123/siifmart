@@ -29,9 +29,7 @@ const mockSites: Site[] = [
         type: 'Warehouse',
         address: 'Enterprise Road, Nairobi',
         country: 'KE',
-        status: 'Active',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        status: 'Active'
     }
 ];
 
