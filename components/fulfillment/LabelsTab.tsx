@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { useFulfillment } from './FulfillmentContext';
 import { AssignLabelHub } from './assign/AssignLabelHub';
-import { warehouseZonesService } from '../../services/supabase.service';
-import { WarehouseZone } from '../../types';
-import { logger } from '../../utils/logger';
 
 export const LabelsTab: React.FC = () => {
     const {
@@ -11,38 +8,21 @@ export const LabelsTab: React.FC = () => {
         addNotification,
         t,
         user,
-        activeSite
+        activeSite, zones
     } = useFulfillment();
-
-    const [zones, setZones] = useState<WarehouseZone[]>([]);
-
-    const loadZones = useCallback(async () => {
-        if (!activeSite?.id) return;
-        try {
-            const data = await warehouseZonesService.getAll(activeSite.id);
-            setZones(data);
-        } catch (error) {
-            logger.error('LabelsTab', 'Failed to load zones for LabelsTab', error as Error);
-        }
-    }, [activeSite?.id]);
-
-    useEffect(() => {
-        if (activeSite?.id) {
-            loadZones();
-        }
-    }, [activeSite?.id, loadZones]);
 
     return (
         <div className="flex-1 overflow-y-auto space-y-6">
-            <AssignLabelHub
+            {activeSite?.id ? <AssignLabelHub
+                key={activeSite.id}
                 filteredProducts={filteredProducts}
                 addNotification={addNotification}
                 t={t}
                 zones={zones}
-                onZoneUpdate={loadZones}
+                onZoneUpdate={() => {}}
                 user={user}
                 activeSite={activeSite}
-            />
+            /> : <p className="p-4 text-sm text-[var(--theme-text-secondary)]">Select a facility to prepare labels.</p>}
         </div>
     );
 };

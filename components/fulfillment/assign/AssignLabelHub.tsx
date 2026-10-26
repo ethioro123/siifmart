@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Printer, Package, Layers, Layout, Info, CheckCircle, Eye } from 'lucide-react';
 import { generateUnifiedBatchLabelsHTML } from '../../../utils/labels/ProductLabelGenerator';
 import { generateLocationLabelHTML } from '../../../utils/labels/LocationLabelGenerator';
 import { encodeLocation, extractSitePrefix } from '../../../utils/locationEncoder';
 import { Product, WarehouseZone, Site } from '../../../types';
-import { printHtmlContent } from '../../../utils/printHelper';
+import { useLabelPrintJob } from '../../../hooks/useLabelPrintJob';
+import { findLabelProduct, validLabelCopies, MAX_LABEL_COPIES } from '../../../utils/labelSelection';
 import { BarcodeLabelPreviewCard } from './BarcodeLabelPreviewCard';
 import { BarcodeLabelPreviewModal } from './BarcodeLabelPreviewModal';
 import { AssignBayLocationSelector } from './AssignBayLocationSelector';
@@ -47,23 +48,15 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     // Multi-country currency sovereignty (ETB vs KES)
     const activeCurrency = activeSite?.currency || (activeSite?.country === 'KE' ? 'KSh' : 'ETB');
 
-    const matchedProduct = useMemo(() => {
-        if (!searchSku.trim()) return null;
-        const upperSearch = searchSku.toUpperCase();
-        return filteredProducts.find(p =>
-            p.sku?.toUpperCase() === upperSearch ||
-            p.barcode?.toUpperCase() === upperSearch ||
-            p.id === searchSku ||
-            p.name?.toUpperCase().includes(upperSearch)
-        ) || null;
-    }, [searchSku, filteredProducts]);
+    const matchedProduct = useMemo(() => findLabelProduct(filteredProducts,searchSku,activeSite?.id),[filteredProducts,searchSku,activeSite?.id]);
+    const { print, isPrinting } = useLabelPrintJob(addNotification);
+    const changeCopies = (quantity:number) => { if(validLabelCopies(quantity))setPrintQty(quantity); };
 
     // Location config derived from site settings
-    const maxAisles = activeSite?.aisleCount || 20;
-    const maxBays = activeSite?.bayCount || 20;
-    const zoneLetters = zones.length > 0
-        ? zones.map(z => z.name)
-        : Array.from({ length: activeSite?.zoneCount || 10 }, (_, i) => String.fromCharCode(65 + i));
+    const maxAisles = Math.min(99,Math.max(1,activeSite?.aisleCount || 20));
+    const maxBays = Math.min(99,Math.max(1,activeSite?.bayCount || 20));
+    const zoneLetters = [...new Set(zones.filter(zone => (zone.siteId || zone.site_id) === activeSite?.id)
+        .flatMap(zone => zone.name.trim().toUpperCase().match(/^(?:ZONE\s+)?([A-Z])(?:$|[\s-])/)?.[1] || []))];
 
     // Bay Config State — single location (zone/aisle/bay)
     const [bayConfig, setBayConfig] = useState({
@@ -82,9 +75,10 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     const aislePad = bayConfig.aisle.padStart(2, '0');
     const bayPad = bayConfig.bay.padStart(2, '0');
     const humanLocationLabel = `${bayConfig.zone}-${aislePad}-${bayPad}`;
-    const locationBarcode = getBarcode(bayConfig.zone, bayConfig.aisle, bayConfig.bay);
+    const locationBarcode = zoneLetters.includes(bayConfig.zone) ? getBarcode(bayConfig.zone, bayConfig.aisle, bayConfig.bay) : '';
 
-    const handlePrintLocation = async () => {
+    const buildLocationLabel = async () => {
+        if (!zoneLetters.includes(bayConfig.zone) || !activeSite?.id || !/^[A-Z]$/.test(bayConfig.zone) || !locationBarcode || !/^\d{15}$/.test(locationBarcode)) throw new Error('Select a valid configured storage bay.');
         const labelHTML = await generateLocationLabelHTML([{
             humanLabel: humanLocationLabel,
             barcode: locationBarcode,
@@ -98,16 +92,12 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             format: labelFormat === 'QR' ? 'QR' : 'Barcode'
         });
 
-        const res = await printHtmlContent(labelHTML);
-        if (res && !res.success && res.error) {
-            addNotification('alert', `Printing alert: ${res.error}`);
-        } else {
-            addNotification('success', `Location label ${humanLocationLabel} ready!`);
-        }
+        return labelHTML;
     };
 
-    const handlePrintProduct = async () => {
-        if (!searchSku.trim()) return;
+    const buildProductLabel = async () => {
+        if (!matchedProduct || !activeSite?.id) throw new Error('Select one product at this facility using its SKU or barcode.');
+        if (!validLabelCopies(printQty)) throw new Error(`Choose 1–${MAX_LABEL_COPIES} whole label copies.`);
         const canonicalCode = (matchedProduct?.sku || searchSku).trim();
         const labelHTML = await generateUnifiedBatchLabelsHTML([{
             value: canonicalCode,
@@ -127,13 +117,14 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             showCategory: true
         });
 
-        const res = await printHtmlContent(labelHTML);
-        if (res && !res.success && res.error) {
-            addNotification('alert', `Printing alert: ${res.error}`);
-        } else {
-            addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
-        }
+        return labelHTML;
     };
+
+    const handlePrintLocation = () => print(buildLocationLabel);
+    const handlePrintProduct = () => print(buildProductLabel);
+    useEffect(() => {
+        if (!zoneLetters.includes(bayConfig.zone)) setBayConfig({zone:zoneLetters[0] || 'A',aisle:'01',bay:'01'});
+    }, [zoneLetters.join('|'), bayConfig.zone]);
 
     const activePreviewData = labelMode === 'PRODUCT' ? {
         type: 'PRODUCT' as const,
@@ -176,13 +167,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         <div className="flex bg-[var(--theme-bg-subtle)] p-0.5 rounded-lg border border-[var(--theme-border)] shrink-0">
                             <button
                                 onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
-                                className={`px-2.5 py-1 min-h-[30px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
+                                className={`px-2.5 py-1 min-h-[44px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 Products
                             </button>
                             <button
                                 onClick={() => { setLabelMode('BAY'); setLabelSize('MEDIUM'); }}
-                                className={`px-2.5 py-1 min-h-[30px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
+                                className={`px-2.5 py-1 min-h-[44px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 Bays
                             </button>
@@ -203,13 +194,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] w-full sm:w-auto">
                             <button
                                 onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
-                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
                                 <Package size={14} className="inline mr-2 shrink-0" /> Products
                             </button>
                             <button
                                 onClick={() => { setLabelMode('BAY'); setLabelSize('MEDIUM'); }}
-                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
                                 <Layout size={14} className="inline mr-2 shrink-0" /> Bays
                             </button>
@@ -226,13 +217,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
                                     <button
                                         onClick={() => setLabelFormat('BARCODE')}
-                                        className={`flex-1 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'BARCODE' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                        className={`flex-1 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'BARCODE' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
                                         BARCODE
                                     </button>
                                     <button
                                         onClick={() => setLabelFormat('QR')}
-                                        className={`flex-1 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'QR' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                        className={`flex-1 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'QR' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
                                         QR CODE
                                     </button>
@@ -266,6 +257,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     maxBays={maxBays}
                                 />
 
+                                {!zoneLetters.length && <p role="status" className="text-sm text-[var(--theme-text-secondary)]">No configured zones are available at this facility. Configure the warehouse layout before printing bay labels.</p>}
                                 {/* LIVE PREVIEW */}
                                 <div className="bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] p-4 sm:p-5 relative overflow-hidden space-y-3">
                                     <div className="flex items-center justify-between">
@@ -279,7 +271,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                             className="text-xs font-semibold text-[var(--theme-accent)] hover:underline flex items-center gap-1.5 touch-manipulation"
                                         >
                                             <Eye size={13} />
-                                            <span>Expand 1:1 Preview</span>
+                                            <span>Expand preview</span>
                                         </button>
                                     </div>
 
@@ -309,6 +301,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         <span>QUICK PREVIEW</span>
                                     </button>
                                     <button
+                                        disabled={isPrinting || !zoneLetters.length}
                                         onClick={handlePrintLocation}
                                         className="flex-1 min-h-[44px] py-3.5 bg-[var(--theme-accent)] text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation"
                                     >
@@ -341,12 +334,12 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 {searchSku.trim() && (
                                     <div className="space-y-3">
                                         <div className={`p-4 rounded-2xl border transition-colors ${matchedProduct ? 'bg-[var(--theme-accent)]/5 border-[var(--theme-accent)]/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
-                                            <div className="flex justify-between items-start">
+                                            <div className="flex flex-wrap gap-2 justify-between items-start">
                                                 <div>
                                                     <h4 className={`text-sm font-semibold mb-1 ${matchedProduct ? 'text-[var(--theme-text-primary)]' : 'text-amber-700 dark:text-amber-400'}`}>
-                                                        {matchedProduct ? matchedProduct.name : 'Unknown Product / Manual Entry'}
+                                                        {matchedProduct ? matchedProduct.name : 'No unique product match — scan an exact SKU or barcode'}
                                                     </h4>
-                                                    <div className="flex gap-3 text-xs font-mono tabular-nums tracking-wider">
+                                                    <div className="flex flex-wrap gap-3 break-all text-xs font-mono tabular-nums tracking-wider">
                                                         <span className="text-[var(--theme-text-secondary)]">SKU: <span className="text-[var(--theme-text-primary)] font-bold">{matchedProduct ? matchedProduct.sku : searchSku}</span></span>
                                                         {matchedProduct?.price && (
                                                             <span className="text-[var(--theme-text-secondary)]">Price: <span className="text-[var(--theme-accent)] font-bold">{activeCurrency} {matchedProduct.price.toFixed(2)}</span></span>
@@ -373,7 +366,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                     className="text-xs font-semibold text-[var(--theme-accent)] hover:underline flex items-center gap-1 touch-manipulation"
                                                 >
                                                     <Eye size={12} />
-                                                    <span>Expand 1:1 Preview</span>
+                                                    <span>Expand preview</span>
                                                 </button>
                                             </div>
                                             <BarcodeLabelPreviewCard
@@ -396,7 +389,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         <div className="flex items-center justify-between px-3 py-2">
                                             <button
                                                 type="button"
-                                                onClick={() => setPrintQty(Math.max(1, printQty - 1))}
+                                                onClick={() => changeCopies(printQty - 1)}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] rounded-xl transition-colors font-bold text-lg touch-manipulation"
                                                 aria-label="Decrease quantity"
                                             >-</button>
@@ -404,11 +397,12 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                 title="Quantity"
                                                 className="w-16 bg-transparent text-center text-[var(--theme-text-primary)] text-xl font-bold outline-none font-mono tabular-nums"
                                                 value={printQty}
-                                                onChange={(e) => setPrintQty(Math.max(1, parseInt(e.target.value) || 1))}
+                                                type="number" min={1} max={MAX_LABEL_COPIES} step={1}
+                                                onChange={(e) => changeCopies(Number(e.target.value))}
                                             />
                                             <button
                                                 type="button"
-                                                onClick={() => setPrintQty(printQty + 1)}
+                                                onClick={() => changeCopies(printQty + 1)}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] rounded-xl transition-colors font-bold text-lg touch-manipulation"
                                                 aria-label="Increase quantity"
                                             >+</button>
@@ -418,7 +412,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     <div className="flex-1 flex gap-2 sm:gap-3">
                                         <button
                                             type="button"
-                                            disabled={!searchSku.trim()}
+                                            disabled={!matchedProduct || isPrinting}
                                             onClick={() => setIsPreviewOpen(true)}
                                             className={`px-4 sm:px-5 py-3.5 font-semibold rounded-2xl transition-all flex items-center justify-center gap-2 text-xs touch-manipulation min-h-[44px] ${searchSku.trim()
                                                 ? 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] active:scale-[0.98]'
@@ -429,7 +423,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                             <span>QUICK PREVIEW</span>
                                         </button>
                                         <button
-                                            disabled={!searchSku.trim()}
+                                            disabled={!matchedProduct || isPrinting}
                                             onClick={handlePrintProduct}
                                             className={`flex-1 min-h-[44px] py-3.5 font-semibold rounded-2xl transition-all flex items-center justify-center gap-2 text-xs touch-manipulation ${searchSku.trim()
                                                 ? 'bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98]'
@@ -463,7 +457,8 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                 onClose={() => setIsPreviewOpen(false)}
                 previewData={activePreviewData}
                 quantity={labelMode === 'PRODUCT' ? printQty : 1}
-                onQuantityChange={labelMode === 'PRODUCT' ? setPrintQty : undefined}
+                onQuantityChange={labelMode === 'PRODUCT' ? changeCopies : undefined}
+                isPrinting={isPrinting}
                 onFormatChange={setLabelFormat}
                 onPrint={labelMode === 'PRODUCT' ? handlePrintProduct : handlePrintLocation}
             />

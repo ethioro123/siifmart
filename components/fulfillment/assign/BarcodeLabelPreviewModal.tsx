@@ -245,7 +245,6 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                     <button
                         onClick={() => {
                             onPrint();
-                            onClose();
                         }}
                         disabled={isPrinting || !previewData.code?.trim()}
                         className="px-6 py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 text-white font-semibold text-xs min-h-[44px] flex items-center gap-2 shadow-xs transition-all disabled:opacity-50 touch-manipulation"
