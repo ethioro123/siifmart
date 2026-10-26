@@ -72,6 +72,7 @@ export function canSwitchRegion(
     employees?: Array<{ id: string; regionCode?: string; region_code?: string; scopeLevel?: string; scope_level?: string; siteId?: string; site_id?: string; role?: string }>
 ): boolean {
     if (!user) return false;
+    if (canSwitchCountry(user)) return true;
     const role = (user.role || '').toLowerCase();
 
     // 1. Level 1 & Level 2 Corporate HQ Directorate roles always have country-wide regional lens switching

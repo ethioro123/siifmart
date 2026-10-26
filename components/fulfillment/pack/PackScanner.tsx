@@ -9,6 +9,7 @@ import { getSellUnit } from '../../../utils/units';
 import { PackScannerStatusView } from './PackScannerStatusView';
 import { PackScannerItemTally } from './PackScannerItemTally';
 import { isExactPackQuantity, matchesPackItemScan } from '../../../utils/packScanValidation';
+import { getProductForItem, getItemMeasureQty as getItemMeasureQtyShared } from './utils/packItemHelpers';
 
 interface PackScannerProps {
     job: WMSJob;
@@ -60,35 +61,9 @@ export const PackScanner: React.FC<PackScannerProps> = ({
     });
 
     // Helpers
-    const getProduct = (item: any) => {
-        if (!item) return undefined;
-        const targetSiteId = job.siteId || (job as any).site_id;
-        const isAtJobSite = (product: Product) =>
-            !targetSiteId || product.siteId === targetSiteId || product.site_id === targetSiteId;
-
-        if (item.productId) {
-            const byId = products.find(p => p.id === item.productId && isAtJobSite(p));
-            if (byId) return byId;
-        }
-
-        return products.find(p => p.sku === item.sku && isAtJobSite(p));
-    };
-
-    const getItemMeasureQty = (item: any, productInfo?: Product | null): number | null => {
-        if (!item) return null;
-        if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
-            return (item as any).requestedMeasureQty;
-        }
-        const prod = productInfo !== undefined ? productInfo : getProduct(item);
-        const customAttrs = prod?.customAttributes || (prod as any)?.custom_attributes;
-        const sellBy = customAttrs?.commercial?.sellBy || '';
-        const isWeighted = customAttrs?.commercial?.isWeighted === true;
-
-        if (sellBy === 'Weight' || sellBy === 'Volume' || isWeighted) {
-            return item.expectedQty || (item as any).quantity || null;
-        }
-        return null;
-    };
+    const getProduct = (item: any) => getProductForItem(item, job, products);
+    const getItemMeasureQty = (item: any, productInfo?: Product | null): number | null =>
+        getItemMeasureQtyShared(item, job, products, productInfo);
 
     const totalItems = job.lineItems?.length || 0;
     const isLineDone = (i: any) => {
@@ -379,38 +354,17 @@ export const PackScanner: React.FC<PackScannerProps> = ({
 
                                         {/* Blind-Safe Rapid Thumb Stepper Pills */}
                                         <div className="grid grid-cols-5 gap-1.5">
-                                            <button
-                                                type="button"
-                                                onClick={() => adjustQty(-1)}
-                                                disabled={isProcessing || isSubmitting}
-                                                className="py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-sm font-bold transition-transform active:scale-95 touch-manipulation min-h-[44px]"
-                                            >
-                                                -1
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => adjustQty(1)}
-                                                disabled={isProcessing || isSubmitting}
-                                                className="py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-sm font-bold transition-transform active:scale-95 touch-manipulation min-h-[44px]"
-                                            >
-                                                +1
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => adjustQty(5)}
-                                                disabled={isProcessing || isSubmitting}
-                                                className="py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-sm font-bold transition-transform active:scale-95 touch-manipulation min-h-[44px]"
-                                            >
-                                                +5
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => adjustQty(10)}
-                                                disabled={isProcessing || isSubmitting}
-                                                className="py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-sm font-bold transition-transform active:scale-95 touch-manipulation min-h-[44px]"
-                                            >
-                                                +10
-                                            </button>
+                                            {[-1, 1, 5, 10].map((delta) => (
+                                                <button
+                                                    key={delta}
+                                                    type="button"
+                                                    onClick={() => adjustQty(delta)}
+                                                    disabled={isProcessing || isSubmitting}
+                                                    className="py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-sm font-bold transition-transform active:scale-95 touch-manipulation min-h-[44px]"
+                                                >
+                                                    {delta > 0 ? `+${delta}` : delta}
+                                                </button>
+                                            ))}
                                             <button
                                                 type="button"
                                                 onClick={() => {
