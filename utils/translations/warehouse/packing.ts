@@ -4,6 +4,11 @@ export const packing: TranslationBlock = {
     // Pack
     packJobs: { en: 'Pack Jobs', am: 'የማሸጊያ ስራዎች', or: 'Hojiiwwan Saamuu' },
     itemsToPack: { en: 'Items to Pack', am: 'ለማሸግ ዕቃዎች', or: 'Meeshalee Saamuu' },
+    stepDetails: { en: 'Details', am: 'ዝርዝሮች', or: 'Bal\'ina' },
+    stepItems: { en: 'Scan Items', am: 'ዕቃዎች ይቃኙ', or: 'Meeshalee Iskaani' },
+    stepBox: { en: 'Box', am: 'ሳጥን', or: 'Saanduqa' },
+    stepWeigh: { en: 'Weigh', am: 'መመዘን', or: 'Madaaluu' },
+    stepFinish: { en: 'Finish', am: 'ማጠናቀቅ', or: 'Xumuruu' },
     boxSize: { en: 'Box Size', am: 'የሳጥን መጠን', or: 'Hanga Saanduqaa' },
     small: { en: 'Small', am: 'ትንሽ', or: 'Xiqqaa' },
     medium: { en: 'Medium', am: 'መካከለኛ', or: 'Giddugaleessa' },
@@ -91,5 +96,8 @@ export const packing: TranslationBlock = {
     coldChain: { en: 'Cold Chain', am: 'ቀዝቃዛ ሰንሰለት', or: 'Cold Chain' },
     icePacks: { en: 'Ice Packs', am: 'የበረዶ እሽጎች', or: 'Ice Packs' },
     flagCountIssue: { en: 'Flag Count Issue', am: 'ቆጠራ ችግር ምልክት አድርግ', or: 'Rakkoo Lakkaawise Mallattessi' },
+    linkedPicker: { en: 'Linked Order Picker', am: 'የተገናኘው ትዕዛዝ መራጭ', or: 'Fidaa Ajajaa Kan Qabatee' },
+    supervisorSignOff: { en: 'Supervisor Co-Attribution (Dual Control)', am: 'የተቆጣጣሪ ተባባሪ ፊርማ (ድርብ ቁጥጥር)', or: 'Mallattoo Supervaayizaraa (To\'annoo Dachaa)' },
+    supervisorPinDesc: { en: 'A supervisor PIN or Employee ID is required to authorize and attribute this variance.', am: 'ይህን ልዩነት ለማጽደቅ የተቆጣጣሪ ፒን ወይም የመታወቂያ ቁጥር ያስፈልጋል።', or: 'Garaagarummaa kana heeyyamuuf PIN ykn ID hojjetaa supervaayizaraa ni barbaachisa.' },
     complete: { en: 'Complete', am: 'ጨርስ', or: 'Xumuri' },
 };

@@ -114,27 +114,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
       }
       groups[acc.siteCode].accounts.push(acc);
     }
-
-    const sortedGroups = Object.values(groups).map(g => ({
-      ...g,
-      accounts: [...g.accounts].sort((a, b) => {
-        if (a.level !== b.level) return a.level - b.level;
-        return a.name.localeCompare(b.name);
-      })
-    }));
-
-    const getSiteRank = (type: StagingQuickAccount['siteType']) => {
-      switch (type) {
-        case 'HQ': return 1;
-        case 'Regional Administration': return 2;
-        case 'Store': return 3;
-        case 'Warehouse': return 4;
-        case 'Distribution Center': return 5;
-        default: return 6;
-      }
-    };
-
-    return sortedGroups.sort((a, b) => getSiteRank(a.siteType) - getSiteRank(b.siteType) || a.siteCode.localeCompare(b.siteCode));
+    return Object.values(groups);
   }, [accounts, countryFilter, roleFilter, searchQuery]);
 
   const totalFilteredAccounts = useMemo(() => {

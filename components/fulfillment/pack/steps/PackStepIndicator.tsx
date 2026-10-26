@@ -40,7 +40,7 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
         {
             id: 'DETAILS',
             stepNum: 1,
-            label: t('warehouse.packing.stepDetails') || 'Job Details',
+            label: t('warehouse.packing.stepDetails') && t('warehouse.packing.stepDetails') !== 'warehouse.packing.stepDetails' ? t('warehouse.packing.stepDetails') : 'Details',
             sublabel: 'Overview & Directives',
             icon: FileText,
             isComplete: true,
@@ -48,7 +48,7 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
         {
             id: 'ITEMS',
             stepNum: 2,
-            label: t('warehouse.packing.stepItems') || 'Scan & Pack',
+            label: t('warehouse.packing.stepItems') && t('warehouse.packing.stepItems') !== 'warehouse.packing.stepItems' ? t('warehouse.packing.stepItems') : 'Items',
             sublabel: isFullyPacked ? 'Verified' : 'Scan Required',
             icon: Package,
             isComplete: isFullyPacked,
@@ -56,7 +56,7 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
         {
             id: 'BOX',
             stepNum: 3,
-            label: t('warehouse.packing.stepBox') || 'Carton & Prep',
+            label: t('warehouse.packing.stepBox') && t('warehouse.packing.stepBox') !== 'warehouse.packing.stepBox' ? t('warehouse.packing.stepBox') : 'Box',
             sublabel: !isFullyPacked ? 'Locked (Scan)' : hasBoxSelected ? 'Selected' : 'Box Size & Care',
             icon: Box,
             isComplete: hasBoxSelected,
@@ -64,7 +64,7 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
         {
             id: 'WEIGH',
             stepNum: 4,
-            label: t('warehouse.packing.stepWeigh') || 'Weigh & Seal',
+            label: t('warehouse.packing.stepWeigh') && t('warehouse.packing.stepWeigh') !== 'warehouse.packing.stepWeigh' ? t('warehouse.packing.stepWeigh') : 'Weigh',
             sublabel: !isFullyPacked || !hasBoxSelected ? 'Locked' : hasWeightEntered ? 'Audited' : 'Scale & Security',
             icon: Scale,
             isComplete: hasWeightEntered,
@@ -72,7 +72,7 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
         {
             id: 'FINISH',
             stepNum: 5,
-            label: t('warehouse.packing.stepFinish') || 'Label & Handover',
+            label: t('warehouse.packing.stepFinish') && t('warehouse.packing.stepFinish') !== 'warehouse.packing.stepFinish' ? t('warehouse.packing.stepFinish') : 'Finish',
             sublabel: !isFullyPacked ? 'Locked' : 'Print & Seal',
             icon: CheckCircle,
             isComplete: false,
@@ -80,8 +80,8 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
     ];
 
     return (
-        <div className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] px-3 py-2 md:px-6 md:py-3 shrink-0">
-            <div className="grid grid-cols-5 gap-1 md:gap-2.5 max-w-5xl mx-auto">
+        <div className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] px-2 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 shrink-0 overflow-x-auto no-scrollbar">
+            <div className="grid grid-cols-5 gap-1 sm:gap-1.5 md:gap-2.5 max-w-5xl mx-auto min-w-[300px]">
                 {steps.map((st) => {
                     const isActive = currentStep === st.id;
                     const isAccessible = isStepAccessible(st.id);
@@ -96,7 +96,7 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
                                 if (isAccessible) setStep(st.id);
                             }}
                             title={!isAccessible ? 'Scanning and previous steps required before unlocking this step.' : undefined}
-                            className={`min-h-[44px] py-1.5 px-2 md:py-2 md:px-3 rounded-xl border flex items-center gap-2 md:gap-3 transition-colors text-left touch-manipulation ${
+                            className={`min-h-[44px] py-1 px-1.5 sm:py-1.5 sm:px-2 md:py-2 md:px-3 rounded-xl border flex items-center justify-center sm:justify-start gap-1 sm:gap-2 md:gap-3 transition-colors text-left touch-manipulation min-w-0 ${
                                 !isAccessible
                                     ? 'opacity-40 cursor-not-allowed bg-[var(--theme-bg-card)]/20 border-dashed border-[var(--theme-border)]'
                                     : isActive
@@ -108,7 +108,7 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
                         >
                             {/* Step Badge */}
                             <div
-                                className={`w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center shrink-0 font-mono font-bold text-xs transition-colors ${
+                                className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center shrink-0 font-mono font-bold text-[10px] sm:text-xs transition-colors ${
                                     !isAccessible
                                         ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                         : isActive
@@ -119,11 +119,11 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
                                 }`}
                             >
                                 {!isAccessible ? (
-                                    <Lock size={12} className="opacity-70" />
+                                    <Lock size={11} className="opacity-70" />
                                 ) : st.isComplete && !isActive ? (
-                                    <Check size={14} className="stroke-[2.5]" />
+                                    <Check size={12} className="stroke-[2.5]" />
                                 ) : (
-                                    <IconComponent size={14} />
+                                    <IconComponent size={12} />
                                 )}
                             </div>
 
@@ -151,13 +151,13 @@ export const PackStepIndicator: React.FC<PackStepIndicatorProps> = ({
                             {/* Mobile-only compact step number */}
                             <div className="sm:hidden min-w-0 flex-1">
                                 <span
-                                    className={`text-[11px] font-bold uppercase truncate block ${
+                                    className={`text-[10px] font-bold uppercase truncate block leading-tight ${
                                         isActive
                                             ? 'text-[var(--theme-text-primary)]'
                                             : 'text-[var(--theme-text-secondary)]'
                                     }`}
                                 >
-                                    {st.label.split(' ')[0]}
+                                    {st.label}
                                 </span>
                             </div>
                         </button>

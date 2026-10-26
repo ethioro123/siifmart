@@ -32,26 +32,26 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
     return (
         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 md:p-6 space-y-4 md:space-y-6 bg-[var(--theme-bg-app)]">
             {/* Top Mission Briefing Banner */}
-            <div className="p-4 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0">
-                        <FileText size={20} />
+            <div className="p-3 sm:p-4 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 overflow-hidden">
+                <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 w-full flex-1">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                        <FileText size={18} className="sm:w-5 sm:h-5" />
                     </div>
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)]">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                            <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)] shrink-0">
                                 Pack Mission Overview
                             </span>
-                            <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[11px] font-mono font-semibold text-[var(--theme-text-primary)]">
+                            <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[11px] font-mono font-semibold text-[var(--theme-text-primary)] shrink-0">
                                 #{formatJobId(job)}
                             </span>
                             {orderRef && (
-                                <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[11px] font-mono font-semibold text-[var(--theme-text-primary)]">
+                                <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[11px] font-mono font-semibold text-[var(--theme-text-primary)] truncate max-w-[140px] sm:max-w-none">
                                     Ref: {orderRef}
                                 </span>
                             )}
                         </div>
-                        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 truncate">
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1 break-words whitespace-normal leading-relaxed">
                             Review parcel destination, handling directives, and cargo manifest before scanning.
                         </p>
                     </div>
@@ -62,13 +62,13 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
             {/* Key Information Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {/* Destination & Order */}
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-sm flex flex-col justify-between">
-                    <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-sm flex flex-col justify-between overflow-hidden">
+                    <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)] gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5 shrink-0">
                             <MapPin size={13} className="text-[var(--theme-accent)]" />
                             Destination
                         </span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${
                             job.priority === 'Critical' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' :
                             job.priority === 'High' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' :
                             'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
@@ -76,13 +76,15 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                             {job.priority} Priority
                         </span>
                     </div>
-                    <div className="pt-3 space-y-1">
-                        <p className="text-sm font-bold text-[var(--theme-text-primary)] truncate">
+                    <div className="pt-3 space-y-1 min-w-0">
+                        <p className="text-sm font-bold text-[var(--theme-text-primary)] truncate" title={customerOrDest}>
                             {customerOrDest}
                         </p>
-                        <p className="text-xs text-[var(--theme-text-secondary)] flex items-center gap-1.5">
-                            <Clock size={12} />
-                            {new Date(job.createdAt || (job as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                        <p className="text-xs text-[var(--theme-text-secondary)] flex items-center gap-1.5 min-w-0">
+                            <Clock size={12} className="shrink-0" />
+                            <span className="truncate">
+                                {new Date(job.createdAt || (job as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                            </span>
                         </p>
                     </div>
                 </div>
