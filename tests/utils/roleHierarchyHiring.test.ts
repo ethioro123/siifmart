@@ -330,11 +330,11 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
             expect(canEmployRole('warehouse_manager', 'driver')).toBe(true);
         });
 
-        it('warehouse supervisors (picking_supervisor, dispatch_supervisor, etc.) have no hiring authority', () => {
+        it('warehouse supervisors (picking_supervisor, returns_waste_supervisor, etc.) have no hiring authority', () => {
             expect(canEmployRole('receiving_supervisor', 'receiver')).toBe(false);
             expect(canEmployRole('picking_supervisor', 'picker')).toBe(false);
             expect(canEmployRole('packing_supervisor', 'packer')).toBe(false);
-            expect(canEmployRole('dispatch_supervisor', 'driver')).toBe(false);
+            expect(canEmployRole('returns_waste_supervisor', 'driver')).toBe(false);
             expect(canEmployRole('inventory_control_supervisor', 'stock_counter')).toBe(false);
             expect(canEmployRole('fleet_maintenance_supervisor', 'fleet_mechanic')).toBe(false);
         });
