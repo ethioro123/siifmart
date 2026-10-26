@@ -25,7 +25,7 @@ describe('atomic worker points awards', () => {
             id: 'persisted', employee_id: 'assigned-worker', total_points: 85
         }, error: null } as Awaited<ReturnType<typeof supabase.rpc>>);
         const saved = await workerPointsService.awardCompletedJob('putaway-job');
-        expect(saved?.totalPoints).toBe(85);
+        expect(saved && 'totalPoints' in saved ? saved.totalPoints : undefined).toBe(85);
         expect(supabase.rpc).toHaveBeenCalledWith('award_completed_warehouse_job', { p_job_id: 'putaway-job' });
         expect(supabase.from).not.toHaveBeenCalled();
     });

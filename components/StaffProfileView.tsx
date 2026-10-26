@@ -1,3 +1,4 @@
+import { FloorAuditTimeline } from './fulfillment/discrepancies/FloorAuditTimeline';
 import React from 'react';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
@@ -136,6 +137,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
             />
 
             <div className="min-h-[400px]">
+                {['tasks','gamification'].includes(profile.activeProfileTab)&&<FloorAuditTimeline scope={{kind:'employee',id:employee.id,siteId:employee.siteId||'',country:sites.find(s=>s.id===employee.siteId)?.country||''}}/>}
                 {profile.activeProfileTab === 'overview' && (
                     <OverviewTab
                         employee={employee}

@@ -11,8 +11,8 @@ describe('Guideline Role Extensions & Dual-Control Reporting', () => {
     describe('1. Role Catalog & Hierarchy Configuration', () => {
         const expectedNewRoles = [
             { id: 'group_cmo', level: 1, expectedRank: 99, category: 'executive', isManagerial: true },
-            { id: 'regional_it_manager', level: 5, expectedRank: 81, category: 'director', isManagerial: true },
-            { id: 'regional_compliance_manager', level: 5, expectedRank: 81, category: 'director', isManagerial: true },
+            { id: 'regional_it_manager', level: 5, expectedRank: 81, category: 'manager', isManagerial: true },
+            { id: 'regional_compliance_manager', level: 5, expectedRank: 81, category: 'manager', isManagerial: true },
             { id: 'inbound_operations_supervisor', level: 8, expectedRank: 56, category: 'supervisor', isManagerial: true },
             { id: 'outbound_operations_supervisor', level: 8, expectedRank: 56, category: 'supervisor', isManagerial: true },
             { id: 'cash_office_officer', level: 9, expectedRank: 36, category: 'specialist', isManagerial: false },

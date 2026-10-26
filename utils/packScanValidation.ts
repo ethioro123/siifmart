@@ -4,12 +4,13 @@ const normalizePackIdentifier = (value: string): string =>
 export const matchesPackItemScan = (
     scannedValue: string,
     item: { sku?: string | null } | null | undefined,
-    product?: { sku?: string | null; barcode?: string | null } | null
+    product?: { sku?: string | null; barcode?: string | null; barcodes?: string[] | null } | null
 ): boolean => {
     const scanned = normalizePackIdentifier(scannedValue.trim());
     if (!scanned || !item) return false;
 
-    return [item.sku, product?.sku, product?.barcode]
+    const extraBarcodes = Array.isArray(product?.barcodes) ? product.barcodes : [];
+    return [item.sku, product?.sku, product?.barcode, ...extraBarcodes]
         .filter((identifier): identifier is string => Boolean(identifier?.trim()))
         .some(identifier => normalizePackIdentifier(identifier) === scanned);
 };

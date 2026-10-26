@@ -1,3 +1,4 @@
+import { FloorAuditTimeline } from '../fulfillment/discrepancies/FloorAuditTimeline';
 import React from 'react';
 import {
     Package, Tag, Hash, Layers, Box, Info, ScanBarcode, Lock, Edit2, Check, X,
@@ -459,6 +460,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     onClose={() => setIsSmartUnitModalOpen(false)}
                 />
             )}
+            <FloorAuditTimeline scope={{kind:'product',id:product.id,siteId:product.siteId||product.site_id||'',country:effectiveCountry||''}}/>
         </Modal>
     );
 };

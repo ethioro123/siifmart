@@ -345,7 +345,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             console.timeEnd(`completeJob-${jobId}`);
-            return pointsResult;
+            return job.type === 'PACK' ? { points: 0, breakdown: [], pendingConfirmation: true } : pointsResult;
         } catch (error) {
             logger.error('useJobCompletion', `❌ completeJob failed for ${jobId}:`, error);
             console.timeEnd(`completeJob-${jobId}`);

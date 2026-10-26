@@ -31,6 +31,6 @@ export function useCompletePickJob({ setJobs, queryClient, addNotification }: De
         addNotification('success', pack
             ? 'Picking completed. Stock deducted and packing job created.'
             : 'Picking completed with no stock picked. No packing job was created; the order requires supervisor review.');
-        return pointsResult;
+        return { points: 0, breakdown: [], pendingConfirmation: true };
     }, [setJobs, queryClient, addNotification]);
 }

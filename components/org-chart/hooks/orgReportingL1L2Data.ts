@@ -50,8 +50,8 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 1,
         levelCategory: 'executive',
         levelTag: 'L1 Global Executive',
-        reportsToRole: 'group_cco',
-        reportsToLabel: 'Group CCO',
+        reportsToRole: 'group_ceo',
+        reportsToLabel: 'Group CEO',
         managesRoles: ['regional_merchandising_manager', 'merchandising_specialist'],
         isManagerial: true
     },
@@ -131,90 +131,6 @@ export const L1_L2_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         dottedLineRole: 'group_ceo',
         dottedLineLabel: 'Group CEO (Executive Oversight)',
         managesRoles: ['country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'country_technology_director', 'country_compliance_manager'],
-        isManagerial: true
-    },
-    country_operations_director: {
-        role: 'country_operations_director',
-        level: 3,
-        levelCategory: 'director',
-        levelTag: 'L3 Country Operations Director',
-        reportsToRole: 'group_coo',
-        reportsToLabel: 'Group COO',
-        dottedLineRole: 'country_managing_director',
-        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
-        managesRoles: ['regional_operations_manager'],
-        isManagerial: true
-    },
-    country_finance_director: {
-        role: 'country_finance_director',
-        level: 3,
-        levelCategory: 'director',
-        levelTag: 'L3 Country Finance Director',
-        reportsToRole: 'group_cfo',
-        reportsToLabel: 'Group CFO',
-        dottedLineRole: 'country_managing_director',
-        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
-        managesRoles: ['regional_finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
-        isManagerial: true
-    },
-    country_commercial_director: {
-        role: 'country_commercial_director',
-        level: 3,
-        levelCategory: 'director',
-        levelTag: 'L3 Country Commercial Director',
-        reportsToRole: 'group_cco',
-        reportsToLabel: 'Group CCO',
-        dottedLineRole: 'country_managing_director',
-        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
-        managesRoles: ['regional_procurement_manager', 'regional_merchandising_manager', 'buyer', 'merchandising_specialist', 'vendor_relations_manager'],
-        isManagerial: true
-    },
-    country_supply_chain_director: {
-        role: 'country_supply_chain_director',
-        level: 3,
-        levelCategory: 'director',
-        levelTag: 'L3 Country Supply Chain Director',
-        reportsToRole: 'group_csco',
-        reportsToLabel: 'Group CSCO',
-        dottedLineRole: 'country_managing_director',
-        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
-        managesRoles: ['regional_logistics_manager', 'warehouse_manager', 'regional_supply_chain_manager', 'dispatch_supervisor', 'demand_planner', 'replenishment_planner', 'fleet_maintenance_supervisor'],
-        isManagerial: true
-    },
-    country_hr_director: {
-        role: 'country_hr_director',
-        level: 3,
-        levelCategory: 'director',
-        levelTag: 'L3 Country HR Director',
-        reportsToRole: 'group_chro',
-        reportsToLabel: 'Group CHRO',
-        dottedLineRole: 'country_managing_director',
-        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
-        managesRoles: ['regional_hr_manager', 'hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'],
-        isManagerial: true
-    },
-    country_technology_director: {
-        role: 'country_technology_director',
-        level: 3,
-        levelCategory: 'director',
-        levelTag: 'L3 Country Technology Director',
-        reportsToRole: 'group_cio',
-        reportsToLabel: 'Group CIO',
-        dottedLineRole: 'country_managing_director',
-        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
-        managesRoles: ['regional_it_manager', 'it_support', 'data_analyst'],
-        isManagerial: true
-    },
-    country_compliance_manager: {
-        role: 'country_compliance_manager',
-        level: 3,
-        levelCategory: 'director',
-        levelTag: 'L3 Country Compliance Manager',
-        reportsToRole: 'group_clco',
-        reportsToLabel: 'Group General Counsel & Compliance Officer',
-        dottedLineRole: 'country_managing_director',
-        dottedLineLabel: 'Country Managing Director (Country Executive Coordination)',
-        managesRoles: ['regional_compliance_manager', 'tax_compliance_officer', 'loss_prevention'],
         isManagerial: true
     }
 };

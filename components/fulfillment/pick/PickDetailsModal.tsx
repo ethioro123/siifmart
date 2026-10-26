@@ -1,3 +1,4 @@
+import { FloorAuditTimeline } from '../discrepancies/FloorAuditTimeline';
 import React, { useState } from 'react';
 import { X, Calendar, User, Package, Box, MapPin, ArrowRight, Undo2, FileEdit, Trash2 } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
@@ -187,6 +188,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
 
                 {/* Line Items */}
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-[var(--theme-bg-subtle)]">
+                    <FloorAuditTimeline scope={{kind:'job',id:selectedItem.id,siteId:selectedItem.siteId,country:selectedItem.countryCode||selectedItem.country_code||sites.find(s=>s.id===selectedItem.siteId)?.country||''}}/>
                     <h4 className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-3">{t('warehouse.itemsToPick')}</h4>
                     <div className="space-y-3">
                         {data.items.map((item: any, idx: number) => {

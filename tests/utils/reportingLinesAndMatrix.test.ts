@@ -19,7 +19,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(groupCoo.level).toBe(1);
         expect(groupCoo.levelCategory).toBe('executive');
         expect(groupCoo.reportsToRole).toBe('group_ceo');
-        expect(groupCoo.reportsToLabel).toContain('group_ceo');
+        expect(groupCoo.reportsToLabel).toContain('Group CEO');
         expect(groupCoo.isManagerial).toBe(true);
         expect(groupCoo.managesRoles.length).toBeGreaterThan(0);
 
@@ -27,7 +27,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(groupCfo.level).toBe(1);
         expect(groupCfo.levelCategory).toBe('executive');
         expect(groupCfo.reportsToRole).toBe('group_ceo');
-        expect(groupCfo.reportsToLabel).toContain('group_ceo');
+        expect(groupCfo.reportsToLabel).toContain('Group CEO');
         expect(groupCfo.isManagerial).toBe(true);
         expect(groupCfo.managesRoles.length).toBeGreaterThan(0);
 
@@ -48,7 +48,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
 
         const groupCto = getRoleReportingMeta('group_cto');
         expect(groupCto.level).toBe(1);
-        expect(groupCto.reportsToRole).toBe('group_ceo');
+        expect(groupCto.reportsToRole).toBe('group_cio');
         expect(groupCto.isManagerial).toBe(true);
 
         const groupCio = getRoleReportingMeta('group_cio');
@@ -89,23 +89,23 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
         expect(cmd.managesRoles).toContain('country_compliance_manager');
     });
 
-    it('verifies Level 2 Country Functional Directors solid and dotted-line reporting structure', () => {
+    it('verifies Level 3 Country Functional Directors solid and dotted-line reporting structure', () => {
         const countryRoles = [
-            { role: 'country_operations_director', dotted: 'group_coo' },
-            { role: 'country_finance_director', dotted: 'group_cfo' },
-            { role: 'country_commercial_director', dotted: 'group_cco' },
-            { role: 'country_supply_chain_director', dotted: 'group_csco' },
-            { role: 'country_hr_director', dotted: 'group_chro' },
-            { role: 'country_technology_director', dotted: 'group_cto' },
-            { role: 'country_compliance_manager', dotted: 'group_cae' }
+            { role: 'country_operations_director', solid: 'group_coo' },
+            { role: 'country_finance_director', solid: 'group_cfo' },
+            { role: 'country_commercial_director', solid: 'group_cco' },
+            { role: 'country_supply_chain_director', solid: 'group_csco' },
+            { role: 'country_hr_director', solid: 'group_chro' },
+            { role: 'country_technology_director', solid: 'group_cto' },
+            { role: 'country_compliance_manager', solid: 'group_cae' }
         ];
 
-        countryRoles.forEach(({ role, dotted }) => {
+        countryRoles.forEach(({ role, solid }) => {
             const meta = getRoleReportingMeta(role);
-            expect(meta.level).toBe(2);
+            expect(meta.level).toBe(3);
             expect(meta.levelCategory).toBe('director');
-            expect(meta.reportsToRole).toBe('country_managing_director');
-            expect(meta.dottedLineRole).toBe(dotted);
+            expect(meta.reportsToRole).toBe(solid);
+            expect(meta.dottedLineRole).toBe('country_managing_director');
             expect(meta.isManagerial).toBe(true);
             expect(meta.managesRoles.length).toBeGreaterThan(0);
         });
@@ -353,7 +353,7 @@ describe('Dual-Control Reporting Lines & Supervisory Matrix Engine', () => {
 
         expect(HIERARCHY_LEVEL_CONFIGS[1].badge).toBe('L1 Global Exec');
         expect(HIERARCHY_LEVEL_CONFIGS[2].badge).toBe('L2 Country Exec');
-        expect(HIERARCHY_LEVEL_CONFIGS[3].badge).toBe('L3 HQ Director');
+        expect(HIERARCHY_LEVEL_CONFIGS[3].badge).toBe('L3 Country Director');
         expect(HIERARCHY_LEVEL_CONFIGS[4].badge).toBe('L4 Regional Ops');
         expect(HIERARCHY_LEVEL_CONFIGS[5].badge).toBe('L5 Manager');
         expect(HIERARCHY_LEVEL_CONFIGS[6].badge).toBe('L6 Facility Captain');

@@ -51,17 +51,25 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (!activeSiteId) return;
 
+        let cancelled = false;
+        setWorkerPoints([]);
         const loadPoints = async () => {
             try {
                 const data = await workerPointsService.getAll(activeSiteId);
-                setWorkerPoints(data);
+                if (!cancelled) setWorkerPoints(data);
             } catch (error) {
                 logger.error('GamificationContext', 'Failed to load worker points', error);
             }
         };
 
         loadPoints();
-    }, [activeSiteId]);
+        const refreshReviewed = (event: Event) => {
+            const detail = (event as CustomEvent<{siteId:string;country:string}>).detail;
+            if (detail?.siteId === activeSiteId && detail.country === activeSite?.country) loadPoints();
+        };
+        window.addEventListener('warehouse-points-review-saved', refreshReviewed);
+        return () => { cancelled = true; window.removeEventListener('warehouse-points-review-saved', refreshReviewed); };
+    }, [activeSiteId, activeSite?.country]);
 
     const getWorkerPoints = useCallback((employeeId: string) => {
         return workerPoints.find(wp => wp.employeeId === employeeId);
@@ -86,6 +94,7 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
             if (type === 'JOB_COMPLETE') {
                 if (!jobId) throw new Error('A completed job is required for automatic points');
                 const persisted = await workerPointsService.awardCompletedJob(jobId);
+                if (persisted && 'pendingReview' in persisted) { addNotification('info', 'Job completion points are pending discrepancy review.'); return; }
                 if (persisted) setWorkerPoints(prev => [...prev.filter(wp => wp.employeeId !== persisted.employeeId), persisted]);
                 return;
             }

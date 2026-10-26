@@ -56,10 +56,11 @@ const mapWorkerPointsRow = (wp: ReturnType<typeof toWorkerPointsRow> & { id: str
 });
 
 export const workerPointsService = {
-    async awardCompletedJob(jobId: string): Promise<WorkerPoints | null> {
+    async awardCompletedJob(jobId: string): Promise<WorkerPoints | { pendingReview: true } | null> {
         if (!jobId) throw new Error('A completed warehouse job is required');
         const { data, error } = await supabase.rpc('award_completed_warehouse_job', { p_job_id: jobId });
         if (error) throw error;
+        if (data?.pending_review === true) return { pendingReview: true };
         if (data === null) return null; // Bonuses are disabled by persisted site/country settings.
         if (!data?.id) throw new Error('Job award returned no persisted worker record');
         return mapWorkerPointsRow(data);

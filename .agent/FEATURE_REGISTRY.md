@@ -41,7 +41,7 @@
 - Employee roles, Auth metadata, role validation, database authorization functions, and RLS policies use the same canonical IDs. Historic IDs occur only in the one-time migration that converted existing records and policies.
 - **Files**: `types/auth.ts`, `utils/roles.ts`, `utils/roleDisplay.ts`, `services/auth.rbac.ts`, `services/permissions.matrix.ts`, `supabase/functions/admin-reset-password/index.ts`, `migrations/20261022_canonical_hq_and_regional_manager_roles.sql`.
 - **Database**: Migration applied to staging (`utykzifrblpyxlvlknsm`) and production (`zdgzpxvorwinugjufkvb`); the admin password reset function was deployed to both.
-
+- Discrepancy history/review (2026-10-27): scoped job, product and staff audit timelines; immutable independent findings; completion awards deferred until review, with idempotent ledger release and no automatic clawbacks. Applied to staging; rollback regression covers history, scope, review and one-time awards.
 ### Database-Assigned Purchase Order Numbers (2026-10-22)
 - PO creation leaves the display number to the existing database sequence trigger and reads the saved number from the insert response. This prevents globally unique PO numbers from colliding when site-scoped reads hide other orders or submissions overlap.
 - **Files**: `services/purchase-orders.service.ts`, `migrations/20261022_atomic_po_number_allocation.sql`.

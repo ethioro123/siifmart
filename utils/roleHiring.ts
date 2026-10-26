@@ -88,7 +88,8 @@ const WAREHOUSE_DOMAIN_ROLES = new Set([
     'driver',
     'stock_clerk',
     'inventory_specialist',
-    'returns_clerk'
+    'returns_clerk',
+    'warehouse_administrator'
 ]);
 
 const ROLE_ALIASES: Record<string, string> = {

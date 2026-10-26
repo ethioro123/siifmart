@@ -18,3 +18,13 @@ Supervisor notes capture the observed corrective action and reconciled quantity.
 Applied to staging `utykzifrblpyxlvlknsm`: `migrations/20261027_pick_pack_discrepancies.sql` and `migrations/20261027_exact_pack_reconciliation.sql`. Production was not changed.
 
 Rollback-only `tests/database/pick-pack-discrepancies.sql` checks 23/20 shortages, 23/25 excess, immutable picked quantities, held-job updates and dispatch rejection, independent supervisor decisions, rejection of short packing and tolerance bypasses, worker/anonymous scope, and exact approved Pick deduction. `tests/database/atomic-picking.sql` covers the existing stock, retry, partial/zero and online-reservation cases with the new shortage approvals.
+
+## History, staff review and points
+
+Job history details, product details and staff Tasks/Points views expose an on-demand, paginated discrepancy timeline scoped to site/country. Staff involvement is displayed separately from confirmed responsibility. Reports show both counts, product/lot snapshot, worker and supervisor timestamps, findings and recorded job points.
+
+A separate supervisor reviews resolved reports as counting correction, stock issue, confirmed handling error or undetermined. Only a recorded handler can be named responsible, and only for a confirmed handling error. Decisions cannot be overwritten.
+
+New completion awards on a reported job are deferred until all its reports have been reviewed. The last review releases an eligible completed job through the existing idempotent points ledger; confirmed handling errors suppress an unawarded accuracy bonus for the responsible handler. Previously awarded points remain recorded. Any retrospective adjustment uses the existing supervised points-transaction workflow; no automatic clawback or balance overwrite occurs. Completion popups do not present client estimates as saved awards.
+
+Staging migrations: `20261027_discrepancy_history_reviews.sql`, `20261027_review_aware_job_points.sql`. Rollback regression: `tests/database/discrepancy-audit-reviews.sql`.
