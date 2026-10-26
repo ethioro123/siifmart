@@ -74,7 +74,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/60 overflow-x-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-4 bg-black/60 overflow-x-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-md rounded-3xl border border-[var(--theme-border)] shadow-xl flex flex-col isolate overflow-hidden max-h-[90vh] relative">
                 
                 {/* Header */}

@@ -384,7 +384,7 @@ export const ScannerInterface: React.FC = () => {
     // If no pending items, but job not null -> All Done Screen
     if (!currentItem) {
         return (
-            <div className="fixed inset-0 z-50 bg-[var(--theme-bg-app)] flex flex-col items-center justify-center text-[var(--theme-text-primary)] p-6">
+            <div className="fixed inset-0 z-[150] bg-[var(--theme-bg-app)] flex flex-col items-center justify-center text-[var(--theme-text-primary)] p-6">
                 <CheckCircle size={64} className="text-primary mb-4" />
                 <h2 className="text-2xl font-bold mb-2">{t('warehouse.jobComplete')}</h2>
                 <button onClick={() => setSelectedJob(null)} className="woody-btn-secondary px-6 py-3 mt-6 min-h-[44px] touch-manipulation">
@@ -395,7 +395,7 @@ export const ScannerInterface: React.FC = () => {
     }
 
     return (
-        <div className="fixed inset-0 z-50 bg-[var(--theme-bg-app)] flex flex-col">
+        <div className="fixed inset-0 z-[150] bg-[var(--theme-bg-app)] flex flex-col">
             {/* Header */}
             <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-[var(--theme-bg-subtle)] flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-[var(--theme-border)]">
                 <div className="text-[var(--theme-text-primary)] w-full md:w-auto">

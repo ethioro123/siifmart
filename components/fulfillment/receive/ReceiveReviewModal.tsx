@@ -58,7 +58,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
     const isFullyReceived = stats.totalReceivedSellable >= stats.totalExpectedSellable;
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-2 sm:p-4 z-50 overflow-x-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-2 sm:p-4 z-[150] overflow-x-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] relative shadow-2xl">
                 {/* Header */}
                 <div className="p-4 md:p-6 border-b border-[var(--theme-border)] flex justify-between items-start bg-[var(--theme-bg-subtle)]">

@@ -77,18 +77,28 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 p-0 md:p-4 animate-in fade-in duration-200">
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-t-3xl md:rounded-2xl w-full md:max-w-2xl max-h-[85vh] overflow-hidden shadow-xl flex flex-col relative">
+        <div 
+            className="fixed inset-0 z-[150] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200"
+            onClick={(e) => {
+                if (e.target === e.currentTarget) setIsDetailsOpen(false);
+            }}
+        >
+            <div 
+                className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-t-3xl md:rounded-2xl w-full md:max-w-2xl max-h-[85vh] overflow-hidden shadow-xl flex flex-col relative"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="assign-job-details-title"
+            >
 
                 {/* Header */}
-                <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] flex justify-between items-start bg-[var(--theme-bg-subtle)]">
+                <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] flex justify-between items-start bg-[var(--theme-bg-subtle)] shrink-0">
                     <div className="flex gap-3.5">
                         <div className="p-2.5 bg-primary/10 rounded-xl border border-primary/20 flex items-center justify-center shrink-0">
                             {getJobIcon(selectedJob.type)}
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <h2 className="text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">Job Intelligence</h2>
+                                <h2 id="assign-job-details-title" className="text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">Job Intelligence</h2>
                                 <span className="px-2.5 py-0.5 bg-primary/10 border border-primary/20 rounded-full text-[11px] font-mono font-medium text-primary uppercase tracking-wider">
                                     {formatJobId(selectedJob)}
                                 </span>
@@ -262,7 +272,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center gap-3">
+                <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center gap-3 shrink-0">
                     <div>
                         {canDelete && (
                             <button

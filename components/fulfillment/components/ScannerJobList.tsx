@@ -22,7 +22,7 @@ export const ScannerJobList: React.FC<ScannerJobListProps> = ({
     t
 }) => {
     return (
-        <div className="fixed inset-0 z-50 bg-[var(--theme-bg-app)] flex flex-col">
+        <div className="fixed inset-0 z-[150] bg-[var(--theme-bg-app)] flex flex-col">
             <div className="p-4 bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] flex justify-between items-center">
                 <h2 className="text-lg font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">{t('warehouse.selectJob')}</h2>
                 <button
