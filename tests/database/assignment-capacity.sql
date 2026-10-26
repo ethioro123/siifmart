@@ -3,7 +3,7 @@ BEGIN;
 SET LOCAL statement_timeout='15s';
 SELECT set_config('request.jwt.claims','{"role":"service_role"}',true);
 DO $$
-DECLARE worker uuid; facility uuid; country text; actor uuid; baseline integer; extra uuid; stats jsonb; tz text; start_day timestamptz; done_baseline integer;
+DECLARE worker uuid; facility uuid; country text; actor uuid; baseline integer; release_job uuid; extra uuid; stats jsonb; tz text; start_day timestamptz; done_baseline integer;
 BEGIN
  SELECT id,site_id INTO worker,facility FROM public.employees WHERE role='picker' AND lower(status)='active' AND site_id IS NOT NULL LIMIT 1;
  SELECT s.country INTO country FROM public.sites s WHERE id=facility;
@@ -13,7 +13,7 @@ BEGIN
  IF baseline>=100 THEN RAISE EXCEPTION 'Fixture worker already at capacity'; END IF;
  FOR i IN baseline+1..100 LOOP
   INSERT INTO public.wms_jobs(site_id,country_code,type,status,priority,assigned_to,line_items,items_count)
-  VALUES(facility,country,'COUNT','Pending','Normal',worker::text,'[]',0);
+  VALUES(facility,country,'COUNT','Pending','Normal',worker::text,'[]',0) RETURNING id INTO release_job;
  END LOOP;
  BEGIN
   INSERT INTO public.wms_jobs(site_id,country_code,type,status,priority,assigned_to,line_items,items_count)
@@ -44,6 +44,10 @@ BEGIN
   PERFORM public.assignment_workloads(facility,'INVALID',ARRAY[worker]);
   RAISE EXCEPTION 'TEST: cross-country workload accepted';
  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+ PERFORM set_config('test.capacity_actor',actor::text,true);
+ PERFORM set_config('test.capacity_worker',worker::text,true);
+ PERFORM set_config('test.capacity_extra',extra::text,true);
+ PERFORM set_config('test.capacity_release',release_job::text,true);
  PERFORM set_config('request.jwt.claim.sub','',true);
  PERFORM set_config('request.jwt.claims','{"role":"anon"}',true);
  BEGIN

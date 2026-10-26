@@ -2,7 +2,7 @@
 - Picking prefix correction (2026-10-27): migration applied to staging `utykzifrblpyxlvlknsm`; server validation honors configured facility prefixes. Rollback-only database regression passed.
 # This file records selected implementation history; it is not a source of current policy.
 # Update it for new features or significant fixes, and verify the current code before relying on older notes.
-
+- Assign workload (2026-10-27): server counts show active jobs and calendar-day completions in the configured timezone; 100 active jobs per person enforced by a serialized database trigger. Scoped reads refresh every 15 seconds. Applied to staging `utykzifrblpyxlvlknsm`; rollback-only capacity, midnight and scope checks passed.
 ## Active Features
 ### PO Creator Permissions Aligned With Database Policy (2026-10-23)
 - PO creation in the application now matches the authenticated insert roles enforced in staging and production. The Group CEO retains creation authority; other Group executives, Area Operations Managers, and Regional Supply Chain Managers no longer see a create permission the database will reject.

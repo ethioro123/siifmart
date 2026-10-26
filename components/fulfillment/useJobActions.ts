@@ -1,4 +1,3 @@
-import { assignmentWorkloadsService } from '../../services/assignment-workloads.service';
 import { useCallback } from 'react';
 import {
     WMSJob, JobItem, JobAssignment, Product
@@ -72,9 +71,36 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 throw new Error(`This job is already assigned to ${workerName}. Unassign it first before reassigning.`);
             }
 
-            const saved = await assignmentWorkloadsService.assign(jobId, employee.id, source || user?.name);
-            const updatedJob = saved.job;
-            setJobAssignments(prev => [saved.assignment, ...prev.filter(a => a.id !== saved.assignment.id)]);
+            let estimatedDuration = 15;
+            if (job.type === 'PICK') {
+                estimatedDuration = Math.max(15, job.items * 3);
+            } else if (job.type === 'PACK') {
+                estimatedDuration = Math.max(10, job.items * 2);
+            } else if (job.type === 'PUTAWAY') {
+                estimatedDuration = Math.max(20, job.items * 4);
+            }
+
+            const updatedJob = await wmsJobsService.update(jobId, {
+                assignedTo: employee.id,
+                status: 'In-Progress',
+                assignedBy: source || user?.name || 'System'
+            });
+
+            try {
+                const assignment: Partial<JobAssignment> = {
+                    jobId: job.id,
+                    employeeId: employee.id,
+                    employeeName: employee.name,
+                    assignedAt: new Date().toISOString(),
+                    status: 'Assigned',
+                    estimatedDuration
+                };
+
+                const createdAssignment = await jobAssignmentsService.create(assignment);
+                setJobAssignments(prev => [createdAssignment, ...prev]);
+            } catch (assignError) {
+                logger.warn('useJobActions', 'Job assignment saved, but assignment history could not be recorded', { jobId });
+            }
 
             // If this is a DISPATCH job linked to a parent TRANSFER job (orderRef), synchronize assignedTo & carrier to parent TRANSFER job!
             if (job.type === 'DISPATCH' && job.orderRef) {

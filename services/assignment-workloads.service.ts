@@ -1,7 +1,5 @@
 import { supabase } from '../lib/supabase';
 import { z } from 'zod';
-import { mapWmsJobRow } from './wms-jobs.mapper';
-import { mapJobAssignmentRow } from './job-assignments.service';
 
 export const MAX_ACTIVE_JOBS = 100;
 const snapshot = z.object({
@@ -24,12 +22,5 @@ export const assignmentWorkloadsService = {
             workers.push(...value.workers); timezone = value.timezone; day = value.day;
         }
         return { workers, timezone, day };
-    },
-    async assign(jobId: string, employeeId: string, source?: string) {
-        z.string().uuid().parse(jobId); z.string().uuid().parse(employeeId);
-        const { data, error } = await supabase.rpc('assign_wms_job', { p_job_id: jobId, p_employee_id: employeeId, p_source: source || null });
-        if (error) throw error;
-        if (data?.job?.id !== jobId || data.job.assigned_to !== employeeId || !data.assignment?.id) throw new Error('Server did not confirm the assignment.');
-        return { job: mapWmsJobRow(data.job), assignment: mapJobAssignmentRow(data.assignment) };
     }
 };

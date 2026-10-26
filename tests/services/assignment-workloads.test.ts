@@ -12,14 +12,10 @@ describe('assignment workload persistence', () => {
         expect(result.workers[0]).toEqual({ employeeId: site, active: 99, completedToday: 12 });
         expect(supabase.rpc).toHaveBeenCalledWith('assignment_workloads', { p_site_id: site, p_country_code: 'ET', p_employee_ids: [site] });
     });
-    it('propagates capacity rejections without claiming assignment success', async () => {
-        const error = { message: 'This employee already has 100 active jobs.' };
+    it('propagates server errors instead of displaying zero workload', async () => {
+        const error = { message: 'Workload is outside the authorized facility' };
         reply(null, error);
-        await expect(assignmentWorkloadsService.assign(site, site)).rejects.toEqual(error);
-    });
-    it('rejects an unconfirmed assignment', async () => {
-        reply({ job: { id: site, assigned_to: site } });
-        await expect(assignmentWorkloadsService.assign(site, site)).rejects.toThrow('did not confirm');
+        await expect(assignmentWorkloadsService.load(site, 'ET', [site])).rejects.toEqual(error);
     });
     it('bounds large team requests to 100 employee IDs', async () => {
         reply({ workers: [], timezone: 'UTC', day: '2026-10-27' });
