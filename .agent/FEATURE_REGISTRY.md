@@ -85,7 +85,7 @@
 - Offline fallback remains constrained to the authorized country and site, and CSV export quotes fields and neutralizes spreadsheet formulas.
 - The return action opens the POS return flow with the receipt reference prefilled; refund authorization remains in POS.
 - Files: `pages/SalesHistory.tsx`, `pages/POSTerminal.tsx`, `pages/sales-history/components/SalesToolbar.tsx`, `pages/sales-history/components/SalesDetailModal.tsx`, `pages/sales-history/utils/salesCsv.ts`, `services/sales.service.ts`, `types/sales.ts`.
-
+- Blind POS receiving (2026-10-27): pending cards hide expected counts; destination Store/Dark Store reads use scoped redacted manifests before arrival. Existing arrival scrubbing protects counting; variances now require independent supervisor recount before intake. Applied to staging with API/RLS/arrival/recount rollback checks.
 ### HQ and Regional Merchandising Proposals (2026-10-21)
 - Added Merchandising Specialist and Regional Merchandising Manager to the role hierarchy and administration assignment flow.
 - Scoped product, price, planogram, and campaign preparation to assigned countries or regions. Merchandising leads approve product and price proposals; Finance independently signs off below-floor prices.

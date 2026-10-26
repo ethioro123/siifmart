@@ -145,8 +145,8 @@ export const ReceivingForm: React.FC = () => {
 
                                 const casesExpected = item.displayExpectedQty || item.expectedQty;
                                 const rawExpected = isWeightVol ? casesExpected * sizeNum : casesExpected;
-                                const isFullyReceived = item.receivedQty >= rawExpected;
-                                const isOverReceived = item.receivedQty > rawExpected;
+                                const isFullyReceived = isManagerOrHQ && item.receivedQty >= rawExpected;
+                                const isOverReceived = isManagerOrHQ && item.receivedQty > rawExpected;
 
                                 return (
                                     <tr key={index} className={`transition-colors ${isFullyReceived ? 'bg-emerald-500/[0.04]' : 'hover:bg-[var(--theme-bg-card-hover)]'}`}>
@@ -296,7 +296,7 @@ export const ReceivingForm: React.FC = () => {
                     </div>
                     <button
                         onClick={handleConfirmTransferReceiving}
-                        disabled={isConfirmingReceive || transferReceivingItems.reduce((sum, item) => sum + item.receivedQty, 0) === 0}
+                        disabled={isConfirmingReceive || transferReceivingItems.length === 0}
                         className="px-6 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-bold flex items-center gap-2 rounded-xl transition-all active:scale-95 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs cursor-pointer text-xs uppercase tracking-wider"
                     >
                         {isConfirmingReceive ? (

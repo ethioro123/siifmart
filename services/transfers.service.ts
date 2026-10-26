@@ -1,3 +1,4 @@
+import { blindReceivingService } from './blind-receiving.service';
 import { supabase } from '../lib/supabase';
 import type { TransferRecord } from '../types';
 import { generateTransferId } from './wms-jobs.service';
@@ -110,7 +111,7 @@ export const transfersService = {
         const seenIds = new Set<string>();
         const combinedData: TransferRecord[] = [];
 
-        for (const raw of [...(activeRes.data || []), ...(historyRes.data || [])]) {
+        for (const raw of [...(activeRes.data || []), ...(historyRes.data || []), ...(siteId ? await blindReceivingService.transfers(siteId,countryCode) : [])]) {
             if (raw.id && !seenIds.has(raw.id)) {
                 seenIds.add(raw.id);
                 combinedData.push(mapTransferRow(raw));

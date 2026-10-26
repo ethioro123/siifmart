@@ -1,3 +1,4 @@
+import { blindReceivingService } from './blind-receiving.service';
 import { supabase } from '../lib/supabase';
 import type { WMSJob } from '../types';
 import { mapWmsJobRow } from './wms-jobs.mapper';
@@ -107,7 +108,8 @@ export const wmsJobsService = {
         if (historyRes.error) throw historyRes.error;
 
         // Combine datasets
-        const combinedData = [...(activeRes.data || []), ...(historyRes.data || [])];
+        const blind = siteId ? await blindReceivingService.jobs(siteId,countryCode) : [];
+        const combinedData = [...(activeRes.data || []), ...(historyRes.data || []), ...blind];
 
         return combinedData.map(mapWmsJobRow);
     },

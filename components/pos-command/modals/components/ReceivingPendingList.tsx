@@ -286,7 +286,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                             <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono">SKU: {lineItem.sku}</p>
                                                         </div>
                                                         <span className="text-[var(--theme-text-secondary)] font-mono pl-3">
-                                                            {lineItem.expectedQty || lineItem.quantity || 0}
+                                                            {['group_ceo','country_operations_director','regional_operations_manager'].includes(user?.role||'') ? (lineItem.expectedQty || lineItem.quantity || 0) : 'Blind count'}
                                                             {lineItem.unit ? ` ${lineItem.unit}` : ''}
                                                         </span>
                                                     </div>
