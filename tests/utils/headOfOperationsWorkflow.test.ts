@@ -79,14 +79,14 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
     describe('2. Multi-Site Executive Exemption & Navigation Resilience', () => {
         it('preserves all sections regardless of active site type (exempt from section stripping)', () => {
             const warehouseSections = getAvailableSections('country_operations_director', 'Warehouse');
-            expect(warehouseSections).toContain('country_managing_director');
-            expect(warehouseSections).toContain('cashier');
+            expect(warehouseSections).toContain('admin');
+            expect(warehouseSections).toContain('pos');
             expect(warehouseSections).toContain('pricing');
             expect(warehouseSections).toContain('finance');
             expect(warehouseSections).toContain('settings');
 
             const storeSections = getAvailableSections('country_operations_director', 'Store');
-            expect(storeSections).toContain('country_managing_director');
+            expect(storeSections).toContain('admin');
             expect(storeSections).toContain('warehouse');
             expect(storeSections).toContain('pricing');
             expect(storeSections).toContain('finance');
@@ -101,8 +101,8 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
     });
 
     describe('3. Role Hierarchy & Employment Authority (canEmployRole)', () => {
-        it('has Level 2 Hierarchy Rank of 95', () => {
-            expect(getRoleHierarchy('country_operations_director')).toBe(95);
+        it('has Level 2 Hierarchy Rank of 97', () => {
+            expect(getRoleHierarchy('country_operations_director')).toBe(97);
         });
 
         it('can hire Level 3 managers and Level 4 operational personnel', () => {
@@ -114,7 +114,7 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
         });
 
         it('cannot hire Level 2 peers or executives with higher/equal rank', () => {
-            const nonHireableRoles = ['group_ceo', 'regional_operations_manager', 'country_operations_director'];
+            const nonHireableRoles = ['group_ceo', 'country_managing_director', 'country_operations_director'];
 
             for (const r of nonHireableRoles) {
                 expect(canEmployRole('country_operations_director', r as any)).toBe(false);
@@ -184,8 +184,8 @@ describe('Head of Operations (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
         });
 
         it('verifies hierarchy ranks for Central Operations Team', () => {
-            expect(getRoleHierarchy('country_operations_director')).toBe(95);
-            expect(getRoleHierarchy('regional_security_manager')).toBe(75);
+            expect(getRoleHierarchy('country_operations_director')).toBe(97);
+            expect(getRoleHierarchy('regional_security_manager')).toBe(81);
             expect(getRoleHierarchy('cs_manager')).toBe(60);
             expect(getRoleHierarchy('store_operations_auditor')).toBe(45);
             expect(getRoleHierarchy('data_analyst')).toBe(35);

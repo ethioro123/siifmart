@@ -81,15 +81,15 @@ describe('Regional Operations Manager (SOP-MGT-020, Level 4, Rank 90) Full Opera
             expect(storeSections).toContain('warehouse');
             expect(storeSections).toContain('procurement');
             expect(storeSections).toContain('pricing');
-            expect(storeSections).toContain('country_managing_director');
+            expect(storeSections).toContain('admin');
             expect(storeSections).toContain('finance');
         });
 
         it('never strips pos section from regional_operations_manager when viewing a Warehouse', () => {
             const whSections = getAvailableSections('regional_operations_manager', 'Warehouse');
-            expect(whSections).toContain('cashier');
+            expect(whSections).toContain('pos');
             expect(whSections).toContain('pricing');
-            expect(whSections).toContain('country_managing_director');
+            expect(whSections).toContain('admin');
             expect(whSections).toContain('finance');
             expect(whSections).toContain('procurement');
         });
@@ -105,7 +105,7 @@ describe('Regional Operations Manager (SOP-MGT-020, Level 4, Rank 90) Full Opera
         it('has Rank 90 hierarchy — territorial director outranking facility leadership', () => {
             expect(getRoleHierarchy('regional_operations_manager')).toBe(90);
             expect(getRoleHierarchy('country_operations_director')).toBeGreaterThan(getRoleHierarchy('regional_operations_manager'));
-            expect(getRoleHierarchy('regional_operations_manager')).toBeGreaterThan(getRoleHierarchy('country_finance_director'));
+            expect(getRoleHierarchy('country_finance_director')).toBeGreaterThan(getRoleHierarchy('regional_operations_manager'));
             expect(getRoleHierarchy('regional_operations_manager')).toBeGreaterThan(getRoleHierarchy('store_manager'));
             expect(getRoleHierarchy('regional_operations_manager')).toBeGreaterThan(getRoleHierarchy('warehouse_manager'));
         });

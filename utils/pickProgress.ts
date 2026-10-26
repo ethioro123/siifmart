@@ -13,8 +13,9 @@ export const validatePickQuantity = (quantity: number, maximum: number): void =>
 
 /** A SKU may have several lots/bins at one facility; prefer the manifest record. */
 export const resolvePickProduct = <T extends { id: string; sku?: string; siteId?: string; site_id?: string; location?: string }>(
-    products: T[], line: { productId?: string; sku?: string; location?: string }, siteId?: string
+    products: T[], line: { productId?: string; sku?: string; location?: string } | null | undefined, siteId?: string
 ): T | undefined => {
+    if (!line || !siteId) return undefined;
     const scoped = products.filter(product => (product.siteId || product.site_id) === siteId);
     return scoped.find(product => product.id === line.productId)
         || scoped.find(product => product.sku === line.sku && !!line.location && product.location === line.location)

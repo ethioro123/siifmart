@@ -44,7 +44,7 @@
 - PO creation leaves the display number to the existing database sequence trigger and reads the saved number from the insert response. This prevents globally unique PO numbers from colliding when site-scoped reads hide other orders or submissions overlap.
 - **Files**: `services/purchase-orders.service.ts`, `migrations/20261022_atomic_po_number_allocation.sql`.
 - **Database**: The existing `generate_po_number()` trigger now allocates the established `AAAA0000` format from a synchronized sequence on staging and production.
-
+- Pack scanner completion crash (2026-10-27): missing next-item lookups return no product; the all-packed status renders without querying an undefined manifest line. Regression covers completed-state rendering and absent lookup scope.
 ### 10-Level Organizational Role Hierarchy (`Level 1` to `Level 10`) (2026-10-22)
 - Upgraded SIIFMART's organizational role hierarchy from the 4-level system (`L1–L4`) to a 10-level enterprise command hierarchy (`L1–L10`):
   - **Level 1 (`L1 Global Exec`)**: Global Executive (`group_ceo`, `CEO`, `ceo`)

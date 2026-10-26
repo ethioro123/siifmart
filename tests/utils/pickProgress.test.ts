@@ -33,3 +33,10 @@ it('resolves the manifest lot before another bin holding the same SKU', () => {
     expect(resolvePickProduct(products,{sku:'SKU',location:'B-01-01'},'dc')?.id).toBe('lot2');
     expect(resolvePickProduct(products,{sku:'SKU'},'unknown')).toBeUndefined();
 });
+
+it('returns no product when there is no next manifest line or authorized facility', () => {
+    const products = [{ id: 'lot', sku: 'SKU', siteId: 'dc' }];
+    expect(resolvePickProduct(products, undefined, 'dc')).toBeUndefined();
+    expect(resolvePickProduct(products, null, 'dc')).toBeUndefined();
+    expect(resolvePickProduct(products, { productId: 'lot' })).toBeUndefined();
+});

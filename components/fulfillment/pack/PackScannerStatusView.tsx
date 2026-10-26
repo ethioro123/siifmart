@@ -45,7 +45,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
 }) => {
     const { t } = useLanguage();
     const item = step === 'CONFIRM_QTY' ? matchedItem : nextUnpackedItem;
-    const product = step === 'CONFIRM_QTY' ? matchedProduct : getProduct(item);
+    const product = step === 'CONFIRM_QTY' ? matchedProduct : item ? getProduct(item) : undefined;
 
     const totalLines = job.lineItems?.length || 0;
     const packedCount =

@@ -123,7 +123,11 @@ export interface ApprovalWorkflow {
 export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     purchase_order: {
         name: 'Purchase Order Approval',
-        levels: [{ roles: ['country_commercial_director', 'regional_procurement_manager', 'group_ceo'] }]
+        levels: [
+            { roles: ['country_commercial_director', 'regional_procurement_manager'], threshold: 10000 },
+            { roles: ['country_commercial_director', 'country_finance_director', 'regional_finance_manager'], threshold: 50000 },
+            { roles: ['country_commercial_director', 'country_finance_director', 'regional_operations_manager', 'country_operations_director', 'country_managing_director', 'group_ceo'], threshold: Infinity }
+        ]
     },
     expense: {
         name: 'Expense Approval',
