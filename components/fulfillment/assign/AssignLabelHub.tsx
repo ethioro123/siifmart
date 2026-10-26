@@ -32,7 +32,7 @@ interface AssignLabelHubProps {
 export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     filteredProducts,
     addNotification,
-    zones,
+    zones = [],
     activeSite
 }) => {
     // Label Printing State

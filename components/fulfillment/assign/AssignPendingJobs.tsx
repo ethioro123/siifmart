@@ -1,3 +1,4 @@
+import { MAX_ACTIVE_JOBS, type AssignmentWorkload } from '../../../services/assignment-workloads.service';
 import React, { useState } from 'react';
 import { ArrowRight, SlidersHorizontal, RotateCcw, ArrowUpDown, Building2, Search, AlertTriangle, List, Check } from 'lucide-react';
 import { WMSJob, Site, Employee } from '../../../types';
@@ -5,6 +6,7 @@ import { AssignJobCard } from './AssignJobCard';
 import { canWorkerPerformJob } from '../../../utils/fulfillmentRoles';
 
 interface AssignPendingJobsProps {
+    workloads?: AssignmentWorkload[];
     filteredJobs: WMSJob[];
     historicalJobs: WMSJob[];
     assignJobFilter: string;
@@ -27,6 +29,7 @@ interface AssignPendingJobsProps {
 export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     filteredJobs,
     historicalJobs,
+    workloads,
     assignJobFilter,
     setAssignJobFilter,
     dispatchPriorityFilter,
@@ -212,11 +215,10 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                         const bestMatchEmployee = employees
                             .filter(e => e.status?.toLowerCase() === 'active' && e.role?.toLowerCase() !== 'group_ceo' && canWorkerPerformJob(e.role, job.type))
                             .map(e => {
-                                const activeAssignments = jobAssignments.filter(
-                                    a => a.employeeId === e.id && ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)
-                                );
-                                return { employee: e, workload: activeAssignments.length };
+                                const current = workloads?.find(w => w.employeeId === e.id);
+                                return { employee: e, workload: current?.active ?? MAX_ACTIVE_JOBS };
                             })
+                            .filter(candidate => candidate.workload < MAX_ACTIVE_JOBS)
                             .sort((a, b) => a.workload - b.workload)[0];
 
                         const isAssigned = !!job.assignedTo || !['pending'].includes(job.status?.toLowerCase() || '');

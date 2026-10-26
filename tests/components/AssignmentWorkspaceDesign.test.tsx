@@ -27,10 +27,17 @@ describe('assignment workspace',()=>{
  });
  it('preserves eligibility and saves assignment only for an eligible selected worker',async()=>{
   const notify=vi.fn(),refresh=vi.fn().mockResolvedValue(undefined);mocks.assign.mockResolvedValue(undefined);
-  render(<AssignAvailableWorkers filteredEmployees={team} dispatchEmployeeFilter="ALL" setDispatchEmployeeFilter={vi.fn()} dispatchEmployeeSearch="" setDispatchEmployeeSearch={vi.fn()} isEmployeeRoleDropdownOpen={false} setIsEmployeeRoleDropdownOpen={vi.fn()} jobAssignments={[]} selectedJob={{...job,type:'DISPATCH'}} setSelectedJob={vi.fn()} setIsSubmitting={vi.fn()} refreshData={refresh} addNotification={notify} wmsJobsService={{}} assignCurrentPage={1} setAssignCurrentPage={vi.fn()} ASSIGN_ITEMS_PER_PAGE={20} t={s=>s}/>);
+  render(<AssignAvailableWorkers filteredEmployees={team} dispatchEmployeeFilter="ALL" setDispatchEmployeeFilter={vi.fn()} dispatchEmployeeSearch="" setDispatchEmployeeSearch={vi.fn()} isEmployeeRoleDropdownOpen={false} setIsEmployeeRoleDropdownOpen={vi.fn()} workloads={team.map(e => ({employeeId:e.id,active:0,completedToday:4}))} workloadReady={true} jobAssignments={[]} selectedJob={{...job,type:'DISPATCH'}} setSelectedJob={vi.fn()} setIsSubmitting={vi.fn()} refreshData={refresh} addNotification={notify} wmsJobsService={{}} assignCurrentPage={1} setAssignCurrentPage={vi.fn()} ASSIGN_ITEMS_PER_PAGE={20} t={s=>s}/>);
   expect((screen.getByRole('button',{name:'Assign job to Order Picker'}) as HTMLButtonElement).disabled).toBe(true);
   fireEvent.click(screen.getByRole('button',{name:'Assign job to Delivery Driver'}));
   await waitFor(()=>expect(mocks.assign).toHaveBeenCalledWith('job','driver'));
   expect(notify).toHaveBeenCalledWith('success','Job assigned to Delivery Driver');
  });
+ it('shows live daily totals and disables assignment at 100 active jobs',()=>{
+  render(<AssignAvailableWorkers filteredEmployees={team} dispatchEmployeeFilter="ALL" setDispatchEmployeeFilter={vi.fn()} dispatchEmployeeSearch="" setDispatchEmployeeSearch={vi.fn()} isEmployeeRoleDropdownOpen={false} setIsEmployeeRoleDropdownOpen={vi.fn()} workloads={[{employeeId:'picker',active:100,completedToday:7}]} workloadReady={true} workloadTimezone="Africa/Addis_Ababa" jobAssignments={[]} selectedJob={job} setSelectedJob={vi.fn()} setIsSubmitting={vi.fn()} refreshData={vi.fn()} addNotification={vi.fn()} wmsJobsService={{}} assignCurrentPage={1} setAssignCurrentPage={vi.fn()} ASSIGN_ITEMS_PER_PAGE={20} t={s=>s}/>);
+  expect(screen.getByText(/100 \/ 100 active · 7 completed today/)).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Assign job to Order Picker'}));
+  expect(mocks.assign).not.toHaveBeenCalled();
+ });
+
 });

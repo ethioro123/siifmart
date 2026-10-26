@@ -55,7 +55,7 @@ export default function WarehouseOperations() {
     } = useData();
 
     const {
-        jobs, transfers, jobAssignments, historicalJobs,
+        jobs, transfers, jobAssignments, historicalJobs, zones,
         receivePO, receivePOSplit, finalizePO, assignJob, updateJobItem, completeJob, resetJob, updateJobStatus, deleteJob,
         refreshJobs, fixBrokenJobs, loadHistoricalJobs
     } = useFulfillmentData();
@@ -341,6 +341,7 @@ export default function WarehouseOperations() {
         adjustStockMutation,
         relocateProductMutation,
         putawayStock,
+        zones,
         filteredJobs,
         filteredProducts,
         filteredEmployees,

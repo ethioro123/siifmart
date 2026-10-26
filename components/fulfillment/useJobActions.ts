@@ -1,3 +1,4 @@
+import { assignmentWorkloadsService } from '../../services/assignment-workloads.service';
 import { useCallback } from 'react';
 import {
     WMSJob, JobItem, JobAssignment, Product
@@ -47,8 +48,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
         try {
             const job = jobs.find(j => j.id === jobId);
             if (!job) {
-                addNotification('alert', 'Job not found');
-                return;
+                throw new Error('Job not found');
             }
 
             const employee = employees.find((e: any) =>
@@ -56,68 +56,25 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             );
 
             if (!employee) {
-                addNotification('alert', 'Employee not found');
-                return;
+                throw new Error('Employee not found');
             }
 
             // Enforce Floor Worker Interchangeability & Delivery Lockdown Law
             const eligibility = getJobAssignmentEligibility(employee.role, job.type);
             if (!eligibility.eligible) {
-                addNotification('alert', eligibility.reason || 'Worker is not eligible for this job type');
-                return;
+                throw new Error(eligibility.reason || 'Worker is not eligible for this job type');
             }
 
             // Block double-assignment: if someone is already on this job, it must be unassigned first
             if (job.assignedTo && job.assignedTo !== employee.id) {
                 const currentWorker = employees.find((e: any) => e.id === job.assignedTo);
                 const workerName = currentWorker?.name || 'another worker';
-                addNotification('alert', `This job is already assigned to ${workerName}. Unassign it first before reassigning.`);
-                return;
+                throw new Error(`This job is already assigned to ${workerName}. Unassign it first before reassigning.`);
             }
 
-            const activeAssignments = jobAssignments.filter(
-                a => a.employeeId === employee.id &&
-                    ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)
-            );
-
-            // Removed 3-job limit as per user request
-            /*
-            if (activeAssignments.length >= 3) {
-                addNotification('alert', getTranslation('warehouse.employeeHasActiveJobs').replace('{name}', employee.name).replace('{count}', activeAssignments.length.toString()));
-                return;
-            }
-            */
-
-            let estimatedDuration = 15;
-            if (job.type === 'PICK') {
-                estimatedDuration = Math.max(15, job.items * 3);
-            } else if (job.type === 'PACK') {
-                estimatedDuration = Math.max(10, job.items * 2);
-            } else if (job.type === 'PUTAWAY') {
-                estimatedDuration = Math.max(20, job.items * 4);
-            }
-
-            try {
-                const assignment: Partial<JobAssignment> = {
-                    jobId: job.id,
-                    employeeId: employee.id,
-                    employeeName: employee.name,
-                    assignedAt: new Date().toISOString(),
-                    status: 'Assigned',
-                    estimatedDuration
-                };
-
-                const createdAssignment = await jobAssignmentsService.create(assignment);
-                setJobAssignments(prev => [createdAssignment, ...prev]);
-            } catch (assignError) {
-                logger.warn('useJobActions', 'Failed to create job assignment record (likely permissions), proceeding with job update:');
-            }
-
-            const updatedJob = await wmsJobsService.update(jobId, {
-                assignedTo: employee.id,
-                status: 'In-Progress',
-                assignedBy: source || user?.name || 'System'
-            });
+            const saved = await assignmentWorkloadsService.assign(jobId, employee.id, source || user?.name);
+            const updatedJob = saved.job;
+            setJobAssignments(prev => [saved.assignment, ...prev.filter(a => a.id !== saved.assignment.id)]);
 
             // If this is a DISPATCH job linked to a parent TRANSFER job (orderRef), synchronize assignedTo & carrier to parent TRANSFER job!
             if (job.type === 'DISPATCH' && job.orderRef) {
@@ -137,10 +94,11 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
 
             setJobs(prev => prev.map(j => j.id === jobId ? updatedJob : j));
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            queryClient.invalidateQueries({ queryKey: ['assignment-workloads'] });
             addNotification('success', getTranslation('warehouse.jobAssigned').replace('{name}', employee.name));
         } catch (error) {
             logger.error('useJobActions', 'Failed to assign job:', error);
-            addNotification('alert', getTranslation('warehouse.jobAssignFailed'));
+            throw error;
         }
     }, [jobs, jobAssignments, employees, user, setJobs, setJobAssignments, addNotification, queryClient]);
 

@@ -1,3 +1,4 @@
+import { useAssignmentWorkloads } from '../../hooks/useAssignmentWorkloads';
 import React, { useState } from 'react';
 import { WMSJob, Site, Product, Employee } from '../../types';
 import { AssignHeader } from './assign/AssignHeader';
@@ -56,7 +57,8 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
     user
 }) => {
 
-    // Search and filter state
+    const workloads = useAssignmentWorkloads(activeSite?.id, activeSite?.country, user?.id, filteredEmployees.map(e => e.id));
+
     // Search and filter state
     const [dispatchSearch, setDispatchSearch] = useState('');
     const [dispatchPriorityFilter, setDispatchPriorityFilter] = useState<string>('ALL');
@@ -91,6 +93,7 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
             <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-4 items-start">
                 {/* Pending Jobs */}
                 <AssignPendingJobs
+                    workloads={workloads.isSuccess && !workloads.isError ? workloads.data?.workers : undefined}
                     filteredJobs={filteredJobs}
                     historicalJobs={historicalJobs}
                     assignJobFilter={assignJobFilter}
@@ -112,6 +115,10 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
 
                 {/* Available Workers */}
                 <AssignAvailableWorkers
+                    workloads={workloads.data?.workers}
+                    workloadReady={workloads.isSuccess && !workloads.isError}
+                    workloadTimezone={workloads.data?.timezone}
+                    refreshWorkloads={() => workloads.refetch()}
                     filteredEmployees={filteredEmployees}
                     dispatchEmployeeFilter={dispatchEmployeeFilter}
                     setDispatchEmployeeFilter={setDispatchEmployeeFilter}

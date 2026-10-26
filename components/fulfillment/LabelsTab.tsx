@@ -18,7 +18,7 @@ export const LabelsTab: React.FC = () => {
                 filteredProducts={filteredProducts}
                 addNotification={addNotification}
                 t={t}
-                zones={zones}
+                zones={zones || []}
                 onZoneUpdate={() => {}}
                 user={user}
                 activeSite={activeSite}
