@@ -1,3 +1,4 @@
+import { PackHandoffRecovery } from './components/PackHandoffRecovery';
 import { FloorAuditTimeline } from '../discrepancies/FloorAuditTimeline';
 import React from 'react';
 import { X, Calendar, User, Package, Archive, Box, MapPin, Printer, ArrowRight, Undo2, Trash2 } from 'lucide-react';
@@ -217,6 +218,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                 {/* Line Items */}
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[var(--theme-bg-app)]">
+                    <PackHandoffRecovery job={selectedItem}/>
                     <FloorAuditTimeline scope={{kind:'job',id:selectedItem.id,siteId:selectedItem.siteId,country:selectedItem.countryCode||selectedItem.country_code||sites.find(s=>s.id===selectedItem.siteId)?.country||''}}/>
                     <h4 className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-3">{t('warehouse.packing.itemsToPack') || 'Items to Pack'}</h4>
                     <div className="space-y-2.5">

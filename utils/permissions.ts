@@ -97,9 +97,9 @@ export const PERMISSIONS = {
 
     // Pricing
     ACCESS_PRICING: ['group_cfo', 'group_ceo', 'country_managing_director', 'country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_operations_manager', 'regional_procurement_manager', 'country_operations_director', 'country_finance_director', 'vendor_relations_manager', 'store_operations_auditor'],
-    EDIT_PRICE: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'regional_operations_manager', 'country_finance_director'],
+    EDIT_PRICE: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_finance_director'],
     CREATE_PROMOTION: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_operations_manager'],
-    APPROVE_PRICE_CHANGE: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'regional_merchandising_manager', 'country_finance_director'],
+    APPROVE_PRICE_CHANGE: ['group_ceo', 'country_managing_director', 'regional_merchandising_manager', 'country_finance_director'],
 
     // Warehouse
     ACCESS_WAREHOUSE: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'warehouse_manager', 'dispatch_supervisor', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'regional_supply_chain_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner', 'regional_logistics_manager', 'country_supply_chain_director'],

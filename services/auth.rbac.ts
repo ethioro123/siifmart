@@ -58,7 +58,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'admin', 'finance', 'sales', 'pricing', 'procurement', 'settings', 'profile'
     ],
     country_commercial_director: [
-        'dashboard', 'admin', 'procurement', 'pricing', 'inventory', 'sales', 'customers', 'settings', 'profile'
+        'dashboard', 'admin', 'procurement', 'pricing', 'inventory', 'sales', 'customers', 'profile'
     ],
     country_supply_chain_director: [
         'dashboard', 'admin', 'warehouse', 'inventory', 'procurement', 'regional-ops', 'sales', 'settings', 'profile'

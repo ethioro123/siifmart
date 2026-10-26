@@ -1,3 +1,4 @@
+import { useCompletePackJob } from '../../hooks/useCompletePackJob';
 import { useCallback } from 'react';
 import {
     WMSJob, JobItem, TransferRecord, PurchaseOrder,
@@ -56,6 +57,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
         addNotification, adjustStock, queryClient
     } = deps;
 
+    const completePack = useCompletePackJob({ setJobs, queryClient, addNotification });
     const completePick = useCompletePickJob({ setJobs, queryClient, addNotification });
 
     const completeJob = useCallback(async (jobId: string, employeeName: string, skipValidation = false, optimisticLineItems?: any[], timestamp?: string) => {
@@ -89,6 +91,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             }
 
             if (job.type === 'PICK') return await completePick(job.id);
+            if (job.type === 'PACK') return await completePack(job.id);
 
             if (job.type === 'DISPATCH' || job.type === 'DRIVER') {
                 throw new Error('Release shipments from Outbound dispatch and record arrival from Driver deliveries.');
@@ -136,17 +139,12 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
                 itemsToValidate = forcedLineItems;
             } else {
-                const isPack = job.type === 'PACK';
                 await wmsJobsService.update(jobId, {
                     status: 'Completed',
                     lineItems: itemsToValidate.map((i: any) => ({
                         ...i,
                         status: (i.status === 'Short' ? 'Short' : 'Completed') as JobItem['status'],
-                        ...(isPack ? {
-                            packed: i.packed !== undefined ? i.packed : true,
-                            packedQty: i.packedQty ?? (i.expectedQty || 0),
-                            pickedQty: i.pickedQty || i.packedQty || i.expectedQty || 0
-                        } : {})
+
                     })),
                     completedBy: completedByValue,
                     completedAt: timestamp || new Date().toISOString()
@@ -262,62 +260,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
             // --- JOB CHAINING LOGIC ---
             stage('Job Chaining');
-            if (job && job.type === 'PACK' && job.orderRef) {
-                stage('Chaining: PACK -> DISPATCH');
-                const sale = sales.find(s => s.id === job!.orderRef);
-                const transfer = jobs.find(j => (j.id === job!.orderRef || j.jobNumber === job!.orderRef) && j.type === 'TRANSFER');
-                const isTransfer = !!transfer || (job.orderRef && (job.orderRef.startsWith('TRF-')));
-                const tId = transfer?.id || job.orderRef;
 
-                const dispatchItems = itemsToValidate
-                    .filter((item: any) => (item.packedQty || item.pickedQty || 0) > 0)
-                    .map((item: any) => ({
-                        ...item,
-                        expectedQty: item.packedQty || item.pickedQty,
-                        pickedQty: 0,
-                        packedQty: 0,
-                        packed: false,
-                        status: 'Pending' as JobItem['status']
-                    }));
-
-                if (dispatchItems.length > 0) {
-                    const existingDispatchJob = jobs.find(j => j.orderRef === job!.orderRef && j.type === 'DISPATCH' && j.status !== 'Cancelled');
-
-                    if (existingDispatchJob) {
-                        logger.warn('useJobCompletion', `⚠️ DISPATCH job already exists for ${job.orderRef}. Skipping creation.`);
-                    } else {
-                        const dispatchJob = await wmsJobsService.create({
-                            siteId: job.siteId,
-                            site_id: job.site_id,
-                            type: 'DISPATCH',
-                            priority: job.priority,
-                            status: 'Pending',
-                            items: Math.ceil(dispatchItems.reduce((acc: number, curr: any) => acc + (curr.expectedQty || 0), 0)) || dispatchItems.length,
-                            lineItems: dispatchItems,
-                            location: 'Dispatch Bay',
-                            orderRef: job.orderRef,
-                            sourceSiteId: job.sourceSiteId,
-                            destSiteId: job.destSiteId,
-                            transferStatus: 'Packed',
-                            jobNumber: (job as any).jobNumber,
-                            assignedBy: user?.name || 'System' // [NEW] Track creator
-                        });
-
-                        setJobs(prev => prev.find(j => j.id === dispatchJob.id) ? prev : [dispatchJob, ...prev]);
-                    }
-                } else {
-                    logger.warn('useJobCompletion', `⚠️ Skipped creation of DISPATCH job for ${job.orderRef} because no items were packed.`);
-                }
-
-                if (sale) {
-                    await salesService.update(sale.id, { fulfillmentStatus: 'Packing' });
-                    setSales(prev => prev.map(s => s.id === sale.id ? { ...s, fulfillmentStatus: 'Packing' } : s));
-                } else if (isTransfer) {
-                    await wmsJobsService.update(tId, { transferStatus: 'Packed' });
-                    setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Packed' } : j));
-                    setTransfers((prev: any[]) => prev.map(t => t.id === tId ? { ...t, transferStatus: 'Packed' } : t));
-                }
-            }
 
             stage('Final Logs');
             try {
@@ -345,7 +288,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             console.timeEnd(`completeJob-${jobId}`);
-            return job.type === 'PACK' ? { points: 0, breakdown: [], pendingConfirmation: true } : pointsResult;
+            return pointsResult;
         } catch (error) {
             logger.error('useJobCompletion', `❌ completeJob failed for ${jobId}:`, error);
             console.timeEnd(`completeJob-${jobId}`);
@@ -354,7 +297,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 : getTranslation('warehouse.jobCompleteFailed'));
             throw error;
         }
-    }, [jobs, sales, employees, user, allOrders, allProducts, setJobs, setTransfers, setOrders, setAllOrders, setSales, addNotification, adjustStock, queryClient, completePick]);
+    }, [jobs, sales, employees, user, allOrders, allProducts, setJobs, setTransfers, setOrders, setAllOrders, setSales, addNotification, adjustStock, queryClient, completePick, completePack]);
 
     return { completeJob };
 };

@@ -41,9 +41,9 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     country_finance_director: HEAD_OF_FINANCE_PERMISSIONS,
     country_commercial_director: [
         'dashboard.view', 'admin.view',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.delete_po',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po',
         'inventory.view', 'pricing.view',
-        'sales.view', 'sales.view_reports', 'customers.view', 'settings.view'
+        'sales.view', 'sales.view_reports', 'customers.view'
     ],
     country_supply_chain_director: [...HEAD_OF_SUPPLY_CHAIN_PERMISSIONS, 'procurement.create_po'],
     country_hr_director: HEAD_OF_HR_PERMISSIONS,

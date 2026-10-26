@@ -34,10 +34,10 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
             expect(hasPermission(role, 'TERMINATE_EMPLOYEE')).toBe(true);
         });
 
-        it('has Level 3 ranking and hierarchy rank 85 in hr department', () => {
-            expect(getRoleHierarchy(role)).toBe(85);
+        it('has Level 3 ranking and hierarchy rank 97 in hr department', () => {
+            expect(getRoleHierarchy(role)).toBe(97);
             expect(getRoleLevel(role)).toBe(3);
-            expect(getRoleDept(role)).toBe('hr_generalist');
+            expect(getRoleDept(role)).toBe('hr');
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
             expect(sysRole?.level).toBe(3);
             expect(sysRole?.label).toBe('Head of Human Resources');
@@ -81,7 +81,7 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
         it('has Level 9 ranking and hierarchy rank 40', () => {
             expect(getRoleHierarchy(role)).toBe(40);
             expect(getRoleLevel(role)).toBe(9);
-            expect(getRoleDept(role)).toBe('hr_generalist');
+            expect(getRoleDept(role)).toBe('hr');
         });
 
         it('cannot employ any roles as frontline staff', () => {
@@ -117,7 +117,7 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
         it('has Level 9 ranking and hierarchy rank 35', () => {
             expect(getRoleHierarchy(role)).toBe(35);
             expect(getRoleLevel(role)).toBe(9);
-            expect(getRoleDept(role)).toBe('hr_generalist');
+            expect(getRoleDept(role)).toBe('hr');
         });
     });
 
@@ -142,7 +142,7 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
         it('has Level 9 ranking and hierarchy rank 35 in hr department', () => {
             expect(getRoleHierarchy(role)).toBe(35);
             expect(getRoleLevel(role)).toBe(9);
-            expect(getRoleDept(role)).toBe('hr_generalist');
+            expect(getRoleDept(role)).toBe('hr');
         });
     });
 });

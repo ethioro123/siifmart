@@ -32,7 +32,12 @@ const NON_HIRING_ROLES = new Set([
     'forklift_operator',
     'stock_counter',
     'inventory_controller',
-    'fleet_mechanic'
+    'fleet_mechanic',
+    'accountant',
+    'auditor',
+    'treasury_officer',
+    'tax_compliance_officer',
+    'credit_control_officer'
 ]);
 
 /**
@@ -159,15 +164,18 @@ export const canEmployRole = (
         return !['group_ceo', 'group_coo', 'group_chro'].includes(candidate);
     }
 
-    // 3. Country Functional Directors (Operations, Supply Chain, Finance, HR)
+    // 3. Country Functional Directors (Operations, Supply Chain, Finance, Commercial, HR)
     if (manager === 'country_operations_director') {
         return !['group_ceo', 'group_coo', 'country_managing_director', 'country_operations_director'].includes(candidate);
     }
     if (manager === 'country_supply_chain_director') {
-        return !['group_ceo', 'group_coo', 'country_managing_director', 'country_supply_chain_director'].includes(candidate);
+        return !['group_ceo', 'group_coo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director', 'regional_operations_manager'].includes(candidate);
     }
     if (manager === 'country_finance_director') {
-        return !['group_ceo', 'group_coo', 'country_managing_director', 'country_finance_director'].includes(candidate);
+        return !['group_ceo', 'group_coo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'regional_operations_manager'].includes(candidate);
+    }
+    if (manager === 'country_commercial_director') {
+        return !['group_ceo', 'group_coo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'regional_operations_manager'].includes(candidate);
     }
     if (manager === 'country_hr_director' || manager === 'hr_generalist') {
         // HR Directors & Generalists cannot hire C-suite or country managing directors
@@ -191,7 +199,7 @@ export const canEmployRole = (
         return ['driver', 'dispatcher', 'fleet_mechanic', 'transport_fleet_manager'].includes(candidate);
     }
     if (manager === 'inventory_manager') {
-        return ['inventory_specialist', 'stock_counter', 'inventory_controller', 'stock_clerk'].includes(candidate);
+        return ['inventory_specialist', 'stock_counter', 'inventory_controller', 'stock_clerk', 'replenishment_planner'].includes(candidate);
     }
     if (manager === 'dispatch_supervisor') {
         return ['driver', 'dispatcher', 'dispatch_team_leader', 'dispatch_operator'].includes(candidate);
@@ -208,7 +216,8 @@ export const canEmployRole = (
         return WAREHOUSE_DOMAIN_ROLES.has(candidate);
     }
 
-    return candidateRank < managerRank;
+    // Frontline, support, specialist, and unmapped staff roles have zero hiring authority
+    return false;
 };
 
 /** HR and the Group CEO provide the checker sign-off for submitted proposals. */

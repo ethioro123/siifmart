@@ -138,6 +138,8 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
                         children: [
                             { role: 'accountant', label: 'Accountant', dept: 'finance', reportsTo: 'Country Finance Director' },
                             { role: 'treasury_officer', label: 'Treasury Officer', dept: 'finance', reportsTo: 'Country Finance Director' },
+                            { role: 'tax_compliance_officer', label: 'Tax Compliance Officer', dept: 'finance', reportsTo: 'Country Finance Director' },
+                            { role: 'credit_control_officer', label: 'Credit Control Officer', dept: 'finance', reportsTo: 'Country Finance Director' },
                             { role: 'auditor', label: 'Auditor', dept: 'finance', reportsTo: 'Country Finance Director' },
                         ]
                     },

@@ -28,3 +28,11 @@ A separate supervisor reviews resolved reports as counting correction, stock iss
 New completion awards on a reported job are deferred until all its reports have been reviewed. The last review releases an eligible completed job through the existing idempotent points ledger; confirmed handling errors suppress an unawarded accuracy bonus for the responsible handler. Previously awarded points remain recorded. Any retrospective adjustment uses the existing supervised points-transaction workflow; no automatic clawback or balance overwrite occurs. Completion popups do not present client estimates as saved awards.
 
 Staging migrations: `20261027_discrepancy_history_reviews.sql`, `20261027_review_aware_job_points.sql`. Rollback regression: `tests/database/discrepancy-audit-reviews.sql`.
+
+## Atomic packing handoff
+
+Packing completion uses `complete_pack_job`: the server validates the assigned independent verifier, exact persisted carton counts, seal policy, country/site boundaries and discrepancy holds. Completing the Pack, closing assignments, creating one unassigned dispatch and recording the handoff occur in one transaction. Retries return the same dispatch. Floor staff do not receive direct dispatch-creation permissions.
+
+For an older job marked Completed before its client-side dispatch insert failed, open Pack History, open the job and select **Confirm / recover dispatch handoff**. The original verifier or an authorized scoped supervisor can recover it; existing completed quantities stay unchanged.
+
+Migration `20261027_atomic_pack_handoff.sql` was applied to staging `utykzifrblpyxlvlknsm`. Rollback tests: `tests/database/atomic-pack-handoff.sql` and `tests/database/reported-pack-handoff-recovery.sql`.
