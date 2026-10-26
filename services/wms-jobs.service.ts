@@ -94,13 +94,8 @@ export const wmsJobsService = {
 
                 if (countryCode) historyQuery = historyQuery.eq('country_code', countryCode);
 
-                if (siteId && employeeId) {
-                    historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
-                } else if (siteId) {
-                    historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
-                } else if (employeeId) {
-                    historyQuery = historyQuery.eq('assigned_to', employeeId);
-                }
+                if (siteId) historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+                if (employeeId) historyQuery = historyQuery.eq('status','Completed').eq('completed_by',employeeId);
                 return historyQuery;
             })()
             : Promise.resolve({ data: [] as any[], error: null });

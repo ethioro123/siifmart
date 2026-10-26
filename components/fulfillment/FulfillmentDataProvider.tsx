@@ -1,3 +1,4 @@
+import { useScopedJobHistory } from '../../hooks/useScopedJobHistory';
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -112,7 +113,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     // --- LOCAL STATE ---
     const [jobs, setJobs] = useState<WMSJob[]>([]);
     /** RULE 10: Never pre-populated. Filled only on user-triggered loadHistoricalJobs(). */
-    const [historicalJobs, setHistoricalJobs] = useState<WMSJob[]>([]);
+    const { historicalJobs, loadHistoricalJobs } = useScopedJobHistory(activeSiteId, effectiveCountry || settings?.country || 'ET', user, employees);
     const [transfers, setTransfers] = useState<TransferRecord[]>([]);
     const [jobAssignments, setJobAssignments] = useState<JobAssignment[]>([]);
     const [zones, setZones] = useState<WarehouseZone[]>([]);
@@ -138,16 +139,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
      * Called ONLY when the user explicitly switches to the History view in any tab.
      * Clears stale cache and fetches completed/cancelled jobs on demand.
      */
-    const loadHistoricalJobs = useCallback(async (limit: number = 200) => {
-        if (!activeSiteId) return;
-        try {
-            const activeCountryCode = effectiveCountry || settings?.country || 'ET';
-            const fetched = await wmsJobsService.getHistory(activeSiteId, limit, undefined, activeCountryCode);
-            setHistoricalJobs(fetched);
-        } catch (error) {
-            logger.error('FulfillmentDataProvider', 'Failed to load history', error);
-        }
-    }, [activeSiteId, effectiveCountry, settings?.country]);
 
     // --- FETCHING LOGIC (Migrated from DataContext hooks/useDataQueries) ---
     // In a real refactor, we should probably pull this out into a hook too, 
@@ -171,7 +162,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             setJobAssignments([]);
             setZones([]);
             setBarcodeApprovals([]);
-            setHistoricalJobs([]);
+
             return;
         }
 

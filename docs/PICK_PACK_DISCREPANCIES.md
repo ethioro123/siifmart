@@ -36,3 +36,9 @@ Packing completion uses `complete_pack_job`: the server validates the assigned i
 For an older job marked Completed before its client-side dispatch insert failed, open Pack History, open the job and select **Confirm / recover dispatch handoff**. The original verifier or an authorized scoped supervisor can recover it; existing completed quantities stay unchanged.
 
 Migration `20261027_atomic_pack_handoff.sql` was applied to staging `utykzifrblpyxlvlknsm`. Rollback tests: `tests/database/atomic-pack-handoff.sql` and `tests/database/reported-pack-handoff-recovery.sql`.
+
+## Personal job history
+
+Floor workers can read only historical jobs with Completed status and their own trusted employee identity in completed_by. Assignment or earlier participation does not grant access to another worker's completion. Cancelled/deleted records are management history. Existing active operational queues are unaffected. A restrictive SELECT policy applies alongside every permissive policy, so site-wide floor reads cannot bypass it. Private job-discrepancy history checks the same rule. Managers retain their existing authorized site/country scope.
+
+The on-demand history loader applies the completion identity explicitly and clears/discards results when account, employee identity, role, site or country changes. Staging migrations: `20261027_own_completed_job_history.sql` and `20261027_completed_discrepancy_history_scope.sql`. Read-only rollback regression: `tests/database/own-completed-job-history.sql`.

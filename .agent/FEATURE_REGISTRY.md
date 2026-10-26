@@ -1,5 +1,5 @@
 # Feature Registry
-- Pack mobile scanner UX & blind count (2026-10-27): mobile-first header with progress bar, prominent scan/error status banners, blind-count thumb steppers (`-1`, `+1`, `+5`, `+10`, `Clear`), one-tap rescan, and unpacked/packed tote queue without revealing expected quantities.
+- Pack mobile scanner UX, blind count & history (2026-10-27): mobile-first header with progress bar, prominent scan/error status banners, blind-count thumb steppers (`-1`, `+1`, `+5`, `+10`, `Clear`), one-tap rescan, unpacked/packed tote queue without revealing expected quantities, mobile card history layout with dynamic search and status chips, and a safe bottom-sheet shipping label reprint selector.
 - Picking prefix correction (2026-10-27): migration applied to staging `utykzifrblpyxlvlknsm`; server validation honors configured facility prefixes. Rollback-only database regression passed.
 # This file records selected implementation history; it is not a source of current policy.
 # Update it for new features or significant fixes, and verify the current code before relying on older notes.
@@ -78,7 +78,7 @@
 - The terminal header opens a paginated, responsive history view; review acknowledgements persist across terminals for that cashier.
 - Files: `components/pos/hooks/usePOSPriceHistory.ts`, `components/pos/modals/PriceUpdatesModal.tsx`, `components/pos/POSCartPanel.tsx`, `services/product-price-history.service.ts`, `migrations/20261021_product_price_history.sql`, `tests/components/pos/utils/priceUpdates.test.ts`.
 - Database: `product_price_history`, `product_price_history_reviews`, effective-price trigger functions, scoped RLS policies, and `count_unreviewed_product_price_history` on the linked SIIFMART project.
-
+- Personal job history (2026-10-27): restrictive database reads limit floor staff to their own completed jobs; scoped manager history remains available. On-demand queries filter completed_by and discard stale history across account/site/country changes. Staging SQL and hook regressions pass.
 ### Sales History Reliability and Return Handoff (2026-10-21)
 - Sales list rows include item counts and customer names without loading full line-item details.
 - Search supports receipt, cashier, customer, and exact sale ID online and offline; stale fetches cannot replace newer filters.

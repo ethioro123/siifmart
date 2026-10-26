@@ -5,8 +5,18 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PackHistory } from '../../components/fulfillment/pack/PackHistory';
 import { WMSJob, Site } from '../../types';
 
+const translations: Record<string, string> = {
+    'warehouse.searchByIdOrOrder': 'Search ID, order, worker, SKU...',
+    'warehouse.packing.reprintPackLabel': 'Reprint Shipping Label',
+    'warehouse.reprintPackLabel': 'Reprint Shipping Label',
+    'warehouse.history': 'Pack History',
+    'warehouse.itemSingular': 'item',
+    'warehouse.itemPlural': 'items'
+};
+const mockT = (key: string) => translations[key] || key;
+
 vi.mock('../../contexts/LanguageContext', () => ({
-    useLanguage: () => ({ t: (key: string) => key })
+    useLanguage: () => ({ t: mockT })
 }));
 
 afterEach(cleanup);
@@ -16,9 +26,9 @@ const mockSites: Site[] = [
         id: 'site-1',
         name: 'Nairobi Central DC',
         code: 'NBO-DC',
-        type: 'warehouse',
+        type: 'Warehouse',
         country_code: 'KE',
-        status: 'active',
+        status: 'Active',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     }
@@ -35,7 +45,17 @@ const mockJobs: WMSJob[] = [
         trackingNumber: 'TRK-987654',
         completedBy: 'user-emp-1',
         lineItems: [
-            { id: 'li-1', name: 'Sunflower Cooking Oil 1L', sku: 'KE-OIL-1L', quantity: 2, packedQty: 2, packed: true }
+            {
+                productId: 'prod-1',
+                name: 'Sunflower Cooking Oil 1L',
+                sku: 'KE-OIL-1L',
+                quantity: 2,
+                expectedQty: 2,
+                pickedQty: 2,
+                packedQty: 2,
+                packed: true,
+                status: 'Completed'
+            }
         ],
         createdAt: '2026-10-27T01:00:00Z',
         updatedAt: '2026-10-27T01:30:00Z',
@@ -51,7 +71,18 @@ const mockJobs: WMSJob[] = [
         trackingNumber: 'TRK-112233',
         completedBy: 'user-emp-2',
         lineItems: [
-            { id: 'li-2', name: 'Baby Formula Milk 400g', sku: 'KE-MILK-400G', quantity: 1, packedQty: 1, returnedQty: 1, packed: true }
+            {
+                productId: 'prod-2',
+                name: 'Baby Formula Milk 400g',
+                sku: 'KE-MILK-400G',
+                quantity: 1,
+                expectedQty: 1,
+                pickedQty: 1,
+                packedQty: 1,
+                returnedQty: 1,
+                packed: true,
+                status: 'Completed'
+            }
         ],
         createdAt: '2026-10-27T02:00:00Z',
         updatedAt: '2026-10-27T02:30:00Z',
@@ -71,14 +102,14 @@ describe('PackHistory mobile UX and interaction', () => {
                 historicalJobs={mockJobs}
                 sites={mockSites}
                 employees={mockEmployees}
-                t={(key: string) => key}
+                t={mockT}
             />
         );
 
         expect(screen.getByText('TRK-987654')).toBeTruthy();
         expect(screen.getByText('TRK-112233')).toBeTruthy();
-        expect(screen.getByText(/Alice Mwangi/)).toBeTruthy();
-        expect(screen.getByText(/Bob Ochieng/)).toBeTruthy();
+        expect(screen.getAllByText(/Alice Mwangi/).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(/Bob Ochieng/).length).toBeGreaterThan(0);
         expect(screen.getByText('Sunflower Cooking Oil 1L')).toBeTruthy();
         expect(screen.getByText('Baby Formula Milk 400g')).toBeTruthy();
     });
@@ -89,7 +120,7 @@ describe('PackHistory mobile UX and interaction', () => {
                 historicalJobs={mockJobs}
                 sites={mockSites}
                 employees={mockEmployees}
-                t={(key: string) => key}
+                t={mockT}
             />
         );
 
@@ -113,7 +144,7 @@ describe('PackHistory mobile UX and interaction', () => {
                 historicalJobs={mockJobs}
                 sites={mockSites}
                 employees={mockEmployees}
-                t={(key: string) => key}
+                t={mockT}
             />
         );
 
@@ -133,7 +164,7 @@ describe('PackHistory mobile UX and interaction', () => {
                 sites={mockSites}
                 employees={mockEmployees}
                 onJobSelect={handleJobSelect}
-                t={(key: string) => key}
+                t={mockT}
             />
         );
 
@@ -153,7 +184,7 @@ describe('PackHistory mobile UX and interaction', () => {
                 sites={mockSites}
                 employees={mockEmployees}
                 onReprintLabel={handleReprint}
-                t={(key: string) => key}
+                t={mockT}
             />
         );
 
@@ -168,7 +199,7 @@ describe('PackHistory mobile UX and interaction', () => {
         expect(standardButton).toBeTruthy();
 
         fireEvent.click(standardButton);
-        expect(handleReprint).toHaveBeenCalledWith(expect.objectContaining({ id: 'job-pack-1' }), 'XL');
+        expect(handleReprint).toHaveBeenCalledWith(expect.objectContaining({ id: 'job-pack-2' }), 'XL');
 
         // Modal should close
         expect(screen.queryByRole('button', { name: /XL \(4 × 6 Standard\)/i })).toBeNull();
