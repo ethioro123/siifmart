@@ -259,7 +259,7 @@ export const getRoleDept = (role: string, empDept?: string): string => {
     }
 
     // 2. Authoritative role-based department mapping
-    if (['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director', 'country_operations_director', 'regional_operations_manager', 'area_operations_manager', 'country_commercial_director', 'regional_merchandising_manager', 'merchandising_specialist', 'store_operations_auditor'].includes(r)) return 'executive';
+    if (['group_ceo', 'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco', 'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae', 'country_managing_director', 'country_operations_director', 'regional_operations_manager', 'area_operations_manager', 'regional_merchandising_manager', 'merchandising_specialist', 'store_operations_auditor'].includes(r)) return 'executive';
     if (['country_finance_director', 'country_compliance_manager', 'regional_compliance_manager', 'accountant', 'cash_office_officer', 'auditor', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_manager'].includes(r)) return 'finance';
     if (['country_hr_director', 'hr_generalist', 'payroll_specialist', 'talent_recruiter', 'training_coordinator', 'regional_hr_manager'].includes(r)) return 'hr';
     if (['country_commercial_director', 'country_supply_chain_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'regional_procurement_manager'].includes(r)) return 'procurement';

@@ -33,13 +33,13 @@ describe('Procurement Directorate Team Roles & Hierarchy', () => {
             expect(hasPermission(role, 'APPROVE_PO')).toBe(true);
         });
 
-        it('has Level 3 ranking and hierarchy rank 82', () => {
-            expect(getRoleHierarchy(role)).toBe(82);
+        it('has Level 3 ranking and hierarchy rank 97', () => {
+            expect(getRoleHierarchy(role)).toBe(97);
             expect(getRoleLevel(role)).toBe(3);
             expect(getRoleDept(role)).toBe('procurement');
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
             expect(sysRole?.level).toBe(3);
-            expect(sysRole?.label).toBe('Head of Procurement');
+            expect(sysRole?.label).toBe('Country Commercial Director');
         });
     });
 

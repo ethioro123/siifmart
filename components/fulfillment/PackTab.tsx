@@ -1,3 +1,4 @@
+import { PackRecoveryLookup } from './pack/components/PackRecoveryLookup';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useFulfillment } from './FulfillmentContext';
 import { PackHeader } from './pack/PackHeader';
@@ -11,6 +12,7 @@ import { PackModalsContainer } from './pack/components/PackModalsContainer';
 
 export const PackTab: React.FC = () => {
     const {
+        activeSite,
         filteredJobs,
         historicalJobs,
         sites,
@@ -314,6 +316,7 @@ export const PackTab: React.FC = () => {
                 />
 
                 <div className="flex-1 overflow-hidden flex flex-col">
+                    <PackRecoveryLookup siteId={activeSite?.id} country={activeSite?.country}/>
                     {viewMode === 'Process' ? (
                         <div className="flex-1 overflow-hidden">
                                 <PackList

@@ -81,7 +81,7 @@ export const PERMISSIONS = {
     // Procurement
     ACCESS_PROCUREMENT: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'country_operations_director', 'country_commercial_director', 'country_supply_chain_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'credit_control_officer'],
     CREATE_PO: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'regional_procurement_manager', 'country_supply_chain_director', 'country_operations_director', 'regional_operations_manager', 'buyer', 'demand_planner', 'replenishment_planner'],
-    APPROVE_PO: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_commercial_director', 'regional_procurement_manager', 'regional_operations_manager'],
+    APPROVE_PO: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'regional_procurement_manager', 'regional_operations_manager'],
     RECEIVE_PO: ['group_ceo', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'receiver', 'regional_logistics_manager', 'regional_procurement_manager'],
     DELETE_PO: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'regional_procurement_manager'],
     MANAGE_SUPPLIERS: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'regional_procurement_manager', 'regional_operations_manager', 'buyer', 'vendor_relations_manager'],
