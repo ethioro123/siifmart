@@ -132,13 +132,8 @@ export const wmsJobsService = {
         if (type) q = q.eq('type', type);
         if (countryCode) q = q.eq('country_code', countryCode);
 
-        if (siteId && employeeId) {
-            q = q.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
-        } else if (siteId) {
-            q = q.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
-        } else if (employeeId) {
-            q = q.eq('assigned_to', employeeId);
-        }
+        if (siteId) q = q.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+        if (employeeId) q = q.eq('status', 'Completed').eq('completed_by', employeeId);
 
         const { data, error } = await q;
         if (error) throw error;

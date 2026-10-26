@@ -145,37 +145,35 @@ export const canEmployRole = (
     }
 
     // 2. Group C-Suite & Country Managing Director
-    if (manager === 'group_coo') {
-        return !['group_ceo', 'group_coo'].includes(candidate);
+    const GROUP_CSUITE = new Set([
+        'group_coo', 'group_cfo', 'group_cco', 'group_cmo', 'group_csco',
+        'group_chro', 'group_cto', 'group_cio', 'group_clco', 'group_cae'
+    ]);
+    if (GROUP_CSUITE.has(manager)) {
+        return !GROUP_CSUITE.has(candidate) && candidate !== 'group_ceo';
     }
     if (manager === 'country_managing_director') {
-        return !['group_ceo', 'group_coo', 'country_managing_director'].includes(candidate);
-    }
-    if (manager === 'group_cfo') {
-        return !['group_ceo', 'group_coo', 'group_cfo'].includes(candidate);
-    }
-    if (manager === 'group_cco') {
-        return !['group_ceo', 'group_coo', 'group_cco'].includes(candidate);
-    }
-    if (manager === 'group_csco') {
-        return !['group_ceo', 'group_coo', 'group_csco'].includes(candidate);
-    }
-    if (manager === 'group_chro') {
-        return !['group_ceo', 'group_coo', 'group_chro'].includes(candidate);
+        return !['group_ceo', 'country_managing_director', ...GROUP_CSUITE].includes(candidate);
     }
 
-    // 3. Country Functional Directors (Operations, Supply Chain, Finance, Commercial, HR)
+    // 3. Country Functional Directors (Operations, Supply Chain, Finance, Commercial, HR, Tech, Compliance)
     if (manager === 'country_operations_director') {
-        return !['group_ceo', 'group_coo', 'country_managing_director', 'country_operations_director'].includes(candidate);
+        return !['group_ceo', 'country_managing_director', 'country_operations_director', ...GROUP_CSUITE].includes(candidate);
     }
     if (manager === 'country_supply_chain_director') {
-        return !['group_ceo', 'group_coo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director', 'regional_operations_manager'].includes(candidate);
+        return !['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director', 'regional_operations_manager', ...GROUP_CSUITE].includes(candidate);
     }
     if (manager === 'country_finance_director') {
-        return !['group_ceo', 'group_coo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'regional_operations_manager'].includes(candidate);
+        return !['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'regional_operations_manager', ...GROUP_CSUITE].includes(candidate);
     }
     if (manager === 'country_commercial_director') {
-        return !['group_ceo', 'group_coo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'regional_operations_manager'].includes(candidate);
+        return !['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_commercial_director', 'country_supply_chain_director', 'country_hr_director', 'regional_operations_manager', ...GROUP_CSUITE].includes(candidate);
+    }
+    if (manager === 'country_technology_director') {
+        return candidateRank < 90;
+    }
+    if (manager === 'country_compliance_manager') {
+        return candidateRank < 90;
     }
     if (manager === 'country_hr_director' || manager === 'hr_generalist') {
         // HR Directors & Generalists cannot hire C-suite or country managing directors
@@ -188,6 +186,9 @@ export const canEmployRole = (
     }
     if (manager === 'area_operations_manager') {
         return candidateRank < 88;
+    }
+    if (manager === 'regional_hr_manager') {
+        return candidateRank < 81;
     }
     if (manager === 'regional_supply_chain_manager') {
         return candidateRank < 83;

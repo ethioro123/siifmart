@@ -147,7 +147,7 @@ describe('HQ Leadership Governance & Code Harmonization Suite', () => {
         });
 
         it('grants settings module access for HR & Workforce Policy', () => {
-            expect(canAccessModule('country_hr_director', 'settings')).toBe(true);
+            expect(hasPermission('country_hr_director', 'EDIT_HR_SETTINGS')).toBe(true);
             expect(ROLE_PERMISSIONS['country_hr_director']).toContain('settings');
         });
     });
