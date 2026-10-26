@@ -281,7 +281,8 @@ export const usePOSReceiving = ({
                 }
             }
 
-            let transfer = transfers.find(t => t.id === selectedId) as any;
+            const persistedTransfer = transfers.find(t => t.id === selectedId);
+            let transfer = persistedTransfer as any;
             if (transfer) {
                 if (!transferJob) {
                     transferJob = jobs.find(j => j.type === 'TRANSFER' && (j.id === transfer.id || j.jobNumber === transfer.jobNumber || j.orderRef === transfer.id));
@@ -355,13 +356,9 @@ export const usePOSReceiving = ({
                 }
             }
 
-            const hasDiscrepancies = receivedItems.some(i => {
-                const sizeNum = i.productSize || 0;
-                const isWV = sizeNum > 0 && (isWeightBased(i.unit || '') || isVolumeBased(i.unit || ''));
-                const rawExpected = isWV ? (i.displayExpectedQty || i.expectedQty) * sizeNum : (i.displayExpectedQty || i.expectedQty);
-                return i.receivedQty !== rawExpected || (i.condition || 'Good') !== 'Good';
-            });
-            const discrepancyDetails = hasDiscrepancies ? summarizeTransferReceiptDiscrepancies(receivedItems) : undefined;
+            const verifiedReceipt = await transferReceiptVerificationService.get(targetTransferId);
+            const hasDiscrepancies = verifiedReceipt.hasDiscrepancy === true;
+            const discrepancyDetails = hasDiscrepancies ? 'Physical receipt variance recorded against the private arrival manifest.' : undefined;
             // 2. Update WMS job with verified quantities
             try {
                 await wmsJobsService.update(targetTransferId, {
@@ -410,16 +407,14 @@ export const usePOSReceiving = ({
                 }
             }
 
-            // 3. Sync transfer status atomically to transfers table
-            try {
+            // WMS-only shipments have no transfers-table mirror to synchronize.
+            if (persistedTransfer) {
                 const { transfersService } = await import('../../../services/transfers.service');
-                await transfersService.receiveAtomic(targetTransferId, {
+                await transfersService.receiveAtomic(persistedTransfer.id, {
                     receiverName,
                     hasDiscrepancy: hasDiscrepancies,
                     discrepancyDetails
                 });
-            } catch {
-                // If record was only in wms_jobs, transfersService update failure is safe to ignore
             }
             setReceivingSummary({
                 orderRef: transfer.orderRef || selectedId,

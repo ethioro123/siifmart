@@ -40,13 +40,6 @@ export const ReceivingSummary: React.FC = () => {
                         const sizeNum = item.productSize || 0;
                         const isWeightVol = (isWeightBased(resolvedUnit) || isVolumeBased(resolvedUnit)) && sizeNum > 0;
 
-                        const casesExpected = item.displayExpectedQty || item.expectedQty;
-                        const rawExpected = isWeightVol ? casesExpected * sizeNum : casesExpected;
-
-                        const formattedExpected = isWeightVol
-                            ? `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum} ${resolvedUnit}`
-                            : `${casesExpected}${resolvedUnit ? ` ${resolvedUnit}` : ''}`;
-
                         const casesReceived = isWeightVol ? item.receivedQty / sizeNum : item.receivedQty;
                         const formattedReceived = isWeightVol
                             ? `${casesReceived % 1 === 0 ? casesReceived : casesReceived.toFixed(2)} x ${sizeNum} ${resolvedUnit}`
@@ -60,8 +53,8 @@ export const ReceivingSummary: React.FC = () => {
                                 </div>
                                 <div className="flex flex-col items-end">
                                     <div className="flex items-center gap-2">
-                                        <span className={`text-xs font-bold ${item.receivedQty < rawExpected ? 'text-rose-500' : 'text-emerald-500'}`}>
-                                            {t('posCommand.received')} {formattedReceived} {t('pos.outOf')} {formattedExpected}
+                                        <span className="text-xs font-bold text-[var(--theme-text-primary)]">
+                                            {t('posCommand.received')} {formattedReceived}
                                         </span>
                                     </div>
                                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full mt-1 border ${
@@ -87,7 +80,7 @@ export const ReceivingSummary: React.FC = () => {
                     <AlertTriangle className="text-amber-500 flex-shrink-0" size={20} />
                     <div>
                         <p className="text-sm font-bold text-amber-500">{t('posCommand.discrepanciesReported')}</p>
-                        <p className="text-xs text-amber-500/80">{t('posCommand.notifiedAlert')}</p>
+                        <p className="text-xs text-amber-500/80">Variance recorded against the private shipment manifest.</p>
                     </div>
                 </div>
             )}

@@ -264,38 +264,20 @@ export const transfersService = {
             notes?: string;
         }
     ): Promise<TransferRecord> {
-        try {
-            const { data: rpcData, error: rpcError } = await supabase.rpc('receive_transfer_atomic', {
-                p_transfer_id: id,
-                p_receiver_id: receiver.receiverId || 'unknown',
-                p_receiver_name: receiver.receiverName,
-                p_receiver_role: receiver.receiverRole || 'receiver',
-                p_has_discrepancy: receiver.hasDiscrepancy || false,
-                p_discrepancy_details: receiver.discrepancyDetails || null,
-                p_notes: receiver.notes || ''
-            });
-
-            if (!rpcError && rpcData?.success) {
-                const fresh = await this.getById(id);
-                if (fresh) return fresh;
-            }
-
-            if (rpcError) {
-                logger.warn('transfersService', 'RPC receive_transfer_atomic failed, falling back:', { error: String(rpcError.message) });
-            }
-        } catch (rpcErr: any) {
-            logger.warn('transfersService', 'Exception in receive_transfer_atomic RPC:', { error: String(rpcErr?.message) });
-        }
-
-        const now = new Date().toISOString();
-        return this.update(id, {
-            status: 'Completed',
-            transferStatus: 'Received',
-            receivedBy: receiver.receiverName,
-            receivedAt: now,
-            hasDiscrepancy: receiver.hasDiscrepancy,
-            discrepancyDetails: receiver.discrepancyDetails
+        const { data, error } = await supabase.rpc('receive_transfer_atomic', {
+            p_transfer_id: id,
+            p_receiver_id: receiver.receiverId || 'unknown',
+            p_receiver_name: receiver.receiverName,
+            p_receiver_role: receiver.receiverRole || 'receiver',
+            p_has_discrepancy: receiver.hasDiscrepancy || false,
+            p_discrepancy_details: receiver.discrepancyDetails || null,
+            p_notes: receiver.notes || ''
         });
+        if (error) throw error;
+        if (!data?.success) throw new Error('Server did not confirm transfer receipt.');
+        const fresh = await this.getById(id);
+        if (!fresh) throw new Error('Confirmed transfer receipt could not be loaded.');
+        return fresh;
     },
 
     /**
