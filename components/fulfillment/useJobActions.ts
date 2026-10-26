@@ -6,7 +6,7 @@ import {
     wmsJobsService,
     jobAssignmentsService
 } from '../../services/supabase.service';
-import { packVerificationService } from '../../services/pack-verification.service';
+import { isIndependentFloorStage, floorStageVerificationService } from '../../services/floor-stage-verification.service';
 import { QueryClient } from '@tanstack/react-query';
 import { logger } from '../../utils/logger';
 import { canWorkerPerformJob, getJobAssignmentEligibility } from '../../utils/fulfillmentRoles';
@@ -65,7 +65,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 throw new Error(eligibility.reason || 'Worker is not eligible for this job type');
             }
 
-            if (job.type === 'PACK' && (await packVerificationService.excludedWorkers(job.id)).includes(employee.id)) throw new Error('Choose a different worker: this employee handled picking for this order.');
+            if (isIndependentFloorStage(job.type) && (await floorStageVerificationService.excludedWorkers(job.id)).includes(employee.id)) throw new Error('Choose a different worker: this employee handled another stage of this order.');
 
             // Block double-assignment: if someone is already on this job, it must be unassigned first
             if (job.assignedTo && job.assignedTo !== employee.id) {
@@ -272,7 +272,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
 
             let assignedCount = 0;
             for (const job of pendingJobs) {
-                const excluded = job.type === 'PACK' ? await packVerificationService.excludedWorkers(job.id) : [];
+                const excluded = isIndependentFloorStage(job.type) ? await floorStageVerificationService.excludedWorkers(job.id) : [];
                 const candidates = eligibleEmployees
                     .filter(e => canWorkerPerformJob(e.role, job.type) && !excluded.includes(e.id))
                     .sort((a, b) => (currentWorkloads.get(a.id) || 0) - (currentWorkloads.get(b.id) || 0));

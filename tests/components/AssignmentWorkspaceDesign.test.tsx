@@ -6,10 +6,11 @@ import { AssignJobCard } from '../../components/fulfillment/assign/AssignJobCard
 import { AssignPendingJobs } from '../../components/fulfillment/assign/AssignPendingJobs';
 import { AssignAvailableWorkers } from '../../components/fulfillment/assign/AssignAvailableWorkers';
 import type { WMSJob, Employee } from '../../types';
-const mocks=vi.hoisted(()=>({assign:vi.fn()}));
+const mocks=vi.hoisted(()=>({assign:vi.fn(),excluded:[] as string[]}));
+vi.mock('../../hooks/useFloorStageEligibility',()=>({useFloorStageEligibility:()=>({ready:true,excluded:mocks.excluded})}));
 vi.mock('../../components/fulfillment/FulfillmentContext',()=>({useFulfillment:()=>({assignJob:mocks.assign})}));
 vi.mock('../../components/Protected',()=>({Protected:({children}:{children:React.ReactNode})=><>{children}</>}));
-afterEach(cleanup);beforeEach(()=>vi.clearAllMocks());
+afterEach(cleanup);beforeEach(()=>{vi.clearAllMocks();mocks.excluded=[];});
 const job={id:'job',jobNumber:'9K63JN',type:'PICK',status:'Pending',priority:'Normal',items:4,siteId:'dc',lineItems:[{sku:'ETBB002',name:'MoliCare'}]} as WMSJob;
 const team=[{id:'picker',name:'Order Picker',role:'picker',status:'Active'},{id:'driver',name:'Delivery Driver',role:'driver',status:'Active'}] as Employee[];
 describe('assignment workspace',()=>{
@@ -32,6 +33,12 @@ describe('assignment workspace',()=>{
   fireEvent.click(screen.getByRole('button',{name:'Assign job to Delivery Driver'}));
   await waitFor(()=>expect(mocks.assign).toHaveBeenCalledWith('job','driver'));
   expect(notify).toHaveBeenCalledWith('success','Job assigned to Delivery Driver');
+ });
+ it('excludes a worker who handled a different stage of the same order',()=>{
+  mocks.excluded=['picker'];
+  render(<AssignAvailableWorkers filteredEmployees={team} dispatchEmployeeFilter="ALL" setDispatchEmployeeFilter={vi.fn()} dispatchEmployeeSearch="" setDispatchEmployeeSearch={vi.fn()} isEmployeeRoleDropdownOpen={false} setIsEmployeeRoleDropdownOpen={vi.fn()} workloads={[{employeeId:'picker',active:0,completedToday:7}]} workloadReady={true} jobAssignments={[]} selectedJob={{...job,type:'PUTAWAY'}} setSelectedJob={vi.fn()} setIsSubmitting={vi.fn()} refreshData={vi.fn()} addNotification={vi.fn()} wmsJobsService={{}} assignCurrentPage={1} setAssignCurrentPage={vi.fn()} ASSIGN_ITEMS_PER_PAGE={20} t={s=>s}/>);
+  expect((screen.getByRole('button',{name:'Assign job to Order Picker'}) as HTMLButtonElement).disabled).toBe(true);
+  expect(screen.getByText(/Handled another stage/)).toBeTruthy();
  });
  it('shows live daily totals and disables assignment at 100 active jobs',()=>{
   render(<AssignAvailableWorkers filteredEmployees={team} dispatchEmployeeFilter="ALL" setDispatchEmployeeFilter={vi.fn()} dispatchEmployeeSearch="" setDispatchEmployeeSearch={vi.fn()} isEmployeeRoleDropdownOpen={false} setIsEmployeeRoleDropdownOpen={vi.fn()} workloads={[{employeeId:'picker',active:100,completedToday:7}]} workloadReady={true} workloadTimezone="Africa/Addis_Ababa" jobAssignments={[]} selectedJob={job} setSelectedJob={vi.fn()} setIsSubmitting={vi.fn()} refreshData={vi.fn()} addNotification={vi.fn()} wmsJobsService={{}} assignCurrentPage={1} setAssignCurrentPage={vi.fn()} ASSIGN_ITEMS_PER_PAGE={20} t={s=>s}/>);

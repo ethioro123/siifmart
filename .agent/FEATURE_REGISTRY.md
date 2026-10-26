@@ -240,7 +240,7 @@
 - **Database**: None
 
 ### Secure PICK-to-PACK Handoff (2026-10-19)
-- Completing a PICK creates its PACK through an idempotent database function that verifies the authenticated employee, active WMS role, completed-by identity, and country/site scope. The resulting PACK is assigned to that employee so the operation can load under WMS row-level security. Failed handoffs state that PICK persisted and are caught by the scanner handler.
+- Completing a PICK creates its PACK through an idempotent database function that verifies the authenticated employee, active WMS role, completed-by identity, and country/site scope. The resulting PACK is unassigned for an independent worker. Database guards enforce one floor stage per employee for each order within its country (receiving, putaway, picking, packing, count, replenishment, waste and returns); manual/automatic assignment uses server eligibility. Order identity and assignment attribution are retained. Failed handoffs state that PICK persisted and are caught by the scanner handler.
 - **Files**: `migrations/20261019_create_pack_after_completed_pick.sql`, `services/wms-jobs.service.ts`, `components/fulfillment/useJobCompletion.ts`, `components/fulfillment/PickTab.tsx`, `tests/services/wmsJobsZeroTrust.test.ts`
 - **Database**: Applied to Staging (`utykzifrblpyxlvlknsm`)
 - **Root Cause**: The client attempted a direct insert into `wms_jobs` after persisting the completed PICK; RLS rejected the follow-up job and the scanner handler left an unhandled rejection.

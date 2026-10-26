@@ -1,4 +1,4 @@
-import { usePackVerifierEligibility } from '../../../hooks/usePackVerifierEligibility';
+import { useFloorStageEligibility } from '../../../hooks/useFloorStageEligibility';
 import { MAX_ACTIVE_JOBS, type AssignmentWorkload } from '../../../services/assignment-workloads.service';
 import React, { useRef, useState } from 'react';
 import { Employee, WMSJob } from '../../../types';
@@ -36,7 +36,7 @@ interface AssignAvailableWorkersProps {
 
 export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({ workloads, workloadReady = false, workloadTimezone, refreshWorkloads, filteredEmployees, dispatchEmployeeFilter, setDispatchEmployeeFilter, dispatchEmployeeSearch, setDispatchEmployeeSearch, jobAssignments, selectedJob, setSelectedJob, setIsSubmitting, refreshData, addNotification, assignCurrentPage, setAssignCurrentPage, ASSIGN_ITEMS_PER_PAGE }) => {
     const { assignJob } = useFulfillment();
-    const verification = usePackVerifierEligibility(selectedJob);
+    const verification = useFloorStageEligibility(selectedJob);
     const [busy, setBusy] = useState<string | null>(null);
     const lock = useRef(false);
     const team = filteredEmployees.filter(employee => employee.status?.toLowerCase() === 'active' && (isFloorWorkerRole(employee.role) || ['country_managing_director','regional_operations_manager','country_operations_director','warehouse_manager','dispatcher','driver','auditor'].includes(employee.role?.toLowerCase())));
@@ -66,7 +66,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({ 
         </header>
         <div className="max-h-[65vh] overflow-y-auto divide-y divide-[var(--theme-border)]">
             {visible.map(employee => {
-                const eligibility = selectedJob ? !verification.ready ? {eligible:false,reason:'Checking independent verifier…'} : verification.excluded.includes(employee.id) ? {eligible:false,reason:'Handled PICK for this order; choose an independent packer.'} : getJobAssignmentEligibility(employee.role, selectedJob.type) : null;
+                const eligibility = selectedJob ? !verification.ready ? {eligible:false,reason:'Checking independent verifier…'} : verification.excluded.includes(employee.id) ? {eligible:false,reason:'Handled another stage of this order; choose an independent worker.'} : getJobAssignmentEligibility(employee.role, selectedJob.type) : null;
                 const initials = employee.name.replace(/^\[TEST\]\s*/,'').trim().split(/\s+/).filter(Boolean).slice(0,2).map(word => word[0]).join('');
                 return <div key={employee.id} className="flex items-start gap-3 p-4">
                     <div aria-hidden="true" className="h-9 w-9 shrink-0 rounded-full flex items-center justify-center bg-[var(--theme-bg-subtle)] text-xs font-semibold text-[var(--theme-text-secondary)]">{initials}</div>
