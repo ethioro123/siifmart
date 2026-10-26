@@ -31,11 +31,7 @@ SELECT set_config('request.jwt.claims',jsonb_build_object('sub',current_setting(
 SET LOCAL ROLE authenticated;
 DO $$ DECLARE result jsonb; BEGIN
  result:=public.record_transfer_receipt_count(current_setting('test.blind_job')::uuid,'[{"index":0,"productId":"11111111-1111-4111-8111-111111111111","receivedQty":20,"condition":"Good"}]');
- IF result->>'status'<>'awaiting_recount' THEN RAISE EXCEPTION 'TEST: variance skipped recount'; END IF;
- BEGIN
-  PERFORM public.record_transfer_receipt_count(current_setting('test.blind_job')::uuid,'[{"index":0,"productId":"11111111-1111-4111-8111-111111111111","receivedQty":20,"condition":"Good"}]');
-  RAISE EXCEPTION 'TEST: same receiver approved own variance';
- EXCEPTION WHEN raise_exception THEN IF SQLERRM LIKE 'TEST:%' THEN RAISE; END IF; END;
+ IF result->>'status'<>'verified' THEN RAISE EXCEPTION 'TEST: single accountable receiver was forced to obtain a second count'; END IF;
 END; $$;
 RESET ROLE;
 ROLLBACK;

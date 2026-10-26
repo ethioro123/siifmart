@@ -12,7 +12,7 @@ export async function verifyPOSTransferReceipt(jobId: string, receivedItems: any
             productId: verification.items[index].productId
         }));
         const saved = await transferReceiptVerificationService.recordCount(jobId, countItems);
-        if (saved.status !== 'verified') throw new Error('Physical count saved. An independent supervisor must perform a blind recount before stock can be received.');
+        if (saved.status !== 'verified') throw new Error('Receipt count was not verified. Refresh the shipment before continuing.');
         return receivedItems;
     }
 
