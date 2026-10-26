@@ -62,4 +62,16 @@ describe('live staging roster mapping', () => {
             'ke-hq', 'ke-region', 'ke-store', 'ke-wh', 'ke-dc', 'global-admin'
         ]);
     });
+    it('always includes CMC Summit Supermarket workers in quick login', () => {
+        const makeAccount = (id: string, code: string, name: string) =>
+            mapStagingEmployee({ ...row, id, site: { code, name, type: 'Store', country: 'ET', region_code: 'ET-ADD' } })!;
+        const roster = [
+            makeAccount('cmc-manager', 'ET-ADD-STR-03', 'CMC Summit Supermarket'),
+            makeAccount('cmc-cashier', 'ET-ADD-STR-03', 'CMC Summit Supermarket'),
+            makeAccount('other-store', 'ET-ADD-STR-99', 'Other Store'),
+        ];
+        const selected = selectRepresentativeStagingAccounts(roster);
+        expect(selected.some(acc => acc.id === 'cmc-manager')).toBe(true);
+        expect(selected.some(acc => acc.id === 'cmc-cashier')).toBe(true);
+    });
 });

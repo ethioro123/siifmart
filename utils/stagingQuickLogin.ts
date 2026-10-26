@@ -52,14 +52,22 @@ const QUICK_LOGIN_SITE_TYPES: StagingSiteType[] = [
     'HQ', 'Regional Administration', 'Store', 'Warehouse', 'Distribution Center'
 ];
 
-/** Show all regional and receiving facilities; keep representative HQ and stores. */
+const PINNED_QUICK_LOGIN_SITE_CODES = new Set<string>(['ET-ADD-STR-03']);
+
+function isPinnedQuickLoginAccount(account: StagingQuickAccount): boolean {
+    return PINNED_QUICK_LOGIN_SITE_CODES.has(account.siteCode) ||
+        (Boolean(account.siteName) && /cmc summit/i.test(account.siteName));
+}
+
+/** Show all regional and receiving facilities; keep pinned sites and representative HQ/stores. */
 export function selectRepresentativeStagingAccounts(accounts: StagingQuickAccount[]): StagingQuickAccount[] {
     const selected = new Set<string>();
     const groups = new Map<string, StagingQuickAccount[]>();
 
     for (const account of accounts) {
         if (account.country === 'GLOBAL' || account.facilityTier === 'Regional Administration' ||
-            account.siteType === 'Warehouse' || account.siteType === 'Distribution Center') {
+            account.siteType === 'Warehouse' || account.siteType === 'Distribution Center' ||
+            isPinnedQuickLoginAccount(account)) {
             selected.add(account.id);
             continue;
         }
