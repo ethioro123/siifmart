@@ -178,7 +178,7 @@ const POSCommandContent: React.FC = () => {
             ) : (
               <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-muted)] shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-stone-400" />
-                <span>Drawer Inactive • No Active Shift</span>
+                <span>{t('posCommand.drawerInactive')}</span>
               </span>
             )}
           </div>
@@ -213,7 +213,7 @@ const POSCommandContent: React.FC = () => {
                 <div className="w-5 h-5 rounded-md bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0">
                   <Play size={12} className="fill-current" />
                 </div>
-                <span>Start Shift</span>
+                <span>{t('posCommand.startShift')}</span>
               </button>
             )}
 
@@ -229,7 +229,7 @@ const POSCommandContent: React.FC = () => {
                   <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                     <Box size={13} />
                   </div>
-                  <span>Stock List</span>
+                  <span>{t('posCommand.stockList')}</span>
                 </button>
                 {updatedProductCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-amber-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
@@ -247,7 +247,7 @@ const POSCommandContent: React.FC = () => {
                 <div className="w-5 h-5 rounded-md bg-teal-500/10 text-teal-500 flex items-center justify-center shrink-0">
                   <PackageCheck size={13} />
                 </div>
-                <span>Receive</span>
+                <span>{t('posCommand.receiveLabel')}</span>
               </button>
 
               <button
@@ -259,7 +259,7 @@ const POSCommandContent: React.FC = () => {
                 <div className="w-5 h-5 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                   <Vault size={13} />
                 </div>
-                <span>Safe Ledger</span>
+                <span>{t('posCommand.safeLedgerLabel')}</span>
               </button>
             </div>
 
@@ -274,7 +274,7 @@ const POSCommandContent: React.FC = () => {
                 <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center shrink-0">
                   <UserPlus size={13} />
                 </div>
-                <span>Onboard Talent</span>
+                <span>{t('posCommand.onboardTalent')}</span>
               </button>
             )}
 
@@ -292,7 +292,7 @@ const POSCommandContent: React.FC = () => {
                   <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                     <Printer size={13} />
                   </div>
-                  <span>Print</span>
+                  <span>{t('posCommand.printAction')}</span>
                   <ChevronDown size={11} className={`text-[var(--theme-text-muted)] transition-transform duration-150 ${isPrintMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
@@ -311,8 +311,8 @@ const POSCommandContent: React.FC = () => {
                         <ReceiptText size={13} />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">Reprint Last Receipt</p>
-                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">Customer sale receipt</p>
+                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{t('posCommand.reprintReceipt')}</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">{t('posCommand.customerSaleReceipt')}</p>
                       </div>
                     </button>
 
@@ -329,8 +329,8 @@ const POSCommandContent: React.FC = () => {
                         <Tags size={13} />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">Print Labels</p>
-                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">Price tags and barcodes</p>
+                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{t('posCommand.printLabels')}</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">{t('posCommand.priceTagsAndBarcodes')}</p>
                       </div>
                     </button>
                   </div>
@@ -346,7 +346,7 @@ const POSCommandContent: React.FC = () => {
                 <div className="w-5 h-5 rounded-md bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
                   <Lock size={13} />
                 </div>
-                <span>Lock</span>
+                <span>{t('posCommand.lockScreen')}</span>
               </button>
             </div>
 
@@ -365,10 +365,10 @@ const POSCommandContent: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 pb-1 border-b border-[var(--theme-border)]">
           <div role="group" aria-label="POS command panels" className="inline-flex items-center p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-2xs gap-1 overflow-x-auto max-w-full">
             {[
-              { id: 'overview', label: 'Register & Sales', icon: ReceiptText },
-              { id: 'audit', label: 'Cash & Audit Control', icon: ShieldCheck },
-              { id: 'roster', label: 'Staff & Roster', icon: Users2 },
-              { id: 'all', label: 'All Panels', icon: LayoutGrid },
+              { id: 'overview', label: t('posCommand.tabOverview'), icon: ReceiptText },
+              { id: 'audit', label: t('posCommand.tabAudit'), icon: ShieldCheck },
+              { id: 'roster', label: t('posCommand.tabRoster'), icon: Users2 },
+              { id: 'all', label: t('posCommand.tabAll'), icon: LayoutGrid },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -389,7 +389,7 @@ const POSCommandContent: React.FC = () => {
 
           <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-mono">
             <span className="w-2 h-2 rounded-full bg-[var(--theme-accent)]" aria-hidden="true" />
-            <h1 className="text-sm font-semibold text-[var(--theme-text-primary)]">POS Command</h1>
+            <h1 className="text-sm font-semibold text-[var(--theme-text-primary)]">{t('posCommand.title')}</h1>
             {activeSite?.code && <span>• [{activeSite.code}]</span>}
           </div>
         </div>
@@ -402,7 +402,7 @@ const POSCommandContent: React.FC = () => {
             {activeTab === 'all' && (
               <div className="flex items-center gap-2 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                 <ReceiptText size={14} aria-hidden="true" className="text-[var(--theme-accent)]" />
-                <span>Register Performance &amp; Live Activity</span>
+                <span>{t('posCommand.tabOverviewHeader')}</span>
               </div>
             )}
             <POSCommandCharts />
@@ -416,7 +416,7 @@ const POSCommandContent: React.FC = () => {
             {activeTab === 'all' && (
               <div className="flex items-center gap-2 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                 <ShieldCheck size={14} aria-hidden="true" className="text-[var(--theme-accent)]" />
-                <span>Daily Cash Drawer &amp; Supervisory Audit</span>
+                <span>{t('posCommand.tabAuditHeader')}</span>
               </div>
             )}
             <ShiftReconciliationTable />
@@ -430,7 +430,7 @@ const POSCommandContent: React.FC = () => {
             {activeTab === 'all' && (
               <div className="flex items-center gap-2 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                 <Users2 size={14} aria-hidden="true" className="text-[var(--theme-accent)]" />
-                <span>Personnel Roster, Schedule &amp; Team Bonus</span>
+                <span>{t('posCommand.tabRosterHeader')}</span>
               </div>
             )}
 

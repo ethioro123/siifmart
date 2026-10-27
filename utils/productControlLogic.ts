@@ -1,0 +1,70 @@
+import type { Product } from '../types';
+import type { UnitConfig, StockConfig, ProfileConfig } from '../types/product-control';
+import { getSellUnit } from './units';
+import { validateStockThresholds } from './productDetailLogic';
+
+export function initialUnitConfig(product: Product): UnitConfig {
+    const attributes = product.customAttributes || product.custom_attributes || {};
+    const physical = attributes.physical || {};
+    const packaging = attributes.packaging || {};
+    const embedded = String(product.size || '').match(/^([\d.]+)\s*(kg|g|ml|l|pcs)$/i);
+    const rawUnit = embedded?.[2] || physical.unit || physical.sizeType || '';
+    return {
+        sellMode: getSellUnit(product.unit).category, sellUnit: getSellUnit(product.unit).code,
+        physicalQty: String(embedded?.[1] || product.size || physical.netWeight || physical.volume || ''),
+        physicalUnit: rawUnit.toLowerCase() === 'l' ? 'L' : rawUnit.toLowerCase(),
+        packOf: String(packaging.packQty || (product.packQuantity && product.packQuantity > 1 ? product.packQuantity : '')),
+        caseOf: String(packaging.caseSize || product.caseSize || ''), label: attributes.commercial?.labelOverride || '', scope: 'single', selectedSiteIds: [],
+    };
+}
+export function unitProposal(product: Product, cfg: UnitConfig): Partial<Product> {
+    const before = initialUnitConfig(product);
+    const patch: Partial<Product> = {};
+    if (getSellUnit(cfg.sellUnit).category !== cfg.sellMode) throw new Error('Select a selling unit that matches the charging method.');
+    for (const [label, raw] of [['Units per pack', cfg.packOf], ['Packs per case', cfg.caseOf]]) {
+        if (raw !== '' && (!Number.isSafeInteger(Number(raw)) || Number(raw) <= 0)) throw new Error(`${label} must be a positive whole number.`);
+    }
+    if (cfg.label.length > 100) throw new Error('Keep the receipt label within 100 characters.');
+    const attrs = product.customAttributes || product.custom_attributes || {};
+    let attributesChanged = false;
+    const next = { ...attrs };
+    if (cfg.sellUnit !== before.sellUnit || cfg.sellMode !== before.sellMode || cfg.label !== before.label) {
+        patch.unit = cfg.sellUnit;
+        next.commercial = { ...(attrs.commercial || {}), sellBy: cfg.sellMode === 'weight' ? 'Weight' : cfg.sellMode === 'volume' ? 'Volume' : 'Count', sellUnit: cfg.sellUnit, labelOverride: cfg.label.trim() };
+        attributesChanged = true;
+    }
+    if (cfg.physicalQty !== before.physicalQty || cfg.physicalUnit !== before.physicalUnit) {
+        if (!Number.isFinite(Number(cfg.physicalQty)) || Number(cfg.physicalQty) <= 0 || !['g', 'kg', 'ml', 'L', 'pcs'].includes(cfg.physicalUnit)) throw new Error('Enter a positive net quantity and its measurement unit.');
+        patch.size = cfg.physicalQty;
+        next.physical = { ...(attrs.physical || {}), unit: cfg.physicalUnit, sizeType: cfg.physicalUnit, netWeight: cfg.physicalQty };
+        attributesChanged = true;
+    }
+    if (cfg.packOf !== before.packOf || cfg.caseOf !== before.caseOf) {
+        patch.packQuantity = cfg.packOf === '' ? 1 : Number(cfg.packOf);
+        next.packaging = { ...(attrs.packaging || {}), packQty: cfg.packOf || '', caseSize: cfg.caseOf || '' };
+        attributesChanged = true;
+    }
+    if (attributesChanged) patch.customAttributes = next;
+    return patch;
+}
+export function stockPolicyPreview(product: Product, cfg: StockConfig) {
+    const min = cfg.minStock === '' ? product.minStock ?? undefined : Number(cfg.minStock);
+    const max = cfg.maxStock === '' ? product.maxStock ?? undefined : Number(cfg.maxStock);
+    validateStockThresholds(min, max);
+    if ([min, max].some(value => value !== undefined && !Number.isSafeInteger(value))) throw new Error('Stock thresholds must be whole numbers.');
+    const state = min === undefined && max === undefined ? 'Not configured' : min !== undefined && product.stock < min ? 'Below minimum' : max !== undefined && product.stock > max ? 'Above maximum' : 'Within limits';
+    return { min, max, state, gap: max === undefined ? null : Math.max(0, max - product.stock), fill: max && max > 0 ? Math.max(0, Math.min(100, product.stock / max * 100)) : null };
+}
+export function profileProposal(product: Product, cfg: ProfileConfig): Partial<Product> {
+    if (!cfg.name.trim()) throw new Error('Product name is required.');
+    const patch: Partial<Product> = {};
+    if (cfg.name.trim() !== product.name) patch.name = cfg.name.trim();
+    if (cfg.brand.trim() !== (product.brand || '')) patch.brand = cfg.brand.trim();
+    if (cfg.description.trim() !== (product.description || '')) patch.description = cfg.description.trim();
+    return patch;
+}
+export function packagingPreview(cfg: UnitConfig) {
+    const perPack = cfg.packOf === '' ? 1 : Number(cfg.packOf);
+    const packsPerCase = cfg.caseOf === '' ? null : Number(cfg.caseOf);
+    return { perPack, packsPerCase, unitsPerCase: packsPerCase === null ? null : perPack * packsPerCase };
+}

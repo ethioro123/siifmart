@@ -65,10 +65,10 @@ export const DashboardKPIs: React.FC = () => {
                         </div>
                         <div>
                             <h4 className="text-xs font-semibold text-[var(--theme-text-primary)]">
-                                Register Drawer Closed • Daily Shift Inactive
+                                {t('posCommand.drawerClosedBannerTitle')}
                             </h4>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
-                                Submit opening float to begin recording register sales and activate live audit tracking.
+                                {t('posCommand.drawerClosedBannerDesc')}
                             </p>
                         </div>
                     </div>
@@ -78,7 +78,7 @@ export const DashboardKPIs: React.FC = () => {
                         className="px-4 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 active:scale-95 cursor-pointer shrink-0 shadow-2xs"
                     >
                         <Play size={13} className="fill-current" />
-                        <span>Start Daily Shift</span>
+                        <span>{t('posCommand.startDailyShift')}</span>
                     </button>
                 </div>
             )}
@@ -97,7 +97,7 @@ export const DashboardKPIs: React.FC = () => {
                             </span>
                         </div>
                         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-1">
-                            {isCentralHQ ? t('posCommand.shiftTarget') || 'Shift Target' : 'Orders & Target'}
+                            {isCentralHQ ? t('posCommand.shiftTarget') || 'Shift Target' : t('posCommand.ordersAndTarget')}
                         </h3>
                         <div className="flex items-baseline gap-1.5">
                             <span className="text-2xl font-bold font-mono tracking-tight text-[var(--theme-text-primary)]">
@@ -108,9 +108,9 @@ export const DashboardKPIs: React.FC = () => {
                             <span className="text-xs text-[var(--theme-text-secondary)] font-mono font-medium">
                                 / {isCentralHQ
                                     ? periodRevenueTarget === null
-                                        ? 'Target not set'
+                                        ? t('posCommand.targetNotSet')
                                         : `${CURRENCY_SYMBOL} ${periodRevenueTarget.toLocaleString()}`
-                                    : `${baseTxTarget} Target`}
+                                    : t('posCommand.targetCount', { count: baseTxTarget })}
                             </span>
                         </div>
                     </div>
@@ -131,8 +131,8 @@ export const DashboardKPIs: React.FC = () => {
                             <span className="flex items-center gap-1">
                                 <span className={`w-1.5 h-1.5 rounded-full ${activeShift ? 'bg-[var(--theme-status-success)]' : 'bg-[var(--theme-text-muted)]'}`} />
                                 {progressPercent === null
-                                    ? rangeStr === 'All Time' ? 'No all-time target' : 'No period target'
-                                    : activeShift ? 'Shift open' : 'No active shift'}
+                                    ? rangeStr === 'All Time' ? t('posCommand.noAllTimeTarget') : t('posCommand.noPeriodTarget')
+                                    : activeShift ? t('posCommand.shiftOpen') : t('posCommand.noActiveShift')}
                             </span>
                             <span className="font-mono text-[10px]">{dateRange}</span>
                         </div>
@@ -160,7 +160,7 @@ export const DashboardKPIs: React.FC = () => {
                                     </button>
                                 )}
                                 <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                    {isCentralHQ && isRevealed ? 'Visible to HQ' : 'Blind view'}
+                                    {isCentralHQ && isRevealed ? t('posCommand.visibleToHQ') : t('posCommand.blindView')}
                                 </span>
                             </div>
                         </div>
@@ -170,13 +170,13 @@ export const DashboardKPIs: React.FC = () => {
                         <p className="text-2xl font-bold font-mono tracking-tight text-[var(--theme-text-primary)]">
                             {isCentralHQ && isRevealed
                                 ? `${CURRENCY_SYMBOL} ${cashInDrawer.toLocaleString()}`
-                                : 'Protected (Blind)'}
+                                : t('posCommand.protectedBlind')}
                         </p>
                     </div>
                     <div className="mt-4 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
-                        <span>Cash visibility</span>
+                        <span>{t('posCommand.cashVisibility')}</span>
                         <span className="font-medium text-[var(--theme-text-primary)]">
-                            {isCentralHQ && isRevealed ? 'Revealed' : 'Hidden'}
+                            {isCentralHQ && isRevealed ? t('posCommand.revealed') : t('posCommand.hidden')}
                         </span>
                     </div>
                 </div>
@@ -198,7 +198,7 @@ export const DashboardKPIs: React.FC = () => {
                     </div>
                     <div className="mt-4 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
                         <span>{dateRange}</span>
-                        <span className="font-mono">{shiftTxCount} in shift</span>
+                        <span className="font-mono">{shiftTxCount} {t('posCommand.inShift')}</span>
                     </div>
                 </div>
 
@@ -223,7 +223,7 @@ export const DashboardKPIs: React.FC = () => {
                     </div>
                     <div className="mt-4 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
                         <span>{dateRange}</span>
-                        <span>Refunded or partial</span>
+                        <span>{t('posCommand.refundedOrPartial')}</span>
                     </div>
                 </div>
             </div>
