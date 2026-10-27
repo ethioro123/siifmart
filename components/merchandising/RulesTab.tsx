@@ -1,10 +1,35 @@
-import React from 'react';
-import { BrainCircuit, ArrowRight, Loader2, Play, Power, Trash2, Plus, RefreshCw, Zap, Sparkles } from 'lucide-react';
+import React, { useMemo } from 'react';
+import {
+   BrainCircuit,
+   ArrowRight,
+   Loader2,
+   Play,
+   Power,
+   Trash2,
+   Plus,
+   RefreshCw,
+   Zap,
+   Sparkles,
+   Search,
+   AlertTriangle,
+   ChevronLeft,
+   ChevronRight,
+   Info
+} from 'lucide-react';
 import { useMerchandising } from './MerchandisingContext';
+import { detectRuleConflicts } from './utils/ruleEvaluator';
 
 export const RulesTab: React.FC = () => {
    const {
       pricingRules,
+      pricingRulesTotalCount,
+      pricingRulesPage,
+      setPricingRulesPage,
+      pricingRulesTotalPages,
+      pricingRulesSearch,
+      setPricingRulesSearch,
+      pricingRulesStatus,
+      setPricingRulesStatus,
       runPricingRule,
       isSubmitting,
       toggleRuleStatus,
@@ -15,143 +40,282 @@ export const RulesTab: React.FC = () => {
       isSimulating
    } = useMerchandising();
 
+   const conflicts = useMemo(() => detectRuleConflicts(pricingRules), [pricingRules]);
+
+   const fromRecord = pricingRulesTotalCount === 0 ? 0 : (pricingRulesPage - 1) * 25 + 1;
+   const toRecord = Math.min(pricingRulesPage * 25, pricingRulesTotalCount);
+
    return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in">
-         {/* Left: Active Automation Rules List */}
+         {/* Left: Pricing Rules List & Filters */}
          <div className="lg:col-span-2 space-y-4">
-            {pricingRules.map(rule => (
-               <div
-                  key={rule.id}
-                  className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-[var(--theme-accent)]/40 group"
+            {/* Header info & explanation of manual review workflow */}
+            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+               <div>
+                  <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Pricing Rules & Proposals</h3>
+                  <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                     Rules evaluate catalog items to generate price change proposals staged for review.
+                  </p>
+               </div>
+               <button
+                  type="button"
+                  onClick={() => setIsRuleModalOpen(true)}
+                  className="px-3.5 py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm transition-all"
                >
-                  <div className="flex items-start gap-4">
-                     <div
-                        className={`p-3 rounded-2xl border transition-colors shrink-0 ${
-                           rule.isActive
-                              ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20'
-                              : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
+                  <Plus size={15} />
+                  <span>Create Rule</span>
+               </button>
+            </div>
+
+            {/* Overlap & Conflict Warning Banner */}
+            {conflicts.length > 0 && (
+               <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-1.5 text-xs">
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold">
+                     <AlertTriangle size={15} className="shrink-0" />
+                     <span>Rule Overlap Detected ({conflicts.length})</span>
+                  </div>
+                  <p className="text-[var(--theme-text-secondary)] leading-relaxed">
+                     Multiple enabled rules target overlapping categories. During execution and simulation, rules evaluate in list priority order (first match wins).
+                  </p>
+                  <ul className="list-disc list-inside space-y-0.5 text-[11px] text-[var(--theme-text-secondary)] font-mono">
+                     {conflicts.slice(0, 3).map((c, idx) => (
+                        <li key={idx}>
+                           &quot;{c.ruleName}&quot; takes precedence over &quot;{c.conflictingRuleName}&quot; on {c.targetCategory}
+                        </li>
+                     ))}
+                  </ul>
+               </div>
+            )}
+
+            {/* Filter and Search Bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[var(--theme-bg-card)] p-3 rounded-2xl border border-[var(--theme-border)]">
+               <div className="relative flex-1">
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" />
+                  <input
+                     type="text"
+                     placeholder="Search rules by name..."
+                     value={pricingRulesSearch}
+                     onChange={(e) => {
+                        setPricingRulesSearch(e.target.value);
+                        setPricingRulesPage(1);
+                     }}
+                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)]"
+                  />
+               </div>
+               <div className="flex items-center gap-1 shrink-0">
+                  {(['all', 'enabled', 'paused'] as const).map(status => (
+                     <button
+                        key={status}
+                        type="button"
+                        onClick={() => {
+                           setPricingRulesStatus(status);
+                           setPricingRulesPage(1);
+                        }}
+                        className={`px-2.5 py-1.5 text-xs font-medium rounded-xl capitalize transition-colors cursor-pointer ${
+                           pricingRulesStatus === status
+                              ? 'bg-[var(--theme-accent)] text-white shadow-sm'
+                              : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
                         }`}
                      >
-                        <BrainCircuit size={22} />
+                        {status}
+                     </button>
+                  ))}
+               </div>
+            </div>
+
+            {/* Rules List */}
+            {pricingRules.length === 0 ? (
+               <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-3xl border border-[var(--theme-border)] text-[var(--theme-text-secondary)] space-y-2">
+                  <BrainCircuit size={28} className="mx-auto text-[var(--theme-text-secondary)]/50" />
+                  <p className="text-xs font-medium">No pricing rules match current filters.</p>
+               </div>
+            ) : (
+               pricingRules.map(rule => (
+                  <div
+                     key={rule.id}
+                     className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-[var(--theme-accent)]/40 group"
+                  >
+                     <div className="flex items-start gap-4">
+                        <div
+                           className={`p-3 rounded-2xl border transition-colors shrink-0 ${
+                              rule.isActive
+                                 ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20'
+                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
+                           }`}
+                        >
+                           <BrainCircuit size={22} />
+                        </div>
+                        <div>
+                           <div className="flex items-center gap-2.5">
+                              <h3 className="font-semibold text-[var(--theme-text-primary)] text-sm sm:text-base leading-tight">
+                                 {rule.name}
+                              </h3>
+                              {rule.isActive ? (
+                                 <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 rounded-full uppercase border border-emerald-500/20 font-semibold tracking-wider">
+                                    Enabled
+                                 </span>
+                              ) : (
+                                 <span className="text-[10px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] px-2.5 py-0.5 rounded-full uppercase border border-[var(--theme-border)] font-medium tracking-wider">
+                                    Paused
+                                 </span>
+                              )}
+                           </div>
+
+                           <div className="flex flex-wrap items-center gap-2 mt-2.5 text-xs font-mono">
+                              <span className="bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-xl text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium">
+                                 {rule.condition === 'Sales < X'
+                                    ? `IF Sales (30d) < ${rule.threshold} units`
+                                    : `IF ${rule.condition.replace('X', rule.threshold.toString())}`}
+                              </span>
+                              <ArrowRight size={13} className="text-[var(--theme-text-secondary)]" />
+                              <span className="bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] px-2.5 py-1 rounded-xl border border-[var(--theme-accent)]/20 font-semibold">
+                                 {rule.action === 'Set to Cost + Margin'
+                                    ? `Cost + ${rule.value}% Margin`
+                                    : `${rule.action} ${rule.value}%`}
+                              </span>
+                           </div>
+
+                           <p className="text-xs text-[var(--theme-text-secondary)] mt-2 font-medium">
+                              Applies to: <span className="text-[var(--theme-text-primary)] font-semibold">{rule.targetCategory}</span>
+                           </p>
+                        </div>
                      </div>
-                     <div>
-                        <div className="flex items-center gap-2.5">
-                           <h3 className="font-semibold text-[var(--theme-text-primary)] text-sm sm:text-base leading-tight">
-                              {rule.name}
-                           </h3>
-                           {rule.isActive ? (
-                              <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 rounded-full uppercase border border-emerald-500/20 font-semibold tracking-wider">
-                                 Active
-                              </span>
+
+                     {/* Rule Actions */}
+                     <div className="flex items-center gap-2 self-end sm:self-center">
+                        <button
+                           type="button"
+                           onClick={() => runPricingRule(rule)}
+                           disabled={isSubmitting}
+                           className="px-3 py-2 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)] text-[var(--theme-accent)] hover:text-white rounded-2xl transition-all border border-[var(--theme-accent)]/20 disabled:opacity-50 cursor-pointer shadow-sm text-xs font-medium flex items-center gap-1.5"
+                           aria-label={`Preview proposals for rule ${rule.name}`}
+                           title={rule.isActive ? 'Generate & preview price proposals' : 'Preview proposals (test paused rule)'}
+                        >
+                           {isSubmitting ? (
+                              <Loader2 size={15} className="animate-spin" />
                            ) : (
-                              <span className="text-[10px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] px-2.5 py-0.5 rounded-full uppercase border border-[var(--theme-border)] font-medium tracking-wider">
-                                 Paused
-                              </span>
+                              <Play size={15} />
                            )}
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-2 mt-2.5 text-xs font-mono">
-                           <span className="bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-xl text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium">
-                              IF {rule.condition.replace('X', rule.threshold.toString())}
-                           </span>
-                           <ArrowRight size={13} className="text-[var(--theme-text-secondary)]" />
-                           <span className="bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] px-2.5 py-1 rounded-xl border border-[var(--theme-accent)]/20 font-semibold">
-                              {rule.action} {rule.value}%
-                           </span>
-                        </div>
-
-                        <p className="text-xs text-[var(--theme-text-secondary)] mt-2 font-medium">
-                           Applies to: <span className="text-[var(--theme-text-primary)] font-semibold">{rule.targetCategory}</span>
-                        </p>
+                           <span>{rule.isActive ? 'Preview' : 'Test'}</span>
+                        </button>
+                        <button
+                           type="button"
+                           onClick={() => toggleRuleStatus(rule.id)}
+                           className={`p-2.5 rounded-2xl border transition-all cursor-pointer ${
+                              rule.isActive
+                                 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
+                           }`}
+                           title={rule.isActive ? 'Pause Rule' : 'Enable Rule'}
+                        >
+                           <Power size={16} />
+                        </button>
+                        <button
+                           type="button"
+                           onClick={() => deleteRule(rule.id)}
+                           className="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-2xl transition-colors cursor-pointer"
+                           title="Delete Rule"
+                        >
+                           <Trash2 size={16} />
+                        </button>
                      </div>
                   </div>
+               ))
+            )}
 
-                  {/* Rule Actions */}
-                  <div className="flex items-center gap-2 self-end sm:self-center">
+            {/* Pagination Controls */}
+            {pricingRulesTotalCount > 0 && (
+               <div className="flex items-center justify-between pt-2 px-1 text-xs text-[var(--theme-text-secondary)]">
+                  <span>
+                     Showing {fromRecord}-{toRecord} of {pricingRulesTotalCount} rules
+                  </span>
+                  <div className="flex items-center gap-2">
                      <button
                         type="button"
-                        onClick={() => runPricingRule(rule)}
-                        disabled={isSubmitting}
-                        className="p-2.5 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)] text-[var(--theme-accent)] hover:text-white rounded-2xl transition-all border border-[var(--theme-accent)]/20 disabled:opacity-50 cursor-pointer shadow-sm"
-                        aria-label="Run Rule Now"
-                        title="Execute Rule Immediately"
+                        disabled={pricingRulesPage <= 1}
+                        onClick={() => setPricingRulesPage(Math.max(1, pricingRulesPage - 1))}
+                        className="p-1.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] disabled:opacity-40 hover:bg-[var(--theme-bg-subtle)] cursor-pointer disabled:cursor-not-allowed transition-colors"
+                        aria-label="Previous page"
                      >
-                        {isSubmitting ? (
-                           <Loader2 size={16} className="animate-spin" />
-                        ) : (
-                           <Play size={16} />
-                        )}
+                        <ChevronLeft size={16} />
                      </button>
+                     <span className="font-mono px-2 py-0.5 rounded bg-[var(--theme-bg-subtle)]">
+                        Page {pricingRulesPage} of {pricingRulesTotalPages}
+                     </span>
                      <button
                         type="button"
-                        onClick={() => toggleRuleStatus(rule.id)}
-                        className={`p-2.5 rounded-2xl border transition-all cursor-pointer ${
-                           rule.isActive
-                              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                              : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
-                        }`}
-                        title={rule.isActive ? 'Deactivate Rule' : 'Activate Rule'}
+                        disabled={pricingRulesPage >= pricingRulesTotalPages}
+                        onClick={() => setPricingRulesPage(Math.min(pricingRulesTotalPages, pricingRulesPage + 1))}
+                        className="p-1.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] disabled:opacity-40 hover:bg-[var(--theme-bg-subtle)] cursor-pointer disabled:cursor-not-allowed transition-colors"
+                        aria-label="Next page"
                      >
-                        <Power size={16} />
-                     </button>
-                     <button
-                        type="button"
-                        onClick={() => deleteRule(rule.id)}
-                        className="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-2xl transition-colors cursor-pointer"
-                        title="Delete Rule"
-                     >
-                        <Trash2 size={16} />
+                        <ChevronRight size={16} />
                      </button>
                   </div>
                </div>
-            ))}
-
-            <button
-               type="button"
-               onClick={() => setIsRuleModalOpen(true)}
-               className="w-full py-4 border border-dashed border-[var(--theme-border)] hover:border-[var(--theme-accent)] rounded-3xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/5 transition-all flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wider cursor-pointer"
-            >
-               <Plus size={16} />
-               <span>Create New Automation Rule</span>
-            </button>
+            )}
          </div>
 
          {/* Right: Rule Simulator Card */}
          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div>
-               <div className="flex items-center gap-3 pb-3 mb-4 border-b border-[var(--theme-border)]">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                     <Sparkles size={18} />
+               <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--theme-border)]">
+                  <div className="flex items-center gap-3">
+                     <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                        <Sparkles size={18} />
+                     </div>
+                     <div>
+                        <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Rule Simulator</h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Pre-flight impact testing</p>
+                     </div>
                   </div>
-                  <div>
-                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Rule Simulator</h3>
-                     <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Pre-flight impact testing</p>
-                  </div>
+                  <span className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
+                     Model Estimate
+                  </span>
                </div>
-               <p className="text-xs text-[var(--theme-text-secondary)] mb-5 leading-relaxed">
-                  Test how rules affect your revenue and profit margins across affected catalog SKUs before activating them network-wide.
+
+               <p className="text-xs text-[var(--theme-text-secondary)] mb-4 leading-relaxed">
+                  Tests how enabled rules affect revenue and margins across catalog targets before staging proposals for review.
                </p>
 
+               {/* Disclose assumptions */}
+               <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] space-y-1.5 mb-4">
+                  <div className="flex items-center gap-1.5 font-semibold text-[var(--theme-text-primary)]">
+                     <Info size={13} className="text-[var(--theme-accent)]" />
+                     <span>Simulation Assumptions</span>
+                  </div>
+                  <p className="leading-relaxed">
+                     Uses identical target catalog scope as live execution. Incorporates 30-day recorded sales (or velocity baseline) with modeled price elasticity (+25% volume on price cuts, -12% on price hikes). Margins computed only on products with recorded costs.
+                  </p>
+                  <p className="text-[10px] text-[var(--theme-text-secondary)]/80 italic">
+                     * All calculations strictly adhere to whole-number merchandising policy.
+                  </p>
+               </div>
+
+               {/* Projection Results */}
                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-3">
-                  <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Projected Portfolio Impact</p>
+                  <div className="flex justify-between items-center text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
+                     <span>Estimated Impact</span>
+                     <span>Estimate Only</span>
+                  </div>
                   <div className="flex justify-between items-center text-xs">
-                     <span className="text-[var(--theme-text-secondary)] font-medium">Revenue</span>
+                     <span className="text-[var(--theme-text-secondary)] font-medium">Est. Revenue Delta</span>
                      <span
                         className={`font-mono font-semibold tabular-nums ${
                            simResult && simResult.rev > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'
                         }`}
                      >
-                        {simResult ? `${simResult.rev > 0 ? '+' : ''}${simResult.rev}% ` : '--'}
+                        {simResult ? `${simResult.rev > 0 ? '+' : ''}${Math.round(simResult.rev)}%` : '--'}
                      </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                     <span className="text-[var(--theme-text-secondary)] font-medium">Margin Delta</span>
+                     <span className="text-[var(--theme-text-secondary)] font-medium">Est. Margin Delta</span>
                      <span
                         className={`font-mono font-semibold tabular-nums ${
                            simResult && simResult.margin < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
                         }`}
                      >
-                        {simResult ? `${simResult.margin > 0 ? '+' : ''}${simResult.margin}% ` : '--'}
+                        {simResult ? `${simResult.margin > 0 ? '+' : ''}${Math.round(simResult.margin)}%` : '--'}
                      </span>
                   </div>
                </div>

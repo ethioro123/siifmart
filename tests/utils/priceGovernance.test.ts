@@ -65,7 +65,10 @@ describe('merchandising no longer writes prices directly', () => {
     it('markdown tab submits for approval', () => {
         const src = read('components/merchandising/MarkdownTab.tsx');
         expect(src).not.toContain('updateProduct(');
-        expect(src).toContain('useSubmitPriceChanges');
+        expect(src).toContain('useMarkdownProposal');
+        const hook = read('hooks/useMarkdownProposal.ts');
+        expect(hook).toContain('useSubmitPriceChanges');
+        expect(hook).not.toContain('updateProduct(');
     });
 
     it('migration enforces country-scoped RLS and the margin floor trigger', () => {
