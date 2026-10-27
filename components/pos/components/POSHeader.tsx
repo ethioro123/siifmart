@@ -91,7 +91,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                         <div className="hidden sm:flex items-center gap-1.5">
                             <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono font-medium text-[var(--theme-text-muted)] select-none">
                                 <ScanBarcode size={11} className="text-blue-500" />
-                                <span>Scan</span>
+                                <span>{t('pos.scan')}</span>
                             </div>
                             <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono font-medium text-[var(--theme-text-muted)] select-none">
                                 <span>⌘</span><span>K</span>
@@ -112,7 +112,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                             aria-label={`Review ${unreviewedPriceUpdateCount} unreviewed product price changes`}
                         >
                             <span className="w-2 h-2 rounded-full bg-[var(--theme-status-info)] shrink-0" aria-hidden="true" />
-                            <span className="truncate">{unreviewedPriceUpdateCount} unreviewed price {unreviewedPriceUpdateCount === 1 ? 'change' : 'changes'} · Review history</span>
+                            <span className="truncate">{t('pos.unreviewedPriceChangesCount', { count: unreviewedPriceUpdateCount, s: unreviewedPriceUpdateCount === 1 ? '' : 's' })}</span>
                         </button>
                     </div>
                 )}
@@ -170,7 +170,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                     <SlidersHorizontal size={13} />
                 </div>
-                <span className="hidden sm:inline">Filter & Sort</span>
+                <span className="hidden sm:inline">{t('pos.filterAndSort')}</span>
                 {activeFiltersCount > 0 && (
                     <span className="w-4.5 h-4.5 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold">
                         {activeFiltersCount}

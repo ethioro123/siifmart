@@ -161,6 +161,179 @@ export const pos: TranslationBlock = {
     miscItemTitle: { en: 'Add Miscellaneous Item', am: 'የተለያዩ ዕቃዎችን ይጨምሩ', or: 'Oomisha Addaa Ida\'i' },
     description: { en: 'Description', am: 'መግለጫ', or: 'Ibsa' },
 
+    // Navigation & Store
+    selectStore: { en: 'Select a Store', am: 'ሱቅ ይምረጡ', or: 'Suuqii Fili' },
+    selectStorePrompt: { en: 'To access POS, tap your store below or select from the dropdown in the top bar.', am: 'POS ለመድረስ፣ ከታች ሱቅዎን ይንኩ ወይም ከላይኛው አሞሌ ይምረጡ።', or: 'POS fayyadamuuf, suuqii keessan kan armaan gadii tuqaa ykn sarara gubbaa irraa filadhaa.' },
+
+    // Cart Operations & Controls
+    cart: { en: 'Cart', am: 'ጋሪ', or: 'Kaartii' },
+    products: { en: 'Products', am: 'ምርቶች', or: 'Oomishaalee' },
+    scan: { en: 'Scan', am: 'ቃኝ', or: 'Iskaanii' },
+    filterAndSort: { en: 'Filter & Sort', am: 'አጣራ እና ደርድር', or: 'Calali fi Tarreessi' },
+    more: { en: 'More', am: 'ተጨማሪ', or: 'Dabalata' },
+    void: { en: 'Void', am: 'ሰርዝ', or: 'Haqi' },
+    hold: { en: 'Hold', am: 'አቆይ', or: 'Tursi' },
+    charge: { en: 'Charge', am: 'ክፈል', or: 'Kaffalchiisi' },
+    viewCart: { en: 'View Cart', am: 'ጋሪ ይመልከቱ', or: 'Kaartii Ilaali' },
+    viewBreakdown: { en: 'View breakdown', am: 'ዝርዝር ይመልከቱ', or: 'Ibsa Ilaali' },
+    hideBreakdown: { en: 'Hide breakdown', am: 'ዝርዝር ደብቅ', or: 'Ibsa Dhoksi' },
+    totalAmount: { en: 'Total Amount', am: 'ጠቅላላ መጠን', or: 'Waliigala Gatii' },
+    item: { en: 'item', am: 'ዕቃ', or: 'meeshaa' },
+    items: { en: 'items', am: 'ዕቃዎች', or: 'meeshaalee' },
+    changed: { en: 'Changed', am: 'ተለውጧል', or: 'Jijjiirameera' },
+    tapItemsToStart: { en: 'Tap items from the catalog or scan barcodes to start sale.', am: 'ሽያጭ ለመጀመር እቃዎችን ይንኩ ወይም ባርኮድ ይቃኙ።', or: 'Gurgurtaa jalqabuuf oomisha tuqi ykn baarkoodii iskaani godhi.' },
+    catalogPriceChangedTo: { en: 'Catalog price changed to {price}.', am: 'የካታሎግ ዋጋ ወደ {price} ተለውጧል።', or: 'Gatiin oomishaa gara {price}tti jijjiirameera.' },
+    useCurrentPrice: { en: 'Use current price', am: 'የአሁኑን ዋጋ ተጠቀም', or: 'Gatii ammaa fayyadami' },
+    unreviewedPriceChangesCount: { en: '{count} unreviewed price change{s} · Review history', am: '{count} ያልተገመገሙ የዋጋ ለውጦች · ታሪክ ይገምግሙ', or: 'Jijjiirama gatii hin mirkanoofne {count} · Seenaa ilaali' },
+
+    // Cart Actions Menu
+    priceUpdates: { en: 'Price Updates', am: 'የዋጋ ለውጦች', or: 'Jijjiirama Gatii' },
+    recallHeld: { en: 'Recall Held', am: 'የታቀፈውን መልስ', or: 'Ajaaja Tursiifame' },
+    returnsAndRefunds: { en: 'Returns & Refunds', am: 'ምላሾች እና ተመላሾች', or: 'Deebii fi Deebifama Qarshii' },
+    safeCashDrop: { en: 'Safe Cash Drop', am: 'ጥሬ ገንዘብ ወደ ካዝና አስገባ', or: 'Qarshii Kaazaa Hir\'isi' },
+    openCashDrawer: { en: 'Open Cash Drawer', am: 'የገንዘብ ሳጥን ክፈት', or: 'Kaaza Qarshii Bani' },
+    reprintReceipt: { en: 'Reprint Receipt', am: 'ደረሰኝ ደግመህ አትም', or: 'Nagahee Irra-deebiin Maxxansi' },
+    shiftSummary: { en: 'Shift Summary', am: 'የፈረቃ ማጠቃለያ', or: 'Gabaasa Shiftii' },
+
+    // Payment Dialog
+    exact: { en: 'Exact', am: 'ትክክለኛ', or: 'Qarshii Sirrii' },
+    needMore: { en: 'Need {amount} more', am: '{amount} ተጨማሪ ያስፈልጋል', or: 'Qarshii {amount} dabalataan barbaachisa' },
+    cardPromptTitle: { en: 'Confirm payment on the card terminal', am: 'በካርድ ተርሚናል ላይ ክፍያ ያረጋግጡ', or: 'Tarmiinaala kaardii irratti kaffaltii mirkaneessi' },
+    cardPromptDesc: { en: 'After approval, complete the sale here to record it.', am: 'ከተፈቀደ በኋላ ሽያጩን እዚህ ይመዝግቡ።', or: 'Erga mirkanaa\'ee booda gurgurtaa asitti galmeessi.' },
+    enterTenderedAmount: { en: 'Enter Tendered Amount', am: 'የተከፈለውን መጠን ያስገቡ', or: 'Qarshii Kenname Galchi' },
+    enterPaymentDetails: { en: 'Enter Payment Details', am: 'የክፍያ ዝርዝሮችን ያስገቡ', or: 'Odeeffannoo Kaffaltii Galchi' },
+    enterAmountPlaceholder: { en: 'Enter amount...', am: 'መጠን ያስገቡ...', or: 'Qarshii galchi...' },
+    receiptPreview: { en: 'Receipt Preview', am: 'የደረሰኝ ቅድመ እይታ', or: 'Nagahee Ilaali' },
+
+    // Weight & Unit Modal
+    enterUnit: { en: 'Enter {unit}', am: '{unit} ያስገቡ', or: '{unit} Galchi' },
+    lineTotal: { en: 'Line Total', am: 'የመስመር ድምር', or: 'Ida\'ama Sararaa' },
+    addToCart: { en: 'Add to Cart', am: 'ወደ ጋሪ ጨምር', or: 'Gara Kaartiitti Ida\'i' },
+    perUnit: { en: 'per {unit}', am: 'በ{unit}', or: '{unit} tokkoon' },
+
+    // Start Shift Modal
+    startCashierShift: { en: 'Start Cashier Shift', am: 'የካሺየር ፈረቃ ጀምር', or: 'Shiftii Kaashiyaraa Jalqabi' },
+    assignCounter: { en: 'Assign Physical Counter / Register', am: 'የካውንተር / መመዝገቢያ ይመድቡ', or: 'Kaawuntarii / Kaaza Qarshii Fili' },
+    strictMutualExclusion: { en: 'Strict mutual exclusion', am: 'ጥብቅ የተናጠል አጠቃቀም', or: 'Tokko qofaan fayyadama' },
+    occupied: { en: 'Occupied', am: 'ተይዟል', or: 'Qabameera' },
+    available: { en: 'Available', am: 'ዝግጁ', or: 'Bani/Qophii' },
+    openingDrawerCashFloat: { en: 'Opening Drawer Cash Float', am: 'የመጀመሪያ የሳጥን ጥሬ ገንዘብ', or: 'Qarshii Ka\'umsa Kaazaa' },
+    startingShiftAt: { en: 'Shift starting ({time})', am: 'ፈረቃ የሚጀምረው ({time})', or: 'Shiftiin jalqabaa jira ({time})' },
+    cashierResponsibility: { en: '1:1 Cashier Responsibility', am: '1:1 የካሺየር ኃላፊነት', or: 'Itti-gaafatamummaa Kaashiyaraa 1:1' },
+    antiSkimmingNotice: { en: 'Opening float will be credited to {counter}. At shift close, the system will verify your drawer cash against this starting float under badge {badge}.', am: 'የመጀመሪያ ገንዘብ ለ{counter} ገቢ ይደረጋል። በፈረቃ መዝጊያ ላይ ሲስተሙ ከዚህ መነሻ ጋር ያመሳክራል።', or: 'Qarshiin ka\'umsaa {counter} irratti galmaa\'a. Shiftiin yoo cufamu, sirnichi qarshii kaaza keessaa mallattoo {badge} jala jiru waliin mirkaneessa.' },
+    starting: { en: 'Starting...', am: 'በመጀመር ላይ...', or: 'Jalqabaa jira...' },
+    startCounter: { en: 'Start {counter}', am: '{counter} ጀምር', or: '{counter} Jalqabi' },
+
+    // Shift Closing Modal
+    blindShiftClose: { en: 'Blind Shift Close ({id})', am: 'የፈረቃ መዝጊያ ቆጠራ ({id})', or: 'Shiftii Cufi - Ija-Cufaa ({id})' },
+    endOfShiftReconciliation: { en: 'End of Shift Cash Reconciliation', am: 'የፈረቃ መጨረሻ የገንዘብ ማስታረቅ', or: 'Qarshii Kaazaa Mirkaneessuu' },
+    blindCashTrayCount: { en: '1. Blind Cash Tray Count', am: '1. የገንዘብ ሳጥን ቆጠራ', or: '1. Lakkoofsa Kaaza Qarshii (Ija-Cufaa)' },
+    reconciliationAndAudit: { en: '2. Reconciliation & Audit', am: '2. ማስታረቅ እና ኦዲት', or: '2. Mirkaneessa fi Qorannoo' },
+    blindDrawerProtocol: { en: 'Blind Drawer Count Protocol (Anti-Skimming Active)', am: 'የተደበቀ የሳጥን ቆጠራ ፕሮቶኮል (ፀረ-ስርቆት ንቁ)', or: 'Sirna Lakkoofsa Kaaza Qarshii (Hanna Ittisuu)' },
+    blindDrawerInstruction: { en: 'Please count each physical cash denomination currently in the cash drawer. System expected totals remain concealed until physical counting is finalized.', am: 'እባክዎ በሳጥኑ ውስጥ ያለውን የእያንዳንዱን ኖት ይቁጠሩ። ሲስተሙ የሚጠብቀው ድምር ቆጠራው እስኪጠናቀቅ ድረስ ተደብቆ ይቆያል።', or: 'Maaloo qarshii kaaza keessa jiru gosa gosaan lakkaa\'aa galchaa. Herregni sirnichi eegu hanga lakkoofsi xumuramutti dhokataa ta\'a.' },
+    note: { en: 'Note', am: 'ኖት', or: 'Qarshii' },
+    totalCountedInDrawer: { en: 'Total Counted in Drawer', am: 'በሳጥኑ ውስጥ የተቆጠረ ጠቅላላ', or: 'Waliigala Qarshii Kaaza Keessatti Lakkaa\'ame' },
+    lockCountAndProceed: { en: 'Lock Count & Proceed to Reconciliation', am: 'ቆጠራውን ቆልፍ እና ወደ ማስታረቅ ቀጥል', or: 'Lakkoofsa Cufii Gara Mirkaneessaatti Deemi' },
+    blindDrawerCountSealed: { en: 'Blind Drawer Count Sealed', am: 'የሳጥን ቆጠራ ታሽጓል', or: 'Lakkoofsi Kaaza Qarshii Saamameera' },
+    blindDrawerCountSealedDesc: { en: 'Anti-Skimming Protocol: Total physical cash count is permanently locked. Register variance and expected totals are audited independently by Central HQ Finance.', am: 'ፀረ-ስርቆት ፕሮቶኮል፡ የጥሬ ገንዘብ ቆጠራ በቋሚነት ተቆልፏል። የሳጥን ልዩነት በማዕከላዊ ፋይናንስ በገለልተኝነት ይመረመራል።', or: 'Hanna Ittisuuf: Lakkoofsi qarshii callaa guutummaatti cufameera. Garaagarummaan jiru faayinaansii giddu-galeessaatiin qoratama.' },
+    sealedCashTotal: { en: 'Sealed Cash Total', am: 'የታሸገው ጠቅላላ ገንዘብ', or: 'Waliigala Qarshii Cufame' },
+    shiftHandoverNotes: { en: 'Shift Handover Notes (Optional)', am: 'የፈረቃ ርክክብ ማስታወሻዎች (አማራጭ)', or: 'Yaadannoo Dabarsa Shiftii (Filannoo)' },
+    shiftNotesPlaceholder: { en: 'Optional notes for HQ audit (e.g. damaged bill accepted, coin shortage)...', am: 'ለዋና መሥሪያ ቤት ኦዲት አማራጭ ማስታወሻዎች...', or: 'Yaadannoo qorannoo faayinaansiitiif (fakkeenyaaf qarshii tarsa\'e, saantima dhabuu)...' },
+    zeroTrustCompliance: { en: 'Zero-Trust Compliance', am: 'የዜሮ-ትረስት ደንብ ማክበር', or: 'Sirna Nageenyaa Guutuu' },
+    directHqDispatch: { en: 'Direct HQ Dispatch', am: 'ቀጥታ ወደ ዋና መሥሪያ ቤት', or: 'Gara Wiirtuu Ol-aanaatti' },
+    submitSealedCount: { en: 'Submit Sealed Count & Close Register', am: 'የታሸገውን ቆጠራ አስገባ እና ሳጥኑን ዝጋ', or: 'Lakkoofsa Saamame Galchiitii Kaaza Cufi' },
+
+    // Void Modal
+    zeroTrustVoidTitle: { en: 'Zero-Trust Void & Cancellation Authorization', am: 'የሽያጭ ስረዛ ማረጋገጫ ፈቃድ', or: 'Heeyyama Gurgurtaa Haquu (Hogganaatiin)' },
+    supervisoryApprovalRequired: { en: 'Supervisory Approval Required (SOP-POS-008)', am: 'የተቆጣጣሪ ማረጋገጫ ያስፈልጋል', or: 'Heeyyama Hogganaa Barbaachisa' },
+    voidWarning: { en: 'Under Zero-Trust Loss Prevention, cashiers cannot unilaterally void sales. Voiding {count} item(s) worth {amount} requires on-duty supervisor co-sign.', am: 'ካሺየሮች ሽያጭን በራሳቸው መሰረዝ አይችሉም። ዋጋቸው {amount} የሆኑ {count} ዕቃዎችን ለመሰረዝ የተቆጣጣሪ ፈቃድ ያስፈልጋል።', or: 'Kaashiyaroonni gurgurtaa ofiin haquu hin danda\'an. Meeshaalee {count} kan gatiin isaanii {amount} ta\'e haquuf heeyyama hogganaa barbaachisa.' },
+    mandatoryReasonCode: { en: 'Mandatory Reason Code', am: 'አስገዳጅ የምክንያት ኮድ', or: 'Koodii Sababaa Dirqamaa' },
+    supervisorEnterPin: { en: 'Supervisor Enter Staff PIN', am: 'ተቆጣጣሪ የሰራተኛ ፒን ያስገቡ', or: 'Hogganaan PIN Hojjettootaa Galchaa' },
+    authorizeAndVoid: { en: 'Authorize & Void Cart', am: 'አረጋግጥ እና ጋሪውን ሰርዝ', or: 'Mirkaneessii Kaartii Haqi' },
+
+    // Cash Drop Modal
+    safeCashDropTitle: { en: 'Mid-Day Safe Cash Drop (Skim)', am: 'ጥሬ ገንዘብ ወደ ካዝና ማስገባት', or: 'Qarshii Kaazaa Hir\'isuu (Gara Saanduqaatti)' },
+    supervisorDualSignOff: { en: '4-Eyes Supervisor Dual-Sign Off', am: 'የ4-አይኖች ተቆጣጣሪ የጋራ ፊርማ', or: 'Mirkaneessa Hogganaa (Ija 4)' },
+    dropAmount: { en: 'Drop Amount', am: 'የሚገባው መጠን', or: 'Qarshii Hir\'ifamu' },
+    safeBagNumber: { en: 'Safe Bag / Tamper-Evident Bag #', am: 'የካዝና ቦርሳ ቁጥር', or: 'Lakkofsa Qodaa Qarshii (Safe Bag)' },
+    reasonForDrop: { en: 'Reason for Drop', am: 'የማስገባት ምክንያት', or: 'Sababa Qarshii Hir\'isuu' },
+    dropNotes: { en: 'Audit Notes (Optional)', am: 'የኦዲት ማስታወሻዎች (አማራጭ)', or: 'Yaadannoo Qorannoo (Filannoo)' },
+    proceedToSupervisorAuth: { en: 'Proceed to Supervisor Auth', am: 'ወደ ተቆጣጣሪ ማረጋገጫ ቀጥል', or: 'Gara Mirkaneessa Hogganaatti Deemi' },
+    confirmCashDrop: { en: 'Verify Supervisor PIN & Drop Cash', am: 'ተቆጣጣሪ ፒን አረጋግጥ እና ገንዘብ አስገባ', or: 'PIN Hogganaa Mirkaneessii Qarshii Galchi' },
+
+    // No-Sale Kick Modal
+    manualDrawerKickTitle: { en: 'Manual Cash Drawer Kick (No-Sale)', am: 'የገንዘብ ሳጥን በእጅ መክፈት (ሽያጭ የለም)', or: 'Kaaza Qarshii Bani (Gurgurtaa Malee)' },
+    antiSkimmingProtocol: { en: 'Anti-Skimming Security Protocol', am: 'ፀረ-ስርቆት የደህንነት ፕሮቶኮል', or: 'Sirna Nageenyaa Hanna Ittisuu' },
+    noSaleWarning: { en: 'Opening the cash drawer without a registered sale is an audited high-risk event. Supervisory co-sign is mandatory under store loss prevention policy.', am: 'ያለ ሽያጭ የገንዘብ ሳጥን መክፈት ከፍተኛ ክትትል የሚደረግበት ድርጊት ነው። የተቆጣጣሪ ማረጋገጫ ግዴታ ነው።', or: 'Gurgurtaa malee kaaza qarshii banuun gocha qoratamuudha. Heeyyama hogganaa argachuun dirqama.' },
+    operationalReason: { en: 'Operational Reason', am: 'የአሰራር ምክንያት', or: 'Sababa Hojii' },
+    changeMaking: { en: 'Change Making / Denomination Exchange', am: 'መልስ መስጠት / ኖት መመንዘር', or: 'Baqiyyaa Kennuu / Qarshii Jijjiiruu' },
+    tillAuditInspection: { en: 'Spot Till Audit / Cash Inspection', am: 'ድንገተኛ የሳጥን ፍተሻ / ቆጠራ', or: 'Qorannoo Kaaza Qarshii Dinsummaan' },
+    cashDrawerJam: { en: 'Mechanical Drawer Jam / Inspection', am: 'የሳጥን መቆለፍ / ፍተሻ', or: 'Kaaza Qarshii Sababa Cufamuutiin' },
+    otherAuthorized: { en: 'Other Authorized Supervisory Task', am: 'ሌላ የተፈቀደ የተቆጣጣሪ ተግባር', or: 'Hojii Hogganaa Biroo Kan Heeyyamame' },
+    authorizeDrawerKick: { en: 'Authorize Drawer Kick', am: 'የሳጥን መክፈት ፍቀድ', or: 'Kaaza Qarshii Bani' },
+
+    // Customer Selection Modal
+    defaultGuestAccount: { en: 'Default guest account', am: 'ነባሪ የእንግዳ አካውንት', or: 'Herrega keessummaa' },
+    storeVisits: { en: 'Store Visits', am: 'የሱቅ ጉብኝቶች', or: 'Deddeebii Suuqii' },
+    storeSpent: { en: 'Store Spent', am: 'በሱቅ የወጣ ወጪ', or: 'Bittaa Suuqii' },
+    recentStorePurchases: { en: 'Recent Store Purchases', am: 'የቅርብ ጊዜ የሱቅ ግዢዎች', or: 'Bittaa Suuqii Dhiyoo' },
+    noPurchaseHistory: { en: 'No purchase history at this store', am: 'በዚህ ሱቅ ምንም የግዢ ታሪክ የለም', or: 'Seenaan bittaa suuqii kana keessatti hin jiru' },
+    visits: { en: 'visits', am: 'ጉብኝቶች', or: 'yeroo dhufe' },
+    spent: { en: 'spent', am: 'ወጪ', or: 'baase' },
+
+    // Price Updates Modal
+    productPriceHistory: { en: 'Product Price History', am: 'የምርት ዋጋ ታሪክ', or: 'Seenaa Gatii Oomishaa' },
+    fullHistoryForStore: { en: 'Full history for this store, newest first.', am: 'የዚህ ሱቅ ሙሉ ታሪክ፣ አዲሱ በመጀመሪያ።', or: 'Seenaa suuqii kanaa guutuu, haaraa irraa eegalee.' },
+    unreviewedInLast7Days: { en: '{count} unreviewed in the last 7 days', am: 'ባለፉት 7 ቀናት {count} ያልተገመገሙ', or: 'Guyyoota 7 darban keessatti {count} hin mirkanoofne' },
+    noPriceChangesRecorded: { en: 'No price changes have been recorded for this store yet.', am: 'ለዚህ ሱቅ እስካሁን ምንም የዋጋ ለውጦች አልተመዘገቡም።', or: 'Jijjiiramni gatii suuqii kanaaf ammatti hin galmoofne.' },
+    loadingPriceHistory: { en: 'Loading price history…', am: 'የዋጋ ታሪክ በመጫን ላይ…', or: 'Seenaa gatii fe\'aa jira…' },
+    product: { en: 'Product', am: 'ምርት', or: 'Oomisha' },
+    previousPosPrice: { en: 'Previous POS price', am: 'የቀድሞ የPOS ዋጋ', or: 'Gatii POS Duraanii' },
+    newPosPrice: { en: 'New POS price', am: 'አዲስ የPOS ዋጋ', or: 'Gatii POS Haaraa' },
+    changedBy: { en: 'Changed by', am: 'የተለወጠው በ', or: 'Kan jijjiire' },
+    review: { en: 'Review', am: 'ግምገማ', or: 'Mirkaneessi' },
+    reviewed: { en: 'Reviewed', am: 'ተገምግሟል', or: 'Mirkanaa\'eera' },
+    new: { en: 'New', am: 'አዲስ', or: 'Haaraa' },
+    loadOlderChanges: { en: 'Load older changes', am: 'የቆዩ ለውጦችን ጫን', or: 'Jijjiiramoota durii fidi' },
+    endOfPriceHistory: { en: 'End of price history', am: 'የዋጋ ታሪክ መጨረሻ', or: 'Dhuma seenaa gatii' },
+    markThisPageReviewed: { en: 'Mark this page reviewed', am: 'ይህን ገጽ እንደተገመገመ ምልክት አድርግ', or: 'Fuula kana mirkaneessi' },
+
+    // Recall & Overwrite Modal
+    overwriteCartTitle: { en: 'Overwrite Cart?', am: 'ጋሪው ይተካ?', or: 'Kaartiin haa jijjiiramuu?' },
+    cartNotEmpty: { en: 'Cart Not Empty', am: 'ጋሪው ባዶ አይደለም', or: 'Kaartiin duwwaa miti' },
+    cartOverwriteWarning: { en: 'Current cart items will be replaced by the held order.', am: 'በጋሪው ውስጥ ያሉት አሁን ያሉ ዕቃዎች በተያዘው ትዕዛዝ ይተካሉ።', or: 'Meeshaaleen kaartii ammaa keessa jiran gurgurtaa tursiifameen bakka bu\'u.' },
+    overwrite: { en: 'Overwrite', am: 'ተካ', or: 'Bakka Buusi' },
+
+    // Discount Modal
+    saving: { en: 'Saving', am: 'ቁጠባ', or: 'Qusannaa' },
+    zeroTrustPromotionPolicy: { en: 'Zero-Trust Promotion Policy', am: 'የዜሮ-ትረስት ማስተዋወቂያ ፖሊሲ', or: 'Imaammata Beeksisaa Qajeelaa' },
+    zeroTrustPromotionDesc: { en: 'Arbitrary manual cashier or manager discounts are strictly disabled. Discounts can only be redeemed through verified promotional campaign codes generated and audited centrally by HQ Finance.', am: 'በካሺየር ወይም በማናጀር የሚደረግ የዘፈቀደ ቅናሽ የተከለከለ ነው። ቅናሾች በማዕከላዊ ፋይናንስ በተረጋገጡ የቅናሽ ኮዶች ብቻ ይሰጣሉ።', or: 'Hifsa ykn hir\'ifama feete gochuun dhowwaadha. Hir\'ifamni koodii beeksisaa faayinaansii giddu-galeessaan mirkanaa\'e qofaan hojjeta.' },
+    cartSubtotal: { en: 'Cart Subtotal', am: 'የጋሪ ንዑስ ድምር', or: 'Ida\'ama Kaartii Duraa' },
+
+    // Hold Modal
+    holdOrderPrompt: { en: 'Enter a reference note for this order (e.g., Customer Name):', am: 'ለዚህ ትዕዛዝ የማጣቀሻ ማስታወሻ ያስገቡ (ለምሳሌ፣ የደንበኛ ስም)፡', or: 'Gurgurtaa kanaaf yaadannoo galchi (fakkeenyaaf, Maqaa Maamilaa):' },
+    notePlaceholder: { en: 'Note...', am: 'ማስታወሻ...', or: 'Yaadannoo...' },
+
+    // Email Modal
+    emailReceiptTitle: { en: 'Email Receipt', am: 'ደረሰኝ በኢሜይል', or: 'Nagahee Imeeliin Ergi' },
+    enterCustomerEmail: { en: 'Enter customer email address:', am: 'የደንበኛውን ኢሜይል አድራሻ ያስገቡ፡', or: 'Teessoo imeelii maamilaa galchi:' },
+    sendReceipt: { en: 'Send Receipt', am: 'ደረሰኝ ላክ', or: 'Nagahee Ergi' },
+
+    // Offline Banner
+    syncInProgress: { en: 'Sync in progress', am: 'ማመሳሰል በሂደት ላይ', or: 'Walsimsiisaa jira' },
+    offlineTerminal: { en: 'Offline Terminal', am: 'ተርሚናል ከመስመር ውጭ', or: 'Tarmiinaala Oflaayinii' },
+    readyToSync: { en: 'Ready to Sync', am: 'ለማመሳሰል ዝግጁ', or: 'Walsimsiisuuf qophii' },
+    uploadingQueuedTransactions: { en: 'Uploading {count} queued offline transactions to cloud...', am: '{count} ከመስመር ውጭ ልውውጦችን በመጫን ላይ...', or: 'Gurgurtaalee {count} gara sararaatti olfe\'aa jira...' },
+    posRunningOffline: { en: 'POS running offline. Barcode scanning, receipt printing, and sales are fully operational.', am: 'POS ከመስመር ውጭ እየሰራ ነው። ባርኮድ መቃኘት፣ ደረሰኝ ማተም እና ሽያጭ ሙሉ በሙሉ ይሰራሉ።', or: 'POS oflaayinii hojjetaa jira. Baarkoodii iskaanii godhuun, nagahee maxxansuun fi gurgurtaan guutuu dha.' },
+    networkReconnected: { en: 'Network reconnected. {count} offline transactions ready to sync.', am: 'ኢንተርኔት ተገናኝቷል። {count} ከመስመር ውጭ ልውውጦች ለማመሳሰል ዝግጁ ናቸው።', or: 'Sararri deebi\'eera. Gurgurtaaleen {count} walsimsiisuuf qophii dha.' },
+
+    // Return Modal
+    receiptReference: { en: 'Receipt Reference', am: 'የደረሰኝ ማጣቀሻ', or: 'Eeruu Nagahee' },
+    cashPayout: { en: 'Cash Payout', am: 'የጥሬ ገንዘብ ክፍያ', or: 'Qarshii Deebifamu' },
+    backToTenders: { en: 'Back to Tenders', am: 'ወደ ክፍያ ተመለስ', or: 'Gara Kaffaltiitti Deebi\'i' },
+    verifyHqOtpAndDispense: { en: 'Verify HQ OTP & Dispense Cash', am: 'የHQ OTP አረጋግጥ እና ጥሬ ገንዘብ ክፈል', or: 'OTP Wiirtuu Mirkaneessii Qarshii Baasi' },
+    scanReceiptOrEnter: { en: 'Scan receipt barcode or enter e.g. TX-9981', am: 'የደረሰኝ ባርኮድ ይቃኙ ወይም ያስገቡ ለምሳሌ TX-9981', or: 'Baarkoodii nagahee iskaanii godhi ykn galchi fakkeenyaaf TX-9981' },
+
     // Missing keys reported in console
     activeShift: { en: 'Active Shift', am: 'ንቁ ፈረቃ', or: 'Shiftii Hojii Ammaa' },
     mobileMoney: { en: 'Mobile Money', am: 'ሞባይል ክፍያ', or: 'Mobaayila (Zaad/E-Birr)' },

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { POSProvider, usePOS } from '../components/pos/POSContext';
 import { POSProductGrid } from '../components/pos/POSProductGrid';
 import { POSCartPanel } from '../components/pos/POSCartPanel';
@@ -11,6 +12,7 @@ import Logo from '../components/Logo';
 const POSTerminalContent: React.FC = () => {
   const { needsStoreSelection, setReturnSearchId, setIsReturnModalOpen } = usePOS();
   const { sites, setActiveSite } = useData();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -31,9 +33,9 @@ const POSTerminalContent: React.FC = () => {
       <div className="h-full flex items-center justify-center p-4">
         <div className="text-center p-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl max-w-md shadow-xl transition-all duration-300">
           <Logo variant="emblem" size={32} className="mx-auto mb-4 flex justify-center" />
-          <h2 className="text-xl font-bold text-[var(--theme-text-primary)] mb-2">Select a Store</h2>
+          <h2 className="text-xl font-bold text-[var(--theme-text-primary)] mb-2">{t('pos.selectStore')}</h2>
           <p className="text-xs text-[var(--theme-text-secondary)] mb-6">
-            To access POS, tap your store below or select from the dropdown in the top bar.
+            {t('pos.selectStorePrompt')}
           </p>
           <div className="flex flex-wrap justify-center gap-2.5">
             {sites.filter(s => s.type === 'Store').map(site => (
