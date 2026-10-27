@@ -1,3 +1,4 @@
+import { ProductHandlingDetails } from './components/ProductHandlingDetails';
 import { FloorAuditTimeline } from '../fulfillment/discrepancies/FloorAuditTimeline';
 import React from 'react';
 import {
@@ -279,6 +280,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         );
                     })()}
                 </details>
+                <ProductHandlingDetails product={product} currencySymbol={activeCurrency}/>
                 <details className="border-b border-[var(--theme-border)] pb-4 space-y-4"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Pricing details</summary>
                     <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
                         <DollarSign size={14} className="text-[var(--theme-text-secondary)]" />
@@ -288,6 +290,8 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         const smartProfile = resolveSmartProductAttributes(product, allProducts, activeCurrency);
                         return (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+                                <DetailField label="Stock value at selling price" value={price > 0 ? `${activeCurrency} ${formatPriceValue((product.stock || 0) * price)}` : 'Selling price not set'} />
+                                <DetailField label="Stock value calculation" value={`${product.stock || 0} × ${activeCurrency} ${formatPriceValue(price)}`} />
                                 <DetailField label="Retail Price" value={`${activeCurrency} ${formatPriceValue(product.price)}`} icon={DollarSign} />
                                 <DetailField label="Unit Price Equiv." value={smartProfile.unitPriceLabel} icon={Tag} highlight={Boolean(smartProfile.unitPriceLabel)} />
                                 <DetailField label="Promo Price" value={salePrice > 0 ? `${activeCurrency} ${formatPriceValue(salePrice)}` : null} icon={Tag} highlight />
@@ -295,10 +299,11 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                 {compPrice > 0 && <DetailField label="Competitor Price" value={`${activeCurrency} ${formatPriceValue(compPrice)}`} icon={compDiff > 0 ? TrendingDown : TrendingUp} colorClass={compDiff > 0 ? 'text-red-500' : 'text-emerald-500'} />}
                                 {showCostPrice && (
                                     <>
+                                        <DetailField label="Stock value at cost" value={cost > 0 ? `${activeCurrency} ${formatPriceValue((product.stock || 0) * cost)}` : null} />
                                         <DetailField label="Cost Price (COGS)" value={cost > 0 ? `${activeCurrency} ${formatPriceValue(cost)}` : null} icon={Lock} colorClass="text-[var(--theme-text-muted)]" />
-                                        <DetailField label="Gross Profit" value={grossProfit > 0 ? `${activeCurrency} ${grossProfit.toFixed(2)}` : null} icon={TrendingUp} />
-                                        <DetailField label="Gross Margin" value={marginPct > 0 ? `${marginPct.toFixed(1)}%` : null} icon={Percent} />
-                                        <DetailField label="Markup Rate" value={markupPct > 0 ? `${markupPct.toFixed(1)}%` : null} icon={Percent} />
+                                        <DetailField label="Gross Profit" value={price > 0 && cost > 0 ? `${activeCurrency} ${grossProfit.toFixed(2)}` : null} icon={TrendingUp} />
+                                        <DetailField label="Gross Margin" value={price > 0 && cost > 0 ? `${marginPct.toFixed(1)}%` : null} icon={Percent} />
+                                        <DetailField label="Markup Rate" value={price > 0 && cost > 0 ? `${markupPct.toFixed(1)}%` : null} icon={Percent} />
                                     </>
                                 )}
                             </div>
