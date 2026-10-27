@@ -123,7 +123,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                 return (
                                                     <span className="absolute top-1.5 left-1.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1 z-10">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info)]" aria-hidden="true" />
-                                                        Changed
+                                                        {t('pos.changed')}
                                                     </span>
                                                 );
                                             }
@@ -180,11 +180,11 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                     {totalPages > 1 && (
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-28 lg:pb-8 border-t border-[var(--theme-border)] mt-6 px-1">
                                     <span role="status" className="text-xs text-[var(--theme-text-secondary)] font-medium">
-                                Showing <span className="font-bold text-[var(--theme-text-primary)]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to{' '}
+                                {t('common.showing')} <span className="font-bold text-[var(--theme-text-primary)]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> -{' '}
                                 <span className="font-bold text-[var(--theme-text-primary)]">
                                     {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)}
                                 </span>{' '}
-                                of <span className="font-bold text-[var(--theme-text-primary)]">{filteredProducts.length}</span> products
+                                {t('common.of')} <span className="font-bold text-[var(--theme-text-primary)]">{filteredProducts.length}</span> {t('pos.products')}
                             </span>
                             
                             <div className="flex items-center gap-1.5 touch-manipulation">

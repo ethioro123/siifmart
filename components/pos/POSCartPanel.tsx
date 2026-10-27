@@ -87,12 +87,12 @@ export const POSCartPanel: React.FC = () => {
                         aria-label={t('pos.backToProducts')}
                     >
                         <ArrowLeft size={18} />
-                        <span>Products</span>
+                        <span>{t('pos.products')}</span>
                     </button>
 
                     <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight">
-                            Cart ({totalItemCount})
+                            {t('pos.cart')} ({totalItemCount})
                         </span>
                     </div>
 
@@ -100,13 +100,13 @@ export const POSCartPanel: React.FC = () => {
                         type="button"
                         onClick={() => setIsCustomerModalOpen(true)}
                         className="min-h-11 flex items-center gap-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] px-3 rounded-2xl transition-colors group shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                        aria-label={`Customer: ${selectedCustomer ? selectedCustomer.name : 'Walk-in'}. Change customer`}
+                        aria-label={`Customer: ${selectedCustomer ? selectedCustomer.name : t('pos.walkIn')}. Change customer`}
                     >
                             <div className="w-5 h-5 rounded-md bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <User size={13} aria-hidden="true" />
                         </div>
                         <span className="text-xs font-semibold text-[var(--theme-text-primary)] max-w-[110px] truncate tracking-tight">
-                            {selectedCustomer ? selectedCustomer.name : 'Walk-in'}
+                            {selectedCustomer ? selectedCustomer.name : t('pos.walkIn')}
                         </span>
                     </button>
                 </div>
@@ -119,7 +119,7 @@ export const POSCartPanel: React.FC = () => {
                                 <CreditCard size={24} className="text-teal-500" />
                             </div>
                             <h4 className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">{t('pos.cartEmpty')}</h4>
-                            <p className="text-xs text-[var(--theme-text-secondary)]">Tap items from the catalog or scan barcodes to start sale.</p>
+                            <p className="text-xs text-[var(--theme-text-secondary)]">{t('pos.tapItemsToStart')}</p>
                         </div>
                     ) : (
                         cart.map(item => {
@@ -132,20 +132,20 @@ export const POSCartPanel: React.FC = () => {
                                 >
                                     <div className="flex-1 min-w-0">
                                         <h4 className="text-[var(--theme-text-primary)] text-xs font-bold truncate leading-snug">
-                                            {item.name}
+                                             {item.name}
                                         </h4>
                                         <p className="text-[var(--theme-text-secondary)] font-mono font-bold text-[11px] mt-0.5">
                                             {CURRENCY_SYMBOL} {formatPriceValue(item.price)}{unit.code !== 'UNIT' ? `/${unit.shortLabel}` : ''}
                                         </p>
                                         {stalePrice && (
                                             <div role="status" className="mt-2 p-2 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]">
-                                                <p className="text-[11px] font-semibold">Catalog price changed to {CURRENCY_SYMBOL} {formatPriceValue(stalePrice.currentPrice)}.</p>
+                                                <p className="text-[11px] font-semibold">{t('pos.catalogPriceChangedTo', { price: `${CURRENCY_SYMBOL} ${formatPriceValue(stalePrice.currentPrice)}` })}</p>
                                                 <button
                                                     type="button"
                                                     onClick={() => updateCartItemPrice(item.id, stalePrice.currentPrice)}
                                                     className="mt-1 min-h-11 px-2.5 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] text-xs font-bold hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                                 >
-                                                    Use current price
+                                                    {t('pos.useCurrentPrice')}
                                                 </button>
                                             </div>
                                         )}
@@ -228,7 +228,7 @@ export const POSCartPanel: React.FC = () => {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-semibold text-[var(--theme-text-secondary)] tracking-tight">
-                                    Subtotal ({totalItemCount} {totalItemCount === 1 ? 'item' : 'items'}):
+                                    {t('pos.subtotal')} ({totalItemCount} {totalItemCount === 1 ? t('pos.item') : t('pos.items')}):
                                 </span>
                                 <span className="font-bold text-xs text-[var(--theme-text-primary)] font-mono tabular-nums">
                                     {CURRENCY_SYMBOL} {subtotal.toLocaleString()}
@@ -241,7 +241,7 @@ export const POSCartPanel: React.FC = () => {
                                 aria-expanded={showDetails}
                                 className="min-h-11 px-2 text-[11px] font-semibold text-[var(--theme-text-primary)] flex items-center gap-1 hover:bg-[var(--theme-bg-subtle)] rounded-lg tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
-                                <span>{showDetails ? 'Hide breakdown' : 'View breakdown'}</span>
+                                <span>{showDetails ? t('pos.hideBreakdown') : t('pos.viewBreakdown')}</span>
                                 {showDetails ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                             </button>
                         </div>
@@ -251,7 +251,7 @@ export const POSCartPanel: React.FC = () => {
                             <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-2 text-xs animate-in fade-in duration-200">
                                 <div className="flex justify-between items-center text-[var(--theme-text-secondary)]">
                                     <div className="flex items-center gap-1.5">
-                                        <span>Discount</span>
+                                        <span>{t('pos.discount')}</span>
                                         <Protected permission="APPLY_DISCOUNT">
                                             <button
                                                 type="button"
@@ -259,7 +259,7 @@ export const POSCartPanel: React.FC = () => {
                                                 className="min-h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-2.5 rounded-xl font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                             >
                                                 <Tag size={11} className="inline mr-1 text-pink-500" />
-                                                {appliedDiscountCodeDetails ? appliedDiscountCodeDetails.code : 'Apply Code'}
+                                                {appliedDiscountCodeDetails ? appliedDiscountCodeDetails.code : t('pos.applyCode')}
                                             </button>
                                         </Protected>
                                     </div>
@@ -270,14 +270,14 @@ export const POSCartPanel: React.FC = () => {
 
                                 {taxBreakdown.length > 0 && (
                                     <div className="flex justify-between items-center text-[var(--theme-text-secondary)]">
-                                        <span>Tax ({taxBreakdown.map(t => t.name).join(', ')})</span>
+                                        <span>{t('pos.tax')} ({taxBreakdown.map(t => t.name).join(', ')})</span>
                                         <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{CURRENCY_SYMBOL} {tax.toFixed(2)}</span>
                                     </div>
                                 )}
 
                                 <div className="flex justify-between items-center text-[var(--theme-text-secondary)]">
                                     <div className="flex items-center gap-1.5">
-                                        <span>Cash Rounding</span>
+                                        <span>{t('pos.cashRounding')}</span>
                                         <button
                                             type="button"
                                             role="switch"
@@ -298,7 +298,7 @@ export const POSCartPanel: React.FC = () => {
                         {/* Grand Total Row */}
                         <div className="flex justify-between items-baseline pt-1">
                             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                                Total Amount
+                                {t('pos.totalAmount')}
                             </span>
                             <span className="text-2xl font-bold font-mono text-[var(--theme-text-primary)] tracking-tight tabular-nums">
                                 {CURRENCY_SYMBOL} {total.toLocaleString()}
@@ -320,7 +320,7 @@ export const POSCartPanel: React.FC = () => {
                             <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                                 <PauseCircle size={13} />
                             </div>
-                            <span>Hold</span>
+                            <span>{t('pos.hold')}</span>
                         </button>
 
                         <button
@@ -338,7 +338,7 @@ export const POSCartPanel: React.FC = () => {
                             <div className="w-5 h-5 rounded-md bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
                                 <Trash2 size={13} />
                             </div>
-                            <span>Void</span>
+                            <span>{t('pos.void')}</span>
                         </button>
 
                         <div className="relative">
@@ -351,7 +351,7 @@ export const POSCartPanel: React.FC = () => {
                                 <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                                     <Settings size={13} />
                                 </div>
-                                <span>More</span>
+                                <span>{t('pos.more')}</span>
                                 {unreviewedPriceUpdateCount > 0 && (
                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                                 )}
@@ -385,7 +385,7 @@ export const POSCartPanel: React.FC = () => {
                         className="w-full min-h-14 py-4 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-sm font-semibold uppercase tracking-wider text-xs sm:text-sm select-none border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <CreditCard size={18} />
-                        <span>Charge {CURRENCY_SYMBOL} {total.toLocaleString()}</span>
+                        <span>{t('pos.charge')} {CURRENCY_SYMBOL} {total.toLocaleString()}</span>
                     </button>
                 </div>
             </div>
@@ -403,9 +403,9 @@ export const POSCartPanel: React.FC = () => {
                     >
                         <div className="flex items-center gap-2.5">
                             <div className="bg-black/15 dark:bg-black/20 border border-black/10 dark:border-black/25 text-inherit px-2 py-0.5 rounded-lg text-xs font-bold">
-                                {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'}
+                                {totalItemCount} {totalItemCount === 1 ? t('pos.item') : t('pos.items')}
                             </div>
-                            <span className="text-xs font-bold uppercase tracking-wider">View Cart</span>
+                            <span className="text-xs font-bold uppercase tracking-wider">{t('pos.viewCart')}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm font-bold font-mono tabular-nums">
                             <span>{CURRENCY_SYMBOL} {total.toLocaleString()}</span>

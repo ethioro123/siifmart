@@ -4,6 +4,7 @@ import {
     ArrowDownCircle, ShoppingBag
 } from 'lucide-react';
 import { Protected } from '../../Protected';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { native } from '../../../utils/native';
 
 interface POSCartActionsMenuProps {
@@ -35,6 +36,8 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
     onCloseShift,
     onOpenMiscItem,
 }) => {
+    const { t } = useLanguage();
+
     if (!showActions) return null;
 
     return (
@@ -54,7 +57,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
                             <ShoppingBag size={14} />
                         </div>
-                        <span>Misc Item</span>
+                        <span>{t('pos.miscItem')}</span>
                     </button>
                 </Protected>
 
@@ -71,7 +74,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0">
                             <Tag size={14} />
                         </div>
-                        <span>Price Updates</span>
+                        <span>{t('pos.priceUpdates')}</span>
                     </div>
                     {unseenPriceUpdatesCount > 0 && (
                         <span className="px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full">
@@ -92,7 +95,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                         <PlayCircle size={14} />
                     </div>
-                    <span>Recall Held ({heldOrdersCount})</span>
+                    <span>{t('pos.recallHeld')} ({heldOrdersCount})</span>
                 </button>
 
                 <div className="my-1 border-t border-[var(--theme-border-subtle)]" />
@@ -109,7 +112,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
                             <RotateCcw size={14} />
                         </div>
-                        <span>Returns & Refunds</span>
+                        <span>{t('pos.returnsAndRefunds')}</span>
                     </button>
                 </Protected>
 
@@ -124,7 +127,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                         <ArrowDownCircle size={14} />
                     </div>
-                    <span>Safe Cash Drop</span>
+                    <span>{t('pos.safeCashDrop')}</span>
                 </button>
 
                 <button
@@ -138,7 +141,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     <div className="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
                         <Box size={14} />
                     </div>
-                    <span>Open Cash Drawer</span>
+                    <span>{t('pos.openCashDrawer')}</span>
                 </button>
 
                 <div className="my-1 border-t border-[var(--theme-border-subtle)]" />
@@ -154,7 +157,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
                         <Printer size={14} />
                     </div>
-                    <span>Reprint Receipt</span>
+                    <span>{t('pos.reprintReceipt')}</span>
                 </button>
 
                 <button
@@ -168,7 +171,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                         <Lock size={14} />
                     </div>
-                    <span>Shift Summary</span>
+                    <span>{t('pos.shiftSummary')}</span>
                 </button>
             </div>
         </>
