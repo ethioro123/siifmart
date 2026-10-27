@@ -64,7 +64,7 @@ describe('Pricing Rules Gaps and Improvements (High & Medium Items)', () => {
                total: 750,
                subtotal: 750,
                tax: 0,
-               payment_method: 'CASH',
+               paymentMethod: 'CASH',
                amount_tendered: 750,
                change: 0,
                created_at: '2026-10-20T10:00:00Z'
@@ -78,7 +78,7 @@ describe('Pricing Rules Gaps and Improvements (High & Medium Items)', () => {
                total: 1200,
                subtotal: 1200,
                tax: 0,
-               payment_method: 'CASH',
+               paymentMethod: 'CASH',
                amount_tendered: 1200,
                change: 0,
                created_at: '2026-10-15T10:00:00Z'
@@ -92,7 +92,7 @@ describe('Pricing Rules Gaps and Improvements (High & Medium Items)', () => {
                total: 7500,
                subtotal: 7500,
                tax: 0,
-               payment_method: 'CASH',
+               paymentMethod: 'CASH',
                amount_tendered: 7500,
                change: 0,
                created_at: '2026-08-01T10:00:00Z'
