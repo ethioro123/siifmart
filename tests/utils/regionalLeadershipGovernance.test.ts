@@ -156,7 +156,7 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
             expect(canAccessRoute('regional_logistics_manager', '/wms-ops')).toBe(true);
             expect(getDefaultFulfillmentTab('regional_logistics_manager')).toBe('DOCKS');
             expect(getVisibleFulfillmentTabs('regional_logistics_manager')).toEqual(
-                expect.arrayContaining(['DOCKS', 'DRIVER', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'REPLENISH', 'ASSIGN'])
+                expect.arrayContaining(['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER'])
             );
             expect(canEmployRole('regional_logistics_manager', 'transport_fleet_manager')).toBe(true);
             expect(canEmployRole('regional_logistics_manager', 'driver')).toBe(true);

@@ -1,3 +1,4 @@
+- Merchandising Demand Forecasting & Replenishment Audit (2026-10-28): Replaced synthetic demand multipliers with 4-week observed POS completed sales and regression trend; grounded AI confidence in demand variance; strictly isolated sales matching by store and country excluding pending/refunded transactions; loaded complete 30-day sales with line items; converted selling units to PO order packs with proper multipliers; eliminated cost guessing; calculated pipeline net stock (on-hand minus expired plus on-order and in-transit); respected explicit zero minStock; consolidated separate lots by SKU/site; added bounded pagination; and replaced ungrounded seasonality claims with factual replenishment metrics.
 - POS Command East Hararghe Oromo localization (2026-10-28): Complete English, Amharic, and East Hararghe (Harargee Bahaa) Afaan Oromoo dialect coverage across all POS Command Center panels, KPIs, reconciliation table, supervisor override velocity, drop safe ledger, stock list, and receiving flows.
 - Product edit governance (2026-10-28): existing product edits, thresholds and selling units require distinct regional Operations, Supply Chain and Merchandising approvals. Server records each vote, rejects self/foreign/duplicate approvals and stale proposals, and applies the third vote atomically. CEO direct edits are blocked; existing Finance controls remain. Applied to staging `utykzifrblpyxlvlknsm`. Legacy pending edits without a snapshot need resubmission.
 # Feature Registry
@@ -467,7 +468,6 @@
 ### Responsive top bar priorities (2026-10-23)
 - Header adapts to measured available width, including sidebar changes. Compact views retain navigation, search, notifications and profile, with workplace/region controls in an overflow panel.
 - Long profile names and secondary appearance/search controls yield space before overlap; appearance and refresh remain available in the profile menu.
-
 ### PO attribute consistency and pricing handoff (2026-10-23)
 - Live delivery checks align order temperature and minimum remaining days with item storage and total product shelf life; conflicting temperature groups require separate orders.
 - New product handling requirements require confirmation, packaging counts require entry, and unbranded identity is explicit. Category preview suggestions are labeled and advanced catalog specifications are read only.

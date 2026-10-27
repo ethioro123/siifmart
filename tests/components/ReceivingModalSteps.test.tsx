@@ -26,13 +26,13 @@ describe('receiving modal steps', () => {
   render(<Step1ReceiveIntake splitReceivingItem={{ productName: 'Diaper', sku: 'ETBB002' }} splitReceivingPO={po} allProducts={[]} isBlindReceiving expectedSellable={98765} previouslyReceived={0} t={t} />);
   expect(screen.queryByRole('button')).toBeNull();
   expect(screen.queryByText(/98765/)).toBeNull();
-  expect(screen.getByText('*** Blind Mode')).toBeTruthy();
+  expect(screen.getByText('warehouse.blindModeActiveTitle')).toBeTruthy();
  });
  it('keeps printing available without a duplicate save or premature received claim', () => {
   render(<Step3ReceiveHandover splitReceivingPO={po} splitReceivingItem={{}} splitVariants={[{ id: 'lot', sku: 'ETBB002', skuType: 'existing', quantity: 3 }]} totalScanned={3} isSubmitting={false} onPrintLabels={vi.fn()} t={t} />);
   expect(screen.getAllByRole('button')).toHaveLength(1);
-  expect(screen.getByRole('button', { name: 'Print Pallet & Intake Labels' })).toBeTruthy();
-  expect(screen.getByText('3 Counted · Not saved')).toBeTruthy();
+  expect(screen.getByRole('button', { name: /printPalletAndIntakeLabels/ })).toBeTruthy();
+  expect(screen.getByText('warehouse.countedNotSaved')).toBeTruthy();
  });
  it('requires valid counts on every retained split without using expected quantities', () => {
   for (const splits of [[], [{ quantity: 0 }], [{ quantity: 2 }, { quantity: 0 }], [{ quantity: -1 }], [{ quantity: NaN }], [{ quantity: Infinity }]]) expect(hasValidReceivingCounts(splits)).toBe(false);
