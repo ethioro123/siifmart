@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Product } from '../types';
 import { useProductChanges } from './useProductChanges';
 import { useSubmitPriceChanges } from './useSubmitPriceChanges';
@@ -10,6 +10,8 @@ export function useMarkdownProposal(product: Product | null, country: string, sc
     // Only pending requests are needed; defer audit and price history until explicitly opened elsewhere.
     const { pending } = useProductChanges(product, country, 1, false);
     const lock = useRef(false);
+    const alive = useRef(true);
+    useEffect(()=>{alive.current=true;return ()=>{alive.current=false;};},[]);
     const current = useRef({ id: product?.id, scope });
     current.current = { id: product?.id, scope };
     const [busy, setBusy] = useState(false);
@@ -25,7 +27,7 @@ export function useMarkdownProposal(product: Product | null, country: string, sc
             if (!Number.isInteger(price) || price <= 0 || price >= (product.isOnSale ? product.salePrice || product.price : product.price)) throw new Error('Choose a stage below the current selling price.');
             const check = await pending.refetch();
             if (check.error || !check.data) throw new Error('Pending approvals could not be checked. Try again before submitting.');
-            if (current.current.id !== product.id || current.current.scope !== scope) return;
+            if (!alive.current || current.current.id !== product.id || current.current.scope !== scope) return;
             if (check.data.data.length) throw new Error('This product already has a pending edit. Review it before submitting another.');
             const response = await submit([{product,proposal:{price:product.price,costPrice:product.costPrice,isOnSale:true,salePrice:price}}],
                 `Clearance proposal: price ${price}; planning deadline ${deadline}. Only this price is proposed; later stages are not scheduled.`);

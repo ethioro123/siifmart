@@ -55,6 +55,8 @@ export default function Pricing() {
       newRule,
       setNewRule,
       handleCreateRule,
+      isCreatingRule,
+      ruleValidationErrors,
 
       isBulkDiscountModalOpen,
       setIsBulkDiscountModalOpen,
@@ -260,6 +262,8 @@ export default function Pricing() {
                newRule={newRule}
                setNewRule={setNewRule}
                handleCreateRule={handleCreateRule}
+               isSubmitting={isCreatingRule}
+               errors={ruleValidationErrors}
             />
 
             {/* Bulk Discount Modal */}

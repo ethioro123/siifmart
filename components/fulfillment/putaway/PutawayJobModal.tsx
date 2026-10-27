@@ -148,7 +148,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 </span>
                                 {job.orderRef && (
                                     <span className="font-mono text-[11px] break-all">
-                                        Ref: {resolveOrderRef(job.orderRef)}
+                                        {t('warehouse.ref') || 'Ref'}: {resolveOrderRef(job.orderRef)}
                                     </span>
                                 )}
                             </div>
@@ -241,7 +241,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider flex items-center gap-2 hover:border-[var(--theme-accent)]/30 transition-colors active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 <ArrowLeft size={16} />
-                                <span>Back</span>
+                                <span>{t('warehouse.back') || 'Back'}</span>
                             </button>
                         )}
 
@@ -271,7 +271,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 disabled={isSubmitting || isCompleted || !totalItems}
                                 className="min-h-[44px] w-full sm:w-auto justify-center px-3 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                             >
-                                <span>Start scanning</span>
+                                <span>{t('warehouse.putaway.startScanning') || 'Start scanning'}</span>
                                 <ArrowRight size={16} />
                             </button>
                         )}
@@ -288,7 +288,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 }`}
                             >
                                 {!isFullySlotted && <Lock size={14} className="text-[var(--theme-text-muted)]" />}
-                                <span>{isFullySlotted ? 'Review completion' : 'Start scanning'}</span>
+                                <span>{isFullySlotted ? (t('warehouse.putaway.reviewCompletion') || 'Review completion') : (t('warehouse.putaway.startScanning') || 'Start scanning')}</span>
                                 <ArrowRight size={16} />
                             </button>
                         )}
@@ -305,7 +305,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 ) : (
                                     <>
                                         <CheckCircle size={16} />
-                                        <span>Complete Putaway</span>
+                                        <span>{t('warehouse.putaway.completePutaway') || 'Complete Putaway'}</span>
                                     </>
                                 )}
                             </button>

@@ -160,7 +160,6 @@
 ### Workforce Job Titles and App Login Separation (2026-10-20)
 - Employee job titles can now be entered and edited independently from the system access profile. Onboarding can create an active workforce record without creating app credentials; password policy checks and temporary-password storage apply only when app login is enabled. The existing `employees.job_title` column supports this change, so no database migration was needed.
 - **Files**: `components/employees/wizard/StepIdentity.tsx`, `components/employees/wizard/StepRole.tsx`, `components/employees/wizard/StepDetails.tsx`, `components/employees/wizard/StepReview.tsx`, `components/staff-profile/tabs/SettingsTab.tsx`, `components/staff-profile/tabs/settings/ProfileRoleDeptCard.tsx`, `hooks/useEmployeeWizard.ts`
-
 ### Notification Accuracy (2026-10-20)
 - Shared popup cards retain the source severity and message without guessing diagnoses or recovery advice. Notification history stays in memory within the current user/site/country session; old device-wide history is removed. The activity badge counts unread events and pending tasks, and history is labeled Recent events.
 - Cached POS stock estimates no longer generate stock warnings. Queued sales are distinguished from server saves; failed PO writes no longer appear as successful local orders. Site-load errors do not guess a network cause, and refresh requests no longer announce unconfirmed completion.
@@ -380,6 +379,7 @@
 - **Regression Verification**: Authenticated WMS and assignment reads, update policy planning, and a rollback-only system log insert completed without recursion or RLS rejection.
 
 ### Fulfilment Transfer Units (2026-10-18)
+- Clearance planner uses a bounded searchable catalog, date-driven whole-number stages and available-sales baseline without assumed discount uplift; a responsive stage table leads to one guarded price proposal under existing approvals, with no automatic schedule activation. Scope changes reset local state; pending checks fail closed, concurrent submissions lock, and failed saves remain retryable.
 - Standardized transfer, bulk distribution, Smart Replenish, picking, and receiving quantity labels and precision against product unit and package attributes. Picking uses protected scan receipts and atomic, idempotent completion for exact-lot stock deduction, assignment/parent updates and PACK creation. Partial/zero shortages require reasons; all-short jobs create no PACK. Manual scan bypasses are removed; source country, bin and lot/expiry are rechecked, and online reservations remain protected. Mobile collection/scanning has one primary action and no quantity overflow.
 - Kept measured quantities alongside stock-unit quantities through the WMS job line-item JSON and mapper; measured receipts convert back to inventory stock units before applying stock.
 - **Root Cause Fixed**: Transfer allocation screens hardcoded generic integer units, inconsistent package-size conversion mixed stock counts with physical measures, and pick completion used package quantity as the measured-pick denominator.

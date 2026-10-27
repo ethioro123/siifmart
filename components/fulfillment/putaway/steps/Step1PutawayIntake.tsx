@@ -40,19 +40,19 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)]">
-                                Inbound Staging Intake
+                                {t('warehouse.putaway.inboundStagingIntake') || 'Inbound Staging Intake'}
                             </span>
                             <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[11px] font-mono font-semibold text-[var(--theme-text-primary)]">
-                                {totalItems} Lines · {totalUnits} Units
+                                {totalItems} {t('warehouse.putaway.lines') || 'Lines'} · {totalUnits} {t('warehouse.unitsLabel') || 'Units'}
                             </span>
                             {hasColdItems && (
                                 <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[11px] font-bold text-cyan-700 dark:text-cyan-300 flex items-center gap-1 uppercase">
-                                    <ThermometerSnowflake size={11} /> Cold Chain
+                                    <ThermometerSnowflake size={11} /> {t('warehouse.putaway.coldChain') || 'Cold Chain'}
                                 </span>
                             )}
                         </div>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 break-words">
-                            Verify cargo at inbound dock staging before routing to warehouse storage bins.
+                            {t('warehouse.putaway.verifyCargoPrompt') || 'Verify cargo at inbound dock staging before routing to warehouse storage bins.'}
                         </p>
                     </div>
                 </div>
@@ -67,10 +67,10 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
                 <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
                     <span className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider flex items-center gap-2">
                         <Box size={16} className="text-[var(--theme-accent)]" />
-                        Inbound Items Manifest
+                        {t('warehouse.putaway.inboundItemsManifest') || 'Inbound Items Manifest'}
                     </span>
                     <span className="text-xs font-mono font-semibold text-[var(--theme-text-secondary)]">
-                        {totalItems} Line Items
+                        {totalItems} {t('warehouse.putaway.lineItemsCount') || 'Line Items'}
                     </span>
                 </div>
 
@@ -111,7 +111,7 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
 
                                 <div className="flex items-center gap-2 sm:justify-end shrink-0">
                                     <span className="text-xs font-mono font-bold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-lg border border-[var(--theme-border)]">
-                                        {expected} {item.unit || prod?.unit || 'Units'}
+                                        {expected} {item.unit || prod?.unit || (t('warehouse.unitsLabel') || 'Units')}
                                     </span>
                                 </div>
                             </div>

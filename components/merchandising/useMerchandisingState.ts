@@ -131,7 +131,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       handleRunSimulation
    } = usePricingRulesActions({
       activeCountry,
-      activeRegionCode,
+      activeRegionCode: activeRegionCode || undefined,
       sites: sites || [],
       salesMetricsIndex,
       createRule,
@@ -345,7 +345,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       setPricingRulesSearch,
       pricingRulesStatus,
       setPricingRulesStatus,
-      isCreatingRule: createRule.isPending,
+      isCreatingRule,
       ruleValidationErrors,
       setRuleValidationErrors,
 

@@ -35,24 +35,24 @@ export const PutawayStepIndicator: React.FC<PutawayStepIndicatorProps> = ({
         {
             id: 'INTAKE',
             stepNum: 1,
-            label: label('warehouse.inboundIntake', 'Cargo Intake'),
-            sublabel: 'Staging & Origin',
+            label: label('warehouse.putaway.inboundIntake', 'Cargo Intake'),
+            sublabel: label('warehouse.putaway.stagingAndOrigin', 'Staging & Origin'),
             icon: Package,
             isComplete: true,
         },
         {
             id: 'SLOTTING',
             stepNum: 2,
-            label: label('warehouse.binSlotting', 'Bin Routing'),
-            sublabel: isFullySlotted ? 'All Slotted' : 'Scan & Slot',
+            label: label('warehouse.putaway.binSlotting', 'Bin Routing'),
+            sublabel: isFullySlotted ? label('warehouse.putaway.allSlotted', 'All Slotted') : label('warehouse.putaway.scanAndSlot', 'Scan & Slot'),
             icon: MapPin,
             isComplete: isFullySlotted,
         },
         {
             id: 'PLACEMENT',
             stepNum: 3,
-            label: label('warehouse.shelfLock', 'Review completion'),
-            sublabel: !isFullySlotted ? 'Locked (Slot All)' : 'Verify & Stock',
+            label: label('warehouse.putaway.shelfLock', 'Review completion'),
+            sublabel: !isFullySlotted ? label('warehouse.putaway.lockedSlotAll', 'Locked (Slot All)') : label('warehouse.putaway.verifyAndStock', 'Verify & Stock'),
             icon: CheckCircle,
             isComplete: false,
         },
@@ -74,7 +74,7 @@ export const PutawayStepIndicator: React.FC<PutawayStepIndicatorProps> = ({
                             onClick={() => {
                                 if (isAccessible) setStep(st.id);
                             }}
-                            title={!isAccessible ? 'All items must be slotted and verified before shelf placement lock.' : undefined}
+                            title={!isAccessible ? label('warehouse.putaway.slotAllVerifiedPrompt', 'All items must be slotted and verified before shelf placement lock.') : undefined}
                             className={`min-h-[44px] py-1.5 px-2 md:py-2 md:px-3 rounded-xl border flex items-center gap-2 md:gap-3 transition-colors text-left touch-manipulation ${
                                 !isAccessible
                                     ? 'opacity-40 cursor-not-allowed bg-[var(--theme-bg-card)]/20 border-dashed border-[var(--theme-border)]'

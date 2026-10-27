@@ -6,6 +6,7 @@ import { usePriceManagerCatalog } from '../../hooks/usePriceManagerCatalog';
 import { useMarkdownProposal } from '../../hooks/useMarkdownProposal';
 import { calculateMarkdownGlidePath, localDateInput, validateMarkdownProduct, validateTargetExitDate, type MarkdownGlidePathSimulation } from '../../utils/markdownGlidePath';
 import { computeProductSalesMetrics } from '../../utils/merchandisingAnalytics';
+import { isHqFacilitySite, isRegionalAdminFacilitySite } from '../../utils/roleSegregation';
 import { MarkdownPlanResults } from './MarkdownPlanResults';
 
 const control='min-h-[44px] w-full min-w-0 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 text-sm text-[var(--theme-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]';
@@ -25,7 +26,7 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
     const [selectedId,setSelectedId]=useState(''), [deadline,setDeadline]=useState('');
     const [selectedStage,setSelectedStage]=useState(-1), [error,setError]=useState('');
     const [generated,setGenerated]=useState<{signature:string;plan:MarkdownGlidePathSimulation}|null>(null);
-    const catalog=usePriceManagerCatalog({country,search:query,page,pageSize:25,filters:activeSite?.id ? {sites:[activeSite.id]} : {}},true);
+    const catalog=usePriceManagerCatalog({country,search:query,page,pageSize:25,filters:activeSite?.id && !isHqFacilitySite(activeSite) && !isRegionalAdminFacilitySite(activeSite) ? {sites:[activeSite.id]} : {}},true);
     const products=catalog.data?.data || [];
     const product=products.find(p=>p.id===selectedId) || null;
     const metrics=product ? computeProductSalesMetrics(product,sales || []) : null;
@@ -72,7 +73,7 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
                 {product && validation.hasZeroVelocity && <p className="text-sm text-[var(--theme-text-secondary)]">Insufficient positive sales history. This scenario estimates zero sales; a discount is not evidence of new demand.</p>}
                 <div><label htmlFor="markdown-deadline" className="block text-sm font-medium mb-2">Target exit date</label><input id="markdown-deadline" type="date" className={control} value={deadline} min={localDateInput(tomorrow)} disabled={busy} aria-describedby={error ? 'markdown-error' : undefined} aria-invalid={!!error} onChange={e=>{setDeadline(e.target.value);setGenerated(null);setError('');}}/></div>
                 {error && <p id="markdown-error" role="alert" className="text-sm">{error}</p>}
-                <button type="button" onClick={generate} disabled={!product || !validation.isValid || catalog.isFetching || busy} className={`${button} w-full bg-[var(--theme-accent)] text-[var(--theme-text-inverse)] flex items-center justify-center gap-2`}><Calculator size={18}/>Generate plan</button>
+                <button type="button" onClick={generate} disabled={!product || !validation.isValid || catalog.isFetching || busy} className={`${button} w-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] flex items-center justify-center gap-2`}><Calculator size={18}/>Generate plan</button>
             </section>
             <div className="xl:col-span-2 min-w-0 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-4 space-y-4">
                 {plan ? <MarkdownPlanResults plan={plan} currency={currency} currentPrice={price} selectedStage={selectedStage} onSelectStage={setSelectedStage}/> : <p role="status" className="py-12 text-center text-sm text-[var(--theme-text-secondary)]">{generated ? 'Inputs changed. Generate a fresh plan to continue.' : 'Choose a product and deadline to review a clearance plan.'}</p>}
