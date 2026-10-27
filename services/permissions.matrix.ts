@@ -76,8 +76,11 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
     ],
     regional_merchandising_manager: [
-        'dashboard.view', 'inventory.view', 'pricing.view', 'pricing.edit',
-        'pricing.create_promo', 'pricing.approve_promo', 'sales.view', 'sales.view_reports'
+        'dashboard.view', 'admin.view',
+        'inventory.view',
+        'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
+        'sales.view', 'sales.view_reports',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
     ],
     regional_finance_manager: [
         'dashboard.view', 'admin.view',
