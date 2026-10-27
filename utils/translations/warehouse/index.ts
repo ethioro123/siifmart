@@ -14,6 +14,7 @@ import { misc } from './misc';
 import { count } from './count';
 import { waste } from './waste';
 import { returns } from './returns';
+import { assign } from './assign';
 
 export const warehouse: TranslationBlock = {
     ...core,
@@ -34,6 +35,8 @@ export const warehouse: TranslationBlock = {
     waste,
     ...returns,
     returns,
+    ...assign,
+    assign,
     ...misc,
     misc,
     ...modals,

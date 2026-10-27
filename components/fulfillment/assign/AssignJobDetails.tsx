@@ -20,29 +20,30 @@ import { formatJobId, formatOrderRef } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
 import { useFulfillment } from '../FulfillmentContext';
 import { useStore } from '../../../contexts/CentralStore';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface AssignJobDetailsProps {
     selectedJob: WMSJob | null;
     isDetailsOpen: boolean;
     setIsDetailsOpen: (val: boolean) => void;
     sites: Site[];
-    t: (key: string) => string;
+    t?: (key: string) => string;
 }
 
 export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
     selectedJob,
     isDetailsOpen,
     setIsDetailsOpen,
-    sites,
-    t
+    sites
 }) => {
+    const { t } = useLanguage();
     const { deleteJob } = useFulfillment();
     const { user } = useStore();
     const canDelete = ['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_operations_director', 'regional_operations_manager'].includes(user?.role || '');
 
     const handleDelete = async () => {
         if (!selectedJob) return;
-        if (!window.confirm('Are you sure you want to permanently delete this job?')) return;
+        if (!window.confirm(t('warehouse.confirmDeleteJob'))) return;
         await deleteJob(selectedJob.id);
         setIsDetailsOpen(false);
     };
@@ -98,7 +99,9 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <h2 id="assign-job-details-title" className="text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">Job Intelligence</h2>
+                                <h2 id="assign-job-details-title" className="text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">
+                                    {t('warehouse.jobIntelligenceTitle')}
+                                </h2>
                                 <span className="px-2.5 py-0.5 bg-primary/10 border border-primary/20 rounded-full text-[11px] font-mono font-medium text-primary uppercase tracking-wider">
                                     {formatJobId(selectedJob)}
                                 </span>
@@ -121,7 +124,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                     <button
                         onClick={() => setIsDetailsOpen(false)}
                         aria-label="Close"
-                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors touch-manipulation"
+                        className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors touch-manipulation cursor-pointer"
                     >
                         <X size={18} />
                     </button>
@@ -134,27 +137,27 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                         {originSiteId && (
                             <div className="bg-[var(--theme-bg-subtle)] rounded-2xl p-4 border border-[var(--theme-border)] flex flex-col justify-between min-h-[120px]">
                                 <div className="flex justify-between items-center mb-2">
-                                    <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">Logistics Route</p>
+                                    <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">{t('warehouse.logisticsRoute')}</p>
                                     <Truck size={18} className="text-primary opacity-60" />
                                 </div>
                                 
                                 {destSiteId ? (
                                     <div className="flex items-center gap-3">
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-medium mb-0.5">Origin</p>
+                                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-medium mb-0.5">{t('warehouse.originLabel')}</p>
                                             <p className="font-semibold text-[var(--theme-text-primary)] truncate text-xs" title={originName}>{originName}</p>
                                         </div>
                                         <div className="p-1.5 bg-primary/10 border border-primary/20 rounded-full flex-shrink-0">
                                             <ArrowRight className="text-primary" size={13} />
                                         </div>
                                         <div className="flex-1 text-right min-w-0">
-                                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-medium mb-0.5">Destination</p>
+                                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-medium mb-0.5">{t('warehouse.destinationLabel')}</p>
                                             <p className="font-semibold text-[var(--theme-text-primary)] truncate text-xs" title={destName}>{destName}</p>
                                         </div>
                                     </div>
                                 ) : (
                                     <div>
-                                        <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-medium mb-0.5">Active Warehouse</p>
+                                        <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-medium mb-0.5">{t('warehouse.activeWarehouseLabel')}</p>
                                         <p className="font-semibold text-[var(--theme-text-primary)] text-xs">{originName}</p>
                                     </div>
                                 )}
@@ -163,25 +166,25 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
 
                         {/* Operations Matrix */}
                         <div className="bg-[var(--theme-bg-subtle)] rounded-2xl p-4 border border-[var(--theme-border)] space-y-2">
-                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider mb-1">Operations Matrix</p>
+                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider mb-1">{t('warehouse.operationsMatrixLabel')}</p>
                             <div className="grid grid-cols-1 gap-2">
                                 <div className="flex justify-between items-center bg-[var(--theme-bg-card)] px-3 py-2 rounded-xl border border-[var(--theme-border)]">
                                     <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase flex items-center gap-1.5">
-                                        <User size={12} className="text-primary" /> Requested By
+                                        <User size={12} className="text-primary" /> {t('warehouse.requestedByLabel')}
                                     </span>
                                     <span className="text-[var(--theme-text-primary)] font-semibold text-xs">{selectedJob.requestedBy || 'System Terminal'}</span>
                                 </div>
                                 <div className="flex justify-between items-center bg-[var(--theme-bg-card)] px-3 py-2 rounded-xl border border-[var(--theme-border)]">
                                     <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase flex items-center gap-1.5">
-                                        <ShieldCheck size={12} className="text-primary" /> Auth Authority
+                                        <ShieldCheck size={12} className="text-primary" /> {t('warehouse.authAuthorityLabel')}
                                     </span>
                                     <span className={`font-semibold text-xs ${selectedJob.approvedBy ? 'text-[var(--theme-text-primary)]' : 'text-amber-600 dark:text-amber-400'}`}>
-                                        {selectedJob.approvedBy || 'Pending Auth'}
+                                        {selectedJob.approvedBy || t('warehouse.pendingAuthLabel')}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center bg-[var(--theme-bg-card)] px-3 py-2 rounded-xl border border-[var(--theme-border)]">
                                     <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase flex items-center gap-1.5">
-                                        <Calendar size={12} className="text-primary" /> Timestamp
+                                        <Calendar size={12} className="text-primary" /> {t('warehouse.timestampLabel')}
                                     </span>
                                     <span className="text-[var(--theme-text-secondary)] font-mono text-[11px] font-medium tabular-nums">
                                         {formatDateTime(selectedJob.createdAt || selectedJob.created_at || new Date())}
@@ -189,7 +192,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                                 </div>
                                 <div className="flex justify-between items-center bg-[var(--theme-bg-card)] px-3 py-2 rounded-xl border border-[var(--theme-border)]">
                                     <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase flex items-center gap-1.5">
-                                        <AlertTriangle size={12} className="text-primary" /> Priority
+                                        <AlertTriangle size={12} className="text-primary" /> {t('warehouse.priorityLabel')}
                                     </span>
                                     <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider border ${
                                         selectedJob.priority === 'Critical' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
@@ -210,10 +213,10 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                                 <div className="p-1.5 bg-primary/10 rounded-lg border border-primary/20">
                                     <Package size={14} className="text-primary" />
                                 </div>
-                                Inventory Manifest
+                                {t('warehouse.inventoryManifest')}
                             </h3>
                             <span className="text-[11px] font-mono text-[var(--theme-text-muted)] font-medium bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-0.5 rounded-full tabular-nums">
-                                {selectedJob.lineItems?.length || selectedJob.items || 0} ITEMS
+                                {t('warehouse.jobItemsCount', { count: selectedJob.lineItems?.length || selectedJob.items || 0 })}
                             </span>
                         </div>
 
@@ -263,7 +266,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                                             </td>
                                         </tr>
                                     )) : (
-                                        <tr><td colSpan={3} className="px-4 py-8 text-center text-[var(--theme-text-muted)] font-medium uppercase tracking-wider text-[11px]">Operational Payload Empty</td></tr>
+                                        <tr><td colSpan={3} className="px-4 py-8 text-center text-[var(--theme-text-muted)] font-medium uppercase tracking-wider text-[11px]">{t('warehouse.operationalPayloadEmpty')}</td></tr>
                                     )}
                                 </tbody>
                             </table>
@@ -287,9 +290,9 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                     </div>
                     <button
                         onClick={() => setIsDetailsOpen(false)}
-                        className="min-h-[44px] px-6 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] transition-colors active:scale-[0.98] touch-manipulation"
+                        className="min-h-[44px] px-6 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] transition-colors active:scale-[0.98] touch-manipulation cursor-pointer"
                     >
-                        Dismiss
+                        {t('warehouse.dismissButton')}
                     </button>
                 </div>
             </div>

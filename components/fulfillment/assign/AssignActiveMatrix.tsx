@@ -4,6 +4,7 @@ import { Employee, WMSJob } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getEmployeeJobTitle } from '../../../utils/roles';
 import { useFulfillmentData } from '../FulfillmentDataProvider';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface AssignActiveMatrixProps {
     employees: Employee[];
@@ -32,6 +33,7 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
     selectedJob,
     setSelectedJob
 }) => {
+    const { t } = useLanguage();
     const { unassignJob } = useFulfillmentData();
     const [expandedWorker, setExpandedWorker] = useState<string | null>(null);
 
@@ -65,9 +67,11 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                 <div className="p-2 bg-primary/10 rounded-xl">
                     <ClipboardCheck className="text-primary" size={20} />
                 </div>
-                Live Operations Matrix
+                {t('warehouse.liveOperationsMatrixTitle')}
                 {activeWorkers.length > 0 && (
-                    <span className="text-[11px] font-mono tabular-nums text-[var(--theme-text-muted)] ml-auto">{activeWorkers.length} active</span>
+                    <span className="text-[11px] font-mono tabular-nums text-[var(--theme-text-muted)] ml-auto">
+                        {t('warehouse.workersActiveCount', { count: activeWorkers.length })}
+                    </span>
                 )}
             </h3>
 
@@ -175,18 +179,18 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                                                             {canReassign && (
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); setSelectedJob(job); }}
-                                                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-primary/10 text-[var(--theme-text-muted)] hover:text-primary rounded-xl transition-colors touch-manipulation"
-                                                                    title="Reassign"
-                                                                    aria-label="Reassign job"
+                                                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-primary/10 text-[var(--theme-text-muted)] hover:text-primary rounded-xl transition-colors touch-manipulation cursor-pointer"
+                                                                    title={t('warehouse.reassignAction')}
+                                                                    aria-label={t('warehouse.reassignAction')}
                                                                 >
                                                                     <RefreshCw size={14} />
                                                                 </button>
                                                             )}
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); unassignJob(job.id); }}
-                                                                className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-red-500/10 text-[var(--theme-text-muted)] hover:text-red-500 rounded-xl transition-colors touch-manipulation"
-                                                                title="Unassign"
-                                                                aria-label="Unassign job"
+                                                                className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-red-500/10 text-[var(--theme-text-muted)] hover:text-red-500 rounded-xl transition-colors touch-manipulation cursor-pointer"
+                                                                title={t('warehouse.unassignAction')}
+                                                                aria-label={t('warehouse.unassignAction')}
                                                             >
                                                                 <X size={14} />
                                                             </button>
@@ -195,10 +199,12 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                                                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums font-medium">{formatJobId(job)}</p>
                                                     <p className="text-[11px] text-[var(--theme-text-muted)] font-mono tabular-nums flex items-center gap-1 mt-1">
                                                         <Layers size={12} className="text-[var(--theme-text-muted)]" />
-                                                        {job.items} items
+                                                        {t('warehouse.jobItemsCount', { count: job.items })}
                                                     </p>
                                                     {isSelected && (
-                                                        <span className="text-[11px] text-primary font-semibold uppercase tracking-wider mt-1 block">Select Worker →</span>
+                                                        <span className="text-[11px] text-primary font-semibold uppercase tracking-wider mt-1 block">
+                                                            {t('warehouse.selectWorkerPrompt')}
+                                                        </span>
                                                     )}
                                                 </div>
                                             );
@@ -213,7 +219,7 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
 
             {activeWorkers.length === 0 && (
                 <div className="text-center py-8 text-[var(--theme-text-muted)] text-sm">
-                    No active assignments
+                    {t('warehouse.noActiveAssignments')}
                 </div>
             )}
         </div>

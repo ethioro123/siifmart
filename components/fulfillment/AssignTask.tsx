@@ -150,14 +150,18 @@ export const AssignTask: React.FC<AssignTaskProps> = ({
             />
 
             {/* LIVE OPERATIONS MATRIX */}
-            <details className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-4"><summary className="min-h-[44px] cursor-pointer text-sm font-medium text-[var(--theme-text-secondary)]">Workload overview</summary>
-            <AssignActiveMatrix
-                employees={employees}
-                jobAssignments={jobAssignments}
-                filteredJobs={filteredJobs}
-                selectedJob={selectedJob}
-                setSelectedJob={setSelectedJob}
-            /></details>
+            <details className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-4">
+                <summary className="min-h-[44px] cursor-pointer text-sm font-medium text-[var(--theme-text-secondary)]">
+                    {t('warehouse.workloadOverviewSummary')}
+                </summary>
+                <AssignActiveMatrix
+                    employees={employees}
+                    jobAssignments={jobAssignments}
+                    filteredJobs={filteredJobs}
+                    selectedJob={selectedJob}
+                    setSelectedJob={setSelectedJob}
+                />
+            </details>
 
         </div>
     );

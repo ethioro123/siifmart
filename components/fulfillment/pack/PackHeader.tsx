@@ -144,14 +144,8 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
 
                 {/* Smart Unified Search & Barcode Scan Bar */}
                 <div className="relative flex-1 min-w-0">
-                    <div className={`relative flex items-center rounded-xl border transition-colors ${
-                        scanSuccess
-                            ? 'border-emerald-500/50 bg-emerald-500/5'
-                            : scanError
-                                ? 'border-red-500/50 bg-red-500/5'
-                                : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] focus-within:border-[var(--theme-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-accent-muted)]'
-                    }`}>
-                        <div className="pl-3.5 flex items-center pointer-events-none shrink-0">
+                    <div className="relative flex items-center w-full">
+                        <div className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none shrink-0 z-10">
                             {isScanning ? (
                                 <Loader2 size={16} className="text-[var(--theme-accent)] animate-spin" />
                             ) : scanSuccess ? (
@@ -178,9 +172,17 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                                 }
                             }}
                             autoComplete="off"
-                            className="w-full bg-transparent border-0 pl-2.5 pr-2 py-2 text-[var(--theme-text-primary)] text-xs font-medium outline-none placeholder:text-[var(--theme-text-secondary)]/60 min-h-[36px] sm:min-h-[42px]"
+                            className={`w-full pl-9 sm:pl-10 text-xs font-medium text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 border rounded-xl outline-none transition-all min-h-[36px] sm:min-h-[42px] py-2 ${
+                                packSearch && onGlobalScan ? 'pr-20 sm:pr-24' : packSearch ? 'pr-8 sm:pr-9' : 'pr-3'
+                            } ${
+                                scanSuccess
+                                    ? '!bg-emerald-500/5 border-emerald-500/50 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                                    : scanError
+                                        ? '!bg-red-500/5 border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                                        : '!bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20'
+                            }`}
                         />
-                        <div className="flex items-center gap-1 pr-2 shrink-0">
+                        <div className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 shrink-0 z-10">
                             {packSearch && (
                                 <button
                                     type="button"

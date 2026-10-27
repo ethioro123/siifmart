@@ -4,6 +4,7 @@ import { ArrowRight, SlidersHorizontal, RotateCcw, ArrowUpDown, Building2, Searc
 import { WMSJob, Site, Employee } from '../../../types';
 import { AssignJobCard } from './AssignJobCard';
 import { canWorkerPerformJob } from '../../../utils/fulfillmentRoles';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface AssignPendingJobsProps {
     workloads?: AssignmentWorkload[];
@@ -23,7 +24,7 @@ interface AssignPendingJobsProps {
     selectedJob: WMSJob | null;
     setSelectedJob: (job: WMSJob | null) => void;
     setIsDetailsOpen: (val: boolean) => void;
-    t: (key: string) => string;
+    t?: (key: string, params?: Record<string, any>) => string;
 }
 
 export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
@@ -43,9 +44,9 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     sites,
     selectedJob,
     setSelectedJob,
-    setIsDetailsOpen,
-    t
+    setIsDetailsOpen
 }) => {
+    const { t } = useLanguage();
     // Local filter and sorting states
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
     const [selectedSiteId, setSelectedSiteId] = useState<string>('ALL');
@@ -201,15 +202,51 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
         setSortDirection('asc');
     };
 
-    return <section aria-label="Assignment job queue" className="min-w-0 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-2 p-4 border-b border-[var(--theme-border)]"><div><h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Job queue <span className="ml-1 text-[var(--theme-text-secondary)]">{filteredActiveJobs.length}</span></h3><p className="mt-1 text-xs text-[var(--theme-text-secondary)]">Select a row to assign or reassign.</p></div><button type="button" aria-expanded={isAdvancedOpen} onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} className="min-h-[44px] rounded-lg border border-[var(--theme-border)] px-3 text-xs text-[var(--theme-text-primary)]">More filters</button></div>
-        <div className="flex flex-wrap gap-1 px-3 pt-3">{(['ALL','UNASSIGNED','ASSIGNED'] as const).map(filter => <button type="button" key={filter} aria-pressed={assignmentFilter === filter} onClick={() => setAssignmentFilter(filter)} className={`min-h-[44px] rounded-lg px-3 text-xs font-medium ${assignmentFilter === filter ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-secondary)]'}`}>{filter === 'ALL' ? 'All active' : filter === 'UNASSIGNED' ? 'Needs assignment' : 'Assigned'}</button>)}</div>
-        {isAdvancedOpen && <div className="p-3 flex flex-wrap gap-2 border-b border-[var(--theme-border)]">
-            <select aria-label="Filter by Location / Site" value={selectedSiteId} onChange={e => setSelectedSiteId(e.target.value)} className="min-h-[44px] min-w-0 max-w-full rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-2 text-xs text-[var(--theme-text-primary)]"><option value="ALL">All facilities</option>{sites.map(site => <option value={site.id} key={site.id}>{site.name}</option>)}</select>
-            <select aria-label="Filter by job size" value={jobSizeFilter} onChange={e => setJobSizeFilter(e.target.value as typeof jobSizeFilter)} className="min-h-[44px] rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-2 text-xs text-[var(--theme-text-primary)]"><option value="ALL">All sizes</option><option value="SMALL">Under 5 items</option><option value="MEDIUM">5–10 items</option><option value="LARGE">Over 10 items</option></select>
-            <button type="button" onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')} className="min-h-[44px] rounded-lg border border-[var(--theme-border)] px-3 text-xs text-[var(--theme-text-primary)]">Order: {sortDirection === 'asc' ? 'Ascending' : 'Descending'}</button>
-            <button type="button" onClick={handleClearFilters} className="min-h-[44px] px-3 text-xs text-[var(--theme-text-secondary)]">Reset filters</button>
-        </div>}
+    return <section aria-label={t('warehouse.jobQueueTitle')} className="min-w-0 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 p-4 border-b border-[var(--theme-border)]">
+            <div>
+                <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                    {t('warehouse.jobQueueTitle')} <span className="ml-1 text-[var(--theme-text-secondary)]">{filteredActiveJobs.length}</span>
+                </h3>
+                <p className="mt-1 text-xs text-[var(--theme-text-secondary)]">{t('warehouse.jobQueueSubtitle')}</p>
+            </div>
+            <button type="button" aria-expanded={isAdvancedOpen} onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} className="min-h-[44px] rounded-lg border border-[var(--theme-border)] px-3 text-xs text-[var(--theme-text-primary)] cursor-pointer">
+                {t('warehouse.moreFilters')}
+            </button>
+        </div>
+        <div className="flex flex-wrap gap-1 px-3 pt-3">
+            {(['ALL','UNASSIGNED','ASSIGNED'] as const).map(filter => (
+                <button
+                    type="button"
+                    key={filter}
+                    aria-pressed={assignmentFilter === filter}
+                    onClick={() => setAssignmentFilter(filter)}
+                    className={`min-h-[44px] rounded-lg px-3 text-xs font-medium cursor-pointer ${assignmentFilter === filter ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-secondary)]'}`}
+                >
+                    {filter === 'ALL' ? t('warehouse.allActiveFilter') : filter === 'UNASSIGNED' ? t('warehouse.needsAssignmentFilter') : t('warehouse.assignedFilter')}
+                </button>
+            ))}
+        </div>
+        {isAdvancedOpen && (
+            <div className="p-3 flex flex-wrap gap-2 border-b border-[var(--theme-border)]">
+                <select aria-label={t('warehouse.allFacilities')} value={selectedSiteId} onChange={e => setSelectedSiteId(e.target.value)} className="min-h-[44px] min-w-0 max-w-full rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-2 text-xs text-[var(--theme-text-primary)] cursor-pointer">
+                    <option value="ALL">{t('warehouse.allFacilities')}</option>
+                    {sites.map(site => <option value={site.id} key={site.id}>{site.name}</option>)}
+                </select>
+                <select aria-label={t('warehouse.allSizes')} value={jobSizeFilter} onChange={e => setJobSizeFilter(e.target.value as typeof jobSizeFilter)} className="min-h-[44px] rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-2 text-xs text-[var(--theme-text-primary)] cursor-pointer">
+                    <option value="ALL">{t('warehouse.allSizes')}</option>
+                    <option value="SMALL">{t('warehouse.under5Items')}</option>
+                    <option value="MEDIUM">{t('warehouse.items5To10')}</option>
+                    <option value="LARGE">{t('warehouse.over10Items')}</option>
+                </select>
+                <button type="button" onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')} className="min-h-[44px] rounded-lg border border-[var(--theme-border)] px-3 text-xs text-[var(--theme-text-primary)] cursor-pointer">
+                    {t('warehouse.orderDirection', { direction: sortDirection === 'asc' ? t('warehouse.ascendingWord') : t('warehouse.descendingWord') })}
+                </button>
+                <button type="button" onClick={handleClearFilters} className="min-h-[44px] px-3 text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] cursor-pointer">
+                    {t('warehouse.resetFilters')}
+                </button>
+            </div>
+        )}
         <div className="p-3 space-y-2 max-h-[65vh] overflow-y-auto">                {filteredActiveJobs.length > 0 ? (
                     filteredActiveJobs.map(job => {
                         const bestMatchEmployee = employees
