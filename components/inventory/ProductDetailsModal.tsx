@@ -1,3 +1,5 @@
+import {isLocationBarcode} from '../../utils/locationEncoder';
+import {formatLocationIdentity} from '../../utils/locationIdentity';
 import { ProductHandlingDetails } from './components/ProductHandlingDetails';
 import { FloorAuditTimeline } from '../fulfillment/discrepancies/FloorAuditTimeline';
 import React from 'react';
@@ -154,9 +156,9 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     ].filter(Boolean).join(' ');
 
     const allBarcodes = new Set<string>();
-    if (product.barcode) allBarcodes.add(product.barcode.trim());
+    if (product.barcode && !isLocationBarcode(product.barcode.trim())) allBarcodes.add(product.barcode.trim());
     if ((product as any).barcodes && Array.isArray((product as any).barcodes)) {
-        (product as any).barcodes.forEach((b: string) => { if (b?.trim()) allBarcodes.add(b.trim()); });
+        (product as any).barcodes.forEach((b: string) => { if (b?.trim() && !isLocationBarcode(b.trim())) allBarcodes.add(b.trim()); });
     }
     const barcodeList = Array.from(allBarcodes);
 
@@ -273,7 +275,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                 />
                                 <DetailField label="Expiry Date" value={product.expiryDate ? `${new Date(product.expiryDate).toLocaleDateString()}${expiryAlert ? ` (${expiryAlert})` : ''}` : null} icon={Calendar} colorClass={expiryColor || undefined} />
                                 <DetailField label="Shelf Position" value={product.shelfPosition} icon={Layers} />
-                                <DetailField label="Storage Location" value={product.location} icon={Building2} />
+                                <DetailField label="Storage Location" value={formatLocationIdentity(product.location)} icon={Building2} />
                                 <DetailField label="Date Registered" value={product.createdAt || (product as any).created_at ? new Date(product.createdAt || (product as any).created_at).toLocaleDateString() : null} icon={Clock} />
                                 {(product as any).salesVelocity && <DetailField label="Sales Velocity" value={(product as any).salesVelocity} icon={TrendingUp} />}
                             </div>

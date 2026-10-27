@@ -68,9 +68,10 @@ export const HR_STAFF_PERMISSIONS: Permission[] = [
 export const HEAD_OF_SUPPLY_CHAIN_PERMISSIONS: Permission[] = [
     'dashboard.view',
     'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
-    'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+    'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
     'procurement.view', 'procurement.edit_po', 'procurement.receive',
-    'sales.view', 'sales.view_reports'
+    'sales.view', 'sales.view_reports',
+    'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
 ];
 
 export const HEAD_OF_MERCHANDISING_PERMISSIONS: Permission[] = [

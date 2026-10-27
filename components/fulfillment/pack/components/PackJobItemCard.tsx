@@ -1,5 +1,6 @@
+import {formatLocationIdentity} from '../../../../utils/locationIdentity';
 import React from 'react';
-import { Package, CheckCircle, Barcode } from 'lucide-react';
+import { Package, CheckCircle } from 'lucide-react';
 import { WMSJob, Product } from '../../../../types';
 import { getProductForItem, getItemMeasureQty as getItemMeasureQtyShared } from '../utils/packItemHelpers';
 import { formatProductSize } from '../../../../utils/units';
@@ -73,10 +74,10 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                                     {formatProductSize(product || item)}
                                 </span>
                             )}
-                            {product?.barcode && (
+                            {(item?.location || product?.location) && (
                                 <div className="flex items-center gap-1 text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase font-mono hidden sm:flex shrink-0">
-                                    <Barcode size={11} />
-                                    {product.barcode}
+
+                                    {formatLocationIdentity(item?.location || product?.location)}
                                 </div>
                             )}
                         </div>

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Building2, Landmark, Warehouse, Store, Truck, UserCheck, Search, ShieldCheck, X } from 'lucide-react';
 import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
 import { isStagingQuickLoginAvailable, type FacilityTierType, type StagingSiteType, type StagingQuickAccount } from '../../utils/stagingQuickLogin';
-import { getSiteTheme, POPULAR_ROLE_CHIPS } from './quickLoginTheme';
+import { getSiteTheme, POPULAR_ROLE_CHIPS, WORK_LOCATION_ORDER } from './quickLoginTheme';
 export type { StagingQuickAccount } from '../../utils/stagingQuickLogin';
 
 interface CountryQuickLoginPanelProps {
@@ -103,7 +103,24 @@ export function CountryQuickLoginPanel({
       }
       groups[acc.siteCode].accounts.push(acc);
     }
-    return Object.values(groups);
+
+    // 1. Organize work locations by facility hierarchy & location name
+    const sortedGroups = Object.values(groups).sort((a, b) => {
+      const orderA = WORK_LOCATION_ORDER[a.siteType] ?? 99;
+      const orderB = WORK_LOCATION_ORDER[b.siteType] ?? 99;
+      if (orderA !== orderB) return orderA - orderB;
+      return a.siteName.localeCompare(b.siteName);
+    });
+
+    // 2. Inside each work location, organize accounts by ranking (Level 1..10)
+    for (const group of sortedGroups) {
+      group.accounts.sort((a, b) => {
+        if (a.level !== b.level) return a.level - b.level;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    return sortedGroups;
   }, [accounts, searchQuery, tierFilter, opsSiteFilter, levelFilter, roleFilter]);
 
   const totalFilteredAccounts = useMemo(() => {
@@ -414,11 +431,11 @@ export function CountryQuickLoginPanel({
                             {acc.role}
                           </span>
                           <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
-                            L{acc.level}
+                            Rank L{acc.level}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[10.5px] font-medium text-stone-600 dark:text-stone-300 truncate">
+                          <span className="text-[11px] font-bold text-stone-800 dark:text-stone-100 truncate">
                             {acc.name}
                           </span>
                         </div>

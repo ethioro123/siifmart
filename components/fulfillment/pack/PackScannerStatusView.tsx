@@ -1,8 +1,9 @@
+import {formatLocationIdentity} from '../../../utils/locationIdentity';
 import React from 'react';
 import {
     AlertTriangle,
     ArrowLeft,
-    Barcode,
+
     CheckCircle,
     Package,
     ScanLine,
@@ -166,10 +167,10 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                         <span className="rounded-lg border border-[var(--theme-accent)]/25 bg-[var(--theme-accent)]/10 px-2 py-0.5 text-xs sm:text-sm font-mono tabular-nums font-bold text-[var(--theme-accent)] break-all">
                             {item?.sku || product?.sku || 'SKU unavailable'}
                         </span>
-                        {product?.barcode && (
+                        {(item?.location || product?.location) && (
                             <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 text-xs sm:text-sm font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)] break-all">
-                                <Barcode size={12} className="shrink-0" />
-                                {product.barcode}
+
+                                {formatLocationIdentity(item?.location || product?.location)}
                             </span>
                         )}
                         {sizeText && (

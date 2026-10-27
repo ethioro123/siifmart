@@ -79,6 +79,14 @@ export function getSiteTheme(type: StagingSiteType): SiteTheme {
   }
 }
 
+export const WORK_LOCATION_ORDER: Record<StagingSiteType, number> = {
+  'HQ': 1,
+  'Regional Administration': 2,
+  'Distribution Center': 3,
+  'Warehouse': 4,
+  'Store': 5,
+};
+
 const MANAGER_AND_DIRECTOR_ROLE_CHIPS = SYSTEM_ROLES
   .filter(role => /\b(manager|director)\b/i.test(role.label))
   .map(({ id, label }) => ({ id, label }));

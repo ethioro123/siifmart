@@ -88,7 +88,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
 
     // ═══ LEVEL 5 - REGIONAL DEPARTMENT MANAGERS ═══
     regional_supply_chain_manager: [
-        'dashboard', 'admin', 'regional-ops', 'warehouse', 'inventory', 'procurement', 'employees', 'settings', 'profile'
+        'dashboard', 'regional-ops', 'warehouse', 'inventory', 'procurement', 'sales', 'employees', 'profile'
     ],
     regional_procurement_manager: [
         'dashboard', 'regional-ops', 'procurement', 'inventory', 'pricing', 'customers', 'profile'

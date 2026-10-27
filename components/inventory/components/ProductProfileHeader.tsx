@@ -1,3 +1,4 @@
+import {formatLocationIdentity} from '../../../utils/locationIdentity';
 import React from 'react';
 import {Package} from 'lucide-react';
 import type {Product} from '../../../types';
@@ -24,7 +25,7 @@ export function ProductProfileHeader({product,currencySymbol=CURRENCY_SYMBOL}:Pr
   </div>
   <dl className="grid grid-cols-2 gap-6 border-y border-[var(--theme-border)] py-5">
    <div><dt className="text-sm text-[var(--theme-text-secondary)]">Selling price</dt><dd className="mt-1 text-2xl font-medium tabular-nums">{product.price>0?`${currencySymbol} ${formatPriceValue(product.price)}`:'Not set'}</dd><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">per {getSellUnit(product.unit).shortLabel||'unit'}</p></div>
-   <div><dt className="text-sm text-[var(--theme-text-secondary)]">Available stock</dt><dd className="mt-1 text-2xl font-medium tabular-nums">{formatStockDisplay(stock,product)}</dd><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">{product.location||'No bay assigned'}</p></div>
+   <div><dt className="text-sm text-[var(--theme-text-secondary)]">Available stock</dt><dd className="mt-1 text-2xl font-medium tabular-nums">{formatStockDisplay(stock,product)}</dd><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">{formatLocationIdentity(product.location)}</p></div>
   </dl>
   {readiness&&<p className="rounded-lg bg-[var(--theme-bg-subtle)] px-4 py-3 text-sm">{readiness}{!(product.price>0)&&approval==='pending'?' · Selling price not set':''}</p>}
  </section>;

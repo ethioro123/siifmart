@@ -62,7 +62,7 @@ export default function Sidebar() {
   if (!user) return null;
 
   // Regional Scope & Dynamic Persona Navigation
-  const isRegionalStaff = isRegionalUser || user.scopeLevel === 'REGIONAL' || user.scope_level === 'REGIONAL' || ['regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user.role);
+  const isRegionalStaff = isRegionalUser || user.scopeLevel === 'REGIONAL' || user.scope_level === 'REGIONAL' || ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user.role);
 
   const targetRegionCode = activeRegionCode || user.regionCode || user.region_code;
   const activeRegion = (regions || []).find(r => r.code === targetRegionCode);
@@ -91,17 +91,17 @@ export default function Sidebar() {
       { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'regional_operations_manager', 'regional_logistics_manager', 'inventory_manager', 'regional_supply_chain_manager', 'fleet_maintenance_supervisor'] },
 
       // NETWORK INVENTORY - Executive & Supply Chain Leadership
-      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['group_ceo', 'country_managing_director', 'country_supply_chain_director', 'country_operations_director', 'country_compliance_manager', 'auditor', 'regional_operations_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'replenishment_planner', 'demand_planner'] },
+      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['group_ceo', 'country_managing_director', 'country_supply_chain_director', 'country_operations_director', 'country_compliance_manager', 'auditor', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'replenishment_planner', 'demand_planner'] },
 
       // INVENTORY - Strictly Warehouse & Distribution Center Only
-      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'warehouse_manager', 'dispatcher', 'dispatch_supervisor', 'country_compliance_manager', 'auditor', 'inventory_specialist', 'regional_operations_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'regional_security_manager', 'inventory_manager', 'inbound_qc_inspector', 'replenishment_planner', 'demand_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'] },
+      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'warehouse_manager', 'dispatcher', 'dispatch_supervisor', 'country_compliance_manager', 'auditor', 'inventory_specialist', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'regional_security_manager', 'inventory_manager', 'inbound_qc_inspector', 'replenishment_planner', 'demand_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'] },
 
       // FULFILLMENT (WMS) - Warehouse staff & operations leadership
       { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'warehouse_manager', 'dispatch_supervisor', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'regional_operations_manager', 'regional_logistics_manager', 'inventory_manager', 'regional_supply_chain_manager', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor'] },
       { to: "/online-store", icon: Globe, label: "Online Operations", section: "warehouse", roles: ['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_operations_director', 'regional_supply_chain_manager', 'regional_logistics_manager'] },
 
       // PROCUREMENT - Corporate administration, procurement & operational leadership
-      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'country_finance_director', 'country_supply_chain_director', 'country_operations_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'replenishment_planner'] },
+      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'country_finance_director', 'country_supply_chain_director', 'country_operations_director', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'replenishment_planner'] },
       { to: "/purchase-requests", icon: ClipboardList, label: "Purchase Requests", section: "requests", roles: Object.keys(ACTION_PERMISSIONS) },
 
       // ROADMAP - CEO Only (Confidential Strategic Canvas)
@@ -133,7 +133,7 @@ export default function Sidebar() {
       { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'store_manager', 'assistant_store_manager', 'shift_supervisor', 'cashier', 'regional_operations_manager', 'regional_finance_manager', 'regional_security_manager', 'country_compliance_manager', 'auditor', 'store_operations_auditor'] },
 
       // SALES - Management & Auditing (Cashiers blocked from historical revenue)
-      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_supply_chain_director', 'country_compliance_manager', 'auditor', 'store_manager', 'assistant_store_manager', 'shift_supervisor', 'cs_manager', 'regional_operations_manager', 'regional_finance_manager', 'regional_security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'demand_planner', 'replenishment_planner', 'store_operations_auditor'] },
+      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_supply_chain_director', 'country_compliance_manager', 'auditor', 'store_manager', 'assistant_store_manager', 'shift_supervisor', 'cs_manager', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_finance_manager', 'regional_security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'demand_planner', 'replenishment_planner', 'store_operations_auditor'] },
 
       // MERCHANDISING
       { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'country_finance_director', 'country_operations_director', 'merchandiser', 'regional_operations_manager', 'regional_procurement_manager', 'store_operations_auditor'] },
@@ -145,7 +145,7 @@ export default function Sidebar() {
       { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'store_manager', 'assistant_store_manager', 'shift_supervisor', 'cashier', 'sales_associate', 'cs_manager', 'regional_operations_manager', 'regional_procurement_manager', 'credit_control_officer'] },
 
       // EMPLOYEES - Corporate HR & Operations Executive Suite only (Site managers onboard via POS Command & WMS Dashboard)
-      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['group_ceo', 'country_managing_director', 'country_hr_director', 'hr_generalist', 'country_operations_director', 'regional_operations_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter'] },
+      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['group_ceo', 'country_managing_director', 'country_hr_director', 'hr_generalist', 'country_operations_director', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter'] },
 
       // SETTINGS
       { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director', 'country_technology_director', 'it_support', 'country_compliance_manager', 'auditor', 'regional_security_manager', 'regional_operations_manager'] },
@@ -185,7 +185,7 @@ export default function Sidebar() {
         // Departmental specialists and regional officers retain access to their respective modules.
         const isMerchandisingSpecialist = item.section === 'pricing' && ['country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_procurement_manager', 'regional_operations_manager'].includes(userRole);
         const isFinanceSpecialist = item.section === 'finance' && ['country_finance_director', 'regional_finance_manager', 'regional_operations_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'country_compliance_manager', 'auditor'].includes(userRole);
-        const isSalesSpecialist = item.section === 'sales' && ['regional_finance_manager', 'regional_security_manager', 'regional_operations_manager', 'country_compliance_manager', 'auditor', 'store_operations_auditor'].includes(userRole);
+        const isSalesSpecialist = item.section === 'sales' && ['regional_finance_manager', 'regional_security_manager', 'regional_operations_manager', 'regional_supply_chain_manager', 'country_supply_chain_director', 'demand_planner', 'replenishment_planner', 'country_compliance_manager', 'auditor', 'store_operations_auditor'].includes(userRole);
         const isSettingsSpecialist = item.section === 'settings' && ['regional_security_manager', 'regional_operations_manager', 'country_technology_director', 'it_support', 'country_compliance_manager', 'auditor', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director'].includes(userRole);
         const isCustomersSpecialist = item.section === 'customers' && ['regional_procurement_manager', 'regional_operations_manager', 'cs_manager'].includes(userRole);
         const isPosCommandSpecialist = item.to === '/pos-dashboard' && ['regional_finance_manager', 'regional_security_manager', 'regional_operations_manager', 'store_operations_auditor'].includes(userRole);
@@ -195,7 +195,7 @@ export default function Sidebar() {
             isAllowedForSite = false;
           }
         }
-        if (item.to === '/network-inventory' && !['regional_operations_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'country_supply_chain_director', 'replenishment_planner'].includes(userRole) && !isExecutive) {
+        if (item.to === '/network-inventory' && !['regional_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'country_supply_chain_director', 'replenishment_planner'].includes(userRole) && !isExecutive) {
           isAllowedForSite = false;
         }
         if (item.to === '/roadmap') {
@@ -209,7 +209,7 @@ export default function Sidebar() {
         // ═══ STORE / POS SITE CONTEXT ═══
         // Store Manager view: POS Terminal, POS Command, Sales, Customers, Staff.
         // POS sites strictly DO NOT have access to inventory for store staff (strictly for warehouse and distribution center).
-        const isRegionalInventoryOrLogistics = ['regional_operations_manager', 'regional_logistics_manager', 'regional_procurement_manager', 'regional_security_manager', 'country_supply_chain_director', 'replenishment_planner'].includes(userRole);
+        const isRegionalInventoryOrLogistics = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_logistics_manager', 'regional_procurement_manager', 'regional_security_manager', 'country_supply_chain_director', 'replenishment_planner'].includes(userRole);
 
         if ((item.to === '/inventory' || item.section === 'inventory' || item.to === '/network-inventory') && !isRegionalInventoryOrLogistics && !isExecutive) {
           isAllowedForSite = false;
@@ -220,7 +220,7 @@ export default function Sidebar() {
 
         const isMerchandisingSpecialist = item.section === 'pricing' && ['country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_procurement_manager', 'regional_operations_manager'].includes(userRole);
         const isFinanceSpecialist = item.section === 'finance' && ['country_finance_director', 'regional_finance_manager', 'regional_operations_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'country_compliance_manager', 'auditor'].includes(userRole);
-        const isProcurementSpecialist = item.section === 'procurement' && ['country_commercial_director', 'country_finance_director', 'country_supply_chain_director', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_operations_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
+        const isProcurementSpecialist = item.section === 'procurement' && ['country_commercial_director', 'country_finance_director', 'country_supply_chain_director', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_operations_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
         const isWarehouseSpecialist = item.section === 'warehouse' && ['regional_logistics_manager', 'regional_operations_manager', 'country_supply_chain_director', 'regional_supply_chain_manager'].includes(userRole);
         const isSettingsSpecialist = item.section === 'settings' && ['regional_security_manager', 'regional_operations_manager', 'country_technology_director', 'it_support', 'country_compliance_manager', 'auditor', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director'].includes(userRole);
 
@@ -241,10 +241,10 @@ export default function Sidebar() {
         if (item.to === '/pos') {
           isAllowedForSite = false;
         }
-        if (item.to === '/wms-ops' && userRole !== 'regional_logistics_manager') {
+        if (item.to === '/wms-ops' && !['regional_logistics_manager', 'regional_supply_chain_manager', 'country_supply_chain_director'].includes(userRole)) {
           isAllowedForSite = false;
         }
-        if (item.to === '/inventory' && !['regional_logistics_manager', 'regional_security_manager'].includes(userRole)) {
+        if (item.to === '/inventory' && !['regional_logistics_manager', 'regional_supply_chain_manager', 'regional_security_manager'].includes(userRole)) {
           // In HQ, local single-facility inventory is replaced by Network View
           isAllowedForSite = false;
         }

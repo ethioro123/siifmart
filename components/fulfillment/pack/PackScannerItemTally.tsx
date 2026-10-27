@@ -1,5 +1,6 @@
+import {formatLocationIdentity} from '../../../utils/locationIdentity';
 import React from 'react';
-import { Barcode, CheckCircle, Clock, Package } from 'lucide-react';
+import { CheckCircle, Clock, Package } from 'lucide-react';
 import { Product } from '../../../types';
 import { formatProductSize } from '../../../utils/units';
 
@@ -66,10 +67,10 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                                             <span className="text-[11px] font-mono tabular-nums font-semibold text-[var(--theme-accent)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded uppercase">
                                                 {item.sku || product?.sku}
                                             </span>
-                                            {product?.barcode && (
+                                            {(item?.location || product?.location) && (
                                                 <span className="text-[10px] font-mono tabular-nums text-[var(--theme-text-secondary)] flex items-center gap-1">
-                                                    <Barcode size={10} />
-                                                    {product.barcode}
+
+                                                    {formatLocationIdentity(item?.location || product?.location)}
                                                 </span>
                                             )}
                                             {sizeLabel && (

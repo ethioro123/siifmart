@@ -1,3 +1,4 @@
+import {formatLocationIdentity} from '../../../utils/locationIdentity';
 import React from 'react';
 import { Building2 } from 'lucide-react';
 import { Product } from '../../../types';
@@ -52,7 +53,7 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
                                     <span className="text-[11px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-[var(--theme-accent)] text-white">This Store</span>
                                 )}
                             </div>
-                            <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5 truncate">Shelf / Bin: {loc.location}</p>
+                            <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5 truncate">{formatLocationIdentity(loc.location)}</p>
                         </div>
                         <div className="text-right shrink-0">
                             <p className={`text-xs font-bold font-mono ${loc.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Building2, Warehouse, Store, Truck, ChevronDown, ChevronUp, ShieldCheck, UserCheck, Search, X } from 'lucide-react';
 import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
 import { isStagingQuickLoginAvailable, type StagingQuickAccount, type StagingSiteType } from '../../utils/stagingQuickLogin';
-import { getSiteTheme, POPULAR_ROLE_CHIPS } from './quickLoginTheme';
+import { getSiteTheme, POPULAR_ROLE_CHIPS, WORK_LOCATION_ORDER } from './quickLoginTheme';
 export { checkIsLocalhost } from '../../utils/stagingQuickLogin';
 
 interface StagingSiteGroup {
@@ -114,7 +114,24 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
       }
       groups[acc.siteCode].accounts.push(acc);
     }
-    return Object.values(groups);
+
+    // 1. Organize work locations by facility hierarchy & location name
+    const sortedGroups = Object.values(groups).sort((a, b) => {
+      const orderA = WORK_LOCATION_ORDER[a.siteType] ?? 99;
+      const orderB = WORK_LOCATION_ORDER[b.siteType] ?? 99;
+      if (orderA !== orderB) return orderA - orderB;
+      return a.siteName.localeCompare(b.siteName);
+    });
+
+    // 2. Inside each work location, organize accounts by ranking (Level 1..10)
+    for (const group of sortedGroups) {
+      group.accounts.sort((a, b) => {
+        if (a.level !== b.level) return a.level - b.level;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    return sortedGroups;
   }, [accounts, countryFilter, roleFilter, searchQuery]);
 
   const totalFilteredAccounts = useMemo(() => {
@@ -305,13 +322,13 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                             </span>
                             <div className="flex items-center gap-1 shrink-0">
                               <span className={`text-[8px] font-bold px-1 py-0.2 rounded shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
-                                L{acc.level}
+                                Rank L{acc.level}
                               </span>
                               <UserCheck size={10} className="text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
                             </div>
                           </div>
                           <div className="flex items-center justify-between w-full mt-1">
-                            <span className="text-[10px] font-medium text-stone-600 dark:text-stone-300 truncate max-w-[130px]">
+                            <span className="text-[10px] font-bold text-stone-800 dark:text-stone-100 truncate max-w-[130px]">
                               {acc.name}
                             </span>
                             <span className="text-[8px] font-mono tabular-nums text-stone-400 dark:text-stone-500 shrink-0">
