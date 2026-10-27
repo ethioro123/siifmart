@@ -287,7 +287,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 className="min-h-[44px] px-3.5 sm:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 hover:border-[var(--theme-accent)]/30 transition-colors active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 <ArrowLeft size={16} />
-                                <span>Back</span>
+                                <span>{t('warehouse.back') || 'Back'}</span>
                             </button>
                         )}
 
@@ -301,10 +301,10 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                     }
                                 }}
                                 className="min-h-[44px] px-2.5 sm:px-3.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors active:scale-95 cursor-pointer touch-manipulation"
-                                title="Delete Job"
+                                title={t('common.delete') || 'Delete'}
                             >
                                 <Trash2 size={14} />
-                                <span className="hidden sm:inline">Delete</span>
+                                <span className="hidden sm:inline">{t('common.delete') || 'Delete'}</span>
                             </button>
                         )}
                     </div>
@@ -317,7 +317,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 className="min-h-[48px] px-4 sm:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 <Package size={16} />
-                                <span>Start Scanning</span>
+                                <span>{t('warehouse.picking.startScanning') || 'Start Scanning'}</span>
                             </button>
                         )}
 
@@ -328,7 +328,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 onClick={() => isFullyPicked ? setStep('STAGING') : onStartPick(job)}
                                 className="min-h-[44px] px-4 sm:px-7 rounded-xl font-semibold text-xs md:text-sm flex items-center gap-2 bg-[var(--theme-accent)] text-white disabled:opacity-50"
                             >
-                                <span>{isFullyPicked ? 'Review handover' : 'Start scanning'}</span>
+                                <span>{isFullyPicked ? (t('warehouse.picking.reviewHandover') || 'Review handover') : (t('warehouse.picking.startScanning') || 'Start scanning')}</span>
                                 <ArrowRight size={16} />
                             </button>
                         )}
@@ -345,7 +345,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 ) : (
                                     <>
                                         <CheckCircle size={16} />
-                                        <span>Complete picking</span>
+                                        <span>{t('warehouse.picking.completePicking') || 'Complete picking'}</span>
                                     </>
                                 )}
                             </button>
