@@ -219,7 +219,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     );
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Product details" size="lg" footer={modalFooter}>
+        <Modal isOpen={isOpen} onClose={onClose} title="Product details" size="xl" footer={modalFooter}>
             <div className="flex flex-col gap-1 text-[var(--theme-text-primary)]">
                 {/* Executive Hero Product Profile Header */}
                 <ProductProfileHeader product={product} showCostPrice={showCostPrice} currencySymbol={activeCurrency} />
