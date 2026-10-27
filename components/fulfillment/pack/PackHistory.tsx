@@ -168,7 +168,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                 {t('warehouse.history') || 'Pack History'}
                             </h4>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
-                                {filteredHistory.length} {filteredHistory.length === 1 ? 'record' : 'records'}
+                                {filteredHistory.length} {filteredHistory.length === 1 ? (t('warehouse.recordSingular') || 'record') : (t('warehouse.recordPlural') || 'records')}
                             </p>
                         </div>
                     </div>
@@ -192,7 +192,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                             <button
                                 onClick={() => setSearch('')}
                                 className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]"
-                                aria-label="Clear search"
+                                aria-label={t('warehouse.clearSearch') || 'Clear search'}
                             >
                                 <X size={14} />
                             </button>
@@ -211,7 +211,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30'
                         }`}
                     >
-                        All ({historicalJobs.filter((j: WMSJob) => j.type === 'PACK').length})
+                        {t('warehouse.allStatus') || 'All'} ({historicalJobs.filter((j: WMSJob) => j.type === 'PACK').length})
                     </button>
                     <button
                         type="button"
@@ -222,7 +222,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                 : 'bg-[var(--theme-bg-subtle)] text-emerald-600 dark:text-emerald-400 border-[var(--theme-border)] hover:border-emerald-500/30'
                         }`}
                     >
-                        Completed ({completedCount})
+                        {t('warehouse.completed') || 'Completed'} ({completedCount})
                     </button>
                     {returnedCount > 0 && (
                         <button
@@ -234,7 +234,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                     : 'bg-[var(--theme-bg-subtle)] text-red-600 dark:text-red-400 border-[var(--theme-border)] hover:border-red-500/30'
                             }`}
                         >
-                            With Returns ({returnedCount})
+                            {t('warehouse.withReturns') || 'With Returns'} ({returnedCount})
                         </button>
                     )}
                 </div>
@@ -286,7 +286,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                             </span>
                                             {job.hasReturns && (
                                                 <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
-                                                    Returned
+                                                    {t('warehouse.packing.returned') || 'Returned'}
                                                 </span>
                                             )}
                                             <ChevronRight size={16} className="text-[var(--theme-text-secondary)] sm:hidden" />
