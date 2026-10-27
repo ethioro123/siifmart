@@ -19,20 +19,6 @@ import { useData } from '../../contexts/DataContext';
 import { Protected } from '../Protected';
 import { MobileTabSelector, DesktopTabSelector } from './TabSelectors';
 import { ScannerInterface } from './ScannerInterface';
-import { WasteTab } from './WasteTab';
-import { DriverTab } from './DriverTab';
-import { PutawayTab } from './PutawayTab';
-import { ReplenishTab } from './ReplenishTab';
-import { DocksTab } from './DocksTab';
-import { CountTab } from './CountTab';
-import { ReturnsTab } from './ReturnsTab';
-import { PackTab } from './PackTab';
-import { PickTab } from './PickTab';
-import { ReceiveTab } from './ReceiveTab';
-import { AssignTask } from './AssignTask';
-import { LabelsTab } from './LabelsTab';
-
-import { TransferTab } from './TransferTab';
 import { CURRENCY_SYMBOL } from '../../constants';
 // Services are likely needed for props passage or use context
 import { purchaseOrdersService } from '../../services/supabase.service'; // Needed for DocksTab
@@ -41,6 +27,21 @@ import { inventoryRequestsService } from '../../services/supabase.service'; // N
 import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator'; // Needed for DocksTab
 import { getVisibleFulfillmentTabs, getDefaultFulfillmentTab } from '../../utils/fulfillmentTabPermissions';
 import { logger } from '../../utils/logger';
+
+// Lazy-loaded tab components to isolate bundle transforms and enforce egress efficiency
+const WasteTab = React.lazy(() => import('./WasteTab').then(m => ({ default: m.WasteTab })));
+const DriverTab = React.lazy(() => import('./DriverTab').then(m => ({ default: m.DriverTab })));
+const PutawayTab = React.lazy(() => import('./PutawayTab').then(m => ({ default: m.PutawayTab })));
+const ReplenishTab = React.lazy(() => import('./ReplenishTab').then(m => ({ default: m.ReplenishTab })));
+const DocksTab = React.lazy(() => import('./DocksTab').then(m => ({ default: m.DocksTab })));
+const CountTab = React.lazy(() => import('./CountTab').then(m => ({ default: m.CountTab })));
+const ReturnsTab = React.lazy(() => import('./ReturnsTab').then(m => ({ default: m.ReturnsTab })));
+const PackTab = React.lazy(() => import('./PackTab').then(m => ({ default: m.PackTab })));
+const PickTab = React.lazy(() => import('./PickTab').then(m => ({ default: m.PickTab })));
+const ReceiveTab = React.lazy(() => import('./ReceiveTab').then(m => ({ default: m.ReceiveTab })));
+const AssignTask = React.lazy(() => import('./AssignTask').then(m => ({ default: m.AssignTask })));
+const LabelsTab = React.lazy(() => import('./LabelsTab').then(m => ({ default: m.LabelsTab })));
+const TransferTab = React.lazy(() => import('./TransferTab').then(m => ({ default: m.TransferTab })));
 
 export const FulfillmentContent: React.FC = () => {
     const {
