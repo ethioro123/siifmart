@@ -1,6 +1,8 @@
 import type { Product, PurchaseOrder, SaleRecord } from '../types';
 import type { TransferRecord } from '../types/infrastructure';
-import { computeProductSalesMetrics, type ProductSalesMetrics } from './merchandisingAnalytics';
+import { productOrderUnits } from './productControlLogic';
+import { orderCostFromSellUnit } from './productCosts';
+import { type ProductSalesMetrics } from './merchandisingAnalytics';
 
 export interface ConsolidatedProductInventory {
     sku: string;
@@ -87,6 +89,7 @@ export function consolidateInventoryBySku(
     const groups = new Map<string, { primary: Product; lots: Product[] }>();
 
     for (const p of products || []) {
+        if (scopedSiteId && p.siteId !== scopedSiteId) continue;
         if (p.status === 'archived' || p.name?.startsWith('Test') || p.sku?.startsWith('TEST')) {
             continue;
         }
@@ -138,14 +141,14 @@ export function consolidateInventoryBySku(
         // Gap 8: Explicit minimum of zero is strictly preserved and never coerced to default 15
         const minThreshold = (typeof primary.minStock === 'number' && !isNaN(primary.minStock))
             ? Math.max(0, Math.round(primary.minStock))
-            : 15;
+            : 0;
 
         // Gap 7: Calculate On-Order pipeline from open purchase orders
         let onOrderStock = 0;
-        const openPoStatuses = new Set(['Submitted', 'Pending', 'Approved', 'Ordered', 'Partially Received']);
+        const openPoStatuses = new Set(['Approved', 'Ordered', 'Partially Received']);
         for (const po of openPOs) {
             if (!openPoStatuses.has(po.status)) continue;
-            if (siteId && po.siteId && po.siteId !== siteId) continue;
+            if (siteId && po.siteId !== siteId) continue;
 
             for (const item of po.lineItems || []) {
                 const matchesSku = Boolean(sku && item.sku && item.sku.toUpperCase() === sku.toUpperCase());
@@ -161,11 +164,11 @@ export function consolidateInventoryBySku(
         // Gap 7: Calculate In-Transit pipeline from active incoming transfers
         let inTransitStock = 0;
         const activeTransferStatuses = new Set([
-            'Requested', 'Approved', 'Picking', 'Packed', 'Shipped', 'Dispatched', 'In-Transit'
+            'Shipped', 'Dispatched', 'In-Transit'
         ]);
         for (const transfer of openTransfers) {
             if (!activeTransferStatuses.has(transfer.status || (transfer as any).transferStatus)) continue;
-            if (siteId && transfer.destSiteId && transfer.destSiteId !== siteId) continue;
+            if (siteId && transfer.destSiteId !== siteId) continue;
 
             for (const item of transfer.items || []) {
                 const matchesSku = Boolean(sku && item.sku && item.sku.toUpperCase() === sku.toUpperCase());
@@ -177,7 +180,7 @@ export function consolidateInventoryBySku(
             }
         }
 
-        const reservedStock = Math.max(0, primary.customAttributes?.reserved || 0);
+        const reservedStock = lots.reduce((sum, lot) => sum + Math.max(0, Number(lot.customAttributes?.reserved) || 0), 0);
         const effectiveInventory = (availableStock - reservedStock) + onOrderStock + inTransitStock;
 
         consolidatedList.push({
@@ -214,14 +217,14 @@ export function computeWeeklyDemand(
     let totalSales = 0;
 
     for (const sale of salesHistory || []) {
-        if (!sale.status || EXCLUDED_SALE_STATUSES.has(sale.status)) continue;
+        if (sale.status !== 'Completed') continue;
 
         // Border and Site isolation
         const sCountry = sale.countryCode || (sale as any).country_code || (sale as any).country;
         if (countryCode && sCountry && countryCode.toUpperCase() !== sCountry.toUpperCase()) continue;
 
         const sSiteId = sale.siteId || (sale as any).site_id;
-        if (siteId && sSiteId && siteId !== sSiteId) continue;
+        if (siteId && siteId !== sSiteId) continue;
 
         const saleDate = new Date(sale.date || (sale as any).createdAt || (sale as any).created_at || 0).getTime();
         const ageMs = nowMs - saleDate;
@@ -267,48 +270,15 @@ export function generateDemandChartData(
         };
     }
 
-    const mean = weeklyActuals.reduce((a, b) => a + b, 0) / 4;
-    const variance = weeklyActuals.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / 4;
-    const stdDev = Math.sqrt(variance);
-
-    // Linear regression on weeks [1, 2, 3, 4]
-    const x = [1, 2, 3, 4];
-    const y = weeklyActuals;
-    const sumX = 10;
-    const sumY = y.reduce((a, b) => a + b, 0);
-    const sumXY = x.reduce((acc, xi, idx) => acc + xi * y[idx], 0);
-    const sumX2 = 30;
-    const slope = (4 * sumXY - sumX * sumY) / (4 * sumX2 - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / 4;
-
-    const cv = mean > 0 ? stdDev / mean : 1;
-    // Real statistical confidence: higher when demand variability (CV) is low
-    const rawConfidence = Math.max(20, Math.min(96, Math.round((1 - Math.min(0.8, cv)) * 100)));
-
-    const predict = (w: number) => Math.max(0, Math.round(slope * w + intercept));
-
-    const w5 = predict(5);
-    const w6 = predict(6);
-    const w7 = predict(7);
-    const w8 = predict(8);
-
-    const band = Math.round(stdDev);
-
-    const chartData: ForecastDemandPoint[] = [
-        { period: 'Week 1', actual: weeklyActuals[0], predicted: null },
-        { period: 'Week 2', actual: weeklyActuals[1], predicted: null },
-        { period: 'Week 3', actual: weeklyActuals[2], predicted: null },
-        { period: 'Week 4', actual: weeklyActuals[3], predicted: weeklyActuals[3] },
-        { period: 'Week 5', actual: null, predicted: w5, confidenceLow: Math.max(0, w5 - band), confidenceHigh: w5 + band },
-        { period: 'Week 6', actual: null, predicted: w6, confidenceLow: Math.max(0, w6 - band), confidenceHigh: w6 + band },
-        { period: 'Week 7', actual: null, predicted: w7, confidenceLow: Math.max(0, w7 - band), confidenceHigh: w7 + band },
-        { period: 'Week 8', actual: null, predicted: w8, confidenceLow: Math.max(0, w8 - band), confidenceHigh: w8 + band }
-    ];
-
+    const mean = weeklyActuals.reduce((a, b) => a + b, 0) / weeklyActuals.length;
+    // Four observations cannot establish predictive accuracy. Use a transparent baseline.
     return {
-        chartData,
-        confidencePct: rawConfidence,
-        confidenceLabel: `${rawConfidence}% (CV ${(cv * 100).toFixed(0)}%)`
+        chartData: [
+            ...weeklyActuals.map((actual, i) => ({ period: `Week ${i + 1}`, actual, predicted: null })),
+            ...Array.from({ length: 4 }, (_, i) => ({ period: `Week ${i + 5}`, actual: null, predicted: Math.round(mean) })),
+        ],
+        confidencePct: null,
+        confidenceLabel: 'Baseline · accuracy not validated',
     };
 }
 
@@ -326,23 +296,20 @@ export function buildReplenishmentQueue(
         const { primaryProduct: p, onHand, onOrderStock, inTransitStock, reservedStock, effectiveInventory, minThreshold } = item;
         const metrics = salesMetricsIndex.get(p.id);
 
-        const runRate = metrics?.dailyRunRate || 0;
+        const runRate = (metrics?.unitsSold30d || 0) / 30;
         const unitsSold30d = metrics?.unitsSold30d || 0;
-        const leadTimeDays = Math.max(1, Math.round(p.customAttributes?.logistics?.leadTimeDays || 7));
+        const leadTimeDays = Math.max(0, Math.round(p.customAttributes?.logistics?.leadTimeDays || 0));
         const leadTimeDemand = Math.round(runRate * leadTimeDays);
 
-        // Safety stock: based on daily run rate or fallback to minThreshold
-        const safetyStock = runRate > 0
-            ? Math.round(runRate * 3)
-            : Math.round(minThreshold * 0.5);
-
-        const reorderPoint = Math.max(minThreshold, leadTimeDemand + safetyStock);
-        const predictedDemand30d = runRate > 0 ? unitsSold30d : minThreshold * 2;
-        const targetInventory = Math.max(minThreshold * 2, reorderPoint + (runRate > 0 ? predictedDemand30d : minThreshold));
+        const safetyStock = minThreshold;
+        const reorderPoint = Math.max(minThreshold, leadTimeDemand);
+        const predictedDemand30d = Math.round(unitsSold30d);
+        let targetInventory = Math.max(minThreshold, predictedDemand30d + leadTimeDemand);
+        if (p.maxStock !== undefined && p.maxStock > 0) targetInventory = Math.min(targetInventory, p.maxStock);
 
         // Calculate replenish deficit based on effective net inventory
         let deficit = 0;
-        if (effectiveInventory <= reorderPoint) {
+        if (effectiveInventory < targetInventory) {
             deficit = Math.max(0, targetInventory - effectiveInventory);
         }
 
@@ -356,14 +323,16 @@ export function buildReplenishmentQueue(
         if (suggestedBuySellable <= 0) continue;
 
         // Gap 5: Calculate pack multipliers accurately for PO creation
-        const packSize = p.packQuantity && p.packQuantity > 1 ? Math.round(p.packQuantity) : 1;
+        const packSize = productOrderUnits(p);
+        if (!Number.isFinite(packSize) || packSize <= 0) continue;
         const suggestedBuyPacks = Math.ceil(suggestedBuySellable / packSize);
-        const effectiveOrderedUnits = suggestedBuyPacks * packSize;
+        const effectiveOrderedUnits = Math.round(suggestedBuyPacks * packSize);
+        if (p.maxStock && effectiveInventory + effectiveOrderedUnits > p.maxStock) continue;
 
         // Gap 6: Unsupported cost guessing (70% or 50) is strictly eliminated
         const unitCost = (typeof p.costPrice === 'number' && p.costPrice > 0) ? p.costPrice : 0;
         const costUnrecorded = unitCost === 0;
-        const orderUnitCost = unitCost * packSize;
+        const orderUnitCost = orderCostFromSellUnit(unitCost, packSize);
         const totalCost = Math.round(suggestedBuyPacks * orderUnitCost * 100) / 100;
 
         // Gap 12: Factual reasoning based strictly on observed data

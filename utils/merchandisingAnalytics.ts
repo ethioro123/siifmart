@@ -32,43 +32,26 @@ export const computeProductSalesMetrics = (
     let revenue30d = 0;
     let matchedOrderCount = 0;
 
-    const EXCLUDED_STATUSES = new Set([
-        'Pending', 'pending',
-        'Refunded', 'refunded',
-        'Cancelled', 'cancelled',
-        'Draft', 'draft',
-        'Void', 'void',
-        'Rejected', 'rejected'
-    ]);
-
     for (const order of orders) {
-        if (!order.status || EXCLUDED_STATUSES.has(order.status)) continue;
-
-        // Multi-Country Sovereignty: Kenya and Ethiopia data never query or merge across borders
-        const orderCountry = (order as any).countryCode || (order as any).country_code || (order as any).country;
-        const productCountry = (product as any).countryCode || (product as any).country_code || (product as any).country;
-        if (productCountry && orderCountry && productCountry.toUpperCase() !== orderCountry.toUpperCase()) {
-            continue;
-        }
-
-        // Zero-Trust Site Isolation: Prevent another location's sales from inflating this location's forecast
-        const orderSiteId = order.siteId || (order as any).site_id;
-        const productSiteId = product.siteId || (product as any).site_id;
-        if (productSiteId && orderSiteId && productSiteId !== orderSiteId) {
-            continue;
-        }
+        // Partial refunds lack line-level returned quantities here; never count their gross units.
+        if (order.status !== 'Completed') continue;
+        const orderCountry = order.countryCode || order.country_code;
+        const productCountry = product.countryCode || product.country_code;
+        if (productCountry && orderCountry && productCountry.toUpperCase() !== orderCountry.toUpperCase()) continue;
+        if (product.siteId && (order.siteId || order.site_id) !== product.siteId) continue;
 
         const orderDate = new Date(order.date || order.createdAt || (order as { created_at?: string }).created_at || 0).getTime();
         const ageMs = nowMs - orderDate;
 
-        if (ageMs < 0 || ageMs > ms30d) continue;
+        if (!Number.isFinite(orderDate) || ageMs < 0 || ageMs > ms30d) continue;
 
         for (const item of order.items || []) {
             const matchesId = item.id === product.id || item.productId === product.id;
             const matchesSku = !!product.sku && item.sku === product.sku;
 
             if (matchesId || matchesSku) {
-                const qty = item.quantity || 0;
+                const qty = Number(item.quantity);
+                if (!Number.isFinite(qty) || qty <= 0) continue;
                 const itemPrice = item.salePrice && item.salePrice > 0 ? item.salePrice : item.price || 0;
 
                 unitsSold30d += qty;
@@ -99,7 +82,7 @@ export const computeProductSalesMetrics = (
         effectiveVelocity = (product.salesVelocity as 'High' | 'Medium' | 'Low') || 'Low';
     }
 
-    const stockoutRisk = stock > 0 && daysOfSupply < 7;
+    const stockoutRisk = matchedOrderCount > 0 && daysOfSupply < 7;
     const needsMarkdown = (daysOfSupply > 60 || effectiveVelocity === 'Low') && stock > 20;
 
     return {
