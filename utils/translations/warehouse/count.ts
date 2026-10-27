@@ -1,30 +1,35 @@
 import { TranslationBlock } from '../types';
 
-export const count: TranslationBlock = {
+export const count: any = {
+    // Leaf translation for the key "count" itself (e.g. t('warehouse.count'))
+    en: 'Count',
+    am: 'ቆጠራ',
+    or: 'Lakkoofsa Meeshaa',
+
     inventoryAuditTitle: {
         en: 'Inventory Audit & Cycle Counting',
         am: 'የዕቃ ቆጠራ እና የዑደት ቆጠራ',
-        or: 'Herrega Kuusaa & Lakkoofsa Marsaa'
+        or: 'Qorannoo Kuusaa & Lakkoofsa Marsaa'
     },
     startCountSession: {
         en: 'Start a new count session',
         am: 'አዲስ የቆጠራ ክፍለ ጊዜ ይጀምሩ',
-        or: 'Kifl-samayii lakkoofsa haaraa jalqabi'
+        or: 'Yeroo lakkoofsaa haaraa jalqabi'
     },
     blindCountInProgress: {
         en: 'BLIND COUNT IN PROGRESS',
         am: 'ዕውር ቆጠራ በመካሄድ ላይ ነው',
-        or: 'LAKKOOFSA DHOKSAA ADEEMSA IRRA JIRA'
+        or: 'LAKKOOFSA IJA-CUFAA HOJII IRRA JIRA'
     },
     reviewApproveVariances: {
         en: 'Review & Approve Variances',
         am: 'ልዩነቶችን ይገምግሙ እና ያጽድቁ',
-        or: 'Garaagarummaa Gamgami & Mirkaneessi'
+        or: 'Baqiyyaa Gamgami & Mirkaneessi'
     },
     historicalAccuracyReports: {
         en: 'Historical accuracy and variance reports',
         am: 'የታሪክ ትክክለኛነት እና የልዩነት ሪፖርቶች',
-        or: 'Gabaasa sirrummaa seenaa fi garaagarummaa'
+        or: 'Gabaasa sirrummaa seenaa fi baqiyyaa'
     },
     operations: {
         en: 'Operations',
@@ -39,17 +44,17 @@ export const count: TranslationBlock = {
     cancelCurrentSessionPrompt: {
         en: 'Cancel current session? Progress will be lost.',
         am: 'የአሁኑን ክፍለ ጊዜ ይሰርዙ? ሂደት ይጠፋል።',
-        or: 'Kifl-samayii amma haquu? Adeemsi ni bada.'
+        or: 'Yeroo lakkoofsaa ammaa haquu? Adeemsi ni bada.'
     },
     cancelSession: {
         en: 'Cancel Session',
         am: 'ክፍለ ጊዜ ሰርዝ',
-        or: 'Kifl-samayii Haqi'
+        or: 'Yeroo Lakkoofsaa Haqi'
     },
     inventoryAccuracy: {
         en: 'Inventory Accuracy',
         am: 'የዕቃ ዝርዝር ትክክለኛነት',
-        or: 'Sirrummaa Meeshaalee Kuusaa'
+        or: 'Sirrummaa Kuusaa'
     },
     varianceFromLastMonth: {
         en: '↑ 1.2% from last month',
@@ -59,12 +64,12 @@ export const count: TranslationBlock = {
     netVarianceValue: {
         en: 'Net Variance Value',
         am: 'የተጣራ የልዩነት ዋጋ',
-        or: 'Gatii Garaagarummaa Qulqulluu'
+        or: 'Gatii Baqiyyaa Qulqulluu'
     },
     totalAdjustmentValue: {
         en: 'Total value of adjustments',
         am: 'አጠቃላይ የማስተካከያ ዋጋ',
-        or: 'Gatii Walii Gala sirreeffama'
+        or: 'Gatii Waliigala Sirreeffama Baqiyyaa'
     },
     cycleCountsYTD: {
         en: 'Cycle Counts YTD',
@@ -84,7 +89,7 @@ export const count: TranslationBlock = {
     recentVarianceAdjustments: {
         en: 'Recent variance and cycle count adjustments',
         am: 'የቅርብ ጊዜ ልዩነት እና የዑደት ቆጠራ ማስተካከያዎች',
-        or: 'Sirreeffama garaagarummaa fi lakkoofsa marsaa dhiyoo'
+        or: 'Sirreeffama baqiyyaa fi lakkoofsa marsaa dhiyoo'
     },
     searchHistory: {
         en: 'Search history...',
@@ -99,7 +104,7 @@ export const count: TranslationBlock = {
     units: {
         en: 'units',
         am: 'ክፍሎች',
-        or: 'yuunitii'
+        or: 'qodaa'
     },
     dailyCycleCount: {
         en: 'Daily Cycle Count',
@@ -114,7 +119,7 @@ export const count: TranslationBlock = {
     spotCheck: {
         en: 'Spot Check',
         am: 'ፈጣን ፍተሻ',
-        or: 'Sakatta\'iinsa Iddoo'
+        or: 'Sakatta\'a Bakkaa'
     },
     randomAuditFiveItems: {
         en: 'Random audit of 5 items',
@@ -124,7 +129,7 @@ export const count: TranslationBlock = {
     blindCountModeInfo: {
         en: 'Blind Count Mode: System quantities are hidden to ensure accuracy.',
         am: 'ዕውር ቆጠራ ሁኔታ፡ ትክክለኛነትን ለማረጋገጥ የስርዓት ብዛቶች ተደብቀዋል።',
-        or: 'Haala Lakkoofsa Dhoksaa: Sirrummaa mirkaneessuuf lakkoofsi sirnaa dhoksamaniiru.'
+        or: 'Haala Lakkoofsa Ija-Cufaa: Sirrummaa eeguuf baay\'inni sirnaa dhokfameera.'
     },
     pleaseCountAllItems: {
         en: 'Please count all items before finishing.',
@@ -149,7 +154,7 @@ export const count: TranslationBlock = {
     variance: {
         en: 'Variance',
         am: 'ልዩነት',
-        or: 'Garaagarummaa'
+        or: 'Baqiyyaa'
     },
     recount: {
         en: 'Recount',
@@ -164,17 +169,17 @@ export const count: TranslationBlock = {
     approveVariance: {
         en: 'Approve Variance',
         am: 'ልዩነትን አጽድቅ',
-        or: 'Garaagarummaa Mirkaneessi'
+        or: 'Baqiyyaa Mirkaneessi'
     },
     varianceRequestSubmitted: {
         en: 'Variance adjustment request submitted for approval.',
         am: 'የልዩነት ማስተካከያ ጥያቄ ለማጽደቅ ቀርቧል።',
-        or: 'Gaaffiin sirreeffama garaagarummaa mirkaneessaaf dhiyaateera.'
+        or: 'Gaaffiin sirreeffama baqiyyaa mirkaneessaaf dhiyaateera.'
     },
     failedVarianceSubmit: {
         en: 'Failed to submit variance approval',
         am: 'የልዩነት ማጽደቂያ ማቅረብ አልተሳካም',
-        or: 'Mirkaneessa garaagarummaa dhiyeessuun hin danda\'amne'
+        or: 'Mirkaneessa baqiyyaa dhiyeessuun hin danda\'amne'
     },
     adjusted: {
         en: 'Adjusted',
@@ -189,16 +194,157 @@ export const count: TranslationBlock = {
     unapprovedVariancesPrompt: {
         en: 'There are unapproved variances. Finish anyway?',
         am: 'ያልጸደቁ ልዩነቶች አሉ። ለማንኛውም ልጨርስ?',
-        or: 'Garaagarummaan hin mirkaneeffamne jiru. Ta\'us xumuruu?'
+        or: 'Baqiyyaan hin mirkanoofne jira. Ta\'us xumuruu?'
     },
     countSessionCompleted: {
         en: 'Count session completed!',
         am: 'የቆጠራ ክፍለ ጊዜ ተጠናቅቋል!',
-        or: 'Kifl-samayii lakkoofsaa xumurameera!'
+        or: 'Yeroon lakkoofsaa xumurameera!'
     },
     completeSession: {
         en: 'Complete Session',
         am: 'ክፍለ ጊዜ ጨርስ',
-        or: 'Kifl-samayii Xumuri'
+        or: 'Yeroo Lakkoofsaa Xumuri'
+    },
+
+    // Additional East Hararghe Count Keys
+    auditShort: { en: 'Audit', am: 'ኦዲት', or: 'Qorannoo' },
+    opsShort: { en: 'Ops', am: 'ክዋኔ', or: 'Hojii' },
+    reportsShort: { en: 'Reports', am: 'ሪፖርቶች', or: 'Gabaasa' },
+    cancelShort: { en: 'Cancel', am: 'ሰርዝ', or: 'Haqi' },
+    dailyCycleCountDesc: {
+        en: 'Start a site-scoped blind count. The expected quantities stay on the server.',
+        am: 'የጣቢያ አቀፍ ዕውር ቆጠራ ይጀምሩ። የሚጠበቁ ብዛቶች በአገልጋዩ ላይ ይቆያሉ።',
+        or: 'Lakkoofsa ija-cufaa buufata kanaa jalqabi. Baay\'inni eegamu sarvararra tura.'
+    },
+    spotCheckDesc: {
+        en: 'Select a small random sample from this site.',
+        am: 'ከዚህ ጣቢያ ትንሽ የዘፈቀደ ናሙና ይምረጡ።',
+        or: 'Buufata kana irraa fakkeenya muraasa tasaa filadhu.'
+    },
+    blindCountNotice: {
+        en: 'Blind count in progress. Record the quantity physically present; expected quantities are withheld.',
+        am: 'ዕውር ቆጠራ በሂደት ላይ ነው። በአካል የሚገኘውን ብዛት ይመዝግቡ፤ የሚጠበቁ ብዛቶች ተደብቀዋል።',
+        or: 'Lakkoofsi ija-cufaa hojii irra jira. Baay\'ina qabatamaan argame galchi; baay\'inni eegamu ni dhokfama.'
+    },
+    varianceDetectedRecount: {
+        en: 'Variance detected · independent recount required',
+        am: 'ልዩነት ተገኝቷል · ገለልተኛ ድጋሚ ቆጠራ ያስፈልጋል',
+        or: 'Baqiyyaan argameera · lakkoofsi lammaffaa of-danda\'e ni barbaachisa'
+    },
+    countRecorded: {
+        en: 'Count recorded',
+        am: 'ቆጠራው ተመዝግቧል',
+        or: 'Lakkoofsi galmaa\'eera'
+    },
+    enterPhysicalQtyCounted: {
+        en: 'Enter the physical quantity counted.',
+        am: 'በአካል የተቆጠረውን ብዛት ያስገቡ።',
+        or: 'Baay\'ina qabatamaan lakkaa\'ame galchi.'
+    },
+    unableToSaveCount: {
+        en: 'Unable to save this count.',
+        am: 'ይህንን ቆጠራ ማስቀመጥ አልተቻለም።',
+        or: 'Lakkoofsa kana kusuun hin danda\'amne.'
+    },
+    secondWorkerRecountNotice: {
+        en: 'A second authenticated worker must recount every variance before submission.',
+        am: 'ከማቅረቡ በፊት ሁለተኛ የተረጋገጠ ሰራተኛ እያንዳንዱን ልዩነት በድጋሚ መቁጠር አለበት።',
+        or: 'Hojjetaan mirkanaa\'e lammaffaan erguun dura baqiyyaa hunda deebisee lakkaa\'uu qaba.'
+    },
+    unableToCompleteCountSession: {
+        en: 'Unable to complete this count session.',
+        am: 'ይህንን የቆጠራ ክፍለ ጊዜ ማጠናቀቅ አልተቻለም።',
+        or: 'Yeroo lakkoofsaa kana xumuruun hin danda\'amne.'
+    },
+    unableToStartCountSession: {
+        en: 'Unable to start a count session.',
+        am: 'የቆጠራ ክፍለ ጊዜ መጀመር አልተቻለም።',
+        or: 'Yeroo lakkoofsaa jalqabuun hin danda\'amne.'
+    },
+    waitingForAnotherWorker: {
+        en: 'Waiting for another worker',
+        am: 'ሌላ ሰራተኛ በመጠባበቅ ላይ',
+        or: 'Hojjetaa biraa eegaa jira'
+    },
+    savedWord: {
+        en: 'Saved',
+        am: 'ተቀምጧል',
+        or: 'Kusameera'
+    },
+    recordWord: {
+        en: 'Record',
+        am: 'መዝግብ',
+        or: 'Galmeessi'
+    },
+    recountWord: {
+        en: 'Recount',
+        am: 'እንደገና ቁጠር',
+        or: 'Irra Deebi\'ii Lakkaa\'i'
+    },
+    savingProgress: {
+        en: 'Saving…',
+        am: 'በማስቀመጥ ላይ…',
+        or: 'Kusaa jira…'
+    },
+    submittingProgress: {
+        en: 'Submitting…',
+        am: 'በማስገባት ላይ…',
+        or: 'Ergaa jira…'
+    },
+    completeAndSubmitVariances: {
+        en: 'Complete and submit variances',
+        am: 'ያጠናቅቁ እና ልዩነቶችን ያስገቡ',
+        or: 'Xumuri fi baqiyyaa ergi'
+    },
+    noAssignedSite: {
+        en: 'Your account has no assigned site.',
+        am: 'መለያዎ የተመደበ ጣቢያ የለውም።',
+        or: 'Akkaawuntiin keessan buufata ramadame hin qabu.'
+    },
+    noActiveCountSession: {
+        en: 'No active count session.',
+        am: 'ምንም ንቁ የቆጠራ ክፍለ ጊዜ የለም።',
+        or: 'Yeroon lakkoofsaa hojiirra jiru hin jiru.'
+    },
+    varianceRequestsSentHQ: {
+        en: '{count} variance request(s) sent for HQ approval.',
+        am: '{count} የልዩነት ጥያቄዎች ለዋና መ/ቤት ማጽደቂያ ተልከዋል።',
+        or: 'Gaaffiin baqiyyaa {count} heeyyama HQ\'f ergameera.'
+    },
+    blindCountCompletedNoVariance: {
+        en: 'Blind count completed with no variances.',
+        am: 'ዕውር ቆጠራ ያለ ምንም ልዩነት ተጠናቋል።',
+        or: 'Lakkoofsi ija-cufaa baqiyyaa tokko malee xumurameera.'
+    },
+    sessionCancelledAuditHistory: {
+        en: 'Count session cancelled and retained in the audit history.',
+        am: 'የቆጠራ ክፍለ ጊዜ ተሰርዞ በኦዲት ታሪክ ውስጥ ተቀምጧል።',
+        or: 'Yeroon lakkoofsaa haqamee seenaa qorannoo keessatti kuufameera.'
+    },
+    unableToCancelCountSession: {
+        en: 'Unable to cancel this count session.',
+        am: 'ይህንን የቆጠራ ክፍለ ጊዜ መሰረዝ አልተቻለም።',
+        or: 'Yeroo lakkoofsaa kana haquun hin danda\'amne.'
+    },
+    couldNotRestoreActiveCount: {
+        en: 'Could not restore the active count. Refresh and try again.',
+        am: 'ንቁ ቆጠራን ወደነበረበት መመለስ አልተቻለም። ያድሱ እና እንደገና ይሞክሩ።',
+        or: 'Lakkoofsa hojiirra jiru deebisuun hin danda\'amne. Haaromsiitii yaali.'
+    },
+    unknownItem: {
+        en: 'Unknown Item',
+        am: 'ያልታወቀ ዕቃ',
+        or: 'Meeshaa Hin Beekamne'
+    },
+    historyItemName: {
+        en: 'history',
+        am: 'ታሪክ',
+        or: 'seenaa'
+    },
+    physicalCountForSku: {
+        en: 'Physical count for {sku}',
+        am: 'ለ {sku} በአካል የተቆጠረ',
+        or: 'Lakkoofsa qabatamaa {sku}\'f'
     }
 };

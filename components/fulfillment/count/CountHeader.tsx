@@ -82,7 +82,9 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
             <div className="flex sm:hidden items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                     <ClipboardCheck size={14} className="text-[var(--theme-accent)] shrink-0" />
-                    <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">Audit</span>
+                    <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">
+                        {t('warehouse.auditShort')}
+                    </span>
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         {countSessionStatus}
@@ -99,7 +101,7 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                                     : 'text-[var(--theme-text-secondary)]'
                             }`}
                         >
-                            Ops
+                            {t('warehouse.opsShort')}
                         </button>
                         <button
                             onClick={() => setCountViewMode('Reports')}
@@ -109,7 +111,7 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                                     : 'text-[var(--theme-text-secondary)]'
                             }`}
                         >
-                            Reports
+                            {t('warehouse.reportsShort')}
                         </button>
                     </div>
 
@@ -121,7 +123,7 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                             disabled={isSubmitting}
                             className="text-red-500 text-[10px] font-semibold border border-red-500/20 px-2 py-1 rounded-lg min-h-[30px]"
                         >
-                            Cancel
+                            {t('warehouse.cancelShort')}
                         </button>
                     )}
                 </div>
