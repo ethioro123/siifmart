@@ -1,3 +1,4 @@
+import { computeSellUnitsPerOrderUnit } from './productPackaging';
 import type { Product } from '../types';
 import type { UnitConfig, StockConfig, ProfileConfig } from '../types/product-control';
 import { getSellUnit, SELL_UNITS } from './units';
@@ -42,7 +43,7 @@ export function unitProposal(product: Product, cfg: UnitConfig): Partial<Product
     }
     if (cfg.packOf !== before.packOf || cfg.caseOf !== before.caseOf) {
         patch.packQuantity = cfg.packOf === '' ? 1 : Number(cfg.packOf);
-        next.packaging = { ...(attrs.packaging || {}), packQty: cfg.packOf || '', caseSize: cfg.caseOf || '' };
+        next.packaging = { ...(attrs.packaging || {}), packQty: cfg.packOf || '', caseSize: cfg.caseOf || '', packagingLevel: cfg.caseOf && Number(cfg.caseOf) > 0 ? 'two_tier' : cfg.packOf && Number(cfg.packOf) > 1 ? ((attrs.packaging?.packageType === 'Bale') ? 'bale' : 'case') : 'single' };
         attributesChanged = true;
     }
     if (attributesChanged) patch.customAttributes = next;
@@ -79,4 +80,13 @@ export function netContentPreview(cfg: UnitConfig): { equivalent: string; pack: 
     const format = (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 4 });
     const equivalent = cfg.physicalUnit === 'g' ? `${format(amount / 1000)} kg` : cfg.physicalUnit === 'kg' ? `${format(amount * 1000)} g` : cfg.physicalUnit === 'ml' ? `${format(amount / 1000)} L` : cfg.physicalUnit === 'L' ? `${format(amount * 1000)} ml` : `${format(amount)} items`;
     return { equivalent, pack: `${format(amount * packageQty.perPack)} ${cfg.physicalUnit}`, case: packageQty.unitsPerCase === null ? null : `${format(amount * packageQty.unitsPerCase)} ${cfg.physicalUnit}` };
+}
+
+/** Canonical buying quantity: sellable units in one supplier order unit. */
+export function productOrderUnits(product: Product): number {
+    const cfg = initialUnitConfig(product);
+    const packaging = packagingPreview(cfg);
+    const attrs = product.customAttributes || product.custom_attributes || {};
+    const isSingle = attrs.packaging?.packagingLevel === 'single';
+    return computeSellUnitsPerOrderUnit(cfg.physicalQty, cfg.physicalUnit, cfg.sellUnit, isSingle ? 1 : packaging.perPack, isSingle ? 0 : packaging.packsPerCase || 0);
 }

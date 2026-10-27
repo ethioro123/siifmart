@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { useCreateInventoryRequestMutation } from './useInventoryRequestMutations';
 import { useStore } from '../contexts/CentralStore';
@@ -11,6 +12,7 @@ import { buildPriceChangeRequest, isBelowMarginFloor, type PriceProposal } from 
  * Returns the number of requests submitted and how many need Finance co-approval.
  */
 export function useSubmitPriceChanges(countryCode: string) {
+    const queryClient = useQueryClient();
     const { user } = useStore();
     const { addNotification } = useData();
     const createRequest = useCreateInventoryRequestMutation();
@@ -23,6 +25,7 @@ export function useSubmitPriceChanges(countryCode: string) {
             }, isBelowMarginFloor);
             if (result.submitted > 0) addNotification('success', `${result.submitted} price proposal(s) submitted for Operations, Supply Chain and Merchandising approval${result.financeFlagged ? `; ${result.financeFlagged} also require Finance signoff` : ''}.`);
             if (result.failures.length) addNotification('alert', `${result.failures.length} proposal(s) were not submitted. Their selections are retained for retry.`);
+            if (result.submitted) { queryClient.invalidateQueries({ queryKey: ['product_pending_changes'] }); queryClient.invalidateQueries({ queryKey: ['product_change_history'] }); }
             return result;
         },
         [user, countryCode, createRequest, addNotification]

@@ -1,3 +1,4 @@
+import { purchaseAmount } from '../../utils/productCosts';
 import React from 'react';
 import { ShoppingBag, Sparkles } from 'lucide-react';
 import { getCategorySpecGroup } from './categoryAttributes';
@@ -115,12 +116,12 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                         <input
                             type="number"
                             aria-label="Buying cost per order unit"
-                            step="1"
+                            step="0.01"
                             min="0"
                             className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.cost ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums`}
                             value={currentCost || ''}
                             onChange={e => {
-                                setCurrentCost(Math.round(parseFloat(e.target.value) || 0));
+                                setCurrentCost(purchaseAmount(parseFloat(e.target.value) || 0));
                                 if (errors.cost) setErrors(prev => ({ ...prev, cost: '' }));
                             }}
                             placeholder="0"

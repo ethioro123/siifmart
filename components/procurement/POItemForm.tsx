@@ -1,3 +1,5 @@
+import { productOrderUnits } from '../../utils/productControlLogic';
+import { orderCostFromSellUnit } from '../../utils/productCosts';
 import { POValidationFeedback, itemFieldSelectors } from './POValidationFeedback';
 import React, { useState, useEffect, useImperativeHandle } from 'react';
 import { POItem, Product } from '../../types';
@@ -174,11 +176,10 @@ export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
         const pUnitsPerOrder = pCaseSize >= 1 ? pCaseSize * pPackQty : (pPackQty > 1 ? pPackQty : 1);
 
         // Catalog costPrice is stored per sellable unit; scale to order-unit cost when ordering by pack/case
-        const rawCost = Math.round(p.costPrice || 0);
+        const rawCost = p.costPrice || 0;
         const rawRetail = Math.round(p.price || 0);
-        const orderUnitCost = (pUnitsPerOrder > 1 && rawCost > 0 && (rawRetail === 0 || rawCost <= rawRetail))
-            ? Math.round(rawCost * pUnitsPerOrder)
-            : rawCost;
+        const sellUnitsPerOrder = productOrderUnits(p);
+        const orderUnitCost = orderCostFromSellUnit(rawCost, sellUnitsPerOrder);
         setCurrentCost(orderUnitCost);
         setCurrentRetailPrice(rawRetail);
 

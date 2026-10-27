@@ -6,8 +6,7 @@
 - Staging login real names & hierarchical organization (2026-10-28): Replaced all numbered/placeholder staging accounts with authentic Ethiopian, Kenyan, and Executive real names across public.employees, public.users, and auth.users (migration `migrations/20261028_staging_real_employee_names.sql` applied to staging `utykzifrblpyxlvlknsm`). Quick Login is structured by work location (HQ -> Regional Administration -> DCs -> Warehouses -> Retail Stores) and ordered inside each location by organizational hierarchy rank (L1..L10) with Rank badges.
 - Pack mobile scanner UX, blind count & history (2026-10-27): mobile-first header with progress bar, prominent scan/error status banners, blind-count thumb steppers (`-1`, `+1`, `+5`, `+10`, `Clear`), one-tap rescan, unpacked/packed tote queue without revealing expected quantities, mobile card history layout with dynamic search and status chips, and a safe bottom-sheet shipping label reprint selector.
 - Picking prefix correction (2026-10-27): migration applied to staging `utykzifrblpyxlvlknsm`; server validation honors configured facility prefixes. Rollback-only database regression passed.
-# This file records selected implementation history; it is not a source of current policy.
-# Update it for new features or significant fixes, and verify the current code before relying on older notes.
+# Implementation history; verify current code before relying on older notes.
 - Assign workload (2026-10-27): server counts show active jobs and calendar-day completions in the configured timezone; 100 active jobs per person enforced by a serialized database trigger. Scoped reads refresh every 15 seconds. Applied to staging `utykzifrblpyxlvlknsm`; rollback-only capacity, midnight and scope checks passed.
 ## Active Features
 ### PO Creator Permissions Aligned With Database Policy (2026-10-23)

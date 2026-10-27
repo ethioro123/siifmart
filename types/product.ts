@@ -136,6 +136,7 @@ export interface PendingInventoryChange {
   requested_at?: string; // Supabase compatibility
   status: 'pending' | 'approved' | 'rejected';
   proposedChanges?: Partial<Product>;
+  proposalBaseline?: Record<string, unknown> | null;
   proposed_changes?: Partial<Product>; // Supabase compatibility
   adjustmentType?: 'IN' | 'OUT';
   adjustment_type?: 'IN' | 'OUT'; // Supabase compatibility

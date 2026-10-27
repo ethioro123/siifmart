@@ -1,3 +1,4 @@
+import { purchaseAmount } from '../../utils/productCosts';
 import { POValidationFeedback, type POFieldIssue } from './POValidationFeedback';
 import { getPOCreationIssue } from '../../utils/poCreationValidation';
 import { getPODeliveryIssue } from '../../utils/poDeliveryRequirements';
@@ -89,13 +90,13 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         countryCode: activeCountry, userId: user?.id, enabled: enableAutoSave, isEditMode, isOpen
     });
 
-    // Computed Totals (whole-number currency values, accounting for multi-hub per-store multiplication)
+    // Computed purchase totals retain cents and account for multi-hub per-store multiplication
     const hubCount = !isEditMode && destinationSiteIds.length > 1 ? destinationSiteIds.length : 1;
     const perStoreMultiplier = hubCount > 1 && quantityDistribution === 'per-store' ? hubCount : 1;
-    const singleHubSubtotal = Math.round(newPOItems.reduce((sum, item) => sum + item.totalCost, 0));
-    const singleHubTax = Math.round(singleHubSubtotal * (taxRate / 100));
-    const singleHubDiscount = Math.round(singleHubSubtotal * (discountRate / 100));
-    const singleHubTotal = Math.round(singleHubSubtotal + singleHubTax + shippingCost - singleHubDiscount);
+    const singleHubSubtotal = purchaseAmount(newPOItems.reduce((sum, item) => sum + item.totalCost, 0));
+    const singleHubTax = purchaseAmount(singleHubSubtotal * (taxRate / 100));
+    const singleHubDiscount = purchaseAmount(singleHubSubtotal * (discountRate / 100));
+    const singleHubTotal = purchaseAmount(singleHubSubtotal + singleHubTax + shippingCost - singleHubDiscount);
 
     const poSubtotal = singleHubSubtotal * perStoreMultiplier;
     const poTax = singleHubTax * perStoreMultiplier;
@@ -278,7 +279,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     const mergedItem: POItem = {
                         ...existing, ...item,
                         quantity: mergedQty,
-                        totalCost: Math.round(mergedQty * item.unitCost)
+                        totalCost: purchaseAmount(mergedQty * item.unitCost)
                     };
                     showToast(`Merged quantity for ${item.productName} (${mergedQty})`, 'info');
                     return prev.map((row, idx) => idx === dupIdx ? mergedItem : row);

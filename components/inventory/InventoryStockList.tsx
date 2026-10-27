@@ -179,7 +179,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                         getOtherLocationsForSku={getOtherLocationsForSku}
                         toggleSelection={toggleSelection}
                         handleOpenAdjust={handleOpenAdjust}
-                        handleOpenEditProduct={handleOpenEditProduct}
+                        handleOpenEditProduct={setSelectedViewProduct}
                         handleDeleteProduct={handleDeleteProduct}
                         setSelectedViewProduct={setSelectedViewProduct}
                         currencySymbol={currencySymbol}
@@ -195,7 +195,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                         totalInventoryValue={totalInventoryValue}
                         toggleSelection={toggleSelection}
                         handleOpenAdjust={handleOpenAdjust}
-                        handleOpenEditProduct={handleOpenEditProduct}
+                        handleOpenEditProduct={setSelectedViewProduct}
                         handleDeleteProduct={handleDeleteProduct}
                         setSelectedViewProduct={setSelectedViewProduct}
                         currencySymbol={currencySymbol}
@@ -252,7 +252,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                 isOpen={!!selectedViewProduct}
                 onClose={() => setSelectedViewProduct(null)}
                 currencySymbol={currencySymbol}
-                onEdit={handleOpenEditProduct}
+                readOnly={isReadOnly}
             />
         </div>
     );

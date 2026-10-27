@@ -1,3 +1,4 @@
+import { purchaseAmount } from '../../utils/productCosts';
 import { parseShelfLifeDays } from '../../utils/poDeliveryRequirements';
 import { POItem, Product } from '../../types';
 import { getSellUnit } from '../../utils/units';
@@ -223,7 +224,7 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         },
     };
 
-    const wholeCost = Math.round(currentCost);
+    const purchaseCost = purchaseAmount(currentCost);
     const wholeRetail = prod ? Number(prod.price) || 0 : 0;
 
     const itemData: POItem = {
@@ -232,8 +233,8 @@ export async function buildPOItem(params: BuildPOItemParams): Promise<{
         sku,
         category: cat,
         quantity: currentQty,
-        unitCost: wholeCost,
-        totalCost: Math.round(currentQty * wholeCost),
+        unitCost: purchaseCost,
+        totalCost: purchaseAmount(currentQty * purchaseCost),
         retailPrice: wholeRetail,
         image,
         brand: prod?.brand || (customAttributes.identity?.unbranded ? '' : customItemBrand),

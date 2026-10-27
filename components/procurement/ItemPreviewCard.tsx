@@ -294,7 +294,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Unit Cost:</span>
                                 <span className="text-xs font-bold text-[var(--theme-text-primary)] tabular-nums">
-                                    {currencySymbol} {formatPriceValue(Math.round(costPerSellUnit))}{' '}
+                                    {currencySymbol} {costPerSellUnit.toLocaleString(undefined, { maximumFractionDigits: 4 })}{' '}
                                     <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] font-sans">
                                         /{sellUnitLabel}
                                     </span>
@@ -303,7 +303,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                         )}
                         {isBulkOrder && effectiveCost > 0 && (
                             <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono">
-                                Order: {currencySymbol} {formatPriceValue(Math.round(effectiveCost))}/{orderUnitName.toLowerCase()} ({unitsPerOrder} {sellUnitLabel})
+                                Order: {currencySymbol} {effectiveCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}/{orderUnitName.toLowerCase()} ({unitsPerOrder} {sellUnitLabel})
                             </div>
                         )}
                         {marginPct !== null && grossProfit !== null && (
@@ -318,7 +318,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                             >
                                 <span>+{Math.round(marginPct)}% margin</span>
                                 <span className="text-[9px] opacity-80">
-                                    (+{currencySymbol} {formatPriceValue(Math.round(grossProfit))}/{sellUnitLabel})
+                                    (+{currencySymbol} {grossProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}/{sellUnitLabel})
                                 </span>
                             </div>
                         )}

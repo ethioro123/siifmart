@@ -6,6 +6,8 @@ import { ProductControlModal } from '../../components/merchandising/ProductContr
 import { StockTab } from '../../components/merchandising/product-control/StockTab';
 import type { Product } from '../../types';
 const actions = { isSaving: false, lastSubmitted: null, clearFeedback: vi.fn(), saveProfile: vi.fn(), saveUnit: vi.fn(), saveStock: vi.fn(), preparePricing: vi.fn(), confirmPricing: vi.fn(), priceBatch: null, batchFailures: [], cancelPricing: vi.fn() };
+vi.mock('../../hooks/useProductWorkspaceRecord', () => ({ useProductWorkspaceRecord: (product: Product) => ({ data: product }) }));
+vi.mock('../../hooks/useProductChanges', () => ({ useProductChanges: () => ({ pending: { data: { data: [], totalCount: 0 } }, history: {}, prices: {}, decision: {} }) }));
 vi.mock('../../hooks/useProductControlProposals', () => ({ useProductControlProposals: () => actions }));
 vi.mock('../../contexts/CentralStore', () => ({ useStore: () => ({ user: { role: 'regional_operations_manager' } }) }));
 vi.mock('../../contexts/DataContext', () => ({ useData: () => ({ sites: [{ id: 'site', name: 'CMC Summit', type: 'Store' }], allProducts: [], effectiveCountry: 'ET', settings: {} }) }));
@@ -15,14 +17,14 @@ describe('Product control tabs', () => {
     it('offers named accessible tabs and shows the effective proposed sale margin', () => {
         render(<ProductControlModal product={product} isOpen onClose={vi.fn()} />);
         expect(screen.getByRole('dialog', { name: product.name })).toBeTruthy();
-        expect(screen.getAllByRole('tab')).toHaveLength(4);
+        expect(screen.getAllByRole('tab')).toHaveLength(5);
         expect(screen.getByRole('tab', { name: 'Pricing' }).getAttribute('aria-selected')).toBe('true');
         expect(screen.getByText('6.7%')).toBeTruthy();
         expect(screen.getByText('Required below 15% margin')).toBeTruthy();
     });
     it('retains all product barcodes and disables an invalid profile submission', () => {
         render(<ProductControlModal product={product} isOpen onClose={vi.fn()} />);
-        fireEvent.click(screen.getByRole('tab', { name: 'Profile' }));
+        fireEvent.click(screen.getByRole('tab', { name: 'Specifications & Packaging' }));
         expect(screen.getByText('123 · 456')).toBeTruthy();
         fireEvent.change(screen.getByRole('textbox', { name: 'Product name' }), { target: { value: '' } });
         expect((screen.getByRole('button', { name: 'Submit profile proposal' }) as HTMLButtonElement).disabled).toBe(true);

@@ -1,3 +1,4 @@
+import {effectivePrice} from '../../../utils/pricingGovernance';
 import {productSaleIssues} from '../../../utils/productDetailLogic';
 import {formatLocationIdentity} from '../../../utils/locationIdentity';
 import React from 'react';
@@ -9,6 +10,7 @@ import {formatStockDisplay,getSellUnit} from '../../../utils/units';
 import {formatProductDisplayName} from '../../procurement/utils';
 interface Props {product:Product;showCostPrice:boolean;currencySymbol?:string}
 export function ProductProfileHeader({product,currencySymbol=CURRENCY_SYMBOL}:Props){
+ const price=effectivePrice(product)||0;
  const stock=product.stock||0;
  const status=stock<=0?'Out of stock':product.minStock&&stock<=product.minStock?'Low stock':'In stock';
  const issues=productSaleIssues(product);
@@ -24,7 +26,7 @@ export function ProductProfileHeader({product,currencySymbol=CURRENCY_SYMBOL}:Pr
    </div>
   </div>
   <dl className="grid grid-cols-2 gap-4 border-y border-[var(--theme-border)] py-3">
-   <div><dt className="text-sm text-[var(--theme-text-secondary)]">Selling price</dt><dd className="mt-1 text-2xl font-medium tabular-nums">{product.price>0?`${currencySymbol} ${formatPriceValue(product.price)}`:'Not set'}</dd><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">per {getSellUnit(product.unit).shortLabel||'unit'}</p></div>
+   <div><dt className="text-sm text-[var(--theme-text-secondary)]">Selling price</dt><dd className="mt-1 text-2xl font-medium tabular-nums">{price>0?`${currencySymbol} ${formatPriceValue(price)}`:'Not set'}</dd><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">per {getSellUnit(product.unit).shortLabel||'unit'}</p></div>
    <div><dt className="text-sm text-[var(--theme-text-secondary)]">On-hand stock</dt><dd className="mt-1 text-2xl font-medium tabular-nums">{formatStockDisplay(stock,product)}</dd><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">{formatLocationIdentity(product.location,'Location not assigned')}</p></div>
   </dl>
   {issues.length>0&&<div className="rounded-lg bg-[var(--theme-bg-subtle)] px-4 py-3 text-sm"><p className="font-medium">Sale readiness</p><ul className="mt-1 space-y-1">{issues.map(issue=><li key={issue}>{issue}</li>)}</ul></div>}

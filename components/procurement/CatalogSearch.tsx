@@ -85,7 +85,7 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                                             setCurrentProductToAdd(p.id);
                                             setSearchTerm(formatProductDisplayName(p) || p.name);
                                             setIsSearchOpen(false);
-                                            setCurrentCost(Math.round(p.costPrice || 0));
+                                            setCurrentCost(p.costPrice || 0);
                                             setCurrentRetailPrice(Math.round(p.price || 0));
                                             setCustomItemUnit(p.unit || '');
                                             onSelectProduct?.(p);

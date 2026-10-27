@@ -33,6 +33,8 @@ export function useProductControlProposals(product: Product | null, country: str
                 adjustmentReason: `MERCHANDISING: ${reason}` });
             showToast('Proposal submitted for regional Operations, Supply Chain and Merchandising approval.', 'info');
             queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
+            queryClient.invalidateQueries({ queryKey: ['product_pending_changes'] });
+            queryClient.invalidateQueries({ queryKey: ['product_change_history'] });
             setLastSubmitted(reason);
             onSaved?.();
             return true;

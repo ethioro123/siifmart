@@ -264,8 +264,8 @@ export const getPOItemPackagingSummary = (item: any, allProducts?: any[]): POIte
     }
 
     const costPerSellableUnit = unitsPerOrderUnit > 1 && item.unitCost
-        ? Math.round(item.unitCost / unitsPerOrderUnit)
-        : Math.round(item.unitCost || 0);
+        ? (item.unitCost / unitsPerOrderUnit)
+        : (item.unitCost || 0);
 
     return {
         sellableQty,

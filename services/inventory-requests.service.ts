@@ -17,6 +17,8 @@ export interface GetMerchandisingOptions {
     limit?: number;
     status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'all';
     regionCode?: string;
+    productId?: string;
+    siteId?: string;
 }
 
 export const inventoryRequestsService = {
@@ -53,7 +55,7 @@ export const inventoryRequestsService = {
         const to = from + pageSize - 1;
 
         let query = supabase.from('inventory_requests')
-            .select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_at,status,proposed_changes,adjustment_reason,finance_approved_by_employee_id,requested_by_employee_id,product_edit_approvals,rejection_reason,rejected_by,rejected_at,approved_by,approved_at', { count: 'exact' })
+            .select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_at,status,proposed_changes,adjustment_reason,finance_approved_by_employee_id,requested_by_employee_id,product_edit_approvals,product_edit_baseline,rejection_reason,rejected_by,rejected_at,approved_by,approved_at', { count: 'exact' })
             .eq('country_code', countryCode.toUpperCase())
             .eq('change_type', 'edit');
 
@@ -67,6 +69,8 @@ export const inventoryRequestsService = {
             query = query.eq('status', 'pending');
         }
 
+        if (options.productId) query = query.eq('product_id', options.productId);
+        if (options.siteId) query = query.eq('site_id', options.siteId);
         if (options.regionCode) {
             query = query.eq('region_code', options.regionCode);
         }
@@ -123,6 +127,7 @@ export const inventoryRequestsService = {
             requestedAt: r.requested_at,
             status: r.status,
             proposedChanges: r.proposed_changes,
+            proposalBaseline: r.product_edit_baseline,
             adjustmentReason: r.adjustment_reason,
             financeApprovedByEmployeeId: r.finance_approved_by_employee_id,
             requestedByEmployeeId: r.requested_by_employee_id,
@@ -173,6 +178,7 @@ export const inventoryRequestsService = {
             requestedAt: r.requested_at,
             status: r.status,
             proposedChanges: r.proposed_changes,
+            proposalBaseline: r.product_edit_baseline,
             adjustmentType: r.adjustment_type,
             adjustmentQty: r.adjustment_qty,
             adjustmentReason: r.adjustment_reason,

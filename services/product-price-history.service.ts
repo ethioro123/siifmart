@@ -25,6 +25,13 @@ export interface ProductPriceHistoryEntry {
 const HISTORY_PROJECTION = 'id, product_id, site_id, country_code, product_name, sku, old_regular_price, new_regular_price, old_sale_price, new_sale_price, old_is_on_sale, new_is_on_sale, old_effective_price, new_effective_price, actor_id, actor_name, changed_at';
 
 export const productPriceHistoryService = {
+    async listByProduct(siteId: string, country: string, productId: string, offset = 0, limit = 10): Promise<ProductPriceHistoryEntry[]> {
+        const { data, error } = await supabase.from('product_price_history').select(HISTORY_PROJECTION)
+            .eq('site_id', siteId).eq('country_code', country.toUpperCase()).eq('product_id', productId)
+            .order('changed_at', { ascending: false }).range(Math.max(0, offset), Math.max(0, offset) + Math.min(50, Math.max(1, limit)) - 1);
+        if (error) throw error;
+        return (data || []).map(row => ({ ...row, reviewed_by_me: false })) as ProductPriceHistoryEntry[];
+    },
     async listBySite(siteId: string, offset = 0, limit = 50): Promise<ProductPriceHistoryEntry[]> {
         const { data, error } = await supabase
             .from('product_price_history')

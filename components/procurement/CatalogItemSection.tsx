@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ProductWorkspace } from '../products/ProductWorkspace';
 import { Product } from '../../types';
 import { CatalogSearch } from './CatalogSearch';
 import { POItemOrderDetails } from './POItemOrderDetails';
@@ -65,10 +66,12 @@ export const CatalogItemSection: React.FC<CatalogItemSectionProps> = ({
     errors,
     setErrors
 }) => {
+    const [workspaceOpen, setWorkspaceOpen] = useState(false);
     const effectiveCategory = selectedCatalogProduct?.category || selectedMainCategory;
 
     return (
         <div className="space-y-5">
+            {selectedCatalogProduct && <><button type="button" className="min-h-[44px] rounded-xl border border-[var(--theme-border)] px-4 text-sm" onClick={() => setWorkspaceOpen(true)}>Open product workspace</button><ProductWorkspace product={selectedCatalogProduct} isOpen={workspaceOpen} onClose={() => setWorkspaceOpen(false)} initialTab="overview" readOnly currencySymbol={currencySymbol} /></>}
             <CatalogSearch
                 products={products}
                 searchTerm={searchTerm}
