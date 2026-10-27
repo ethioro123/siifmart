@@ -34,7 +34,7 @@
 3. Update `mapRow()` in the relevant `.service.ts` (snake_case → camelCase read)
 4. Update `update()` allowlist in the same service (camelCase → snake_case write)
 5. If needed in `create()`, add to the insert object
-6. Apply only when authorized; report the application status and include the complete runnable SQL in the final response
+6. Apply automatically to the linked project as part of the request; report the application status and migration file name; do not paste SQL into chat unless the user asks to see it
 
 ### Adding a New Service
 1. **Check if a service already exists** for that domain — extend it instead of creating a duplicate
@@ -195,7 +195,7 @@ When editing or creating any file, the AI MUST:
 - Never skip RLS/grant review, role checks, country/site scoping, required approvals, blind-count controls, or chain-of-custody records.
 - Never write business data or sensitive session state to `localStorage` when it belongs in the server or secure session store.
 - Never mutate from a component by calling a service directly. Never use mass-assignment spreads in database updates or silently swallow errors.
-- Never create a migration after writing its SQL. Save the migration first, include the complete SQL in the final response, and report whether it was applied.
+- Never create a migration after writing its SQL. Save the migration to disk first, state whether it was applied, and do not paste SQL into chat unless the user asks to see it.
 - Never hardcode country-specific prices, tax, tender, or operational policy across tenants. Do not add settings for fixed technical details that operators do not need to control.
 - Never fan out every business mutation to unrelated modules. Define real dependencies and make retries idempotent and observable.
 - Never use unvalidated HTML, raw console logging, `any`, inline aesthetic values, or interface emoji.

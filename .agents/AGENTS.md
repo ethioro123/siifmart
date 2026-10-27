@@ -33,7 +33,7 @@
 - Halal catalog: no liquor, beer, wine, or spirits anywhere (catalog, mocks, examples). Use cooking oil, baby formula, coffee, etc.
 
 ### Database and RLS
-- **Rule 9 (Persistent Migration File is Paramount & Execution Status)**: creating a permanent, version-controlled file in `migrations/YYYYMMDD_<name>.sql` for ANY SQL created or modified is strictly mandatory and takes precedence over in-chat snippets. Never write or propose SQL without saving it to disk first; ALSO paste the same runnable SQL in chat. **Execution Status**: explicitly inform the user whether the SQL migration has already been applied/run in the database or still requires manual execution in Supabase.
+- **Rule 9 (Persistent Migration File is Paramount & Execution Status)**: creating a permanent, version-controlled file in `migrations/YYYYMMDD_<name>.sql` for ANY SQL created or modified is strictly mandatory. Never write or propose SQL without saving it to disk first; do NOT paste SQL into chat unless the user explicitly asks to see it. **Execution Status**: explicitly inform the user whether the SQL migration has already been applied to the linked Supabase project or report any blocker.
 
 ### Egress efficiency (Rule 10)
 - Lists/history use bounded pagination; 25 records is a reasonable initial default, adjusted for row size, device, and measured cost.

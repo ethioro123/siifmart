@@ -9,7 +9,7 @@ Follow repository `AGENTS.md` for every task and use `.agent/RULES.md` as the ca
 - Enforce role, site, and country access in Supabase RLS or trusted server code. A UI guard is never the security boundary.
 - Keep country-specific data and settings isolated. Only authorized executives use the central country switch.
 - Route writes through hooks and services; validate input, use explicit database field allowlists, propagate errors, and log through the project logger without sensitive data.
-- Before writing or proposing SQL, create a version-controlled migration under `/migrations/`. Do not apply it without authorization. Include complete runnable SQL in the final response and state whether it was applied.
+- Before writing or proposing database changes, create a version-controlled migration under `/migrations/`. Apply it automatically to the linked project, state whether it was applied, and do not paste SQL into chat unless the user asks to see it.
 - Use shared design tokens and accessible patterns. Measure before optimizing; avoid speculative memoization, fixed virtualization thresholds, and unrelated redesigns.
 - Never expose secrets, trust client-supplied prices/roles, or weaken approvals, blind counts, auditability, or chain of custody.
 
