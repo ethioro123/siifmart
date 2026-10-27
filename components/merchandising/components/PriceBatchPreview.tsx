@@ -12,7 +12,7 @@ interface Props {
 export function PriceBatchPreview({ batch, failures = [], sites, currency, pending, onConfirm, onClose }: Props) {
     if (!batch) return null;
     const locations = new Set(batch.changes.map(change => change.product.siteId || change.product.site_id));
-    return <Modal isOpen onClose={() => { if (!pending) onClose(); }} title="Review price proposals" size="xl">
+    return <Modal isOpen onClose={() => { if (!pending) onClose(); }} title="Review price proposals" size="xl" zIndex="z-[10010]">
         <div className="space-y-4 text-[var(--theme-text-primary)]">
             <p>{batch.source} · {batch.changes.length} product record(s) across {locations.size} location(s).</p>
             <p className="text-sm text-[var(--theme-text-secondary)]">Selling prices round to the nearest whole number. Submission creates proposals; Operations, Supply Chain and Merchandising must approve before prices change. Below-floor prices also require Finance signoff.</p>

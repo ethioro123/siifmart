@@ -11,14 +11,14 @@ export function useProductControlDialog(open: boolean, nestedOpen: boolean, savi
         const controls = () => Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex="0"]') || []).filter(element => element.offsetParent !== null);
         controls()[0]?.focus();
         const onKey = (event: KeyboardEvent) => {
-            if (event.key === 'Escape' && !current.current.saving) { event.preventDefault(); current.current.close(); }
+            if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); if (!current.current.saving) current.current.close(); }
             if (event.key !== 'Tab') return;
             const elements = controls(); const first = elements[0]; const last = elements[elements.length - 1];
             if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
             else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
         };
-        document.addEventListener('keydown', onKey);
-        return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', onKey); previous?.focus(); };
+        document.addEventListener('keydown', onKey, true);
+        return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', onKey, true); previous?.focus(); };
     }, [open, nestedOpen]);
     return dialogRef;
 }

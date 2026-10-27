@@ -4,7 +4,7 @@ import type { ProfileConfig } from '../../../types/product-control';
 import { getSellUnit } from '../../../utils/units';
 import { effectivePrice } from '../../../utils/pricingGovernance';
 import { sellingMargin } from '../../../utils/priceManager';
-import { profileProposal } from '../../../utils/productControlLogic';
+import { profileProposal, productBarcodes } from '../../../utils/productControlLogic';
 import { formatLocationIdentity } from '../../../utils/locationIdentity';
 import { ControlSection, ControlFact, ControlField, ProposalAction, controlInput } from './ControlPrimitives';
 import { RecordedAttributes } from './RecordedAttributes';
@@ -14,7 +14,7 @@ interface Props {
     handleSaveProfile: () => Promise<void>; isSaving: boolean; submitted?: boolean;
 }
 export const ProfileTab: React.FC<Props> = ({ product, currencySymbol = 'ETB', siteName, showCost, profileCfg, setProfileCfg, handleSaveProfile, isSaving, submitted }) => {
-    const barcodes = [...new Set([product.barcode, ...(product.barcodes || [])].filter(Boolean))];
+    const barcodes = productBarcodes(product);
     const margin = sellingMargin(product);
     let error = ''; let changed = false;
     try { changed = Object.keys(profileProposal(product, profileCfg)).length > 0; } catch (cause) { error = (cause as Error).message; }

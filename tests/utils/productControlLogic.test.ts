@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Product } from '../../types';
-import { initialUnitConfig, unitProposal, stockPolicyPreview, profileProposal, packagingPreview, netContentPreview } from '../../utils/productControlLogic';
+import { initialUnitConfig, unitProposal, stockPolicyPreview, profileProposal, packagingPreview, netContentPreview, productBarcodes } from '../../utils/productControlLogic';
 const product = { id: 'milk', name: 'Milk 1L', sku: 'ETDY001', unit: 'UNIT', size: '1L', price: 125, stock: 23, minStock: 10, maxStock: 50, customAttributes: { physical: { storage: 'Chilled' }, packaging: { packQty: 6, caseSize: 4 }, commercial: { labelOverride: '' } } } as Product;
 describe('Product control tab logic', () => {
     it('reads embedded quantities without assigning an invented physical unit', () => {
@@ -32,6 +32,7 @@ describe('Product control tab logic', () => {
         expect(stockPolicyPreview(product, { minStock: '', maxStock: '' }).min).toBe(10);
         expect(() => stockPolicyPreview(product, { minStock: '30', maxStock: '20' })).toThrow();
     });
+    it('deduplicates real product barcodes', () => { expect(productBarcodes({ ...product, barcode: '123', barcodes: ['123', ' 456 ', ''] })).toEqual(['123', '456']); });
     it('builds narrow profile changes and rejects an empty name', () => {
         expect(profileProposal(product, { name: ' Milk 1L ', brand: ' Brand ', description: '' })).toEqual({ brand: 'Brand' });
         expect(() => profileProposal(product, { name: ' ', brand: '', description: '' })).toThrow('required');

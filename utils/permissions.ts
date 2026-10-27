@@ -97,7 +97,7 @@ export const PERMISSIONS = {
 
     // Pricing
     ACCESS_PRICING: ['group_cfo', 'group_ceo', 'country_managing_director', 'country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_operations_manager', 'area_operations_manager', 'regional_procurement_manager', 'country_operations_director', 'country_finance_director', 'regional_finance_manager', 'country_supply_chain_director', 'regional_supply_chain_manager', 'vendor_relations_manager', 'store_operations_auditor'],
-    EDIT_PRICE: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_finance_director'],
+    EDIT_PRICE: ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'regional_merchandising_manager', 'country_finance_director'],
     CREATE_PROMOTION: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_operations_manager'],
     APPROVE_PRICE_CHANGE: ['group_ceo', 'country_managing_director', 'regional_merchandising_manager', 'country_finance_director'],
 

@@ -1,3 +1,4 @@
+import { isLocationBarcode } from './locationEncoder';
 import { computeSellUnitsPerOrderUnit } from './productPackaging';
 import type { Product } from '../types';
 import type { UnitConfig, StockConfig, ProfileConfig } from '../types/product-control';
@@ -89,4 +90,8 @@ export function productOrderUnits(product: Product): number {
     const attrs = product.customAttributes || product.custom_attributes || {};
     const isSingle = attrs.packaging?.packagingLevel === 'single';
     return computeSellUnitsPerOrderUnit(cfg.physicalQty, cfg.physicalUnit, cfg.sellUnit, isSingle ? 1 : packaging.perPack, isSingle ? 0 : packaging.packsPerCase || 0);
+}
+
+export function productBarcodes(product: Product): string[] {
+    return [...new Set([product.barcode, ...(product.barcodes || [])].map(value => value?.trim()).filter((value): value is string => Boolean(value) && !isLocationBarcode(value!)))];
 }

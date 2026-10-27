@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useProductWorkspaceRecord } from '../../hooks/useProductWorkspaceRecord';
 import { ProductOverview } from './ProductOverview';
 import { ProductChangesTab } from './ProductChangesTab';
@@ -10,7 +11,7 @@ import { productSiteName } from '../../utils/priceManager';
 import type { ProfileConfig } from '../../types/product-control';
 import { useProductControlDialog } from '../../hooks/useProductControlDialog';
 import { formatLocationIdentity } from '../../utils/locationIdentity';
-import React, { useState, useEffect, useId } from 'react';
+import React, { useState, useEffect, useId, useRef } from 'react';
 import { X, Package, Scale, DollarSign, Layers, Info, History, PackageSearch, type LucideIcon } from 'lucide-react';
 import { Product } from '../../types';
 import { useStore } from '../../contexts/CentralStore';
@@ -41,6 +42,11 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
     const activeCountry = (effectiveCountry || settings?.country || 'ET') as any;
     const record = useProductWorkspaceRecord(selectedProduct, activeCountry, isOpen);
     const product = record.data || selectedProduct;
+    const previousCountry = useRef(activeCountry);
+    useEffect(() => {
+        if (previousCountry.current !== activeCountry && isOpen) onClose();
+        previousCountry.current = activeCountry;
+    }, [activeCountry, isOpen, onClose]);
     const dynamicCurrency = currencySymbol || getCountryProfile(activeCountry).currencySymbol || 'ETB';
     const showCost = canViewCostPrice(user?.role);
     const canDirectEdit = false;
@@ -108,8 +114,8 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
 
     const inputCls = 'w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm font-mono font-medium text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors';
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-5" role="dialog" aria-modal="true" aria-labelledby={titleId} ref={dialogRef}>
+    return createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-5" role="dialog" aria-modal="true" aria-labelledby={titleId} ref={dialogRef}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
             <div className="relative bg-[var(--theme-bg-card)] rounded-3xl shadow-2xl w-full max-w-5xl max-h-[94dvh] flex flex-col border border-[var(--theme-border)] overflow-hidden">
 
@@ -223,6 +229,6 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
                     )}
                 </div>
             </div>
-        </div>
+        </div>, document.body
     );
 };

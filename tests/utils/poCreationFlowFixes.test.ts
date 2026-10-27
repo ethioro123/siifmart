@@ -197,7 +197,7 @@ describe('PO Creation Flow Fixes & Helpers', () => {
         expect(result.item?.customAttributes?.storage?.inboundQcDirective).toBeTruthy();
     });
 
-    it('preserves buying-cost rounding and approved catalog retail while using the concise Juice option', async () => {
+    it('preserves precise buying costs and approved catalog retail while using the concise Juice option', async () => {
         const beverageField = CATEGORY_SPEC_GROUPS.beverages.fields.find(f => f.key === 'beverageType');
         expect(beverageField?.options).toContain('Juice');
         expect(beverageField?.options).not.toContain('100% Pure Fruit Juice');
@@ -228,8 +228,8 @@ describe('PO Creation Flow Fixes & Helpers', () => {
             pkgType: ''
         });
 
-        expect(itemRes.item?.unitCost).toBe(120);
+        expect(itemRes.item?.unitCost).toBe(120.4);
         expect(itemRes.item?.retailPrice).toBe(185.6);
-        expect(itemRes.item?.totalCost).toBe(600);
+        expect(itemRes.item?.totalCost).toBe(602);
     });
 });
