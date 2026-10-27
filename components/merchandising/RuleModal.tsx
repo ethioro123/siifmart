@@ -66,9 +66,10 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                   <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Threshold Value (X)</label>
                   <input
                      type="number"
+                     step="1"
                      className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-mono font-medium tabular-nums transition-colors"
                      value={newRule.threshold || ''}
-                     onChange={(e) => setNewRule({ ...newRule, threshold: parseFloat(e.target.value) })}
+                     onChange={(e) => setNewRule({ ...newRule, threshold: Math.round(parseFloat(e.target.value) || 0) })}
                      placeholder="0"
                      aria-label="Threshold Value"
                   />
@@ -92,9 +93,10 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                   <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Value (%)</label>
                   <input
                      type="number"
+                     step="1"
                      className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-mono font-medium tabular-nums transition-colors"
                      value={newRule.value || ''}
-                     onChange={(e) => setNewRule({ ...newRule, value: parseFloat(e.target.value) })}
+                     onChange={(e) => setNewRule({ ...newRule, value: Math.round(parseFloat(e.target.value) || 0) })}
                      placeholder="0"
                      aria-label="Action Value"
                   />
