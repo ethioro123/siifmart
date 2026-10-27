@@ -5,7 +5,8 @@ import { employeesService } from '../services/employees.service';
 import { shiftsService } from '../services/shifts.service';
 import { purchaseOrdersService } from '../services/purchase-orders.service';
 import { salesService } from '../services/sales.service';
-import type { Product, Employee, ShiftRecord, PurchaseOrder, SaleRecord } from '../types';
+import { transfersService } from '../services/transfers.service';
+import type { Product, Employee, ShiftRecord, PurchaseOrder, SaleRecord, TransferRecord } from '../types';
 import { logger } from '../utils/logger';
 
 interface UseRegionalDataQueriesProps {
@@ -20,6 +21,7 @@ export interface UseRegionalDataQueriesResult {
   regionalShifts: ShiftRecord[];
   regionalOrders: PurchaseOrder[];
   regionalSales: SaleRecord[];
+  regionalTransfers: TransferRecord[];
   isLoading: boolean;
 }
 
@@ -110,12 +112,28 @@ export function useRegionalDataQueries({
     staleTime: 1000 * 60 * 5,
   });
 
+  // 6. Regional Transfers across all facilities in region
+  const { data: regionalTransfers = [], isLoading: isTransfersLoading } = useQuery({
+    queryKey: ['regional-transfers', regionCode],
+    queryFn: async () => {
+      try {
+        return await transfersService.getAll(undefined, 50, regionCode);
+      } catch (err) {
+        logger.error('useRegionalDataQueries', 'Failed to fetch regional transfers', err);
+        return [];
+      }
+    },
+    enabled: Boolean(enabled && regionCode),
+    staleTime: 1000 * 60 * 2,
+  });
+
   return {
     regionalProducts,
     regionalEmployees,
     regionalShifts,
     regionalOrders,
     regionalSales,
-    isLoading: isProductsLoading || isEmployeesLoading || isShiftsLoading || isOrdersLoading || isSalesLoading
+    regionalTransfers,
+    isLoading: isProductsLoading || isEmployeesLoading || isShiftsLoading || isOrdersLoading || isSalesLoading || isTransfersLoading
   };
 }

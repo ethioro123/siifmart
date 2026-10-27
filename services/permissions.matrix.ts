@@ -45,7 +45,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'inventory.view', 'pricing.view',
         'sales.view', 'sales.view_reports', 'customers.view'
     ],
-    country_supply_chain_director: [...HEAD_OF_SUPPLY_CHAIN_PERMISSIONS, 'procurement.create_po'],
+    country_supply_chain_director: [...HEAD_OF_SUPPLY_CHAIN_PERMISSIONS, 'procurement.create_po', 'pricing.view'],
     country_hr_director: HEAD_OF_HR_PERMISSIONS,
     country_technology_director: HEAD_OF_IT_PERMISSIONS,
     country_compliance_manager: HEAD_OF_AUDIT_PERMISSIONS,
@@ -55,11 +55,18 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     auditor: HEAD_OF_AUDIT_PERMISSIONS,
 
     // ═══ LEVEL 4: REGIONAL OPERATIONS & AREA MANAGERS ═══
-    regional_operations_manager: HEAD_OF_OPERATIONS_PERMISSIONS,
-    area_operations_manager: HEAD_OF_OPERATIONS_PERMISSIONS.filter(permission => permission !== 'procurement.create_po'),
+    regional_operations_manager: HEAD_OF_OPERATIONS_PERMISSIONS.filter(
+        permission => !['pos.create_sale', 'pos.hold_order', 'pos.void_sale', 'sales.create', 'procurement.delete_po'].includes(permission)
+    ),
+    area_operations_manager: HEAD_OF_OPERATIONS_PERMISSIONS.filter(
+        permission => !['pos.create_sale', 'pos.hold_order', 'pos.void_sale', 'sales.create', 'procurement.create_po', 'procurement.delete_po'].includes(permission)
+    ),
 
     // ═══ LEVEL 5: REGIONAL DEPARTMENT MANAGERS ═══
-    regional_supply_chain_manager: HEAD_OF_SUPPLY_CHAIN_PERMISSIONS.filter(permission => permission !== 'procurement.create_po'),
+    regional_supply_chain_manager: [
+        ...HEAD_OF_SUPPLY_CHAIN_PERMISSIONS.filter(permission => permission !== 'procurement.create_po'),
+        'pricing.view'
+    ],
     regional_procurement_manager: [
         'dashboard.view', 'admin.view',
         'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
@@ -76,6 +83,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'procurement.view',
         'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.reconcile_drawer', 'finance.view_payroll',
         'sales.view', 'sales.view_reports',
+        'pricing.view',
         'pos.view'
     ],
     regional_hr_manager: [

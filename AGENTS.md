@@ -1,37 +1,51 @@
-# SIIFMART AI Development Rules
+# SIIFMART AI Agent Rules
 
-Follow these rules for all work in this repository. `.agent/RULES.md` is the canonical index; its focused guides hold the details. If guidance conflicts, honor the user's explicit request and security requirements, then this file and the canonical rules. Historical feature notes do not override current policy.
+> Canonical rule specification for all AI agents. `.agent/RULES.md` is the canonical index; its focused guides hold the details. For UI work, consult `docs/APPLE_DESIGN_GUIDE.md` and `APPLE_DESIGN_GUIDE.md`. If guidance conflicts, honor the user's explicit request and security requirements, then this file and canonical rules. Historical feature notes do not override current policy.
 
-## Before code changes
+## 1. Workflow & Delivery (Every Task)
+1. **Inspect**: Run `git status --short` before code changes; report and preserve unrelated work. Read target files and patterns in focused sections.
+2. **Verify**: Confirm database columns, types, and constraints from the schema registry, generated types, or live schema before changing queries; diagnose from evidence.
+3. **Split Before Changing**: Split any target file over 500 lines before changing behavior, preserving imports and functionality. Keep all source and guidance files strictly under 500 lines.
+4. **Smallest Verified Change**: Make the smallest complete change. Run `npx tsc --noEmit` and relevant regression checks required by the task after code changes; report anything that could not be run.
+5. **Mandatory Auto-Commit**: Whenever you write or modify code, migrations, or config, you MUST automatically stage and commit all changes (`git add -A` excluding `.env*` secrets, then `git commit`) before finishing your turn—without waiting for user input, even if follow-up fixes remain. Do NOT `git push` unless explicitly asked.
+6. **Report Clearly**: Explain the user-visible result, verification, and commit hash in plain English without code dumps or line-by-line diffs. Update `.agent/FEATURE_REGISTRY.md` for new features or significant bug fixes.
 
-1. Run `git status --short` and report existing uncommitted work before editing. Preserve unrelated changes.
-2. Check the target file's size. Split files over 500 lines before changing behavior; keep source and guidance files under 500 lines.
-3. Inspect existing patterns, types, and schema. For Supabase errors, verify the live schema or authoritative types first.
-4. Make the smallest complete change. Run `npx tsc --noEmit` after code changes and relevant regression checks required by the task.
-5. **Mandatory auto-commit before finishing**: Whenever you write or modify any code, migration, or configuration, you MUST automatically stage and commit all changes (`git add -A` excluding `.env*` secrets, then `git commit`) before ending your turn—without waiting for the user to ask or touch anything, and even if non-blocking issues remain to be fixed later. Do not `git push` unless asked.
+## 2. Invariants (Never Violate)
 
-## Architecture and data
+### Multi-Country Sovereignty
+- **Border Isolation**: Kenya (`KE`) and Ethiopia (`ET`) data, money, stock, sales, shifts, and event cascades never query, merge, or cascade across borders.
+- **Independent Currency & Catalog**: Never convert or sum ETB and KES. SKU prefixes use the active country (`ET-`, `KE-`, etc.); shelf prices and catalogs remain independent.
+- **Central Country Switch**: Country switching is CEO-only via the single top-nav switch (`canSwitchCountry()`); others locked via `getUserCountry()`. No per-screen country pickers or tenant banners; tenancy is automatic via `country_code`.
+- **Tax Configuration**: `taxOnPurchasing` and `taxOnSelling` default `false`. Editable only in Finance settings, never in Procurement or POS. Tax must not appear there unless enabled for the active country.
 
-- UI mutations go through hooks in `/hooks/`; persistence belongs in `/services/`. Use existing query/cache and session patterns.
-- Scope all data and cache keys to the authorized site and country. Enforce access in Supabase RLS or trusted server code; client checks alone are not security.
-- Use explicit projections, bounded pagination, on-demand history/detail reads, and targeted invalidation. Choose page sizes based on the workflow and measured cost.
-- Validate inputs, use explicit database update allowlists, propagate errors, and log safely through `/utils/logger.ts`.
-- Make a rule configurable only when authorized operations genuinely need to vary it. Country-specific settings must be isolated by `country_code`.
+### Zero-Trust & Anti-Fraud
+- **Least Privilege & Boundaries**: Apply least privilege and deny-by-default access. Never expose service-role keys, credentials, PINs, or sensitive personal data in client code or logs. Client checks alone are not security; enforce access in Supabase RLS or trusted server code.
+- **Approvals & Dual Control**: Stock edits, write-offs, voids, price changes, and drawer kicks need supervisory/HQ approval (`inventory_requests` or Cashier + Manager/HQ OTP). Transfers require dual handshake (driver co-sign on discrepancy); unrecorded variance is receiver liability.
+- **Real-Time Audit & Blind Controls**: Shift float, drops, and Z-Reports sync to Supabase in real time (never `localStorage`). Preserve blind counts and blind transfer receiving (hide expected quantities).
+- **Branch Scope**: Branch users only see their active `siteId`. Propagate mutations only to systems that depend on the event, using explicit contracts, idempotency, retries, and country-scoped correlation; avoid speculative fan-out.
+- **Operations & Catalog**: Floor roles (`picker`, `packer`, `receiver`, `inventory_specialist`, `forklift_operator`, `stock_clerk`) and `driver` are interchangeable on internal jobs (`PICK`, `PACK`, `RECEIVE`, `PUTAWAY`, `COUNT`, `TRANSFER`, `REPLENISH`, `WASTE`, `RETURNS`, `LABELS`). `DRIVER`/`DELIVERY`/`DISPATCH` jobs are locked to verified drivers. Catalog is strictly Halal: no liquor, beer, wine, or spirits anywhere (catalog, mocks, examples). Use cooking oil, baby formula, coffee, etc.
 
-## Security, operations, and database changes
+### Database & SQL Governance
+- **Rule 9 (Persistent Migration File is Paramount)**: For ANY database change, save the complete SQL in a persistent `/migrations/YYYYMMDD_description.sql` file on disk before execution.
+- **Automatic Execution**: Inspect the linked Supabase project's live schema and migration history, then automatically apply the migration to that linked project as part of the request. Do not ask for separate authorization. If blocked or unlinked, keep the migration file and report the specific blocker.
+- **Execution Reporting**: In the final response, identify the saved migration file(s), state whether each was applied and to which project/environment, and report any blocker.
+- **No SQL in Chat**: Do NOT paste SQL into chat unless the user explicitly asks to see it.
 
-- Apply least privilege and deny-by-default access. Never expose service-role keys, credentials, PINs, or sensitive personal data in client code or logs.
-- Keep audit trails for sensitive actions, require approvals/dual control where defined, and preserve blind counts and chain of custody.
-- For any requested database change: first save the complete SQL in a persistent `/migrations/YYYYMMDD_description.sql` file, inspect the linked Supabase project's live schema and migration history, then automatically apply the migration to that linked project as part of the request. Do not ask for separate SQL-application authorization. If the project is not linked or the execution tool blocks application, keep the migration file and report the specific blocker. In the final response, identify the saved migration file(s), state whether each was applied and to which project/environment, and report any blocker. Do not paste SQL into chat unless the user asks to see it.
-- Keep all country data, money, settings, and event cascades within their authorized national boundary. The country switch is central and executive-only; branch staff see a seamless single-country app.
+### Egress Efficiency (Rule 10)
+- **Bounded Pagination**: Lists and history use bounded pagination (25 records initial default, adjusted for row size and device). Defer history/archive/audit queries until requested; show active working set on entry.
+- **Explicit Projections**: No naked `.select('*')`; select needed columns; load `line_items`/`po_items`/`sale_items` only when a single record is opened.
+- **Targeted Invalidation**: Invalidate only affected query keys. Choose cache lifetimes based on data volatility; avoid blind polling and prefer supported realtime events or explicit refresh. Scope branch queries by `siteId` + `country_code`. No domain data on app mount.
 
-## Design, performance, and completion
+## 3. Architecture & Code Standards
+- **500-Line Maximum**: Files over 500 lines must be split into focused components before altering behavior. Pages in `/pages/` are lazy and wrapped in `<ModuleErrorBoundary>`; reusable UI is in `/components/`.
+- **Data Flow**: UI writes go through custom mutation hooks in `/hooks/`, never services directly from UI. Reads: `useQuery` (server), `useData()` (cache), `useStore()` (auth/session).
+- **Validation & Types**: Pure functions in `/utils/`, types in `/types/` or `/types.ts`; never `any`. Validate inputs and use explicit database update allowlists.
+- **Safe Logging**: Log with `logger` from `/utils/logger.ts`, never raw `console.log`.
+- **Factual Alerts**: Alerts and notifications must report observed facts only. Do not infer causes or recovery steps from message keywords, present cached estimates as current balances, or claim success before verified save. Distinguish queued work from server completion; omit unverified notices. Scope history to current user, site, country, and session.
 
-- Use semantic theme tokens, shared components, accessible contrast/focus, responsive layouts, and zero decorative UI emoji. Adapt the design to the task; avoid unrelated redesigns.
-- Measure performance before adding memoization or virtualization. Keep mobile POS responsive; give Fulfillment scanning flows extra care on constrained hardware.
-- New routes use lazy loading and `ModuleErrorBoundary`. New services/utils and bug fixes follow the testing rules in `.agent/rules/05-delivery-and-verification.md`.
-- Update `.agent/FEATURE_REGISTRY.md` for new features or significant bug fixes. Keep documentation below 500 lines.
-- Finish in plain language: explain the user-visible change and verification, without code dumps or line-by-line diffs.
-- Alerts and notifications must report observed facts. Do not infer causes or recovery steps from message keywords, present cached estimates as current balances, or claim success before the relevant save is confirmed. Distinguish queued work from server completion; omit unverified notices. Keep notification history within the current user, site, country, and session.
-
-See `.agent/RULES.md`, `.agent/TROUBLESHOOTING.md`, and `docs/APPLE_DESIGN_GUIDE.md` for the full guidance.
+## 4. UI & Performance Standards
+- **Design Tokens**: Follow `docs/APPLE_DESIGN_GUIDE.md`. Use semantic theme tokens; verify contrast, focus, keyboard/touch access, zoom, and reduced motion as relevant.
+- **Lucide Icons & Zero Emoji**: Use Lucide consistently; don't rely on color alone or use emoji as interface decoration.
+- **Performance**: Measure performance before adding memoization or virtualization. Use glass only when it helps floating controls with a solid fallback; keep dense/repainting content simple.
+- **Responsiveness**: All modules must be responsive; Fulfillment scanning has the strictest low-end device constraints. Keep mobile POS responsive.
+- **Priority**: Security, business, and accessibility requirements take precedence over visual styling.

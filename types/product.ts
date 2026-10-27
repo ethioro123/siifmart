@@ -160,6 +160,7 @@ export interface PendingInventoryChange {
   approval_role?: 'warehouse_manager' | 'country_commercial_director'; // Supabase compatibility
   createdAt?: string;
   created_at?: string; // Supabase compatibility
+  currentProduct?: Partial<Product>;
 }
 
 export interface PricingRule {

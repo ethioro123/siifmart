@@ -123,7 +123,7 @@ export const PaymentModal: React.FC = () => {
                                 </label>
                                 {shortage > 0 && (
                                     <span id="amount-tendered-shortage" role="status" className="text-[11px] font-bold text-rose-600 dark:text-rose-400">
-                                        Need {CURRENCY_SYMBOL} {shortage.toLocaleString()} more
+                                        {t('pos.needMore', { amount: `${CURRENCY_SYMBOL} ${shortage.toLocaleString()}` })}
                                     </span>
                                 )}
                             </div>
@@ -136,7 +136,7 @@ export const PaymentModal: React.FC = () => {
                                 value={amountTendered}
                                 onChange={(e) => setAmountTendered(e.target.value)}
                                 aria-describedby={shortage > 0 ? 'amount-tendered-shortage' : undefined}
-                                placeholder="Enter amount..."
+                                placeholder={t('pos.enterAmountPlaceholder') || 'Enter amount...'}
                                 className={`w-full bg-[var(--theme-bg-subtle)] border rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] text-2xl outline-none font-mono font-bold transition-all tabular-nums tracking-tight ${
                                     shortage > 0
                                         ? 'border-rose-400 focus:border-rose-500'
@@ -163,7 +163,7 @@ export const PaymentModal: React.FC = () => {
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] border-[var(--theme-border)]'
                                         }`}
                                     >
-                                        {isExact ? 'Exact' : `${CURRENCY_SYMBOL} ${amt.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                                        {isExact ? t('pos.exact') : `${CURRENCY_SYMBOL} ${amt.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
                                     </button>
                                 );
                             })}
@@ -194,8 +194,8 @@ export const PaymentModal: React.FC = () => {
                     <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-3">
                         <CreditCard className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
                         <div>
-                            <p className="text-blue-600 dark:text-blue-400 text-sm font-bold">Confirm payment on the card terminal</p>
-                            <p className="text-[var(--theme-text-secondary)] text-xs mt-0.5">After approval, complete the sale here to record it.</p>
+                            <p className="text-blue-600 dark:text-blue-400 text-sm font-bold">{t('pos.cardPromptTitle')}</p>
+                            <p className="text-[var(--theme-text-secondary)] text-xs mt-0.5">{t('pos.cardPromptDesc')}</p>
                         </div>
                     </div>
                 )}
@@ -220,7 +220,7 @@ export const PaymentModal: React.FC = () => {
                         ) : (
                             <Check size={18} />
                         )}
-                        <span>{canComplete ? t('pos.completeSale') : selectedPaymentMethod === 'Cash' ? 'Enter Tendered Amount' : 'Enter Payment Details'}</span>
+                        <span>{canComplete ? t('pos.completeSale') : selectedPaymentMethod === 'Cash' ? t('pos.enterTenderedAmount') : t('pos.enterPaymentDetails')}</span>
                     </button>
                 </div>
             </div>

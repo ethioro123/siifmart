@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import type { Site, ShiftRecord, SaleRecord } from '../../types';
 import { formatCompactNumber } from '../../utils/formatting';
+import { useData } from '../../contexts/DataContext';
 
 interface TerritoryFacilityGridProps {
   sites: Site[];
@@ -21,6 +22,7 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
   currencySymbol
 }) => {
   const navigate = useNavigate();
+  const { setActiveSite } = useData();
 
   // Aggregate metrics per facility
   const todayPrefix = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -202,17 +204,19 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
             <button
               type="button"
               onClick={() => {
+                setActiveSite?.(site.id);
                 if (isAdministration) {
-                  navigate('/admin');
+                  const isRegionalHub = Boolean(site.regionCode || (site as any).region_code);
+                  navigate(isRegionalHub ? '/regional-ops' : '/admin');
                 } else if (isWarehouse) {
                   navigate('/wms-dashboard');
                 } else {
                   navigate('/pos-dashboard');
                 }
               }}
-              className="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent)] hover:text-white border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all duration-200"
+              className="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent)] hover:text-white border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all duration-200 cursor-pointer"
             >
-              <span>{isAdministration ? 'Inspect Command Hub' : isWarehouse ? 'Inspect WMS Hub' : 'Inspect POS Command'}</span>
+              <span>{isAdministration ? 'Inspect Regional Hub' : isWarehouse ? 'Inspect WMS Hub' : 'Inspect POS Command'}</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>

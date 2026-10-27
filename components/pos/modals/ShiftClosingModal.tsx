@@ -43,7 +43,7 @@ export const ShiftClosingModal: React.FC = () => {
         <Modal
             isOpen={isShiftModalOpen}
             onClose={() => !isProcessing && setIsShiftModalOpen(false)}
-            title={activeShift ? `Blind Shift Close (${formatShiftId(activeShift)})` : "End of Shift Cash Reconciliation"}
+            title={activeShift ? t('pos.blindShiftClose', { id: formatShiftId(activeShift) }) : t('pos.endOfShiftReconciliation')}
             size="lg"
         >
             <div className="space-y-6">
@@ -59,7 +59,7 @@ export const ShiftClosingModal: React.FC = () => {
                             </div>
                             <span className={`text-xs font-bold uppercase tracking-wider ${closingStep === step ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-secondary)]'
                                 }`}>
-                                {step === 1 ? "1. Blind Cash Tray Count" : "2. Reconciliation & Audit"}
+                                {step === 1 ? t('pos.blindCashTrayCount') : t('pos.reconciliationAndAudit')}
                             </span>
                             {step < 2 && <div className="w-12 h-[1px] bg-[var(--theme-border)] mx-3" />}
                         </div>
@@ -73,10 +73,10 @@ export const ShiftClosingModal: React.FC = () => {
                                     <EyeOff className="text-emerald-700 dark:text-emerald-400 mt-0.5 shrink-0" size={20} />
                                     <div className="space-y-0.5">
                                         <p className="text-xs font-bold text-emerald-900 dark:text-emerald-300">
-                                            Blind Drawer Count Protocol (Anti-Skimming Active)
+                                            {t('pos.blindDrawerProtocol')}
                                         </p>
                                         <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed font-medium">
-                                            Please count each physical cash denomination currently in the cash drawer. System expected totals remain concealed until physical counting is finalized.
+                                            {t('pos.blindDrawerInstruction')}
                                         </p>
                                     </div>
                                 </div>
@@ -85,7 +85,7 @@ export const ShiftClosingModal: React.FC = () => {
                                     {Object.keys(cashDenominations).sort((a, b) => parseInt(b) - parseInt(a)).map((denom) => (
                                         <div key={denom} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex flex-col gap-2 focus-within:border-[var(--theme-border-focus)] transition-all shadow-xs">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-xs text-[var(--theme-text-secondary)] font-bold tracking-wider uppercase">{denom} Note</span>
+                                                <span className="text-xs text-[var(--theme-text-secondary)] font-bold tracking-wider uppercase">{denom} {t('pos.note')}</span>
                                                 <span className="text-xs font-mono text-[var(--theme-primary)] font-bold">{CURRENCY_SYMBOL}{(parseInt(denom) * cashDenominations[denom]).toLocaleString()}</span>
                                             </div>
                                             <input
@@ -104,7 +104,7 @@ export const ShiftClosingModal: React.FC = () => {
                                 </div>
 
                                 <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex justify-between items-center shadow-xs">
-                                    <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">Total Counted in Drawer</span>
+                                    <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('pos.totalCountedInDrawer')}</span>
                                     <span className="text-2xl font-mono text-[var(--theme-text-primary)] font-bold">
                                         {CURRENCY_SYMBOL} {actualCashCounted.toLocaleString()}
                                     </span>
@@ -122,7 +122,7 @@ export const ShiftClosingModal: React.FC = () => {
                                     }}
                                     className="w-full py-3.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer text-xs uppercase tracking-wider"
                                 >
-                                    Lock Count & Proceed to Reconciliation <ArrowLeft className="rotate-180" size={16} />
+                                    {t('pos.lockCountAndProceed')} <ArrowLeft className="rotate-180" size={16} />
                                 </button>
                             </div>
                         )}
@@ -136,14 +136,14 @@ export const ShiftClosingModal: React.FC = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-base font-bold text-[var(--theme-text-primary)]">
-                                            Blind Drawer Count Sealed
+                                            {t('pos.blindDrawerCountSealed')}
                                         </h3>
                                         <p className="text-xs text-[var(--theme-text-secondary)] mt-1 max-w-md mx-auto">
-                                            Anti-Skimming Protocol: Total physical cash count is permanently locked. Register variance and expected totals are audited independently by Central HQ Finance.
+                                            {t('pos.blindDrawerCountSealedDesc')}
                                         </p>
                                     </div>
                                     <div className="pt-2">
-                                        <span className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold block mb-0.5">Sealed Cash Total</span>
+                                        <span className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold block mb-0.5">{t('pos.sealedCashTotal')}</span>
                                         <p className="text-3xl font-mono font-bold text-[var(--theme-text-primary)]">
                                             {CURRENCY_SYMBOL} {actualCashCounted.toLocaleString()}
                                         </p>
@@ -153,10 +153,10 @@ export const ShiftClosingModal: React.FC = () => {
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider px-1">
-                                            Shift Handover Notes (Optional)
+                                            {t('pos.shiftHandoverNotes')}
                                         </label>
                                         <textarea
-                                            placeholder="Optional notes for HQ audit (e.g. damaged bill accepted, coin shortage)..."
+                                            placeholder={t('pos.shiftNotesPlaceholder') || "Optional notes for HQ audit (e.g. damaged bill accepted, coin shortage)..."}
                                             className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-2xl p-4 text-sm text-[var(--theme-input-text)] outline-none focus:border-[var(--theme-border-focus)] min-h-[70px]"
                                             value={discrepancyReason}
                                             onChange={(e) => setDiscrepancyReason(e.target.value)}
@@ -166,10 +166,10 @@ export const ShiftClosingModal: React.FC = () => {
                                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-center justify-between text-xs">
                                         <span className="text-[var(--theme-text-secondary)] font-medium flex items-center gap-1.5">
                                             <ShieldAlert size={14} className="text-[var(--theme-primary)]" />
-                                            Zero-Trust Compliance
+                                            {t('pos.zeroTrustCompliance')}
                                         </span>
                                         <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-xs">
-                                            Direct HQ Dispatch
+                                            {t('pos.directHqDispatch')}
                                         </span>
                                     </div>
                                 </div>
@@ -182,7 +182,7 @@ export const ShiftClosingModal: React.FC = () => {
                                         className="w-full py-3.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl shadow-xs flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer text-xs uppercase tracking-wider"
                                     >
                                         {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <LogOut size={16} />}
-                                        Submit Sealed Count & Close Register
+                                        {t('pos.submitSealedCount')}
                                     </button>
                                 </div>
                             </div>

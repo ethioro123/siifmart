@@ -1,8 +1,10 @@
 import React from 'react';
 import { usePOS } from '../POSContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import Modal from '../../Modal';
 
 export const MiscItemModal: React.FC = () => {
+    const { t } = useLanguage();
     const {
         isMiscItemModalOpen,
         setIsMiscItemModalOpen,
@@ -12,10 +14,10 @@ export const MiscItemModal: React.FC = () => {
     } = usePOS();
 
     return (
-        <Modal isOpen={isMiscItemModalOpen} onClose={() => setIsMiscItemModalOpen(false)} title="Add Miscellaneous Item" size="sm">
+        <Modal isOpen={isMiscItemModalOpen} onClose={() => setIsMiscItemModalOpen(false)} title={t('pos.miscItemTitle')} size="sm">
             <div className="space-y-4">
                 <div>
-                    <label htmlFor="misc-desc" className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider mb-1.5 block">Description</label>
+                    <label htmlFor="misc-desc" className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider mb-1.5 block">{t('pos.description')}</label>
                     <input
                         id="misc-desc"
                         value={miscItem.name}
@@ -24,7 +26,7 @@ export const MiscItemModal: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider mb-1.5 block">Price</label>
+                    <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider mb-1.5 block">{t('common.price')}</label>
                     <input
                         type="number"
                         value={miscItem.price}
@@ -39,7 +41,7 @@ export const MiscItemModal: React.FC = () => {
                     disabled={!miscItem.price}
                     className="w-full py-3 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer text-xs uppercase tracking-wider"
                 >
-                    Add to Cart
+                    {t('pos.addToCart')}
                 </button>
             </div>
         </Modal>

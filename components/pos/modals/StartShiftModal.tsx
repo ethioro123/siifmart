@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePOS } from '../POSContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { native } from '../../../utils/native';
@@ -12,6 +13,7 @@ import { Store, User, Clock, ShieldCheck, DollarSign, ArrowLeft, Monitor, CheckC
 const PRESET_FLOATS = [1000, 2000, 3000, 5000];
 
 export const StartShiftModal: React.FC = () => {
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const { user } = useStore();
     const { activeSite, shifts } = useData();
@@ -78,7 +80,7 @@ export const StartShiftModal: React.FC = () => {
         <Modal
             isOpen={isStartShiftModalOpen}
             onClose={handleClose}
-            title="Start Cashier Shift"
+            title={t('pos.startCashierShift')}
             size="md"
         >
             <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
@@ -109,9 +111,9 @@ export const StartShiftModal: React.FC = () => {
                     <div className="flex items-center justify-between text-xs font-medium text-[var(--theme-text-secondary)] pt-2 border-t border-[var(--theme-border-subtle)]">
                         <div className="flex items-center gap-1.5">
                             <Clock size={13} className="text-amber-500" />
-                            <span>Shift starting ({new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})</span>
+                            <span>{t('pos.startingShiftAt', { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })}</span>
                         </div>
-                        <span className="text-[10px] uppercase font-bold text-amber-500">1:1 Cashier Responsibility</span>
+                        <span className="text-[10px] uppercase font-bold text-amber-500">{t('pos.cashierResponsibility')}</span>
                     </div>
                 </div>
 
@@ -120,9 +122,9 @@ export const StartShiftModal: React.FC = () => {
                     <div className="flex justify-between items-baseline">
                         <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
                             <Monitor size={14} className="text-indigo-500" />
-                            Assign Physical Counter / Register
+                            {t('pos.assignCounter')}
                         </label>
-                        <span className="text-[11px] text-[var(--theme-text-secondary)]">Strict mutual exclusion</span>
+                        <span className="text-[11px] text-[var(--theme-text-secondary)]">{t('pos.strictMutualExclusion')}</span>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -160,10 +162,10 @@ export const StartShiftModal: React.FC = () => {
                                     <span className="text-[10px] font-mono mt-1">
                                         {isOccupied ? (
                                             <span className="text-rose-500 font-semibold truncate block">
-                                                {occ?.cashierCode || 'Occupied'}
+                                                {occ?.cashierCode || t('pos.occupied')}
                                             </span>
                                         ) : (
-                                            <span className="text-emerald-500 font-semibold">Available</span>
+                                            <span className="text-emerald-500 font-semibold">{t('pos.available')}</span>
                                         )}
                                     </span>
                                 </button>
@@ -175,7 +177,7 @@ export const StartShiftModal: React.FC = () => {
                 {/* Opening Cash Float Input */}
                 <div className="space-y-3">
                     <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                        Opening Drawer Cash Float ({CURRENCY_SYMBOL})
+                        {t('pos.openingDrawerCashFloat')} ({CURRENCY_SYMBOL})
                     </label>
 
                     <div className="relative">
@@ -220,7 +222,7 @@ export const StartShiftModal: React.FC = () => {
                 <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-2.5">
                     <ShieldCheck size={18} className="text-blue-500 shrink-0 mt-0.5" />
                     <p className="text-xs text-[var(--theme-text-primary)] leading-relaxed font-medium">
-                        Opening float will be credited to {selectedCounter}. At shift close, the system will verify your drawer cash against this starting float under badge <strong>{cashierBadge}</strong>.
+                        {t('pos.antiSkimmingNotice', { counter: selectedCounter, badge: cashierBadge })}
                     </p>
                 </div>
 
@@ -232,7 +234,7 @@ export const StartShiftModal: React.FC = () => {
                         className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-[var(--theme-border)] shadow-xs active:scale-95 tracking-tight"
                     >
                         <ArrowLeft size={15} />
-                        <span>Cancel</span>
+                        <span>{t('common.cancel')}</span>
                     </button>
 
                     <button
@@ -241,7 +243,7 @@ export const StartShiftModal: React.FC = () => {
                         className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer border border-transparent tracking-tight"
                     >
                         <DollarSign size={15} />
-                        <span>{isSubmitting ? 'Starting...' : `Start ${selectedCounter} (${CURRENCY_SYMBOL} ${floatNum.toLocaleString()})`}</span>
+                        <span>{isSubmitting ? t('pos.starting') : `${t('pos.startCounter', { counter: selectedCounter })} (${CURRENCY_SYMBOL} ${floatNum.toLocaleString()})`}</span>
                     </button>
                 </div>
             </form>

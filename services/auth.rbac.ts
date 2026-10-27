@@ -61,7 +61,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'admin', 'procurement', 'pricing', 'inventory', 'warehouse', 'sales', 'customers', 'profile'
     ],
     country_supply_chain_director: [
-        'dashboard', 'admin', 'warehouse', 'inventory', 'procurement', 'regional-ops', 'sales', 'settings', 'profile'
+        'dashboard', 'admin', 'warehouse', 'inventory', 'procurement', 'regional-ops', 'pricing', 'sales', 'settings', 'profile'
     ],
     country_hr_director: [
         'dashboard', 'admin', 'employees', 'finance', 'settings', 'profile'
@@ -88,7 +88,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
 
     // ═══ LEVEL 5 - REGIONAL DEPARTMENT MANAGERS ═══
     regional_supply_chain_manager: [
-        'dashboard', 'regional-ops', 'warehouse', 'inventory', 'procurement', 'sales', 'employees', 'profile'
+        'dashboard', 'regional-ops', 'warehouse', 'inventory', 'procurement', 'pricing', 'sales', 'employees', 'profile'
     ],
     regional_procurement_manager: [
         'dashboard', 'regional-ops', 'procurement', 'inventory', 'pricing', 'customers', 'profile'
@@ -97,7 +97,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'regional-ops', 'pricing', 'inventory', 'sales', 'profile'
     ],
     regional_finance_manager: [
-        'dashboard', 'regional-ops', 'finance', 'sales', 'pos', 'profile'
+        'dashboard', 'regional-ops', 'finance', 'sales', 'pricing', 'pos', 'profile'
     ],
     regional_hr_manager: [
         'dashboard', 'regional-ops', 'employees', 'profile'

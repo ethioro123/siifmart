@@ -92,7 +92,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Zero-Trust Void & Cancellation Authorization"
+            title={t('pos.zeroTrustVoidTitle')}
             size="md"
         >
             <div className="p-4 sm:p-6 space-y-5">
@@ -101,10 +101,10 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                     <ShieldAlert size={22} className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
                     <div className="space-y-1">
                         <h4 className="text-xs font-black text-rose-800 dark:text-rose-300 uppercase tracking-wider">
-                            Supervisory Approval Required (SOP-POS-008)
+                            {t('pos.supervisoryApprovalRequired')}
                         </h4>
                         <p className="text-xs font-medium text-rose-700 dark:text-rose-300 leading-relaxed">
-                            Under Zero-Trust Loss Prevention, cashiers cannot unilaterally void sales. Voiding <b>{itemsCount} item(s)</b> worth <b>{CURRENCY_SYMBOL} {voidTotal.toLocaleString()}</b> requires on-duty supervisor co-sign.
+                            {t('pos.voidWarning', { count: itemsCount, amount: `${CURRENCY_SYMBOL} ${voidTotal.toLocaleString()}` })}
                         </p>
                     </div>
                 </div>
@@ -112,7 +112,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                 {/* Reason Code Dropdown */}
                 <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase text-[var(--theme-text-secondary)] tracking-wider">
-                        Mandatory Reason Code
+                        {t('pos.mandatoryReasonCode')}
                     </label>
                     <select
                         value={reasonCode}
@@ -133,7 +133,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
 
                 {/* Pin Pad */}
                 <div className="flex flex-col items-center">
-                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold mb-2">Supervisor Enter Staff PIN</p>
+                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold mb-2">{t('pos.supervisorEnterPin')}</p>
                     <PinPad pin={supervisorPin} setPin={setSupervisorPin} onEnter={handleConfirmVoid} />
                 </div>
 
@@ -143,7 +143,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                         onClick={onClose}
                         className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs transition-colors"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         type="button"
@@ -152,7 +152,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                         className="flex-2 py-3 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
-                        Authorize & Void Cart
+                        {t('pos.authorizeAndVoid')}
                     </button>
                 </div>
             </div>

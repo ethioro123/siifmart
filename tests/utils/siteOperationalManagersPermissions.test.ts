@@ -19,7 +19,7 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
         it('blocks access to POS till, central finance, and system settings modules', () => {
             expect(canAccessModule('regional_supply_chain_manager', 'pos')).toBe(false);
             expect(canAccessModule('regional_supply_chain_manager', 'finance')).toBe(false);
-            expect(canAccessModule('regional_supply_chain_manager', 'pricing')).toBe(false);
+            expect(canAccessModule('regional_supply_chain_manager', 'pricing')).toBe(true);
             expect(canAccessModule('regional_supply_chain_manager', 'settings')).toBe(false);
             expect(canAccessModule('regional_supply_chain_manager', 'admin')).toBe(false);
         });

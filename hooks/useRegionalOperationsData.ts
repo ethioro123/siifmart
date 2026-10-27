@@ -182,7 +182,8 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     regionalEmployees: queriedEmployees,
     regionalShifts: queriedShifts,
     regionalOrders: queriedOrders,
-    regionalSales: queriedSales
+    regionalSales: queriedSales,
+    regionalTransfers: queriedTransfers = []
   } = useRegionalDataQueries({
     regionCode: effectiveRegionCode,
     siteIds: siteIdsArray,
@@ -217,12 +218,14 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     });
   }, [queriedOrders, allOrders, effectiveRegionCode, regionalSiteIds]);
 
-  // Filter Regional Transfers
+  // Filter Regional Transfers (originating or terminating in region)
   const regionalTransfers = useMemo(() => {
-    // In this context, transfers are loaded into movements or transfers
-    // Transfers originating or terminating in region
-    return (allOrders as any[]).filter(o => false); // Fallback placeholder if no fulfillment context
-  }, [allOrders]);
+    return queriedTransfers.filter(t => {
+      const srcMatch = t.sourceRegionCode === effectiveRegionCode || regionalSiteIds.has(t.sourceSiteId);
+      const dstMatch = t.destRegionCode === effectiveRegionCode || regionalSiteIds.has(t.destSiteId);
+      return srcMatch || dstMatch;
+    });
+  }, [queriedTransfers, effectiveRegionCode, regionalSiteIds]);
 
   const intraRegionalTransfers = useMemo(() => {
     return regionalTransfers.filter(t => {
@@ -231,6 +234,10 @@ export function useRegionalOperationsData(): RegionalOperationsData {
       return srcMatch && dstMatch;
     });
   }, [regionalTransfers, effectiveRegionCode, regionalSiteIds]);
+
+  const discrepancyTransfers = useMemo(() => {
+    return regionalTransfers.filter(t => Boolean(t.hasDiscrepancy));
+  }, [regionalTransfers]);
 
   // Filter Regional Shifts (prioritizing direct territorial query)
   const regionalShifts = useMemo(() => {
@@ -455,7 +462,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
       pendingEscalatedPOCount: pendingEscalatedPOs.length,
       pendingCandidateCount: pendingCandidateTalent.length,
       varianceShiftCount: varianceShifts.length,
-      discrepancyTransferCount: 0,
+      discrepancyTransferCount: discrepancyTransfers.length,
       managerOverrideCount: overrideVelocityBreaches.reduce((acc, b) => acc + b.totalOverrides, 0),
       overrideVelocityBreachCount: overrideVelocityBreaches.length
     },
@@ -463,7 +470,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     pendingEscalatedPOs,
     pendingCandidateTalent,
     varianceShifts,
-    discrepancyTransfers: [],
+    discrepancyTransfers,
     overrideVelocityBreaches
   };
 }

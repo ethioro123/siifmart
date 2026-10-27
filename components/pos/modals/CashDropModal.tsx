@@ -135,7 +135,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={isPinStep ? "4-Eyes Supervisor Dual-Sign Off" : "Mid-Day Safe Cash Drop (Skim)"}
+            title={isPinStep ? t('pos.supervisorDualSignOff') : t('pos.safeCashDropTitle')}
             size="md"
         >
             <div className="p-4 sm:p-6 space-y-6">
@@ -170,7 +170,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                         {/* Amount Input */}
                         <div className="space-y-2">
                             <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">
-                                Drop Amount to Deposit in Safe ({policy.currency})
+                                {t('pos.dropAmount')} ({policy.currency})
                             </label>
                             <input
                                 type="number"
@@ -189,7 +189,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                         {/* Safe Bag & Reason */}
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Tamper-Proof Safe Bag #</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('pos.safeBagNumber')}</label>
                                 <input
                                     type="text"
                                     value={safeBagNumber}
@@ -198,7 +198,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Reason</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('pos.reasonForDrop')}</label>
                                 <select
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
@@ -219,14 +219,14 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                                 onClick={onClose}
                                 className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold uppercase text-xs cursor-pointer transition-colors shadow-xs"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 type="submit"
                                 disabled={amountNum <= 0}
                                 className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl font-bold uppercase text-xs shadow-xs cursor-pointer transition-all"
                             >
-                                Request Supervisor Co-Sign
+                                {t('pos.proceedToSupervisorAuth')}
                             </button>
                         </div>
                     </form>
@@ -261,7 +261,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                                 onClick={() => setIsPinStep(false)}
                                 className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold text-xs cursor-pointer shadow-xs"
                             >
-                                Back
+                                {t('common.back')}
                             </button>
                             <button
                                 type="button"
@@ -270,7 +270,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                                 className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                             >
                                 {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-                                Confirm Deposit & Pop Drawer
+                                {t('pos.confirmCashDrop')}
                             </button>
                         </div>
                     </div>

@@ -62,7 +62,7 @@ export default function Sidebar() {
   if (!user) return null;
 
   // Regional Scope & Dynamic Persona Navigation
-  const isRegionalStaff = isRegionalUser || user.scopeLevel === 'REGIONAL' || user.scope_level === 'REGIONAL' || ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user.role);
+  const isRegionalStaff = isRegionalUser || user.scopeLevel === 'REGIONAL' || user.scope_level === 'REGIONAL' || ['regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_it_manager', 'regional_compliance_manager'].includes(user.role);
 
   const targetRegionCode = activeRegionCode || user.regionCode || user.region_code;
   const activeRegion = (regions || []).find(r => r.code === targetRegionCode);
@@ -79,6 +79,20 @@ export default function Sidebar() {
       setActiveSite(adminSite.id);
     }
     navigate('/admin');
+    toggleSidebar();
+  };
+
+  // Regional leadership clicking "Regional Command": return activeSite to the Regional Hub for their region
+  const handleRegionalCommandClick = () => {
+    if (targetRegionCode) {
+      const regionalHub = sites.find(s =>
+        (s.regionCode === targetRegionCode || (s as any).region_code === targetRegionCode) &&
+        (s.type === 'Administration' || s.type === 'Administrative')
+      );
+      if (regionalHub && activeSite?.id !== regionalHub.id) {
+        setActiveSite(regionalHub.id);
+      }
+    }
     toggleSidebar();
   };
 
@@ -114,7 +128,7 @@ export default function Sidebar() {
           icon: Activity,
           label: `Regional Command (${regionDisplayName})`,
           section: "dashboard",
-          roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'store_operations_auditor', 'auditor', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator', 'it_support', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'buyer', 'demand_planner', 'replenishment_planner', 'merchandising_specialist', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'regional_supply_chain_manager', 'inventory_manager', 'merchandiser', 'data_analyst', 'cs_manager']
+          roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'regional_operations_manager', 'area_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_it_manager', 'regional_compliance_manager', 'store_operations_auditor', 'auditor', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator', 'it_support', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'buyer', 'demand_planner', 'replenishment_planner', 'merchandising_specialist', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'regional_supply_chain_manager', 'inventory_manager', 'merchandiser', 'data_analyst', 'cs_manager']
         }
       ] : [
         {
@@ -136,7 +150,7 @@ export default function Sidebar() {
       { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_supply_chain_director', 'country_compliance_manager', 'auditor', 'store_manager', 'assistant_store_manager', 'shift_supervisor', 'cs_manager', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_finance_manager', 'regional_security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'demand_planner', 'replenishment_planner', 'store_operations_auditor'] },
 
       // MERCHANDISING
-      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'country_finance_director', 'country_operations_director', 'merchandiser', 'regional_operations_manager', 'regional_procurement_manager', 'store_operations_auditor'] },
+      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['group_ceo', 'country_managing_director', 'country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'country_finance_director', 'country_operations_director', 'country_supply_chain_director', 'merchandiser', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_finance_manager', 'regional_procurement_manager', 'store_operations_auditor'] },
 
       // FINANCE
       { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['group_ceo', 'country_managing_director', 'country_finance_director', 'country_compliance_manager', 'auditor', 'country_operations_director', 'regional_operations_manager', 'regional_finance_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },
@@ -201,15 +215,15 @@ export default function Sidebar() {
         if (item.to === '/roadmap') {
           isAllowedForSite = false;
         }
-        // Central Operations button is kept for CEO & operational leadership to return to HQ
-        if (item.to === '/admin' && !isSuperAdminOrCeo && !['country_managing_director', 'regional_operations_manager', 'country_operations_director'].includes(userRole)) {
+        // Central Operations button is kept for CEO & national operational leadership to return to HQ
+        if (item.to === '/admin' && !isSuperAdminOrCeo && !['country_managing_director', 'country_operations_director'].includes(userRole)) {
           isAllowedForSite = false;
         }
       } else if (isStore) {
         // ═══ STORE / POS SITE CONTEXT ═══
         // Store Manager view: POS Terminal, POS Command, Sales, Customers, Staff.
         // POS sites strictly DO NOT have access to inventory for store staff (strictly for warehouse and distribution center).
-        const isRegionalInventoryOrLogistics = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_logistics_manager', 'regional_procurement_manager', 'regional_security_manager', 'country_supply_chain_director', 'replenishment_planner'].includes(userRole);
+        const isRegionalInventoryOrLogistics = ['regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_logistics_manager', 'regional_procurement_manager', 'regional_security_manager', 'country_supply_chain_director', 'replenishment_planner'].includes(userRole);
 
         if ((item.to === '/inventory' || item.section === 'inventory' || item.to === '/network-inventory') && !isRegionalInventoryOrLogistics && !isExecutive) {
           isAllowedForSite = false;
@@ -218,19 +232,19 @@ export default function Sidebar() {
           isAllowedForSite = false;
         }
 
-        const isMerchandisingSpecialist = item.section === 'pricing' && ['country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_procurement_manager', 'regional_operations_manager'].includes(userRole);
-        const isFinanceSpecialist = item.section === 'finance' && ['country_finance_director', 'regional_finance_manager', 'regional_operations_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'country_compliance_manager', 'auditor'].includes(userRole);
-        const isProcurementSpecialist = item.section === 'procurement' && ['country_commercial_director', 'country_finance_director', 'country_supply_chain_director', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_operations_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
-        const isWarehouseSpecialist = item.section === 'warehouse' && ['regional_logistics_manager', 'regional_operations_manager', 'country_supply_chain_director', 'regional_supply_chain_manager'].includes(userRole);
-        const isSettingsSpecialist = item.section === 'settings' && ['regional_security_manager', 'regional_operations_manager', 'country_technology_director', 'it_support', 'country_compliance_manager', 'auditor', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director'].includes(userRole);
+        const isMerchandisingSpecialist = item.section === 'pricing' && ['country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser', 'regional_procurement_manager', 'regional_operations_manager', 'area_operations_manager'].includes(userRole);
+        const isFinanceSpecialist = item.section === 'finance' && ['country_finance_director', 'regional_finance_manager', 'regional_operations_manager', 'area_operations_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'country_compliance_manager', 'auditor'].includes(userRole);
+        const isProcurementSpecialist = item.section === 'procurement' && ['country_commercial_director', 'country_finance_director', 'country_supply_chain_director', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_operations_manager', 'area_operations_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
+        const isWarehouseSpecialist = item.section === 'warehouse' && ['regional_logistics_manager', 'regional_operations_manager', 'area_operations_manager', 'country_supply_chain_director', 'regional_supply_chain_manager'].includes(userRole);
+        const isSettingsSpecialist = item.section === 'settings' && ['regional_security_manager', 'regional_operations_manager', 'area_operations_manager', 'country_technology_director', 'it_support', 'country_compliance_manager', 'auditor', 'country_finance_director', 'country_hr_director', 'country_commercial_director', 'country_supply_chain_director'].includes(userRole);
 
         if (['warehouse', 'inventory', 'procurement', 'pricing', 'finance', 'settings'].includes(item.section)) {
           if (!isMerchandisingSpecialist && !isFinanceSpecialist && !isProcurementSpecialist && !isWarehouseSpecialist && !isSettingsSpecialist && !isRegionalInventoryOrLogistics && !isExecutive) {
             isAllowedForSite = false;
           }
         }
-        // Central Operations button is kept for CEO & operational leadership to return to HQ
-        if (item.to === '/admin' && !isSuperAdminOrCeo && !['country_managing_director', 'regional_operations_manager', 'country_operations_director'].includes(userRole)) {
+        // Central Operations button is kept for CEO & national operational leadership to return to HQ
+        if (item.to === '/admin' && !isSuperAdminOrCeo && !['country_managing_director', 'country_operations_director'].includes(userRole)) {
           isAllowedForSite = false;
         }
       } else if (isHQ) {
@@ -310,8 +324,8 @@ export default function Sidebar() {
           <p className="px-4 text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-3">Menu</p>
           {navItems.map(item => {
             const Icon = item.icon;
-            // "Central Operations" for multi-site leadership: switch to Admin site before navigating
-            if (item.to === '/admin' && ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director'].includes(user.role)) {
+            // "Central Operations" for national multi-site leadership: switch to Admin site before navigating
+            if (item.to === '/admin' && ['group_ceo', 'country_managing_director', 'country_operations_director'].includes(user.role)) {
               return (
                 <button
                   key={item.to}
@@ -330,7 +344,7 @@ export default function Sidebar() {
                 to={item.to}
                 icon={item.icon}
                 label={item.label}
-                onClick={toggleSidebar}
+                onClick={item.to === '/regional-ops' ? handleRegionalCommandClick : toggleSidebar}
               />
             );
           })}

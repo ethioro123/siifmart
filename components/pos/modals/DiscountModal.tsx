@@ -1,11 +1,13 @@
 import React from 'react';
 import { usePOS } from '../POSContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { Tag, AlertTriangle, Loader2, CheckCircle } from 'lucide-react';
 
 export const DiscountModal: React.FC = () => {
+    const { t } = useLanguage();
     const {
         isDiscountModalOpen,
         setIsDiscountModalOpen,
@@ -22,7 +24,7 @@ export const DiscountModal: React.FC = () => {
     } = usePOS();
 
     return (
-        <Modal isOpen={isDiscountModalOpen} onClose={() => { setIsDiscountModalOpen(false); setDiscountCodeError(''); }} title="Apply Discount Code" size="sm">
+        <Modal isOpen={isDiscountModalOpen} onClose={() => { setIsDiscountModalOpen(false); setDiscountCodeError(''); }} title={t('pos.applyDiscountCode')} size="sm">
             <div className="space-y-5">
                 {/* Current Applied Discount */}
                 {appliedDiscountCodeDetails && (
@@ -45,7 +47,7 @@ export const DiscountModal: React.FC = () => {
                                     }
                                 </p>
                                 <p className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums">
-                                    Saving: {formatCompactNumber(cartDiscount, { currency: CURRENCY_SYMBOL })}
+                                    {t('pos.saving')}: {formatCompactNumber(cartDiscount, { currency: CURRENCY_SYMBOL })}
                                 </p>
                             </div>
                         </div>
@@ -53,7 +55,7 @@ export const DiscountModal: React.FC = () => {
                             onClick={handleRemoveDiscount}
                             className="w-full mt-3 py-2.5 text-rose-500 text-xs font-semibold border border-rose-500/20 bg-rose-500/10 rounded-xl hover:bg-rose-500/20 transition-all cursor-pointer active:scale-95 tracking-tight"
                         >
-                            Remove Discount
+                            {t('pos.removeDiscount')}
                         </button>
                     </div>
                 )}
@@ -66,14 +68,14 @@ export const DiscountModal: React.FC = () => {
                                 <Tag className="w-7 h-7" />
                             </div>
                             <p className="text-[var(--theme-text-secondary)] text-xs font-medium">
-                                Enter the discount code provided to the customer
+                                {t('pos.enterDiscountCode')}
                             </p>
                         </div>
 
                         <div className="space-y-3">
                             <div>
                                 <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block tracking-wider">
-                                    Discount Code
+                                    {t('pos.discountCode')}
                                 </label>
                                 <input
                                     type="text"
@@ -105,12 +107,12 @@ export const DiscountModal: React.FC = () => {
                                 {isValidatingCode ? (
                                     <>
                                         <Loader2 className="w-4 h-4 animate-spin" />
-                                        <span>Validating...</span>
+                                        <span>{t('pos.validating')}</span>
                                     </>
                                 ) : (
                                     <>
                                         <CheckCircle className="w-4 h-4" />
-                                        <span>Apply Code</span>
+                                        <span>{t('pos.applyCode')}</span>
                                     </>
                                 )}
                             </button>
@@ -122,16 +124,16 @@ export const DiscountModal: React.FC = () => {
                                 <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                                     <Tag className="w-3 h-3" />
                                 </div>
-                                <span>Zero-Trust Promotion Policy</span>
+                                <span>{t('pos.zeroTrustPromotionPolicy')}</span>
                             </div>
                             <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed font-normal">
-                                Arbitrary manual cashier or manager discounts are strictly disabled. Discounts can only be redeemed through verified promotional campaign codes generated and audited centrally by HQ Finance.
+                                {t('pos.zeroTrustPromotionDesc')}
                             </p>
                         </div>
 
                         {/* Cart Summary */}
                         <div className="flex justify-between items-baseline text-xs text-[var(--theme-text-secondary)] pt-2 border-t border-[var(--theme-border-subtle)]">
-                            <span className="font-semibold uppercase tracking-wider">Cart Subtotal:</span>
+                            <span className="font-semibold uppercase tracking-wider">{t('pos.cartSubtotal')}:</span>
                             <span className="text-[var(--theme-text-primary)] font-bold font-mono tabular-nums text-sm">{formatCompactNumber(subtotal, { currency: CURRENCY_SYMBOL })}</span>
                         </div>
                     </>

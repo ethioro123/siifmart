@@ -44,7 +44,7 @@ export const HEAD_OF_OPERATIONS_PERMISSIONS: Permission[] = [
     'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
     'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
     'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.delete_po', 'procurement.receive',
+    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
     'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.view_payroll',
     'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
     'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',

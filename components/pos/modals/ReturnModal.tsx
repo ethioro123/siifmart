@@ -111,12 +111,12 @@ export const ReturnModal: React.FC = () => {
                         </div>
 
                         <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 text-center">
-                            <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1">Receipt Reference</span>
+                            <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1">{t('pos.receiptReference')}</span>
                             <span className="text-sm font-black text-[var(--theme-text-primary)] font-mono block truncate">
                                 {foundSaleForReturn?.receiptNumber || `TX-${foundSaleForReturn?.id}`}
                             </span>
                             <span className="text-lg font-mono text-rose-500 font-black block mt-1 tabular-nums">
-                                Cash Payout: {CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}
+                                {t('pos.cashPayout')}: {CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}
                             </span>
                         </div>
 
@@ -147,7 +147,7 @@ export const ReturnModal: React.FC = () => {
                                 }}
                                 className="px-4 py-2.5 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs transition-colors cursor-pointer"
                             >
-                                Back to Tenders
+                                {t('pos.backToTenders')}
                             </button>
                             <button
                                 type="button"
@@ -156,7 +156,7 @@ export const ReturnModal: React.FC = () => {
                                 className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs uppercase tracking-wider"
                             >
                                 {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-                                Verify HQ OTP & Dispense Cash
+                                {t('pos.verifyHqOtpAndDispense')}
                             </button>
                         </div>
                     </div>
@@ -171,7 +171,7 @@ export const ReturnModal: React.FC = () => {
                         <div className="flex max-w-md mx-auto gap-2 mt-4">
                             <input
                                 type="text"
-                                placeholder="Scan receipt barcode or enter e.g. TX-9981"
+                                placeholder={t('pos.scanReceiptOrEnter') || "Scan receipt barcode or enter e.g. TX-9981"}
                                 className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-border-focus)] transition-colors font-mono text-sm"
                                 value={returnSearchId}
                                 onChange={(e) => setReturnSearchId(e.target.value)}

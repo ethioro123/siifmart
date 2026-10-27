@@ -12,7 +12,7 @@ export const MARGIN_FLOOR_PCT = 15;
 export const PRICE_CHANGE_TAG = 'PRICE_CHANGE';
 
 /** Roles allowed to approve a price change that falls below the margin floor. */
-export const FINANCE_COAPPROVER_ROLES: readonly string[] = ['country_finance_director', 'country_managing_director', 'group_ceo'];
+export const FINANCE_COAPPROVER_ROLES: readonly string[] = ['country_finance_director', 'country_managing_director', 'group_ceo', 'regional_finance_manager'];
 
 export type PriceProposal = Pick<Product, 'price' | 'costPrice' | 'salePrice' | 'isOnSale'>;
 
@@ -33,11 +33,71 @@ export const isBelowMarginFloor = (
     return margin !== null && margin < floorPct;
 };
 
+/**
+ * Resolves whether a proposal (or product edit request) requires independent Finance co-approval.
+ * Merges proposed changes with existing baseline/product attributes (e.g. existing costPrice when only price is proposed),
+ * matching the database check in approve_product_edit RPC.
+ */
+export const checkRequiresFinanceSignoff = (
+    proposedChanges?: Record<string, any> | null,
+    currentProduct?: Partial<Product> | null,
+    floorPct: number = MARGIN_FLOOR_PCT
+): {
+    requiresFinance: boolean;
+    effectiveSellingPrice: number | null;
+    effectiveCostPrice: number | null;
+    effectiveMarginPct: number | null;
+    currentMarginPct: number | null;
+} => {
+    const patch = proposedChanges || {};
+
+    const touchesPricing = [
+        'price', 'cost_price', 'costPrice',
+        'sale_price', 'salePrice',
+        'is_on_sale', 'isOnSale'
+    ].some(k => k in patch);
+
+    const price = patch.price !== undefined ? Number(patch.price) : currentProduct?.price ?? null;
+    const salePrice = patch.salePrice !== undefined ? Number(patch.salePrice) : patch.sale_price !== undefined ? Number(patch.sale_price) : currentProduct?.salePrice ?? null;
+    const isOnSale = patch.isOnSale !== undefined ? Boolean(patch.isOnSale) : patch.is_on_sale !== undefined ? Boolean(patch.is_on_sale) : Boolean(currentProduct?.isOnSale);
+    const costPrice = patch.costPrice !== undefined ? Number(patch.costPrice) : patch.cost_price !== undefined ? Number(patch.cost_price) : currentProduct?.costPrice ?? null;
+
+    const effectiveSellingPrice = (isOnSale && salePrice && salePrice > 0) ? salePrice : (price && price > 0 ? price : null);
+    const effectiveCostPrice = costPrice && costPrice > 0 ? costPrice : null;
+
+    let effectiveMarginPct: number | null = null;
+    if (effectiveSellingPrice && effectiveCostPrice) {
+        effectiveMarginPct = ((effectiveSellingPrice - effectiveCostPrice) / effectiveSellingPrice) * 100;
+    }
+
+    let currentMarginPct: number | null = null;
+    if (currentProduct?.price && currentProduct?.costPrice) {
+        const curSell = (currentProduct.isOnSale && currentProduct.salePrice && currentProduct.salePrice > 0)
+            ? currentProduct.salePrice
+            : currentProduct.price;
+        if (curSell > 0 && currentProduct.costPrice > 0) {
+            currentMarginPct = ((curSell - currentProduct.costPrice) / curSell) * 100;
+        }
+    }
+
+    const requiresFinance = touchesPricing && effectiveMarginPct !== null && effectiveMarginPct < floorPct;
+
+    return {
+        requiresFinance,
+        effectiveSellingPrice,
+        effectiveCostPrice,
+        effectiveMarginPct,
+        currentMarginPct
+    };
+};
+
 export const isPriceChangeRequest = (change: Pick<PendingInventoryChange, 'changeType' | 'adjustmentReason'>): boolean =>
     change.changeType === 'edit' && (change.adjustmentReason || '').startsWith(PRICE_CHANGE_TAG);
 
-export const requiresFinanceCoApproval = (change: PendingInventoryChange): boolean =>
-    isPriceChangeRequest(change) && !!change.proposedChanges && isBelowMarginFloor(change.proposedChanges);
+export const requiresFinanceCoApproval = (change: PendingInventoryChange, currentProduct?: Partial<Product> | null): boolean => {
+    const product = currentProduct || change.currentProduct;
+    return isPriceChangeRequest(change) && checkRequiresFinanceSignoff(change.proposedChanges, product).requiresFinance;
+};
 
 export const canApproveBelowFloor = (role?: string | null): boolean =>
     !!role && FINANCE_COAPPROVER_ROLES.includes(role);

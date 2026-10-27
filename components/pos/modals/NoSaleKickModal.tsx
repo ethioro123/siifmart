@@ -16,6 +16,7 @@ interface NoSaleKickModalProps {
 }
 
 export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClose }) => {
+    const { t } = useLanguage();
     const { user } = useStore();
     const { activeSite, employees, addNotification, effectiveCountry } = useData();
 
@@ -81,7 +82,7 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Manual Cash Drawer Kick (No-Sale)"
+            title={t('pos.manualDrawerKickTitle')}
             size="md"
         >
             <div className="p-4 sm:p-6 space-y-5">
@@ -89,27 +90,27 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
                     <ShieldAlert size={22} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                     <div className="space-y-1">
                         <h4 className="text-xs font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">
-                            Anti-Skimming Security Protocol
+                            {t('pos.antiSkimmingProtocol')}
                         </h4>
                         <p className="text-xs font-medium text-amber-800 dark:text-amber-300 leading-relaxed">
-                            Opening the cash drawer without a registered sale is an audited high-risk event. Supervisory co-sign is mandatory under store loss prevention policy.
+                            {t('pos.noSaleWarning')}
                         </p>
                     </div>
                 </div>
 
                 <div className="space-y-1.5">
                     <label className="text-xs font-bold uppercase text-[var(--theme-text-secondary)] tracking-wider">
-                        Operational Reason
+                        {t('pos.operationalReason')}
                     </label>
                     <select
                         value={reasonCode}
                         onChange={(e) => setReasonCode(e.target.value as OverrideReasonCode)}
                         className="w-full px-3 py-2.5 bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-xl text-xs text-[var(--theme-input-text)] font-semibold outline-none focus:border-[var(--theme-border-focus)] transition-colors"
                     >
-                        <option value="change_making">Change Making / Denomination Exchange</option>
-                        <option value="till_audit_inspection">Spot Till Audit / Cash Inspection</option>
-                        <option value="cash_drawer_jam">Mechanical Drawer Jam / Inspection</option>
-                        <option value="other_authorized">Other Authorized Supervisory Task</option>
+                        <option value="change_making">{t('pos.changeMaking')}</option>
+                        <option value="till_audit_inspection">{t('pos.tillAuditInspection')}</option>
+                        <option value="cash_drawer_jam">{t('pos.cashDrawerJam')}</option>
+                        <option value="other_authorized">{t('pos.otherAuthorized')}</option>
                     </select>
                 </div>
 
@@ -120,7 +121,7 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
                 )}
 
                 <div className="flex flex-col items-center">
-                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold mb-2">Supervisor Staff PIN</p>
+                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold mb-2">{t('pos.supervisorEnterPin')}</p>
                     <PinPad pin={supervisorPin} setPin={setSupervisorPin} onEnter={handleConfirmKick} />
                 </div>
 
@@ -130,7 +131,7 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
                         onClick={onClose}
                         className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs transition-colors"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         type="button"
@@ -139,7 +140,7 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
                         className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <KeyRound size={16} />}
-                        Authorize & Open Till
+                        {t('pos.authorizeDrawerKick')}
                     </button>
                 </div>
             </div>

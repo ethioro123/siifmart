@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { hasPermission } from '../../utils/permissions';
+import { hasPermission, authService } from '../../utils/permissions';
 import { canAccessRoute, canAccessSite } from '../../services/auth.rbac';
+import { canEmployRole } from '../../utils/roles';
 
 describe('Regional Leadership & Field Supervisors Governance Suite', () => {
     describe('Regional Operations Manager (regional_operations_manager)', () => {
@@ -14,11 +15,23 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
             expect(canAccessRoute('regional_operations_manager', '/employees')).toBe(true);
         });
 
-        it('authorizes operational settings while denying enterprise security roles and system config', () => {
+        it('authorizes operational settings and autonomous PO approval while denying cashier register and enterprise config', () => {
             expect(hasPermission('regional_operations_manager', 'EDIT_OPERATIONAL_SETTINGS')).toBe(true);
             expect(hasPermission('regional_operations_manager', 'ACCESS_SETTINGS')).toBe(true);
+            expect(hasPermission('regional_operations_manager', 'APPROVE_PO')).toBe(true);
+            expect(authService.checkPermission('regional_operations_manager', 'procurement.approve_po')).toBe(true);
+            expect(hasPermission('regional_operations_manager', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('regional_operations_manager', 'VOID_SALE')).toBe(false);
+            expect(hasPermission('regional_operations_manager', 'DELETE_PO')).toBe(false);
             expect(hasPermission('regional_operations_manager', 'MANAGE_ROLES')).toBe(false);
             expect(hasPermission('regional_operations_manager', 'EDIT_SYSTEM_SETTINGS')).toBe(false);
+        });
+
+        it('authorizes recruiting regional managers and branch captains while blocking national directors', () => {
+            expect(canEmployRole('regional_operations_manager', 'store_manager')).toBe(true);
+            expect(canEmployRole('regional_operations_manager', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('regional_operations_manager', 'regional_supply_chain_manager')).toBe(true);
+            expect(canEmployRole('regional_operations_manager', 'country_managing_director')).toBe(false);
         });
 
         it('strictly confines regional managers to single assigned site/region without CEO bypass', () => {
