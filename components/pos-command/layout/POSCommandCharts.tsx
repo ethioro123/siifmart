@@ -87,7 +87,7 @@ export const POSCommandCharts: React.FC = () => {
                         <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
                             <PieChartIcon size={14} />
                         </div>
-                        <span>{isCentralHQ ? t('posCommand.paymentMethods') : "Shift Integrity & Security"}</span>
+                        <span>{isCentralHQ ? t('posCommand.paymentMethods') : t('posCommand.shiftIntegrityAndSecurity')}</span>
                     </h3>
                 </div>
 
@@ -147,10 +147,10 @@ export const POSCommandCharts: React.FC = () => {
                         </div>
                         <div className="space-y-1">
                             <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
-                                Blind Reconciliation Protocol
+                                {t('posCommand.blindReconciliationProtocol')}
                             </h4>
                             <p className="text-xs text-[var(--theme-text-secondary)] max-w-sm leading-relaxed">
-                                Payment distribution analytics and tender proportions are concealed to guarantee untampered physical counts during shift closure.
+                                {t('posCommand.blindReconciliationDesc')}
                             </p>
                         </div>
                     </div>

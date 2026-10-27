@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../../contexts/DataContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { posOverridesService, OverrideVelocityStats } from '../../../services/pos-overrides.service';
 import { realtimeService } from '../../../services/realtime.service';
 import type { SupervisoryOverrideRecord } from '../../../types/pos-zero-trust';
@@ -7,6 +8,7 @@ import { OVERRIDE_REASON_LABELS } from '../../../types/pos-zero-trust';
 import { ShieldAlert, ShieldCheck, AlertTriangle, CheckCircle2, Trash2, RefreshCcw, KeyRound, Tag } from 'lucide-react';
 
 export const OverrideVelocityWidget: React.FC = () => {
+    const { t } = useLanguage();
     const { activeSite } = useData();
     const [stats, setStats] = useState<OverrideVelocityStats | null>(null);
     const [recentOverrides, setRecentOverrides] = useState<SupervisoryOverrideRecord[]>([]);
@@ -43,7 +45,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                     <div>
                         <div className="flex items-center gap-2">
                             <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">
-                                Supervisor Override Velocity (Rule 18 Audit)
+                                {t('posCommand.overrideVelocityTitle')}
                             </h3>
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-tight ${
                                 stats.isExcessive
@@ -53,24 +55,24 @@ export const OverrideVelocityWidget: React.FC = () => {
                                 {stats.isExcessive ? (
                                     <>
                                         <AlertTriangle className="w-3 h-3 text-rose-400 shrink-0" />
-                                        <span>High Shrinkage Alert</span>
+                                        <span>{t('posCommand.highShrinkageAlert')}</span>
                                     </>
                                 ) : (
                                     <>
                                         <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                                        <span>Controlled Velocity</span>
+                                        <span>{t('posCommand.controlledVelocity')}</span>
                                     </>
                                 )}
                             </span>
                         </div>
                         <p className="text-xs text-[var(--theme-text-secondary)]">
-                            Central compliance threshold: Maximum 3.0% override frequency
+                            {t('posCommand.complianceThreshold')}
                         </p>
                     </div>
                 </div>
 
                 <div className="text-right">
-                    <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">Today's Override Velocity</span>
+                    <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">{t('posCommand.todayOverrideVelocity')}</span>
                     <p className={`text-2xl font-mono font-bold tracking-tight ${
                         stats.isExcessive ? 'text-rose-500' : 'text-[var(--theme-text-primary)]'
                     }`}>
@@ -86,7 +88,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                         <Trash2 size={15} />
                     </div>
                     <div className="min-w-0">
-                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold block truncate">Voids &amp; Clears</span>
+                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold block truncate">{t('posCommand.voidsAndClears')}</span>
                         <p className="text-lg font-mono font-bold text-[var(--theme-text-primary)] leading-tight">{stats.voidCount}</p>
                     </div>
                 </div>
@@ -96,7 +98,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                         <RefreshCcw size={15} />
                     </div>
                     <div className="min-w-0">
-                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold block truncate">Refunds &amp; Returns</span>
+                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold block truncate">{t('posCommand.refundsAndReturns')}</span>
                         <p className="text-lg font-mono font-bold text-[var(--theme-text-primary)] leading-tight">{stats.refundCount}</p>
                     </div>
                 </div>
@@ -106,7 +108,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                         <KeyRound size={15} />
                     </div>
                     <div className="min-w-0">
-                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold block truncate">No-Sale Till Kicks</span>
+                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold block truncate">{t('posCommand.drawerKicks')}</span>
                         <p className="text-lg font-mono font-bold text-[var(--theme-text-primary)] leading-tight">{stats.drawerKickCount}</p>
                     </div>
                 </div>
@@ -116,7 +118,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                         <Tag size={15} />
                     </div>
                     <div className="min-w-0">
-                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold block truncate">Price Overrides</span>
+                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold block truncate">{t('posCommand.priceChanges')}</span>
                         <p className="text-lg font-mono font-bold text-[var(--theme-text-primary)] leading-tight">{stats.priceOverrideCount}</p>
                     </div>
                 </div>
@@ -125,12 +127,12 @@ export const OverrideVelocityWidget: React.FC = () => {
             {/* Recent Overrides Audit Strip */}
             <div className="space-y-2">
                 <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block px-1">
-                    Live Supervisory Audit Log
+                    {t('posCommand.recentOverrides')}
                 </span>
                 <div className="divide-y divide-[var(--theme-border)] border border-[var(--theme-border)] rounded-2xl overflow-hidden bg-[var(--theme-bg-subtle)] isolate">
                     {recentOverrides.length === 0 ? (
                         <div className="p-4 text-center text-xs text-[var(--theme-text-muted)] font-sans">
-                            No supervisory overrides logged today. Register floor operating strictly within policy.
+                            {t('posCommand.noOverridesLogged')}
                         </div>
                     ) : (
                         recentOverrides.map((ov) => (
@@ -140,16 +142,16 @@ export const OverrideVelocityWidget: React.FC = () => {
                                         {ov.override_type.replace(/_/g, ' ')}
                                     </span>
                                     <span className="font-sans font-semibold text-[var(--theme-text-primary)]">
-                                        Cashier: {ov.cashier_name}
+                                        {t('posCommand.cashierPrefix')} {ov.cashier_name}
                                     </span>
                                     <span className="text-[var(--theme-border)]">|</span>
                                     <span className="text-[var(--theme-text-secondary)] font-sans text-[11px]">
-                                        Reason: {OVERRIDE_REASON_LABELS[ov.reason_code] || ov.reason_code}
+                                        {t('posCommand.reasonPrefix')} {OVERRIDE_REASON_LABELS[ov.reason_code] || ov.reason_code}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-3 text-right">
                                     <span className="text-[var(--theme-text-primary)] font-sans font-semibold text-[11px]">
-                                        Auth: {ov.supervisor_name} ({ov.supervisor_role})
+                                        {t('posCommand.authPrefix')} {ov.supervisor_name} ({ov.supervisor_role})
                                     </span>
                                     <span className="text-[var(--theme-text-muted)] text-[10px]">
                                         {new Date(ov.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

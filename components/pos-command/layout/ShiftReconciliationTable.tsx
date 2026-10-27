@@ -9,7 +9,7 @@ import { generateZReportReceiptHtml } from '../utils/receiptTemplate';
 
 export const ShiftReconciliationTable: React.FC = () => {
     const { shifts, reconcileShift, activeSite, addNotification, effectiveCountry } = useData();
-    const { currencySymbol } = useLanguage();
+    const { currencySymbol, t } = useLanguage();
     const currency = currencySymbol || (effectiveCountry === 'KE' ? 'KSh' : 'ETB');
     const { user } = useStore();
     const [searchTerm, setSearchTerm] = useState('');
@@ -72,10 +72,10 @@ export const ShiftReconciliationTable: React.FC = () => {
                     </div>
                     <div>
                         <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">
-                            Daily Cash &amp; Shift Reconciliation (HQ Oversight)
+                            {t('posCommand.reconciliationTableTitle')}
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)]">
-                            Central drawer audit, multi-tender verification, and 4-eyes dual control
+                            {t('posCommand.reconciliationTableSubtitle')}
                         </p>
                     </div>
                 </div>
@@ -90,7 +90,7 @@ export const ShiftReconciliationTable: React.FC = () => {
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search cashier or ID..."
+                            placeholder={t('posCommand.searchCashierOrId') || "Search cashier or ID..."}
                             className="bg-transparent border-none ml-2 text-xs text-[var(--theme-text-primary)] font-mono outline-none placeholder-[var(--theme-text-muted)] w-36 sm:w-48"
                         />
                         {searchTerm ? (
@@ -110,11 +110,11 @@ export const ShiftReconciliationTable: React.FC = () => {
                         onChange={(e) => setFilterStatus(e.target.value as any)}
                         className="bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] font-semibold outline-none cursor-pointer transition-colors shadow-2xs"
                     >
-                        <option value="All">All Shifts</option>
-                        <option value="Open">Active (Open)</option>
-                        <option value="Closed">Awaiting Audit (Closed)</option>
-                        <option value="Audited">Audited (Signed Off)</option>
-                        <option value="Flagged">Discrepancy Flagged</option>
+                        <option value="All">{t('posCommand.filterAllShifts')}</option>
+                        <option value="Open">{t('posCommand.filterOpenShifts')}</option>
+                        <option value="Closed">{t('posCommand.filterClosedShifts')}</option>
+                        <option value="Audited">{t('posCommand.filterAuditedShifts')}</option>
+                        <option value="Flagged">{t('posCommand.filterFlaggedShifts')}</option>
                     </select>
                 </div>
             </div>
@@ -124,22 +124,22 @@ export const ShiftReconciliationTable: React.FC = () => {
                 <table className="w-full text-left text-xs">
                     <thead>
                         <tr className="border-b border-[var(--theme-border)] text-[10px] uppercase font-semibold tracking-wider text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]/70">
-                            <th className="py-3.5 px-4">Status</th>
-                            <th className="py-3.5 px-4">Cashier &amp; Counter</th>
-                            <th className="py-3.5 px-4">Start Time</th>
-                            <th className="py-3.5 px-4 text-right">Float</th>
-                            <th className="py-3.5 px-4 text-right">Cash Sales</th>
-                            <th className="py-3.5 px-4 text-right">Expected</th>
-                            <th className="py-3.5 px-4 text-right">Actual Count</th>
-                            <th className="py-3.5 px-4 text-right">Variance</th>
-                            <th className="py-3.5 px-4 text-center">HQ Audit Action</th>
+                            <th className="py-3.5 px-4">{t('posCommand.thStatus')}</th>
+                            <th className="py-3.5 px-4">{t('posCommand.thCashierCounter')}</th>
+                            <th className="py-3.5 px-4">{t('posCommand.thStartTime')}</th>
+                            <th className="py-3.5 px-4 text-right">{t('posCommand.thFloat')}</th>
+                            <th className="py-3.5 px-4 text-right">{t('posCommand.thCashSales')}</th>
+                            <th className="py-3.5 px-4 text-right">{t('posCommand.thExpected')}</th>
+                            <th className="py-3.5 px-4 text-right">{t('posCommand.thActualCount')}</th>
+                            <th className="py-3.5 px-4 text-right">{t('posCommand.thVariance')}</th>
+                            <th className="py-3.5 px-4 text-center">{t('posCommand.thAuditAction')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--theme-border)] font-mono">
                         {filteredShifts.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="py-8 text-center text-[var(--theme-text-muted)] font-sans text-xs">
-                                    No shifts matching the selected criteria.
+                                    {t('posCommand.noShiftsMatching')}
                                 </td>
                             </tr>
                         ) : (
@@ -151,19 +151,19 @@ export const ShiftReconciliationTable: React.FC = () => {
                                         <td className="py-3 px-4 font-sans">
                                             {shift.status === 'Open' ? (
                                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                                                    <Clock size={10} /> Open
+                                                    <Clock size={10} /> {t('posCommand.statusOpen')}
                                                 </span>
                                             ) : shift.status === 'Audited' ? (
                                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                                                    <CheckCircle size={10} /> Audited
+                                                    <CheckCircle size={10} /> {t('posCommand.statusAudited')}
                                                 </span>
                                             ) : shift.status === 'Flagged' ? (
                                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-500 border border-rose-500/20">
-                                                    <AlertTriangle size={10} /> Flagged
+                                                    <AlertTriangle size={10} /> {t('posCommand.statusFlagged')}
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                                                    <Clock size={10} /> Awaiting HQ
+                                                    <Clock size={10} /> {t('posCommand.statusAwaitingHQ')}
                                                 </span>
                                             )}
                                         </td>
@@ -229,7 +229,7 @@ export const ShiftReconciliationTable: React.FC = () => {
                                                         title="Print Z-Report Slip"
                                                     >
                                                         <Printer size={11} className="text-purple-500" />
-                                                        <span>Z-Report</span>
+                                                        <span>{t('posCommand.zReportBtn')}</span>
                                                     </button>
                                                 )}
 
@@ -240,14 +240,14 @@ export const ShiftReconciliationTable: React.FC = () => {
                                                             disabled={reconcilingId === shift.id}
                                                             className="px-2.5 py-1 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[10px] font-semibold rounded-xl transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
                                                         >
-                                                            Sign-Off
+                                                            {t('posCommand.signOff')}
                                                         </button>
                                                         <button
                                                             onClick={() => handleReconcile(shift.id, 'Discrepancy_Flagged')}
                                                             disabled={reconcilingId === shift.id}
                                                             className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-semibold rounded-xl transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
                                                         >
-                                                            Flag
+                                                            {t('posCommand.flagDiscrepancy')}
                                                         </button>
                                                     </>
                                                 ) : shift.reconciledBy ? (

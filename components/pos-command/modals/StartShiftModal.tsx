@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { usePOSCommand } from '../POSCommandContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { audioFeedback } from '../../../utils/audioFeedback';
@@ -10,6 +11,7 @@ import { Store, User, Clock, ShieldCheck, DollarSign, Play, Monitor, CheckCircle
 const PRESET_FLOATS = [500, 1000, 2000, 3000, 5000];
 
 export const StartShiftModal: React.FC = () => {
+    const { t } = useLanguage();
     const { user } = useStore();
     const { activeSite, shifts } = useData();
     const { isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift } = usePOSCommand();

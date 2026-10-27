@@ -6,7 +6,8 @@ import { useCreateInventoryRequestMutation } from './useInventoryRequestMutation
 import { useSubmitPriceChanges } from './useSubmitPriceChanges';
 import { priceManagerService } from '../services/price-manager.service';
 import { normalizePriceProposal, type PriceBatch, type PriceBatchResult } from '../utils/priceManager';
-import { validateStockThresholds } from '../utils/productDetailLogic';
+import { unitProposal, profileProposal, stockPolicyPreview } from '../utils/productControlLogic';
+import type { ProfileConfig } from '../types/product-control';
 import type { Product } from '../types';
 import type { UnitConfig } from '../components/merchandising/product-control/UnitTab';
 import type { PricingConfig } from '../components/merchandising/product-control/PricingTab';
@@ -18,12 +19,14 @@ export function useProductControlProposals(product: Product | null, country: str
     const createRequest = useCreateInventoryRequestMutation();
     const { submit } = useSubmitPriceChanges(country);
     const queryClient = useQueryClient();
+    const [lastSubmitted, setLastSubmitted] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [priceBatch, setPriceBatch] = useState<PriceBatch | null>(null);
     const [batchFailures, setBatchFailures] = useState<PriceBatchResult['failures']>([]);
     useEffect(() => { setPriceBatch(null); setBatchFailures([]); }, [product?.id, country, activeRegionCode]);
     const savePatch = async (patch: Partial<Product>, reason: string) => {
-        if (!product) return;
+        if (!product || isSaving) return false;
+        if (!Object.keys(patch).some(key => patch[key as keyof Product] !== undefined)) { showToast('No changes to submit.', 'info'); return false; }
         setIsSaving(true);
         try {
             await createRequest.mutateAsync({ productId: product.id, productName: product.name, productSku: product.sku,
@@ -32,31 +35,28 @@ export function useProductControlProposals(product: Product | null, country: str
                 adjustmentReason: `MERCHANDISING: ${reason}` });
             showToast('Proposal submitted for regional Operations, Supply Chain and Merchandising approval.', 'info');
             queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
+            setLastSubmitted(reason);
             onSaved?.();
-        } catch (error) { showToast((error as Error).message || 'Proposal was not submitted.', 'error'); }
+            return true;
+        } catch (error) { showToast((error as Error).message || 'Proposal was not submitted.', 'error'); return false; }
         finally { setIsSaving(false); }
     };
+    const saveProfile = async (cfg: ProfileConfig) => {
+        if (!product) return false;
+        try { return await savePatch(profileProposal(product, cfg), 'Product profile update'); }
+        catch (error) { showToast((error as Error).message, 'error'); return false; }
+    };
     const saveUnit = async (cfg: UnitConfig) => {
-        if (!product) return;
-        const packQuantity = cfg.packOf ? Number(cfg.packOf) : 1;
-        if (!Number.isInteger(packQuantity) || packQuantity <= 0) { showToast('Pack quantity must be a positive whole number.', 'error'); return; }
-        const attrs = product.customAttributes || {};
-        await savePatch({ unit: cfg.sellUnit, size: cfg.physicalQty || undefined, packQuantity,
-            customAttributes: { ...attrs,
-                physical: { ...(attrs.physical || {}), unit: cfg.physicalUnit, sizeType: cfg.physicalUnit, netWeight: cfg.physicalQty || undefined },
-                packaging: { ...(attrs.packaging || {}), packQty: cfg.packOf || undefined, caseSize: cfg.caseOf || undefined },
-                commercial: { ...(attrs.commercial || {}), sellBy: cfg.sellMode === 'weight' ? 'Weight' : cfg.sellMode === 'volume' ? 'Volume' : 'Count', sellUnit: cfg.sellUnit, labelOverride: cfg.label || undefined },
-            } }, 'Unit and packaging update');
+        if (!product) return false;
+        try { return await savePatch(unitProposal(product, cfg), 'Unit and packaging update'); }
+        catch (error) { showToast((error as Error).message, 'error'); return false; }
     };
     const saveStock = async (cfg: StockConfig) => {
+        if (!product) return false;
         try {
-            const minStock = cfg.minStock === '' ? undefined : Number(cfg.minStock);
-            const maxStock = cfg.maxStock === '' ? undefined : Number(cfg.maxStock);
-            validateStockThresholds(minStock ?? product?.minStock, maxStock ?? product?.maxStock);
-            if ([minStock, maxStock].some(value => value !== undefined && !Number.isInteger(value))) throw new Error('Stock thresholds must be whole numbers.');
-            if (minStock === undefined && maxStock === undefined) throw new Error('Enter at least one stock threshold.');
-            await savePatch({ minStock, maxStock }, 'Stock threshold update');
-        } catch (error) { showToast((error as Error).message, 'error'); }
+            const preview = stockPolicyPreview(product, cfg);
+            return await savePatch({ ...(preview.min !== product.minStock && preview.min !== undefined ? { minStock: preview.min } : {}), ...(preview.max !== product.maxStock && preview.max !== undefined ? { maxStock: preview.max } : {}) }, 'Stock threshold update');
+        } catch (error) { showToast((error as Error).message, 'error'); return false; }
     };
     const preparePricing = async (cfg: PricingConfig) => {
         if (!product || isSaving) return;
@@ -80,8 +80,9 @@ export function useProductControlProposals(product: Product | null, country: str
             const result = await submit(priceBatch.changes, priceBatch.source);
             setBatchFailures(result.failures);
             setPriceBatch(result.failures.length ? { ...priceBatch, changes: priceBatch.changes.filter(change => result.failures.some(failure => failure.productId === change.product.id)) } : null);
-            if (result.submitted) onSaved?.();
+            if (result.submitted) { setLastSubmitted(`${result.submitted} price proposal(s)`); onSaved?.(); }
+            return result.submitted > 0 && result.failures.length === 0;
         } finally { setIsSaving(false); }
     };
-    return { isSaving, saveUnit, saveStock, preparePricing, confirmPricing, priceBatch, batchFailures, cancelPricing: () => setPriceBatch(null) };
+    return { isSaving, saveProfile, lastSubmitted, clearFeedback: () => setLastSubmitted(null), saveUnit, saveStock, preparePricing, confirmPricing, priceBatch, batchFailures, cancelPricing: () => setPriceBatch(null) };
 }

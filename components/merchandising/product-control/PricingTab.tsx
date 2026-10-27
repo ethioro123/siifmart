@@ -1,295 +1,46 @@
-import { computeMarginPct, effectivePrice } from '../../../utils/pricingGovernance';
 import React from 'react';
-import {
-    TrendingUp, TrendingDown, Lock, Store, Globe, SlidersHorizontal,
-    Check, CheckSquare, RefreshCw, Save, AlertCircle
-} from 'lucide-react';
-import { Product, Site } from '../../../types';
-
-export type PricingScope = 'single' | 'all' | 'custom';
-
-export interface PricingConfig {
-    price: number;
-    costPrice: number;
-    salePrice: number;
-    isOnSale: boolean;
-    competitorPrice: number;
-    scope: PricingScope;
-    selectedSiteIds: string[];
-}
-
+import type { Product, Site } from '../../../types';
+import type { PricingConfig, PricingScope } from '../../../types/product-control';
+import { effectivePrice } from '../../../utils/pricingGovernance';
+import { normalizePriceProposal, sellingMargin, productSiteName } from '../../../utils/priceManager';
+import { getSellUnit } from '../../../utils/units';
+import { ControlSection, ControlField, ControlFact, ProposalAction, controlInput } from './ControlPrimitives';
+export type { PricingConfig, PricingScope } from '../../../types/product-control';
 interface Props {
-    product: Product;
-    pricingCfg: PricingConfig;
-    setPricingCfg: React.Dispatch<React.SetStateAction<PricingConfig>>;
-    handleSavePricing: () => Promise<void>;
-    isSaving: boolean;
-    showCost: boolean;
-    sites: Site[];
-    allProducts: Product[];
-    currencySymbol?: string;
-    canDirectEdit: boolean;
+    product: Product; pricingCfg: PricingConfig; setPricingCfg: React.Dispatch<React.SetStateAction<PricingConfig>>;
+    handleSavePricing: () => Promise<void>; isSaving: boolean; submitted?: boolean; showCost: boolean;
+    sites: Site[]; allProducts?: Product[]; currencySymbol?: string; canDirectEdit?: boolean;
 }
-
-export const PricingTab: React.FC<Props> = ({
-    product,
-    pricingCfg,
-    setPricingCfg,
-    handleSavePricing,
-    isSaving,
-    showCost,
-    canDirectEdit,
-    sites,
-    allProducts,
-    currencySymbol = 'ETB'
-}) => {
-    const actualMargin = computeMarginPct(effectivePrice(pricingCfg), pricingCfg.costPrice);
-    const margin = actualMargin ?? 0;
-    const compDiff = pricingCfg.competitorPrice > 0
-        ? ((pricingCfg.price - pricingCfg.competitorPrice) / pricingCfg.competitorPrice * 100) : null;
-
-    return (
-        <div className="space-y-4">
-            <div className={`p-3.5 rounded-2xl border flex items-center justify-between ${
-                actualMargin === null ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]' : margin < 15 ? 'bg-rose-500/10 border-rose-500/20' : margin > 40 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/20'
-            }`}>
-                <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--theme-text-secondary)]">Margin at selling price</p>
-                    <p className={`text-2xl font-bold font-mono tabular-nums ${actualMargin === null ? 'text-[var(--theme-text-secondary)]' : margin < 15 ? 'text-rose-600 dark:text-rose-400' : margin > 40 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                        {actualMargin === null ? 'Cost unavailable' : `${actualMargin.toFixed(1)}%`}
-                    </p>
-                </div>
-                {compDiff !== null && (
-                    <div className="text-right">
-                        <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--theme-text-secondary)]">vs Competitor</p>
-                        <p className={`text-sm font-semibold font-mono tabular-nums flex items-center gap-1 justify-end ${compDiff > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                            {compDiff > 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-                            {compDiff > 0 ? '+' : ''}{compDiff.toFixed(1)}%
-                        </p>
-                    </div>
-                )}
-            </div>
-
-            <div>
-                <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1.5">Retail Price</label>
-                <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-accent)] font-semibold font-mono">{currencySymbol}</span>
-                    <input type="number" min="0" step="1" value={pricingCfg.price}
-                        aria-label="Retail Price"
-                        title="Retail Price"
-                        onChange={e => setPricingCfg(c => ({ ...c, price: Math.round(parseFloat(e.target.value) || 0) }))}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-9 pr-3 py-2.5 text-base font-semibold font-mono tabular-nums text-right text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors" />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-                {showCost && (
-                    <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                            <label className="text-xs font-medium text-[var(--theme-text-secondary)]">Cost Price (COGS)</label>
-                            <span className="text-[10px] font-mono font-medium uppercase text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                                <Lock size={10} /> Read-only (From PO)
-                            </span>
-                        </div>
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] font-mono">{currencySymbol}</span>
-                            <input type="number" value={pricingCfg.costPrice > 0 ? pricingCfg.costPrice : ''} placeholder="Unavailable"
-                                readOnly
-                                disabled
-                                aria-label="Cost Price (COGS) - Read-only from PO"
-                                title="Cost Price (COGS) is set by Purchase Orders and cannot be edited manually"
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-3 py-2 text-sm font-mono tabular-nums text-right text-[var(--theme-text-secondary)] opacity-70 cursor-not-allowed" />
-                        </div>
-                    </div>
-                )}
-                <div>
-                    <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1.5">Competitor Price</label>
-                    <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] font-mono">{currencySymbol}</span>
-                        <input type="number" min="0" step="1" value={pricingCfg.competitorPrice || ''} disabled
-                            onChange={e => setPricingCfg(c => ({ ...c, competitorPrice: Math.round(parseFloat(e.target.value) || 0) }))}
-                            placeholder="0"
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-3 py-2 text-sm font-mono tabular-nums text-right text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors" />
-                    </div>
-                </div>
-            </div>
-
-            <div className="p-3.5 bg-amber-500/5 border border-amber-500/20 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">Promotional Sale Price</p>
-                    <div onClick={() => setPricingCfg(c => ({ ...c, isOnSale: !c.isOnSale }))}
-                        className={`w-9 h-5 rounded-full cursor-pointer relative transition-colors ${pricingCfg.isOnSale ? 'bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}>
-                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${pricingCfg.isOnSale ? 'translate-x-4' : 'translate-x-0.5'}`} />
-                    </div>
-                </div>
-                {pricingCfg.isOnSale && (
-                    <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-600 dark:text-amber-400 font-mono">{currencySymbol}</span>
-                        <input type="number" min="0" step="1" value={pricingCfg.salePrice || ''}
-                            onChange={e => setPricingCfg(c => ({ ...c, salePrice: Math.round(parseFloat(e.target.value) || 0) }))}
-                            placeholder="Sale price..."
-                            className="w-full bg-[var(--theme-bg-card)] border border-amber-500/30 rounded-xl pl-8 pr-3 py-2 text-sm font-mono tabular-nums text-right text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-amber-500" />
-                    </div>
-                )}
-            </div>
-
-            {/* Location Target Scope */}
-            <div className="space-y-3 pt-2 border-t border-[var(--theme-border)]">
-                <label className="text-xs font-medium text-[var(--theme-text-secondary)] block">Pricing Target Scope (Locations)</label>
-                <div className="grid grid-cols-3 gap-2">
-                    <button
-                        type="button"
-                        onClick={() => setPricingCfg(c => ({ ...c, scope: 'single' }))}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            pricingCfg.scope === 'single'
-                                ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-white shadow-sm'
-                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/40'
-                        }`}
-                    >
-                        <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center gap-1.5 font-semibold text-xs">
-                                <Store size={13} />
-                                <span>This Location</span>
-                            </div>
-                            {pricingCfg.scope === 'single' && <Check size={13} className="text-white" />}
-                        </div>
-                        <p className={`text-[10px] leading-tight ${pricingCfg.scope === 'single' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>Only update price at this specific store.</p>
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => setPricingCfg(c => ({ ...c, scope: 'all' }))}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            pricingCfg.scope === 'all'
-                                ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-white shadow-sm'
-                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/40'
-                        }`}
-                    >
-                        <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center gap-1.5 font-semibold text-xs">
-                                <Globe size={13} />
-                                <span>All Locations</span>
-                            </div>
-                            {pricingCfg.scope === 'all' && <Check size={13} className="text-white" />}
-                        </div>
-                        <p className={`text-[10px] leading-tight ${pricingCfg.scope === 'all' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>Propose prices for matching records in your authorized territory.</p>
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => {
-                            const allSiteIds = (sites || []).map(s => s.id);
-                            setPricingCfg(c => ({
-                                ...c,
-                                scope: 'custom',
-                                selectedSiteIds: c.selectedSiteIds.length > 0 ? c.selectedSiteIds : allSiteIds
-                            }));
-                        }}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            pricingCfg.scope === 'custom'
-                                ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-white shadow-sm'
-                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/40'
-                        }`}
-                    >
-                        <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center gap-1.5 font-semibold text-xs">
-                                <SlidersHorizontal size={13} />
-                                <span>Select Locations</span>
-                            </div>
-                            {pricingCfg.scope === 'custom' && <Check size={13} className="text-white" />}
-                        </div>
-                        <p className={`text-[10px] leading-tight ${pricingCfg.scope === 'custom' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>Propose prices for matching records at selected locations.</p>
-                    </button>
-                </div>
-
-                {pricingCfg.scope === 'custom' && (
-                    <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2.5">
-                        <div className="flex items-center justify-between pb-1.5 border-b border-[var(--theme-border)]">
-                            <p className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5">
-                                <CheckSquare size={13} className="text-[var(--theme-accent)]" />
-                                Select Store Target List ({pricingCfg.selectedSiteIds.length} of {(sites || []).length} selected)
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setPricingCfg(c => ({ ...c, selectedSiteIds: (sites || []).map(s => s.id) }))}
-                                    className="text-xs font-medium text-[var(--theme-accent)] hover:underline"
-                                >
-                                    Select All
-                                </button>
-                                <span className="text-[var(--theme-border)]">|</span>
-                                <button
-                                    type="button"
-                                    onClick={() => setPricingCfg(c => ({ ...c, selectedSiteIds: [product.siteId].filter(Boolean) as string[] }))}
-                                    className="text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:underline"
-                                >
-                                    Only This Location
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
-                            {(sites || []).map(site => {
-                                const isSelected = pricingCfg.selectedSiteIds.includes(site.id);
-                                const siteProd = (allProducts || []).find(p => (p.siteId === site.id || (p as any).site_id === site.id) && p.sku === product.sku);
-                                const sitePrice = siteProd ? siteProd.price : null;
-
-                                return (
-                                    <label
-                                        key={site.id}
-                                        className={`p-2 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                                            isSelected
-                                                ? 'bg-[var(--theme-bg-card)] border-[var(--theme-accent)] shadow-xs'
-                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] opacity-70 hover:opacity-100'
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-2 min-w-0">
-                                            <input
-                                                type="checkbox"
-                                                aria-label={`Select site ${site.name}`}
-                                                title={`Select site ${site.name}`}
-                                                checked={isSelected}
-                                                onChange={e => {
-                                                    const checked = e.target.checked;
-                                                    setPricingCfg(c => ({
-                                                        ...c,
-                                                        selectedSiteIds: checked
-                                                            ? [...c.selectedSiteIds, site.id]
-                                                            : c.selectedSiteIds.filter(id => id !== site.id)
-                                                    }));
-                                                }}
-                                                className="accent-[var(--theme-accent)] w-3.5 h-3.5 cursor-pointer rounded"
-                                            />
-                                            <div className="truncate">
-                                                <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{site.name}</p>
-                                                <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono uppercase">{site.code || site.type || 'STORE'}</p>
-                                            </div>
-                                        </div>
-                                        {sitePrice !== null && (
-                                            <span className="text-[10px] font-mono font-semibold tabular-nums text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-md ml-1 shrink-0">
-                                                {currencySymbol} {sitePrice}
-                                            </span>
-                                        )}
-                                    </label>
-                                );
-                            })}
-                        </div>
-                        {pricingCfg.selectedSiteIds.length === 0 && (
-                            <p className="text-xs text-rose-500 font-medium text-center py-1 flex items-center justify-center gap-1">
-                                <AlertCircle size={13} />
-                                At least one store location must be selected
-                            </p>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            <p className="text-xs text-[var(--theme-text-secondary)]">Prices round to the nearest whole number. Recorded cost is retained separately at each location. Proposals require regional Operations, Supply Chain and Merchandising approval; below-floor prices also require Finance signoff.</p>
-            <button onClick={handleSavePricing} disabled={isSaving}
-                className="w-full py-2.5 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl font-semibold text-xs transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer">
-                {isSaving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                {isSaving ? 'Preparing…' : 'Review price proposals'}
-            </button>
+export const PricingTab: React.FC<Props> = ({ product, pricingCfg, setPricingCfg, handleSavePricing, isSaving, submitted, showCost, sites, currencySymbol = 'ETB' }) => {
+    let normalized: ReturnType<typeof normalizePriceProposal> | null = null; let error = '';
+    try { normalized = normalizePriceProposal({ price: pricingCfg.price, salePrice: pricingCfg.salePrice, isOnSale: pricingCfg.isOnSale }); } catch (cause) { error = (cause as Error).message; }
+    const current = effectivePrice(product) || 0;
+    const proposed = normalized ? effectivePrice(normalized) || 0 : null;
+    const margin = normalized ? sellingMargin({ ...normalized, costPrice: product.costPrice }) : null;
+    const delta = proposed === null ? null : proposed - current;
+    const discount = normalized?.isOnSale && normalized.salePrice ? (1 - normalized.salePrice / normalized.price) * 100 : null;
+    const operationalSites = sites.filter(site => !['Administration', 'Administrative'].includes(site.type));
+    const labels: Record<PricingScope, string> = { single: 'This location', all: 'All matching locations', custom: 'Choose locations' };
+    return <div className="space-y-5">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+            <ControlSection title="Proposed selling price" description={`Price per ${getSellUnit(product.unit).shortLabel}. Selling prices round to the nearest whole number; recorded costs keep their precision.`}>
+                <ControlField label={`Regular price (${currencySymbol})`}><input className={controlInput} type="number" min="1" step="1" value={pricingCfg.price || ''} onChange={event => setPricingCfg(cfg => ({ ...cfg, price: Number(event.target.value) }))} /></ControlField>
+                <label className="flex min-h-[44px] cursor-pointer items-center justify-between gap-3 rounded-xl border border-[var(--theme-border)] p-3 text-sm font-medium"><span>Promotional price active</span><input className="h-5 w-5 accent-[var(--theme-accent)]" type="checkbox" checked={pricingCfg.isOnSale} onChange={event => setPricingCfg(cfg => ({ ...cfg, isOnSale: event.target.checked }))} /></label>
+                {pricingCfg.isOnSale && <ControlField label={`Sale price (${currencySymbol})`} help="Must round to a positive amount below the regular price."><input className={controlInput} type="number" min="1" step="1" value={pricingCfg.salePrice || ''} onChange={event => setPricingCfg(cfg => ({ ...cfg, salePrice: Number(event.target.value) }))} /></ControlField>}
+                {showCost && <dl className="grid grid-cols-2 gap-4 border-t border-[var(--theme-border)] pt-4"><ControlFact label="Recorded cost (read-only)" value={product.costPrice && product.costPrice > 0 ? `${currencySymbol} ${product.costPrice}` : 'Unavailable'} /><ControlFact label="Competitor price (recorded)" value={product.competitorPrice && product.competitorPrice > 0 ? `${currencySymbol} ${product.competitorPrice}` : 'Not recorded'} /></dl>}
+            </ControlSection>
+            <ControlSection title="Price impact at this location" description={productSiteName(product, sites)}>
+                <p className="text-2xl font-semibold tabular-nums">{currencySymbol} {current.toLocaleString()} <span className="text-[var(--theme-text-secondary)]">→</span> {proposed === null ? '—' : proposed.toLocaleString()}</p>
+                <dl className="grid grid-cols-2 gap-4"><ControlFact label="Selling-price change" value={delta === null ? 'Enter a valid price' : `${delta > 0 ? '+' : ''}${delta.toLocaleString()} ${currencySymbol}${current > 0 ? ` (${(delta / current * 100).toFixed(1)}%)` : ''}`} /><ControlFact label="Sale discount" value={discount === null ? 'Sale inactive' : `${discount.toFixed(1)}%`} /><ControlFact label="Margin at proposed price" value={margin === null ? 'Cost unavailable' : `${margin.toFixed(1)}%`} /><ControlFact label="Finance signoff" value={margin === null ? 'Assessed during review' : margin < 15 ? 'Required below 15% margin' : 'Not indicated at this price'} /></dl>
+                <p className="text-xs leading-relaxed text-[var(--theme-text-secondary)]">This margin applies to the selected record. Each target location keeps its own recorded cost. Submitting a proposal does not activate a promotion or change the live price.</p>
+            </ControlSection>
         </div>
-    );
+        <ControlSection title="Where should this proposal apply?" description="The next screen lists the exact product records and locations before anything is submitted.">
+            <fieldset><legend className="sr-only">Price proposal scope</legend><div className="grid gap-2 sm:grid-cols-3">{(['single', 'all', 'custom'] as const).map(scope => <label key={scope} className={`flex min-h-[52px] cursor-pointer items-center gap-2 rounded-xl border p-3 text-sm ${pricingCfg.scope === scope ? 'border-[var(--theme-accent)] bg-[var(--theme-bg-subtle)]' : 'border-[var(--theme-border)]'}`}><input type="radio" name="price-scope" checked={pricingCfg.scope === scope} onChange={() => setPricingCfg(cfg => ({ ...cfg, scope }))} className="accent-[var(--theme-accent)]" />{labels[scope]}</label>)}</div></fieldset>
+            {pricingCfg.scope === 'single' && <p className="text-sm text-[var(--theme-text-secondary)]">{productSiteName(product, sites)} · {product.sku}</p>}
+            {pricingCfg.scope === 'all' && <p className="text-sm text-[var(--theme-text-secondary)]">Matching SKU records inside your authorized country and active territory lens.</p>}
+            {pricingCfg.scope === 'custom' && <div className="space-y-3"><p className="text-sm text-[var(--theme-text-secondary)]">{pricingCfg.selectedSiteIds.length} location(s) selected. Locations without a matching product record are excluded from the preview.</p><div className="grid max-h-48 gap-2 overflow-y-auto rounded-xl border border-[var(--theme-border)] p-3 sm:grid-cols-2">{operationalSites.map(site => <label key={site.id} className="flex min-h-[44px] cursor-pointer items-center gap-3 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--theme-accent)]" checked={pricingCfg.selectedSiteIds.includes(site.id)} onChange={event => setPricingCfg(cfg => ({ ...cfg, selectedSiteIds: event.target.checked ? [...cfg.selectedSiteIds, site.id] : cfg.selectedSiteIds.filter(id => id !== site.id) }))} />{site.name}</label>)}</div></div>}
+        </ControlSection>
+        <ProposalAction pending={isSaving} disabled={submitted || Boolean(error) || (pricingCfg.scope === 'custom' && pricingCfg.selectedSiteIds.length === 0)} error={error} label="Review price proposals" onClick={handleSavePricing} />
+    </div>;
 };

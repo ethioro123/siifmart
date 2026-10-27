@@ -23,14 +23,14 @@ export const ShiftProgress: React.FC = () => {
                         <div className="flex items-center gap-2">
                             <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                             <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                                Cash Drawer Closed • Daily Shift Inactive
+                                {t('posCommand.drawerClosedBannerTitle')}
                             </h3>
                         </div>
                         <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight">
-                            Ready to begin today's register sales?
+                            {t('posCommand.readyToBeginSales')}
                         </h2>
                         <p className="text-xs text-[var(--theme-text-secondary)] max-w-xl leading-relaxed">
-                            Count physical float cash in the register drawer and submit opening float to start sales. Real-time cash tracking and daily HQ audit reconciliation will activate immediately.
+                            {t('posCommand.readyToBeginSalesDesc')}
                         </p>
                     </div>
 
@@ -39,7 +39,7 @@ export const ShiftProgress: React.FC = () => {
                         className="px-6 py-3.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-xs transition-all flex items-center gap-2.5 active:scale-95 cursor-pointer shrink-0"
                     >
                         <Play size={15} className="fill-current" />
-                        <span>Open Drawer &amp; Start Shift</span>
+                        <span>{t('posCommand.openDrawerAndStart')}</span>
                     </button>
                 </div>
             </div>
@@ -67,7 +67,7 @@ export const ShiftProgress: React.FC = () => {
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-2 h-2 rounded-full bg-[var(--theme-primary)]" />
                             <h3 className="text-[var(--theme-text-secondary)] text-xs font-semibold uppercase tracking-wider select-none">
-                                {dateRange} {isCentralHQ ? t('posCommand.shiftTarget') : "Order Target"}
+                                {dateRange} {isCentralHQ ? t('posCommand.shiftTarget') : t('posCommand.orderTarget')}
                             </h3>
                         </div>
                         <div className="flex items-baseline gap-3">
@@ -83,10 +83,10 @@ export const ShiftProgress: React.FC = () => {
                             ) : (
                                 <>
                                     <span className="text-3xl lg:text-4xl font-mono font-bold tracking-tight text-[var(--theme-text-primary)]">
-                                        {shiftTxCount} Orders
+                                        {shiftTxCount} {t('pos.transactions') || 'Orders'}
                                     </span>
                                     <span className="text-[var(--theme-text-secondary)] font-mono text-base font-semibold">
-                                        / {dailyTxTarget} Target
+                                        / {dailyTxTarget} {t('posCommand.target')}
                                     </span>
                                 </>
                             )}
@@ -94,7 +94,7 @@ export const ShiftProgress: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col items-end">
-                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider mb-1 select-none">Completion</span>
+                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider mb-1 select-none">{t('posCommand.completion')}</span>
                         <span className="text-3xl lg:text-4xl font-bold font-mono text-[var(--theme-text-primary)]">
                             {progressPercent.toFixed(1)}%
                         </span>
@@ -129,9 +129,9 @@ export const ShiftProgress: React.FC = () => {
                         ))
                     ) : (
                         [
-                            { label: "Completed Orders", display: `${shiftTxCount} Processed`, icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-500' },
-                            { label: "Speed & Pace", display: "On Schedule", icon: Zap, color: 'bg-amber-500/10 text-amber-500' },
-                            { label: "Drawer Protocol", display: "Blind Active", icon: Lock, color: 'bg-indigo-500/10 text-indigo-500' },
+                            { label: t('pos.transactions') || "Completed Orders", display: t('posCommand.processedCount', { count: shiftTxCount }), icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-500' },
+                            { label: t('posCommand.speedAndPace'), display: t('posCommand.onSchedule'), icon: Zap, color: 'bg-amber-500/10 text-amber-500' },
+                            { label: t('posCommand.drawerProtocol'), display: t('posCommand.blindActive'), icon: Lock, color: 'bg-indigo-500/10 text-indigo-500' },
                         ].map(({ label, display, icon: Icon, color }) => (
                             <div key={label} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 transition-colors hover:bg-[var(--theme-bg-card-hover)] flex items-center gap-3.5 shadow-2xs">
                                 <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center shrink-0`}>

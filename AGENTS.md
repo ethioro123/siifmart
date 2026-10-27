@@ -25,6 +25,7 @@
 - **Branch Scope**: Branch users only see their active `siteId`. Propagate mutations only to systems that depend on the event, using explicit contracts, idempotency, retries, and country-scoped correlation; avoid speculative fan-out.
 - **Operations & Catalog**: Floor roles (`picker`, `packer`, `receiver`, `inventory_specialist`, `forklift_operator`, `stock_clerk`) and `driver` are interchangeable on internal jobs (`PICK`, `PACK`, `RECEIVE`, `PUTAWAY`, `COUNT`, `TRANSFER`, `REPLENISH`, `WASTE`, `RETURNS`, `LABELS`). `DRIVER`/`DELIVERY`/`DISPATCH` jobs are locked to verified drivers. Catalog is strictly Halal: no liquor, beer, wine, or spirits anywhere (catalog, mocks, examples). Use cooking oil, baby formula, coffee, etc.
 - **Merchandising Whole-Number Rule**: All merchandising calculations, prices, automated pricing rules, markdown decay stages, promotional values, and forecasted quantities must strictly be whole numbers (integers). Fractions or decimals are never permitted in merchandising. Whenever any calculation or percentage yields a fraction, it must always be rounded to the nearest whole number (`Math.round()`).
+- **POS & WMS UI Translations**: Any code change to POS or WMS that introduces, modifies, or moves user-visible information (labels, buttons, statuses, table headers, notifications, or modal copy) MUST be accompanied by synchronized translations across all active languages (`en`, `am`, `or`) in `utils/translations/pos.ts`, `utils/translations/posCommand.ts`, or `utils/translations/warehouse/*`. Hardcoded untranslated strings in POS/WMS are strictly prohibited.
 
 ### Database & SQL Governance
 - **Rule 9 (Persistent Migration File is Paramount)**: For ANY database change, save the complete SQL in a persistent `/migrations/YYYYMMDD_description.sql` file on disk before execution.
@@ -47,6 +48,7 @@
 ## 4. UI & Performance Standards
 - **Design Tokens**: Follow `docs/APPLE_DESIGN_GUIDE.md`. Use semantic theme tokens; verify contrast, focus, keyboard/touch access, zoom, and reduced motion as relevant.
 - **Lucide Icons & Zero Emoji**: Use Lucide consistently; don't rely on color alone or use emoji as interface decoration.
+- **POS & WMS UI Translations**: Any UI information change in POS or WMS must be paired with complete translations in the module translation dictionary (`en`, `am`, `or`).
 - **Performance**: Measure performance before adding memoization or virtualization. Use glass only when it helps floating controls with a solid fallback; keep dense/repainting content simple.
 - **Responsiveness**: All modules must be responsive; Fulfillment scanning has the strictest low-end device constraints. Keep mobile POS responsive.
 - **Priority**: Security, business, and accessibility requirements take precedence over visual styling.

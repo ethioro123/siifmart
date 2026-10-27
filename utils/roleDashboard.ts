@@ -35,7 +35,15 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         return '/procurement';
     }
 
-    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_security_manager'].includes(role)) {
+    if (role === 'regional_finance_manager') {
+        if (!siteType || siteType === 'Administration' || siteType === 'Administrative') {
+            return '/regional-ops';
+        }
+        if (isStoreSite) return '/pos-dashboard';
+        return '/finance';
+    }
+
+    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_merchandising_manager', 'regional_hr_manager', 'regional_security_manager'].includes(role)) {
         return '/regional-ops';
     }
 

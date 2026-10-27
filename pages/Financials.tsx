@@ -47,7 +47,7 @@ export default function Finance() {
    const { user } = useStore();
    const { isRegionalUser, effectiveCountry, regions, activeRegionCode } = useData();
 
-   const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || ['regional_operations_manager', 'regional_finance_manager'].includes(user?.role || '');
+   const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || ['regional_operations_manager', 'area_operations_manager', 'regional_finance_manager'].includes(user?.role || '');
 
    const targetRegionCode = activeRegionCode || user?.regionCode || (user as any)?.region_code;
    const activeRegion = (regions || []).find(r => r.code === targetRegionCode);
@@ -144,7 +144,7 @@ export default function Finance() {
                   {(() => {
                      const pendingExpenses = (state.expenses || []).filter(e => e.status === 'Pending').length;
                      const userRole = state.user?.role?.toLowerCase() || '';
-                     const isManager = Boolean(userRole && ['country_finance_director', 'regional_finance_manager', 'country_operations_director', 'regional_operations_manager', 'country_managing_director', 'managing_director', 'group_ceo'].map(r => r.toLowerCase()).includes(userRole));
+                     const isManager = Boolean(userRole && ['country_finance_director', 'regional_finance_manager', 'country_operations_director', 'regional_operations_manager', 'area_operations_manager', 'country_managing_director', 'managing_director', 'group_ceo'].map(r => r.toLowerCase()).includes(userRole));
 
                      if (pendingExpenses === 0) return null;
 
@@ -211,7 +211,10 @@ export default function Finance() {
                      <TabButton id="drawer" label="Drawer Reconciliation" icon={ShieldCheck} />
                      <TabButton id="petty_cash" label="Petty Cash & Floats" icon={Coins} />
                      <TabButton id="expenses" label="Expense Ledger" icon={CreditCard} />
+                     <TabButton id="ap" label="Accounts Payable (3-Way)" icon={Receipt} />
                      <TabButton id="ar" label="Accounts Receivable (B2B)" icon={Users} />
+                     <TabButton id="budget" label="Budgets & Gateway" icon={Target} />
+                     <TabButton id="payroll" label="Payroll Analysis" icon={Briefcase} />
                      <TabButton id="overview" label="Regional P&L Overview" icon={Activity} />
                   </>
                ) : (

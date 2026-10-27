@@ -83,6 +83,7 @@ import { ROLES } from '../constants';
 - Judicious Liquid Glass: Used selectively for navigation bars, toolbars, search pills, sidebars, segmented controls, and modal sheets (not everywhere).
 - Scope of Hardware Overrides: Low-end mobile performance constraints (stripping GPU blurs, restricting RAM/animations, solid opaque surfaces) are STRICTLY CONFINED to the Fulfillment domain (`pages/Fulfillment.tsx` and `components/fulfillment/`). In POS, POS Command, Administration, and all other domains, our full Apple Liquid Glass aesthetic applies completely.
 - Supreme Text Visibility & Contrast: Text readability is paramount. All typography tokens enforce high contrast (minimum WCAG AA 4.5:1, AAA 7:1 for data tables). Never use washed-out or dim text on dark or light backgrounds, and ensure text over Liquid Glass materials maintains a high-contrast backing.
+- POS & WMS UI Translation Synchronization: Any UI modification in POS or WMS components that alters, introduces, or re-labels user-facing information must update the translation definitions in `utils/translations/pos.ts`, `utils/translations/posCommand.ts`, or `utils/translations/warehouse/*` across `en`, `am`, and `or`. Never hardcode untranslated strings in POS or WMS templates.
 
 ---
 

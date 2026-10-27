@@ -103,6 +103,7 @@ const canApprove = ['group_ceo', 'CEO'].includes(user?.role || '');
   - When language is Afaan Oromoo (`or`): 100% pure Afaan Oromoo (e.g. `Jimaata, Fulbaana 22, 2019` and `Ganama/Guyyaa/Galgala/Halkan`). Zero Amharic script or mixed terms. Note: Oromo language code in SIIFMART is strictly `'or'`.
   - When language is Swahili (`sw`): 100% pure Swahili (e.g. `Ijumaa, 2 Oktoba 2026`).
   - When language is English (`en`): 100% pure English (e.g. `Friday, Meskerem 22, 2019`).
+- **POS & WMS UI Translation Synchronization Invariant**: Every code change touching the Point of Sale (POS, Mobile POS, POS Command) or Warehouse Management System (WMS, Fulfillment, Receiving, Picking, Packing, Putaway, Count, Docks, Driver Hub, Transfers) that introduces or alters user-facing UI information (labels, buttons, toast alerts, status chips, table headers, modal text) MUST be accompanied by synchronized translations across all supported languages (`en` for English, `am` for Amharic, `or` for Afaan Oromoo) in the respective dictionaries (`utils/translations/pos.ts`, `utils/translations/posCommand.ts`, `utils/translations/warehouse/*`). Leaving raw hardcoded English or untranslated UI copy in POS or WMS is strictly forbidden.
 
 ### 8. Sovereign National Calendar & Live Clock Sovereignty Model
 - **National Sovereignty of Time**: Enterprisewide operations must be anchored to the sovereign country's national time standard and calendar system.
