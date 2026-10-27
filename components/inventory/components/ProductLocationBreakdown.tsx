@@ -12,6 +12,8 @@ interface LocationBreakdownItem {
     price: number;
     minStock?: number;
     isCurrentSite: boolean;
+    batchNumber?: string|null;
+    expiryDate?: string|null;
 }
 
 interface Props {
@@ -30,12 +32,13 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
             <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2.5">
                 <div className="flex items-center gap-2">
                     <Building2 size={14} className="text-[var(--theme-text-secondary)]" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Multi-Site & Store Stock Breakdown</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Loaded stock by lot and location</h3>
                 </div>
                 <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
-                    {formattedTotal} Across {locationBreakdown.length} {locationBreakdown.length === 1 ? 'Location' : 'Locations'}
+                    {formattedTotal} across {locationBreakdown.length} {locationBreakdown.length === 1 ? 'Record' : 'Records'}
                 </span>
             </div>
+            <p className="text-sm text-[var(--theme-text-secondary)]">Totals cover the loaded records in this country. Each lot and bay is retained; this is not a complete live stock query.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {locationBreakdown.map((loc, i) => (
                     <div
@@ -53,9 +56,11 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
                                     <span className="text-[11px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-[var(--theme-accent)] text-white">This Store</span>
                                 )}
                             </div>
-                            <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5 truncate">{formatLocationIdentity(loc.location)}</p>
+                            <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5 truncate">{formatLocationIdentity(loc.location,'Location not assigned')}</p>
                         </div>
                         <div className="text-right shrink-0">
+                            {loc.batchNumber&&<p className="text-xs text-[var(--theme-text-secondary)]">Lot {loc.batchNumber}</p>}
+                            {loc.expiryDate&&<p className="text-xs text-[var(--theme-text-secondary)]">Expiry {loc.expiryDate}</p>}
                             <p className={`text-xs font-bold font-mono ${loc.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
                                 {formatStockDisplay(loc.stock, product)}
                             </p>

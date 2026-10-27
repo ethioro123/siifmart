@@ -1,3 +1,4 @@
+import {productSaleIssues} from '../../../utils/productDetailLogic';
 import {formatLocationIdentity} from '../../../utils/locationIdentity';
 import React from 'react';
 import {Package} from 'lucide-react';
@@ -10,8 +11,7 @@ interface Props {product:Product;showCostPrice:boolean;currencySymbol?:string}
 export function ProductProfileHeader({product,currencySymbol=CURRENCY_SYMBOL}:Props){
  const stock=product.stock||0;
  const status=stock<=0?'Out of stock':product.minStock&&stock<=product.minStock?'Low stock':'In stock';
- const approval=(product.approvalStatus||product.approval_status||'approved').toLowerCase();
- const readiness=approval==='pending'?'Awaiting catalog approval':approval==='rejected'?'Catalog approval rejected':!(product.price>0)?'Selling price not set':null;
+ const issues=productSaleIssues(product);
  return <section aria-label="Product overview" className="space-y-4 py-1 text-[var(--theme-text-primary)]">
   <div className="flex items-start gap-4">
    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--theme-bg-subtle)]">
@@ -25,8 +25,9 @@ export function ProductProfileHeader({product,currencySymbol=CURRENCY_SYMBOL}:Pr
   </div>
   <dl className="grid grid-cols-2 gap-4 border-y border-[var(--theme-border)] py-3">
    <div><dt className="text-sm text-[var(--theme-text-secondary)]">Selling price</dt><dd className="mt-1 text-2xl font-medium tabular-nums">{product.price>0?`${currencySymbol} ${formatPriceValue(product.price)}`:'Not set'}</dd><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">per {getSellUnit(product.unit).shortLabel||'unit'}</p></div>
-   <div><dt className="text-sm text-[var(--theme-text-secondary)]">Available stock</dt><dd className="mt-1 text-2xl font-medium tabular-nums">{formatStockDisplay(stock,product)}</dd><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">{formatLocationIdentity(product.location)}</p></div>
+   <div><dt className="text-sm text-[var(--theme-text-secondary)]">On-hand stock</dt><dd className="mt-1 text-2xl font-medium tabular-nums">{formatStockDisplay(stock,product)}</dd><p className="mt-1 text-sm text-[var(--theme-text-secondary)]">{formatLocationIdentity(product.location,'Location not assigned')}</p></div>
   </dl>
-  {readiness&&<p className="rounded-lg bg-[var(--theme-bg-subtle)] px-4 py-3 text-sm">{readiness}{!(product.price>0)&&approval==='pending'?' · Selling price not set':''}</p>}
+  {issues.length>0&&<div className="rounded-lg bg-[var(--theme-bg-subtle)] px-4 py-3 text-sm"><p className="font-medium">Sale readiness</p><ul className="mt-1 space-y-1">{issues.map(issue=><li key={issue}>{issue}</li>)}</ul></div>}
+
  </section>;
 }

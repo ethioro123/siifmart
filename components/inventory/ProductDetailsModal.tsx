@@ -1,3 +1,4 @@
+import {productLocationRows,validateStockThresholds} from '../../utils/productDetailLogic';
 import {isLocationBarcode} from '../../utils/locationEncoder';
 import {formatLocationIdentity} from '../../utils/locationIdentity';
 import { ProductHandlingDetails } from './components/ProductHandlingDetails';
@@ -51,42 +52,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     const [isSaving, setIsSaving] = React.useState(false);
     const [isSmartUnitModalOpen, setIsSmartUnitModalOpen] = React.useState(false);
 
-    const locationBreakdown = React.useMemo(() => {
-        if (!product?.sku || !allProducts) return [];
-        const matches = allProducts.filter(p => p.sku === product.sku || (product.productId && p.productId === product.productId));
-
-        // Group by unique siteId to prevent duplicate site entries
-        const siteMap = new Map<string, typeof matches[0]>();
-        matches.forEach(p => {
-            const sId = p.siteId || (p as any).site_id || 'unknown';
-            const existing = siteMap.get(sId);
-            if (!existing) {
-                siteMap.set(sId, p);
-            } else {
-                const pIsGhost = (p.location === 'On Order' || !p.location) && (!p.stock || p.stock === 0);
-                const existingIsGhost = (existing.location === 'On Order' || !existing.location) && (!existing.stock || existing.stock === 0);
-                if (existingIsGhost && !pIsGhost) {
-                    siteMap.set(sId, p);
-                } else if (!pIsGhost && (p.stock || 0) > (existing.stock || 0)) {
-                    siteMap.set(sId, p);
-                }
-            }
-        });
-
-        return Array.from(siteMap.values()).map(p => {
-            const sId = p.siteId || (p as any).site_id;
-            const siteObj = sites?.find(s => s.id === sId);
-            return {
-                id: p.id,
-                siteName: siteObj?.name || 'Main Location',
-                location: p.location || 'General Area',
-                stock: p.stock || 0,
-                price: p.price,
-                minStock: p.minStock,
-                isCurrentSite: p.id === product.id || sId === (product.siteId || (product as any).site_id),
-            };
-        });
-    }, [product, allProducts, sites]);
+    const locationBreakdown = React.useMemo(() => product ? productLocationRows(product, allProducts || [], sites || [], effectiveCountry) : [], [product, allProducts, sites, effectiveCountry]);
 
     React.useEffect(() => {
         if (product) {
@@ -223,6 +189,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
             <div className="flex flex-col gap-1 text-[var(--theme-text-primary)]">
                 {/* Executive Hero Product Profile Header */}
                 <ProductProfileHeader product={product} showCostPrice={showCostPrice} currencySymbol={activeCurrency} />
+                {!product.location && product.stock > 0 && ['Warehouse','Distribution Center'].includes(sites.find(s => s.id === (product.siteId || product.site_id))?.type || '') && <p className="rounded-lg border border-[var(--theme-border)] px-4 py-3 text-sm text-[var(--theme-text-primary)]">Warehouse stock needs a confirmed bin assignment. Use the controlled location workflow to assign its Zone, Aisle and Bay.</p>}
 
                 {/* Multi-Site & Store Stock Locations */}
                 <details className="border-b border-[var(--theme-border)] pb-2"><summary className="min-h-[44px] cursor-pointer py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Stock locations</summary><ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} /></details>
@@ -355,6 +322,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                     <button onClick={async () => {
                                         setIsSaving(true);
                                         try {
+                                            validateStockThresholds(minVal === '' ? product.minStock : minVal, maxVal === '' ? product.maxStock : maxVal);
                                             if (canDirectEdit) {
                                                 // CEO: apply immediately via updateProduct (syncs posDB & audit logs)
                                                 await updateProduct({
@@ -422,7 +390,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     <div className="bg-[var(--theme-bg-card)] p-3 rounded-xl border border-[var(--theme-border)] space-y-4 shadow-xs">
                         <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
                             <TrendingUp size={14} className="text-[var(--theme-text-secondary)]" />
-                            <h3 className="text-sm font-medium text-[var(--theme-text-primary)]">Restock Log & Audits</h3>
+                            <h3 className="text-sm font-medium text-[var(--theme-text-primary)]">Recent loaded restocks</h3>
                         </div>
                         {recentReceives.length > 0 ? (
                             <div className="space-y-3 pl-2 border-l border-[var(--theme-border)] ml-2 max-h-[140px] overflow-y-auto">
@@ -434,7 +402,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                     </div>
                                 ))}
                             </div>
-                        ) : <p className="text-xs font-medium text-[var(--theme-text-muted)] text-center py-2">No recent restocks</p>}
+                        ) : <p className="text-xs font-medium text-[var(--theme-text-muted)] text-center py-2">No restocks in the loaded history</p>}
                         <div className="pt-3 border-t border-[var(--theme-border)] text-[11px] space-y-1.5">
                             <div className="flex justify-between"><span className="text-[var(--theme-text-muted)] font-medium uppercase">Created:</span><span className="font-semibold text-[var(--theme-text-primary)]">{product.createdBy || 'System'}</span></div>
                         </div>

@@ -10,7 +10,7 @@ describe('readable product overview',()=>{
  it('shows stock and price readiness separately without exposing cost',()=>{
   render(<ProductProfileHeader product={product} showCostPrice={false} currencySymbol="ETB"/>);
   expect(screen.getByRole('heading',{level:2})).toBeTruthy();expect(screen.getByText(/Awaiting catalog approval/)).toBeTruthy();
-  expect(screen.getByText('Not set')).toBeTruthy();expect(screen.getByText('No bay assigned')).toBeTruthy();
+  expect(screen.getByText('Not set')).toBeTruthy();expect(screen.getByText('Location not assigned')).toBeTruthy();
   expect(screen.queryByText(/1200|1,200|Gross Margin|Total Stock Value/)).toBeNull();
  });
  it('uses explicit out-of-stock text rather than just color',()=>{
