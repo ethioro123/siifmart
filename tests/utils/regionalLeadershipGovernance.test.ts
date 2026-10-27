@@ -261,6 +261,38 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
         });
     });
 
+    describe('Regional IT Manager (regional_it_manager)', () => {
+        it('authorizes infrastructure settings, audit logs, login provisioning, password resets, and IT staff management', () => {
+            expect(hasPermission('regional_it_manager', 'ACCESS_SETTINGS')).toBe(true);
+            expect(hasPermission('regional_it_manager', 'EDIT_SYSTEM_SETTINGS')).toBe(true);
+            expect(hasPermission('regional_it_manager', 'VIEW_AUDIT_LOGS')).toBe(true);
+            expect(hasPermission('regional_it_manager', 'RESET_PASSWORD')).toBe(true);
+            expect(hasPermission('regional_it_manager', 'CREATE_LOGIN_ACCOUNT')).toBe(true);
+            expect(hasPermission('regional_it_manager', 'ADD_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_it_manager', 'EDIT_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_it_manager', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(canAccessRoute('regional_it_manager', '/regional-ops')).toBe(true);
+            expect(canAccessRoute('regional_it_manager', '/settings')).toBe(true);
+            expect(canAccessRoute('regional_it_manager', '/employees')).toBe(true);
+        });
+
+        it('authorizes hiring of IT Support and Data Analyst roles only', () => {
+            expect(canEmployRole('regional_it_manager', 'it_support')).toBe(true);
+            expect(canEmployRole('regional_it_manager', 'data_analyst')).toBe(true);
+            expect(canEmployRole('regional_it_manager', 'cashier')).toBe(false);
+            expect(canEmployRole('regional_it_manager', 'store_manager')).toBe(false);
+        });
+
+        it('strictly denies sales processing, product pricing, inventory mutations, and financial ledger access', () => {
+            expect(hasPermission('regional_it_manager', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('regional_it_manager', 'EDIT_PRICE')).toBe(false);
+            expect(hasPermission('regional_it_manager', 'ACCESS_FINANCE')).toBe(false);
+            expect(hasPermission('regional_it_manager', 'ACCESS_INVENTORY')).toBe(false);
+            expect(canAccessRoute('regional_it_manager', '/finance')).toBe(false);
+            expect(canAccessRoute('regional_it_manager', '/inventory')).toBe(false);
+        });
+    });
+
     describe('Maker-Checker Segregation & Regional Autonomous Expense Caps', () => {
         it('enforces Maker-Checker: expense creator cannot approve their own expense', () => {
             const creatorId = 'emp-024';

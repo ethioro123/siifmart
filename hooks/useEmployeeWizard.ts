@@ -58,6 +58,7 @@ const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
    regional_finance_manager: ['accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'payroll_specialist', 'auditor', 'store_operations_auditor'],
    regional_logistics_manager: ['warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'inventory_manager', 'dispatch_supervisor', 'fleet_maintenance_supervisor', 'dispatch_team_leader', 'assistant_store_manager', 'shift_supervisor', 'dispatcher', 'dispatch_operator', 'fleet_mechanic', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
    regional_security_manager: ['loss_prevention', 'store_operations_auditor', 'auditor'],
+   regional_it_manager: ['it_support', 'data_analyst'],
    store_manager: ['assistant_store_manager', 'shift_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'cs_manager', 'merchandiser'],
    warehouse_manager: ['assistant_store_manager', 'shift_supervisor', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
    dispatch_supervisor: ['driver', 'dispatcher'],
@@ -140,16 +141,13 @@ export function useEmployeeWizard({
       if (user.role === 'warehouse_manager') return ['Transport', 'Logistics & Warehouse'];
       if (user.role === 'inventory_manager') return ['Logistics & Warehouse', 'Management'];
       if (user.role === 'regional_security_manager') return ['Security'];
+      if (user.role === 'regional_it_manager') return ['Management', 'Retail Operations', 'Logistics & Warehouse'];
       return [];
    };
 
    const availableRoles = SYSTEM_ROLES.filter(r => getCreatableRoles().includes(r.id));
    const availableDepartments = getAvailableDepartments();
-
-   const resetWizard = () => {
-      setIsAddModalOpen(false);
-      setAddStep(1);
-   };
+   const resetWizard = () => { setIsAddModalOpen(false); setAddStep(1); };
 
    const openBlankWizard = () => {
       const validRoles = getCreatableRoles();
@@ -212,7 +210,7 @@ export function useEmployeeWizard({
    };
 
    const handleRoleChange = (newRole: UserRole) => {
-      const isRegional = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '');
+      const isRegional = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_it_manager'].includes(user?.role || '');
       const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
       const candidateSites = isRegional && userRegion
          ? sites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion)

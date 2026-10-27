@@ -110,7 +110,11 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'sales.view', 'sales.view_reports',
         'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
     ],
-    regional_it_manager: HEAD_OF_IT_PERMISSIONS,
+    regional_it_manager: [
+        'dashboard.view', 'admin.view',
+        'settings.view', 'settings.edit', 'settings.view_logs', 'settings.manage_integrations',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
+    ],
     regional_compliance_manager: HEAD_OF_AUDIT_PERMISSIONS,
 
     // ═══ LEVEL 6: FACILITY CAPTAINS (Store & Warehouse Command) ═══

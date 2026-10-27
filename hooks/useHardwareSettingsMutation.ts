@@ -44,7 +44,7 @@ export function useHardwareSettingsMutation() {
   return useMutation<void, Error, HardwareSettingsPayload>({
     mutationFn: async ({ targetCountry = 'ET', data }) => {
       // ── 1. ROLE GUARD ──
-      const allowedRoles = ['group_ceo', 'country_operations_director', 'regional_operations_manager', 'store_manager', 'warehouse_manager'];
+      const allowedRoles = ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_technology_director', 'regional_it_manager', 'it_support', 'regional_operations_manager', 'area_operations_manager', 'store_manager', 'warehouse_manager'];
       const isAuthorized = allowedRoles.includes(user?.role || '');
       if (!isAuthorized) {
         throw new Error('Unauthorized: Modifying station hardware and device mappings requires store manager or administrator credentials.');
