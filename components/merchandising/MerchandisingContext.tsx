@@ -69,6 +69,17 @@ export interface MerchandisingContextType {
    setIsRuleModalOpen: (open: boolean) => void;
    newRule: Partial<PricingRule>;
    setNewRule: React.Dispatch<React.SetStateAction<Partial<PricingRule>>>;
+   pricingRulesTotalCount: number;
+   pricingRulesPage: number;
+   setPricingRulesPage: (page: number) => void;
+   pricingRulesTotalPages: number;
+   pricingRulesSearch: string;
+   setPricingRulesSearch: (search: string) => void;
+   pricingRulesStatus: 'all' | 'enabled' | 'paused';
+   setPricingRulesStatus: (status: 'all' | 'enabled' | 'paused') => void;
+   isCreatingRule: boolean;
+   ruleValidationErrors: Record<string, string>;
+   setRuleValidationErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 
    isBulkDiscountModalOpen: boolean;
    setIsBulkDiscountModalOpen: (open: boolean) => void;
