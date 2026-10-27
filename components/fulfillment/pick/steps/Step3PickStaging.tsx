@@ -35,16 +35,18 @@ export const Step3PickStaging: React.FC<Step3PickStagingProps> = ({
                         </div>
                         <div>
                             <h3 className="text-sm md:text-base font-bold uppercase tracking-tight text-[var(--theme-text-primary)]">
-                                Picking review
+                                {t('warehouse.picking.pickingReview') || 'Picking review'}
                             </h3>
                             <span className="text-xs text-[var(--theme-text-secondary)]">
-                                Review verified quantities and shortages before completion
+                                {t('warehouse.picking.reviewVerifiedQuantities') || 'Review verified quantities and shortages before completion'}
                             </span>
                         </div>
                     </div>
 
                     <span className="px-3 py-1 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 font-mono font-bold text-xs uppercase">
-                        {completedItems} / {totalItems} Lines Verified
+                        {(t('warehouse.picking.linesVerified') || '{completed} / {total} Lines Verified')
+                            .replace('{completed}', String(completedItems))
+                            .replace('{total}', String(totalItems))}
                     </span>
                 </div>
 
@@ -52,27 +54,27 @@ export const Step3PickStaging: React.FC<Step3PickStagingProps> = ({
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
                     <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
-                            Target Drop-Off Zone
+                            {t('warehouse.picking.targetDropOffZone') || 'Target Drop-Off Zone'}
                         </span>
                         <div className="flex items-center gap-1.5 mt-1 text-xs font-bold text-[var(--theme-text-primary)] truncate">
                             <MapPin size={13} className="text-[var(--theme-accent)] shrink-0" />
-                            <span>Packing Station 01</span>
+                            <span>{t('warehouse.picking.packingStation01') || 'Packing Station 01'}</span>
                         </div>
                     </div>
 
                     <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
-                            Source Warehouse
+                            {t('warehouse.picking.sourceWarehouse') || 'Source Warehouse'}
                         </span>
                         <div className="flex items-center gap-1.5 mt-1 text-xs font-bold text-[var(--theme-text-primary)] truncate">
                             <Box size={13} className="text-[var(--theme-accent)] shrink-0" />
-                            <span className="truncate">{sourceSite?.name || 'Central Warehouse'}</span>
+                            <span className="truncate">{sourceSite?.name || t('warehouse.centralWarehouse') || 'Central Warehouse'}</span>
                         </div>
                     </div>
 
                     <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] col-span-2 md:col-span-1">
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
-                            Order Reference
+                            {t('warehouse.picking.orderReference') || 'Order Reference'}
                         </span>
                         <div className="flex items-center gap-1.5 mt-1 text-xs font-bold text-[var(--theme-accent)] truncate font-mono">
                             <Tag size={13} className="shrink-0" />
@@ -87,7 +89,7 @@ export const Step3PickStaging: React.FC<Step3PickStagingProps> = ({
                         <Package size={16} />
                     </div>
                     <p className="text-xs text-[var(--theme-text-secondary)]">
-                        Only picked quantities go to packing. If all lines are short, no packing job is created and the order needs supervisor review.
+                        {t('warehouse.picking.stagingDirectiveNotice') || 'Only picked quantities go to packing. If all lines are short, no packing job is created and the order needs supervisor review.'}
                     </p>
                 </div>
             </div>

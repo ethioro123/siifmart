@@ -41,7 +41,9 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
                     </p>
 
                     <div className="block w-full mx-auto px-4 sm:px-8 py-3 sm:py-7 rounded-2xl sm:rounded-3xl border bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/30 text-[var(--theme-accent)] max-w-2xl">
-                        <p className="text-xs sm:text-base font-bold uppercase tracking-widest text-[var(--theme-text-secondary)] mb-1 sm:mb-2">Pick from this location</p>
+                        <p className="text-xs sm:text-base font-bold uppercase tracking-widest text-[var(--theme-text-secondary)] mb-1 sm:mb-2">
+                            {t('warehouse.picking.pickFromThisLocation') || 'Pick from this location'}
+                        </p>
                         <p className="font-mono font-bold tracking-wide break-words text-4xl sm:text-6xl md:text-7xl leading-tight">
                             {scannedLocationBarcode
                                 ? decodeLocation(scannedLocationBarcode)
@@ -56,8 +58,10 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
     if (step === 'QUANTITY') {
         return (
             <div className="text-center z-10 mb-1 sm:mb-6 w-full max-w-2xl px-2">
-                <p className="text-amber-600 dark:text-amber-400 text-xs sm:text-base uppercase tracking-wider font-bold">Enter the physical quantity picked</p>
-                <ProductIdentity item={currentItem} product={currentProduct} />
+                <p className="text-amber-600 dark:text-amber-400 text-xs sm:text-base uppercase tracking-wider font-bold">
+                    {t('warehouse.picking.enterPhysicalQtyPicked') || 'Enter the physical quantity picked'}
+                </p>
+                <ProductIdentity item={currentItem} product={currentProduct} t={t} />
                 <p className="text-[var(--theme-text-secondary)] text-sm sm:text-base mt-2">{t('warehouse.expected')}: <span className="text-[var(--theme-text-primary)] font-bold text-xl sm:text-3xl tabular-nums">
                     {(() => {
                         const expected = remainingPickQuantity(currentItem);
@@ -74,7 +78,7 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
     return (
         <div className="text-center z-10 mb-1 sm:mb-6 w-full max-w-full px-2">
             <p className="text-[var(--theme-text-secondary)] text-sm sm:text-lg font-semibold">{isItemMatched ? t('warehouse.picking.confirmItemPick') : t('warehouse.picking.scanProductToPick')}</p>
-            <ProductIdentity item={currentItem} product={currentProduct} matched={isItemMatched} />
+            <ProductIdentity item={currentItem} product={currentProduct} matched={isItemMatched} t={t} />
             <div className="mt-2 inline-flex flex-wrap items-center justify-center gap-x-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 py-1.5 shadow-sm">
                 <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.expected')}</span>
                 <span className="font-bold text-[var(--theme-text-primary)] text-xl sm:text-3xl tabular-nums">{(() => {
@@ -110,7 +114,7 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
     );
 };
 
-const ProductIdentity: React.FC<{ item: any; product?: Product; matched?: boolean }> = ({ item, product, matched = false }) => (
+const ProductIdentity: React.FC<{ item: any; product?: Product; matched?: boolean; t: (key: string) => string }> = ({ item, product, matched = false, t }) => (
     <div className="mt-2 sm:mt-5 mx-auto w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 sm:p-6 shadow-sm">
         <div className="flex items-center gap-3 sm:gap-4 text-left">
             <div className="w-16 h-16 sm:w-32 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex items-center justify-center shrink-0">
@@ -120,11 +124,11 @@ const ProductIdentity: React.FC<{ item: any; product?: Product; matched?: boolea
             </div>
             <div className="w-full min-w-0">
                 <h2 className={`text-xl sm:text-4xl md:text-5xl leading-tight font-bold break-words line-clamp-2 ${matched ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'}`}>
-                    {item?.name || product?.name || 'Unknown product'}
+                    {item?.name || product?.name || t('warehouse.picking.unknownProduct') || 'Unknown product'}
                 </h2>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <span className="inline-flex min-h-8 items-center rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 text-xs sm:text-lg font-mono font-bold text-[var(--theme-accent)] break-all">
-                        {item?.sku || product?.sku || 'No SKU'}
+                        {item?.sku || product?.sku || t('warehouse.picking.noSKU') || 'No SKU'}
                     </span>
                     {formatProductSize(product || item) && (
                         <span className="inline-flex min-h-8 items-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 text-xs sm:text-base font-semibold text-emerald-700 dark:text-emerald-400">

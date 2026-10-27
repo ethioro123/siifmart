@@ -12,26 +12,51 @@ interface Props {
     onStartPick: (job: WMSJob) => void; onAdvanceToStaging: () => void; t: (key: string) => string;
 }
 /** Collection always uses the verified bay → product → quantity workflow. */
-export const Step2PickCollect: React.FC<Props> = ({ job, sortedLineItems, completedItems, totalItems, isFullyPicked, getProduct, onStartPick, onAdvanceToStaging }) => (
+export const Step2PickCollect: React.FC<Props> = ({
+    job,
+    sortedLineItems,
+    completedItems,
+    totalItems,
+    isFullyPicked,
+    getProduct,
+    onStartPick,
+    onAdvanceToStaging,
+    t,
+}) => (
     <div className="flex-1 min-h-0 flex flex-col bg-[var(--theme-bg-app)]">
         <div className="p-4 border-b border-[var(--theme-border)]">
-            <p className="font-semibold text-[var(--theme-text-primary)]">{completedItems} / {totalItems} lines verified</p>
-            <p className="text-sm text-[var(--theme-text-secondary)]">Scan the source bay and product, then record the physical quantity. Record a reason for any shortage.</p>
+            <p className="font-semibold text-[var(--theme-text-primary)]">
+                {(t('warehouse.picking.linesVerifiedSimple') || '{completed} / {total} lines verified')
+                    .replace('{completed}', String(completedItems))
+                    .replace('{total}', String(totalItems))}
+            </p>
+            <p className="text-sm text-[var(--theme-text-secondary)]">
+                {t('warehouse.picking.scanSourceBayPrompt') || 'Scan the source bay and product, then record the physical quantity. Record a reason for any shortage.'}
+            </p>
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-[var(--theme-border)]">
             {sortedLineItems.map((item, index) => {
                 const product = getProduct(item);
                 const resolved = isPickLineResolved(item);
-                return <div key={`${item.productId}-${index}`} className="p-4 flex items-start gap-3 min-w-0">
-                    {resolved ? <CheckCircle size={18} className="shrink-0 text-[var(--theme-accent)] mt-1"/> : <span className="shrink-0 text-[var(--theme-text-secondary)]">{index+1}</span>}
-                    <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-[var(--theme-text-primary)] break-words">{item.name || item.sku}</p>
-                        <p className="text-sm text-[var(--theme-text-secondary)] break-words">{item.sku} · {item.location || product?.location || 'Source bin missing'}</p>
-                        <p className="text-sm text-[var(--theme-text-primary)]">{item.pickedQty || 0} / {item.expectedQty} {getTransferQuantityConfig(product).quantityLabel} · {item.status || 'Pending'}</p>
+                return (
+                    <div key={`${item.productId}-${index}`} className="p-4 flex items-start gap-3 min-w-0">
+                        {resolved ? (
+                            <CheckCircle size={18} className="shrink-0 text-[var(--theme-accent)] mt-1" />
+                        ) : (
+                            <span className="shrink-0 text-[var(--theme-text-secondary)]">{index + 1}</span>
+                        )}
+                        <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-[var(--theme-text-primary)] break-words">{item.name || item.sku}</p>
+                            <p className="text-sm text-[var(--theme-text-secondary)] break-words">
+                                {item.sku} · {item.location || product?.location || t('warehouse.picking.sourceBinMissing') || 'Source bin missing'}
+                            </p>
+                            <p className="text-sm text-[var(--theme-text-primary)]">
+                                {item.pickedQty || 0} / {item.expectedQty} {getTransferQuantityConfig(product).quantityLabel} · {item.status || t('warehouse.pending') || 'Pending'}
+                            </p>
+                        </div>
                     </div>
-                </div>;
+                );
             })}
         </div>
-
     </div>
 );

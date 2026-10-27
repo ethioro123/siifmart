@@ -335,6 +335,41 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
         });
     });
 
+    describe('Vendor Relations Manager (vendor_relations_manager)', () => {
+        it('authorizes procurement, supplier management, cost price view, and team management', () => {
+            expect(hasPermission('vendor_relations_manager', 'ACCESS_PROCUREMENT')).toBe(true);
+            expect(hasPermission('vendor_relations_manager', 'MANAGE_SUPPLIERS')).toBe(true);
+            expect(hasPermission('vendor_relations_manager', 'VIEW_COST_PRICE')).toBe(true);
+            expect(hasPermission('vendor_relations_manager', 'ACCESS_PRICING')).toBe(true);
+            expect(hasPermission('vendor_relations_manager', 'ACCESS_INVENTORY')).toBe(true);
+            expect(hasPermission('vendor_relations_manager', 'ADD_EMPLOYEE')).toBe(true);
+            expect(hasPermission('vendor_relations_manager', 'EDIT_EMPLOYEE')).toBe(true);
+            expect(hasPermission('vendor_relations_manager', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(canAccessRoute('vendor_relations_manager', '/regional-ops')).toBe(true);
+            expect(canAccessRoute('vendor_relations_manager', '/procurement')).toBe(true);
+            expect(canAccessRoute('vendor_relations_manager', '/pricing')).toBe(true);
+            expect(canAccessRoute('vendor_relations_manager', '/inventory')).toBe(true);
+            expect(canAccessRoute('vendor_relations_manager', '/employees')).toBe(true);
+        });
+
+        it('authorizes hiring of buyer, customs import specialist, and inbound qc inspector roles only', () => {
+            expect(canEmployRole('vendor_relations_manager', 'buyer')).toBe(true);
+            expect(canEmployRole('vendor_relations_manager', 'customs_import_specialist')).toBe(true);
+            expect(canEmployRole('vendor_relations_manager', 'inbound_qc_inspector')).toBe(true);
+            expect(canEmployRole('vendor_relations_manager', 'cashier')).toBe(false);
+            expect(canEmployRole('vendor_relations_manager', 'store_manager')).toBe(false);
+        });
+
+        it('strictly enforces Procurement Segregation of Duties (no unilateral PO approval, dock receiving, stock adjustments, pricing edits, or finance access)', () => {
+            expect(hasPermission('vendor_relations_manager', 'APPROVE_PO')).toBe(false);
+            expect(hasPermission('vendor_relations_manager', 'CREATE_PO')).toBe(false);
+            expect(hasPermission('vendor_relations_manager', 'RECEIVE_PO')).toBe(false);
+            expect(hasPermission('vendor_relations_manager', 'ADJUST_STOCK')).toBe(false);
+            expect(hasPermission('vendor_relations_manager', 'EDIT_PRICE')).toBe(false);
+            expect(hasPermission('vendor_relations_manager', 'ACCESS_FINANCE')).toBe(false);
+        });
+    });
+
     describe('Maker-Checker Segregation & Regional Autonomous Expense Caps', () => {
         it('enforces Maker-Checker: expense creator cannot approve their own expense', () => {
             const creatorId = 'emp-024';
