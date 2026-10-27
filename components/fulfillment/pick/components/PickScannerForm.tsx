@@ -97,7 +97,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                             </div>
 
                             <label className="block text-sm text-[var(--theme-text-secondary)]">
-                                Shortage reason (required for partial or zero picks)
+                                {t('warehouse.picking.shortageReasonNotice') || 'Shortage reason (required for partial or zero picks)'}
                                 <textarea aria-label="Shortage reason" value={shortageReason} onChange={event=>setShortageReason?.(event.target.value)} maxLength={500} disabled={isProcessing} className="mt-1 block w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 text-[var(--theme-text-primary)]" rows={2}/>
                             </label>
                             {/* Rapid Thumb Stepper Pills */}
@@ -130,7 +130,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                     }}
                                     className="flex-1 py-2 rounded-xl bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 border border-[var(--theme-accent)]/30 text-[var(--theme-accent)] font-mono text-base font-bold transition-all active:scale-95 touch-manipulation min-h-[44px]"
                                 >
-                                    Remaining
+                                    {t('warehouse.remaining') || 'Remaining'}
                                 </button>
                             </div>
                         </div>
@@ -160,7 +160,9 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                             <p className="text-base font-bold uppercase tracking-wider text-[var(--theme-accent)] flex items-center justify-center gap-2">
                                 {(() => {
                                     const barcode = extractLocationBarcodeFromScan(inputVal);
-                                    return barcode ? `IDENTIFIED: ${decodeLocation(barcode)}` : t('warehouse.picking.encodedBarcodeProtocolRequired');
+                                    return barcode
+                                        ? (t('warehouse.picking.identifiedPrefix') || 'IDENTIFIED: {location}').replace('{location}', decodeLocation(barcode) || '')
+                                        : t('warehouse.picking.encodedBarcodeProtocolRequired');
                                 })()}
                             </p>
                         </div>
@@ -169,7 +171,16 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                 </>
             )}
 
-            {onRecordEmptyBin && <button type="button" disabled={isProcessing} onClick={onRecordEmptyBin} className="w-full min-h-11 rounded-xl border border-[var(--theme-border)] px-3 py-2 text-[var(--theme-text-primary)]">No stock in this bay</button>}
+            {onRecordEmptyBin && (
+                <button
+                    type="button"
+                    disabled={isProcessing}
+                    onClick={onRecordEmptyBin}
+                    className="w-full min-h-11 rounded-xl border border-[var(--theme-border)] px-3 py-2 text-[var(--theme-text-primary)]"
+                >
+                    {t('warehouse.picking.noStockInBay') || 'No stock in this bay'}
+                </button>
+            )}
 
             {isProcessing && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
