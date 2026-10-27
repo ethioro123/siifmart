@@ -41,8 +41,8 @@ export const PickStepIndicator: React.FC<PickStepIndicatorProps> = ({
             id: 'ROUTE',
             stepNum: 1,
             label: resolveLabel('warehouse.pickRoute', 'Pick Route'),
-            shortLabel: 'Route',
-            sublabel: 'Optimized Path',
+            shortLabel: resolveLabel('warehouse.route', 'Route'),
+            sublabel: resolveLabel('warehouse.picking.optimizedPath', 'Optimized Path'),
             icon: Route,
             isComplete: true,
         },
@@ -50,8 +50,10 @@ export const PickStepIndicator: React.FC<PickStepIndicatorProps> = ({
             id: 'COLLECT',
             stepNum: 2,
             label: resolveLabel('warehouse.pickItems', 'Collect Items'),
-            shortLabel: 'Collect',
-            sublabel: isFullyPicked ? 'All Picked' : 'Scan & Verify',
+            shortLabel: resolveLabel('warehouse.collect', 'Collect'),
+            sublabel: isFullyPicked
+                ? resolveLabel('warehouse.picking.allPicked', 'All Picked')
+                : resolveLabel('warehouse.picking.scanAndVerify', 'Scan & Verify'),
             icon: Package,
             isComplete: isFullyPicked,
         },
@@ -59,8 +61,10 @@ export const PickStepIndicator: React.FC<PickStepIndicatorProps> = ({
             id: 'STAGING',
             stepNum: 3,
             label: resolveLabel('warehouse.stagingHandover', 'Staging Handover'),
-            shortLabel: 'Staging',
-            sublabel: !isFullyPicked ? 'Locked (Scan All)' : 'Tote & Complete',
+            shortLabel: resolveLabel('warehouse.staging', 'Staging'),
+            sublabel: !isFullyPicked
+                ? resolveLabel('warehouse.picking.lockedScanAll', 'Locked (Scan All)')
+                : resolveLabel('warehouse.picking.toteAndComplete', 'Tote & Complete'),
             icon: CheckCircle,
             isComplete: false,
         },

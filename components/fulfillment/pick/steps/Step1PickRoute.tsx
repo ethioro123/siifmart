@@ -35,14 +35,14 @@ export const Step1PickRoute: React.FC<Step1PickRouteProps> = ({
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)]">
-                                Optimal Pick Route
+                                {t('warehouse.picking.optimalPickRoute') || 'Optimal Pick Route'}
                             </span>
                             <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] sm:text-[11px] font-mono font-semibold text-[var(--theme-text-primary)] whitespace-nowrap">
-                                {totalItems} Stops · {totalUnits} Units
+                                {(t('warehouse.picking.stopsAndUnits') || '{stops} Stops · {units} Units').replace('{stops}', String(totalItems)).replace('{units}', String(totalUnits))}
                             </span>
                         </div>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 leading-snug">
-                            Items are sequenced by aisle and shelf to minimize warehouse travel distance.
+                            {t('warehouse.picking.routeMinimizesTravel') || 'Items are sequenced by aisle and shelf to minimize warehouse travel distance.'}
                         </p>
                     </div>
                 </div>
@@ -53,10 +53,10 @@ export const Step1PickRoute: React.FC<Step1PickRouteProps> = ({
                 <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
                     <span className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider flex items-center gap-2">
                         <Box size={15} className="text-[var(--theme-accent)]" />
-                        Sequence Itinerary
+                        {t('warehouse.picking.sequenceItinerary') || 'Sequence Itinerary'}
                     </span>
                     <span className="text-xs font-mono font-semibold text-[var(--theme-text-secondary)]">
-                        {totalItems} Locations
+                        {(t('warehouse.picking.locationsCount') || '{count} Locations').replace('{count}', String(totalItems))}
                     </span>
                 </div>
 
@@ -82,13 +82,13 @@ export const Step1PickRoute: React.FC<Step1PickRouteProps> = ({
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <h4 className="text-xs font-bold uppercase truncate text-[var(--theme-text-primary)]" title={item.name || prod?.name}>
-                                            {item.name || prod?.name || 'Unknown SKU'}
+                                            {item.name || prod?.name || t('warehouse.unknownItem') || 'Unknown SKU'}
                                         </h4>
                                         <div className="flex items-center gap-2 mt-0.5 text-[11px] font-mono text-[var(--theme-text-secondary)]">
                                             <span className="truncate">{item.sku || prod?.sku}</span>
                                             <span>·</span>
                                             <span className="shrink-0">
-                                                Qty: <strong className="text-[var(--theme-text-primary)]">{expected}</strong>
+                                                {t('warehouse.qty') || 'Qty'}: <strong className="text-[var(--theme-text-primary)]">{expected}</strong>
                                             </span>
                                         </div>
                                     </div>
