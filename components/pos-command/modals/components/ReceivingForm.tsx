@@ -131,7 +131,7 @@ export const ReceivingForm: React.FC = () => {
                             <tr>
                                 <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider">{t('posCommand.itemDetails')}</th>
                                 <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider text-center">
-                                    {isManagerOrHQ ? t('posCommand.expected') : 'Expected (Blind)'}
+                                    {isManagerOrHQ ? t('posCommand.expected') : t('posCommand.protectedBlind')}
                                 </th>
                                 <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider text-center">{t('posCommand.received')}</th>
                                 <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider">{t('posCommand.condition')}</th>

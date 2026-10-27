@@ -110,13 +110,13 @@ export const StockListModal: React.FC = () => {
     React.useEffect(() => { setCurrentPage(1); }, [stockSearch, activeFilter, selectedCategory]);
 
     const filterTabs: Array<{ id: StockFilterMode; label: string; icon?: React.ReactNode; color: string; activeColor: string; count: number }> = [
-        { id: 'ALL', label: 'All', color: 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)]', activeColor: 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs', count: filterCounts.all },
-        { id: 'LOW_STOCK', label: 'Low Stock', icon: <AlertTriangle size={13} />, color: 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20', activeColor: 'bg-amber-500 text-white shadow-xs', count: filterCounts.lowStock },
-        { id: 'OUT_OF_STOCK', label: 'Out of Stock', icon: <AlertCircle size={13} />, color: 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20', activeColor: 'bg-red-600 text-white shadow-xs', count: filterCounts.outOfStock },
-        { id: 'PRICE_UPDATED', label: 'Price Updated', icon: <TrendingUp size={13} />, color: 'bg-blue-500/10 text-blue-500 border border-blue-500/20 hover:bg-blue-500/20', activeColor: 'bg-blue-600 text-white shadow-xs', count: filterCounts.priceUpdated },
-        { id: 'STOCK_UPDATED', label: 'Stock Updated', icon: <Package size={13} />, color: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20', activeColor: 'bg-emerald-600 text-white shadow-xs', count: filterCounts.stockUpdated },
-        { id: 'ON_SALE', label: 'On Sale', icon: <Tag size={13} />, color: 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500/20', activeColor: 'bg-purple-600 text-white shadow-xs', count: filterCounts.onSale },
-        { id: 'BY_WEIGHT_VOLUME', label: 'Weighted / Vol', icon: <Scale size={13} />, color: 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 hover:bg-cyan-500/20', activeColor: 'bg-cyan-600 text-white shadow-xs', count: filterCounts.weighted },
+        { id: 'ALL', label: t('posCommand.filterAll'), color: 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)]', activeColor: 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs', count: filterCounts.all },
+        { id: 'LOW_STOCK', label: t('posCommand.filterLowStock'), icon: <AlertTriangle size={13} />, color: 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20', activeColor: 'bg-amber-500 text-white shadow-xs', count: filterCounts.lowStock },
+        { id: 'OUT_OF_STOCK', label: t('posCommand.filterOutOfStock'), icon: <AlertCircle size={13} />, color: 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20', activeColor: 'bg-red-600 text-white shadow-xs', count: filterCounts.outOfStock },
+        { id: 'PRICE_UPDATED', label: t('posCommand.filterPriceUpdated'), icon: <TrendingUp size={13} />, color: 'bg-blue-500/10 text-blue-500 border border-blue-500/20 hover:bg-blue-500/20', activeColor: 'bg-blue-600 text-white shadow-xs', count: filterCounts.priceUpdated },
+        { id: 'STOCK_UPDATED', label: t('posCommand.filterStockUpdated'), icon: <Package size={13} />, color: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20', activeColor: 'bg-emerald-600 text-white shadow-xs', count: filterCounts.stockUpdated },
+        { id: 'ON_SALE', label: t('posCommand.filterOnSale'), icon: <Tag size={13} />, color: 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500/20', activeColor: 'bg-purple-600 text-white shadow-xs', count: filterCounts.onSale },
+        { id: 'BY_WEIGHT_VOLUME', label: t('posCommand.filterWeightedVol'), icon: <Scale size={13} />, color: 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 hover:bg-cyan-500/20', activeColor: 'bg-cyan-600 text-white shadow-xs', count: filterCounts.weighted },
     ];
 
     return (
@@ -126,10 +126,10 @@ export const StockListModal: React.FC = () => {
                     <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
                         <div className="flex items-center gap-2">
                             <span className="w-5 h-5 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shrink-0">{filterCounts.unseen > 99 ? '99+' : filterCounts.unseen}</span>
-                            <p className="text-xs font-semibold text-amber-500">{filterCounts.unseen} product{filterCounts.unseen !== 1 ? 's' : ''} updated recently</p>
+                            <p className="text-xs font-semibold text-amber-500">{t('posCommand.productsUpdatedRecently', { count: filterCounts.unseen })}</p>
                         </div>
                         <button type="button" onClick={markUpdatesAsRead} title="Mark all updates as read" aria-label="Mark all updates as read" className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all flex items-center gap-1 cursor-pointer">
-                            <CheckCheck size={13} className="text-emerald-300" /><span>Mark all as read</span>
+                            <CheckCheck size={13} className="text-emerald-300" /><span>{t('posCommand.markAllAsRead')}</span>
                         </button>
                     </div>
                 )}
@@ -142,12 +142,12 @@ export const StockListModal: React.FC = () => {
                     ))}
                     {filterCounts.unseen > 0 && (
                         <button type="button" onClick={() => setActiveFilter('UNSEEN')} title="Filter by unseen updates" aria-label="Filter by unseen updates" className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${activeFilter === 'UNSEEN' ? 'bg-amber-600 text-white shadow-xs' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20'}`}>
-                            <Sparkles size={13} /><span>Unseen Updates</span><span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-600 text-white font-bold">{filterCounts.unseen}</span>
+                            <Sparkles size={13} /><span>{t('posCommand.filterUnseenUpdates')}</span><span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-600 text-white font-bold">{filterCounts.unseen}</span>
                         </button>
                     )}
                     {(activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' || stockSearch) && (
                         <button type="button" onClick={() => { setActiveFilter('ALL'); setSelectedCategory('ALL_CATEGORIES'); setStockSearch(''); }} className="px-2.5 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-full text-xs font-semibold transition-all flex items-center gap-1 shrink-0 cursor-pointer ml-auto" title="Reset all filters" aria-label="Reset all filters">
-                            <X size={13} /><span>Reset</span>
+                            <X size={13} /><span>{t('posCommand.resetFilters')}</span>
                         </button>
                     )}
                 </div>
@@ -165,12 +165,12 @@ export const StockListModal: React.FC = () => {
                     )}
                     {availableCategories.length > 0 && (
                         <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer focus:border-[var(--theme-border-focus)] shadow-2xs" title="Filter by Category" aria-label="Filter by Category">
-                            <option value="ALL_CATEGORIES">All Categories ({availableCategories.length})</option>
+                            <option value="ALL_CATEGORIES">{t('posCommand.allCategoriesCount', { count: availableCategories.length })}</option>
                             {availableCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                     )}
                     <button type="button" onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }} title="Print product barcode and price labels" aria-label="Print product barcode and price labels" className="px-3.5 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer shadow-xs">
-                        <Printer size={13} className="opacity-90" /><span>Print Labels</span>
+                        <Printer size={13} className="opacity-90" /><span>{t('posCommand.printLabels')}</span>
                     </button>
                 </div>
 
@@ -181,7 +181,7 @@ export const StockListModal: React.FC = () => {
                                 <th className="text-left p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.product')}</th>
                                 <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.price')}</th>
                                 <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.stock')}</th>
-                                <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">Actions</th>
+                                <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">{t('common.actions') || 'Actions'}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--theme-border)]">
@@ -203,7 +203,7 @@ export const StockListModal: React.FC = () => {
                                     </td>
                                     <td className="p-3" onClick={event => event.stopPropagation()}>
                                         <div className="flex justify-end items-center gap-2">
-                                            <button type="button" onClick={() => setSelectedProduct(product)} className="min-h-[44px] px-3 rounded-lg border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Details</button>
+                                            <button type="button" onClick={() => setSelectedProduct(product)} className="min-h-[44px] px-3 rounded-lg border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{t('posCommand.productDetails')}</button>
                                             <button type="button" onClick={() => { setLabelsToPrint([{ product, quantity: 1 }]); setIsPrintHubOpen(true); }} aria-label={`Print label for ${product.name}`} title="Print label" className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"><Printer size={16}/></button>
                                         </div>
                                     </td>
@@ -212,7 +212,7 @@ export const StockListModal: React.FC = () => {
                             {filteredProducts.length === 0 && (
                                 <tr>
                                     <td colSpan={4} className="p-8 text-center text-[var(--theme-text-secondary)] font-medium">
-                                        {activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' ? `No products found matching active filters` : t('posCommand.noProductsLocation')}
+                                        {activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' ? t('posCommand.noProductsMatchingFilters') : t('posCommand.noProductsLocation')}
                                     </td>
                                 </tr>
                             )}

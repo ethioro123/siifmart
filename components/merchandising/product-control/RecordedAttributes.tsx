@@ -1,6 +1,6 @@
 import type { Product } from '../../../types';
 import { ControlFact } from './ControlPrimitives';
-const allowed = new Set(['physical', 'packaging', 'commercial', 'descriptive', 'technical', 'logistics', 'regulatory', 'storage', 'quality', 'compliance', 'dietary', 'nutrition', 'safety', 'warranty', 'specifications']);
+const allowed = new Set(['identity', 'categorySpecific', 'physical', 'packaging', 'commercial', 'descriptive', 'technical', 'logistics', 'regulatory', 'storage', 'quality', 'compliance', 'dietary', 'nutrition', 'safety', 'warranty', 'specifications']);
 function fields(value: unknown, path: string[] = []): Array<[string, string]> {
     if (value === null || value === undefined || value === '') return [];
     if (Array.isArray(value)) return [[path.join(' · '), value.filter(item => typeof item !== 'object').join(', ')]];

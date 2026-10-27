@@ -3,93 +3,25 @@
 -- Purpose:
 --   Align PostgreSQL RLS helper functions, policies, and triggers for
 --   regional_finance_manager and regional finance specialists:
---   1. Backfill expenses.region_code from sites.region_code where NULL, and
---      update enforce_authenticated_sensitive_transition() to resolve
---      COALESCE(OLD.region_code, s.region_code) when verifying regional
---      expense approval scope.
---   2. Update private.finance_site_scope() and expenses_read_finance to
+--   1. Update enforce_authenticated_sensitive_transition() to allow
+--      migration/admin sessions (postgres, supabase_admin) when auth.uid()
+--      is NULL and resolve COALESCE(OLD.region_code, NEW.region_code, s.region_code)
+--      when verifying regional expense approval scope.
+--   2. Backfill expenses.region_code from sites.region_code where NULL.
+--   3. Update private.finance_site_scope() and expenses_read_finance to
 --      include tax_compliance_officer, credit_control_officer, and
 --      payroll_specialist alongside accountant and treasury_officer.
---   3. Include area_operations_manager in shifts_select_policy and
---      shifts_update_policy alongside regional_operations_manager and
---      regional_finance_manager.
+--   4. Tighten shifts_select_policy and shifts_update_policy so regional
+--      and store roles (including regional_finance_manager and
+--      area_operations_manager) are strictly scoped via
+--      is_site_in_my_authorized_scope(site_id, country_code).
 -- ============================================================================
 
 BEGIN;
 
--- 1. Backfill any missing expenses.region_code from sites.region_code
-UPDATE public.expenses e
-   SET region_code = s.region_code
-  FROM public.sites s
- WHERE e.site_id = s.id
-   AND e.region_code IS NULL
-   AND s.region_code IS NOT NULL;
-
--- 2. Update private.finance_site_scope to cover all regional/HQ finance specialists
-CREATE OR REPLACE FUNCTION private.finance_site_scope(
-  p_site_id text,
-  p_country_code text
-)
-RETURNS boolean
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-  SELECT public.is_site_in_my_authorized_scope(p_site_id, p_country_code)
-    OR EXISTS (
-      SELECT 1
-      FROM public.employees actor
-      JOIN public.sites home ON home.id = actor.site_id
-      JOIN public.sites target ON target.id::text = p_site_id OR target.code = p_site_id
-      WHERE actor.id = (SELECT auth.uid())
-        AND COALESCE(lower(actor.status), 'active') = 'active'
-        AND lower(actor.role) IN (
-          'accountant',
-          'treasury_officer',
-          'tax_compliance_officer',
-          'credit_control_officer',
-          'payroll_specialist',
-          'cfo',
-          'controller'
-        )
-        AND home.type = 'Administration'
-        AND upper(home.country) = upper(target.country)
-        AND upper(p_country_code) = upper(target.country)
-        AND (
-          (home.code = upper(home.country) || '-HQ'
-            AND home.region_code IS NULL AND actor.region_code IS NULL)
-          OR (COALESCE(actor.region_code, home.region_code) IS NOT NULL
-            AND lower(target.region_code) = lower(COALESCE(actor.region_code, home.region_code)))
-        )
-    );
-$$;
-
--- 3. Update expenses_read_finance to include tax_compliance_officer, credit_control_officer, payroll_specialist
-DROP POLICY IF EXISTS "expenses_read_finance" ON public.expenses;
-CREATE POLICY "expenses_read_finance"
-  ON public.expenses
-  FOR SELECT
-  USING (
-    (
-      public.is_manager()
-      OR lower(public.get_my_role()) = ANY (ARRAY[
-        'cfo'::text,
-        'regional_finance_manager'::text,
-        'accountant'::text,
-        'treasury_officer'::text,
-        'tax_compliance_officer'::text,
-        'credit_control_officer'::text,
-        'payroll_specialist'::text,
-        'auditor'::text,
-        'country_compliance_manager'::text
-      ])
-    )
-    AND private.finance_site_scope((site_id)::text, (country_code)::text)
-  );
-
--- 4. Update enforce_authenticated_sensitive_transition() so expenses region check
---    falls back to sites.region_code when expenses.region_code is NULL.
+-- 1. Update enforce_authenticated_sensitive_transition() first so subsequent
+--    backfill UPDATE statements succeed under postgres/supabase_admin and
+--    regional expense approvals fallback to sites.region_code when needed.
 CREATE OR REPLACE FUNCTION public.enforce_authenticated_sensitive_transition()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -105,7 +37,9 @@ DECLARE
   v_norm_role text;
   v_hq boolean;
 BEGIN
-  IF auth.role() = 'service_role' THEN RETURN NEW; END IF;
+  IF auth.role() = 'service_role' OR current_user IN ('postgres', 'supabase_admin') THEN
+    RETURN NEW;
+  END IF;
   IF auth.uid() IS NULL THEN RAISE EXCEPTION 'Authenticated employee session required'; END IF;
 
   SELECT e.* INTO v_actor FROM public.employees e
@@ -248,5 +182,141 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+-- 2. Backfill any missing expenses.region_code from sites.region_code
+UPDATE public.expenses e
+   SET region_code = s.region_code
+  FROM public.sites s
+ WHERE e.site_id = s.id
+   AND e.region_code IS NULL
+   AND s.region_code IS NOT NULL;
+
+-- 3. Update private.finance_site_scope to cover all regional/HQ finance specialists
+CREATE OR REPLACE FUNCTION private.finance_site_scope(
+  p_site_id text,
+  p_country_code text
+)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT public.is_site_in_my_authorized_scope(p_site_id, p_country_code)
+    OR EXISTS (
+      SELECT 1
+      FROM public.employees actor
+      JOIN public.sites home ON home.id = actor.site_id
+      JOIN public.sites target ON target.id::text = p_site_id OR target.code = p_site_id
+      WHERE actor.id = (SELECT auth.uid())
+        AND COALESCE(lower(actor.status), 'active') = 'active'
+        AND lower(actor.role) IN (
+          'accountant',
+          'treasury_officer',
+          'tax_compliance_officer',
+          'credit_control_officer',
+          'payroll_specialist',
+          'cfo',
+          'controller'
+        )
+        AND home.type = 'Administration'
+        AND upper(home.country) = upper(target.country)
+        AND upper(p_country_code) = upper(target.country)
+        AND (
+          (home.code = upper(home.country) || '-HQ'
+            AND home.region_code IS NULL AND actor.region_code IS NULL)
+          OR (COALESCE(actor.region_code, home.region_code) IS NOT NULL
+            AND lower(target.region_code) = lower(COALESCE(actor.region_code, home.region_code)))
+        )
+    );
+$$;
+
+-- 4. Update expenses_read_finance to include tax_compliance_officer, credit_control_officer, payroll_specialist
+DROP POLICY IF EXISTS "expenses_read_finance" ON public.expenses;
+CREATE POLICY "expenses_read_finance"
+  ON public.expenses
+  FOR SELECT
+  USING (
+    (
+      public.is_manager()
+      OR lower(public.get_my_role()) = ANY (ARRAY[
+        'cfo'::text,
+        'regional_finance_manager'::text,
+        'accountant'::text,
+        'treasury_officer'::text,
+        'tax_compliance_officer'::text,
+        'credit_control_officer'::text,
+        'payroll_specialist'::text,
+        'auditor'::text,
+        'country_compliance_manager'::text
+      ])
+    )
+    AND private.finance_site_scope((site_id)::text, (country_code)::text)
+  );
+
+-- 5. Tighten shifts_select_policy and shifts_update_policy so regional and site
+--    roles (including regional_finance_manager and area_operations_manager)
+--    are scoped via is_site_in_my_authorized_scope(site_id, country_code)
+DROP POLICY IF EXISTS "shifts_select_policy" ON public.shifts;
+CREATE POLICY "shifts_select_policy"
+  ON public.shifts
+  FOR SELECT
+  USING (
+    public.is_ceo()
+    OR (
+      upper((country_code)::text) = upper(public.get_my_country_code())
+      AND (
+        public.is_admin()
+        OR public.normalize_role(public.get_my_role()) = ANY (ARRAY[
+          'group_ceo'::text,
+          'group_cfo'::text,
+          'country_managing_director'::text,
+          'country_finance_director'::text,
+          'country_operations_director'::text,
+          'country_compliance_manager'::text,
+          'auditor'::text
+        ])
+        OR public.is_site_in_my_authorized_scope((site_id)::text, (country_code)::text)
+        OR (cashier_id = auth.uid())
+      )
+    )
+  );
+
+DROP POLICY IF EXISTS "shifts_update_policy" ON public.shifts;
+CREATE POLICY "shifts_update_policy"
+  ON public.shifts
+  FOR UPDATE
+  USING (
+    public.is_ceo()
+    OR (
+      upper((country_code)::text) = upper(public.get_my_country_code())
+      AND (
+        public.is_admin()
+        OR public.normalize_role(public.get_my_role()) = ANY (ARRAY[
+          'group_ceo'::text,
+          'group_cfo'::text,
+          'country_managing_director'::text,
+          'country_finance_director'::text,
+          'country_operations_director'::text,
+          'country_compliance_manager'::text,
+          'auditor'::text
+        ])
+        OR (
+          public.normalize_role(public.get_my_role()) = ANY (ARRAY[
+            'regional_operations_manager'::text,
+            'area_operations_manager'::text,
+            'regional_finance_manager'::text,
+            'regional_security_manager'::text,
+            'store_manager'::text,
+            'assistant_store_manager'::text,
+            'head_cashier'::text,
+            'shift_supervisor'::text
+          ])
+          AND public.is_site_in_my_authorized_scope((site_id)::text, (country_code)::text)
+        )
+        OR (cashier_id = auth.uid())
+      )
+    )
+  );
 
 COMMIT;

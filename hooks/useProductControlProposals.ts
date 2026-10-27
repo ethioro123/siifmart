@@ -9,9 +9,7 @@ import { normalizePriceProposal, type PriceBatch, type PriceBatchResult } from '
 import { unitProposal, profileProposal, stockPolicyPreview } from '../utils/productControlLogic';
 import type { ProfileConfig } from '../types/product-control';
 import type { Product } from '../types';
-import type { UnitConfig } from '../components/merchandising/product-control/UnitTab';
-import type { PricingConfig } from '../components/merchandising/product-control/PricingTab';
-import type { StockConfig } from '../components/merchandising/product-control/StockTab';
+import type { UnitConfig, PricingConfig, StockConfig } from '../types/product-control';
 
 export function useProductControlProposals(product: Product | null, country: string, onSaved?: () => void) {
     const { activeRegionCode, sites } = useData();

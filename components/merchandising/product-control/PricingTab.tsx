@@ -20,6 +20,7 @@ export const PricingTab: React.FC<Props> = ({ product, pricingCfg, setPricingCfg
     const delta = proposed === null ? null : proposed - current;
     const discount = normalized?.isOnSale && normalized.salePrice ? (1 - normalized.salePrice / normalized.price) * 100 : null;
     const operationalSites = sites.filter(site => !['Administration', 'Administrative'].includes(site.type));
+    const priceChanged = Boolean(normalized && (normalized.price !== product.price || normalized.isOnSale !== Boolean(product.isOnSale) || (normalized.isOnSale && normalized.salePrice !== product.salePrice)));
     const labels: Record<PricingScope, string> = { single: 'This location', all: 'All matching locations', custom: 'Choose locations' };
     return <div className="space-y-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
@@ -41,6 +42,6 @@ export const PricingTab: React.FC<Props> = ({ product, pricingCfg, setPricingCfg
             {pricingCfg.scope === 'all' && <p className="text-sm text-[var(--theme-text-secondary)]">Matching SKU records inside your authorized country and active territory lens.</p>}
             {pricingCfg.scope === 'custom' && <div className="space-y-3"><p className="text-sm text-[var(--theme-text-secondary)]">{pricingCfg.selectedSiteIds.length} location(s) selected. Locations without a matching product record are excluded from the preview.</p><div className="grid max-h-48 gap-2 overflow-y-auto rounded-xl border border-[var(--theme-border)] p-3 sm:grid-cols-2">{operationalSites.map(site => <label key={site.id} className="flex min-h-[44px] cursor-pointer items-center gap-3 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--theme-accent)]" checked={pricingCfg.selectedSiteIds.includes(site.id)} onChange={event => setPricingCfg(cfg => ({ ...cfg, selectedSiteIds: event.target.checked ? [...cfg.selectedSiteIds, site.id] : cfg.selectedSiteIds.filter(id => id !== site.id) }))} />{site.name}</label>)}</div></div>}
         </ControlSection>
-        <ProposalAction pending={isSaving} disabled={submitted || Boolean(error) || (pricingCfg.scope === 'custom' && pricingCfg.selectedSiteIds.length === 0)} error={error} label="Review price proposals" onClick={handleSavePricing} />
+        <ProposalAction pending={isSaving} disabled={submitted || (pricingCfg.scope === 'single' && !priceChanged) || Boolean(error) || (pricingCfg.scope === 'custom' && pricingCfg.selectedSiteIds.length === 0)} error={error} label="Review price proposals" onClick={handleSavePricing} />
     </div>;
 };

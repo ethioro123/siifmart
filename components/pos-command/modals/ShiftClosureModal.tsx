@@ -104,7 +104,7 @@ export const ShiftClosureModal: React.FC = () => {
         <Modal
             isOpen={isClosingShift}
             onClose={handleClose}
-            title={isManagerPinStep ? "Supervisor Variance Authorization" : t('posCommand.shiftReconciliationTitle')}
+            title={isManagerPinStep ? t('posCommand.supervisorVarianceAuth') : t('posCommand.shiftReconciliationTitle')}
             size="lg"
         >
             <div className="space-y-5">
@@ -114,10 +114,10 @@ export const ShiftClosureModal: React.FC = () => {
                             <ShieldAlert className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" size={22} />
                             <div className="space-y-1">
                                 <h4 className="text-sm font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">
-                                    Cash Discrepancy — Supervisor PIN Required
+                                    {t('posCommand.cashDiscrepancyTitle')}
                                 </h4>
                                 <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                                    The drawer has a cash discrepancy of <b>{currency} {Math.abs(variance).toLocaleString()} ({variance > 0 ? 'Surplus' : 'Shortage'})</b>. A Store Manager or Shift Lead PIN is required to authorize drawer closure.
+                                    {t('posCommand.cashDiscrepancyNotice')} (<b>{currency} {Math.abs(variance).toLocaleString()} - {variance > 0 ? t('posCommand.surplus') : t('posCommand.shortage')}</b>)
                                 </p>
                             </div>
                         </div>
@@ -149,7 +149,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 }}
                                 className="px-4 py-2.5 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs transition-colors cursor-pointer"
                             >
-                                Back
+                                {t('common.back') || 'Back'}
                             </button>
                             <button
                                 type="button"
@@ -158,7 +158,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs"
                             >
                                 {isSubmittingShift ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-                                Sign Off & Finalize
+                                {t('posCommand.signOffAndFinalize')}
                             </button>
                         </div>
                     </div>
@@ -275,7 +275,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 title="Print Physical Z-Report Slip"
                             >
                                 <Printer size={14} className="text-purple-500" />
-                                <span>Z-Report</span>
+                                <span>{t('posCommand.zReportBtn')}</span>
                             </button>
                             <button
                                 type="button"
@@ -288,7 +288,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 ) : isVariance && !isManagerOrAdmin ? (
                                     <Lock size={14} className="text-amber-500" />
                                 ) : null}
-                                {isVariance && !isManagerOrAdmin ? "Authorize with Manager PIN" : t('posCommand.finalizeLogout')}
+                                {isVariance && !isManagerOrAdmin ? t('posCommand.authorizeWithManagerPin') : t('posCommand.finalizeLogout')}
                             </button>
                         </div>
                     </div>

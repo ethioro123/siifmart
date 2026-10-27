@@ -231,7 +231,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                             title="Internal driver must mark delivery complete before POS can start receiving"
                                                         >
                                                             <Clock size={13} />
-                                                            Awaiting Driver Delivery
+                                                            {t('posCommand.awaitingDelivery')}
                                                         </button>
                                                     );
                                                 }
@@ -245,7 +245,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                                 title="Warehouse authority: Click to confirm external carrier departure & start receiving"
                                                             >
                                                                 <Truck size={14} />
-                                                                Confirm Departure & Receive
+                                                                {t('posCommand.confirmDepartureAndReceive')}
                                                             </button>
                                                         );
                                                     }
@@ -256,7 +256,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                             title="Warehouse authority must confirm departure before external receiving can begin"
                                                         >
                                                             <Clock size={13} />
-                                                            Awaiting Departure
+                                                            {t('posCommand.awaitingDeparture')}
                                                         </button>
                                                     );
                                                 }
@@ -286,7 +286,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                             <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono">SKU: {lineItem.sku}</p>
                                                         </div>
                                                         <span className="text-[var(--theme-text-secondary)] font-mono pl-3">
-                                                            {['group_ceo','country_operations_director','regional_operations_manager'].includes(user?.role||'') ? (lineItem.expectedQty || lineItem.quantity || 0) : 'Blind count'}
+                                                            {['group_ceo','country_operations_director','regional_operations_manager'].includes(user?.role||'') ? (lineItem.expectedQty || lineItem.quantity || 0) : t('posCommand.blindCount')}
                                                             {lineItem.unit ? ` ${lineItem.unit}` : ''}
                                                         </span>
                                                     </div>

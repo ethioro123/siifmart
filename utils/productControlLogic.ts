@@ -1,6 +1,6 @@
 import type { Product } from '../types';
 import type { UnitConfig, StockConfig, ProfileConfig } from '../types/product-control';
-import { getSellUnit } from './units';
+import { getSellUnit, SELL_UNITS } from './units';
 import { validateStockThresholds } from './productDetailLogic';
 
 export function initialUnitConfig(product: Product): UnitConfig {
@@ -13,13 +13,14 @@ export function initialUnitConfig(product: Product): UnitConfig {
         sellMode: getSellUnit(product.unit).category, sellUnit: getSellUnit(product.unit).code,
         physicalQty: String(embedded?.[1] || product.size || physical.netWeight || physical.volume || ''),
         physicalUnit: rawUnit.toLowerCase() === 'l' ? 'L' : rawUnit.toLowerCase(),
-        packOf: String(packaging.packQty || (product.packQuantity && product.packQuantity > 1 ? product.packQuantity : '')),
-        caseOf: String(packaging.caseSize || product.caseSize || ''), label: attributes.commercial?.labelOverride || '', scope: 'single', selectedSiteIds: [],
+        packOf: String(packaging.packQty ?? (product.packQuantity && product.packQuantity > 1 ? product.packQuantity : '')),
+        caseOf: String(packaging.caseSize ?? product.caseSize ?? ''), label: attributes.commercial?.labelOverride || '', scope: 'single', selectedSiteIds: [],
     };
 }
 export function unitProposal(product: Product, cfg: UnitConfig): Partial<Product> {
     const before = initialUnitConfig(product);
     const patch: Partial<Product> = {};
+    if (!SELL_UNITS.some(unit => unit.code === cfg.sellUnit)) throw new Error('Select a supported selling unit.');
     if (getSellUnit(cfg.sellUnit).category !== cfg.sellMode) throw new Error('Select a selling unit that matches the charging method.');
     for (const [label, raw] of [['Units per pack', cfg.packOf], ['Packs per case', cfg.caseOf]]) {
         if (raw !== '' && (!Number.isSafeInteger(Number(raw)) || Number(raw) <= 0)) throw new Error(`${label} must be a positive whole number.`);
@@ -57,6 +58,7 @@ export function stockPolicyPreview(product: Product, cfg: StockConfig) {
 }
 export function profileProposal(product: Product, cfg: ProfileConfig): Partial<Product> {
     if (!cfg.name.trim()) throw new Error('Product name is required.');
+    if (cfg.name.trim().length > 200 || cfg.brand.trim().length > 200 || cfg.description.trim().length > 4000) throw new Error('Product name or description exceeds the allowed length.');
     const patch: Partial<Product> = {};
     if (cfg.name.trim() !== product.name) patch.name = cfg.name.trim();
     if (cfg.brand.trim() !== (product.brand || '')) patch.brand = cfg.brand.trim();
@@ -67,4 +69,14 @@ export function packagingPreview(cfg: UnitConfig) {
     const perPack = cfg.packOf === '' ? 1 : Number(cfg.packOf);
     const packsPerCase = cfg.caseOf === '' ? null : Number(cfg.caseOf);
     return { perPack, packsPerCase, unitsPerCase: packsPerCase === null ? null : perPack * packsPerCase };
+}
+
+export function netContentPreview(cfg: UnitConfig): { equivalent: string; pack: string; case: string | null } | null {
+    const amount = Number(cfg.physicalQty);
+    if (!Number.isFinite(amount) || amount <= 0 || !['g','kg','ml','L','pcs'].includes(cfg.physicalUnit)) return null;
+    const packageQty = packagingPreview(cfg);
+    if (!Number.isSafeInteger(packageQty.perPack) || packageQty.perPack <= 0 || (packageQty.packsPerCase !== null && (!Number.isSafeInteger(packageQty.packsPerCase) || packageQty.packsPerCase <= 0))) return null;
+    const format = (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 4 });
+    const equivalent = cfg.physicalUnit === 'g' ? `${format(amount / 1000)} kg` : cfg.physicalUnit === 'kg' ? `${format(amount * 1000)} g` : cfg.physicalUnit === 'ml' ? `${format(amount / 1000)} L` : cfg.physicalUnit === 'L' ? `${format(amount * 1000)} ml` : `${format(amount)} items`;
+    return { equivalent, pack: `${format(amount * packageQty.perPack)} ${cfg.physicalUnit}`, case: packageQty.unitsPerCase === null ? null : `${format(amount * packageQty.unitsPerCase)} ${cfg.physicalUnit}` };
 }

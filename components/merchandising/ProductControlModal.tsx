@@ -5,17 +5,16 @@ import { productSiteName } from '../../utils/priceManager';
 import type { ProfileConfig } from '../../types/product-control';
 import { useProductControlDialog } from '../../hooks/useProductControlDialog';
 import { formatLocationIdentity } from '../../utils/locationIdentity';
-import React, { useState, useEffect, useCallback, useId } from 'react';
-import { X, Package, Scale, DollarSign, Layers, Info } from 'lucide-react';
+import React, { useState, useEffect, useId } from 'react';
+import { X, Package, Scale, DollarSign, Layers, Info, type LucideIcon } from 'lucide-react';
 import { Product } from '../../types';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { canViewCostPrice } from '../../utils/roles';
 import { ProfileTab } from './product-control/ProfileTab';
-import { UnitTab, UnitConfig, SellMode } from './product-control/UnitTab';
+import { UnitTab, UnitConfig } from './product-control/UnitTab';
 import { PricingTab, PricingConfig } from './product-control/PricingTab';
 import { StockTab, StockConfig } from './product-control/StockTab';
-import { getSellUnit } from '../../utils/units';
 import { getCountryProfile } from '../../utils/localization';
 
 type ModalTab = 'profile' | 'unit' | 'pricing' | 'stock';
@@ -26,14 +25,6 @@ interface Props {
     onClose: () => void;
     onSaved?: () => void;
     currencySymbol?: string;
-}
-
-function modeFromUnit(unitCode?: string): SellMode {
-    if (!unitCode) return 'count';
-    const u = getSellUnit(unitCode);
-    if (u.category === 'weight') return 'weight';
-    if (u.category === 'volume') return 'volume';
-    return 'count';
 }
 
 export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose, onSaved, currencySymbol }) => {
@@ -64,7 +55,6 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
         if (!product) return;
         setProfileCfg({ name: product.name, brand: product.brand || '', description: product.description || '' });
         setUnitCfg(initialUnitConfig(product));
-        const allSiteIds: string[] = [];
         setSubmitted({});
         proposals.clearFeedback();
         setPricingCfg({
@@ -74,7 +64,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
             isOnSale: product.isOnSale || false,
             competitorPrice: product.competitorPrice || 0,
             scope: 'single',
-            selectedSiteIds: allSiteIds.length > 0 ? allSiteIds : [product.siteId || '']
+            selectedSiteIds: [product.siteId || product.site_id || ''].filter(Boolean)
         });
         setStockCfg({
             minStock: product.minStock != null ? String(product.minStock) : '',
@@ -93,7 +83,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
     const handleSaveStock = () => markSubmitted('stock', JSON.stringify(stockCfg), () => proposals.saveStock(stockCfg));
     const handleConfirmPrice = () => markSubmitted('pricing', JSON.stringify(pricingCfg), proposals.confirmPricing);
 
-    const tabs: { id: ModalTab; label: string; icon: any }[] = [
+    const tabs: { id: ModalTab; label: string; icon: LucideIcon }[] = [
         { id: 'profile', label: 'Profile', icon: Info },
         { id: 'unit', label: 'Unit & Packaging', icon: Scale },
         { id: 'pricing', label: 'Pricing', icon: DollarSign },

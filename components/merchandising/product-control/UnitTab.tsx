@@ -1,8 +1,8 @@
 import React from 'react';
 import type { Product, Site } from '../../../types';
 import type { UnitConfig, SellMode, UnitScope } from '../../../types/product-control';
-import { getSellUnit, SELL_UNITS, getSmartUnitAttributes } from '../../../utils/units';
-import { initialUnitConfig, packagingPreview, unitProposal } from '../../../utils/productControlLogic';
+import { getSellUnit, SELL_UNITS } from '../../../utils/units';
+import { initialUnitConfig, packagingPreview, unitProposal, netContentPreview } from '../../../utils/productControlLogic';
 import { ControlFact, ControlField, ControlSection, ProposalAction, controlInput } from './ControlPrimitives';
 export type { UnitConfig, SellMode, UnitScope } from '../../../types/product-control';
 interface Props {
@@ -17,7 +17,8 @@ export const UnitTab: React.FC<Props> = ({ product, unitCfg, setUnitCfg, handleS
     const saved = initialUnitConfig(product);
     const units = SELL_UNITS.filter(unit => unit.category === unitCfg.sellMode);
     const packaging = packagingPreview(unitCfg);
-    const recorded = getSmartUnitAttributes(product);
+    const net = netContentPreview(unitCfg);
+    const recordedContents = saved.physicalQty && saved.physicalUnit ? `${saved.physicalQty} ${saved.physicalUnit}` : product.size || 'Not recorded';
     let error = ''; let changed = false;
     try { changed = Object.keys(unitProposal(product, unitCfg)).length > 0; } catch (cause) { error = (cause as Error).message; }
     const setMode = (mode: SellMode) => setUnitCfg(cfg => ({ ...cfg, sellMode: mode, sellUnit: mode === 'count' ? 'UNIT' : mode === 'weight' ? 'KG' : 'L' }));
@@ -38,9 +39,10 @@ export const UnitTab: React.FC<Props> = ({ product, unitCfg, setUnitCfg, handleS
                 <ControlSection title="Proposed checkout setup" description="Preview only. The recorded setup remains active until approval.">
                     <p className="text-lg font-semibold leading-snug">{buildPreview(unitCfg)}</p>
                     <dl className="grid grid-cols-2 gap-4"><ControlFact label="Quantity precision" value={getSellUnit(unitCfg.sellUnit).allowDecimal ? 'Decimal quantities' : 'Whole quantities'} /><ControlFact label="Quantity step" value={getSellUnit(unitCfg.sellUnit).step} /><ControlFact label="One pack" value={Number.isFinite(packaging.perPack) ? `${packaging.perPack} unit(s)` : 'Enter pack quantity'} /><ControlFact label="One case" value={packaging.unitsPerCase !== null && Number.isFinite(packaging.unitsPerCase) ? `${packaging.packsPerCase} packs · ${packaging.unitsPerCase} units` : 'Not defined'} /></dl>
+                    {net && <dl className="grid grid-cols-2 gap-4 border-t border-[var(--theme-border)] pt-4"><ControlFact label="Equivalent per item" value={net.equivalent} /><ControlFact label="Net contents per pack" value={net.pack} /><ControlFact label="Net contents per case" value={net.case || 'Case not defined'} /></dl>}
                     <p className="text-xs leading-relaxed text-[var(--theme-text-secondary)]">Changing packaging does not receive, move, or adjust existing stock.</p>
                 </ControlSection>
-                <ControlSection title="Recorded specification"><dl className="grid grid-cols-2 gap-4"><ControlFact label="Current selling unit" value={getSellUnit(product.unit).label} /><ControlFact label="Brand" value={product.brand || 'Not recorded'} /><ControlFact label="Net contents" value={recorded.formattedNet || product.size || 'Not recorded'} /><ControlFact label="Pack / case" value={`${saved.packOf || 1} units per pack · ${saved.caseOf || '—'} packs per case`} /></dl></ControlSection>
+                <ControlSection title="Recorded specification"><dl className="grid grid-cols-2 gap-4"><ControlFact label="Current selling unit" value={getSellUnit(product.unit).label} /><ControlFact label="Brand" value={product.brand || 'Not recorded'} /><ControlFact label="Net contents" value={recordedContents} /><ControlFact label="Pack / case" value={`${saved.packOf || 1} units per pack · ${saved.caseOf || '—'} packs per case`} /></dl></ControlSection>
                 <button type="button" disabled={isSaving || !changed} onClick={() => setUnitCfg(saved)} className="min-h-[44px] text-sm font-medium text-[var(--theme-text-secondary)] underline underline-offset-4 disabled:opacity-50">Reset to recorded setup</button>
             </div>
         </div>
