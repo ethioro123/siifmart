@@ -45,8 +45,8 @@ export const pos: TranslationBlock = {
     transactionCompleted: { en: 'Transaction Completed Successfully', am: 'ልውውጡ በተሳካ ሁኔታ ተጠናቋል', or: 'Gurgurtaan milkaa\'inaan xumurameera' },
     transactionVerified: { en: 'Transaction Verified', am: 'ልውውጡ ተረጋግጧል', or: 'Gurgurtaan mirkanaa\'eera' },
     totalPaid: { en: 'Total Paid', am: 'ጠቅላላ የተከፈለ', or: 'Waliigala Kaffalame' },
-    receiptId: { en: 'Receipt ID', or: 'Lakk Nagahee' },
-    method: { en: 'Method', or: 'Akkaataa' },
+    receiptId: { en: 'Receipt ID', am: 'የደረሰኝ መታወቂያ', or: 'Lakk Nagahee' },
+    method: { en: 'Method', am: 'ዘዴ', or: 'Akkaataa' },
     digitalCopy: { en: 'Digital Copy', am: 'ዲጂታል ቅጂ', or: 'Kooppii Nagahee' },
     newOrder: { en: 'New Order', am: 'አዲስ ትዕዛዝ', or: 'Gurgurtaa Haaraa' },
 
