@@ -21,7 +21,7 @@ import { detectRuleConflicts } from './utils/ruleEvaluator';
 
 export const RulesTab: React.FC = () => {
    const {
-      pricingRules, pricingRulesLoading, pricingRulesError, retryPricingRules,
+      pricingRules, pricingRulesMutating, pricingRulesLoading, pricingRulesError, retryPricingRules,
       pricingRulesTotalCount,
       pricingRulesPage,
       setPricingRulesPage,
@@ -193,7 +193,7 @@ export const RulesTab: React.FC = () => {
                         <button
                            type="button"
                            onClick={() => runPricingRule(rule)}
-                           disabled={isSubmitting || isSimulating}
+                           disabled={isSubmitting || isSimulating || pricingRulesMutating}
                            className="px-3 py-2 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)] text-[var(--theme-accent)] hover:text-white rounded-2xl transition-all border border-[var(--theme-accent)]/20 disabled:opacity-50 cursor-pointer shadow-sm text-xs font-medium flex items-center gap-1.5"
                            aria-label={`Preview proposals for rule ${rule.name}`}
                            title={rule.isActive ? 'Generate & preview price proposals' : 'Preview proposals (test paused rule)'}
@@ -207,7 +207,7 @@ export const RulesTab: React.FC = () => {
                         </button>
                         <button
                            type="button"
-                           disabled={isSubmitting || isSimulating}
+                           disabled={isSubmitting || isSimulating || pricingRulesMutating}
                            aria-label={rule.isActive ? `Pause ${rule.name}` : `Enable ${rule.name}`}
                            onClick={() => toggleRuleStatus(rule.id)}
                            className={`min-h-11 min-w-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)] p-2.5 rounded-2xl border transition-all cursor-pointer ${
@@ -221,7 +221,7 @@ export const RulesTab: React.FC = () => {
                         </button>
                         <button
                            type="button"
-                           disabled={isSubmitting || isSimulating}
+                           disabled={isSubmitting || isSimulating || pricingRulesMutating}
                            aria-label={`Delete ${rule.name}`}
                            onClick={() => { if (window.confirm(`Delete pricing rule "${rule.name}"? Existing price proposals will remain.`)) deleteRule(rule.id); }}
                            className="min-h-11 min-w-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)] p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-2xl transition-colors cursor-pointer"
@@ -336,7 +336,7 @@ export const RulesTab: React.FC = () => {
                <button
                   type="button"
                   onClick={handleRunSimulation}
-                  disabled={isSimulating || isSubmitting}
+                  disabled={isSimulating || isSubmitting || pricingRulesMutating}
                   className="w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-[var(--theme-accent)] hover:opacity-90 text-white disabled:opacity-50 cursor-pointer shadow-sm transition-colors"
                >
                   {isSimulating ? <RefreshCw className="animate-spin" size={15} /> : <Zap size={15} />}

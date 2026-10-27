@@ -84,6 +84,7 @@ export function usePricingRules(countryCode: string) {
         setSearch,
         statusFilter,
         setStatusFilter,
+        isMutating: createRule.isPending || toggleRule.isPending || deleteRule.isPending,
         isLoading: query.isFetching,
         error: query.error instanceof Error ? query.error.message : null,
         retry: () => { void query.refetch(); },

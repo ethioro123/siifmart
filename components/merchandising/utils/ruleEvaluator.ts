@@ -52,9 +52,12 @@ export const matchRuleProduct = (
             let sum = 0;
             for (const s of contextOrNow.salesRecords) {
                const saleTime = new Date(s.date || s.created_at || '').getTime();
-               if (saleTime >= cutoff && Array.isArray(s.items)) {
+               const siteId = p.siteId || p.site_id;
+               if (siteId && (s.siteId || s.site_id) !== siteId) continue;
+               if (s.status !== 'Completed' && String(s.status).toLowerCase() !== 'completed') continue;
+               if (saleTime >= cutoff && saleTime <= now && Array.isArray(s.items)) {
                   for (const item of s.items) {
-                     if (item.id === p.id || (item as any).productId === p.id || (p.sku && (item as any).sku === p.sku)) {
+                     if (item.id === p.id || item.productId === p.id || (p.sku && item.sku === p.sku)) {
                         sum += item.quantity || 0;
                      }
                   }
@@ -64,8 +67,8 @@ export const matchRuleProduct = (
          }
       }
 
-      if (unitsSold30d === undefined && (p as any).unitsSold30d !== undefined) {
-         unitsSold30d = (p as any).unitsSold30d;
+      if (unitsSold30d === undefined && p.unitsSold30d !== undefined) {
+         unitsSold30d = p.unitsSold30d;
       }
 
       // If recorded sales data was provided/found, compare directly with threshold

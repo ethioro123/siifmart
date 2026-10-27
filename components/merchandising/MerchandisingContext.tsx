@@ -69,6 +69,7 @@ export interface MerchandisingContextType {
    setIsRuleModalOpen: (open: boolean) => void;
    newRule: Partial<PricingRule>;
    setNewRule: React.Dispatch<React.SetStateAction<Partial<PricingRule>>>;
+   pricingRulesMutating: boolean;
    pricingRulesLoading: boolean;
    pricingRulesError: string | null;
    retryPricingRules: () => void;

@@ -59,13 +59,14 @@ describe('Pricing Rules Gaps and Improvements (High & Medium Items)', () => {
                id: 'sale-1',
                date: '2026-10-20T10:00:00Z', // 8 days ago (within 30 days)
                items: [{ id: 'prod-001', name: 'Milk', price: 150, quantity: 5 } as any],
+               siteId: 'site-01',
                site_id: 'site-01',
                status: 'Completed',
                total: 750,
                subtotal: 750,
                tax: 0,
-               paymentMethod: 'CASH',
-               amount_tendered: 750,
+               method: 'Cash',
+               amountTendered: 750,
                change: 0,
                created_at: '2026-10-20T10:00:00Z'
             },
@@ -73,13 +74,14 @@ describe('Pricing Rules Gaps and Improvements (High & Medium Items)', () => {
                id: 'sale-2',
                date: '2026-10-15T10:00:00Z', // 13 days ago (within 30 days)
                items: [{ id: 'prod-001', name: 'Milk', price: 150, quantity: 8 } as any],
+               siteId: 'site-01',
                site_id: 'site-01',
                status: 'Completed',
                total: 1200,
                subtotal: 1200,
                tax: 0,
-               paymentMethod: 'CASH',
-               amount_tendered: 1200,
+               method: 'Cash',
+               amountTendered: 1200,
                change: 0,
                created_at: '2026-10-15T10:00:00Z'
             },
@@ -87,13 +89,14 @@ describe('Pricing Rules Gaps and Improvements (High & Medium Items)', () => {
                id: 'sale-3',
                date: '2026-08-01T10:00:00Z', // >30 days ago (outside window)
                items: [{ id: 'prod-001', name: 'Milk', price: 150, quantity: 50 } as any],
+               siteId: 'site-01',
                site_id: 'site-01',
                status: 'Completed',
                total: 7500,
                subtotal: 7500,
                tax: 0,
-               paymentMethod: 'CASH',
-               amount_tendered: 7500,
+               method: 'Cash',
+               amountTendered: 7500,
                change: 0,
                created_at: '2026-08-01T10:00:00Z'
             }
