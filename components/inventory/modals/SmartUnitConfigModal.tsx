@@ -7,7 +7,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatPriceValue } from '../../../utils/formatting';
 import { getSellUnit, SELL_UNITS } from '../../../utils/units';
-import { inventoryRequestsService } from '../../../services/supabase.service';
+import { useCreateInventoryRequestMutation } from '../../../hooks/useInventoryRequestMutations';
 import { systemLogsService } from '../../../services/system-logs.service';
 import { logger } from '../../../utils/logger';
 import { SmartUnitIntelligencePanel } from './smart-unit/SmartUnitIntelligencePanel';
@@ -41,7 +41,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
     const [selectedUnitCode, setSelectedUnitCode] = useState<string>('UNIT');
     const [isSaving, setIsSaving] = useState(false);
 
-    const isCEO = user?.role === 'group_ceo';
+    const createEditRequest = useCreateInventoryRequestMutation();
 
     useEffect(() => {
         if (product) {
@@ -127,20 +127,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
 
             const countryCode = effectiveCountry || (activeSite as any)?.country || (user as any)?.country || 'ET';
 
-            if (isCEO) {
-                // CEO: Direct Edit (propagates to posDB cache & audit logs)
-                await updateProduct({
-                    ...product,
-                    unit: selectedUnitCode
-                });
-
-                showToast(
-                    `Smart Unit updated to ${selectedUnitCode} for ${targetSiteIds.length || 1} location(s)`,
-                    'success'
-                );
-            } else {
-                // Non-CEO staff: Zero Autonomous Authority - submits request for CEO approval
-                await inventoryRequestsService.create({
+                await createEditRequest.mutateAsync({
                     productId: product.id,
                     productName: product.name,
                     productSku: product.sku,
@@ -150,7 +137,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                     requestedBy: user?.name || 'Unknown',
                     requestedAt: new Date().toISOString(),
                     status: 'pending',
-                    proposedChanges: { ...product, unit: selectedUnitCode },
+                    proposedChanges: { unit: selectedUnitCode },
                     adjustmentReason: `Smart unit change to ${selectedUnitCode}`,
                 });
 
@@ -180,10 +167,9 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                 }
 
                 showToast(
-                    `Unit change to ${selectedUnitCode} submitted for CEO approval`,
+                    `Unit change to ${selectedUnitCode} submitted for Operations, Supply Chain and Merchandising approval`,
                     'info'
                 );
-            }
 
             if (onSaveSuccess) onSaveSuccess();
             await refreshData(['products']);
@@ -219,7 +205,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                         <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                             <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">How You Sell It</h4>
                             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
-                                {isCEO ? 'Direct Edit' : 'Requires Approval'}
+                                Requires 3 approvals
                             </span>
                         </div>
 
@@ -329,10 +315,10 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                             )}
                         </div>
 
-                        {!isCEO && (
+                        {(
                             <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-800 dark:text-amber-300">
                                 <AlertTriangle size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                                <p className="text-xs font-bold">Selling unit changes require CEO approval. Your save will submit an inventory change request.</p>
+                                <p className="text-xs font-bold">Selling unit changes require Operations, Supply Chain and Merchandising approval. Your save will submit an inventory change request.</p>
                             </div>
                         )}
                     </div>
@@ -361,7 +347,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                         ) : (
                             <>
                                 <Check size={14} />
-                                <span>{isCEO ? 'Apply Smart Spec' : 'Submit for Approval'}</span>
+                                <span>Submit for Approval</span>
                             </>
                         )}
                     </button>

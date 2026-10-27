@@ -1,3 +1,5 @@
+import { PRODUCT_EDIT_APPROVERS, canVoteProductEdit } from '../../utils/productEditApproval';
+import { ProductEditApprovalProgress } from '../inventory/ProductEditApprovalProgress';
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '../../contexts/CentralStore';
@@ -8,12 +10,12 @@ import { logger } from '../../utils/logger';
 import { useMerchandising } from './MerchandisingContext';
 import { useCreateInventoryRequestMutation } from '../../hooks/useInventoryRequestMutations';
 
-const MERCHANDISING_LEADS = new Set(['group_ceo', 'country_commercial_director', 'regional_merchandising_manager']);
+const MERCHANDISING_LEADS = new Set(Object.keys(PRODUCT_EDIT_APPROVERS));
 const FINANCE_LEADS = new Set(['group_ceo', 'country_finance_director', 'regional_finance_manager']);
 
 export const MerchandisingReviewsTab: React.FC = () => {
   const { user } = useStore();
-  const { addNotification, effectiveCountry } = useData();
+  const { addNotification, effectiveCountry, activeSite } = useData();
   const { products } = useMerchandising();
   const [productId, setProductId] = useState('');
   const [name, setName] = useState('');
@@ -22,22 +24,22 @@ export const MerchandisingReviewsTab: React.FC = () => {
   const country = (effectiveCountry || user?.country || 'ET').toUpperCase();
   const role = (user?.role || '').toLowerCase();
   const queryClient = useQueryClient();
-  const queryKey = ['merchandising_reviews', country];
+  const queryKey = ['merchandising_reviews', country, user?.regionCode, activeSite?.id, user?.id];
   const { data: requests = [], isLoading, error } = useQuery({
     queryKey,
     queryFn: () => inventoryRequestsService.getMerchandisingPending(country)
   });
   const decision = useMutation({
     mutationFn: async ({ id, action }: { id: string; action: 'approve' | 'finance' }) => {
-      if (action === 'approve') await inventoryRequestsService.approveMerchandising(id);
-      else await inventoryRequestsService.signoffMerchandisingPrice(id);
-      return action;
+      if (action === 'approve') return { action, ...await inventoryRequestsService.approveProductEdit(id) };
+      await inventoryRequestsService.signoffMerchandisingPrice(id);
+      return { action, applied: false, approvalCount: 0 };
     },
-    onSuccess: action => {
+    onSuccess: result => {
       queryClient.invalidateQueries({ queryKey });
       queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      addNotification('success', action === 'approve' ? 'Proposal approved and applied.' : 'Finance signoff recorded.');
+      addNotification('success', result.action === 'finance' ? 'Finance signoff recorded.' : result.applied ? 'Three approvals received. Product edit applied.' : `Regional approval recorded (${result.approvalCount}/3).`);
     },
     onError: error => {
       logger.error('MerchandisingReviewsTab', 'Decision failed', error as Error);
@@ -84,7 +86,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
       <button type="button" disabled={createRequest.isPending} onClick={submitProductProposal} className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Submit proposal</button>
     </div>}
     <p className="text-sm text-[var(--theme-text-secondary)]">
-      Pending proposals in your authorized territory. Finance signs off below-floor prices before a merchandising lead approves.
+      Product edits need Operations, Supply Chain and Merchandising approval in the same region. Below-floor prices also need independent Finance signoff.
     </p>
     {requests.length === 0 && <p className="rounded-2xl border border-[var(--theme-border)] p-6 text-sm text-[var(--theme-text-secondary)]">No pending proposals.</p>}
     {requests.map(request => {
@@ -103,6 +105,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
             {needsFinance && <p className="text-xs text-[var(--theme-text-secondary)] mt-2">
               Finance: {request.financeApprovedByEmployeeId ? 'signed off' : 'awaiting signoff'}
             </p>}
+            <ProductEditApprovalProgress request={request} />
             <pre className="mt-3 whitespace-pre-wrap break-words text-xs text-[var(--theme-text-secondary)]">{JSON.stringify(request.proposedChanges, null, 2)}</pre>
           </div>
           <div className="flex gap-2">
@@ -112,10 +115,10 @@ export const MerchandisingReviewsTab: React.FC = () => {
                 Finance signoff
               </button>}
             {MERCHANDISING_LEADS.has(role) &&
-              <button type="button" disabled={decision.isPending || Boolean(needsFinance && !request.financeApprovedByEmployeeId)}
+              <button type="button" disabled={decision.isPending || !canVoteProductEdit(request, role, user?.id) || Boolean(needsFinance && !request.financeApprovedByEmployeeId)}
                 onClick={() => decision.mutate({ id: request.id, action: 'approve' })}
                 className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">
-                Approve and apply
+                Record regional approval
               </button>}
           </div>
         </div>

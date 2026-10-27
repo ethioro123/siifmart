@@ -108,8 +108,8 @@ export default function Inventory() {
 
     // Pending & History Requests (needed for Badge & Audit Log)
     const [allRequests, setAllRequests] = useState<PendingInventoryChange[]>([]);
-    const pendingChanges = useMemo(() => allRequests.filter(r => r.status === 'pending' && isStockReview(r)), [allRequests]);
-    const historyChanges = useMemo(() => allRequests.filter(r => (r.status === 'approved' || r.status === 'rejected') && isStockReview(r)), [allRequests]);
+    const pendingChanges = useMemo(() => allRequests.filter(r => r.status === 'pending' && (r.changeType === 'edit' || isStockReview(r))), [allRequests]);
+    const historyChanges = useMemo(() => allRequests.filter(r => (r.status === 'approved' || r.status === 'rejected') && (r.changeType === 'edit' || isStockReview(r))), [allRequests]);
     const loadPendingRequests = useCallback(async () => {
         try {
             const isHqOrApprover = isAdminSite(activeSite) || canApprove;
@@ -411,7 +411,7 @@ export default function Inventory() {
                             product: {
                                 ...(editingProduct || {}),
                                 ...data,
-                                siteId: activeSite?.id || editingProduct?.siteId || ''
+                                siteId: editingProduct?.siteId || editingProduct?.site_id || activeSite?.id || ''
                             },
                             isNew,
                             activeSite: activeSite as any,
@@ -419,8 +419,8 @@ export default function Inventory() {
                             canApprove: canApprove,
                             stockToAdjust: data.stock || 0
                         });
-                        if (!canApprove) {
-                            addNotification('info', `Request submitted for approval: ${data.name}`);
+                        if (!isNew || !canApprove) {
+                            addNotification('info', `Request submitted${!isNew ? " for three regional approvals" : " for approval"}: ${data.name}`);
                         } else {
                             addNotification('success', editingProduct ? 'Product updated' : 'Product created');
                         }

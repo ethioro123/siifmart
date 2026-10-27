@@ -272,7 +272,7 @@ export function ProductForm({
                             className="px-6 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-black uppercase text-xs rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer"
                         >
                             {initialData?.id
-                                ? (isCEO ? 'Save Updates' : 'Submit for CEO Approval')
+                                ? 'Submit for 3 Regional Approvals'
                                 : (isCEO ? 'Initialize Product' : 'Submit for Creation Approval')
                             }
                         </Button>

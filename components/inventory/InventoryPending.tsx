@@ -1,3 +1,6 @@
+import { useStore } from '../../contexts/CentralStore';
+import { canVoteProductEdit } from '../../utils/productEditApproval';
+import { ProductEditApprovalProgress } from './ProductEditApprovalProgress';
 import React, { useEffect, useState } from 'react';
 import { Product, PendingInventoryChange } from '../../types';
 import { InventoryHistoryTable } from './components/InventoryHistoryTable';
@@ -16,6 +19,7 @@ interface InventoryPendingProps {
 }
 
 export const InventoryPending: React.FC<InventoryPendingProps> = ({ pendingChanges, historyChanges = [], allProducts, canApprove, isSubmitting, currencySymbol = '', onApproveChange, onRejectChange }) => {
+    const { user } = useStore();
     const [section, setSection] = useState<'pending' | 'history'>('pending');
     const [selected, setSelected] = useState<PendingInventoryChange | null>(null);
     const [reason, setReason] = useState('');
@@ -26,7 +30,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({ pendingChang
         else if (latest !== selected) setSelected(latest);
     }, [pendingChanges, historyChanges, selected]);
     return <section className="space-y-4" aria-label="Stock reviews">
-        <p className="text-sm text-[var(--theme-text-secondary)]">Review stock corrections, removal requests, and existing product changes. Product setup and pricing are managed outside Inventory.</p>
+        <p className="text-sm text-[var(--theme-text-secondary)]">Product edits need one approval each from regional Operations, Supply Chain and Merchandising. Stock corrections and removal requests keep their existing approval rules.</p>
         <div className="flex flex-wrap gap-2">
             {(['pending', 'history'] as const).map(tab => <button key={tab} type="button" aria-pressed={section === tab} onClick={() => { setSection(tab); setSelected(null); setReason(''); }} className="min-h-[44px] rounded-xl border border-[var(--theme-border)] px-4 text-sm text-[var(--theme-text-primary)]">{tab === 'pending' ? `Stock reviews (${pendingChanges.length})` : 'Review history'}</button>)}
         </div>
@@ -42,11 +46,12 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({ pendingChang
             <h3 className="font-semibold text-[var(--theme-text-primary)]">{selected.productName}</h3>
             <p className="text-sm text-[var(--theme-text-secondary)]">Requested by {selected.requestedBy} · {selected.status}</p>
             {selected.changeType === 'stock_adjustment' && <p className="text-sm text-[var(--theme-text-primary)]">{selected.adjustmentType}: {selected.adjustmentQty} units · {selected.adjustmentReason}</p>}
+            <ProductEditApprovalProgress request={selected} />
             <DetailedComparison requestForDetails={selected} allProducts={allProducts} />
-            {selected.status === 'pending' && canApprove && <>
+            {selected.status === 'pending' && (selected.changeType === 'edit' ? canVoteProductEdit(selected, user?.role, user?.id) : canApprove) && <>
                 <label className="block text-sm text-[var(--theme-text-primary)]">Rejection reason<textarea value={reason} onChange={event => setReason(event.target.value)} className="mt-1 block w-full rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-app)] p-2" /></label>
                 <div className="flex flex-wrap gap-2">
-                    <button type="button" disabled={isSubmitting} onClick={() => onApproveChange(selected)} className="min-h-[44px] rounded-lg border border-[var(--theme-border)] px-3 text-[var(--theme-text-primary)] disabled:opacity-50">Approve stock request</button>
+                    <button type="button" disabled={isSubmitting} onClick={() => onApproveChange(selected)} className="min-h-[44px] rounded-lg border border-[var(--theme-border)] px-3 text-[var(--theme-text-primary)] disabled:opacity-50">{selected.changeType === 'edit' ? 'Record regional approval' : 'Approve stock request'}</button>
                     <button type="button" disabled={isSubmitting || !reason.trim()} onClick={() => onRejectChange(selected, reason.trim())} className="min-h-[44px] rounded-lg border border-[var(--theme-border)] px-3 text-[var(--theme-text-primary)] disabled:opacity-50">Reject request</button>
                 </div>
             </>}

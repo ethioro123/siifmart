@@ -66,15 +66,40 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
 
    const isWarehouse = siteType === 'Warehouse' || siteType === 'Distribution Center' || siteType === 'WMS';
    const isCeo = canSwitchCountry(user);
-   const canSwitchSites = !!setActiveSite && isCeo && sites.length > 1;
 
    // Role check for regional authority
    const isRegionalOfficer = Boolean(user && (
       user.role === 'regional_operations_manager' ||
+      user.role === 'area_operations_manager' ||
       (typeof user.role === 'string' && user.role.startsWith('regional_')) ||
       (isRegionalUser && isSharedHqRegionalRole(user.role))
    ));
    const isRegionBadgeVisible = canSwitchRegion || isRegionalOfficer;
+
+   // Authoritative region code for the user (locked for regional officers)
+   const userRegionCode = activeRegionCode
+      || currentEmployee?.region_code
+      || (currentEmployee as any)?.regionCode
+      || (user as any)?.region_code
+      || (user as any)?.regionCode
+      || finalSite?.region_code
+      || finalSite?.regionCode
+      || null;
+
+   // Filter sites in dropdown based on active regional lens (strictly locked to userRegionCode for non-CEO regional officers)
+   const availableSites = useMemo(() => {
+      if (!isCeo && userRegionCode) {
+         return sites.filter(s => (s.region_code === userRegionCode || s.regionCode === userRegionCode));
+      }
+      if (showOnlyActiveRegion && activeRegionCode) {
+         const regionalSites = sites.filter(s => (s.region_code === activeRegionCode || s.regionCode === activeRegionCode));
+         if (regionalSites.length > 0) return regionalSites;
+      }
+      return sites;
+   }, [sites, isCeo, userRegionCode, showOnlyActiveRegion, activeRegionCode]);
+
+   const canSwitchRegionalSites = isRegionalOfficer && Boolean(userRegionCode);
+   const canSwitchSites = !!setActiveSite && (isCeo || canSwitchRegionalSites) && availableSites.length > 1;
 
    // Region details for active site
    const siteRegionCode = displaySite?.region_code || displaySite?.regionCode;
@@ -100,30 +125,25 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
    // Dynamic bidirectional sync when selecting a site
    const handleSelectSite = (selectedSiteId: string) => {
       if (!setActiveSite || !canSwitchSites) return;
+      const selected = sites.find(s => s.id === selectedSiteId);
+      if (!selected) return;
+      if (!isCeo && userRegionCode) {
+         const selectedRegion = selected.region_code || selected.regionCode || null;
+         if (selectedRegion !== userRegionCode) return;
+      }
       setActiveSite(selectedSiteId);
       setIsOpen(false);
-      const selected = sites.find(s => s.id === selectedSiteId);
-      if (selected) {
-         // Sync active region lens with the selected site's territory
-         if (setActiveRegionCode) {
-            const selectedRegion = selected.region_code || selected.regionCode || null;
-            setActiveRegionCode(selectedRegion);
-         }
-         navigate(getRoleDashboardRoute(user?.role, selected.type));
+      // Sync active region lens with the selected site's territory for CEO/country switchers
+      if (isCeo && setActiveRegionCode) {
+         const selectedRegion = selected.region_code || selected.regionCode || null;
+         setActiveRegionCode(selectedRegion);
       }
+      navigate(getRoleDashboardRoute(user?.role, selected.type));
    };
 
-   // Filter sites in dropdown based on active regional lens
-   const availableSites = useMemo(() => {
-      if (showOnlyActiveRegion && activeRegionCode) {
-         const regionalSites = sites.filter(s => (s.region_code === activeRegionCode || s.regionCode === activeRegionCode));
-         if (regionalSites.length > 0) return regionalSites;
-      }
-      return sites;
-   }, [sites, showOnlyActiveRegion, activeRegionCode]);
-
-   const activeRegionObj = activeRegionCode ? regions.find(r => r.code === activeRegionCode) : null;
-   const activeRegionShortName = activeRegionObj ? activeRegionObj.name.replace(/\s*(Region|Territory)$/i, '') : '';
+   const effectiveRegionCode = activeRegionCode || userRegionCode;
+   const activeRegionObj = effectiveRegionCode ? regions.find(r => r.code === effectiveRegionCode) : null;
+   const activeRegionShortName = activeRegionObj ? activeRegionObj.name.replace(/\s*(Region|Territory)$/i, '') : cleanSiteRegionName;
 
    return (
       <div className="relative" ref={dropdownRef}>
@@ -164,34 +184,40 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
             )}
          </button>
 
-         {/* Site Switcher Dropdown - CEO Only */}
+         {/* Site Switcher Dropdown - CEO or Region-Scoped Regional Officers */}
          {canSwitchSites && isOpen && (
             <div className="absolute left-0 mt-1.5 w-64 sm:w-72 bg-[#FDFBF7] dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                <div className="px-3 py-1.5 mb-1 border-b border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">
-                     {activeRegionShortName && showOnlyActiveRegion ? `${activeRegionShortName} Sites` : 'Switch Location'}
+                     {activeRegionShortName && (showOnlyActiveRegion || !isCeo) ? `${activeRegionShortName} Sites` : 'Switch Location'}
                   </span>
-                  <div className="flex items-center gap-2">
-                     {activeRegionCode && (
+                  {isCeo ? (
+                     <div className="flex items-center gap-2">
+                        {activeRegionCode && (
+                           <button
+                              type="button"
+                              onClick={() => setShowOnlyActiveRegion(!showOnlyActiveRegion)}
+                              className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] flex items-center gap-0.5 cursor-pointer"
+                              title={showOnlyActiveRegion ? "Show all facilities across all regions" : `Filter facilities to ${activeRegionShortName}`}
+                           >
+                              <Filter size={10} />
+                              <span>{showOnlyActiveRegion ? 'All' : activeRegionShortName}</span>
+                           </button>
+                        )}
                         <button
                            type="button"
-                           onClick={() => setShowOnlyActiveRegion(!showOnlyActiveRegion)}
-                           className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] flex items-center gap-0.5 cursor-pointer"
-                           title={showOnlyActiveRegion ? "Show all facilities across all regions" : `Filter facilities to ${activeRegionShortName}`}
+                           onClick={() => { setIsOpen(false); navigate('/location-select'); }}
+                           className="text-[10px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline flex items-center gap-0.5 cursor-pointer"
                         >
-                           <Filter size={10} />
-                           <span>{showOnlyActiveRegion ? 'All' : activeRegionShortName}</span>
+                           <span>All</span>
+                           <ExternalLink size={10} />
                         </button>
-                     )}
-                     <button
-                        type="button"
-                        onClick={() => { setIsOpen(false); navigate('/location-select'); }}
-                        className="text-[10px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline flex items-center gap-0.5 cursor-pointer"
-                     >
-                        <span>All</span>
-                        <ExternalLink size={10} />
-                     </button>
-                  </div>
+                     </div>
+                  ) : (
+                     <span className="text-[9px] font-mono font-semibold text-[#4D6E56] dark:text-[#7A9E83]">
+                        {userRegionCode}
+                     </span>
+                  )}
                </div>
 
                <div className="max-h-64 overflow-y-auto space-y-1 custom-scrollbar">

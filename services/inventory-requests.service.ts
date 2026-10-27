@@ -1,10 +1,20 @@
 import { supabase } from '../lib/supabase';
 import type { PendingInventoryChange } from '../types';
+import { productEditFields } from '../utils/productEditApproval';
 import { logger } from '../utils/logger';
 
 export const inventoryRequestsService = {
+    async rejectProductEdit(requestId: string, reason: string): Promise<void> {
+        const { error } = await supabase.rpc('reject_product_edit', { p_request_id: requestId, p_reason: reason });
+        if (error) throw error;
+    },
+    async approveProductEdit(requestId: string): Promise<{ applied: boolean; approvalCount: number }> {
+        const { data, error } = await supabase.rpc('approve_product_edit', { p_request_id: requestId });
+        if (error) throw error;
+        return data;
+    },
     async approveMerchandising(requestId: string): Promise<void> {
-        const { error } = await supabase.rpc('approve_merchandising_request', { p_request_id: requestId });
+        const { error } = await supabase.rpc('approve_product_edit', { p_request_id: requestId });
         if (error) throw error;
     },
 
@@ -15,10 +25,10 @@ export const inventoryRequestsService = {
 
     async getMerchandisingPending(countryCode: string, limit = 100): Promise<PendingInventoryChange[]> {
         const { data, error } = await supabase.from('inventory_requests')
-            .select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_at,status,proposed_changes,adjustment_reason,finance_approved_by_employee_id')
+            .select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_at,status,proposed_changes,adjustment_reason,finance_approved_by_employee_id,requested_by_employee_id,product_edit_approvals')
             .eq('country_code', countryCode.toUpperCase())
             .eq('status', 'pending')
-            .or('adjustment_reason.like.PRICE_CHANGE%,adjustment_reason.like.MERCHANDISING:%')
+            .eq('change_type', 'edit')
             .order('requested_at', { ascending: false })
             .limit(limit);
         if (error) throw error;
@@ -29,12 +39,13 @@ export const inventoryRequestsService = {
             changeType: r.change_type, requestedBy: r.requested_by,
             requestedAt: r.requested_at, status: r.status,
             proposedChanges: r.proposed_changes, adjustmentReason: r.adjustment_reason,
-            financeApprovedByEmployeeId: r.finance_approved_by_employee_id
+            financeApprovedByEmployeeId: r.finance_approved_by_employee_id,
+            requestedByEmployeeId: r.requested_by_employee_id, productEditApprovals: r.product_edit_approvals
         }));
     },
     async getAll(siteId?: string, countryCode?: string, limit: number = 25, regionCode?: string): Promise<PendingInventoryChange[]> {
         // RULE 10: 25-record shelf limit
-        let query = supabase.from('inventory_requests').select('*').limit(limit);
+        let query = supabase.from('inventory_requests').select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_by_employee_id,requested_at,status,proposed_changes,adjustment_type,adjustment_qty,adjustment_reason,approved_by,approved_at,rejected_by,rejected_at,rejection_reason,finance_approved_by_employee_id,product_edit_approvals').limit(limit);
         if (siteId) query = query.eq('site_id', siteId);
         if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
         if (regionCode) query = query.eq('region_code', regionCode);
@@ -63,6 +74,9 @@ export const inventoryRequestsService = {
             approvedAt: r.approved_at,
             rejectionReason: r.rejection_reason,
             rejectedBy: r.rejected_by,
+            requestedByEmployeeId: r.requested_by_employee_id,
+            financeApprovedByEmployeeId: r.finance_approved_by_employee_id,
+            productEditApprovals: r.product_edit_approvals,
             rejectedAt: r.rejected_at
         }));
     },
@@ -106,10 +120,11 @@ export const inventoryRequestsService = {
             status: request.status || 'pending',
             approved_by: request.approvedBy || null,
             approved_at: request.approvedAt || null,
-            proposed_changes: request.proposedChanges,
+            proposed_changes: request.changeType === 'edit' ? productEditFields(request.proposedChanges || {}) : request.proposedChanges,
             adjustment_type: request.adjustmentType,
             adjustment_qty: request.adjustmentQty,
-            adjustment_reason: request.adjustmentReason
+            adjustment_reason: request.changeType === 'edit' && Object.keys(request.proposedChanges || {}).some(key => ['price', 'costPrice', 'salePrice', 'isOnSale'].includes(key))
+                ? `PRICE_CHANGE: ${request.adjustmentReason || 'Product edit'}` : request.adjustmentReason
         };
 
         const { data, error } = await supabase

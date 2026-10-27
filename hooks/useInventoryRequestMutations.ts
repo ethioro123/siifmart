@@ -3,8 +3,6 @@ import {
     productsService,
     inventoryRequestsService,
 } from '../services/supabase.service';
-import { systemLogsService } from '../services/system-logs.service';
-import { posDB } from '../services/db/pos.db';
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { PendingInventoryChange, Product } from '../types';
@@ -47,10 +45,9 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                 throw new Error('Regional Governance Violation: You can only approve inventory adjustments within your assigned region.');
             }
 
-            if (change.adjustmentReason?.startsWith('PRICE_CHANGE') ||
-                change.adjustmentReason?.startsWith('MERCHANDISING:')) {
-                await inventoryRequestsService.approveMerchandising(change.id);
-                return { success: true, change };
+            if (change.changeType === 'edit') {
+                const result = await inventoryRequestsService.approveProductEdit(change.id);
+                return { success: true, change, ...result };
             }
 
             // SOP-MER-037: price changes below the margin floor need Country Finance Director / CEO sign-off
@@ -75,57 +72,6 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                     if (createPutawayJob && (change.adjustmentQty || 0) > 0) {
                         await createPutawayJob(resultProduct, change.adjustmentQty || 0, user?.name || 'System', 'Approved Creation');
                     }
-                }
-            }
-            else if (change.changeType === 'edit' && change.proposedChanges) {
-                const updateResult = await productsService.update(change.productId, {
-                    ...change.proposedChanges,
-                    id: change.productId,
-                    approvalStatus: 'approved' as const,
-                    approvedBy: user?.name,
-                    approvedAt: new Date().toISOString()
-                } as Product);
-                success = !!updateResult;
-
-                if (success && change.siteId) {
-                    // Synaptic Neural Mesh: Sync POS IndexedDB Cache
-                    try {
-                        const existing = await posDB.getCachedProducts(change.siteId);
-                        if (existing && Array.isArray(existing)) {
-                            const updatedList = existing.map(p => p.id === change.productId ? { ...p, ...change.proposedChanges, approvalStatus: 'approved' } : p);
-                            await posDB.cacheProducts(change.siteId, updatedList);
-                        }
-                    } catch (posErr) {
-                        logger.warn('useInventoryRequestMutations', 'POS IndexedDB sync skipped', { error: String(posErr) });
-                    }
-                }
-
-                // Zero-Trust Rule 5 Audit Logging
-                try {
-                    await systemLogsService.create({
-                        action: 'PRODUCT_EDIT_APPROVED',
-                        details: {
-                            requestId: change.id,
-                            productId: change.productId,
-                            productName: change.productName,
-                            productSku: change.productSku,
-                            siteId: change.siteId,
-                            proposedChanges: change.proposedChanges,
-                            requestedBy: change.requestedBy,
-                            approvedBy: user?.name || 'Regional Operations Manager',
-                            approverRole: user?.role,
-                            summary: `Approved by ${user?.role || 'Manager'} ${user?.name}: Updated ${change.productName} (${change.productSku})`
-                        },
-                        module: 'Inventory',
-                        user_name: user?.name || 'System',
-                        employee_id: user?.id,
-                        site_id: change.siteId,
-                        country_code: change.countryCode || 'ET',
-                        entity_type: 'product',
-                        entity_id: change.productId,
-                    });
-                } catch (logErr) {
-                    logger.warn('useInventoryRequestMutations', 'Failed to write approval audit log', { error: String(logErr) });
                 }
             }
             else if (change.changeType === 'delete') {
@@ -157,8 +103,13 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
+            queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
             queryClient.invalidateQueries({ queryKey: ['products'] });
 
+            if ('applied' in data && !data.applied) {
+                addNotification('info', `Approval recorded (${data.approvalCount}/3): ${data.change.productName}`);
+                return;
+            }
             addNotification('success', `Request approved: ${data.change.productName}`);
             logSystemEvent(
                 'Inventory Request Approved',
@@ -181,6 +132,10 @@ export function useRejectInventoryRequestMutation() {
 
     return useMutation({
         mutationFn: async ({ change, reason }: { change: PendingInventoryChange, reason: string }) => {
+            if (change.changeType === 'edit') {
+                await inventoryRequestsService.rejectProductEdit(change.id, reason);
+                return { change, reason };
+            }
             await inventoryRequestsService.update(change.id, {
                 status: 'rejected',
                 rejectedBy: user?.name,
@@ -191,6 +146,7 @@ export function useRejectInventoryRequestMutation() {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
+            queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
             addNotification('info', `Request rejected: ${data.change.productName}`);
             logSystemEvent(
                 'Inventory Request Rejected',
@@ -225,6 +181,7 @@ export function useBulkCleanupRequestsMutation() {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
+            queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
             addNotification('success', `Successfully cleared ${data.length} requests.`);
         },
         onError: (error: any) => {
@@ -246,6 +203,7 @@ export function useCreateInventoryRequestMutation() {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
+            queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
             logSystemEvent(
                 'Inventory Request Created',
                 `Pending request created for ${data.request.changeType} "${data.request.productName}"`,

@@ -111,108 +111,40 @@ export function useSaveProductMutation() {
                     return created;
                 }
             } else {
-                // Calculate actual delta between desired stock and current stock
-                const previousStock = Number(product.stock) || 0;
-                const newStock = Number(stockToAdjust !== undefined ? stockToAdjust : product.stock) || 0;
-                const stockDelta = newStock - previousStock;
+                const request: Omit<PendingInventoryChange, 'id'> = {
+                    productId: product.id,
+                    productName: product.name,
+                    productSku: product.sku,
+                    siteId: product.siteId || product.site_id || activeSite.id,
+                    countryCode: countryCode,
+                    changeType: 'edit',
+                    requestedBy: user?.name || 'Unknown',
+                    requestedAt: new Date().toISOString(),
+                    status: 'pending',
+                    proposedChanges: productToSave,
+                    adjustmentReason: 'Product attributes update'
+                };
+                const res = await inventoryRequestsService.create(request);
 
-                if (!canApprove) {
-                    const request: Omit<PendingInventoryChange, 'id'> = {
+                // Zero-Trust Rule 5 Audit Logging
+                await systemLogsService.create({
+                    action: 'PRODUCT_EDIT_REQUESTED',
+                    details: {
                         productId: product.id,
-                        productName: product.name,
-                        productSku: product.sku,
-                        siteId: activeSite.id,
-                        countryCode: countryCode,
-                        changeType: 'edit',
-                        requestedBy: user?.name || 'Unknown',
-                        requestedAt: new Date().toISOString(),
-                        status: 'pending',
-                        proposedChanges: productToSave,
-                        adjustmentType: stockDelta >= 0 ? 'IN' : 'OUT',
-                        adjustmentQty: Math.abs(stockDelta),
-                        adjustmentReason: stockDelta !== 0 ? `Stock delta: ${stockDelta > 0 ? '+' : ''}${stockDelta}` : 'Product attributes update'
-                    };
-                    const res = await inventoryRequestsService.create(request);
+                        sku: product.sku,
+                        name: product.name,
+                        siteId: product.siteId || product.site_id || activeSite.id,
+                    },
+                    module: 'Inventory',
+                    user_name: user?.name || 'Unknown',
+                    employee_id: user?.id,
+                    site_id: product.siteId || product.site_id || activeSite.id,
+                    country_code: countryCode,
+                    entity_type: 'inventory_request',
+                    entity_id: (res as any)?.id || product.id,
+                });
 
-                    // Zero-Trust Rule 5 Audit Logging
-                    await systemLogsService.create({
-                        action: 'PRODUCT_EDIT_REQUESTED',
-                        details: {
-                            productId: product.id,
-                            sku: product.sku,
-                            name: product.name,
-                            stockDelta,
-                            siteId: activeSite.id,
-                        },
-                        module: 'Inventory',
-                        user_name: user?.name || 'Unknown',
-                        employee_id: user?.id,
-                        site_id: activeSite.id,
-                        country_code: countryCode,
-                        entity_type: 'inventory_request',
-                        entity_id: (res as any)?.id || product.id,
-                    });
-
-                    return res;
-                } else {
-                    const updated = await productsService.update(productToSave.id!, productToSave);
-
-                    // Synaptic Neural Mesh: Sync POS IndexedDB Cache
-                    try {
-                        const existing = await posDB.getCachedProducts(activeSite.id);
-                        if (existing && Array.isArray(existing)) {
-                            const updatedList = existing.map(p => p.id === updated.id ? { ...p, ...updated } : p);
-                            await posDB.cacheProducts(activeSite.id, updatedList);
-                        }
-                    } catch (err) {
-                        logger.warn('useSaveProductMutation', 'POS IndexedDB sync skipped', { error: String(err) });
-                    }
-
-                    // Record in change history log as approved direct edit
-                    try {
-                        await inventoryRequestsService.create({
-                            productId: updated.id,
-                            productName: updated.name,
-                            productSku: updated.sku,
-                            siteId: activeSite.id,
-                            countryCode: countryCode,
-                            changeType: 'edit',
-                            requestedBy: user?.name || 'Manager',
-                            requestedAt: new Date().toISOString(),
-                            status: 'approved',
-                            approvedBy: user?.name || 'Manager',
-                            approvedAt: new Date().toISOString(),
-                            proposedChanges: productToSave,
-                            adjustmentReason: 'Direct Manager Update'
-                        });
-                    } catch (histErr) {
-                        logger.warn('useSaveProductMutation', 'History record creation skipped', { error: String(histErr) });
-                    }
-
-                    // Zero-Trust Rule 5 Audit Logging
-                    await systemLogsService.create({
-                        action: 'PRODUCT_UPDATED',
-                        details: {
-                            productId: updated.id,
-                            sku: updated.sku,
-                            name: updated.name,
-                            price: updated.price,
-                            stock: updated.stock,
-                            siteId: activeSite.id,
-                            updatedBy: user?.name,
-                            userRole: user?.role
-                        },
-                        module: 'Inventory',
-                        user_name: user?.name || 'Unknown',
-                        employee_id: user?.id,
-                        site_id: activeSite.id,
-                        country_code: countryCode,
-                        entity_type: 'product',
-                        entity_id: updated.id,
-                    });
-
-                    return updated;
-                }
+                return res;
             }
         },
         onSuccess: (_data, variables) => {

@@ -61,6 +61,7 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
     expect(getRoleDashboardRoute('regional_supply_chain_manager', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
     expect(getRoleDashboardRoute('regional_supply_chain_manager', 'Distribution Center')).toBe('/wms-ops?tab=DOCKS');
     expect(getRoleDashboardRoute('regional_supply_chain_manager', 'Administration')).toBe('/regional-ops');
+    expect(getRoleDashboardRoute('regional_supply_chain_manager', 'Store')).toBe('/inventory');
     expect(getRoleDashboardRoute('dispatch_supervisor', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
     expect(getRoleDashboardRoute('picker', 'Warehouse')).toBe('/wms-ops?tab=PICK');
     expect(getRoleDashboardRoute('packer', 'Warehouse')).toBe('/wms-ops?tab=PACK');

@@ -81,6 +81,7 @@ export const InventoryProductModal: React.FC<InventoryProductModalProps> = ({
                         use the receiving workflow; to correct its stock, use a stock adjustment.
                     </p>
                 )}
+                {editingProduct && <p className="mb-4 text-sm text-[var(--theme-text-secondary)]">Edits take effect after approval from regional Operations, Supply Chain and Merchandising. Use stock adjustments to change quantities.</p>}
                 <ProductForm
                     initialData={editingProduct || undefined}
                     onSubmit={onSave}

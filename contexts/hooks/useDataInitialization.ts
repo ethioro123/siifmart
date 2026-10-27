@@ -58,7 +58,14 @@ export function useDataInitialization({
   const missingSiteWarningRef = React.useRef<string | null>(null);
 
   useEffect(() => {
-    const canSwitchSites = ['group_ceo', 'auditor'].includes(user?.role || '');
+    const role = user?.role || '';
+    const canSwitchSites = ['group_ceo', 'auditor'].includes(role);
+    const isRegionalSiteSwitcher =
+      role === 'regional_operations_manager' ||
+      role === 'area_operations_manager' ||
+      role.startsWith('regional_') ||
+      role === 'vendor_relations_manager' ||
+      role === 'cs_manager';
 
     if (user && sites.length > 0 && !activeSiteId) {
       if (canSwitchSites) {
@@ -92,7 +99,18 @@ export function useDataInitialization({
       }
 
       missingSiteWarningRef.current = null;
-      if ((!canSwitchSites) && (!activeSiteId || (activeSiteId !== userSite.id && activeSiteId !== userSite.code))) {
+      const userRegionCode = (user as any)?.region_code || (user as any)?.regionCode || (userSite as any)?.region_code || userSite?.regionCode;
+      const activeSiteObj = activeSiteId ? sites.find(s => s.id === activeSiteId || (s as any).code === activeSiteId) : null;
+      const activeSiteRegionCode = (activeSiteObj as any)?.region_code || activeSiteObj?.regionCode;
+      const isValidRegionalSwitch = Boolean(
+        userSiteSyncRef.current &&
+        isRegionalSiteSwitcher &&
+        userRegionCode &&
+        activeSiteObj &&
+        activeSiteRegionCode === userRegionCode
+      );
+
+      if ((!canSwitchSites && !isValidRegionalSwitch) && (!activeSiteId || (activeSiteId !== userSite.id && activeSiteId !== userSite.code))) {
         setActiveSiteId(userSite.id);
       }
       userSiteSyncRef.current = true;
@@ -211,7 +229,19 @@ export function useDataInitialization({
       // Egress optimization: Only global administrative roles need multi-site global batches on startup.
       // Branch workers only require local activeSite data (fetched via useDataQueries).
       const normalizedRole = (user?.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-      const canSwitchSites = ['group_ceo', 'country_managing_director', 'auditor', 'country_commercial_director', 'buyer', 'country_supply_chain_director'].includes(normalizedRole);
+      const canSwitchSites = [
+        'group_ceo',
+        'country_managing_director',
+        'auditor',
+        'country_commercial_director',
+        'buyer',
+        'country_supply_chain_director',
+        'regional_operations_manager',
+        'area_operations_manager',
+        'regional_supply_chain_manager',
+        'regional_procurement_manager',
+        'regional_logistics_manager'
+      ].includes(normalizedRole);
 
       // RULE 10: Lists/history default to 25 records on boot
       const [allProds, allSls, allOrds] = await Promise.all([

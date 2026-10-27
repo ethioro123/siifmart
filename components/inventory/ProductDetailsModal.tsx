@@ -16,7 +16,8 @@ import { useData } from '../../contexts/DataContext';
 import { getSellUnit, formatProductSize, getEffectivePackageSize, formatStockDisplay } from '../../utils/units';
 import { getRoleHierarchy, canViewCostPrice } from '../../utils/roles';
 import { useStore } from '../../contexts/CentralStore';
-import { productsService, inventoryRequestsService } from '../../services/supabase.service';
+import { productsService } from '../../services/supabase.service';
+import { useCreateInventoryRequestMutation } from '../../hooks/useInventoryRequestMutations';
 import { systemLogsService } from '../../services/system-logs.service';
 import { ProductAttributesPanel } from './components/ProductAttributesPanel';
 import { ProductLocationBreakdown } from './components/ProductLocationBreakdown';
@@ -61,6 +62,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
         }
     }, [product, isEditingThresholds]);
 
+    const createEditRequest = useCreateInventoryRequestMutation();
     if (!product) return null;
 
     const isCEO = user?.role === 'group_ceo';
@@ -69,8 +71,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     const isSeniorOperations = ['country_managing_director', 'group_ceo', 'regional_operations_manager', 'country_operations_director'].includes(user?.role || '');
     const showDeleteButton = isCEO || isStoreManager || isWarehouseManager || isSeniorOperations;
     const isDeleteDisabled = (isStoreManager || isWarehouseManager || isSeniorOperations) && product.stock > 0;
-    // Only CEO can directly edit. Everyone else submits for CEO approval.
-    const canDirectEdit = isCEO;
+
 
     const handleDelete = async () => {
         if (!isCEO && !isStoreManager && !isSeniorOperations && !isWarehouseManager) return;
@@ -101,8 +102,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
         }
     };
 
-    // Any manager can see the Edit button, but only CEO applies changes immediately.
-    // All other managers submit a pending request for CEO approval.
+    // Product edits require all three regional approvals, including CEO proposals.
     const canEditThresholds = user?.role ? getRoleHierarchy(user.role) >= 70 : false;
     const customAttrs = product.customAttributes || (product as any).custom_attributes;
     const unitObj = product.unit ? getSellUnit(product.unit) : null;
@@ -323,18 +323,8 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                         setIsSaving(true);
                                         try {
                                             validateStockThresholds(minVal === '' ? product.minStock : minVal, maxVal === '' ? product.maxStock : maxVal);
-                                            if (canDirectEdit) {
-                                                // CEO: apply immediately via updateProduct (syncs posDB & audit logs)
-                                                await updateProduct({
-                                                    id: product.id,
-                                                    minStock: minVal === '' ? undefined : minVal,
-                                                    maxStock: maxVal === '' ? undefined : maxVal
-                                                });
-                                                showToast('Stock thresholds updated', 'success');
-                                            } else {
-                                                // Non-CEO managers: submit for CEO approval
                                                 const country = effectiveCountry || (activeSite as any)?.country || 'ET';
-                                                await inventoryRequestsService.create({
+                                                await createEditRequest.mutateAsync({
                                                     productId: product.id,
                                                     productName: product.name,
                                                     productSku: product.sku,
@@ -344,7 +334,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                                     requestedBy: user?.name || 'Unknown',
                                                     requestedAt: new Date().toISOString(),
                                                     status: 'pending',
-                                                    proposedChanges: { ...product, minStock: minVal === '' ? product.minStock : minVal, maxStock: maxVal === '' ? product.maxStock : maxVal },
+                                                    proposedChanges: { minStock: minVal === '' ? product.minStock : minVal, maxStock: maxVal === '' ? product.maxStock : maxVal },
                                                     adjustmentReason: `Stock thresholds: Min ${minVal}, Max ${maxVal}`,
                                                 });
 
@@ -371,8 +361,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                                     // Silent fallback for audit trail
                                                 }
 
-                                                showToast('Threshold change submitted for CEO approval', 'info');
-                                            }
+                                                showToast('Threshold change submitted for Operations, Supply Chain and Merchandising approval', 'info');
                                             setIsEditingThresholds(false);
                                             await refreshData(['products', 'movements']);
                                         } catch (err: any) {
@@ -381,7 +370,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                             setIsSaving(false);
                                         }
                                     }} disabled={isSaving} className="px-3.5 py-1.5 text-[11px] font-bold uppercase bg-[var(--theme-accent)] text-white rounded-xl disabled:opacity-50 hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer shadow-xs">
-                                        {isSaving ? 'Saving…' : canDirectEdit ? 'Save' : 'Submit for Approval'}
+                                        {isSaving ? 'Saving…' : 'Submit for Approval'}
                                     </button>
                                 </div>
                             </div>

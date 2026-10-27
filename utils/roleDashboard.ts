@@ -95,6 +95,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         // 3. Level 6-10 - Warehouse & Logistics Roles (Direct sovereign role landing)
         case 'regional_supply_chain_manager':
             if (siteType === 'Administration' || siteType === 'Administrative') return '/regional-ops';
+            if (isStoreSite) return '/inventory';
             return `/wms-ops?tab=${getDefaultFulfillmentTab(role)}`;
 
         case 'warehouse_manager':
