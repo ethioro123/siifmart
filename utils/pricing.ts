@@ -61,11 +61,18 @@ function evaluateCondition(
 
         case 'Sales < X':
             const last30Days = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-            const productSales = sales.filter(s =>
-                new Date(s.date) >= last30Days &&
-                s.items.some(i => i.id === product.id)
-            ).length;
-            return productSales < rule.threshold;
+            let unitsSold = 0;
+            for (const s of sales) {
+                const sDate = new Date(s.date || (s as any).created_at || 0);
+                if (sDate >= last30Days && Array.isArray(s.items)) {
+                    for (const item of s.items) {
+                        if (item.id === product.id || (item as any).productId === product.id || (product.sku && (item as any).sku === product.sku)) {
+                            unitsSold += item.quantity || 0;
+                        }
+                    }
+                }
+            }
+            return unitsSold < rule.threshold;
 
         default:
             return false;
@@ -85,14 +92,16 @@ function applyPricingAction(product: Product, rule: PricingRule): Product {
             break;
 
         case 'Set to Cost + Margin':
-            if (product.costPrice) {
-                newPrice = product.costPrice * (1 + rule.value / 100);
+            if (product.costPrice && product.costPrice > 0) {
+                // Gross margin on selling price: Price = Cost / (1 - Margin %)
+                const targetMargin = Math.min(90, Math.max(5, rule.value));
+                newPrice = product.costPrice / (1 - targetMargin / 100);
             }
             break;
     }
 
-    // Round to 2 decimal places
-    newPrice = Math.round(newPrice * 100) / 100;
+    // Merchandising Whole-Number Rule: Prices must strictly be integers
+    newPrice = Math.round(newPrice);
 
     return {
         ...product,
