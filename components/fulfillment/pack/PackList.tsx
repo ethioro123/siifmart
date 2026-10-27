@@ -90,13 +90,13 @@ export const PackList: React.FC<PackListProps> = ({
                                                 </span>
                                                 {isCritical && (
                                                     <span className="flex items-center gap-1 bg-red-500/10 text-red-500 text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-full uppercase border border-red-500/20 shrink-0">
-                                                        <Zap size={10} /> Urgent
+                                                        <Zap size={10} /> {t('warehouse.urgent') || 'Urgent'}
                                                     </span>
                                                 )}
                                                 {isActive && !isCritical && (
                                                     <span className="inline-flex items-center gap-1 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-full uppercase border border-[var(--theme-accent)]/20 shrink-0">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
-                                                        Active
+                                                        {t('warehouse.activeLabel') || 'Active'}
                                                     </span>
                                                 )}
                                             </div>

@@ -159,9 +159,10 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'employees.view'
     ],
     cs_manager: [
-        'dashboard.view',
+        'dashboard.view', 'admin.view', 'pos.view',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
-        'sales.view', 'sales.view_reports', 'sales.refund'
+        'sales.view', 'sales.view_reports', 'sales.refund',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
     ],
     vendor_relations_manager: [
         'dashboard.view', 'admin.view',

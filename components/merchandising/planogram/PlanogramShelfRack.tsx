@@ -27,7 +27,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
   showHeatmap,
   currencySymbol
 }) => {
-  // Calculate total fixture sales units (7d recorded)
+  // Calculate total loaded sales units (7d recorded)
   const totalFixtureUnits7d = fixture.tiers.reduce((total, tier) => {
     const tierProducts = products.filter(p => p.shelfPosition === tier.position);
     const tierUnits = tierProducts.reduce((sum, p) => {
@@ -97,14 +97,14 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
                     </span>
                   )}
                   <span className="text-[10px] text-[var(--theme-text-secondary)] font-medium">
-                    Showing {tierProducts.length} of {tier.capacity} capacity
+                    {tierProducts.length} products · capacity not recorded
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   {hasRecordedHistory ? (
                     <span className="font-mono text-xs font-semibold text-[var(--theme-text-primary)]">
-                      {tierUnitsSold7d} units/7d ({sharePct}% fixture sales)
+                      {tierUnitsSold7d} units/7d ({sharePct}% loaded sales)
                     </span>
                   ) : (
                     <span className="text-[11px] text-[var(--theme-text-secondary)] italic">
@@ -212,7 +212,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
                           </span>
                         ) : (
                           <span className="text-[var(--theme-text-secondary)] italic">
-                            New
+                            No data
                           </span>
                         )}
                       </div>
@@ -220,7 +220,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
                       {/* Swap Target Indicator */}
                       {isSelected && (
                         <div className="absolute inset-0 bg-black/75 flex flex-col items-center justify-center text-white backdrop-blur-[2px]">
-                          <MousePointer2 size={14} className="animate-bounce" />
+                          <MousePointer2 size={14} className="motion-safe:animate-bounce" />
                           <span className="text-[9px] font-semibold uppercase mt-0.5 tracking-wider">
                             Swap Target
                           </span>

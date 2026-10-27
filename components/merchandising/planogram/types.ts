@@ -6,7 +6,6 @@ export interface FixtureTier {
   position: ShelfPosition;
   label: string;
   isPrime?: boolean;
-  capacity: number;
 }
 
 export interface FixtureDefinition {
@@ -22,9 +21,9 @@ export const FIXTURE_DEFINITIONS: Record<FixtureType, FixtureDefinition> = {
     label: 'Standard Gondola Shelving',
     description: '3-tier central store gondola unit (Eye Level, Top Shelf, Bottom Shelf)',
     tiers: [
-      { position: 'Top Shelf', label: 'Top Shelf', capacity: 10 },
-      { position: 'Eye Level', label: 'Eye Level (Prime Tier)', isPrime: true, capacity: 10 },
-      { position: 'Bottom Shelf', label: 'Bottom Shelf (Heavy & Bulk)', capacity: 12 }
+      { position: 'Top Shelf', label: 'Top Shelf' },
+      { position: 'Eye Level', label: 'Eye Level (Prime Tier)', isPrime: true },
+      { position: 'Bottom Shelf', label: 'Bottom Shelf (Heavy & Bulk)' }
     ]
   },
   end_cap: {
@@ -32,7 +31,7 @@ export const FIXTURE_DEFINITIONS: Record<FixtureType, FixtureDefinition> = {
     label: 'Aisle End Cap Display',
     description: 'High-visibility promotional header at aisle entrance',
     tiers: [
-      { position: 'End Cap', label: 'End Cap Display', isPrime: true, capacity: 8 }
+      { position: 'End Cap', label: 'End Cap Display', isPrime: true }
     ]
   },
   checkout: {
@@ -40,7 +39,7 @@ export const FIXTURE_DEFINITIONS: Record<FixtureType, FixtureDefinition> = {
     label: 'Checkout & POS Counter',
     description: 'Front-end impulse grab-and-go queue fixtures',
     tiers: [
-      { position: 'Checkout', label: 'Checkout Front-End', isPrime: true, capacity: 12 }
+      { position: 'Checkout', label: 'Checkout Front-End', isPrime: true }
     ]
   },
   back_aisle: {
@@ -48,7 +47,7 @@ export const FIXTURE_DEFINITIONS: Record<FixtureType, FixtureDefinition> = {
     label: 'Perimeter & Back Wall',
     description: 'High-capacity perimeter wall for bulk and overflow staging',
     tiers: [
-      { position: 'Back Aisle', label: 'Back Wall Fixture', capacity: 15 }
+      { position: 'Back Aisle', label: 'Back Wall Fixture' }
     ]
   },
   secure: {
@@ -56,7 +55,7 @@ export const FIXTURE_DEFINITIONS: Record<FixtureType, FixtureDefinition> = {
     label: 'Secured Lockable Cabinet',
     description: 'Locked glass cabinet for high-shrink or regulated merchandise',
     tiers: [
-      { position: 'Secure', label: 'Secured Cabinet', isPrime: true, capacity: 8 }
+      { position: 'Secure', label: 'Secured Cabinet', isPrime: true }
     ]
   }
 };

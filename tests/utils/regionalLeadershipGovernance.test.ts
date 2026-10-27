@@ -4,6 +4,7 @@ import { canAccessRoute, canAccessSite } from '../../services/auth.rbac';
 import { canEmployRole } from '../../utils/roles';
 import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
 import { getVisibleFulfillmentTabs, getDefaultFulfillmentTab } from '../../utils/fulfillmentTabPermissions';
+import { getRoleDashboardRoute } from '../../utils/roleDashboard';
 
 describe('Regional Leadership & Field Supervisors Governance Suite', () => {
     describe('Regional Operations Manager (regional_operations_manager)', () => {
@@ -367,6 +368,47 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
             expect(hasPermission('vendor_relations_manager', 'ADJUST_STOCK')).toBe(false);
             expect(hasPermission('vendor_relations_manager', 'EDIT_PRICE')).toBe(false);
             expect(hasPermission('vendor_relations_manager', 'ACCESS_FINANCE')).toBe(false);
+        });
+    });
+
+    describe('Customer Service Manager (cs_manager) Governance & Permission Matrix Alignment', () => {
+        it('authorizes customer service management, customer returns & refunds, pos supervision, and staff operations', () => {
+            expect(getRoleDashboardRoute('cs_manager')).toBe('/customers');
+            expect(hasPermission('cs_manager', 'ACCESS_CUSTOMERS')).toBe(true);
+            expect(hasPermission('cs_manager', 'ADD_CUSTOMER')).toBe(true);
+            expect(hasPermission('cs_manager', 'EDIT_CUSTOMER')).toBe(true);
+            expect(hasPermission('cs_manager', 'VIEW_CUSTOMER_HISTORY')).toBe(true);
+            expect(hasPermission('cs_manager', 'ACCESS_SALES')).toBe(true);
+            expect(hasPermission('cs_manager', 'VIEW_SALES_REPORTS')).toBe(true);
+            expect(hasPermission('cs_manager', 'REFUND_SALE')).toBe(true);
+            expect(hasPermission('cs_manager', 'ACCESS_POS')).toBe(true);
+            expect(hasPermission('cs_manager', 'VIEW_POS_DASHBOARD')).toBe(true);
+            expect(hasPermission('cs_manager', 'ACCESS_EMPLOYEES')).toBe(true);
+            expect(hasPermission('cs_manager', 'ADD_EMPLOYEE')).toBe(true);
+            expect(hasPermission('cs_manager', 'EDIT_EMPLOYEE')).toBe(true);
+            expect(hasPermission('cs_manager', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(canAccessRoute('cs_manager', '/customers')).toBe(true);
+            expect(canAccessRoute('cs_manager', '/regional-ops')).toBe(true);
+            expect(canAccessRoute('cs_manager', '/sales')).toBe(true);
+            expect(canAccessRoute('cs_manager', '/employees')).toBe(true);
+        });
+
+        it('authorizes hiring of customer service, returns clerk, and returns operator roles only', () => {
+            expect(canEmployRole('cs_manager', 'customer_service')).toBe(true);
+            expect(canEmployRole('cs_manager', 'returns_clerk')).toBe(true);
+            expect(canEmployRole('cs_manager', 'returns_operator')).toBe(true);
+            expect(canEmployRole('cs_manager', 'cashier')).toBe(false);
+            expect(canEmployRole('cs_manager', 'store_manager')).toBe(false);
+        });
+
+        it('strictly enforces Customer Service & Store Segregation of Duties (no till cashiering, voiding, POs, stock adjustments, pricing edits, or finance access)', () => {
+            expect(hasPermission('cs_manager', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('cs_manager', 'VOID_SALE')).toBe(false);
+            expect(hasPermission('cs_manager', 'CREATE_PO')).toBe(false);
+            expect(hasPermission('cs_manager', 'APPROVE_PO')).toBe(false);
+            expect(hasPermission('cs_manager', 'ADJUST_STOCK')).toBe(false);
+            expect(hasPermission('cs_manager', 'EDIT_PRICE')).toBe(false);
+            expect(hasPermission('cs_manager', 'ACCESS_FINANCE')).toBe(false);
         });
     });
 

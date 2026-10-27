@@ -1,3 +1,4 @@
+- Regional Administration Managers Governance & 7-Layer Alignment (2026-10-28): Completed end-to-end 7-layer audit and alignment across all 12 Regional Administration Manager roles (regional_operations_manager, area_operations_manager, regional_procurement_manager, regional_logistics_manager, regional_finance_manager, regional_merchandising_manager, regional_hr_manager, regional_security_manager, regional_it_manager, regional_compliance_manager, vendor_relations_manager, and cs_manager). Aligned top-bar site switching, sovereign landing routes, sidebar module visibility, dual permission matrices, Maker-Checker segregation, departmental hiring wizard pools, and applied live Postgres RLS migrations across both databases with 86 regression tests passing.
 - WMS Operations (RECEIVE, PUTAWAY, PICK) East Hararghe Oromo localization (2026-10-28): Complete English, Amharic, and authentic East Hararghe (Harargee Bahaa - Dire Dawa, Harar, Aweday, Babille) Afaan Oromoo dialect coverage across WMS Receive, Putaway, and Pick operations. Implements localized terminology for dock receiving, blind count (Lakkoofsa Ija-Cufaa), variance/discrepancies (Baqiyyaa), shelf storage (Kaawwisa Meeshaa / Bakka Kaa'uu), storage bins and aisles (Iddoo Kuusaa / Daandii Kuusaa), picking routes (Karaa Buqqisaa), pull execution (Buqqisa Meeshaa), short picks (Buqqisa Hir'uu), tote pack handovers (Dabarsa Bakka Qophii), and supervisory quantity amendments (Sirreeffama Supervaayizaraa). All components verified strictly under 500 lines.
 - Planogram (2026-10-28): store-level shelf proposals, seven placement types, accessible shelves/list, sales candidates and grouped regional decisions. Physical fixture dimensions and execution tracking remain unimplemented; see planogram integrity fixes below.
 - Smart Rules follow-up (2026-10-28): Missing sales no longer imply low demand; shared constant-volume scenario removes invented elasticity, clears stale results, and guards scope changes. Rule list distinguishes loading/errors with retry; deletion confirms intent and overlap wording distinguishes selected-rule previews from newest-first scenarios. - Pricing Rules & Simulator Governance Audit (2026-10-28): Resolved 8 high and medium pricing automation gaps: evaluated 'Sales < X' using actual 30-day recorded units sold; aligned margin action identifiers to 'Set to Cost + Margin' calculating gross selling margin (Price = Cost / (1 - Margin %)); labeled simulator results as model estimates with explicit assumption disclosure; synchronized simulator scope with execution target fetching; enforced whole-number integers across all merchandising calculations and simulation delta percentages; prevented silent returns and premature modal closures with confirmed save and inline validation; permitted zero threshold values and bounded action percentages; replaced misleading active terminology with 'Enabled' and proposal previews; added bounded pagination, search, and status filters for pricing rules; and added cross-rule category overlap and priority detection.
@@ -401,9 +402,7 @@
 - **Status**: Historical (2026-07-09); verify current implementation
 - Earlier redesign note. Its palette is superseded by the current semantic-token and accessibility standards in `docs/APPLE_DESIGN_GUIDE.md`.
 - **Files Modified**: `WarehouseTab.tsx`, `POSTab.tsx`, `POSRoleDistributionList.tsx`, `POSPointRulesList.tsx`
-
 ---
-
 ## How to Use This Registry
 
 ### For AI Assistants:
@@ -420,7 +419,6 @@
   - Database: any DB columns/tables involved
   - Root Cause: (for bug fixes) what caused the issue
 ```
-
 
 ### Site Product Suggestions and PO Preparation Roles (2026-10-23)
 - Added a site-scoped product suggestion queue for operational employees to report unmet customer or operational demand without supplier or cost details; Procurement/category reviewers can send suitable suggestions to sourcing, decline them, or mark duplicates. Suggestions do not create catalog products or POs.

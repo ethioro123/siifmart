@@ -87,7 +87,7 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                     {/* Mobile Dot Numbers */}
                     {filteredJobsCount && (
                         <div className="flex sm:hidden items-center gap-1.5 px-2 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-[10px] font-mono shrink-0">
-                            <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title="Active">
+                            <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title={t('warehouse.activeLabel') || 'Active'}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 {filteredJobsCount.active}
                             </span>
@@ -164,9 +164,9 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                         </div>
                         <input
                             type="text"
-                            placeholder="Scan barcode / job # or search SKU, order..."
-                            aria-label="Scan barcode or search product, SKU, order"
-                            title="Scan barcode or search product, SKU, order"
+                            placeholder={t('warehouse.packing.scanBarcodePrompt') || 'Scan barcode / job # or search SKU, order...'}
+                            aria-label={t('warehouse.scanPrompt') || 'Scan barcode or search product, SKU, order'}
+                            title={t('warehouse.scanPrompt') || 'Scan barcode or search product, SKU, order'}
                             value={packSearch}
                             onChange={(e) => setPackSearch(e.target.value)}
                             onKeyDown={(e) => {
@@ -185,7 +185,7 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => setPackSearch('')}
-                                    aria-label="Clear search"
+                                    aria-label={t('warehouse.clearSearch') || 'Clear search'}
                                     className="p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors rounded-lg cursor-pointer"
                                 >
                                     <X size={14} />

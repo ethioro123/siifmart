@@ -39,7 +39,7 @@ export const PlanogramListView: React.FC<PlanogramListViewProps> = ({
         </span>
       </div>
 
-      <div className="border border-[var(--theme-border)] rounded-xl overflow-hidden bg-[var(--theme-bg-card)]">
+      <div className="border border-[var(--theme-border)] rounded-xl overflow-x-auto bg-[var(--theme-bg-card)]">
         <table className="w-full text-xs text-left" aria-label="Planogram product table">
           <thead className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase">
             <tr>
@@ -55,7 +55,7 @@ export const PlanogramListView: React.FC<PlanogramListViewProps> = ({
             {products.length === 0 ? (
               <tr>
                 <td colSpan={6} className="p-8 text-center text-xs text-[var(--theme-text-secondary)]">
-                  No products placed on this fixture.
+                  No loaded products for this store.
                 </td>
               </tr>
             ) : (
@@ -147,6 +147,7 @@ export const PlanogramListView: React.FC<PlanogramListViewProps> = ({
                         </button>
 
                         <select
+                          disabled={Boolean(pending)}
                           value=""
                           onChange={(e) => {
                             if (e.target.value) {
