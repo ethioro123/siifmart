@@ -219,15 +219,15 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     );
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Product details" size="xl" footer={modalFooter}>
-            <div className="flex flex-col gap-3 text-[var(--theme-text-primary)]">
+        <Modal isOpen={isOpen} onClose={onClose} title="Product details" size="lg" footer={modalFooter}>
+            <div className="flex flex-col gap-1 text-[var(--theme-text-primary)]">
                 {/* Executive Hero Product Profile Header */}
                 <ProductProfileHeader product={product} showCostPrice={showCostPrice} currencySymbol={activeCurrency} />
 
                 {/* Multi-Site & Store Stock Locations */}
-                <details className="border-b border-[var(--theme-border)] pb-4"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Stock locations</summary><ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} /></details>
+                <details className="border-b border-[var(--theme-border)] pb-2"><summary className="min-h-[44px] cursor-pointer py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Stock locations</summary><ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} /></details>
 
-                <details className="border-b border-[var(--theme-border)] pb-4 space-y-4"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Product specifications</summary>
+                <details className="border-b border-[var(--theme-border)] pb-2 space-y-3"><summary className="min-h-[44px] cursor-pointer py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Product specifications</summary>
                     <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2.5">
                         <div className="flex items-center gap-2">
                             <Info size={14} className="text-[var(--theme-text-secondary)]" />
@@ -246,7 +246,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     {(() => {
                         const smartProfile = resolveSmartProductAttributes(product, allProducts, activeCurrency);
                         return (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
                                 <DetailField label="SKU" value={product.sku} icon={Hash} />
                                 <DetailField label="Product barcode" value={barcodeList.length > 0 ? <span className="font-mono">{barcodeList.join(', ')}</span> : null} icon={ScanBarcode} />
                                 <DetailField label="Brand" value={smartProfile.brand} icon={Building2} highlight={Boolean(smartProfile.brand)} />
@@ -283,7 +283,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     })()}
                 </details>
                 <ProductHandlingDetails product={product} currencySymbol={activeCurrency}/>
-                <details className="border-b border-[var(--theme-border)] pb-4 space-y-4"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Pricing details</summary>
+                <details className="border-b border-[var(--theme-border)] pb-2 space-y-3"><summary className="min-h-[44px] cursor-pointer py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Pricing details</summary>
                     <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
                         <DollarSign size={14} className="text-[var(--theme-text-secondary)]" />
                         <h3 className="text-sm font-medium text-[var(--theme-text-primary)]">Financial & Pricing Details</h3>
@@ -291,7 +291,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     {(() => {
                         const smartProfile = resolveSmartProductAttributes(product, allProducts, activeCurrency);
                         return (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
                                 <DetailField label="Stock value at selling price" value={price > 0 ? `${activeCurrency} ${formatPriceValue((product.stock || 0) * price)}` : 'Selling price not set'} />
                                 <DetailField label="Stock value calculation" value={`${product.stock || 0} × ${activeCurrency} ${formatPriceValue(price)}`} />
                                 <DetailField label="Retail Price" value={`${activeCurrency} ${formatPriceValue(product.price)}`} icon={DollarSign} />
@@ -313,9 +313,9 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     })()}
                 </details>
 
-                <details className="border-b border-[var(--theme-border)] pb-4"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Stock policies and activity</summary>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+                <details className="border-b border-[var(--theme-border)] pb-2"><summary className="min-h-[44px] cursor-pointer py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Stock policies and activity</summary>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="bg-[var(--theme-bg-card)] p-3 rounded-xl border border-[var(--theme-border)] space-y-4 shadow-xs">
                         <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2.5">
                             <div className="flex items-center gap-2">
                                 <Layers size={14} className="text-[var(--theme-text-secondary)]" />
@@ -419,7 +419,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                             </div>
                         )}
                     </div>
-                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+                    <div className="bg-[var(--theme-bg-card)] p-3 rounded-xl border border-[var(--theme-border)] space-y-4 shadow-xs">
                         <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
                             <TrendingUp size={14} className="text-[var(--theme-text-secondary)]" />
                             <h3 className="text-sm font-medium text-[var(--theme-text-primary)]">Restock Log & Audits</h3>
@@ -442,7 +442,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                 </div>
 
                 </details>
-                <details className="border-b border-[var(--theme-border)] pb-4 text-sm leading-relaxed"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Description</summary>
+                <details className="border-b border-[var(--theme-border)] pb-4 text-sm leading-relaxed"><summary className="min-h-[44px] cursor-pointer py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Description</summary>
 
                     <span className="text-[var(--theme-text-primary)] font-bold">{systemDesc || '—'}</span>
                     {customAttrs?.descriptive?.keyFeatures && <p className="mt-2 text-[var(--theme-text-secondary)]">{customAttrs.descriptive.keyFeatures}</p>}

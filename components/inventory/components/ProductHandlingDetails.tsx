@@ -16,9 +16,9 @@ export function ProductHandlingDetails({product,currencySymbol}:Props){
  const handling=[profile.isPerishable&&'Perishable',profile.isColdChain&&'Cold chain',profile.isDeepFreeze&&'Deep freeze',
   profile.isFragile&&'Fragile',profile.isHighValue&&'High value',profile.isHazardous&&'Hazardous',profile.isHalal&&'Halal',
   profile.requiresBatch&&'Batch tracking required',(profile.requiresSerial||profile.isSerialTracked)&&'Serial tracking required',profile.isWeightedScale&&'Scale weighing'].filter(Boolean);
- return <details className="border-b border-[var(--theme-border)] pb-4">
-  <summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Packaging, handling and category details</summary>
-  <dl className="grid grid-cols-1 gap-x-8 gap-y-4 pt-3 sm:grid-cols-2">
+ return <details className="border-b border-[var(--theme-border)] pb-2">
+  <summary className="min-h-[44px] cursor-pointer py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Packaging, handling and category details</summary>
+  <dl className="grid grid-cols-1 gap-x-4 gap-y-3 pt-2 sm:grid-cols-2">
    {fields.filter(([,value])=>value!==null&&value!==undefined&&value!=='').map(([label,value],index)=><div key={`${label}-${index}`} className="min-w-0"><dt className="text-sm text-[var(--theme-text-secondary)]">{label}</dt><dd className="mt-1 text-sm leading-relaxed break-words text-[var(--theme-text-primary)]">{value}</dd></div>)}
    {handling.length>0&&<div className="sm:col-span-2"><dt className="text-sm text-[var(--theme-text-secondary)]">Handling and tracking</dt><dd className="mt-1 text-sm leading-relaxed text-[var(--theme-text-primary)]">{handling.join(' · ')}</dd></div>}
   </dl>
