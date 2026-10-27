@@ -1,10 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { X, Building2, MapPin, DollarSign, ShieldAlert, Check } from 'lucide-react';
-import type { Site, Employee } from '../../../types';
+import React, { useEffect, useState, useMemo } from 'react';
+import { X, Building2, MapPin, DollarSign, ShieldAlert, Check, Sparkles, AlertTriangle } from 'lucide-react';
+import type { Region, Site, Employee } from '../../../types';
 import type { CreateRegionInput } from '../../../services/regions.service';
 import { useCreateRegionMutation } from '../../../hooks/useRegionMutations';
 import { normalizeCountryCode } from '../../../utils/siteIdGenerator';
 import { getCountryProfile, Country } from '../../../utils/localization';
+import {
+    generateNextSmartRegionCode,
+    validateRegionCodeInput,
+    formatRegionCode
+} from '../../../utils/regionIdGenerator';
+import { CreateRegionBudgetFields } from './CreateRegionBudgetFields';
 
 interface CreateRegionModalProps {
     isOpen: boolean;
@@ -15,6 +21,8 @@ interface CreateRegionModalProps {
     sites: Site[];
     employees: Employee[];
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
+    existingRegions?: Region[];
+    existingRegionCodes?: string[];
 }
 
 export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
@@ -25,13 +33,16 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     currency,
     sites,
     employees,
-    addNotification
+    addNotification,
+    existingRegions,
+    existingRegionCodes
 }) => {
     const createRegionMutation = useCreateRegionMutation();
     const selectedCountry = normalizeCountryCode(country) as Country;
     const [name, setName] = useState('');
     const [code, setCode] = useState('');
     const [city, setCity] = useState('');
+    const [isCodeManual, setIsCodeManual] = useState(false);
     const [adminHubSiteId, setAdminHubSiteId] = useState('');
     const [regionalManagerId, setRegionalManagerId] = useState('');
     const [monthlyBudget, setMonthlyBudget] = useState('0');
@@ -42,11 +53,28 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const activeProfile = getCountryProfile(selectedCountry);
 
+    // Build consolidated list of existing region codes across database, prop, and sites
+    const knownExistingCodes = useMemo(() => {
+        const set = new Set<string>();
+        if (existingRegionCodes) {
+            existingRegionCodes.forEach(c => set.add(c.trim().toUpperCase()));
+        }
+        if (existingRegions) {
+            existingRegions.forEach(r => set.add(r.code.trim().toUpperCase()));
+        }
+        sites.forEach(s => {
+            const reg = s.region_code || s.regionCode;
+            if (reg && reg.includes('-')) set.add(reg.trim().toUpperCase());
+        });
+        return Array.from(set);
+    }, [existingRegionCodes, existingRegions, sites]);
+
     useEffect(() => {
         if (!isOpen) return;
         setName('');
         setCode('');
         setCity('');
+        setIsCodeManual(false);
         setAdminHubSiteId('');
         setRegionalManagerId('');
         setMonthlyBudget('0');
@@ -73,17 +101,54 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     const currencyCode = activeProfile.currencyCode;
     const administrationSites = countrySites.filter(s => ['administration', 'administrative'].includes(s.type?.toLowerCase()));
 
-    const handleGenerateCode = (regionName: string) => {
-        setName(regionName);
-        if (!code || code.startsWith(`${selectedCountry}-`)) {
-            const cleanSlug = regionName
-                .toUpperCase()
-                .replace(/[^A-Z0-9]/g, '_')
-                .replace(/_+/g, '_')
-                .slice(0, 15);
-            setCode(`${selectedCountry}-${cleanSlug}`);
+    // Smart auto-generation for Region Name
+    const handleNameChange = (newName: string) => {
+        setName(newName);
+        if (!isCodeManual) {
+            const smart = generateNextSmartRegionCode({
+                name: newName,
+                city,
+                country: selectedCountry,
+                existingCodes: knownExistingCodes
+            });
+            setCode(smart);
         }
     };
+
+    // Smart auto-generation for City
+    const handleCityChange = (newCity: string) => {
+        setCity(newCity);
+        if (!isCodeManual && !name) {
+            const smart = generateNextSmartRegionCode({
+                name,
+                city: newCity,
+                country: selectedCountry,
+                existingCodes: knownExistingCodes
+            });
+            setCode(smart);
+        }
+    };
+
+    // Manual code editing
+    const handleCodeChange = (rawInput: string) => {
+        setIsCodeManual(true);
+        const clean = rawInput.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 7);
+        setCode(clean);
+    };
+
+    const handleApplySuggestion = (suggested: string) => {
+        setCode(suggested);
+        setIsCodeManual(false);
+    };
+
+    // Live validation against format and collision
+    const codeValidation = validateRegionCodeInput({
+        code,
+        country: selectedCountry,
+        existingCodes: knownExistingCodes,
+        name,
+        city
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -91,10 +156,24 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
             addNotification('alert', 'Region name is required');
             return;
         }
-        if (!code.trim()) {
-            addNotification('alert', 'Territorial code is required');
+
+        const validation = validateRegionCodeInput({
+            code,
+            country: selectedCountry,
+            existingCodes: knownExistingCodes,
+            name,
+            city
+        });
+
+        if (!validation.valid) {
+            addNotification('alert', validation.error || 'Territorial code is invalid or already in use');
+            if (validation.suggestedCode) {
+                setCode(validation.suggestedCode);
+                setIsCodeManual(false);
+            }
             return;
         }
+
         if (!changeReason.trim()) {
             addNotification('alert', 'Please provide a reason for creating this region');
             return;
@@ -127,9 +206,10 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
 
         setIsSubmitting(true);
         try {
+            const formattedCode = formatRegionCode(code, selectedCountry);
             const payload: CreateRegionInput = {
                 name: name.trim(),
-                code: code.trim().toUpperCase(),
+                code: formattedCode,
                 country: selectedCountry,
                 city: city.trim() || undefined,
                 default_currency: currencyCode,
@@ -144,7 +224,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
             };
 
             await createRegionMutation.mutateAsync(payload);
-            addNotification('success', `Region "${name}" provisioned successfully`);
+            addNotification('success', `Region "${name}" (${formattedCode}) provisioned successfully`);
             onCreated();
             onClose();
         } catch (err) {
@@ -192,24 +272,60 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             <input
                                 type="text"
                                 value={name}
-                                onChange={(e) => handleGenerateCode(e.target.value)}
+                                onChange={(e) => handleNameChange(e.target.value)}
                                 placeholder="e.g. Mombasa Coastal"
                                 required
                                 className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
-                                Territorial Code *
-                            </label>
+                            <div className="flex items-center justify-between mb-1">
+                                <label className="block text-xs font-medium text-[var(--theme-text-primary)]">
+                                    Territorial Code * ({selectedCountry}-XXX)
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => handleApplySuggestion(generateNextSmartRegionCode({
+                                        name,
+                                        city,
+                                        country: selectedCountry,
+                                        existingCodes: knownExistingCodes
+                                    }))}
+                                    className="text-[10px] text-[var(--theme-accent)] hover:underline flex items-center gap-1 cursor-pointer font-medium"
+                                    title="Auto-calculate the next unique 3 letters"
+                                >
+                                    <Sparkles size={11} />
+                                    <span>Next Unique</span>
+                                </button>
+                            </div>
                             <input
                                 type="text"
                                 value={code}
-                                onChange={(e) => setCode(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                                placeholder="e.g. ke_mombasa"
+                                onChange={(e) => handleCodeChange(e.target.value)}
+                                placeholder={`e.g. ${selectedCountry}-ADD`}
                                 required
-                                className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                                maxLength={7}
+                                className={`w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-subtle)] border rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] uppercase ${
+                                    !codeValidation.valid ? 'border-amber-500 ring-1 ring-amber-500/30' : 'border-[var(--theme-border)]'
+                                }`}
                             />
+                            {!codeValidation.valid && (
+                                <div className="mt-1.5 p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-between gap-1 text-[11px] text-amber-700 dark:text-amber-300">
+                                    <div className="flex items-center gap-1.5 min-w-0 pr-1">
+                                        <AlertTriangle size={12} className="shrink-0 text-amber-500" />
+                                        <span className="truncate">{codeValidation.error}</span>
+                                    </div>
+                                    {codeValidation.suggestedCode && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleApplySuggestion(codeValidation.suggestedCode!)}
+                                            className="shrink-0 px-2 py-0.5 rounded font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-colors cursor-pointer text-[10px]"
+                                        >
+                                            Use {codeValidation.suggestedCode}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -224,7 +340,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                 <input
                                     type="text"
                                     value={city}
-                                    onChange={(e) => setCity(e.target.value)}
+                                    onChange={(e) => handleCityChange(e.target.value)}
                                     placeholder="e.g. Mombasa"
                                     className="w-full pl-8 pr-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                                 />
@@ -285,87 +401,18 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         />
                     </div>
 
-                    {/* Dynamic Budget & Dynamic PO Controls (HQ Centralized Limit) */}
-                    <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
-                        <div className="flex items-center gap-2">
-                            <DollarSign size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
-                            <h4 className="text-xs font-semibold text-[var(--theme-text-primary)]">
-                                Dynamic HQ Budget & Autonomous Spend Limits
-                            </h4>
-                        </div>
-                        <p className="text-[11px] text-[var(--theme-text-secondary)]">
-                            Values are stored dynamically in the central database and can be adjusted anytime by National HQ.
-                        </p>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Monthly Procurement Budget ({currency})
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="10000"
-                                    value={monthlyBudget}
-                                    onChange={(e) => setMonthlyBudget(e.target.value)}
-                                    placeholder="5000000"
-                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Autonomous PO Limit ({currency})
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="5000"
-                                    value={autonomousLimit}
-                                    onChange={(e) => setAutonomousLimit(e.target.value)}
-                                    placeholder="Set a regional limit"
-                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-[var(--theme-border)]/50">
-                            <div>
-                                <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Monthly Expense Budget ({currency})
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="5000"
-                                    value={monthlyExpenseBudget}
-                                    onChange={(e) => setMonthlyExpenseBudget(e.target.value)}
-                                    placeholder="500000"
-                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Autonomous Expense Limit ({currency})
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="1000"
-                                    value={autonomousExpenseLimit}
-                                    onChange={(e) => setAutonomousExpenseLimit(e.target.value)}
-                                    placeholder="25000"
-                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-1.5 text-[11px] text-[var(--theme-text-secondary)] pt-1">
-                            <ShieldAlert size={13} className="shrink-0 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mt-0.5" />
-                            <span>
-                                Orders or expenses exceeding regional autonomous limits automatically require 4-eyes approval from National HQ before issuance.
-                            </span>
-                        </div>
-                    </div>
+                    {/* Dynamic Budget & Dynamic Spend Limits */}
+                    <CreateRegionBudgetFields
+                        currency={currency}
+                        monthlyBudget={monthlyBudget}
+                        setMonthlyBudget={setMonthlyBudget}
+                        autonomousLimit={autonomousLimit}
+                        setAutonomousLimit={setAutonomousLimit}
+                        monthlyExpenseBudget={monthlyExpenseBudget}
+                        setMonthlyExpenseBudget={setMonthlyExpenseBudget}
+                        autonomousExpenseLimit={autonomousExpenseLimit}
+                        setAutonomousExpenseLimit={setAutonomousExpenseLimit}
+                    />
 
                     {/* Footer Actions */}
                     <div className="pt-2 flex items-center justify-end gap-2">

@@ -2,6 +2,7 @@ import React from 'react';
 import { RefreshCw, Search, Filter, ChevronDown, CheckCircle, Box, AlertTriangle, Hash, Zap, Loader2 } from 'lucide-react';
 import { SortDropdown } from '../FulfillmentShared';
 import { WMSJob, Product } from '../../../types';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface ReplenishHeaderProps {
     viewMode?: 'Process' | 'History';
@@ -50,7 +51,23 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
     addNotification,
     activeSite
 }) => {
+    const { t } = useLanguage();
     const alertCount = filteredProducts.filter(p => p.stock < (p.minStock || 10)).length;
+
+    const getFilterLabel = (filter: 'all' | 'critical' | 'low' | 'optimal', isArchive: boolean = false) => {
+        switch (filter) {
+            case 'all':
+                return isArchive ? t('warehouse.allArchives') : t('warehouse.allLevels');
+            case 'critical':
+                return t('warehouse.critical');
+            case 'low':
+                return t('warehouse.low');
+            case 'optimal':
+                return t('warehouse.optimal');
+            default:
+                return filter;
+        }
+    };
 
     return (
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2 sm:p-5 shadow-xs mb-2">
@@ -58,10 +75,12 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
             <div className="flex sm:hidden items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                     <RefreshCw size={14} className="text-[var(--theme-accent)] shrink-0" />
-                    <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">Replenish</span>
+                    <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">
+                        {t('warehouse.replenish')}
+                    </span>
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                        {alertCount} Alerts
+                        {t('warehouse.alertsCount', { count: alertCount })}
                     </span>
                 </div>
             </div>
@@ -72,11 +91,15 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                         <RefreshCw size={20} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-[var(--theme-text-primary)] tracking-tight uppercase">Replenishment Matrix</h3>
+                        <h3 className="text-lg font-bold text-[var(--theme-text-primary)] tracking-tight uppercase">
+                            {t('warehouse.replenishmentMatrix')}
+                        </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] font-medium flex items-center gap-2">
-                            <span>Forward Pick Hub</span>
+                            <span>{t('warehouse.forwardPickHub')}</span>
                             <span className="w-1 h-1 rounded-full bg-[var(--theme-border)]" />
-                            <span className="font-mono tabular-nums text-[var(--theme-accent)] font-semibold">{alertCount} Alerts</span>
+                            <span className="font-mono tabular-nums text-[var(--theme-accent)] font-semibold">
+                                {t('warehouse.alertsCount', { count: alertCount })}
+                            </span>
                         </p>
                     </div>
                 </div>
@@ -93,7 +116,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >
-                                Process
+                                {t('warehouse.processMode')}
                             </button>
                             <button
                                 onClick={() => setViewMode('History')}
@@ -103,7 +126,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >
-                                History
+                                {t('warehouse.historyMode')}
                             </button>
                         </div>
                     )}
@@ -117,7 +140,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                     className="flex items-center gap-1.5 px-3 py-2 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider transition-colors min-h-[44px]"
                                 >
                                     <Filter size={14} className={replenishFilter !== 'all' ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'} />
-                                    <span>{replenishFilter === 'all' ? 'ALL LEVELS' : replenishFilter.toUpperCase()}</span>
+                                    <span>{getFilterLabel(replenishFilter)}</span>
                                     <ChevronDown size={14} className={`transition-transform duration-200 text-[var(--theme-text-secondary)] ${isReplenishFilterDropdownOpen ? 'rotate-180' : ''}`} />
                                 </button>
 
@@ -138,7 +161,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                                             : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                                     }`}
                                                 >
-                                                    {filter === 'all' ? 'ALL ARCHIVES' : filter.toUpperCase()}
+                                                    {getFilterLabel(filter, true)}
                                                     {replenishFilter === filter && <CheckCircle size={14} />}
                                                 </button>
                                             ))}
@@ -149,11 +172,11 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
 
                             {/* Sort Dropdown */}
                             <SortDropdown
-                                label="Sort"
+                                label={t('warehouse.sortByLabel') || 'Sort'}
                                 options={[
-                                    { id: 'urgency' as const, label: 'Urgency', icon: <AlertTriangle size={14} /> },
-                                    { id: 'stock' as const, label: 'Stock', icon: <Box size={14} /> },
-                                    { id: 'name' as const, label: 'Name', icon: <Hash size={14} /> }
+                                    { id: 'urgency' as const, label: t('warehouse.urgency'), icon: <AlertTriangle size={14} /> },
+                                    { id: 'stock' as const, label: t('warehouse.stock'), icon: <Box size={14} /> },
+                                    { id: 'name' as const, label: t('warehouse.name'), icon: <Hash size={14} /> }
                                 ]}
                                 value={replenishSortBy}
                                 onChange={(val) => setReplenishSortBy(val)}
@@ -166,11 +189,11 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                 onClick={() => {
                                     const lowStock = filteredProducts.filter(p => p.stock < (p.minStock || 10));
                                     setSelectedReplenishItems(new Set(lowStock.map(p => p.id)));
-                                    addNotification('info', `Selected ${lowStock.length} items for optimization`);
+                                    addNotification('info', t('warehouse.selectedForOptimization', { count: lowStock.length }));
                                 }}
                                 className="px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider transition-colors min-h-[44px]"
                             >
-                                Select Low Stock
+                                {t('warehouse.selectLowStock')}
                             </button>
                             <button
                                 disabled={selectedReplenishItems.size === 0 || isSubmitting}
@@ -213,7 +236,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                             await wmsJobsService.create(job);
                                             createdCount++;
                                         }
-                                        addNotification('success', `Initialized ${createdCount} Optimization Sequences`);
+                                        addNotification('success', t('warehouse.initializedSequences', { count: createdCount }));
                                         setSelectedReplenishItems(new Set());
                                     } finally {
                                         setIsSubmitting(false);
@@ -222,7 +245,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                 className="px-4 py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-opacity flex items-center gap-2 min-h-[44px] shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
-                                {isSubmitting ? 'Processing...' : `Execute (${selectedReplenishItems.size})`}
+                                {isSubmitting ? t('warehouse.processingProgress') : t('warehouse.executeCount', { count: selectedReplenishItems.size })}
                             </button>
                         </>
                     )}
@@ -236,9 +259,9 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                 </div>
                 <input
                     type="text"
-                    placeholder="Scan product barcode or search inventory matrix..."
-                    aria-label="Scan or Search Inventory"
-                    title="Scan or Search Inventory"
+                    placeholder={t('warehouse.scanInventoryPlaceholder')}
+                    aria-label={t('warehouse.scanOrSearchInventory')}
+                    title={t('warehouse.scanOrSearchInventory')}
                     value={replenishSearch}
                     onChange={(e) => setReplenishSearch(e.target.value)}
                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/50 outline-none transition-colors min-h-[44px]"

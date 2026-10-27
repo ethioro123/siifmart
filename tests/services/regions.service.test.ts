@@ -239,5 +239,22 @@ describe('regionsService - Dynamic Budget & Operations', () => {
         });
 
         expect(insertedPayload.country).toBe('KE');
+        expect(insertedPayload.code).toBe('KE-RIF');
+    });
+
+    it('rejects duplicate region codes and propagates uniqueness error', async () => {
+        (supabase.rpc as any).mockResolvedValue({
+            data: null,
+            error: { message: 'Region code ET-ADD already exists. Each region code must be unique', code: '23505' }
+        });
+
+        await expect(regionsService.createRegion({
+            code: 'ET-ADD',
+            name: 'Addis Ababa Central Region',
+            country: 'ET',
+            default_currency: 'ETB',
+            autonomous_po_limit: 0,
+            change_reason: 'Duplicate region test'
+        })).rejects.toThrow('Region code ET-ADD already exists');
     });
 });

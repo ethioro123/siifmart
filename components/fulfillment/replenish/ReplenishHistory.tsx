@@ -5,6 +5,7 @@ import { WMSJob } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
 import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface ReplenishHistoryProps {
     historicalJobs: WMSJob[];
@@ -21,6 +22,7 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
     setIsDetailsOpen,
     employees
 }) => {
+    const { t } = useLanguage();
     const [replenishHistorySearch, setReplenishHistorySearch] = useState('');
     const [replenishHistoryPage, setReplenishHistoryPage] = useState(1);
 
@@ -83,9 +85,11 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                 <div>
                     <h4 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2 uppercase tracking-wide">
                         <HistoryIcon size={18} className="text-[var(--theme-text-secondary)]" />
-                        Replenishment History
+                        {t('warehouse.replenishHistory')}
                     </h4>
-                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Completed replenishment and forward-pick restock records</p>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">
+                        {t('warehouse.replenishHistorySubtitle')}
+                    </p>
                 </div>
 
                 {/* History Search */}
@@ -93,9 +97,9 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={14} />
                     <input
                         type="text"
-                        placeholder="Search history, worker, SKU..."
-                        aria-label="Search replenishment history"
-                        title="Search replenishment history"
+                        placeholder={t('warehouse.searchHistoryPlaceholder')}
+                        aria-label={t('warehouse.searchReplenishHistory')}
+                        title={t('warehouse.searchReplenishHistory')}
                         value={replenishHistorySearch}
                         onChange={(e) => setReplenishHistorySearch(e.target.value)}
                         className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl py-2 pl-9 pr-3 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/50 outline-none transition-colors min-h-[44px]"
@@ -121,7 +125,7 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                                             {formatJobId(job)}
                                         </span>
                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium break-words mt-0.5">
-                                            {job.orderRef || 'Internal'}
+                                            {job.orderRef || t('warehouse.internal')}
                                             {job.jobNumber && <span className="text-[var(--theme-text-primary)] ml-1 font-mono">• {job.jobNumber}</span>}
                                         </p>
                                     </div>
@@ -134,14 +138,14 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                                     {/* Completed By Attribution */}
                                     <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)] font-medium">
                                         <User size={13} className="text-[var(--theme-accent)] shrink-0" />
-                                        <span className="font-semibold text-[var(--theme-text-primary)]">Completed By:</span>
+                                        <span className="font-semibold text-[var(--theme-text-primary)]">{t('warehouse.completedByColon')}</span>
                                         <span className="break-words leading-tight">{getWorkerDisplay(job)}</span>
                                     </div>
 
                                     <div className="flex justify-between items-center text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums">
                                         <span>{formatDateTime(job.updatedAt || job.createdAt || '')}</span>
                                         <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
-                                            {job.items || 1} <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal">units</span>
+                                            {job.items || 1} <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal">{t('warehouse.unitsWord')}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -156,13 +160,15 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                             totalItems={filteredReplenishHistory.length}
                             itemsPerPage={REPLENISH_HISTORY_PER_PAGE}
                             onPageChange={setReplenishHistoryPage}
-                            itemName="history records"
+                            itemName={t('warehouse.historyRecordsWord') || 'history records'}
                         />
                     </div>
                 </>
             ) : (
                 <div className="text-center py-12 px-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm">
-                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium">No matching replenishment history records found</p>
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                        {t('warehouse.noMatchingHistoryFound')}
+                    </p>
                 </div>
             )}
         </div>

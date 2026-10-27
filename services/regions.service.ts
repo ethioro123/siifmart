@@ -9,6 +9,7 @@ import type { Region } from '../types';
 import { logger } from '../utils/logger';
 import { normalizeCountryCode } from '../utils/siteIdGenerator';
 import { getCountryProfile } from '../utils/localization';
+import { formatRegionCode, isValidRegionCodeFormat } from '../utils/regionIdGenerator';
 
 export interface CreateRegionInput {
     code: string;
@@ -120,7 +121,8 @@ export const regionsService = {
      */
     async getRegionByCode(code: string): Promise<Region | null> {
         try {
-            const { data, error } = await supabase
+            const cleanCode = code.trim().toUpperCase();
+            let { data, error } = await supabase
                 .from('regions')
                 .select(`
                     code,
@@ -139,8 +141,34 @@ export const regionsService = {
                     created_at,
                     updated_at
                 `)
-                .eq('code', code)
+                .eq('code', cleanCode)
                 .maybeSingle();
+
+            if (!data && cleanCode !== code.trim()) {
+                const retry = await supabase
+                    .from('regions')
+                    .select(`
+                        code,
+                        name,
+                        country,
+                        city,
+                        default_currency,
+                        default_language,
+                        admin_hub_site_id,
+                        regional_manager_id,
+                        monthly_procurement_budget,
+                        autonomous_po_limit,
+                        monthly_expense_budget,
+                        autonomous_expense_limit,
+                        status,
+                        created_at,
+                        updated_at
+                    `)
+                    .eq('code', code.trim())
+                    .maybeSingle();
+                data = retry.data;
+                error = retry.error;
+            }
 
             if (error) {
                 logger.error('regionsService', `Error fetching region ${code}`, error);
@@ -182,10 +210,18 @@ export const regionsService = {
             if (input.autonomous_po_limit == null || !Number.isFinite(input.autonomous_po_limit) || input.autonomous_po_limit < 0) {
                 throw new Error('Set the regional PO approval limit before creating a region');
             }
+
+            const normalizedCountry = normalizeCountryCode(input.country);
+            const normalizedCode = formatRegionCode(input.code, normalizedCountry);
+
+            if (!isValidRegionCodeFormat(normalizedCode, normalizedCountry)) {
+                throw new Error(`Region code "${input.code}" is invalid. Territorial code must follow format ${normalizedCountry}-XXX (3 uppercase letters).`);
+            }
+
             const payload = {
-                code: input.code.toLowerCase().trim(),
+                code: normalizedCode,
                 name: input.name.trim(),
-                country: normalizeCountryCode(input.country),
+                country: normalizedCountry,
                 city: input.city || null,
                 default_currency: input.default_currency,
                 default_language: input.default_language || 'en',

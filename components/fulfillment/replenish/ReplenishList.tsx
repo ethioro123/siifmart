@@ -2,6 +2,7 @@ import React from 'react';
 import { RefreshCw, MapPin, AlertTriangle, Plus, Loader2, CheckCircle, Package, ChevronDown } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { Product, WMSJob } from '../../../types';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface ReplenishListProps {
     sortedReplenishItems: Product[];
@@ -40,6 +41,22 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
     addNotification,
     activeSite
 }) => {
+    const { t } = useLanguage();
+
+    const getUrgencyDisplay = (urgency: string) => {
+        switch (urgency) {
+            case 'Critical':
+                return t('warehouse.criticalStatus');
+            case 'High':
+                return t('warehouse.highStatus');
+            case 'Low':
+                return t('warehouse.lowStatus');
+            case 'Stable':
+            default:
+                return t('warehouse.stableStatus');
+        }
+    };
+
     return (
         <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar">
             {paginatedReplenishItems.map(p => {
@@ -134,16 +151,16 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                             <div className="flex items-center gap-4 sm:gap-6 shrink-0">
                                 <div className="hidden sm:flex flex-col items-end">
                                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider mb-1">
-                                        Status
+                                        {t('warehouse.statusLabel')}
                                     </p>
                                     <span className={`text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${urgencyBadgeClass}`}>
-                                        {urgencyLabel}
+                                        {getUrgencyDisplay(urgencyLabel)}
                                     </span>
                                 </div>
 
                                 <div className="text-right">
                                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider mb-1">
-                                        Stock Level
+                                        {t('warehouse.stockLevel')}
                                     </p>
                                     <div className="flex items-baseline gap-1 justify-end font-mono tabular-nums">
                                         <span className={`text-lg sm:text-xl font-bold ${p.stock < minStock ? 'text-amber-500' : 'text-[var(--theme-text-primary)]'}`}>
@@ -165,27 +182,27 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-2">
                                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 shadow-sm">
                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                                            <RefreshCw size={12} className="text-[var(--theme-accent)]" /> Optimization Strategy
+                                            <RefreshCw size={12} className="text-[var(--theme-accent)]" /> {t('warehouse.optimizationStrategy')}
                                         </p>
                                         <p className="text-xs text-[var(--theme-text-primary)] font-semibold mb-1">
-                                            Target Restock: <span className="text-[var(--theme-accent)] font-mono tabular-nums">+{restockQty} Units</span>
+                                            {t('warehouse.targetRestock')} <span className="text-[var(--theme-accent)] font-mono tabular-nums">{t('warehouse.targetRestockUnits', { units: restockQty })}</span>
                                         </p>
-                                        <p className="text-[11px] text-[var(--theme-text-secondary)]">Auto-calculated ({maxStock} unit ceiling)</p>
+                                        <p className="text-[11px] text-[var(--theme-text-secondary)]">{t('warehouse.autoCalculatedCeiling', { maxStock })}</p>
                                     </div>
 
                                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 shadow-sm">
                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                                            <MapPin size={12} className="text-[var(--theme-accent)]" /> Source Location
+                                            <MapPin size={12} className="text-[var(--theme-accent)]" /> {t('warehouse.sourceLocation')}
                                         </p>
                                         <p className="text-xs text-[var(--theme-text-primary)] font-semibold mb-1">
-                                            Bulk Storage: <span className="text-[var(--theme-accent)] font-mono tabular-nums">ZONE-B-041</span>
+                                            {t('warehouse.bulkStorage')} <span className="text-[var(--theme-accent)] font-mono tabular-nums">ZONE-B-041</span>
                                         </p>
-                                        <p className="text-[11px] text-[var(--theme-text-secondary)]">Standard warehouse pallets</p>
+                                        <p className="text-[11px] text-[var(--theme-text-secondary)]">{t('warehouse.standardPallets')}</p>
                                     </div>
 
                                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 shadow-sm">
                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                                            <AlertTriangle size={12} className="text-amber-500" /> Velocity Alerts
+                                            <AlertTriangle size={12} className="text-amber-500" /> {t('warehouse.velocityAlerts')}
                                         </p>
                                         {(() => {
                                             const pendingOrders = sales.filter(s =>
@@ -195,9 +212,9 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                                             return (
                                                 <>
                                                     <p className="text-xs text-[var(--theme-text-primary)] font-semibold mb-1">
-                                                        Status: <span className={pendingOrders > 0 ? 'text-amber-500' : 'text-green-500'}>{pendingOrders > 0 ? 'BACKLOGGED' : 'STABLE'}</span>
+                                                        {t('warehouse.statusLabel')}: <span className={pendingOrders > 0 ? 'text-amber-500' : 'text-green-500'}>{pendingOrders > 0 ? t('warehouse.backlogged') : t('warehouse.stable')}</span>
                                                     </p>
-                                                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums">{pendingOrders} orders awaiting resupply</p>
+                                                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums">{t('warehouse.ordersAwaitingResupply', { count: pendingOrders })}</p>
                                                 </>
                                             );
                                         })()}
@@ -236,7 +253,7 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                                                         orderRef: `REPLENISH-${p.sku}`
                                                     };
                                                     await wmsJobsService.create(job);
-                                                    addNotification('success', `Sequence Initialized for ${p.sku}`);
+                                                    addNotification('success', t('warehouse.sequenceInitializedFor', { sku: p.sku }));
                                                 } finally {
                                                     setCreatingReplenishTask(null);
                                                 }
@@ -244,7 +261,7 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                                             className="w-full bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl text-xs font-semibold py-2.5 px-3 min-h-[44px] flex items-center justify-center gap-2 shadow-sm transition-opacity"
                                         >
                                             {creatingReplenishTask === p.id ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                                            <span>Initialize Optimization</span>
+                                            <span>{t('warehouse.initializeOptimization')}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -263,7 +280,7 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                         itemsPerPage={REPLENISH_ITEMS_PER_PAGE}
                         onPageChange={setReplenishCurrentPage}
                         isLoading={false}
-                        itemName="items"
+                        itemName={t('warehouse.itemsWord') || 'items'}
                     />
                 </div>
             )}
@@ -273,8 +290,12 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                     <div className="w-14 h-14 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center mb-3 text-green-500">
                         <CheckCircle size={28} />
                     </div>
-                    <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">System Optimized</h3>
-                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium max-w-sm mt-1">No replenishment required for the current inventory cycle.</p>
+                    <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">
+                        {t('warehouse.systemOptimized')}
+                    </h3>
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium max-w-sm mt-1">
+                        {t('warehouse.noReplenishRequired')}
+                    </p>
                 </div>
             )}
         </div>

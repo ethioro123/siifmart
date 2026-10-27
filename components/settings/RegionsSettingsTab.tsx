@@ -311,6 +311,7 @@ export default function RegionsSettingsTab() {
                 sites={countrySites}
                 employees={countryEmployees}
                 addNotification={addNotification}
+                existingRegions={regions}
             />
 
             {/* Edit Region Modal */}

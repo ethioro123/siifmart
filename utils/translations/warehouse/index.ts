@@ -6,6 +6,7 @@ import { receiving } from './receiving';
 import { picking } from './picking';
 import { packing } from './packing';
 import { putaway } from './putaway';
+import { replenish } from './replenish';
 import { modals } from './modals';
 import { auxiliary } from './auxiliary';
 import { messages } from './messages';
@@ -25,6 +26,8 @@ export const warehouse: TranslationBlock = {
     packing,
     ...putaway,
     putaway,
+    ...replenish,
+    replenish,
     ...misc,
     misc,
     ...modals,
