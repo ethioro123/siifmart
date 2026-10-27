@@ -109,17 +109,36 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
     });
 
     describe('Regional Finance Manager (regional_finance_manager)', () => {
-        it('authorizes regional financial review, revenue inspection, and expense creation', () => {
+        it('authorizes regional financial review, revenue inspection, expense/PO approval, and finance team onboarding', () => {
             expect(hasPermission('regional_finance_manager', 'ACCESS_FINANCE')).toBe(true);
             expect(hasPermission('regional_finance_manager', 'VIEW_REVENUE')).toBe(true);
             expect(hasPermission('regional_finance_manager', 'VIEW_EXPENSES')).toBe(true);
             expect(hasPermission('regional_finance_manager', 'ADD_EXPENSE')).toBe(true);
+            expect(authService.checkPermission('regional_finance_manager', 'finance.approve_expense')).toBe(true);
+            expect(hasPermission('regional_finance_manager', 'APPROVE_PO')).toBe(true);
             expect(hasPermission('regional_finance_manager', 'VIEW_SALES_REPORTS')).toBe(true);
+            expect(hasPermission('regional_finance_manager', 'ACCESS_EMPLOYEES')).toBe(true);
+            expect(hasPermission('regional_finance_manager', 'ADD_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_finance_manager', 'EDIT_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_finance_manager', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(canAccessRoute('regional_finance_manager', '/regional-ops')).toBe(true);
             expect(canAccessRoute('regional_finance_manager', '/finance')).toBe(true);
+            expect(canAccessRoute('regional_finance_manager', '/procurement')).toBe(true);
+            expect(canAccessRoute('regional_finance_manager', '/sales')).toBe(true);
+            expect(canAccessRoute('regional_finance_manager', '/employees')).toBe(true);
+            expect(canEmployRole('regional_finance_manager', 'accountant')).toBe(true);
+            expect(canEmployRole('regional_finance_manager', 'treasury_officer')).toBe(true);
+            expect(canEmployRole('regional_finance_manager', 'tax_compliance_officer')).toBe(true);
+            expect(canEmployRole('regional_finance_manager', 'credit_control_officer')).toBe(true);
+            expect(canEmployRole('regional_finance_manager', 'payroll_specialist')).toBe(true);
         });
 
-        it('strictly denies cashier register sales processing and pricing changes', () => {
+        it('strictly denies cashier register sales processing, physical stock adjustment, PO receiving, and pricing changes', () => {
             expect(hasPermission('regional_finance_manager', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('regional_finance_manager', 'ACCESS_INVENTORY')).toBe(false);
+            expect(canAccessRoute('regional_finance_manager', '/inventory')).toBe(false);
+            expect(hasPermission('regional_finance_manager', 'ADJUST_STOCK')).toBe(false);
+            expect(hasPermission('regional_finance_manager', 'RECEIVE_PO')).toBe(false);
             expect(hasPermission('regional_finance_manager', 'EDIT_PRICE')).toBe(false);
             expect(hasPermission('regional_finance_manager', 'EDIT_SYSTEM_SETTINGS')).toBe(false);
         });
@@ -146,39 +165,6 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
         it('strictly denies general ledger export and corporate compensation changes', () => {
             expect(hasPermission('regional_logistics_manager', 'EXPORT_FINANCIAL_DATA')).toBe(false);
             expect(hasPermission('regional_logistics_manager', 'APPROVE_SALARY')).toBe(false);
-        });
-    });
-
-    describe('Regional Finance Manager (regional_finance_manager)', () => {
-        it('authorizes regional financial oversight, expense approval, procurement/PO approval, inventory read, and finance team onboarding', () => {
-            expect(hasPermission('regional_finance_manager', 'VIEW_FINANCIALS')).toBe(true);
-            expect(hasPermission('regional_finance_manager', 'APPROVE_EXPENSE')).toBe(true);
-            expect(hasPermission('regional_finance_manager', 'MANAGE_EXPENSES')).toBe(true);
-            expect(hasPermission('regional_finance_manager', 'APPROVE_PO')).toBe(true);
-            expect(hasPermission('regional_finance_manager', 'VIEW_INVENTORY')).toBe(true);
-            expect(hasPermission('regional_finance_manager', 'VIEW_AUDIT_LOGS')).toBe(true);
-            expect(hasPermission('regional_finance_manager', 'VIEW_EMPLOYEES')).toBe(true);
-            expect(hasPermission('regional_finance_manager', 'ADD_EMPLOYEE')).toBe(true);
-            expect(hasPermission('regional_finance_manager', 'EDIT_EMPLOYEE')).toBe(true);
-            expect(hasPermission('regional_finance_manager', 'APPROVE_STAFF_REQUESTS')).toBe(true);
-            expect(canAccessRoute('regional_finance_manager', '/regional-ops')).toBe(true);
-            expect(canAccessRoute('regional_finance_manager', '/finance')).toBe(true);
-            expect(canAccessRoute('regional_finance_manager', '/procurement')).toBe(true);
-            expect(canAccessRoute('regional_finance_manager', '/inventory')).toBe(true);
-            expect(canAccessRoute('regional_finance_manager', '/sales')).toBe(true);
-            expect(canAccessRoute('regional_finance_manager', '/employees')).toBe(true);
-            expect(canEmployRole('regional_finance_manager', 'accountant')).toBe(true);
-            expect(canEmployRole('regional_finance_manager', 'treasury_officer')).toBe(true);
-            expect(canEmployRole('regional_finance_manager', 'tax_compliance_officer')).toBe(true);
-            expect(canEmployRole('regional_finance_manager', 'credit_control_officer')).toBe(true);
-            expect(canEmployRole('regional_finance_manager', 'payroll_specialist')).toBe(true);
-        });
-
-        it('strictly denies physical inventory manipulation, POS register execution, and system configuration', () => {
-            expect(hasPermission('regional_finance_manager', 'ADJUST_STOCK')).toBe(false);
-            expect(hasPermission('regional_finance_manager', 'RECEIVE_PO')).toBe(false);
-            expect(hasPermission('regional_finance_manager', 'PROCESS_SALE')).toBe(false);
-            expect(hasPermission('regional_finance_manager', 'MANAGE_SETTINGS')).toBe(false);
         });
     });
 

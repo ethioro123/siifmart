@@ -193,11 +193,76 @@ export const canEmployRole = (
     if (manager === 'regional_supply_chain_manager') {
         return candidateRank < 83;
     }
+    if (manager === 'regional_procurement_manager') {
+        return [
+            'vendor_relations_manager',
+            'buyer',
+            'demand_planner',
+            'replenishment_planner',
+            'customs_import_specialist',
+            'inbound_qc_inspector',
+            'merchandiser',
+            'inventory_specialist'
+        ].includes(candidate);
+    }
+    if (manager === 'regional_finance_manager') {
+        return [
+            'accountant',
+            'treasury_officer',
+            'tax_compliance_officer',
+            'credit_control_officer',
+            'payroll_specialist',
+            'auditor',
+            'store_operations_auditor',
+            'cash_office_officer'
+        ].includes(candidate);
+    }
+    if (manager === 'regional_merchandising_manager') {
+        return [
+            'merchandising_specialist',
+            'merchandiser'
+        ].includes(candidate);
+    }
     if (manager === 'regional_security_manager') {
-        return candidate === 'loss_prevention';
+        return ['loss_prevention', 'store_operations_auditor', 'auditor'].includes(candidate);
+    }
+    if (manager === 'regional_it_manager') {
+        return ['it_support', 'data_analyst'].includes(candidate);
+    }
+    if (manager === 'regional_compliance_manager') {
+        return ['store_operations_auditor', 'auditor', 'tax_compliance_officer'].includes(candidate);
     }
     if (manager === 'regional_logistics_manager') {
-        return ['driver', 'dispatcher', 'fleet_mechanic', 'transport_fleet_manager'].includes(candidate);
+        return [
+            'warehouse_manager',
+            'warehouse_operations_manager',
+            'transport_fleet_manager',
+            'inventory_manager',
+            'dispatch_supervisor',
+            'fleet_maintenance_supervisor',
+            'dispatch_team_leader',
+            'assistant_store_manager',
+            'shift_supervisor',
+            'dispatcher',
+            'dispatch_operator',
+            'fleet_mechanic',
+            'picker',
+            'packer',
+            'receiver',
+            'driver',
+            'forklift_operator',
+            'stock_clerk',
+            'returns_clerk',
+            'inventory_specialist',
+            'inbound_qc_inspector',
+            'replenishment_planner'
+        ].includes(candidate);
+    }
+    if (manager === 'vendor_relations_manager') {
+        return ['buyer', 'customs_import_specialist', 'inbound_qc_inspector'].includes(candidate);
+    }
+    if (manager === 'cs_manager') {
+        return ['customer_service', 'returns_clerk', 'returns_operator'].includes(candidate);
     }
     if (manager === 'inventory_manager') {
         return ['inventory_specialist', 'stock_counter', 'inventory_controller', 'stock_clerk', 'replenishment_planner'].includes(candidate);

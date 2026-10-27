@@ -81,12 +81,12 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     ],
     regional_finance_manager: [
         'dashboard.view', 'admin.view',
-        'procurement.view',
+        'procurement.view', 'procurement.approve_po',
         'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.edit_expense', 'finance.void_expense', 'finance.reconcile_drawer', 'finance.manage_ap', 'finance.manage_budget', 'finance.view_payroll',
         'sales.view', 'sales.view_reports',
         'pricing.view',
         'pos.view',
-        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.view_salary'
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance', 'employees.view_salary'
     ],
     regional_hr_manager: [
         'dashboard.view', 'admin.view',
