@@ -5,6 +5,7 @@ import { CountOperations } from './count/CountOperations';
 import { CountHistory } from './count/CountHistory';
 import { wmsCountsService, type WMSCountSession } from '../../services/wms-counts.service';
 import { logger } from '../../utils/logger';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface CountTabProps {
     products: Product[];
@@ -22,6 +23,7 @@ export const CountTab: React.FC<CountTabProps> = ({
     products, movements, user, isSubmitting, setIsSubmitting,
     setSelectedJob, setIsDetailsOpen, addNotification,
 }) => {
+    const { t } = useLanguage();
     const [countViewMode, setCountViewMode] = useState<'Operations' | 'Reports'>('Operations');
     const [session, setSession] = useState<WMSCountSession | null>(null);
     const [sessionLoading, setSessionLoading] = useState(true);
@@ -49,7 +51,7 @@ export const CountTab: React.FC<CountTabProps> = ({
     }, [user?.id, user?.siteId]);
 
     const startSession = async (type: WMSCountSession['countType']) => {
-        if (!user?.siteId) throw new Error('Your account has no assigned site.');
+        if (!user?.siteId) throw new Error(t('warehouse.noAssignedSite'));
         setIsSubmitting(true);
         setSessionLoading(true);
         try {
@@ -63,7 +65,7 @@ export const CountTab: React.FC<CountTabProps> = ({
     };
 
     const recordCount = async (productId: string, quantity: number) => {
-        if (!session) throw new Error('No active count session.');
+        if (!session) throw new Error(t('warehouse.noActiveCountSession'));
         await wmsCountsService.recordCount(session.id, productId, quantity);
         await refreshSession(session.id);
     };
@@ -75,8 +77,8 @@ export const CountTab: React.FC<CountTabProps> = ({
             const result = await wmsCountsService.finishSession(session.id);
             setSession(null);
             addNotification('success', result.varianceCount
-                ? `${result.varianceCount} variance request(s) sent for HQ approval.`
-                : 'Blind count completed with no variances.');
+                ? t('warehouse.varianceRequestsSentHQ', { count: result.varianceCount })
+                : t('warehouse.blindCountCompletedNoVariance'));
         } finally {
             setIsSubmitting(false);
         }
@@ -88,9 +90,9 @@ export const CountTab: React.FC<CountTabProps> = ({
         try {
             await wmsCountsService.cancelSession(session.id);
             setSession(null);
-            addNotification('info', 'Count session cancelled and retained in the audit history.');
+            addNotification('info', t('warehouse.sessionCancelledAuditHistory'));
         } catch (error) {
-            addNotification('alert', error instanceof Error ? error.message : 'Unable to cancel this count session.');
+            addNotification('alert', error instanceof Error ? error.message : t('warehouse.unableToCancelCountSession'));
         } finally {
             setIsSubmitting(false);
         }
@@ -107,7 +109,7 @@ export const CountTab: React.FC<CountTabProps> = ({
                 onCancelSession={cancelSession}
                 isSubmitting={isSubmitting}
             />
-            {loadError && <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-[var(--theme-text-primary)]">Could not restore the active count. Refresh and try again.</p>}
+            {loadError && <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-[var(--theme-text-primary)]">{t('warehouse.couldNotRestoreActiveCount')}</p>}
             {countViewMode === 'Operations' ? (
                 <CountOperations
                     products={products}
