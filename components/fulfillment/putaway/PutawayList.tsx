@@ -24,7 +24,7 @@ interface PutawayListProps {
     setIsSubmitting: (val: boolean) => void;
     handleStartJob: (job: WMSJob) => void;
     onShowDetails: (job: WMSJob) => void;
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 export const PutawayList: React.FC<PutawayListProps> = ({
@@ -107,12 +107,12 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                         {job.status === 'In-Progress' && (
                                             <span className="inline-flex items-center gap-1 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] text-[10px] font-semibold px-1.5 py-0.2 rounded-full uppercase border border-[var(--theme-accent)]/20 shrink-0">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
-                                                Active
+                                                {t('warehouse.putaway.active') || 'Active'}
                                             </span>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-1.5 text-[10px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider truncate mt-0.5 font-mono">
-                                        <span>{job.items || job.lineItems?.length || 0} items</span>
+                                        <span>{job.items || job.lineItems?.length || 0} {t('warehouse.items') || 'items'}</span>
                                         <span className="opacity-40">•</span>
                                         <span className="truncate">{((job as any).zone || job.location || 'ZONE A').toUpperCase()}</span>
                                     </div>
@@ -130,7 +130,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                         <span className="text-base font-bold text-[var(--theme-text-primary)] tracking-wide uppercase font-mono">{formatJobId(job)}</span>
                                         {job.orderRef && (
                                             <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium border-l border-[var(--theme-border)] pl-2.5 font-mono">
-                                                Ref: {resolveOrderRef(job.orderRef)}
+                                                {t('warehouse.ref') || 'Ref'}: {resolveOrderRef(job.orderRef)}
                                             </span>
                                         )}
                                     </div>
@@ -232,10 +232,10 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                                     const date = new Date(job.createdAt || '');
                                                     const now = new Date();
                                                     const diffInMins = Math.floor((now.getTime() - date.getTime()) / 60000);
-                                                    if (diffInMins < 1) return 'JUST NOW';
-                                                    if (diffInMins < 60) return `${diffInMins}M AGO`;
+                                                    if (diffInMins < 1) return t('warehouse.justNow') || 'JUST NOW';
+                                                    if (diffInMins < 60) return t('warehouse.minutesAgo', { count: diffInMins }) || `${diffInMins}M AGO`;
                                                     const diffInHours = Math.floor(diffInMins / 60);
-                                                    if (diffInHours < 24) return `${diffInHours}H AGO`;
+                                                    if (diffInHours < 24) return t('warehouse.hoursAgo', { count: diffInHours }) || `${diffInHours}H AGO`;
                                                     return date.toLocaleDateString([], { month: 'short', day: 'numeric' }).toUpperCase();
                                                 })()}
                                             </span>
@@ -270,7 +270,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                     totalItems={sortedPutawayJobs.length}
                     itemsPerPage={putawayItemsPerPage}
                     onPageChange={setPutawayCurrentPage}
-                    itemName="putaway jobs"
+                    itemName={t('warehouse.putawayJobs') || 'putaway jobs'}
                     className="col-span-full"
                 />
             </div>

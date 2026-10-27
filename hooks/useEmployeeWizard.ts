@@ -59,6 +59,7 @@ const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
    regional_logistics_manager: ['warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'inventory_manager', 'dispatch_supervisor', 'fleet_maintenance_supervisor', 'dispatch_team_leader', 'assistant_store_manager', 'shift_supervisor', 'dispatcher', 'dispatch_operator', 'fleet_mechanic', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
    regional_security_manager: ['loss_prevention', 'store_operations_auditor', 'auditor'],
    regional_it_manager: ['it_support', 'data_analyst'],
+   regional_compliance_manager: ['store_operations_auditor', 'auditor', 'tax_compliance_officer'],
    store_manager: ['assistant_store_manager', 'shift_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'cs_manager', 'merchandiser'],
    warehouse_manager: ['assistant_store_manager', 'shift_supervisor', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
    dispatch_supervisor: ['driver', 'dispatcher'],
@@ -132,17 +133,20 @@ export function useEmployeeWizard({
    const getAvailableDepartments = () => {
       if (!user?.role) return [];
       if (isCorporateHqDirectorateRole(user.role) || ['hr_generalist', 'talent_recruiter', 'regional_operations_manager', 'regional_hr_manager'].includes(user.role)) return DEPARTMENTS;
-      if (user.role === 'regional_procurement_manager') return ['Procurement', 'Logistics & Warehouse'];
-      if (user.role === 'regional_finance_manager') return ['Finance', 'Management'];
-      if (user.role === 'regional_merchandising_manager') return ['Merchandising', 'Retail Operations'];
-      if (user.role === 'regional_logistics_manager') return ['Transport', 'Logistics & Warehouse'];
-      if (user.role === 'store_manager') return ['Retail Operations', 'Logistics & Warehouse', 'Transport'];
-      if (user.role === 'regional_supply_chain_manager') return ['Logistics & Warehouse', 'Transport', 'Procurement', 'Management'];
-      if (user.role === 'warehouse_manager') return ['Transport', 'Logistics & Warehouse'];
-      if (user.role === 'inventory_manager') return ['Logistics & Warehouse', 'Management'];
-      if (user.role === 'regional_security_manager') return ['Security'];
-      if (user.role === 'regional_it_manager') return ['Management', 'Retail Operations', 'Logistics & Warehouse'];
-      return [];
+      const deptMap: Record<string, string[]> = {
+         regional_procurement_manager: ['Procurement', 'Logistics & Warehouse'],
+         regional_finance_manager: ['Finance', 'Management'],
+         regional_merchandising_manager: ['Merchandising', 'Retail Operations'],
+         regional_logistics_manager: ['Transport', 'Logistics & Warehouse'],
+         store_manager: ['Retail Operations', 'Logistics & Warehouse', 'Transport'],
+         regional_supply_chain_manager: ['Logistics & Warehouse', 'Transport', 'Procurement', 'Management'],
+         warehouse_manager: ['Transport', 'Logistics & Warehouse'],
+         inventory_manager: ['Logistics & Warehouse', 'Management'],
+         regional_security_manager: ['Security'],
+         regional_it_manager: ['Management', 'Retail Operations', 'Logistics & Warehouse'],
+         regional_compliance_manager: ['Finance', 'Security', 'Management'],
+      };
+      return deptMap[user.role] || [];
    };
 
    const availableRoles = SYSTEM_ROLES.filter(r => getCreatableRoles().includes(r.id));
@@ -210,7 +214,7 @@ export function useEmployeeWizard({
    };
 
    const handleRoleChange = (newRole: UserRole) => {
-      const isRegional = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_it_manager'].includes(user?.role || '');
+      const isRegional = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_it_manager', 'regional_compliance_manager'].includes(user?.role || '');
       const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
       const candidateSites = isRegional && userRegion
          ? sites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion)

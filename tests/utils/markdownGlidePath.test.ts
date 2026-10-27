@@ -37,7 +37,7 @@ describe('Markdown Clearance Glide Path Engine', () => {
         needsMarkdown: true
     };
 
-    const now = new Date('2026-10-28T00:00:00Z');
+    const now = new Date(2026,9,28,12);
 
     describe('Finding 1: Target Exit Date Calculation & Validation', () => {
         it('rejects empty or missing target exit date', () => {
@@ -238,4 +238,31 @@ describe('Markdown Clearance Glide Path Engine', () => {
             }
         });
     });
+});
+
+describe('Clearance model boundary regressions',()=>{
+ const product={id:'p',name:'Coffee',sku:'ET-CF',price:100,costPrice:65,stock:100,siteId:'site',status:'active'} as Product;
+ const metrics={hasOrderHistory:true,dailyRunRate:0.2} as ProductSalesMetrics;
+ const now=new Date(2026,9,28,12);
+ it('does not invent demand uplift or extra rounding units across stages',()=>{
+  const plan=calculateMarkdownGlidePath({product,metrics,now,targetExitDate:'2026-11-04'})!;
+  expect(plan.totalProjectedSales).toBe(Math.round(0.2*7));
+  expect(plan.stages.every(s=>s.openingStock-s.projectedSales===s.closingStock)).toBe(true);
+ });
+ it('supports a one-day horizon without zero-length stages',()=>{
+  const plan=calculateMarkdownGlidePath({product,metrics,now,targetExitDate:'2026-10-29'})!;
+  expect(plan.stages).toHaveLength(1);expect(plan.durationDays).toBe(1);expect(plan.stages[0].price).toBe(90);
+ });
+ it('rejects non-finite values, impossible dates and below-cost baselines',()=>{
+  for(const patch of [{stock:NaN},{price:Infinity},{costPrice:NaN},{costPrice:101}]) expect(calculateMarkdownGlidePath({product:{...product,...patch},metrics,now,targetExitDate:'2026-11-04'})).toBeNull();
+  expect(validateTargetExitDate('2026-02-30',now).isValid).toBe(false);
+  expect(validateTargetExitDate('2028-01-01',now).isValid).toBe(false);
+ });
+ it('never raises an existing sale price or uses absent history as positive demand',()=>{
+  const plan=calculateMarkdownGlidePath({product:{...product,isOnSale:true,salePrice:70},metrics:{...metrics,hasOrderHistory:false},now,targetExitDate:'2026-11-18'})!;
+  expect(plan.stages.every(s=>s.price<=70 && s.price>=65)).toBe(true);expect(plan.totalProjectedSales).toBe(0);
+ });
+ it('calculates local calendar days independently of time of day and DST',()=>{
+  expect(validateTargetExitDate('2026-10-05',new Date(2026,9,3,23,30)).durationDays).toBe(2);
+ });
 });

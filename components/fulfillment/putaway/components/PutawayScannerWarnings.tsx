@@ -59,7 +59,7 @@ export const PutawayScannerWarnings: React.FC<PutawayScannerWarningsProps> = ({
                         </span>
                     </div>
                     <p className="text-xs font-medium text-[var(--theme-text-primary)] leading-relaxed mb-1.5">
-                        Incompatible inventory detected:{' '}
+                        {t('warehouse.putaway.incompatibleInventoryDetected') || 'Incompatible inventory detected:'}{' '}
                         <span className="bg-rose-500/20 text-rose-500 px-2 py-0.5 rounded-md font-mono font-semibold">
                             {conflictingOccupants[0]?.sku}
                         </span>

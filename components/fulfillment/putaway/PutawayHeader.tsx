@@ -112,7 +112,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
 
                         {/* Mobile Dot Numbers */}
                         <div className="flex items-center gap-1.5 px-2 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-[10px] font-mono shrink-0">
-                            <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title="Active">
+                            <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title={t('warehouse.putaway.active') || 'Active'}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 {filteredJobsCount.active}
                             </span>

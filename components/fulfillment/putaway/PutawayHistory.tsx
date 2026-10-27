@@ -15,7 +15,7 @@ interface PutawayHistoryProps {
     setIsDetailsOpen: (open: boolean) => void;
     employees: any[];
     sites?: any[];
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const ITEMS_PER_PAGE = 12;
@@ -148,9 +148,9 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
             date.getFullYear() === now.getFullYear();
 
         if (isToday) {
-            if (diffInSeconds < 60) return 'Just now';
-            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-            return `${Math.floor(diffInSeconds / 3600)}h ago`;
+            if (diffInSeconds < 60) return t('warehouse.justNow') || 'Just now';
+            if (diffInSeconds < 3600) return t('warehouse.minutesAgo', { count: Math.floor(diffInSeconds / 60) }) || `${Math.floor(diffInSeconds / 60)}m ago`;
+            return t('warehouse.hoursAgo', { count: Math.floor(diffInSeconds / 3600) }) || `${Math.floor(diffInSeconds / 3600)}h ago`;
         }
 
         return date.toLocaleString('en-US', {
@@ -261,7 +261,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                         ))}
                     </div>
                     <div className="mt-6">
-                        <Pagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredHistory.length} itemsPerPage={perPage} onPageChange={setCurrentPage} itemName="records" />
+                        <Pagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredHistory.length} itemsPerPage={perPage} onPageChange={setCurrentPage} itemName={t('warehouse.records') || 'records'} />
                     </div>
                 </>
             ) : (

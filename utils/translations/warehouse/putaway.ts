@@ -72,4 +72,110 @@ export const putaway: TranslationBlock = {
     zone: { en: 'Zone', am: 'ቀጠና', or: 'Zoonii' },
     aisle: { en: 'Aisle', am: 'መተላለፊያ', or: 'Daandii' },
     bay: { en: 'Bay', am: 'ቦታ', or: 'Kutaa' },
+
+    // Step Indicator & Modal Workflow
+    inboundIntake: { en: 'Cargo Intake', am: 'የጭነት ቅበላ', or: 'Simannaa Meeshaa Galu' },
+    stagingAndOrigin: { en: 'Staging & Origin', am: 'የመድረሻ ቦታ እና መነሻ', or: 'Qophii fi Madda' },
+    binSlotting: { en: 'Bin Routing', am: 'የቦታ መስመር', or: 'Qajeelcha Bakka Meeshaa' },
+    allSlotted: { en: 'All Slotted', am: 'ሁሉም ተመድቧል', or: 'Hundinuu Ramadameera' },
+    scanAndSlot: { en: 'Scan & Slot', am: 'ስካን እና መድብ', or: 'Iskaanii fi Ramadi' },
+    shelfLock: { en: 'Review Completion', am: 'ማጠናቀቅን ከልስ', or: 'Xumura Irra Deebi\'ii Ilaali' },
+    lockedSlotAll: { en: 'Locked (Slot All)', am: 'ተቆልፏል (ሁሉንም መድብ)', or: 'Cufamaadha (Hunda Ramadi)' },
+    verifyAndStock: { en: 'Verify & Stock', am: 'አረጋግጥ እና አስቀምጥ', or: 'Mirkaneessi fi Kaa\'i' },
+    slotAllVerifiedPrompt: {
+        en: 'All items must be slotted and verified before shelf placement lock.',
+        am: 'የመደርደሪያ ማስቀመጫ ከመቆለፉ በፊት ሁሉም ዕቃዎች መመደብ እና መረጋገጥ አለባቸው።',
+        or: 'Meeshaaleen hundinuu bakka isaaniitti ramadamanii mirkanaawuu qabu.'
+    },
+
+    // Step 1 Intake
+    inboundStagingIntake: { en: 'Inbound Staging Intake', am: 'የገቢ ማረፊያ ቅበላ', or: 'Simannaa Qophii Meeshaa Seensaa' },
+    lines: { en: 'Lines', am: 'መስመሮች', or: 'Sararoota' },
+    coldChain: { en: 'Cold Chain', am: 'ቀዝቃዛ ሰንሰለት', or: 'Kuusaa Qabbanaawaa' },
+    verifyCargoPrompt: {
+        en: 'Verify cargo at inbound dock staging before routing to warehouse storage bins.',
+        am: 'ወደ መጋዘን ማከማቻ ከመመደብዎ በፊት በመርከቡ ማረፊያ ላይ ያለውን ጭነት ያረጋግጡ።',
+        or: 'Meeshaa gara kuusaatti kaahuu dura buufata seensaa irratti mirkaneessi.'
+    },
+    inboundItemsManifest: { en: 'Inbound Items Manifest', am: 'የገቢ ዕቃዎች ዝርዝር', or: 'Gabaasa Meeshaalee Galanii' },
+    lineItemsCount: { en: 'Line Items', am: 'የዕቃ መስመሮች', or: 'Tarree Meeshaalee' },
+
+    // Step 2 Routing & Step 3 Placement
+    step2RoutingPrompt: {
+        en: 'Review the items. Live bin suggestions are recalculated from current site stock when scanning starts. Use the bottom scanning action to verify the actual location, SKU, and physical quantity before stock is posted.',
+        am: 'ዕቃዎችን ይገምግሙ። ስካን ሲጀመር የቀጥታ የቦታ ጥቆማዎች አሁን ካለው የመጋዘን ክምችት ይሰላሉ። ክምችት ከመመዝገቡ በፊት ትክክለኛውን ቦታ፣ SKU እና ብዛት ለማረጋገጥ የታችኛውን የስካን እርምጃ ይጠቀሙ።',
+        or: 'Meeshaalee irra deebi\'ii ilaali. Iddoon meeshaa eeramu qabeenya amma jiru irraa ofumaan shallagama. Bakka sirrii, SKU fi baay\'ina mirkaneessuuf mallattoo iskaanii gadii fayyadami.'
+    },
+    recordedBin: { en: 'Recorded bin: {bin}', am: 'የተመዘገበ ቦታ፡ {bin}', or: 'Bakka galmaa\'e: {bin}' },
+    routingStrategyDesc: {
+        en: 'Same SKU and lot first, then a compatible bin near this category.',
+        am: 'ተመሳሳይ SKU እና ሎት መጀመሪያ፣ ከዚያም ከዚህ ምድብ አጠገብ ተስማሚ ቦታ።',
+        or: 'Dura SKU fi lottii walfakkaatu, itti aansuun bakka oomisha kanaaf mijatu.'
+    },
+    placementRecorded: { en: 'Placement recorded', am: 'ማስቀመጥ ተመዝግቧል', or: 'Kaawwisni galmaa\'eera' },
+    shortPlacementRecorded: { en: 'Short placement recorded', am: 'የጎደለ ማስቀመጥ ተመዝግቧል', or: 'Kaawwisni hir\'uu galmaa\'eera' },
+    awaitingPlacement: { en: 'Awaiting physical placement', am: 'አካላዊ ማስቀመጥን በመጠባበቅ ላይ', or: 'Bakka kaa\'amuu eeggachaa jira' },
+    storageSlottingVerified: { en: 'Storage Slotting Verified', am: 'የማከማቻ ምደባ ተረጋግጧል', or: 'Ramaddiin Bakka Kuusaa Mirkanaa\'eera' },
+    storageSlottingDesc: {
+        en: 'All stock slotted to designated aisle, rack, and bin locations',
+        am: 'ሁሉም ክምችት ወደ ተመደበው መተላለፊያ፣ መደርደሪያ እና ቦታ ገብቷል',
+        or: 'Meeshaaleen hundinuu daandii, madaala fi iddoo ramadameetti kaa\'amaniiru'
+    },
+    itemsVerified: { en: 'Items Verified', am: 'ዕቃዎች ተረጋግጠዋል', or: 'Meeshaalee Mirkanaa\'an' },
+    facilitySite: { en: 'Facility / Site', am: 'ተቋም / ቦታ', or: 'Wiirtuu / Bakka' },
+    jobReference: { en: 'Job Reference', am: 'የስራ መለያ', or: 'Koodii Hojii' },
+    originPoRef: { en: 'Origin / PO Ref', am: 'መነሻ / የግዢ ትዕዛዝ መለያ', or: 'Madda / Koodii Ajaja Bittaa' },
+    reviewPlacementsNotice: {
+        en: 'Review the recorded placements. Stock is updated when each placement is saved; completing the job closes its workflow.',
+        am: 'የተመዘገቡትን ማስቀመጫዎች ይገምግሙ። እያንዳንዱ ሲቀመጥ ክምችት ይሻሻላል፤ ስራውን ማጠናቀቅ ሂደቱን ይዘጋል።',
+        or: 'Kaawwisa galmaa\'e irra deebi\'ii ilaali. Qabeenyi akkuma kaa\'ameen sirreeffama; hojii xumuruun adeemsa cufa.'
+    },
+
+    // Scanner Overlay & Confirmation Actions
+    enterShelvedQuantity: { en: 'Enter Shelved Quantity', am: 'የተቀመጠውን ብዛት ያስገቡ', or: 'Baay\'ina Kaa\'ame Galchi' },
+    stepOf: { en: 'STEP {step} OF {total}', am: 'ደረጃ {step} ከ {total}', or: 'SADARKAA {step} KAN {total}' },
+    confirmQuantity: { en: 'CONFIRM QUANTITY', am: 'ብዛትን አረጋግጥ', or: 'BAAY\'INA MIRKANEESSI' },
+    confirmMerge: { en: 'CONFIRM MERGE', am: 'ማጣመርን አረጋግጥ', or: 'WALITTI DABALUU MIRKANEESSI' },
+    blocked: { en: 'BLOCKED', am: 'ተዘግቷል', or: 'DHORKAMEERA' },
+    warehouseScannerActiveMode: { en: 'Warehouse Scanner / Active Mode', am: 'የመጋዘን ስካነር / ንቁ ሁኔታ', or: 'Iskaanera Manna-Kuusaa / Hojjataa Jira' },
+    enterCountMax: { en: 'Enter count (max {max})', am: 'ብዛት ያስገቡ (ከፍተኛ {max})', or: 'Baay\'ina galchi (hanga {max})' },
+    scanLocationBarcodePrompt: { en: 'Scan a location barcode', am: 'የቦታ ባርኮድ ስካን ያድርጉ', or: 'Baarkoodii iddoo iskaan godhi' },
+    incompatibleInventoryDetected: { en: 'Incompatible inventory detected:', am: 'የማይስማማ ክምችት ተገኝቷል:', or: 'Meeshaan walsimne argameera:' },
+    completePutaway: { en: 'Complete Putaway', am: 'ማስቀመጥን ጨርስ', or: 'Kaawwisa Xumuri' },
+    reviewCompletion: { en: 'Review completion', am: 'ማጠናቀቅን ከልስ', or: 'Xumura Irra Deebi\'ii Ilaali' },
+    startScanning: { en: 'Start scanning', am: 'ስካን ማድረግ ጀምር', or: 'Iskaan Gochuu Jalqabi' },
+    scanError: { en: 'Scan Error', am: 'የስካን ስህተት', or: 'Dogoggora Iskaanii' },
+    success: { en: 'Success!', am: 'ተሳክቷል!', or: 'Milkaa\'eera!' },
+
+    // Live Routing Suggestions
+    livePutawayRouting: { en: 'Live putaway routing', am: 'የቀጥታ የማስቀመጫ መስመር', or: 'Qajeelcha Kaawwisa Meeshaa Battalaa' },
+    routingError: {
+        en: 'Could not refresh routing. Scan and verify a suitable bin, or retry.',
+        am: 'መስመር ማደስ አልተቻለም። ተስማሚ ቦታ ስካን አድርገው ያረጋግጡ ወይም እንደገና ይሞክሩ።',
+        or: 'Qajeelcha haaromsuun hin danda\'amne. Iddoo sirrii iskaan godhii mirkaneessi, ykn irra deebi\'i yaali.'
+    },
+    routingLoading: {
+        en: 'Checking current site stock and storage zones…',
+        am: 'የአሁኑን የመጋዘን ክምችት እና የማከማቻ ዞኖች በመፈተሽ ላይ…',
+        or: 'Qabeenya manna-kuusaa fi zooniiwwan qorachaa jira…'
+    },
+    unitsRecordedInSnapshot: {
+        en: '{count} units recorded in this stock snapshot.',
+        am: '{count} ክፍሎች በዚህ የክምችት ቅጽበታዊ እይታ ተመዝግበዋል።',
+        or: 'Kutaa {count} galmeen qabeenyaa kana irratti galmaa\'eera.'
+    },
+    alternatives: { en: 'Alternatives:', am: 'አማራጮች፡', or: 'Filannoowwan:' },
+    noSuitableSuggestion: {
+        en: 'No suitable suggestion. Check storage requirements and ask your warehouse lead for an authorized bin.',
+        am: 'ተስማሚ ጥቆማ የለም። የማከማቻ መስፈርቶችን ያረጋግጡ እና የመጋዘኑን ኃላፊ የተፈቀደ ቦታ ይጠይቁ።',
+        or: 'Iddoon eeramu hin jiru. Ulaagaalee kuusaa qoradhuutii hogganaa manna-kuusaa iddoo hayyamame gaafadhu.'
+    },
+    binFullFindNext: { en: 'Bin full — find next', am: 'ቦታው ሞልቷል — ቀጣዩን ፈልግ', or: 'Bakki guuteera — kan biraa barbaadi' },
+    refreshSuggestions: { en: 'Refresh suggestions', am: 'ጥቆማዎችን አድስ', or: 'Eeruuwwan Haaromsi' },
+    fullBinsNotice: {
+        en: 'Full bins are skipped for this job. Scan the physical bin label to confirm placement.',
+        am: 'የሞሉ ቦታዎች ለዚህ ስራ ይታለፋሉ። ማስቀመጥን ለማረጋገጥ ትክክለኛውን የቦታ መለያ ስካን ያድርጉ።',
+        or: 'Bakkeewwan guutan hojii kanaaf ni darbu. Kaawwisa mirkaneessuuf leeblii iddoo iskaan godhi.'
+    },
+    checkedAt: { en: 'Checked {time}.', am: 'በ{time} ተረጋግጧል።', or: 'Sa\'aatii {time} qoratame.' },
 };

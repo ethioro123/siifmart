@@ -112,7 +112,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'regional-ops', 'settings', 'employees', 'profile'
     ],
     regional_compliance_manager: [
-        'dashboard', 'regional-ops', 'sales', 'inventory', 'pos', 'pricing', 'settings', 'profile'
+        'dashboard', 'regional-ops', 'finance', 'sales', 'inventory', 'pos', 'pricing', 'employees', 'settings', 'profile'
     ],
 
     // ═══ LEVEL 6 - FACILITY CAPTAINS (STORE, WAREHOUSE & DISPATCH GMs) ═══

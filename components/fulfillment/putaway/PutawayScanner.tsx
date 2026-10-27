@@ -34,7 +34,7 @@ interface PutawayScannerProps {
     allProducts: Product[];
     activeSiteId?: string;
     expectedPrefix?: string;
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 export const PutawayScanner: React.FC<PutawayScannerProps> = ({
@@ -325,7 +325,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     </button>
                     <div className="min-w-0">
                         <h3 className="font-bold text-[var(--theme-text-primary)] text-base sm:text-lg uppercase tracking-tight truncate">
-                            {step === 'LOCATION' ? t('warehouse.scanLocation') : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : 'Enter Shelved Quantity'}
+                            {step === 'LOCATION' ? t('warehouse.scanLocation') : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : (t('warehouse.putaway.enterShelvedQuantity') || 'Enter Shelved Quantity')}
                         </h3>
                         <p className="text-[11px] text-[var(--theme-accent)] font-semibold uppercase tracking-wider font-mono break-all">
                             JOB: {formatJobId(job)}
@@ -334,7 +334,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] px-3 py-1 rounded-full text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
-                        STEP {step === 'LOCATION' ? '1' : step === 'ITEM' ? '2' : '3'} OF {scanningPolicy.requirePutawayQuantityEntry ? '3' : '2'}
+                        {t('warehouse.putaway.stepOf', { step: step === 'LOCATION' ? '1' : step === 'ITEM' ? '2' : '3', total: scanningPolicy.requirePutawayQuantityEntry ? '3' : '2' }) || `STEP ${step === 'LOCATION' ? '1' : step === 'ITEM' ? '2' : '3'} OF ${scanningPolicy.requirePutawayQuantityEntry ? '3' : '2'}`}
                     </span>
                 </div>
             </div>
@@ -350,7 +350,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     />
 
                     <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight break-words mb-3 sm:mb-4 transition-colors ${isStrictlyValid ? 'text-[var(--theme-accent)]' : showError ? 'text-rose-500' : ''}`}>
-                        {showSuccess ? 'Success!' : showError ? 'Scan Error' : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : 'Enter Shelved Quantity'}
+                        {showSuccess ? (t('warehouse.putaway.success') || 'Success!') : showError ? (t('warehouse.putaway.scanError') || 'Scan Error') : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : (t('warehouse.putaway.enterShelvedQuantity') || 'Enter Shelved Quantity')}
                     </h1>
 
                     {showSuccess ? (
@@ -363,7 +363,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         </div>
                     ) : step === 'LOCATION' ? (
                         <div className="w-full mb-6">
-                            {routing && <PutawayRoutingSuggestions routing={routing} />}
+                            {routing && <PutawayRoutingSuggestions routing={routing} t={t} />}
                             <PutawayScannerLocationCard
                                 isStrictlyValid={isStrictlyValid}
                                 inputVal={inputVal}
@@ -413,7 +413,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                         ? t('warehouse.putaway.scanLocationPlaceholder')
                                         : step === 'ITEM'
                                             ? t('warehouse.putaway.scanSkuPlaceholder')
-                                            : `Enter count (max ${currentItem?.expectedQty || 1})`
+                                            : t('warehouse.putaway.enterCountMax', { max: currentItem?.expectedQty || 1 }) || `Enter count (max ${currentItem?.expectedQty || 1})`
                                 }
                                 autoFocus
                                 disabled={isProcessing || showSuccess}
@@ -423,7 +423,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         {step === 'LOCATION' && inputVal.trim() && (
                             <div className="text-center animate-in fade-in duration-200">
                                 <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-accent)] flex items-center justify-center gap-2">
-                                    {isStrictlyValid ? `DETECTED: ${decodeLocation(inputVal.trim().toUpperCase())}` : 'Scan a location barcode'}
+                                    {isStrictlyValid ? `DETECTED: ${decodeLocation(inputVal.trim().toUpperCase())}` : (t('warehouse.putaway.scanLocationBarcodePrompt') || 'Scan a location barcode')}
                                 </p>
                             </div>
                         )}
@@ -456,13 +456,13 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 <CheckCircle size={20} />
                             )}
                             <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-                                {isProcessing ? 'Processing...' : isPlacementBlocked ? 'BLOCKED' : awaitingOccupancyConfirmation ? 'CONFIRM MERGE' : awaitingMismatchConfirmation ? 'CONFIRM LOCATION' : step === 'QUANTITY' ? 'CONFIRM QUANTITY' : 'SUBMIT'}
+                                {isProcessing ? (t('warehouse.processingStatus') || 'Processing...') : isPlacementBlocked ? (t('warehouse.putaway.blocked') || 'BLOCKED') : awaitingOccupancyConfirmation ? (t('warehouse.putaway.confirmMerge') || 'CONFIRM MERGE') : awaitingMismatchConfirmation ? (t('warehouse.putaway.confirmLocation') || 'CONFIRM LOCATION') : step === 'QUANTITY' ? (t('warehouse.putaway.confirmQuantity') || 'CONFIRM QUANTITY') : (t('warehouse.submitScan') || 'SUBMIT')}
                             </span>
                         </button>
                     </form>
 
                     <p className="mt-8 text-[var(--theme-text-secondary)] text-[11px] font-medium font-mono uppercase tracking-widest text-center">
-                        Warehouse Scanner / Active Mode
+                        {t('warehouse.putaway.warehouseScannerActiveMode') || 'Warehouse Scanner / Active Mode'}
                     </p>
                 </div>
             </div>
