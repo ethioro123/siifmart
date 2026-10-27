@@ -134,64 +134,73 @@ CREATE POLICY "headcount_quota_requests_scoped"
     AND private.hr_site_scope(site_id, (country_code)::text)
   );
 
--- 4. Update leave_requests_read_scoped and leave_requests_update_scoped
-DROP POLICY IF EXISTS "leave_requests_read_scoped" ON public.leave_requests;
-CREATE POLICY "leave_requests_read_scoped"
-  ON public.leave_requests
-  FOR SELECT
-  USING (
-    (employee_id = auth.uid())
-    OR (
-      lower(public.get_my_role()) = ANY (ARRAY[
-        'group_ceo'::text,
-        'country_managing_director'::text,
-        'country_hr_director'::text,
-        'regional_hr_manager'::text,
-        'hr_generalist'::text,
-        'country_operations_director'::text,
-        'regional_operations_manager'::text,
-        'area_operations_manager'::text,
-        'store_manager'::text,
-        'warehouse_manager'::text
-      ])
-      AND private.hr_site_scope(site_id, (country_code)::text)
-    )
-  );
+-- 4. Update leave_requests_read_scoped and leave_requests_update_scoped if table exists
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'leave_requests') THEN
+    EXECUTE 'DROP POLICY IF EXISTS "leave_requests_read_scoped" ON public.leave_requests';
+    EXECUTE $pol$
+      CREATE POLICY "leave_requests_read_scoped"
+        ON public.leave_requests
+        FOR SELECT
+        USING (
+          (employee_id = auth.uid())
+          OR (
+            lower(public.get_my_role()) = ANY (ARRAY[
+              'group_ceo'::text,
+              'country_managing_director'::text,
+              'country_hr_director'::text,
+              'regional_hr_manager'::text,
+              'hr_generalist'::text,
+              'country_operations_director'::text,
+              'regional_operations_manager'::text,
+              'area_operations_manager'::text,
+              'store_manager'::text,
+              'warehouse_manager'::text
+            ])
+            AND private.hr_site_scope(site_id, (country_code)::text)
+          )
+        )
+    $pol$;
 
-DROP POLICY IF EXISTS "leave_requests_update_scoped" ON public.leave_requests;
-CREATE POLICY "leave_requests_update_scoped"
-  ON public.leave_requests
-  FOR UPDATE
-  USING (
-    lower(public.get_my_role()) = ANY (ARRAY[
-      'group_ceo'::text,
-      'country_managing_director'::text,
-      'country_hr_director'::text,
-      'regional_hr_manager'::text,
-      'hr_generalist'::text,
-      'country_operations_director'::text,
-      'regional_operations_manager'::text,
-      'area_operations_manager'::text,
-      'store_manager'::text,
-      'warehouse_manager'::text
-    ])
-    AND private.hr_site_scope(site_id, (country_code)::text)
-  )
-  WITH CHECK (
-    lower(public.get_my_role()) = ANY (ARRAY[
-      'group_ceo'::text,
-      'country_managing_director'::text,
-      'country_hr_director'::text,
-      'regional_hr_manager'::text,
-      'hr_generalist'::text,
-      'country_operations_director'::text,
-      'regional_operations_manager'::text,
-      'area_operations_manager'::text,
-      'store_manager'::text,
-      'warehouse_manager'::text
-    ])
-    AND private.hr_site_scope(site_id, (country_code)::text)
-  );
+    EXECUTE 'DROP POLICY IF EXISTS "leave_requests_update_scoped" ON public.leave_requests';
+    EXECUTE $pol$
+      CREATE POLICY "leave_requests_update_scoped"
+        ON public.leave_requests
+        FOR UPDATE
+        USING (
+          lower(public.get_my_role()) = ANY (ARRAY[
+            'group_ceo'::text,
+            'country_managing_director'::text,
+            'country_hr_director'::text,
+            'regional_hr_manager'::text,
+            'hr_generalist'::text,
+            'country_operations_director'::text,
+            'regional_operations_manager'::text,
+            'area_operations_manager'::text,
+            'store_manager'::text,
+            'warehouse_manager'::text
+          ])
+          AND private.hr_site_scope(site_id, (country_code)::text)
+        )
+        WITH CHECK (
+          lower(public.get_my_role()) = ANY (ARRAY[
+            'group_ceo'::text,
+            'country_managing_director'::text,
+            'country_hr_director'::text,
+            'regional_hr_manager'::text,
+            'hr_generalist'::text,
+            'country_operations_director'::text,
+            'regional_operations_manager'::text,
+            'area_operations_manager'::text,
+            'store_manager'::text,
+            'warehouse_manager'::text
+          ])
+          AND private.hr_site_scope(site_id, (country_code)::text)
+        )
+    $pol$;
+  END IF;
+END $$;
 
 -- 5. Update employee_documents policies to use private.hr_employee_scope
 DROP POLICY IF EXISTS "employee_docs_read" ON public.employee_documents;

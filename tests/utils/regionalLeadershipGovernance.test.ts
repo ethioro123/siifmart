@@ -198,6 +198,37 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
         });
     });
 
+    describe('Regional HR Manager (regional_hr_manager)', () => {
+        it('authorizes regional workforce management, talent onboarding, checker sign-off, salary proposals, and payroll visibility', () => {
+            expect(hasPermission('regional_hr_manager', 'ACCESS_REGIONAL_OPS')).toBe(true);
+            expect(hasPermission('regional_hr_manager', 'ACCESS_EMPLOYEES')).toBe(true);
+            expect(hasPermission('regional_hr_manager', 'ADD_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_hr_manager', 'EDIT_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_hr_manager', 'TERMINATE_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_hr_manager', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_hr_manager', 'MANAGE_SHIFTS')).toBe(true);
+            expect(hasPermission('regional_hr_manager', 'VIEW_SALARY')).toBe(true);
+            expect(hasPermission('regional_hr_manager', 'PROPOSE_SALARY')).toBe(true);
+            expect(hasPermission('regional_hr_manager', 'VIEW_PAYROLL')).toBe(true);
+            expect(canAccessRoute('regional_hr_manager', '/regional-ops')).toBe(true);
+            expect(canAccessRoute('regional_hr_manager', '/employees')).toBe(true);
+            expect(canEmployRole('regional_hr_manager', 'store_manager')).toBe(true);
+            expect(canEmployRole('regional_hr_manager', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('regional_hr_manager', 'hr_generalist')).toBe(true);
+            expect(canEmployRole('regional_hr_manager', 'talent_recruiter')).toBe(true);
+            expect(canEmployRole('regional_hr_manager', 'training_coordinator')).toBe(true);
+            expect(canEmployRole('regional_hr_manager', 'payroll_specialist')).toBe(true);
+        });
+
+        it('strictly denies salary final approval, POS sales processing, stock adjustments, and corporate HR policy overrides', () => {
+            expect(hasPermission('regional_hr_manager', 'APPROVE_SALARY')).toBe(false);
+            expect(hasPermission('regional_hr_manager', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('regional_hr_manager', 'ADJUST_STOCK')).toBe(false);
+            expect(hasPermission('regional_hr_manager', 'EDIT_HR_SETTINGS')).toBe(false);
+            expect(canEmployRole('regional_hr_manager', 'regional_operations_manager')).toBe(false);
+        });
+    });
+
     describe('Regional Security Manager (regional_security_manager)', () => {
         it('authorizes system audit inspection, loss prevention logs, and pos telemetry monitoring', () => {
             expect(hasPermission('regional_security_manager', 'VIEW_AUDIT_LOGS')).toBe(true);
