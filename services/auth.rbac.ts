@@ -106,7 +106,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'regional-ops', 'warehouse', 'inventory', 'procurement', 'employees', 'profile'
     ],
     regional_security_manager: [
-        'dashboard', 'regional-ops', 'settings', 'pos', 'inventory', 'sales', 'employees', 'profile'
+        'dashboard', 'regional-ops', 'settings', 'pos', 'sales', 'employees', 'profile'
     ],
     regional_it_manager: [
         'dashboard', 'regional-ops', 'settings', 'employees', 'profile'

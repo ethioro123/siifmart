@@ -56,7 +56,15 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         return '/employees';
     }
 
-    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_security_manager'].includes(role)) {
+    if (role === 'regional_security_manager') {
+        if (!siteType || siteType === 'Administration' || siteType === 'Administrative') {
+            return '/regional-ops';
+        }
+        if (isStoreSite) return '/pos-dashboard';
+        return '/settings';
+    }
+
+    if (role === 'regional_operations_manager' || role === 'area_operations_manager') {
         return '/regional-ops';
     }
 

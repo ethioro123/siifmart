@@ -37,9 +37,19 @@ const SETTINGS_TAB_LABELS: Record<SettingsTab, string> = {
 
 export default function SettingsPage() {
     const { user } = useStore();
-    const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '');
+    const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || ['regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_merchandising_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_it_manager', 'regional_compliance_manager'].includes(user?.role || '');
 
-    const [activeTab, setActiveTab] = useState<SettingsTab>(isRegionalStaff ? 'regions' : 'general');
+    const getDefaultSettingsTab = (): SettingsTab => {
+        if (['regional_security_manager', 'regional_compliance_manager', 'auditor', 'country_compliance_manager', 'store_operations_auditor'].includes(user?.role || '')) {
+            return 'audit';
+        }
+        if (['regional_it_manager', 'it_support', 'country_technology_director'].includes(user?.role || '')) {
+            return 'infrastructure';
+        }
+        return isRegionalStaff ? 'regions' : 'general';
+    };
+
+    const [activeTab, setActiveTab] = useState<SettingsTab>(() => getDefaultSettingsTab());
     const [isNavOpen, setIsNavOpen] = useState(false);
 
     const TabButton = ({ id, icon: Icon, label }: { id: SettingsTab, icon: LucideIcon, label: string }) => (

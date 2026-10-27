@@ -230,17 +230,34 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
     });
 
     describe('Regional Security Manager (regional_security_manager)', () => {
-        it('authorizes system audit inspection, loss prevention logs, and pos telemetry monitoring', () => {
+        it('authorizes system audit inspection, loss prevention logs, pos telemetry monitoring, and LP staff management', () => {
             expect(hasPermission('regional_security_manager', 'VIEW_AUDIT_LOGS')).toBe(true);
             expect(hasPermission('regional_security_manager', 'VIEW_ALL_TRANSACTIONS')).toBe(true);
             expect(hasPermission('regional_security_manager', 'VIEW_POS_DASHBOARD')).toBe(true);
+            expect(hasPermission('regional_security_manager', 'VIEW_SALES_REPORTS')).toBe(true);
+            expect(hasPermission('regional_security_manager', 'ADD_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_security_manager', 'EDIT_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_security_manager', 'APPROVE_EMPLOYEE')).toBe(true);
             expect(canAccessRoute('regional_security_manager', '/regional-ops')).toBe(true);
+            expect(canAccessRoute('regional_security_manager', '/pos-dashboard')).toBe(true);
+            expect(canAccessRoute('regional_security_manager', '/employees')).toBe(true);
+            expect(canAccessRoute('regional_security_manager', '/settings')).toBe(true);
         });
 
-        it('strictly denies sales processing, product pricing, and payroll approvals', () => {
+        it('authorizes hiring of loss prevention, store operations auditor, and auditor roles only', () => {
+            expect(canEmployRole('regional_security_manager', 'loss_prevention')).toBe(true);
+            expect(canEmployRole('regional_security_manager', 'store_operations_auditor')).toBe(true);
+            expect(canEmployRole('regional_security_manager', 'auditor')).toBe(true);
+            expect(canEmployRole('regional_security_manager', 'cashier')).toBe(false);
+            expect(canEmployRole('regional_security_manager', 'store_manager')).toBe(false);
+        });
+
+        it('strictly denies sales processing, product pricing, inventory mutations, and payroll approvals', () => {
             expect(hasPermission('regional_security_manager', 'PROCESS_SALE')).toBe(false);
             expect(hasPermission('regional_security_manager', 'EDIT_PRICE')).toBe(false);
             expect(hasPermission('regional_security_manager', 'PROCESS_PAYROLL')).toBe(false);
+            expect(hasPermission('regional_security_manager', 'ACCESS_INVENTORY')).toBe(false);
+            expect(canAccessRoute('regional_security_manager', '/inventory')).toBe(false);
         });
     });
 

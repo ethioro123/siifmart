@@ -57,7 +57,7 @@ const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
    regional_procurement_manager: ['vendor_relations_manager', 'buyer', 'demand_planner', 'replenishment_planner', 'customs_import_specialist', 'inbound_qc_inspector', 'merchandiser', 'inventory_specialist'],
    regional_finance_manager: ['accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'payroll_specialist', 'auditor', 'store_operations_auditor'],
    regional_logistics_manager: ['warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'inventory_manager', 'dispatch_supervisor', 'fleet_maintenance_supervisor', 'dispatch_team_leader', 'assistant_store_manager', 'shift_supervisor', 'dispatcher', 'dispatch_operator', 'fleet_mechanic', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
-   regional_security_manager: ['regional_security_manager', 'loss_prevention', 'store_operations_auditor', 'auditor'],
+   regional_security_manager: ['loss_prevention', 'store_operations_auditor', 'auditor'],
    store_manager: ['assistant_store_manager', 'shift_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'cs_manager', 'merchandiser'],
    warehouse_manager: ['assistant_store_manager', 'shift_supervisor', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
    dispatch_supervisor: ['driver', 'dispatcher'],

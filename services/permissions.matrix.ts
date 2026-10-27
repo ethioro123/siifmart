@@ -108,7 +108,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'settings.view', 'settings.view_logs',
         'pos.view',
         'sales.view', 'sales.view_reports',
-        'employees.view', 'employees.manage_attendance'
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
     ],
     regional_it_manager: HEAD_OF_IT_PERMISSIONS,
     regional_compliance_manager: HEAD_OF_AUDIT_PERMISSIONS,
