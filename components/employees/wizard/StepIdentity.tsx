@@ -25,7 +25,7 @@ export default function StepIdentity({
     const isRegional = Boolean(
         user?.scopeLevel === 'REGIONAL' ||
         (user as any)?.scope_level === 'REGIONAL' ||
-        ['regional_operations_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '') ||
+        ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '') ||
         (['hr_generalist', 'talent_recruiter', 'training_coordinator'].includes(user?.role || '') && Boolean(effectiveRegion))
     );
     const isHQ = !isRegional && ['group_ceo', 'country_managing_director', 'country_hr_director', 'hr_generalist', 'talent_recruiter', 'country_operations_director', 'country_finance_director'].includes(user?.role || '');

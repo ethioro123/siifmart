@@ -54,12 +54,12 @@ const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
    regional_merchandising_manager: ['merchandising_specialist'],
    regional_procurement_manager: ['vendor_relations_manager', 'buyer', 'demand_planner', 'replenishment_planner', 'customs_import_specialist', 'inbound_qc_inspector', 'merchandiser', 'inventory_specialist'],
    regional_finance_manager: ['accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'payroll_specialist', 'auditor', 'store_operations_auditor'],
-   regional_logistics_manager: ['warehouse_manager', 'regional_supply_chain_manager', 'inventory_manager', 'dispatch_supervisor', 'fleet_maintenance_supervisor', 'assistant_store_manager', 'shift_supervisor', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
+   regional_logistics_manager: ['warehouse_manager', 'inventory_manager', 'dispatch_supervisor', 'fleet_maintenance_supervisor', 'assistant_store_manager', 'shift_supervisor', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
    regional_security_manager: ['regional_security_manager', 'loss_prevention', 'store_operations_auditor', 'auditor'],
    store_manager: ['assistant_store_manager', 'shift_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'cs_manager', 'merchandiser'],
    warehouse_manager: ['assistant_store_manager', 'shift_supervisor', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
    dispatch_supervisor: ['driver', 'dispatcher'],
-   regional_supply_chain_manager: ['assistant_store_manager', 'shift_supervisor', 'fleet_maintenance_supervisor', 'driver', 'dispatcher'],
+   regional_supply_chain_manager: ['warehouse_manager', 'warehouse_operations_manager', 'transport_fleet_manager', 'regional_logistics_manager', 'inventory_manager', 'dispatch_supervisor', 'receiving_supervisor', 'inventory_control_supervisor', 'putaway_replenishment_supervisor', 'picking_supervisor', 'packing_supervisor', 'inbound_operations_supervisor', 'outbound_operations_supervisor', 'returns_waste_supervisor', 'fleet_maintenance_supervisor', 'receiving_team_leader', 'picking_team_leader', 'packing_team_leader', 'dispatch_team_leader', 'assistant_store_manager', 'shift_supervisor', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'demand_planner', 'receiving_operator', 'putaway_operator', 'replenishment_operator', 'inventory_controller', 'stock_counter', 'dispatch_operator', 'returns_operator', 'fleet_mechanic', 'warehouse_administrator'],
    inventory_manager: ['assistant_store_manager', 'shift_supervisor', 'replenishment_planner', 'inventory_specialist', 'stock_clerk', 'receiver'],
 };
 
@@ -134,7 +134,8 @@ export function useEmployeeWizard({
       if (user.role === 'regional_merchandising_manager') return ['Merchandising'];
       if (user.role === 'regional_logistics_manager') return ['Transport', 'Logistics & Warehouse'];
       if (user.role === 'store_manager') return ['Retail Operations', 'Logistics & Warehouse', 'Transport'];
-      if (user.role === 'warehouse_manager' || user.role === 'regional_supply_chain_manager') return ['Transport', 'Logistics & Warehouse'];
+      if (user.role === 'regional_supply_chain_manager') return ['Logistics & Warehouse', 'Transport', 'Procurement', 'Management'];
+      if (user.role === 'warehouse_manager') return ['Transport', 'Logistics & Warehouse'];
       if (user.role === 'inventory_manager') return ['Logistics & Warehouse', 'Management'];
       if (user.role === 'regional_security_manager') return ['Security'];
       return [];
@@ -209,7 +210,7 @@ export function useEmployeeWizard({
    };
 
    const handleRoleChange = (newRole: UserRole) => {
-      const isRegional = ['regional_operations_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '');
+      const isRegional = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '');
       const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
       const candidateSites = isRegional && userRegion
          ? sites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion)

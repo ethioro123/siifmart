@@ -37,7 +37,7 @@ const SETTINGS_TAB_LABELS: Record<SettingsTab, string> = {
 
 export default function SettingsPage() {
     const { user } = useStore();
-    const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || ['regional_operations_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '');
+    const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '');
 
     const [activeTab, setActiveTab] = useState<SettingsTab>(isRegionalStaff ? 'regions' : 'general');
     const [isNavOpen, setIsNavOpen] = useState(false);

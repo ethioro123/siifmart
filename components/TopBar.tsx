@@ -230,8 +230,8 @@ export default function TopBar() {
             if (nav.path === '/network-inventory' || nav.path === '/roadmap') return false;
             if (nav.module === 'admin' && nav.path === '/admin') return false;
          } else if (isHQ && !isCeo) {
-            if (nav.path === '/pos' || (nav.path === '/wms-ops' && userRole !== 'regional_logistics_manager')) return false;
-            if (nav.path === '/inventory' && !['regional_logistics_manager', 'regional_security_manager'].includes(userRole)) return false; // In HQ, local inventory is replaced by Network Inventory
+            if (nav.path === '/pos' || (nav.path === '/wms-ops' && !['regional_logistics_manager', 'regional_supply_chain_manager', 'country_supply_chain_director'].includes(userRole))) return false;
+            if (nav.path === '/inventory' && !['regional_logistics_manager', 'regional_supply_chain_manager', 'regional_security_manager'].includes(userRole)) return false; // In HQ, local inventory is replaced by Network Inventory
          }
 
          return nav.title.toLowerCase().includes(query) || nav.keywords.some(k => k.toLowerCase().includes(query));

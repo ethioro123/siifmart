@@ -133,10 +133,13 @@ export default function LoginPage() {
                   className="w-full py-2 px-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/40 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <Crown size={14} className="text-amber-600 dark:text-amber-400" />
-                    <span>Group Chief Executive Officer (All Access)</span>
+                    <Crown size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                    <div className="text-left">
+                      <span className="font-bold text-stone-900 dark:text-white block leading-tight">{stagingExecutive.name || 'Dr. Shukri Idriss'}</span>
+                      <span className="text-[10px] text-amber-700 dark:text-amber-300 font-semibold block">Group Chief Executive Officer • Rank L1</span>
+                    </div>
                   </div>
-                  <span className="text-[10px] font-mono opacity-70">{stagingExecutive.email}</span>
+                  <span className="text-[10px] font-mono opacity-70 shrink-0">Global HQ</span>
                 </button>
               )}
 
@@ -150,11 +153,14 @@ export default function LoginPage() {
                       className="py-1.5 px-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 hover:border-blue-500/40 text-blue-800 dark:text-blue-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                       title={`Quick Login: ${stagingKeRegionalMgr.name} (${stagingKeRegionalMgr.role})`}
                     >
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-xs">🇰🇪</span>
-                        <span className="truncate">Kenya Regional Operations Manager</span>
+                      <div className="flex flex-col items-start min-w-0 pr-1 text-left">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs">🇰🇪</span>
+                          <span className="font-bold truncate text-stone-900 dark:text-white">{stagingKeRegionalMgr.name || 'Kamau Ndenga'}</span>
+                        </div>
+                        <span className="text-[9.5px] text-stone-500 dark:text-stone-400 truncate">Regional Ops Manager • L4</span>
                       </div>
-                      <span className="text-[9px] font-mono opacity-70 shrink-0">Kamau</span>
+                      <span className="text-[9px] font-mono opacity-70 shrink-0">Nairobi</span>
                     </button>
                   )}
                   {stagingEtRegionalMgr && (
@@ -165,11 +171,14 @@ export default function LoginPage() {
                       className="py-1.5 px-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 hover:border-blue-500/40 text-blue-800 dark:text-blue-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                       title={`Quick Login: ${stagingEtRegionalMgr.name} (${stagingEtRegionalMgr.role})`}
                     >
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-xs">🇪🇹</span>
-                        <span className="truncate">Ethiopia Regional Operations Manager</span>
+                      <div className="flex flex-col items-start min-w-0 pr-1 text-left">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs">🇪🇹</span>
+                          <span className="font-bold truncate text-stone-900 dark:text-white">{stagingEtRegionalMgr.name || 'Henok Tadesse'}</span>
+                        </div>
+                        <span className="text-[9.5px] text-stone-500 dark:text-stone-400 truncate">Regional Ops Manager • L4</span>
                       </div>
-                      <span className="text-[9px] font-mono opacity-70 shrink-0">Henok</span>
+                      <span className="text-[9px] font-mono opacity-70 shrink-0">Addis</span>
                     </button>
                   )}
                 </div>

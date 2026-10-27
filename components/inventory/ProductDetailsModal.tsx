@@ -248,7 +248,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         return (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
                                 <DetailField label="SKU" value={product.sku} icon={Hash} />
-                                <DetailField label="Barcodes" value={barcodeList.length > 0 ? <span className="font-mono">{barcodeList.join(', ')}</span> : null} icon={ScanBarcode} />
+                                <DetailField label="Product barcode" value={barcodeList.length > 0 ? <span className="font-mono">{barcodeList.join(', ')}</span> : null} icon={ScanBarcode} />
                                 <DetailField label="Brand" value={smartProfile.brand} icon={Building2} highlight={Boolean(smartProfile.brand)} />
                                 <DetailField label="Department / Subcat" value={smartProfile.subcategory ? `${product.category} › ${smartProfile.subcategory}` : product.category} icon={Tag} />
                                 <DetailField label="Net Content / Size" value={smartProfile.netContent || formatProductSize(product)} icon={Box} highlight={Boolean(smartProfile.netContent)} />

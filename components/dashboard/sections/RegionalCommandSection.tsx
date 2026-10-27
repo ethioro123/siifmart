@@ -77,7 +77,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
                 procurement: regionEmployees.find(e => e.role === 'regional_procurement_manager'),
                 finance: regionEmployees.find(e => e.role === 'regional_finance_manager'),
                 hr: regionEmployees.find(e => e.role === 'regional_hr_manager'),
-                logistics: regionEmployees.find(e => e.role === 'regional_logistics_manager'),
+                logistics: regionEmployees.find(e => e.role === 'regional_supply_chain_manager') || regionEmployees.find(e => e.role === 'regional_logistics_manager'),
                 security: regionEmployees.find(e => e.role === 'regional_security_manager')
             };
 

@@ -28,7 +28,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
     const allowedRoles = recruitmentService.getAllowedRolesForManager(user?.role || '');
     const userRoleLevel = recruitmentService.getUserRoleLevel(user?.role || '');
     const isSiteManager = userRoleLevel === 3;
-    const isRegional = ['regional_operations_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '')
+    const isRegional = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '')
         || (user?.role === 'talent_recruiter' && Boolean(user?.regionCode || (user as any)?.region_code));
     const userRegion = user?.regionCode || (user as any)?.region_code || activeSite?.regionCode || (activeSite as any)?.region_code;
     const regionalSites = isRegional && userRegion 

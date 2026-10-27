@@ -12,7 +12,7 @@ interface InboundQCTabProps {
 
 export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
   const { user, showToast } = useStore();
-  const isManager = Boolean(user?.role && ['country_commercial_director', 'country_supply_chain_director', 'regional_operations_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'country_operations_director', 'country_managing_director', 'group_ceo'].includes(user.role));
+  const isManager = Boolean(user?.role && ['country_commercial_director', 'country_supply_chain_director', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_procurement_manager', 'regional_logistics_manager', 'country_operations_director', 'country_managing_director', 'group_ceo'].includes(user.role));
 
   const [inspections, setInspections] = useState<InboundQCInspection[]>([]);
   const [loading, setLoading] = useState(false);
