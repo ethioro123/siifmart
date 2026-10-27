@@ -129,6 +129,7 @@ export function generateNextSiteCode(
 export function isPlaceSpecificCode(code?: string | null): boolean {
     if (!code) return false;
     const clean = code.trim().toUpperCase();
+    if (clean.startsWith('SITE-')) return false;
     if (/^[A-Z]{2}-HQ$/i.test(clean)) return true;
     if (/^[A-Z]{3,4}$/.test(clean) && !['SITE', 'LOC'].includes(clean)) return true;
     return /^[A-Z]{3,4}-[A-Z]{2,3}-\d{2,}$/.test(clean) ||
@@ -147,6 +148,8 @@ export function isPlaceSpecificCode(code?: string | null): boolean {
 export function normalizeCleanSiteCode(code?: string | null, _countryHint?: string | null): string | null {
     if (!code) return null;
     const clean = code.trim().toUpperCase();
+
+    if (clean.startsWith('SITE-')) return null;
 
     // 0. Sovereign Corporate HQ: ET-HQ, KE-HQ (strictly retains country prefix)
     if (/^[A-Z]{2}-HQ$/i.test(clean)) {

@@ -28,14 +28,14 @@ describe('CreateRegionModal - Smart Unique Region ID Generation', () => {
 
     const existingRegions: Region[] = [
         {
-            code: 'ET-ADD',
+            code: 'ADD',
             name: 'Addis Ababa Central Region',
             country: 'ET',
             default_currency: 'ETB',
             status: 'active'
         },
         {
-            code: 'ET-DIR',
+            code: 'DIR',
             name: 'Dire Dawa Eastern Region',
             country: 'ET',
             default_currency: 'ETB',
@@ -51,7 +51,7 @@ describe('CreateRegionModal - Smart Unique Region ID Generation', () => {
         cleanup();
     });
 
-    it('generates standard hub code ET-ADD when ET-ADD is not taken', () => {
+    it('generates standard hub code ADD when ADD is not taken', () => {
         render(
             <CreateRegionModal
                 {...defaultProps}
@@ -62,11 +62,11 @@ describe('CreateRegionModal - Smart Unique Region ID Generation', () => {
         const nameInput = screen.getByPlaceholderText('e.g. Mombasa Coastal');
         fireEvent.change(nameInput, { target: { value: 'Addis Ababa' } });
 
-        const codeInput = screen.getByPlaceholderText('e.g. ET-ADD') as HTMLInputElement;
-        expect(codeInput.value).toBe('ET-ADD');
+        const codeInput = screen.getByPlaceholderText('e.g. ADD, NRB') as HTMLInputElement;
+        expect(codeInput.value).toBe('ADD');
     });
 
-    it('CRITICAL: Never gives duplicate ET-ADD when ET-ADD already exists, giving next smart unique 3 letters', () => {
+    it('CRITICAL: Never gives duplicate ADD when ADD already exists, giving next smart unique 3 letters', () => {
         render(
             <CreateRegionModal
                 {...defaultProps}
@@ -77,14 +77,13 @@ describe('CreateRegionModal - Smart Unique Region ID Generation', () => {
         const nameInput = screen.getByPlaceholderText('e.g. Mombasa Coastal');
         fireEvent.change(nameInput, { target: { value: 'Addis Ababa' } });
 
-        const codeInput = screen.getByPlaceholderText('e.g. ET-ADD') as HTMLInputElement;
-        // MUST NOT BE ET-ADD
-        expect(codeInput.value).not.toBe('ET-ADD');
-        expect(codeInput.value.startsWith('ET-')).toBe(true);
-        expect(codeInput.value).toMatch(/^ET-[A-Z]{3}$/);
+        const codeInput = screen.getByPlaceholderText('e.g. ADD, NRB') as HTMLInputElement;
+        // MUST NOT BE ADD
+        expect(codeInput.value).not.toBe('ADD');
+        expect(codeInput.value).toMatch(/^[A-Z]{3}$/);
     });
 
-    it('generates next unique acronym for multi-word region (Addis Ababa South -> ET-AAS)', () => {
+    it('generates next unique acronym for multi-word region (Addis Ababa South -> AAS)', () => {
         render(
             <CreateRegionModal
                 {...defaultProps}
@@ -95,8 +94,8 @@ describe('CreateRegionModal - Smart Unique Region ID Generation', () => {
         const nameInput = screen.getByPlaceholderText('e.g. Mombasa Coastal');
         fireEvent.change(nameInput, { target: { value: 'Addis Ababa South' } });
 
-        const codeInput = screen.getByPlaceholderText('e.g. ET-ADD') as HTMLInputElement;
-        expect(codeInput.value).toBe('ET-AAS');
+        const codeInput = screen.getByPlaceholderText('e.g. ADD, NRB') as HTMLInputElement;
+        expect(codeInput.value).toBe('AAS');
     });
 
     it('displays collision warning and provides one-click button if user manually types existing code', () => {
@@ -107,17 +106,17 @@ describe('CreateRegionModal - Smart Unique Region ID Generation', () => {
             />
         );
 
-        const codeInput = screen.getByPlaceholderText('e.g. ET-ADD');
-        fireEvent.change(codeInput, { target: { value: 'ET-ADD' } });
+        const codeInput = screen.getByPlaceholderText('e.g. ADD, NRB');
+        fireEvent.change(codeInput, { target: { value: 'ADD' } });
 
         expect(screen.getByText(/already exists/i)).toBeDefined();
-        const useSuggestionButton = screen.getByRole('button', { name: /Use ET-/i });
+        const useSuggestionButton = screen.getByRole('button', { name: /Use /i });
         expect(useSuggestionButton).toBeDefined();
 
         // Clicking suggestion button applies the unique code and dismisses warning
         fireEvent.click(useSuggestionButton);
         expect(screen.queryByText(/already exists/i)).toBeNull();
-        expect((codeInput as HTMLInputElement).value).not.toBe('ET-ADD');
+        expect((codeInput as HTMLInputElement).value).not.toBe('ADD');
     });
 
     it('blocks submission and shows alert if territorial code collides with existing region', async () => {
@@ -131,8 +130,8 @@ describe('CreateRegionModal - Smart Unique Region ID Generation', () => {
         const nameInput = screen.getByPlaceholderText('e.g. Mombasa Coastal');
         fireEvent.change(nameInput, { target: { value: 'Addis Duplicate' } });
 
-        const codeInput = screen.getByPlaceholderText('e.g. ET-ADD');
-        fireEvent.change(codeInput, { target: { value: 'ET-ADD' } });
+        const codeInput = screen.getByPlaceholderText('e.g. ADD, NRB');
+        fireEvent.change(codeInput, { target: { value: 'ADD' } });
 
         const reasonInput = screen.getByPlaceholderText('Record the business reason for this change');
         fireEvent.change(reasonInput, { target: { value: 'Testing duplicate guard' } });

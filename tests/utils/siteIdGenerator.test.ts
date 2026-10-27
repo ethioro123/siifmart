@@ -90,9 +90,9 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
         it('formats existing direct codes cleanly', () => {
             expect(formatDisplaySiteId({ code: 'ET-HQ', country: 'ET' })).toBe('ET-HQ');
             expect(formatDisplaySiteId({ code: 'KE-HQ', country: 'KE' })).toBe('KE-HQ');
-            expect(formatDisplaySiteId({ code: 'ET-ADD', country: 'ET' })).toBe('ET-ADD');
-            expect(formatDisplaySiteId({ code: 'KE-NRB', country: 'KE' })).toBe('KE-NRB');
-            expect(formatDisplaySiteId({ code: 'ET-ADA', country: 'ET' })).toBe('ET-ADA');
+            expect(formatDisplaySiteId({ code: 'ET-ADD', country: 'ET' })).toBe('ADD');
+            expect(formatDisplaySiteId({ code: 'KE-NRB', country: 'KE' })).toBe('NRB');
+            expect(formatDisplaySiteId({ code: 'ET-ADA', country: 'ET' })).toBe('ADA');
             expect(formatDisplaySiteId({ code: 'KE-01', country: 'KE' })).toBe('KE-01');
             expect(formatDisplaySiteId({ code: 'UG-02', country: 'UG' })).toBe('UG-02');
             expect(formatDisplaySiteId({ code: 'TZ-01', country: 'TZ' })).toBe('TZ-01');
@@ -115,25 +115,25 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
             expect(formatDisplaySiteId({ id: 'ke-store-3', country: 'KE' })).toBe('KE-03');
         });
 
-        it('normalizes codes to clean [COUNTRY]-[ZONE]-[TYPE]-[NUMBER] decoupled format even when siteNumber is present', () => {
-            expect(formatDisplaySiteId({ code: 'ADD-WH-01' })).toBe('ET-ADD-WH-01');
-            expect(formatDisplaySiteId({ code: 'ADD-STR-01', siteNumber: 5 })).toBe('ET-ADD-STR-01');
-            expect(formatDisplaySiteId({ code: 'ET-ADD-STR-BOLE-05', site_number: 5 } as any)).toBe('ET-ADD-STR-05');
-            expect(formatDisplaySiteId({ code: 'KE-NRB-WH-EASTLEIGH-12', site_number: 12 } as any)).toBe('KE-NRB-WH-12');
-            expect(formatDisplaySiteId({ code: 'ET-ADA-DC-ADAMA-04', siteNumber: 4 })).toBe('ET-ADA-DC-04');
-            expect(formatDisplaySiteId({ code: 'NRB-ADM-13', siteNumber: 13 })).toBe('KE-NRB-ADM-13');
+        it('normalizes codes to clean [ZONE]-[TYPE]-[NUMBER] decoupled format even when siteNumber is present', () => {
+            expect(formatDisplaySiteId({ code: 'ADD-WH-01' })).toBe('ADD-WH-01');
+            expect(formatDisplaySiteId({ code: 'ADD-STR-01', siteNumber: 5 })).toBe('ADD-STR-01');
+            expect(formatDisplaySiteId({ code: 'ET-ADD-STR-BOLE-05', site_number: 5 } as any)).toBe('ADD-STR-05');
+            expect(formatDisplaySiteId({ code: 'KE-NRB-WH-EASTLEIGH-12', site_number: 12 } as any)).toBe('NRB-WH-12');
+            expect(formatDisplaySiteId({ code: 'ET-ADA-DC-ADAMA-04', siteNumber: 4 })).toBe('ADA-DC-04');
+            expect(formatDisplaySiteId({ code: 'NRB-ADM-13', siteNumber: 13 })).toBe('NRB-ADM-13');
         });
 
-        it('synthesizes clean [COUNTRY]-[ZONE]-[TYPE]-[NUMBER] codes without location names in the ID', () => {
-            expect(formatDisplaySiteId({ name: 'Bole Supermarket', country: 'ET', type: 'Store', region_code: 'et_addis', site_number: 5 } as any)).toBe('ET-ADD-STR-05');
-            expect(formatDisplaySiteId({ name: 'Central Operations', country: 'ET', type: 'Administration', site_number: 1 } as any)).toBe('ET-ADD-ADM-01');
-            expect(formatDisplaySiteId({ name: 'Eastleigh 01', country: 'KE', type: 'Warehouse', region_code: 'ke_nairobi', site_number: 12 } as any)).toBe('KE-NRB-WH-12');
-            expect(formatDisplaySiteId({ name: 'Adama Distribution Center', country: 'ET', type: 'Distribution Center', address: 'Adama, Oromia', site_number: 4 } as any)).toBe('ET-ADA-DC-04');
+        it('synthesizes clean [ZONE]-[TYPE]-[NUMBER] codes without location names in the ID', () => {
+            expect(formatDisplaySiteId({ name: 'Bole Supermarket', country: 'ET', type: 'Store', region_code: 'et_addis', site_number: 5 } as any)).toBe('ADD-STR-05');
+            expect(formatDisplaySiteId({ name: 'Central Operations', country: 'ET', type: 'Administration', site_number: 1 } as any)).toBe('ADD');
+            expect(formatDisplaySiteId({ name: 'Eastleigh 01', country: 'KE', type: 'Warehouse', region_code: 'ke_nairobi', site_number: 12 } as any)).toBe('NRB-WH-12');
+            expect(formatDisplaySiteId({ name: 'Adama Distribution Center', country: 'ET', type: 'Distribution Center', address: 'Adama, Oromia', site_number: 4 } as any)).toBe('ADA-DC-04');
         });
     });
 
     describe('generatePlaceSpecificSiteCode', () => {
-        it('generates clean operational codes [COUNTRY]-[ZONE]-[TYPE]-[NUMBER] decoupling location name', () => {
+        it('generates clean operational codes [ZONE]-[TYPE]-[NUMBER] decoupling location name', () => {
             const boleCode = generatePlaceSpecificSiteCode({
                 country: 'ET',
                 regionCode: 'et_addis',
@@ -141,7 +141,7 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
                 name: 'Bole Supermarket',
                 siteNumber: 5
             });
-            expect(boleCode).toBe('ET-ADD-STR-05');
+            expect(boleCode).toBe('ADD-STR-05');
 
             const eastleighCode = generatePlaceSpecificSiteCode({
                 country: 'KE',
@@ -150,7 +150,7 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
                 name: 'Eastleigh 01',
                 siteNumber: 12
             });
-            expect(eastleighCode).toBe('KE-NRB-WH-12');
+            expect(eastleighCode).toBe('NRB-WH-12');
 
             const adamaDcCode = generatePlaceSpecificSiteCode({
                 country: 'ET',
@@ -159,7 +159,7 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
                 name: 'Adama Distribution Center',
                 siteNumber: 4
             });
-            expect(adamaDcCode).toBe('ET-ADA-DC-04');
+            expect(adamaDcCode).toBe('ADA-DC-04');
 
             const regionalAdminCode = generatePlaceSpecificSiteCode({
                 country: 'KE',
@@ -168,14 +168,14 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
                 name: 'Nairobi Region Administration',
                 siteNumber: 13
             });
-            expect(regionalAdminCode).toBe('KE-NRB');
+            expect(regionalAdminCode).toBe('NRB');
         });
 
         it('guarantees unique numbers across all facilities even if name, type, region or country differ', () => {
             // Given existing sites 01 and 02
             const existingSites = [
-                { code: 'ET-ADD-ADM-01', site_number: 1 },
-                { code: 'ET-DIR-WH-02', site_number: 2 }
+                { code: 'ADD-ADM-01', site_number: 1 },
+                { code: 'DIR-WH-02', site_number: 2 }
             ];
 
             // Next facility receives unique number 03 (never repeating 01 or 02)
@@ -186,7 +186,7 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
                 name: 'AMBO',
                 existingSites
             });
-            expect(nextCode).toBe('ET-ADA-DC-03');
+            expect(nextCode).toBe('ADA-DC-03');
 
             // Subsequent facility in another country (Kenya) continues the unique sequence: 04
             const kenyaStore = generatePlaceSpecificSiteCode({
@@ -194,9 +194,9 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
                 regionCode: 'ke_nairobi',
                 type: 'Store',
                 name: 'Westlands Branch',
-                existingSites: [...existingSites, { code: 'ET-ADA-DC-03', site_number: 3 }]
+                existingSites: [...existingSites, { code: 'ADA-DC-03', site_number: 3 }]
             });
-            expect(kenyaStore).toBe('KE-NRB-STR-04');
+            expect(kenyaStore).toBe('NRB-STR-04');
         });
     });
 

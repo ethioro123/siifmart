@@ -13,6 +13,7 @@ import { messages } from './messages';
 import { misc } from './misc';
 import { count } from './count';
 import { waste } from './waste';
+import { returns } from './returns';
 
 export const warehouse: TranslationBlock = {
     ...core,
@@ -31,6 +32,8 @@ export const warehouse: TranslationBlock = {
     replenish,
     ...waste,
     waste,
+    ...returns,
+    returns,
     ...misc,
     misc,
     ...modals,

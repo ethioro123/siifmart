@@ -239,7 +239,7 @@ describe('regionsService - Dynamic Budget & Operations', () => {
         });
 
         expect(insertedPayload.country).toBe('KE');
-        expect(insertedPayload.code).toBe('KE-RIF');
+        expect(insertedPayload.code).toBe('RIFT');
     });
 
     it('rejects duplicate region codes and propagates uniqueness error', async () => {
