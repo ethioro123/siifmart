@@ -177,7 +177,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                         </div>
                     </div>
 
-                    {labelType !== 'ITEM' && <p className="text-xs text-[var(--theme-text-secondary)]">Intake labels require Medium (3 × 2 in) or larger for readable lot details and scannable codes.</p>}
+                    {labelType !== 'ITEM' && <p className="text-xs text-[var(--theme-text-secondary)]">{t('warehouse.intakeLabelSizeNotice') || 'Intake labels require Medium (3 × 2 in) or larger for readable lot details and scannable codes.'}</p>}
                     {/* Format Selector */}
                     <div className="space-y-2">
                         <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
@@ -229,7 +229,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                             <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-2.5 text-[11px] text-emerald-800 dark:text-emerald-300 font-medium">
                                 <Info size={14} className="shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
                                 <span>
-                                    <strong>Inventory Label Mode:</strong> Inbound receiving labels identify SKU, batch & barcode. Retail shelf price tags are printed in POS Command / Store Shelf Hub to maintain scanner price parity.
+                                    {t('warehouse.inventoryLabelModeNotice') || 'Inventory Label Mode: Inbound receiving labels identify SKU, batch & barcode. Retail shelf price tags are printed in POS Command / Store Shelf Hub to maintain scanner price parity.'}
                                 </span>
                             </div>
                         )}
@@ -239,10 +239,10 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
-                                <ScanLine size={14} /> Print Output Preview
+                                <ScanLine size={14} /> {t('warehouse.printOutputPreview') || 'Print Output Preview'}
                             </label>
                             <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
-                                Label layout
+                                {t('warehouse.labelLayout') || 'Label layout'}
                             </span>
                         </div>
                         <div className="bg-[var(--theme-bg-subtle)] p-3 rounded-2xl border border-[var(--theme-border)]">

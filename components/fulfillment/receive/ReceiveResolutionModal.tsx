@@ -15,7 +15,7 @@ interface ReceiveResolutionModalProps {
     addNotification: (type: 'success' | 'alert' | 'info', message: string) => void;
     refreshData: () => Promise<void>;
     isSubmitting: boolean;
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
@@ -128,7 +128,7 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
 
                                         setUnresolvedScans(prev => prev.filter(s => s.barcode !== resolvingBarcode.barcode));
                                         setResolvingBarcode(null);
-                                        addNotification('success', `Mapped to ${product.name}`);
+                                        addNotification('success', t('warehouse.mappedToProduct', { name: product.name }) || `Mapped to ${product.name}`);
                                         await refreshData();
                                     } finally {
                                         setMappingProductId(null);

@@ -37,14 +37,14 @@ export const Step1ReceiveIntake: React.FC<Step1ReceiveIntakeProps> = ({
                     <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)]">
-                                Inbound Manifest Intake
+                                {t('warehouse.inboundManifestIntake') || 'Inbound Manifest Intake'}
                             </span>
                             <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[11px] font-mono font-semibold text-[var(--theme-text-primary)]">
                                 PO #{splitReceivingPO.poNumber || splitReceivingPO.id}
                             </span>
                         </div>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 truncate">
-                            Supplier: <strong className="text-[var(--theme-text-primary)]">{splitReceivingPO.supplierName || 'Vendor'}</strong>
+                            {t('warehouse.supplier') || 'Supplier'}: <strong className="text-[var(--theme-text-primary)]">{splitReceivingPO.supplierName || 'Vendor'}</strong>
                         </p>
                     </div>
                 </div>
@@ -59,9 +59,9 @@ export const Step1ReceiveIntake: React.FC<Step1ReceiveIntakeProps> = ({
                         <EyeOff size={16} />
                     </div>
                     <div>
-                        <p className="font-bold uppercase tracking-tight">Zero-Trust Blind Receiving Mode Active</p>
+                        <p className="font-bold uppercase tracking-tight">{t('warehouse.blindModeActiveTitle') || 'Zero-Trust Blind Receiving Mode Active'}</p>
                         <span className="text-[11px] opacity-90">
-                            Expected piece quantities are masked to enforce unbiased physical count at intake dock.
+                            {t('warehouse.blindModeActiveDesc') || 'Expected piece quantities are masked to enforce unbiased physical count at intake dock.'}
                         </span>
                     </div>
                 </div>
@@ -101,32 +101,32 @@ export const Step1ReceiveIntake: React.FC<Step1ReceiveIntakeProps> = ({
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-3 border-t border-[var(--theme-border)]">
                     <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
-                            Manifest Expected
+                            {t('warehouse.manifestExpected') || t('warehouse.expected') || 'Manifest Expected'}
                         </span>
                         <div className="mt-1 font-mono text-sm md:text-base font-bold text-[var(--theme-text-primary)]">
                             {isBlindReceiving ? (
-                                <span className="text-amber-600 dark:text-amber-400">*** Blind Mode</span>
+                                <span className="text-amber-600 dark:text-amber-400">*** {t('warehouse.blindAudit') || 'Blind Mode'}</span>
                             ) : (
-                                <span>{expectedSellable} Units</span>
+                                <span>{expectedSellable} {t('warehouse.unitsLabel') || 'Units'}</span>
                             )}
                         </div>
                     </div>
 
                     <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
-                            Previously Received
+                            {t('warehouse.previouslyReceived') || 'Previously Received'}
                         </span>
                         <div className="mt-1 font-mono text-sm md:text-base font-bold text-[var(--theme-text-primary)]">
-                            {previouslyReceived} Units
+                            {previouslyReceived} {t('warehouse.unitsLabel') || 'Units'}
                         </div>
                     </div>
 
                     <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] col-span-2 md:col-span-1">
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
-                            Intake Status
+                            {t('warehouse.intakeStatus') || 'Intake Status'}
                         </span>
                         <div className="mt-1 font-semibold text-xs md:text-sm text-[var(--theme-accent)] uppercase">
-                            Ready for Quality Audit
+                            {t('warehouse.readyForQualityAudit') || 'Ready for Quality Audit'}
                         </div>
                     </div>
                 </div>

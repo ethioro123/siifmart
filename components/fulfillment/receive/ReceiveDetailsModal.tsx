@@ -72,7 +72,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         type: 'JOB',
         id: selectedItem.id,
         reference: resolveOrderRef(selectedItem.orderRef) || selectedItem.jobNumber,
-        title: selectedItem.type === 'PUTAWAY' ? 'Item Receipt' : selectedItem.type,
+        title: selectedItem.type === 'PUTAWAY' ? (t('warehouse.itemReceipt') || 'Item Receipt') : selectedItem.type,
         status: selectedItem.status,
         date: selectedItem.completedAt || selectedItem.updatedAt || selectedItem.createdAt,
         user: {
@@ -222,11 +222,11 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                                 return (
                                                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-md">
                                                         <Box size={12} className="text-[var(--theme-text-secondary)]" />
-                                                        <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase">Lot:</span>
+                                                        <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase">{t('warehouse.batchLotNo') || 'Lot'}:</span>
                                                         <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] font-mono">{item.batchNumber}</span>
                                                         {parsed.isStandard && parsed.formattedDate && (
                                                             <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono ml-1 border-l border-[var(--theme-border)] pl-1.5">
-                                                                Rcvd {parsed.formattedDate}
+                                                                {t('warehouse.dateReceived') || 'Rcvd'} {parsed.formattedDate}
                                                             </span>
                                                         )}
                                                     </div>
@@ -258,7 +258,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                 <div className="flex items-center gap-3 md:gap-5 flex-shrink-0 ml-2">
                                     <div className="text-right">
                                         <p className={`text-[11px] uppercase font-semibold tracking-wider mb-1 ${isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? 'text-amber-600 dark:text-amber-400' : 'text-[var(--theme-text-secondary)]'}`}>
-                                            {t('warehouse.quantityToReceive')}{isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? ' (Blind)' : ''}
+                                            {t('warehouse.quantityToReceive')}{isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? ` (${t('warehouse.blindAudit') || 'Blind'})` : ''}
                                         </p>
                                         {isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? (
                                             <p className="text-base md:text-lg font-bold text-amber-600 dark:text-amber-400 tabular-nums font-mono leading-none tracking-widest">

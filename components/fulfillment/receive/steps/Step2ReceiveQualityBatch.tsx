@@ -52,10 +52,10 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
                 <div className="flex items-center gap-4">
                     <div>
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
-                            Expected
+                            {t('warehouse.expected') || 'Expected'}
                         </span>
                         <span className="text-sm md:text-lg font-mono font-bold text-[var(--theme-text-primary)]">
-                            {isBlindReceiving ? '*** (Blind)' : `${expectedSellable} Units`}
+                            {isBlindReceiving ? `*** (${t('warehouse.blindAudit') || 'Blind'})` : `${expectedSellable} ${t('warehouse.unitsLabel') || 'Units'}`}
                         </span>
                     </div>
 
@@ -63,10 +63,10 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
 
                     <div>
                         <span className="text-[10px] font-mono font-semibold uppercase text-[var(--theme-text-secondary)] block">
-                            Intake Count
+                            {t('warehouse.intakeCount') || 'Intake Count'}
                         </span>
                         <span className="text-sm md:text-lg font-mono font-bold text-[var(--theme-accent)]">
-                            {previouslyReceived + totalScanned} Units
+                            {previouslyReceived + totalScanned} {t('warehouse.unitsLabel') || 'Units'}
                         </span>
                     </div>
                 </div>
@@ -88,12 +88,12 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
                         )}
                         <span>
                             {isBlindReceiving
-                                ? 'Blind Audit'
+                                ? (t('warehouse.blindAudit') || 'Blind Audit')
                                 : remaining === 0
-                                    ? 'Matched'
+                                    ? (t('warehouse.matched') || 'Matched')
                                     : remaining > 0
-                                        ? `${remaining} Left`
-                                        : `${Math.abs(remaining)} Over`}
+                                        ? `${remaining} ${t('warehouse.left') || 'Left'}`
+                                        : `${Math.abs(remaining)} ${t('warehouse.over') || 'Over'}`}
                         </span>
                     </div>
 
@@ -103,7 +103,7 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
                         className="min-h-[38px] px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
                     >
                         <Plus size={14} />
-                        <span className="hidden sm:inline">Add Split</span>
+                        <span className="hidden sm:inline">{t('warehouse.addSplit') || 'Add Split'}</span>
                     </button>
                 </div>
             </div>

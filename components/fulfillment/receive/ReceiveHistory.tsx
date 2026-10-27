@@ -25,7 +25,7 @@ interface ReceiveHistoryProps {
     wmsJobsService?: any;
     jobs?: WMSJob[];
     sites: any[];
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const RECEIVE_HISTORY_PER_PAGE = 12;

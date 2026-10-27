@@ -10,7 +10,7 @@ interface Step3ReceiveHandoverProps {
     totalScanned: number;
     isSubmitting: boolean;
     onPrintLabels: () => void;
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
@@ -33,7 +33,7 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                         </div>
                         <div>
                             <h3 className="text-sm md:text-base font-bold uppercase tracking-tight text-[var(--theme-text-primary)]">
-                                Review before saving receipt
+                                {t('warehouse.reviewBeforeSaving') || 'Review before saving receipt'}
                             </h3>
                             <span className="text-xs text-[var(--theme-text-secondary)]">
                                 PO #{splitReceivingPO.poNumber || splitReceivingPO.id} · {splitReceivingPO.supplierName}
@@ -42,14 +42,14 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                     </div>
 
                     <span className="px-3 py-1 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 font-mono font-bold text-xs uppercase">
-                        {totalScanned} Counted · Not saved
+                        {t('warehouse.countedNotSaved', { count: totalScanned }) || `${totalScanned} Counted · Not saved`}
                     </span>
                 </div>
 
                 {/* Splits Summary Grid */}
                 <div className="space-y-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
-                        Recorded Pallet / Lot Splits
+                        {t('warehouse.recordedSplitsTitle') || 'Recorded Pallet / Lot Splits'}
                     </span>
                     {splitVariants.map((v, i) => (
                         <div
@@ -62,11 +62,11 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                                 </span>
                                 <div>
                                     <span className="font-bold text-[var(--theme-text-primary)] uppercase">
-                                        Lot: {v.batchNumber || 'STANDARD'}
+                                        {t('warehouse.batchLotNo') || 'Lot'}: {v.batchNumber || 'STANDARD'}
                                     </span>
                                     {v.expiryDate && (
                                         <span className="text-[11px] text-[var(--theme-text-secondary)] ml-2">
-                                            Exp: {v.expiryDate}
+                                            {t('warehouse.expiryDate') || 'Exp'}: {v.expiryDate}
                                         </span>
                                     )}
                                 </div>
@@ -78,10 +78,10 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                                         ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
                                         : 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
                                 }`}>
-                                    {v.condition || 'Good'}
+                                    {v.condition === 'Damaged' ? (t('warehouse.conditionDamaged') || 'Damaged') : (t('warehouse.conditionGood') || 'Good')}
                                 </span>
                                 <span className="font-bold text-sm text-[var(--theme-text-primary)]">
-                                    {v.quantity} Units
+                                    {v.quantity} {t('warehouse.unitsLabel') || 'Units'}
                                 </span>
                             </div>
                         </div>
@@ -92,7 +92,7 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
             {/* Print and Confirmation Actions Card */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-4 md:p-6 shadow-sm space-y-4">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                    Dock Handover & Storage Slotting Actions
+                    {t('warehouse.dockHandoverActionsTitle') || 'Dock Handover & Storage Slotting Actions'}
                 </h4>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -103,7 +103,7 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                         className="flex-1 min-h-[52px] px-6 py-3 rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border-2 border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 text-[var(--theme-text-primary)] font-bold text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 transition-colors cursor-pointer touch-manipulation disabled:opacity-50"
                     >
                         <Printer size={18} className="text-[var(--theme-accent)]" />
-                        <span>Print Pallet & Intake Labels</span>
+                        <span>{t('warehouse.printPalletAndIntakeLabels') || 'Print Pallet & Intake Labels'}</span>
                     </button>
 
 

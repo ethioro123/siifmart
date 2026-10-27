@@ -36,7 +36,7 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
             id: 'INTAKE',
             stepNum: 1,
             label: label('warehouse.manifestIntake', 'Manifest Intake'),
-            sublabel: 'PO & Origin',
+            sublabel: label('warehouse.poAndOrigin', 'PO & Origin'),
             icon: Package,
             isComplete: true,
         },
@@ -44,7 +44,7 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
             id: 'QUALITY',
             stepNum: 2,
             label: label('warehouse.qualityBatch', 'Quality & Count'),
-            sublabel: hasQuantityEntered ? 'Counted' : 'Lot, Expiry & Qty',
+            sublabel: hasQuantityEntered ? label('warehouse.countedStatus', 'Counted') : label('warehouse.lotExpiryQty', 'Lot, Expiry & Qty'),
             icon: ShieldAlert,
             isComplete: hasQuantityEntered,
         },
@@ -52,7 +52,7 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
             id: 'HANDOVER',
             stepNum: 3,
             label: label('warehouse.dockHandover', 'Review & Handover'),
-            sublabel: !hasQuantityEntered ? 'Locked (Count Req)' : 'Print & Putaway',
+            sublabel: !hasQuantityEntered ? label('warehouse.lockedCountReq', 'Locked (Count Req)') : label('warehouse.printAndPutaway', 'Print & Putaway'),
             icon: CheckCircle,
             isComplete: false,
         },
@@ -74,7 +74,7 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
                             onClick={() => {
                                 if (isAccessible) setStep(st.id);
                             }}
-                            title={!isAccessible ? 'Items must be counted and inspected before dock handover.' : undefined}
+                            title={!isAccessible ? label('warehouse.stepInspectionRequired', 'Items must be counted and inspected before dock handover.') : undefined}
                             className={`min-h-[44px] py-1.5 px-2 md:py-2 md:px-3 rounded-xl border flex items-center gap-2 md:gap-3 transition-colors text-left touch-manipulation ${
                                 !isAccessible
                                     ? 'opacity-40 cursor-not-allowed bg-[var(--theme-bg-card)]/20 border-dashed border-[var(--theme-border)]'
