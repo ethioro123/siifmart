@@ -81,60 +81,53 @@ const KNOWN_HUB_CODES: Record<string, string> = {
 const VOWELS = new Set(['A', 'E', 'I', 'O', 'U']);
 
 /**
- * Normalizes any raw region code or abbreviation into strict uppercase format [COUNTRY]-[3-LETTERS].
+ * Normalizes any raw region code or abbreviation into strict pure uppercase format [3-4 LETTERS] (e.g. ADD, ADA, NRB, MBA).
+ * Removes any redundant country prefixes (e.g. ET-ADD -> ADD, KE-NRB -> NRB).
  */
-export function formatRegionCode(raw?: string | null, countryHint?: string | null): string {
-    const country = normalizeCountryCode(countryHint);
-    if (!raw) return `${country}-REG`;
+export function formatRegionCode(raw?: string | null, _countryHint?: string | null): string {
+    if (!raw) return 'REG';
 
     const trimmed = raw.trim().toUpperCase();
 
-    // Already matches [COUNTRY]-[3-LETTERS]
-    if (/^[A-Z]{2}-[A-Z]{3}$/.test(trimmed)) {
+    // Already pure 3-4 uppercase letters (e.g. ADD, ADA, NRB, MBA)
+    if (/^[A-Z]{3,4}$/.test(trimmed)) {
         return trimmed;
     }
 
-    // Matches with lowercase or underscore: et_add -> ET-ADD, ke_mombasa -> KE-MBA
-    const matchDashed = trimmed.match(/^([A-Z]{2})[-_]([A-Z0-9]+)$/);
+    // Matches with country prefix or separator: ET-ADD -> ADD, KE-NRB -> NRB, et_add -> ADD
+    const matchDashed = trimmed.match(/^(?:[A-Z]{2}[-_])?([A-Z0-9]+)$/);
     if (matchDashed) {
-        const c = normalizeCountryCode(matchDashed[1]);
-        const sub = matchDashed[2].toLowerCase();
+        const sub = matchDashed[1].toLowerCase();
         if (KNOWN_HUB_CODES[sub]) {
-            return `${c}-${KNOWN_HUB_CODES[sub]}`;
+            return KNOWN_HUB_CODES[sub];
         }
-        const letters = matchDashed[2].replace(/[^A-Z]/g, '').slice(0, 3).padEnd(3, 'X');
-        return `${c}-${letters}`;
+        const letters = matchDashed[1].replace(/[^A-Z]/g, '').slice(0, 4);
+        if (letters.length >= 3) {
+            return letters;
+        }
+        return letters.padEnd(3, 'X');
     }
 
-    // Bare letters: ADD -> ET-ADD, or mombasa -> KE-MBA
     const subClean = trimmed.toLowerCase();
     if (KNOWN_HUB_CODES[subClean]) {
-        return `${country}-${KNOWN_HUB_CODES[subClean]}`;
+        return KNOWN_HUB_CODES[subClean];
     }
 
-    // Bare 3 letters: ADD -> ET-ADD
     const bareLetters = trimmed.replace(/[^A-Z]/g, '');
     if (bareLetters.length >= 3) {
-        return `${country}-${bareLetters.slice(0, 3)}`;
+        return bareLetters.slice(0, 4);
     }
 
-    return `${country}-${bareLetters.padEnd(3, 'X')}`;
+    return bareLetters.padEnd(3, 'X');
 }
 
 /**
- * Validates whether a code strictly adheres to the [COUNTRY]-[3-LETTERS] format.
+ * Validates whether a code strictly adheres to the pure [3-4 LETTERS] format.
  */
-export function isValidRegionCodeFormat(code?: string | null, expectedCountry?: string | null): boolean {
+export function isValidRegionCodeFormat(code?: string | null, _expectedCountry?: string | null): boolean {
     if (!code) return false;
     const clean = code.trim().toUpperCase();
-    if (!/^[A-Z]{2}-[A-Z]{3}$/.test(clean)) return false;
-
-    if (expectedCountry) {
-        const expected = normalizeCountryCode(expectedCountry);
-        return clean.startsWith(`${expected}-`);
-    }
-
-    return true;
+    return /^[A-Z]{3,4}$/.test(clean);
 }
 
 /**
@@ -278,33 +271,19 @@ function getAlphabeticalFallback(root: string, takenSet: Set<string>): string {
 /**
  * Generates the next smart advanced unique 3-letter region code.
  * Guarantees:
- * - Mandatory Sovereign country prefix: ET-, KE-, etc.
- * - Exactly 3 uppercase letters: e.g. ET-ADD
- * - If ET-ADD exists, never duplicates, but returns the next smart unique code (e.g. ET-AAB, ET-ADS, ET-AAC)
+ * - Pure 3-letter uppercase code: e.g. ADD, ADA, NRB, MBA
+ * - If ADD exists, never duplicates, but returns the next smart unique code (e.g. AAB, ADS, AAC)
  */
 export function generateNextSmartRegionCode(params: SmartRegionCodeParams): string {
-    const country = normalizeCountryCode(params.country);
-    const existing = (params.existingCodes || []).map(c => c.trim().toUpperCase());
-
-    // Filter taken 3-letter codes for the active country
-    const countryPrefix = `${country}-`;
-    const takenLetters = new Set<string>();
-
-    for (const code of existing) {
-        if (code.startsWith(countryPrefix)) {
-            const suffix = code.slice(countryPrefix.length).replace(/[^A-Z]/g, '');
-            if (suffix.length === 3) {
-                takenLetters.add(suffix);
-            }
-        }
-    }
+    const existing = (params.existingCodes || []).map(c => formatRegionCode(c));
+    const takenLetters = new Set<string>(existing);
 
     // 1. Extract smart semantic & phonetic candidates
     const candidates = extractRegionCandidates(params.name, params.city);
 
     for (const cand of candidates) {
         if (!takenLetters.has(cand)) {
-            return `${country}-${cand}`;
+            return cand;
         }
     }
 
@@ -312,7 +291,7 @@ export function generateNextSmartRegionCode(params: SmartRegionCodeParams): stri
     const primaryRoot = (candidates[0] || 'REG').slice(0, 2).padEnd(2, 'A');
     const fallback = getAlphabeticalFallback(primaryRoot, takenLetters);
 
-    return `${country}-${fallback}`;
+    return fallback;
 }
 
 /**
@@ -325,14 +304,13 @@ export function validateRegionCodeInput(params: {
     name?: string;
     city?: string;
 }): RegionCodeValidation {
-    const country = normalizeCountryCode(params.country);
     const trimmed = (params.code || '').trim().toUpperCase();
 
     if (!trimmed) {
         const suggested = generateNextSmartRegionCode({
             name: params.name,
             city: params.city,
-            country,
+            country: params.country,
             existingCodes: params.existingCodes
         });
         return {
@@ -342,16 +320,16 @@ export function validateRegionCodeInput(params: {
         };
     }
 
-    if (!isValidRegionCodeFormat(trimmed, country)) {
+    if (!isValidRegionCodeFormat(trimmed)) {
         const suggested = generateNextSmartRegionCode({
             name: params.name || trimmed,
             city: params.city,
-            country,
+            country: params.country,
             existingCodes: params.existingCodes
         });
         return {
             valid: false,
-            error: `Territorial code must follow format ${country}-XXX (3 uppercase letters)`,
+            error: 'Territorial code must follow format XXX (3-4 uppercase letters, e.g. ADD, NRB)',
             suggestedCode: suggested
         };
     }
@@ -361,7 +339,7 @@ export function validateRegionCodeInput(params: {
         const suggested = generateNextSmartRegionCode({
             name: params.name || trimmed,
             city: params.city,
-            country,
+            country: params.country,
             existingCodes: params.existingCodes
         });
         return {

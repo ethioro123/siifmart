@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertOctagon } from 'lucide-react';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface WasteHeaderProps {
     wasteViewMode: 'Log' | 'History';
@@ -10,6 +11,8 @@ export const WasteHeader: React.FC<WasteHeaderProps> = ({
     wasteViewMode,
     setWasteViewMode
 }) => {
+    const { t } = useLanguage();
+
     return (
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2 sm:p-5 mb-2 sm:mb-5 shadow-xs">
             {/* Desktop header */}
@@ -17,9 +20,11 @@ export const WasteHeader: React.FC<WasteHeaderProps> = ({
                 <div>
                     <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-lg tracking-tight">
                         <AlertOctagon className="text-red-500" size={22} />
-                        Waste & Spoilage Management
+                        {t('warehouse.wasteManagementTitle')}
                     </h3>
-                    <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Log and track inventory write-offs</p>
+                    <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                        {t('warehouse.wasteSubtitle')}
+                    </p>
                 </div>
 
                 <div className="flex bg-[var(--theme-bg-subtle)] rounded-xl p-1 border border-[var(--theme-border)] shrink-0">
@@ -31,7 +36,7 @@ export const WasteHeader: React.FC<WasteHeaderProps> = ({
                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                         }`}
                     >
-                        Log Waste
+                        {t('warehouse.logWaste')}
                     </button>
                     <button
                         onClick={() => setWasteViewMode('History')}
@@ -41,7 +46,7 @@ export const WasteHeader: React.FC<WasteHeaderProps> = ({
                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                         }`}
                     >
-                        History
+                        {t('warehouse.historyShort')}
                     </button>
                 </div>
             </div>
@@ -50,10 +55,12 @@ export const WasteHeader: React.FC<WasteHeaderProps> = ({
             <div className="flex sm:hidden items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                     <AlertOctagon className="text-red-500 shrink-0" size={14} />
-                    <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">Waste</span>
+                    <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">
+                        {t('warehouse.waste')}
+                    </span>
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-500 border border-red-500/20 shrink-0">
                         <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                        Write-offs
+                        {t('warehouse.writeOffsBadge')}
                     </span>
                 </div>
 
@@ -66,7 +73,7 @@ export const WasteHeader: React.FC<WasteHeaderProps> = ({
                                 : 'text-[var(--theme-text-secondary)]'
                         }`}
                     >
-                        Log
+                        {t('warehouse.logShort')}
                     </button>
                     <button
                         onClick={() => setWasteViewMode('History')}
@@ -76,7 +83,7 @@ export const WasteHeader: React.FC<WasteHeaderProps> = ({
                                 : 'text-[var(--theme-text-secondary)]'
                         }`}
                     >
-                        History
+                        {t('warehouse.historyShort')}
                     </button>
                 </div>
             </div>

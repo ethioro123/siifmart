@@ -7,11 +7,11 @@
 .app-topbar .topbar-context-toggle, .app-topbar .topbar-search-trigger { display: none; }
 .app-topbar .topbar-profile-name { display: flex; max-width: 12rem; min-width: 0; }
 .app-topbar .topbar-profile-name > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.app-topbar:not([data-density="full"]) .topbar-desktop-search,
-.app-topbar:not([data-density="full"]) .topbar-appearance,
-.app-topbar:not([data-density="full"]) .topbar-profile-name,
+.app-topbar:is([data-density="compact"], [data-density="medium"]) .topbar-desktop-search,
+.app-topbar:is([data-density="compact"], [data-density="medium"]) .topbar-appearance,
+.app-topbar:is([data-density="compact"], [data-density="medium"]) .topbar-profile-name,
 .app-topbar .topbar-refresh { display: none; }
-.app-topbar:not([data-density="full"]) .topbar-search-trigger { display: flex; }
+.app-topbar:is([data-density="compact"], [data-density="medium"]) .topbar-search-trigger { display: flex; }
 .app-topbar[data-density="compact"] .topbar-logo .brand-wordmark { display: none; }
 .app-topbar:is([data-density="compact"], [data-density="medium"]) .topbar-context-toggle { display: flex; }
 .app-topbar:is([data-density="compact"], [data-density="medium"]) .topbar-context {
@@ -31,7 +31,7 @@
 }
 .app-topbar:is([data-density="compact"], [data-density="medium"]) .topbar-context[data-open="true"] { display: flex; }
 .app-topbar .topbar-context > div { min-width: 0; }
-.app-topbar[data-density="full"] .topbar-desktop-search { display: block; flex-shrink: 1; min-width: 12rem; }
-.app-topbar[data-density="full"] .topbar-appearance { display: block; }
+.app-topbar:is([data-density="wide"], [data-density="full"]) .topbar-desktop-search { display: block; flex-shrink: 1; }
+.app-topbar:is([data-density="wide"], [data-density="full"]) .topbar-appearance { display: block; }
 .app-topbar:is([data-density="compact"], [data-density="medium"]) .topbar-context > div > button { width: 100%; }
 .app-topbar:is([data-density="compact"], [data-density="medium"]) .topbar-context > div > button .flex-col { flex: 1; max-width: none; }

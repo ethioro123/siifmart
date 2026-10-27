@@ -7,6 +7,7 @@ import { useCreateInventoryRequestMutation } from '../../../hooks/useInventoryRe
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 import { logger } from '../../../utils/logger';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface WasteLogProps {
     products: Product[];
@@ -20,6 +21,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
     user,
     addNotification,
 }) => {
+    const { t } = useLanguage();
     const { settings, effectiveCountry } = useData();
     const isBlindMode = resolveReceivingPolicy(settings, effectiveCountry).blind;
     const isManagerOrHQ = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_supply_chain_director', 'warehouse_manager', 'store_manager', 'inventory_manager'].includes((user?.role || '').toLowerCase());
@@ -42,13 +44,13 @@ export const WasteLog: React.FC<WasteLogProps> = ({
 
     const handleAddToBasket = () => {
         if (!selectedProductId || !wasteQuantity) {
-            addNotification('alert', 'Please select product and quantity');
+            addNotification('alert', t('warehouse.selectProductAndQuantityPrompt'));
             return;
         }
 
         const qty = parseInt(wasteQuantity, 10);
         if (isNaN(qty) || qty <= 0) {
-            addNotification('alert', 'Please enter a valid quantity greater than zero');
+            addNotification('alert', t('warehouse.validQuantityPrompt'));
             return;
         }
 
@@ -64,7 +66,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
         setWasteQuantity('');
         setWasteNotes('');
         setWasteReason('Expired');
-        addNotification('success', 'Item added to waste basket');
+        addNotification('success', t('warehouse.itemAddedToBasket'));
     };
 
     return (
@@ -73,18 +75,20 @@ export const WasteLog: React.FC<WasteLogProps> = ({
             <div className="lg:col-span-1 space-y-4">
                 <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
                     <h4 className="font-bold text-[var(--theme-text-primary)] text-sm border-b border-[var(--theme-border)] pb-3">
-                        Add Item to Log
+                        {t('warehouse.addItemToLog')}
                     </h4>
 
                     <div>
-                        <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">Product</label>
+                        <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">
+                            {t('warehouse.productLabel')}
+                        </label>
                         <select
                             value={selectedProductId}
                             onChange={(e) => setSelectedProductId(e.target.value)}
                             className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm focus:border-primary outline-none touch-manipulation"
-                            aria-label="Select Product"
+                            aria-label={t('warehouse.productLabel')}
                         >
-                            <option value="">Select Product...</option>
+                            <option value="">{t('warehouse.selectProductPrompt')}</option>
                             {products.map(p => (
                                 <option key={p.id} value={p.id}>
                                     {hideSystemStock ? `${p.name} (${p.sku})` : `${p.name} (Stock: ${p.stock})`}
@@ -95,9 +99,11 @@ export const WasteLog: React.FC<WasteLogProps> = ({
 
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">Quantity</label>
+                            <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">
+                                {t('warehouse.quantityLabel')}
+                            </label>
                             <input
-                                title="Waste Quantity"
+                                title={t('warehouse.quantityLabel')}
                                 type="number"
                                 min="1"
                                 value={wasteQuantity}
@@ -107,29 +113,33 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                             />
                         </div>
                         <div>
-                            <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">Reason</label>
+                            <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">
+                                {t('warehouse.reasonLabel')}
+                            </label>
                             <select
                                 value={wasteReason}
                                 onChange={(e) => setWasteReason(e.target.value)}
                                 className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm focus:border-primary outline-none touch-manipulation"
-                                aria-label="Select Reason"
+                                aria-label={t('warehouse.reasonLabel')}
                             >
-                                <option value="Expired">Expired</option>
-                                <option value="Damaged">Damaged</option>
-                                <option value="Spoiled">Spoiled</option>
-                                <option value="Theft">Theft</option>
-                                <option value="Other">Other</option>
+                                <option value="Expired">{t('warehouse.reasonExpired')}</option>
+                                <option value="Damaged">{t('warehouse.reasonDamaged')}</option>
+                                <option value="Spoiled">{t('warehouse.reasonSpoiled')}</option>
+                                <option value="Theft">{t('warehouse.reasonTheft')}</option>
+                                <option value="Other">{t('warehouse.reasonOther')}</option>
                             </select>
                         </div>
                     </div>
 
                     <div>
-                        <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">Notes / Evidence</label>
+                        <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">
+                            {t('warehouse.notesEvidenceLabel')}
+                        </label>
                         <textarea
                             value={wasteNotes}
                             onChange={(e) => setWasteNotes(e.target.value)}
                             className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm focus:border-primary outline-none h-24 touch-manipulation"
-                            placeholder="Describe damage..."
+                            placeholder={t('warehouse.describeDamagePlaceholder')}
                         />
                     </div>
 
@@ -137,7 +147,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                         onClick={handleAddToBasket}
                         className="w-full min-h-[44px] py-3 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs touch-manipulation active:scale-[0.99] cursor-pointer"
                     >
-                        <Plus size={18} /> Add to Basket
+                        <Plus size={18} /> {t('warehouse.addToBasket')}
                     </button>
                 </div>
             </div>
@@ -146,13 +156,15 @@ export const WasteLog: React.FC<WasteLogProps> = ({
             <div className="lg:col-span-2 flex flex-col h-full">
                 <div className="bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] flex-1 flex flex-col overflow-hidden shadow-xs">
                     <div className="p-4 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
-                        <h4 className="font-bold text-[var(--theme-text-primary)] text-sm">Waste Basket ({wasteBasket.length})</h4>
+                        <h4 className="font-bold text-[var(--theme-text-primary)] text-sm">
+                            {t('warehouse.wasteBasketTitle', { count: wasteBasket.length })}
+                        </h4>
                         {wasteBasket.length > 0 && (
                             <button
                                 onClick={() => setWasteBasket([])}
                                 className="min-h-[36px] px-2.5 text-xs text-red-500 hover:text-red-400 font-semibold touch-manipulation transition-colors"
                             >
-                                Clear All
+                                {t('warehouse.clearAll')}
                             </button>
                         )}
                     </div>
@@ -161,7 +173,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                         {wasteBasket.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-[var(--theme-text-secondary)] opacity-50 py-16">
                                 <Trash2 size={48} className="mb-2" />
-                                <p className="text-xs font-semibold">Basket is empty</p>
+                                <p className="text-xs font-semibold">{t('warehouse.basketIsEmpty')}</p>
                             </div>
                         ) : (
                             wasteBasket.map((item, idx) => {
@@ -185,8 +197,8 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                                 )}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-[var(--theme-text-primary)] text-sm">{product?.name || 'Unknown'}</p>
-                                                <p className="text-[11px] text-[var(--theme-text-secondary)]">{item.reason} • {item.quantity} units</p>
+                                                <p className="font-bold text-[var(--theme-text-primary)] text-sm">{product?.name || t('warehouse.unknownItem')}</p>
+                                                <p className="text-[11px] text-[var(--theme-text-secondary)]">{item.reason} • {item.quantity} {t('warehouse.unitsWord')}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
@@ -194,7 +206,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                             <button
                                                 onClick={() => setWasteBasket(prev => prev.filter((_, i) => i !== idx))}
                                                 className="min-h-[36px] min-w-[36px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-red-500 rounded-lg transition-colors touch-manipulation"
-                                                aria-label="Remove Item"
+                                                aria-label={t('warehouse.removeItemAria')}
                                             >
                                                 <X size={16} />
                                             </button>
@@ -207,7 +219,9 @@ export const WasteLog: React.FC<WasteLogProps> = ({
 
                     <div className="p-4 bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)]">
                         <div className="flex justify-between items-center mb-4">
-                            <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Total Value Loss</span>
+                            <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                                {t('warehouse.totalValueLoss')}
+                            </span>
                             <span className="text-xl font-bold font-mono text-[var(--theme-text-primary)] tabular-nums">
                                 {formatCompactNumber(wasteBasket.reduce((sum, item) => {
                                     const product = products.find(p => p.id === item.productId);
@@ -226,9 +240,9 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                 }, 0);
 
                                 if (totalValue > 100) {
-                                    if (!confirm(`High value waste (${CURRENCY_SYMBOL}${totalValue.toFixed(2)}). Are you sure? This will be flagged for review.`)) return;
+                                    if (!confirm(t('warehouse.highValueWasteConfirm', { formattedValue: `${CURRENCY_SYMBOL}${totalValue.toFixed(2)}` }))) return;
                                 } else {
-                                    if (!confirm('Confirm disposal of these items?')) return;
+                                    if (!confirm(t('warehouse.confirmDisposalPrompt'))) return;
                                 }
 
                                 setIsDisposingWaste(true);
@@ -253,10 +267,10 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                     }
 
                                     setWasteBasket([]);
-                                    addNotification('success', 'Waste adjustment requests submitted for approval');
+                                    addNotification('success', t('warehouse.wasteRequestsSubmitted'));
                                 } catch (e) {
                                     logger.error('WasteLog', 'Failed to submit waste disposal:', e);
-                                    addNotification('alert', 'Failed to submit waste disposal requests');
+                                    addNotification('alert', t('warehouse.failedWasteSubmit'));
                                 } finally {
                                     setIsDisposingWaste(false);
                                 }
@@ -269,12 +283,12 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                             {isDisposingWaste ? (
                                 <>
                                     <RefreshCw size={18} className="animate-spin" />
-                                    Processing...
+                                    {t('warehouse.processingProgress')}
                                 </>
                             ) : (
                                 <>
                                     <AlertTriangle size={18} />
-                                    Confirm Disposal
+                                    {t('warehouse.confirmDisposal')}
                                 </>
                             )}
                         </button>

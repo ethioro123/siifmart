@@ -27,15 +27,13 @@ export function DesktopSearch({
       <div className="topbar-desktop-search relative hidden lg:block" ref={containerRef}>
          <form
             onSubmit={handleSearch}
-            className="flex items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-full px-3.5 py-1.5 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/15 focus-within:bg-[var(--theme-bg-card)] transition-all group shadow-2xs"
+            className="flex items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 min-h-[40px] h-10 focus-within:border-[var(--theme-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 focus-within:bg-[var(--theme-bg-card)] transition-all group shadow-xs"
          >
-            <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 group-focus-within:bg-blue-500 group-focus-within:text-white transition-all">
-               <Search size={13} />
-            </div>
+            <Search size={16} className="text-[var(--theme-text-secondary)] group-focus-within:text-[var(--theme-accent)] transition-colors shrink-0" />
             <input
                type="text"
-               placeholder="Global Search..."
-               className="bg-transparent border-none focus:ring-0 text-sm text-[var(--theme-text-primary)] ml-2.5 w-40 xl:w-48 placeholder-[var(--theme-text-muted)] outline-none font-medium tracking-tight"
+               placeholder="Search..."
+               className="bg-transparent border-none focus:ring-0 text-xs sm:text-sm text-[var(--theme-text-primary)] ml-2.5 w-44 md:w-56 lg:w-64 focus-within:w-72 placeholder:text-[var(--theme-text-secondary)]/60 outline-none font-medium tracking-tight transition-all"
                value={searchValue}
                onChange={(e) => {
                   setSearchValue(e.target.value);
@@ -51,15 +49,15 @@ export function DesktopSearch({
                      setSearchValue('');
                      setIsSearchOpen(false);
                   }}
-                  className="w-5 h-5 rounded-full bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0"
+                  className="w-5 h-5 rounded-md hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-90 shrink-0 ml-1.5"
                   aria-label="Clear Search"
                >
-                  <X size={11} />
+                  <X size={13} />
                </button>
             ) : (
-               <div className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono text-[var(--theme-text-muted)] select-none shrink-0">
-                  <span>⌘</span><span>K</span>
-               </div>
+               <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono text-[var(--theme-text-secondary)] shadow-xs select-none shrink-0 ml-1.5">
+                  <span className="text-xs leading-none">⌘</span><span className="leading-none">K</span>
+               </kbd>
             )}
          </form>
 

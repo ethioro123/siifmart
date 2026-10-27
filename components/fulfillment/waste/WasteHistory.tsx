@@ -4,6 +4,7 @@ import Pagination from '../../shared/Pagination';
 import { Product, StockMovement } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
 import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface WasteHistoryProps {
     movements: StockMovement[];
@@ -20,6 +21,7 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
     setSelectedJob,
     setIsDetailsOpen
 }) => {
+    const { t } = useLanguage();
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -52,9 +54,11 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                 <div>
                     <h4 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2 uppercase tracking-wide">
                         <HistoryIcon size={18} className="text-[var(--theme-text-secondary)]" />
-                        Waste Logs
+                        {t('warehouse.wasteLogsTitle')}
                     </h4>
-                    <p className="text-[var(--theme-text-secondary)] text-[11px]">Recent spoilage and damage records</p>
+                    <p className="text-[var(--theme-text-secondary)] text-[11px]">
+                        {t('warehouse.wasteHistorySubtitle')}
+                    </p>
                 </div>
 
                 {/* History Search */}
@@ -62,7 +66,8 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={15} />
                     <input
                         type="text"
-                        placeholder="Search history..."
+                        placeholder={t('warehouse.searchHistoryPlaceholder')}
+                        aria-label={t('warehouse.searchHistoryPlaceholder')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-4 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-primary transition-all touch-manipulation"
@@ -101,16 +106,16 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                                         </span>
                                     </div>
                                     <div className="space-y-1 mb-2.5">
-                                        <p className="text-sm font-bold text-[var(--theme-text-primary)] break-words">{product?.name || m.productName || 'Unknown Item'}</p>
+                                        <p className="text-sm font-bold text-[var(--theme-text-primary)] break-words">{product?.name || m.productName || t('warehouse.unknownItem')}</p>
                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{product?.sku || 'SKU N/A'}</p>
                                     </div>
                                     <div className="flex items-center justify-between text-[11px] pt-2 border-t border-[var(--theme-border)]">
                                         <div className="flex items-center gap-1 text-[var(--theme-text-secondary)] min-w-0 pr-2">
                                             <UserCheck size={12} className="shrink-0 text-primary" />
-                                            <span className="break-words leading-tight">By: {workerName}</span>
+                                            <span className="break-words leading-tight">{t('warehouse.byWorker', { name: workerName })}</span>
                                         </div>
                                         <div className="text-right text-[var(--theme-text-primary)] font-mono font-bold text-xs tabular-nums shrink-0">
-                                            {m.quantity} <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal">units</span>
+                                            {m.quantity} <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal">{t('warehouse.unitsWord')}</span>
                                         </div>
                                     </div>
                                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-1 text-right">{formatDateTime(m.date)}</p>
@@ -124,12 +129,14 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                         totalItems={filteredHistory.length}
                         itemsPerPage={WASTE_HISTORY_PER_PAGE}
                         onPageChange={setCurrentPage}
-                        itemName="history"
+                        itemName={t('warehouse.historyItemName') || 'history'}
                     />
                 </>
             ) : (
                 <div className="text-center py-12 bg-[var(--theme-bg-subtle)] rounded-2xl border border-dashed border-[var(--theme-border)]">
-                    <p className="text-[var(--theme-text-secondary)] text-xs">No matching waste history found</p>
+                    <p className="text-[var(--theme-text-secondary)] text-xs">
+                        {t('warehouse.noMatchingWasteHistory')}
+                    </p>
                 </div>
             )}
         </div>

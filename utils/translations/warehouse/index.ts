@@ -12,6 +12,7 @@ import { auxiliary } from './auxiliary';
 import { messages } from './messages';
 import { misc } from './misc';
 import { count } from './count';
+import { waste } from './waste';
 
 export const warehouse: TranslationBlock = {
     ...core,
@@ -28,6 +29,8 @@ export const warehouse: TranslationBlock = {
     putaway,
     ...replenish,
     replenish,
+    ...waste,
+    waste,
     ...misc,
     misc,
     ...modals,

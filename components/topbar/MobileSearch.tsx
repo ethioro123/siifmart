@@ -31,15 +31,13 @@ export function MobileSearch({
             >
                <X size={20} />
             </button>
-            <div className="flex-1 relative flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-3.5 py-2 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/15 transition-all">
-               <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                  <Search size={14} />
-               </div>
+            <div className="flex-1 relative flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 min-h-[40px] focus-within:border-[var(--theme-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 focus-within:bg-[var(--theme-bg-card)] transition-all">
+               <Search size={16} className="text-[var(--theme-text-secondary)] shrink-0" />
                <input
                   autoFocus
                   type="text"
-                  placeholder="Search products, orders, customers..."
-                  className="w-full bg-transparent border-none ml-2.5 text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none text-sm font-medium tracking-tight"
+                  placeholder="Search..."
+                  className="w-full bg-transparent border-none ml-2.5 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 outline-none text-sm font-medium tracking-tight"
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
                />
@@ -47,10 +45,10 @@ export function MobileSearch({
                   <button
                      type="button"
                      onClick={() => setSearchValue('')}
-                     className="w-5 h-5 rounded-full bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0"
+                     className="w-5 h-5 rounded-md hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-90 shrink-0"
                      aria-label="Clear Search"
                   >
-                     <X size={11} />
+                     <X size={13} />
                   </button>
                ) : null}
             </div>

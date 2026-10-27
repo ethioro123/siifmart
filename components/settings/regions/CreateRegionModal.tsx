@@ -132,7 +132,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     // Manual code editing
     const handleCodeChange = (rawInput: string) => {
         setIsCodeManual(true);
-        const clean = rawInput.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 7);
+        const clean = rawInput.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
         setCode(clean);
     };
 
@@ -281,7 +281,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         <div>
                             <div className="flex items-center justify-between mb-1">
                                 <label className="block text-xs font-medium text-[var(--theme-text-primary)]">
-                                    Territorial Code * ({selectedCountry}-XXX)
+                                    Territorial Code * (3-4 Letters)
                                 </label>
                                 <button
                                     type="button"
@@ -302,9 +302,9 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                 type="text"
                                 value={code}
                                 onChange={(e) => handleCodeChange(e.target.value)}
-                                placeholder={`e.g. ${selectedCountry}-ADD`}
+                                placeholder="e.g. ADD, NRB"
                                 required
-                                maxLength={7}
+                                maxLength={4}
                                 className={`w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-subtle)] border rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] uppercase ${
                                     !codeValidation.valid ? 'border-amber-500 ring-1 ring-amber-500/30' : 'border-[var(--theme-border)]'
                                 }`}

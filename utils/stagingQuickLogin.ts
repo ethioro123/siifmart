@@ -52,7 +52,7 @@ const QUICK_LOGIN_SITE_TYPES: StagingSiteType[] = [
     'HQ', 'Regional Administration', 'Store', 'Warehouse', 'Distribution Center'
 ];
 
-const PINNED_QUICK_LOGIN_SITE_CODES = new Set<string>(['ET-ADD-STR-03']);
+const PINNED_QUICK_LOGIN_SITE_CODES = new Set<string>(['ADD-STR-03', 'ET-ADD-STR-03']);
 
 function isPinnedQuickLoginAccount(account: StagingQuickAccount): boolean {
     return PINNED_QUICK_LOGIN_SITE_CODES.has(account.siteCode) ||

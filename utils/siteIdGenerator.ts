@@ -120,55 +120,65 @@ export function generateNextSiteCode(
 
 /**
  * Checks if a string is a clean regional operational site code.
- * Matches: [COUNTRY]-[ZONE]-[TYPE]-[NUMBER] (e.g. ET-ADD-ADM-01, ET-DIR-WH-02, KE-NRB-STR-17)
- * Also matches legacy formats like ADD-WH-01 or ET-ADD-STR-BOLE-01 for backward compatibility.
+ * Matches:
+ * - Sovereign Corporate HQ: ET-HQ, KE-HQ
+ * - Pure Regional Administration: ADD, ADA, NRB, MBA
+ * - Clean Facilities: [ZONE]-[TYPE]-[NUMBER] (e.g. ADD-STR-01, NRB-DC-02, ADA-WH-01)
+ * Also matches legacy formats like ET-ADD-STR-01 or ET-ADD for backward compatibility.
  */
 export function isPlaceSpecificCode(code?: string | null): boolean {
     if (!code) return false;
     const clean = code.trim().toUpperCase();
-    if (/^[A-Z]{2}-(?:HQ|[A-Z]{3,4})$/i.test(clean)) return true;
-    return /^[A-Z]{2}-[A-Z]{3,4}-[A-Z]{2,3}-\d{2,}$/.test(clean) ||
-           /^[A-Z]{3,4}-[A-Z]{2,3}-\d{2,}$/.test(clean) ||
+    if (/^[A-Z]{2}-HQ$/i.test(clean)) return true;
+    if (/^[A-Z]{3,4}$/.test(clean) && !['SITE', 'LOC'].includes(clean)) return true;
+    return /^[A-Z]{3,4}-[A-Z]{2,3}-\d{2,}$/.test(clean) ||
+           /^[A-Z]{2}-[A-Z]{3,4}-[A-Z]{2,3}-\d{2,}$/.test(clean) ||
+           /^[A-Z]{2}-(?:HQ|[A-Z]{3,4})$/i.test(clean) ||
            /^[A-Z]{2}-[A-Z0-9]+-[A-Z]+-[A-Z0-9-]+$/i.test(clean);
 }
 
 /**
  * Normalizes any code into the standard clean format:
- * [COUNTRY]-[ZONE]-[TYPE]-[NUMBER] (e.g. ET-DIR-WH-02, KE-NRB-WH-12)
- * Or Sovereign Corporate HQ (ET-HQ, KE-HQ) / Regional Administration (ET-ADD, KE-NRB).
- * Completely decouples the location name from the ID.
+ * - Sovereign Corporate HQ: ET-HQ, KE-HQ (strictly retains country prefix)
+ * - Regional Administration: ADD, ADA, NRB, MBA (pure region code)
+ * - Facilities: [REGION]-[TYPE]-[NUMBER] (e.g. ADD-STR-01, NRB-DC-01)
+ * Strips redundant country prefix from all operational places.
  */
-export function normalizeCleanSiteCode(code?: string | null, countryHint?: string | null): string | null {
+export function normalizeCleanSiteCode(code?: string | null, _countryHint?: string | null): string | null {
     if (!code) return null;
     const clean = code.trim().toUpperCase();
 
-    // 0. Direct match for Sovereign Corporate HQ (ET-HQ, KE-HQ) and Regional Administration IDs (ET-ADD, KE-NRB, ET-ADA)
-    if (/^[A-Z]{2}-(?:HQ|[A-Z]{3,4})$/i.test(clean)) {
+    // 0. Sovereign Corporate HQ: ET-HQ, KE-HQ (strictly retains country prefix)
+    if (/^[A-Z]{2}-HQ$/i.test(clean)) {
         return clean;
     }
 
-    // 1. Direct standard match: ET-DIR-WH-02, KE-NRB-STR-17
-    if (/^[A-Z]{2}-[A-Z]{3,4}-[A-Z]{2,3}-\d{2,}$/.test(clean)) {
+    // 1. Pure Regional Administration IDs: ADD, ADA, NRB, MBA (Option B)
+    if (/^[A-Z]{3,4}$/.test(clean) && !['SITE', 'LOC'].includes(clean)) {
         return clean;
     }
 
-    // 2. Zone-Type-Number match without country prefix: ADD-WH-01 -> ET-ADD-WH-01
-    const noCountryMatch = clean.match(/^([A-Z]{3,4})-([A-Z]{2,3})-(\d{2,})$/);
-    if (noCountryMatch) {
-        const zone = noCountryMatch[1];
-        const type = noCountryMatch[2];
-        const num = noCountryMatch[3];
-        if (zone !== 'SITE' && !['KE', 'ET', 'UG', 'RW', 'TZ'].includes(type)) {
-            const country = normalizeCountryCode(countryHint || getCountryByZoneAbbr(zone));
-            return `${country}-${zone}-${type}-${num}`;
-        }
+    // 1b. Legacy [COUNTRY]-[REGION]: ET-ADD -> ADD, KE-NRB -> NRB
+    const legacyRegMatch = clean.match(/^[A-Z]{2}-([A-Z]{3,4})$/);
+    if (legacyRegMatch) {
+        return legacyRegMatch[1];
     }
 
-    // 3. Legacy hierarchical with location name slug: ET-ADD-STR-BOLE-01 or ADD-STR-BOLE-01
-    const slugMatch = clean.match(/^(?:([A-Z]{2})-)?([A-Z]{3,4})-([A-Z]{2,3})-[A-Z0-9]+-(\d{2,})$/);
+    // 2. Direct standard facility format: [REGION]-[TYPE]-[NUMBER] (Option A: ADD-STR-01, NRB-DC-02)
+    if (/^[A-Z]{3,4}-[A-Z]{2,3}-\d{2,}$/.test(clean)) {
+        return clean;
+    }
+
+    // 3. Legacy country-prefixed facility format: ET-ADD-STR-01 -> ADD-STR-01
+    const legacyCountryMatch = clean.match(/^[A-Z]{2}-([A-Z]{3,4}-[A-Z]{2,3}-\d{2,})$/);
+    if (legacyCountryMatch) {
+        return legacyCountryMatch[1];
+    }
+
+    // 4. Legacy hierarchical with location name slug: ET-ADD-STR-BOLE-01 or ADD-STR-BOLE-01 -> ADD-STR-01
+    const slugMatch = clean.match(/^(?:[A-Z]{2}-)?([A-Z]{3,4})-([A-Z]{2,3})-[A-Z0-9]+-(\d{2,})$/);
     if (slugMatch) {
-        const country = normalizeCountryCode(slugMatch[1] || countryHint || getCountryByZoneAbbr(slugMatch[2]));
-        return `${country}-${slugMatch[2]}-${slugMatch[3]}-${slugMatch[4]}`;
+        return `${slugMatch[1]}-${slugMatch[2]}-${slugMatch[3]}`;
     }
 
     return null;
@@ -302,9 +312,10 @@ export function getNextUniqueSiteNumber(
 
 /**
  * Generates a clean operational site code:
- * [COUNTRY]-[ZONE]-[TYPE]-[UNIQUE_NUMBER]
- * e.g. ET-ADD-ADM-01, ET-DIR-WH-02, KE-NRB-WH-12
- * Completely decouples location name from ID and ensures globally unique numbers.
+ * - Sovereign Corporate HQ: [COUNTRY]-HQ (e.g. ET-HQ, KE-HQ)
+ * - Regional Administration: [REGION] (Option B: e.g. ADD, ADA, NRB, MBA)
+ * - Facilities: [REGION]-[TYPE]-[UNIQUE_NUMBER] (Option A: e.g. ADD-STR-01, NRB-DC-02)
+ * Completely decouples location name from ID and eliminates redundant country prefix.
  */
 export function generatePlaceSpecificSiteCode(params: {
     country?: Country | string;
@@ -320,9 +331,14 @@ export function generatePlaceSpecificSiteCode(params: {
         : resolveRegionAbbreviation({ name: params.name, country, region_code: params.regionCode });
     const type = getFacilityTypeAbbreviation(params.type);
 
-    // Regional Administration office is identified directly by its Region ID: [COUNTRY]-[REGION]
-    if (type === 'ADM' && params.regionCode) {
-        return `${country}-${region}`;
+    // Sovereign Corporate HQ retains [COUNTRY]-HQ (e.g. ET-HQ, KE-HQ)
+    if (type === 'ADM' && !params.regionCode && region === 'HQ') {
+        return `${country}-HQ`;
+    }
+
+    // Regional Administration office is identified directly by its Pure Region ID: [REGION] (Option B)
+    if (type === 'ADM' && (params.regionCode || region !== 'HQ')) {
+        return region;
     }
 
     let seq = params.siteNumber;
@@ -331,24 +347,27 @@ export function generatePlaceSpecificSiteCode(params: {
     }
 
     const seqStr = seq.toString().padStart(2, '0');
-    return `${country}-${region}-${type}-${seqStr}`;
+    // Facility code format: [REGION]-[TYPE]-[NUMBER] (Option A)
+    return `${region}-${type}-${seqStr}`;
 }
 
 /**
  * Formats a site's code into a clean, human-readable display ID.
- * Returns clean operational IDs like ET-DIR-WH-02, KE-NRB-WH-12,
- * Sovereign Corporate HQ IDs (ET-HQ, KE-HQ), or Region IDs (ET-ADD, KE-NRB).
+ * Returns:
+ * - Sovereign Corporate HQ IDs: ET-HQ, KE-HQ
+ * - Pure Regional Administration IDs: ADD, ADA, NRB, MBA
+ * - Facility IDs: ADD-STR-01, NRB-DC-02
  */
 export function formatDisplaySiteId(site?: Partial<Site> | null): string {
     if (!site) return 'N/A';
     const code = site.code?.trim().toUpperCase();
 
-    // 0. Sovereign Corporate HQ (ET-HQ, KE-HQ) and Regional Administration codes (ET-ADD, KE-NRB, ET-ADA)
-    if (code && /^[A-Z]{2}-(?:HQ|[A-Z]{3,4})$/i.test(code)) {
+    // 0. Sovereign Corporate HQ (ET-HQ, KE-HQ) strictly retains country prefix
+    if (code && /^[A-Z]{2}-HQ$/i.test(code)) {
         return code;
     }
 
-    // 1. HIGHEST PRIORITY: Normalized clean site code: [COUNTRY]-[ZONE]-[TYPE]-[NUMBER]
+    // 1. HIGHEST PRIORITY: Normalized clean site code: [REGION]-[TYPE]-[NUMBER] or pure [REGION]
     const normalized = normalizeCleanSiteCode(code, site.country);
     if (normalized) {
         return normalized;
@@ -359,12 +378,15 @@ export function formatDisplaySiteId(site?: Partial<Site> | null): string {
         const country = getSiteCountryId(site);
         const region = resolveRegionAbbreviation(site);
         const type = getFacilityTypeAbbreviation(site.type);
-        if (type === 'ADM' && (site.region_code || (site as any)?.regionCode)) {
-            return `${country}-${region}`;
+        if (type === 'ADM') {
+            if (!site.region_code && !(site as any)?.regionCode && region === 'HQ') {
+                return `${country}-HQ`;
+            }
+            return region;
         }
         const seq = site.siteNumber || (site as any)?.site_number || parseSiteSequence(code, country) || parseSiteSequence(site.id, country) || 1;
         const seqStr = seq.toString().padStart(2, '0');
-        return `${country}-${region}-${type}-${seqStr}`;
+        return `${region}-${type}-${seqStr}`;
     }
 
     // 3. Fallback: Parse sequence from site.id or code

@@ -214,8 +214,8 @@ export const regionsService = {
             const normalizedCountry = normalizeCountryCode(input.country);
             const normalizedCode = formatRegionCode(input.code, normalizedCountry);
 
-            if (!isValidRegionCodeFormat(normalizedCode, normalizedCountry)) {
-                throw new Error(`Region code "${input.code}" is invalid. Territorial code must follow format ${normalizedCountry}-XXX (3 uppercase letters).`);
+            if (!isValidRegionCodeFormat(normalizedCode)) {
+                throw new Error(`Region code "${input.code}" is invalid. Territorial code must follow format XXX (3-4 uppercase letters).`);
             }
 
             const payload = {
