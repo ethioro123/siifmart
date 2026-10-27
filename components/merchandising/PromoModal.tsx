@@ -52,9 +52,10 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                   <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Discount Value</label>
                   <input
                      type="number"
+                     step="1"
                      className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-medium tabular-nums focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors"
                      value={newPromo.value || ''}
-                     onChange={(e) => setNewPromo({ ...newPromo, value: parseFloat(e.target.value) })}
+                     onChange={(e) => setNewPromo({ ...newPromo, value: Math.round(parseFloat(e.target.value) || 0) })}
                      placeholder="0"
                      aria-label="Promo Value"
                   />
