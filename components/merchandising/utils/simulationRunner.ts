@@ -23,10 +23,8 @@ export function runMerchandisingSimulation(
       const cost = p.costPrice;
       if (cost === undefined || cost <= 0) return;
 
-      const recordedSales = salesMetricsIndex.get(p.id)?.unitsSold30d;
-      const estSales = (recordedSales !== undefined && recordedSales > 0)
-         ? recordedSales
-         : (p.salesVelocity === 'High' ? 35 : p.salesVelocity === 'Medium' ? 18 : 6);
+      const estSales = salesMetricsIndex.get(p.id)?.unitsSold30d ?? p.unitsSold30d;
+      if (estSales === undefined || !Number.isFinite(estSales) || estSales < 0) return;
 
       const currentRev = Math.round(p.price * estSales);
       const currentMarg = Math.round((p.price - cost) * estSales);
@@ -34,11 +32,11 @@ export function runMerchandisingSimulation(
       totalCurrentRevenue += currentRev;
       totalCurrentMargin += currentMarg;
 
-      const matchingRule = activeRules.find(r => matchRuleProduct(p, r, { sales30d: estSales }));
+      const matchingRule = activeRules.filter(rule => rule.isActive).find(r => matchRuleProduct(p, r, { sales30d: estSales }));
       if (matchingRule) {
          impactedCount++;
          const newPrice = Math.round(calculateRulePrice(p, matchingRule));
-         const elasticityFactor = newPrice < p.price ? 1.25 : 0.88;
+         const elasticityFactor = 1; // Constant-volume scenario, not a demand forecast.
          const projectedSales = Math.round(estSales * elasticityFactor);
          const projRev = Math.round(newPrice * projectedSales);
          const projMarg = Math.round((newPrice - cost) * projectedSales);

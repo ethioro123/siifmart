@@ -36,7 +36,7 @@ export const computeProductSalesMetrics = (
         // Partial refunds lack line-level returned quantities here; never count their gross units.
         if (order.status !== 'Completed') continue;
         const orderCountry = order.countryCode || order.country_code;
-        const productCountry = product.countryCode || product.country_code;
+        const productCountry = (product as { countryCode?: string; country_code?: string }).countryCode || (product as { countryCode?: string; country_code?: string }).country_code;
         if (productCountry && orderCountry && productCountry.toUpperCase() !== orderCountry.toUpperCase()) continue;
         if (product.siteId && (order.siteId || order.site_id) !== product.siteId) continue;
 

@@ -70,13 +70,11 @@ export const matchRuleProduct = (
 
       // If recorded sales data was provided/found, compare directly with threshold
       if (unitsSold30d !== undefined) {
-         return unitsSold30d < threshold;
+         return Number.isFinite(unitsSold30d) && unitsSold30d >= 0 && unitsSold30d < threshold;
       }
 
-      // Fallback for unrecorded test mocks or legacy catalog items:
-      // Map velocity baseline: Low ~ 6 units, Medium ~ 18 units, High ~ 35 units
-      const baselineSales = p.salesVelocity === 'High' ? 35 : p.salesVelocity === 'Medium' ? 18 : 6;
-      return baselineSales < threshold;
+      // Missing sales coverage cannot establish that sales were below the threshold.
+      return false;
    }
    return false;
 };
@@ -123,7 +121,7 @@ export const detectRuleConflicts = (rules: PricingRule[]): RuleConflict[] => {
          const cat2 = (r2.targetCategory || '').trim().toLowerCase();
 
          // Check category overlap: either identical, or one is 'all'
-         const categoryOverlaps = !cat1 || !cat2 || cat1 === 'all' || cat2 === 'all' || cat1 === cat2;
+         const categoryOverlaps = !cat1 || !cat2 || cat1 === 'all' || cat2 === 'all' || cat1 === cat2 || cat1.startsWith(cat2 + ' > ') || cat2.startsWith(cat1 + ' > ') || cat1.startsWith(cat2 + ' › ') || cat2.startsWith(cat1 + ' › ');
          if (!categoryOverlaps) continue;
 
          conflicts.push({
@@ -163,7 +161,13 @@ export const validatePricingRule = (rule: Partial<PricingRule>): RuleValidationR
       errors.threshold = 'Threshold must be a whole number';
    }
 
+   if (!['Stock > X', 'Expiry < X Days', 'Sales < X'].includes(rule.condition || 'Stock > X')) {
+      errors.condition = 'Select a supported trigger';
+   }
    const action = rule.action || 'Decrease Price %';
+   if (!['Decrease Price %', 'Increase Price %', 'Set to Cost + Margin'].includes(action)) {
+      errors.action = 'Select a supported pricing action';
+   }
    const val = rule.value;
 
    if (val === undefined || val === null || isNaN(Number(val))) {

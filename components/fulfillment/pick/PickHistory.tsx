@@ -304,7 +304,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                         totalItems={filteredHistory.length}
                         itemsPerPage={ITEMS_PER_PAGE}
                         onPageChange={setCurrentPage}
-                        itemName="records"
+                        itemName={t('warehouse.records') || 'records'}
                     />
                 </>
             ) : (

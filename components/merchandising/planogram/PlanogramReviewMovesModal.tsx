@@ -92,7 +92,7 @@ export const PlanogramReviewMovesModal: React.FC<PlanogramReviewMovesModalProps>
               <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
                 <ShieldCheck size={16} className="shrink-0" />
                 <span>
-                  <strong>Constraint rules active:</strong> Heavy items (> 5kg) locked to bottom shelf for ergonomics; shelf capacity limits enforced; verified category compatibility.
+                  <strong>Constraint rules active:</strong> Heavy items (&gt; 5kg) locked to bottom shelf for ergonomics; shelf capacity limits enforced; verified category compatibility.
                 </span>
               </div>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { pricingRulesService } from '../services/pricing-rules.service';
 import { useStore } from '../contexts/CentralStore';
@@ -20,7 +20,7 @@ export function usePricingRules(countryCode: string) {
     const { addNotification } = useData();
 
     const query = useQuery({
-        queryKey: [KEY, countryCode, page, pageSize, search, statusFilter],
+        queryKey: [KEY, countryCode, user?.id, page, pageSize, search, statusFilter],
         queryFn: () => pricingRulesService.getPage({
             countryCode,
             page,
@@ -30,6 +30,11 @@ export function usePricingRules(countryCode: string) {
         }),
         staleTime: 5 * 60 * 1000
     });
+
+    useEffect(() => { setPage(1); setSearch(''); setStatusFilter('all'); }, [countryCode, user?.id]);
+    useEffect(() => {
+        if (query.data && page > query.data.totalPages) setPage(query.data.totalPages);
+    }, [query.data, page]);
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: [KEY, countryCode] });
 
@@ -79,7 +84,9 @@ export function usePricingRules(countryCode: string) {
         setSearch,
         statusFilter,
         setStatusFilter,
-        isLoading: query.isLoading,
+        isLoading: query.isFetching,
+        error: query.error instanceof Error ? query.error.message : null,
+        retry: () => { void query.refetch(); },
         createRule,
         toggleRule,
         deleteRule,

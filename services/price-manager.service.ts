@@ -1,6 +1,8 @@
 import { supabase } from '../lib/supabase';
 import { _mapProduct } from './products/products-helpers';
-import type { Product } from '../types';
+import { salesService } from './sales.service';
+import { buildCatalogSalesMetricsIndex } from '../utils/merchandisingAnalytics';
+import type { Product, SaleRecord } from '../types';
 import type { MerchandisingFilters } from '../components/merchandising/MerchandisingContext';
 
 export interface PriceCatalogInput {
@@ -17,6 +19,25 @@ export const priceManagerService = {
         });
         if (error) throw error;
         return { data: (data?.data || []).map(_mapProduct), count: data?.count || 0 };
+    },
+    async getRuleSalesMetrics(products: Product[], country: string) {
+        const records: SaleRecord[] = [];
+        const startDate = new Date(Date.now() - 30 * 86400000).toISOString();
+        const siteIds = [...new Set(products.map(product => product.siteId || product.site_id))];
+        for (const siteId of siteIds) {
+            if (!siteId) throw new Error('A product location is required to evaluate sales.');
+            let complete = false;
+            for (let offset = 0; offset < 20000; offset += 250) {
+                const page = await salesService.getAll(siteId, 250, offset, {
+                    forecast: true, startDate, status: 'Completed', includeItems: true, countryCode: country,
+                });
+                records.push(...page.data);
+                if (offset + page.data.length >= page.count) { complete = true; break; }
+                if (!page.data.length) throw new Error('Sales changed while loading. Retry the preview.');
+            }
+            if (!complete) throw new Error('Sales analysis is too large. Narrow the location scope.');
+        }
+        return buildCatalogSalesMetricsIndex(products, records);
     },
     async getSkuTargets(country: string, sku: string, siteIds?: string[]): Promise<Product[]> {
         if (siteIds && siteIds.length === 0) throw new Error('Select at least one location.');

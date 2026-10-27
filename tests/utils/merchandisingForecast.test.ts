@@ -154,7 +154,7 @@ describe('Merchandising Forecasting & Replenishment Engine', () => {
         expect(recs[0].totalCost).toBe(0);
     });
 
-    it('generates demand chart from actual sales and computes statistically grounded confidence (Gap 1 & 2)', () => {
+    it('generates demand chart from actual sales and does not claim validated confidence (Gap 1 & 2)', () => {
         const now = new Date('2026-10-28T00:00:00Z');
         const sales: SaleRecord[] = [
             // Week 4 (1-7 days ago)
@@ -219,8 +219,8 @@ describe('Merchandising Forecasting & Replenishment Engine', () => {
         expect(chartData[3].actual).toBe(10);
 
         // Confidence should be statistical (not hardcoded 94.8%)
-        expect(confidencePct).toBeGreaterThan(0);
-        expect(confidencePct).toBeLessThanOrEqual(96);
+        expect(confidencePct).toBeNull();
+        expect(chartData[4].predicted).toBe(10);
     });
 
     it('returns zero and null confidence when there is no POS sales history (Gap 1, 2 & 11)', () => {
@@ -230,6 +230,6 @@ describe('Merchandising Forecasting & Replenishment Engine', () => {
 
         const { chartData, confidencePct } = generateDemandChartData(weeklyActuals, totalSales);
         expect(confidencePct).toBeNull();
-        expect(chartData[4].predicted).toBe(0);
+        expect(chartData[4].predicted).toBeNull();
     });
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrainCircuit, Info } from 'lucide-react';
 import {
-    ComposedChart, Line, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer
+    ComposedChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts';
 import type { ForecastDemandPoint } from '../../../utils/merchandisingForecast';
 
@@ -31,7 +31,7 @@ export const DemandChartSection: React.FC<DemandChartSectionProps> = ({
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                             {hasSalesData
-                                ? `4-week observed POS demand (${totalSales} units sold) and linear trend forecast`
+                                ? `4-week observed POS demand (${totalSales} units sold) and weekly average baseline`
                                 : 'Awaiting 30-day POS sales data for this location'}
                         </p>
                     </div>
@@ -41,7 +41,7 @@ export const DemandChartSection: React.FC<DemandChartSectionProps> = ({
                         <span className="w-2 h-2 bg-[var(--theme-accent)] rounded-full"></span> Observed Sales
                     </span>
                     <span className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 bg-amber-500 rounded-full"></span> Trend Forecast
+                        <span className="w-2 h-2 bg-amber-500 rounded-full"></span> Average Baseline
                     </span>
                 </div>
             </div>
@@ -89,16 +89,7 @@ export const DemandChartSection: React.FC<DemandChartSectionProps> = ({
                             name="Forecast"
                             connectNulls={true}
                         />
-                        {confidencePct !== null && (
-                            <Area
-                                type="monotone"
-                                dataKey="confidenceHigh"
-                                stroke="none"
-                                fill="#F59E0B"
-                                fillOpacity={0.07}
-                                name="Confidence Bound"
-                            />
-                        )}
+
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>

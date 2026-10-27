@@ -58,9 +58,9 @@ describe('Pricing Rules Gaps and Improvements (High & Medium Items)', () => {
             {
                id: 'sale-1',
                date: '2026-10-20T10:00:00Z', // 8 days ago (within 30 days)
-               items: [{ id: 'prod-001', name: 'Milk', price: 150, quantity: 5 }],
+               items: [{ id: 'prod-001', name: 'Milk', price: 150, quantity: 5 } as any],
                site_id: 'site-01',
-               status: 'completed',
+               status: 'Completed',
                total: 750,
                subtotal: 750,
                tax: 0,
@@ -72,9 +72,9 @@ describe('Pricing Rules Gaps and Improvements (High & Medium Items)', () => {
             {
                id: 'sale-2',
                date: '2026-10-15T10:00:00Z', // 13 days ago (within 30 days)
-               items: [{ id: 'prod-001', name: 'Milk', price: 150, quantity: 8 }],
+               items: [{ id: 'prod-001', name: 'Milk', price: 150, quantity: 8 } as any],
                site_id: 'site-01',
-               status: 'completed',
+               status: 'Completed',
                total: 1200,
                subtotal: 1200,
                tax: 0,
@@ -86,9 +86,9 @@ describe('Pricing Rules Gaps and Improvements (High & Medium Items)', () => {
             {
                id: 'sale-3',
                date: '2026-08-01T10:00:00Z', // >30 days ago (outside window)
-               items: [{ id: 'prod-001', name: 'Milk', price: 150, quantity: 50 }],
+               items: [{ id: 'prod-001', name: 'Milk', price: 150, quantity: 50 } as any],
                site_id: 'site-01',
-               status: 'completed',
+               status: 'Completed',
                total: 7500,
                subtotal: 7500,
                tax: 0,

@@ -131,7 +131,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'warehouse', 'inventory', 'employees', 'profile'
     ],
     inventory_manager: ['dashboard', 'regional-ops', 'inventory', 'warehouse', 'profile'],
-    vendor_relations_manager: ['dashboard', 'regional-ops', 'procurement', 'pricing', 'inventory', 'profile'],
+    vendor_relations_manager: ['dashboard', 'regional-ops', 'procurement', 'pricing', 'inventory', 'employees', 'profile'],
     cs_manager: ['dashboard', 'regional-ops', 'customers', 'sales', 'profile'],
 
     // ═══ LEVEL 8 - SHIFT LEADS, FLOOR SUPERVISORS & TEAM LEADERS ═══

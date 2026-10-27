@@ -45,12 +45,12 @@ export const ForecastInsightsSection: React.FC<ForecastInsightsSectionProps> = (
                             </p>
                         </div>
                         <p className="text-xs text-[var(--theme-text-primary)] font-semibold">
-                            {criticalItems.length} Critical Items Breached Thresholds
+                            {criticalItems.length} Priority Recommendations
                         </p>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-1 leading-relaxed">
                             {criticalItems.length > 0
-                                ? `${criticalItems.length} products are at or below minimum threshold and require purchase orders this cycle.`
-                                : `All evaluated items are currently operating above minimum buffer levels.`}
+                                ? `${criticalItems.length} products have a recorded stock or demand deficit and need replenishment review.`
+                                : `No critical recommendations in the evaluated dataset.`}
                         </p>
                     </div>
 
@@ -62,26 +62,26 @@ export const ForecastInsightsSection: React.FC<ForecastInsightsSectionProps> = (
                             </p>
                         </div>
                         <p className="text-xs text-[var(--theme-text-primary)] font-semibold">
-                            {itemsWithPipeline.length} Items In Transit or On-Order
+                            {itemsWithPipeline.length} Recommendations With Incoming Stock
                         </p>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-1 leading-relaxed">
                             {unhedgedDeficits.length > 0
                                 ? `${unhedgedDeficits.length} items have stock deficits without incoming POs or transfer orders.`
-                                : `Open purchase orders and transfers actively cover projected demand.`}
+                                : `No uncovered deficits in the recommendation list.`}
                         </p>
                     </div>
                 </div>
             </div>
 
             <div className="pt-4 border-t border-[var(--theme-border)] flex items-center justify-between text-xs text-[var(--theme-text-secondary)] font-medium mt-4">
-                <span>Model Confidence</span>
+                <span>Forecast validation</span>
                 {confidencePct !== null ? (
                     <span className="font-mono text-xs text-[var(--theme-accent)] font-semibold tabular-nums">
                         {confidenceLabel}
                     </span>
                 ) : (
                     <span className="text-xs text-[var(--theme-text-tertiary)] italic">
-                        Insufficient POS History
+                        Accuracy not measured
                     </span>
                 )}
             </div>

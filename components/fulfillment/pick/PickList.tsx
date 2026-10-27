@@ -144,7 +144,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                     {job.status === 'In-Progress' && (
                                                         <span className="inline-flex items-center gap-1 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] text-[10px] font-semibold px-1.5 py-0.2 rounded-full uppercase border border-[var(--theme-accent)]/20 shrink-0">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
-                                                            Active
+                                                            {t('warehouse.activeLabel')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -295,7 +295,7 @@ export const PickList: React.FC<PickListProps> = ({
                             totalItems={filteredPickJobs.length}
                             itemsPerPage={PICK_ITEMS_PER_PAGE}
                             onPageChange={setPickCurrentPage}
-                            itemName="jobs"
+                            itemName={t('warehouse.jobs') || 'jobs'}
                         />
                     </>
                 ) : (

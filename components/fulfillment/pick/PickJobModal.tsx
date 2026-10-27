@@ -185,7 +185,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 </span>
                                 {job.orderRef && (
                                     <span className="font-mono text-[10px] sm:text-[11px] text-[var(--theme-text-muted)] truncate">
-                                        Ref: {resolveOrderRef(job.orderRef)}
+                                        {t('warehouse.ref') || 'Ref'}: {resolveOrderRef(job.orderRef)}
                                     </span>
                                 )}
                             </div>
@@ -203,7 +203,15 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                 </div>
 
                 {/* Step Indicator */}
-                {onReportDiscrepancy && <button type="button" onClick={onReportDiscrepancy} className="min-h-[44px] border-b border-[var(--theme-border)] px-4 py-2 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Physical discrepancy / supervisor reconciliation</button>}
+                {onReportDiscrepancy && (
+                    <button
+                        type="button"
+                        onClick={onReportDiscrepancy}
+                        className="min-h-[44px] border-b border-[var(--theme-border)] px-4 py-2 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                    >
+                        {t('warehouse.picking.physicalDiscrepancyReconciliation') || 'Physical discrepancy / supervisor reconciliation'}
+                    </button>
+                )}
                 <PickStepIndicator
                     currentStep={step}
                     setStep={setStep}

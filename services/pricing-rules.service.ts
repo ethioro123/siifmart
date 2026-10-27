@@ -60,18 +60,14 @@ export const pricingRulesService = {
 
     /** Returns all active rules for cross-rule simulation and conflict detection. */
     async getAllActive(countryCode: string): Promise<PricingRule[]> {
-        const { data, error } = await supabase
-            .from('pricing_rules')
-            .select(COLUMNS)
-            .eq('country_code', countryCode.toUpperCase())
-            .eq('is_active', true)
-            .order('created_at', { ascending: false })
-            .limit(100);
-        if (error) {
-            logger.error('pricingRulesService', 'getAllActive failed', error);
-            throw error;
+        const rules: PricingRule[] = [];
+        for (let page = 1; page <= 200; page++) {
+            const result = await this.getPage({ countryCode, page, pageSize: 100, status: 'enabled' });
+            rules.push(...result.rules);
+            if (page >= result.totalPages) return rules;
+            if (!result.rules.length) throw new Error('Pricing rules changed while loading. Retry the scenario.');
         }
-        return ((data || []) as PricingRuleRow[]).map(mapPricingRuleRow);
+        throw new Error('Too many enabled pricing rules to evaluate safely.');
     },
 
     /** Bounded pagination, search and status filtering for pricing rules. */
@@ -97,7 +93,7 @@ export const pricingRulesService = {
         }
 
         const { data, count, error } = await query
-            .order('created_at', { ascending: false })
+            .order('created_at', { ascending: false }).order('id', { ascending: false })
             .range(from, to);
 
         if (error) {

@@ -73,7 +73,7 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
 
                         {/* Mobile Inline Dot Numbers */}
                         <div className="flex sm:hidden items-center gap-1.5 px-2 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-[10px] font-mono shrink-0">
-                            <span className="inline-flex items-center gap-1 text-[var(--theme-accent)] font-bold" title="Active jobs">
+                            <span className="inline-flex items-center gap-1 text-[var(--theme-accent)] font-bold" title={t('warehouse.inProgress') || 'Active jobs'}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)] animate-pulse" />{inProgressCount}
                             </span>
                         </div>

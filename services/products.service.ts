@@ -25,7 +25,7 @@ export const productsService = {
     async getAll(siteId?: string, limit?: number, offset?: number, filters?: any, sort?: { key: string, direction: 'asc' | 'desc' }, includeExactCount: boolean = true) {
         let query = supabase
             .from('products')
-            .select('*', includeExactCount ? { count: 'exact' } : undefined);
+            .select(filters?.forecast ? 'id,site_id,name,sku,category,price,cost_price,stock,status,expiry_date,min_stock,max_stock,pack_quantity,unit,size,brand,custom_attributes' : '*', includeExactCount ? { count: 'exact' } : undefined);
 
         if (sort && sort.key) {
             let column = sort.key;

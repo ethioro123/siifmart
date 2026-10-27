@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Country } from '../../../utils/localization';
 import type { Product, PricingRule } from '../../../types';
 import type { PriceChangeInput } from '../../../hooks/useSubmitPriceChanges';
@@ -6,6 +6,7 @@ import type { ProductSalesMetrics } from '../../../utils/merchandisingAnalytics'
 import { priceManagerService } from '../../../services/price-manager.service';
 import { pricingRulesService } from '../../../services/pricing-rules.service';
 import { matchRuleProduct, calculateRulePrice, validatePricingRule } from '../utils/ruleEvaluator';
+import { runMerchandisingSimulation } from '../utils/simulationRunner';
 import { logger } from '../../../utils/logger';
 
 interface PricingRulesActionsProps {
@@ -50,6 +51,11 @@ export function usePricingRulesActions({
    const [simResult, setSimResult] = useState<{ rev: number; margin: number } | null>(null);
    const [isSimulating, setIsSimulating] = useState(false);
 
+   const scope = `${activeCountry}:${activeRegionCode || ''}:${sites.map(site => site.id).sort().join(',')}`;
+   const scopeRef = useRef(scope);
+   scopeRef.current = scope;
+   useEffect(() => { setSimResult(null); }, [scope, pricingRules]);
+
    const handleCreateRule = async () => {
       const validation = validatePricingRule(newRule);
       if (!validation.isValid) {
@@ -65,7 +71,7 @@ export function usePricingRulesActions({
             targetCategory: newRule.targetCategory || 'Fresh Produce',
             condition: newRule.condition || 'Stock > X',
             threshold: Math.round(Number(newRule.threshold) || 0),
-            action: (newRule.action as any) === 'Set Margin %' || newRule.action?.includes('Margin')
+            action: (newRule.action as string) === 'Set Margin %' || newRule.action?.includes('Margin')
                ? 'Set to Cost + Margin'
                : (newRule.action || 'Decrease Price %'),
             value: Math.round(Number(newRule.value) || 0),
@@ -79,6 +85,7 @@ export function usePricingRulesActions({
    };
 
    const runPricingRule = async (rule: PricingRule) => {
+      const requestScope = scope;
       setIsSubmitting(true);
       try {
          const changes: PriceChangeInput[] = [];
@@ -86,8 +93,11 @@ export function usePricingRulesActions({
             sites: activeRegionCode ? (sites.length ? sites.map(site => site.id) : ['no-matching-regional-sites']) : []
          });
 
+         const recordedMetrics = rule.condition === 'Sales < X'
+            ? await priceManagerService.getRuleSalesMetrics(ruleProducts, activeCountry) : new Map<string, ProductSalesMetrics>();
+         if (scopeRef.current !== requestScope) return;
          ruleProducts.forEach(p => {
-            const unitsSold30d = salesMetricsIndex.get(p.id)?.unitsSold30d ?? (p.unitsSold30d ?? 0);
+            const unitsSold30d = recordedMetrics.get(p.id)?.unitsSold30d;
             if (matchRuleProduct(p, rule, { sales30d: unitsSold30d })) {
                // Merchandising Whole-Number Rule: Prices must strictly be integers rounded to the nearest whole number
                const newPrice = Math.round(calculateRulePrice(p, rule));
@@ -126,56 +136,20 @@ export function usePricingRulesActions({
    const deleteRuleById = (id: string) => deleteRule.mutate(id);
 
    const handleRunSimulation = async () => {
+      const requestScope = scope;
+      setSimResult(null);
       setIsSimulating(true);
       try {
          const simProducts = await priceManagerService.getMatchingTargets(activeCountry, {
             sites: activeRegionCode ? (sites.length ? sites.map(site => site.id) : ['no-matching-regional-sites']) : []
          });
          const activeRules = await pricingRulesService.getAllActive(activeCountry);
+         const recordedMetrics = await priceManagerService.getRuleSalesMetrics(simProducts, activeCountry);
 
-         let totalCurrentRevenue = 0, totalProjectedRevenue = 0, totalCurrentMargin = 0, totalProjectedMargin = 0, impactedCount = 0;
-
-         simProducts.forEach(p => {
-            const cost = p.costPrice;
-            if (cost === undefined || cost <= 0) return;
-
-            const recordedSales = salesMetricsIndex.get(p.id)?.unitsSold30d;
-            const estSales = (recordedSales !== undefined && recordedSales > 0)
-               ? recordedSales
-               : (p.salesVelocity === 'High' ? 35 : p.salesVelocity === 'Medium' ? 18 : 6);
-
-            const currentRev = Math.round(p.price * estSales);
-            const currentMarg = Math.round((p.price - cost) * estSales);
-
-            totalCurrentRevenue += currentRev;
-            totalCurrentMargin += currentMarg;
-
-            const matchingRule = activeRules.find(r => matchRuleProduct(p, r, { sales30d: estSales }));
-            if (matchingRule) {
-               impactedCount++;
-               const newPrice = Math.round(calculateRulePrice(p, matchingRule));
-               const elasticityFactor = newPrice < p.price ? 1.25 : 0.88;
-               const projectedSales = Math.round(estSales * elasticityFactor);
-               const projRev = Math.round(newPrice * projectedSales);
-               const projMarg = Math.round((newPrice - cost) * projectedSales);
-               totalProjectedRevenue += projRev;
-               totalProjectedMargin += projMarg;
-            } else {
-               totalProjectedRevenue += currentRev;
-               totalProjectedMargin += currentMarg;
-            }
-         });
-
-         // Merchandising Whole-Number Rule: Delta percentages rounded strictly to integers
-         const revDeltaPct = totalCurrentRevenue > 0
-            ? Math.round(((totalProjectedRevenue - totalCurrentRevenue) / totalCurrentRevenue) * 100)
-            : 0;
-         const margDeltaPct = totalCurrentMargin > 0
-            ? Math.round(((totalProjectedMargin - totalCurrentMargin) / totalCurrentMargin) * 100)
-            : 0;
-
-         setSimResult({ rev: revDeltaPct, margin: margDeltaPct });
-         addNotification('success', `Simulation modeled on ${simProducts.length} target records: ${impactedCount} affected products.`);
+         if (scopeRef.current !== requestScope) return;
+         const result = runMerchandisingSimulation(simProducts, activeRules, recordedMetrics);
+         setSimResult(result);
+         addNotification('info', `Constant-volume scenario: ${result.impactedCount} product records affected. Products without recorded sales or costs are excluded.`);
       } catch (err) {
          logger.error('usePricingRulesActions', 'simulation failed', err as Error);
          addNotification('alert', 'Simulation failed to fetch catalog targets');

@@ -21,7 +21,7 @@ import { detectRuleConflicts } from './utils/ruleEvaluator';
 
 export const RulesTab: React.FC = () => {
    const {
-      pricingRules,
+      pricingRules, pricingRulesLoading, pricingRulesError, retryPricingRules,
       pricingRulesTotalCount,
       pricingRulesPage,
       setPricingRulesPage,
@@ -75,12 +75,12 @@ export const RulesTab: React.FC = () => {
                      <span>Rule Overlap Detected ({conflicts.length})</span>
                   </div>
                   <p className="text-[var(--theme-text-secondary)] leading-relaxed">
-                     Multiple enabled rules target overlapping categories. During execution and simulation, rules evaluate in list priority order (first match wins).
+                     Multiple enabled rules target overlapping categories. This page shows potential category overlap. The scenario uses newest enabled rule first; individual previews test only the selected rule. Review existing proposals before submitting.
                   </p>
                   <ul className="list-disc list-inside space-y-0.5 text-[11px] text-[var(--theme-text-secondary)] font-mono">
                      {conflicts.slice(0, 3).map((c, idx) => (
                         <li key={idx}>
-                           &quot;{c.ruleName}&quot; takes precedence over &quot;{c.conflictingRuleName}&quot; on {c.targetCategory}
+                           &quot;{c.ruleName}&quot; may overlap &quot;{c.conflictingRuleName}&quot; on {c.targetCategory}
                         </li>
                      ))}
                   </ul>
@@ -93,6 +93,7 @@ export const RulesTab: React.FC = () => {
                   <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" />
                   <input
                      type="text"
+                     aria-label="Search pricing rules"
                      placeholder="Search rules by name..."
                      value={pricingRulesSearch}
                      onChange={(e) => {
@@ -105,6 +106,7 @@ export const RulesTab: React.FC = () => {
                <div className="flex items-center gap-1 shrink-0">
                   {(['all', 'enabled', 'paused'] as const).map(status => (
                      <button
+                        aria-pressed={pricingRulesStatus === status}
                         key={status}
                         type="button"
                         onClick={() => {
@@ -124,7 +126,12 @@ export const RulesTab: React.FC = () => {
             </div>
 
             {/* Rules List */}
-            {pricingRules.length === 0 ? (
+            {pricingRulesLoading ? <p role="status" className="p-4 text-[var(--theme-text-secondary)]">Loading pricing rules…</p> : pricingRulesError ? (
+               <div role="alert" className="p-4 text-[var(--theme-text-primary)]">
+                  <p>Could not load pricing rules: {pricingRulesError}</p>
+                  <button type="button" onClick={retryPricingRules} className="min-h-11 px-4 rounded-xl border border-[var(--theme-border)]">Retry</button>
+               </div>
+            ) : pricingRules.length === 0 ? (
                <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-3xl border border-[var(--theme-border)] text-[var(--theme-text-secondary)] space-y-2">
                   <BrainCircuit size={28} className="mx-auto text-[var(--theme-text-secondary)]/50" />
                   <p className="text-xs font-medium">No pricing rules match current filters.</p>
@@ -170,7 +177,7 @@ export const RulesTab: React.FC = () => {
                               <ArrowRight size={13} className="text-[var(--theme-text-secondary)]" />
                               <span className="bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] px-2.5 py-1 rounded-xl border border-[var(--theme-accent)]/20 font-semibold">
                                  {rule.action === 'Set to Cost + Margin'
-                                    ? `Cost + ${rule.value}% Margin`
+                                    ? `Set gross selling margin to ${rule.value}%`
                                     : `${rule.action} ${rule.value}%`}
                               </span>
                            </div>
@@ -186,7 +193,7 @@ export const RulesTab: React.FC = () => {
                         <button
                            type="button"
                            onClick={() => runPricingRule(rule)}
-                           disabled={isSubmitting}
+                           disabled={isSubmitting || isSimulating}
                            className="px-3 py-2 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)] text-[var(--theme-accent)] hover:text-white rounded-2xl transition-all border border-[var(--theme-accent)]/20 disabled:opacity-50 cursor-pointer shadow-sm text-xs font-medium flex items-center gap-1.5"
                            aria-label={`Preview proposals for rule ${rule.name}`}
                            title={rule.isActive ? 'Generate & preview price proposals' : 'Preview proposals (test paused rule)'}
@@ -200,8 +207,10 @@ export const RulesTab: React.FC = () => {
                         </button>
                         <button
                            type="button"
+                           disabled={isSubmitting || isSimulating}
+                           aria-label={rule.isActive ? `Pause ${rule.name}` : `Enable ${rule.name}`}
                            onClick={() => toggleRuleStatus(rule.id)}
-                           className={`p-2.5 rounded-2xl border transition-all cursor-pointer ${
+                           className={`min-h-11 min-w-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)] p-2.5 rounded-2xl border transition-all cursor-pointer ${
                               rule.isActive
                                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
                                  : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
@@ -212,8 +221,10 @@ export const RulesTab: React.FC = () => {
                         </button>
                         <button
                            type="button"
-                           onClick={() => deleteRule(rule.id)}
-                           className="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-2xl transition-colors cursor-pointer"
+                           disabled={isSubmitting || isSimulating}
+                           aria-label={`Delete ${rule.name}`}
+                           onClick={() => { if (window.confirm(`Delete pricing rule "${rule.name}"? Existing price proposals will remain.`)) deleteRule(rule.id); }}
+                           className="min-h-11 min-w-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)] p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-2xl transition-colors cursor-pointer"
                            title="Delete Rule"
                         >
                            <Trash2 size={16} />
@@ -285,7 +296,7 @@ export const RulesTab: React.FC = () => {
                      <span>Simulation Assumptions</span>
                   </div>
                   <p className="leading-relaxed">
-                     Uses identical target catalog scope as live execution. Incorporates 30-day recorded sales (or velocity baseline) with modeled price elasticity (+25% volume on price cuts, -12% on price hikes). Margins computed only on products with recorded costs.
+                     Uses the same catalog target scope as proposal previews. Holds recorded 30-day sales volume constant; it does not predict demand. Products without recorded sales or costs are excluded. Individual previews test one rule; this scenario uses the newest enabled matching rule.
                   </p>
                   <p className="text-[10px] text-[var(--theme-text-secondary)]/80 italic">
                      * All calculations strictly adhere to whole-number merchandising policy.
@@ -309,7 +320,7 @@ export const RulesTab: React.FC = () => {
                      </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                     <span className="text-[var(--theme-text-secondary)] font-medium">Est. Margin Delta</span>
+                     <span className="text-[var(--theme-text-secondary)] font-medium">Est. Gross Profit Delta</span>
                      <span
                         className={`font-mono font-semibold tabular-nums ${
                            simResult && simResult.margin < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
@@ -325,11 +336,11 @@ export const RulesTab: React.FC = () => {
                <button
                   type="button"
                   onClick={handleRunSimulation}
-                  disabled={isSimulating}
+                  disabled={isSimulating || isSubmitting}
                   className="w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-[var(--theme-accent)] hover:opacity-90 text-white disabled:opacity-50 cursor-pointer shadow-sm transition-colors"
                >
                   {isSimulating ? <RefreshCw className="animate-spin" size={15} /> : <Zap size={15} />}
-                  <span>{isSimulating ? 'Simulating Elasticity...' : 'Run Simulation'}</span>
+                  <span>{isSimulating ? 'Calculating scenario…' : 'Run Simulation'}</span>
                </button>
             </div>
          </div>

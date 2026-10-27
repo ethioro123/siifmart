@@ -27,11 +27,11 @@ export const merchandisingForecastService = {
         const asOf = new Date().toISOString();
         const start = new Date(Date.parse(asOf) - 30 * 86400000).toISOString();
         const [products, sales30d, openPOs, openTransfers] = await Promise.all([
-            collectForecastPages<Product>((offset, limit) => productsService.getAll(siteId, limit, offset, undefined, { key: 'id', direction: 'asc' })),
+            collectForecastPages<Product>((offset, limit) => productsService.getAll(siteId, limit, offset, { forecast: true }, { key: 'id', direction: 'asc' })),
             collectForecastPages<SaleRecord>((offset, limit) => salesService.getAll(siteId, limit, offset, {
-                startDate: start, status: 'Completed', includeItems: true, countryCode: country,
+                forecast: true, startDate: start, status: 'Completed', includeItems: true, countryCode: country,
             })),
-            collectForecastPages<PurchaseOrder>((offset, limit) => purchaseOrdersService.getAll(siteId, limit, offset, { includeItems: true, countryCode: country })),
+            collectForecastPages<PurchaseOrder>((offset, limit) => purchaseOrdersService.getAll(siteId, limit, offset, { forecast: true, includeItems: true, countryCode: country })),
             collectForecastPages<TransferRecord>(async (offset, limit) => {
                 const { data, count, error: transferError } = await supabase.from('transfers')
                     .select('id,dest_site_id,status,transfer_status,items,country_code', { count: 'exact' })

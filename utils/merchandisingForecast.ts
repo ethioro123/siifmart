@@ -50,6 +50,7 @@ export interface ReplenishmentRecommendation {
     orderUnitCost: number;
     totalCost: number;
     costUnrecorded: boolean;
+    blockedReason?: string;
     reason: string;
     urgency: 'high' | 'medium' | 'normal';
 }
@@ -65,15 +66,6 @@ export interface ForecastAnalysisSummary {
     pipelineCoveredCount: number;
     totalProductsEvaluated: number;
 }
-
-const EXCLUDED_SALE_STATUSES = new Set([
-    'Pending', 'pending',
-    'Refunded', 'refunded',
-    'Cancelled', 'cancelled',
-    'Draft', 'draft',
-    'Void', 'void',
-    'Rejected', 'rejected'
-]);
 
 /**
  * Consolidates inventory records by SKU and Site across distinct lots/batches (Gap 9),
@@ -154,9 +146,9 @@ export function consolidateInventoryBySku(
                 const matchesSku = Boolean(sku && item.sku && item.sku.toUpperCase() === sku.toUpperCase());
                 const matchesId = item.productId ? lotProductIds.includes(item.productId) : false;
                 if (matchesSku || matchesId) {
-                    const remainingUnits = Math.max(0, (item.quantity || 0) - (item.quantity_received || 0));
-                    const packMult = item.packQuantity && item.packQuantity > 1 ? item.packQuantity : 1;
-                    onOrderStock += remainingUnits * packMult;
+                    const orderedUnits = Math.max(0, item.quantity || 0);
+                    const packMult = productOrderUnits({ ...primary, ...item, customAttributes: item.customAttributes || { packaging: { packQty: item.packQuantity || 1, caseSize: item.caseSize || 0 } } } as Product);
+                    onOrderStock += Math.max(0, orderedUnits * packMult - (item.receivedQty || 0));
                 }
             }
         }
@@ -229,13 +221,14 @@ export function computeWeeklyDemand(
         const saleDate = new Date(sale.date || (sale as any).createdAt || (sale as any).created_at || 0).getTime();
         const ageMs = nowMs - saleDate;
 
-        if (ageMs < 0 || ageMs > 4 * msWeek) continue;
+        if (!Number.isFinite(saleDate) || ageMs < 0 || ageMs >= 4 * msWeek) continue;
 
         const weekIndexFromNow = Math.floor(ageMs / msWeek); // 0 = 0-7d, 1 = 8-14d, 2 = 15-21d, 3 = 22-28d
         if (weekIndexFromNow >= 0 && weekIndexFromNow < 4) {
             const chartIndex = 3 - weekIndexFromNow; // 0 = oldest (W1), 3 = most recent (W4)
             for (const item of sale.items || []) {
-                const qty = item.quantity || 0;
+                const qty = Number(item.quantity);
+                if (!Number.isFinite(qty) || qty <= 0) continue;
                 weeklyActuals[chartIndex] += qty;
                 totalSales += qty;
             }
@@ -246,24 +239,29 @@ export function computeWeeklyDemand(
 }
 
 /**
- * Calculates genuine statistical forecast and confidence interval (Gap 1 & Gap 2).
+ * Builds a descriptive weekly-average baseline; predictive accuracy has not been measured.
  * Strictly avoids synthetic multipliers based on inventory stock.
  */
 export function generateDemandChartData(
     weeklyActuals: number[],
-    totalSales: number
+    totalSales: number,
+    asOf = new Date()
 ): { chartData: ForecastDemandPoint[]; confidencePct: number | null; confidenceLabel: string } {
+    const label = (index: number) => {
+        const date = new Date(asOf.getTime() + (index - 4) * 7 * 86400000);
+        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    };
     if (totalSales === 0) {
         return {
             chartData: [
-                { period: 'Week 1', actual: 0, predicted: null },
-                { period: 'Week 2', actual: 0, predicted: null },
-                { period: 'Week 3', actual: 0, predicted: null },
-                { period: 'Week 4', actual: 0, predicted: 0 },
-                { period: 'Week 5', actual: null, predicted: 0 },
-                { period: 'Week 6', actual: null, predicted: 0 },
-                { period: 'Week 7', actual: null, predicted: 0 },
-                { period: 'Week 8', actual: null, predicted: 0 }
+                { period: label(1), actual: 0, predicted: null },
+                { period: label(2), actual: 0, predicted: null },
+                { period: label(3), actual: 0, predicted: null },
+                { period: label(4), actual: 0, predicted: null },
+                { period: label(5), actual: null, predicted: null },
+                { period: label(6), actual: null, predicted: null },
+                { period: label(7), actual: null, predicted: null },
+                { period: label(8), actual: null, predicted: null }
             ],
             confidencePct: null,
             confidenceLabel: 'No POS History'
@@ -274,8 +272,8 @@ export function generateDemandChartData(
     // Four observations cannot establish predictive accuracy. Use a transparent baseline.
     return {
         chartData: [
-            ...weeklyActuals.map((actual, i) => ({ period: `Week ${i + 1}`, actual, predicted: null })),
-            ...Array.from({ length: 4 }, (_, i) => ({ period: `Week ${i + 5}`, actual: null, predicted: Math.round(mean) })),
+            ...weeklyActuals.map((actual, i) => ({ period: label(i + 1), actual, predicted: null })),
+            ...Array.from({ length: 4 }, (_, i) => ({ period: label(i + 5), actual: null, predicted: Math.round(mean) })),
         ],
         confidencePct: null,
         confidenceLabel: 'Baseline · accuracy not validated',
@@ -327,7 +325,8 @@ export function buildReplenishmentQueue(
         if (!Number.isFinite(packSize) || packSize <= 0) continue;
         const suggestedBuyPacks = Math.ceil(suggestedBuySellable / packSize);
         const effectiveOrderedUnits = Math.round(suggestedBuyPacks * packSize);
-        if (p.maxStock && effectiveInventory + effectiveOrderedUnits > p.maxStock) continue;
+        const blockedReason = p.maxStock !== undefined && p.maxStock > 0 && effectiveInventory + effectiveOrderedUnits > p.maxStock
+            ? 'Supplier pack or minimum order would exceed the recorded maximum stock. Review policy before ordering.' : undefined;
 
         // Gap 6: Unsupported cost guessing (70% or 50) is strictly eliminated
         const unitCost = (typeof p.costPrice === 'number' && p.costPrice > 0) ? p.costPrice : 0;
@@ -376,6 +375,7 @@ export function buildReplenishmentQueue(
             orderUnitCost,
             totalCost,
             costUnrecorded,
+            blockedReason,
             reason,
             urgency
         });

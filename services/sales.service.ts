@@ -24,6 +24,7 @@ function mapSaleRow(s: any): any {
                 id: i.product_id,
                 name: i.product_name,
                 costPrice: i.cost_price,
+                sku: i.products?.sku || i.sku,
                 category: i.products?.category || i.category
             }))
             : []
@@ -34,7 +35,9 @@ export const salesService = {
     async getAll(siteId?: string, limit: number = 25, offset: number = 0, filters?: any) {
         // RULE 10: Lazy loading — list views default to receipt header columns only.
         // Nested sale_items and deep product joins are loaded on-demand via getById().
-        const selectFields = filters?.includeItems
+        const selectFields = filters?.forecast
+            ? 'id,site_id,sale_date,status,country_code,sale_items(product_id,product_name,quantity,price,products(sku))'
+            : filters?.includeItems
             ? '*, sale_items(*, products(category)), customers!left(*)'
             : 'id, site_id, customer_id, sale_date, subtotal, tax, total, payment_method, status, amount_tendered, change, cashier_name, receipt_number, fulfillment_status, release_status, country_code, currency, created_at, sale_items(count), customers!left(name)';
 
@@ -82,7 +85,7 @@ export const salesService = {
 
         // Apply Sort and Pagination
         query = query
-            .order('sale_date', { ascending: false })
+            .order('sale_date', { ascending: false }).order('id')
             .range(offset, offset + limit - 1);
 
         const { data, error, count } = await query;

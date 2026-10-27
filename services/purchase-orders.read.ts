@@ -14,7 +14,9 @@ import { getEffectiveCountry, getCountryProfile } from '../utils/localization';
 export async function getAll(siteId?: string, limit: number = 25, offset: number = 0, filters?: any) {
     // RULE 10: Lazy loading — list views default to PO header columns only.
     // Line items and product joins are loaded on-demand via getById().
-    const selectFields = filters?.includeItems
+    const selectFields = filters?.forecast
+        ? 'id,site_id,status,approved_by,country_code,po_items(product_id,quantity,received_qty,pack_quantity,case_size,unit,size,custom_attributes,sku)'
+        : filters?.includeItems
         ? '*, po_items(*, products(sku))'
         : 'id, po_number, site_id, supplier_id, supplier_name, status, priority, total_amount, items_count, order_date, expected_delivery, shipping_cost, tax_amount, discount, payment_terms, incoterms, temp_req, shelf_life, dock_slot, destination, requested_by, created_by, approved_by, approver_role, approved_at, notes, currency, country_code, created_at, updated_at, region_code, requires_hq_approval, hq_approved_by, hq_approved_at, finance_cleared_at, finance_cleared_amount, finance_cleared_supplier_id, finance_cleared_currency, finance_cleared_payment_terms';
 
@@ -64,7 +66,7 @@ export async function getAll(siteId?: string, limit: number = 25, offset: number
     query = query.order(sortBy, { ascending: sortDir === 'asc' });
 
     // Apply pagination
-    query = query.range(offset, offset + limit - 1);
+    query = query.order('id').range(offset, offset + limit - 1);
 
     let { data, error, count } = await query;
     if (error && (error.code === '42703' || error.message?.includes('country_code'))) {

@@ -60,6 +60,7 @@ const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
    regional_security_manager: ['loss_prevention', 'store_operations_auditor', 'auditor'],
    regional_it_manager: ['it_support', 'data_analyst'],
    regional_compliance_manager: ['store_operations_auditor', 'auditor', 'tax_compliance_officer'],
+   vendor_relations_manager: ['buyer', 'customs_import_specialist', 'inbound_qc_inspector'],
    store_manager: ['assistant_store_manager', 'shift_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'cs_manager', 'merchandiser'],
    warehouse_manager: ['assistant_store_manager', 'shift_supervisor', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
    dispatch_supervisor: ['driver', 'dispatcher'],
@@ -145,6 +146,7 @@ export function useEmployeeWizard({
          regional_security_manager: ['Security'],
          regional_it_manager: ['Management', 'Retail Operations', 'Logistics & Warehouse'],
          regional_compliance_manager: ['Finance', 'Security', 'Management'],
+         vendor_relations_manager: ['Procurement', 'Logistics & Warehouse'],
       };
       return deptMap[user.role] || [];
    };
@@ -157,17 +159,11 @@ export function useEmployeeWizard({
       const validRoles = getCreatableRoles();
       const validDepts = getAvailableDepartments();
       const initialRole = validRoles.length > 0 ? validRoles[0] : 'cashier';
-
       let initialSiteId = '';
       if (activeSite?.id && sites.some(s => s.id === activeSite.id)) {
          initialSiteId = activeSite.id;
       } else {
-         const autoSiteId = autoSelectSiteForRole(initialRole, sites);
-         if (autoSiteId) {
-            initialSiteId = autoSiteId;
-         } else if (sites.length > 0) {
-            initialSiteId = sites[0].id;
-         }
+         initialSiteId = autoSelectSiteForRole(initialRole, sites) || (sites[0]?.id ?? '');
       }
 
       setNewEmpData({
@@ -214,7 +210,7 @@ export function useEmployeeWizard({
    };
 
    const handleRoleChange = (newRole: UserRole) => {
-      const isRegional = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_it_manager', 'regional_compliance_manager'].includes(user?.role || '');
+      const isRegional = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_logistics_manager', 'regional_security_manager', 'regional_it_manager', 'regional_compliance_manager', 'vendor_relations_manager'].includes(user?.role || '');
       const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
       const candidateSites = isRegional && userRegion
          ? sites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion)

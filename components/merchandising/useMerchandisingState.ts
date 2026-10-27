@@ -53,6 +53,9 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    const [activeTab, setActiveTab] = useState<MerchandisingTab>('pricing');
    const {
       rules: pricingRules,
+      isLoading: pricingRulesLoading,
+      error: pricingRulesError,
+      retry: retryPricingRules,
       totalCount: pricingRulesTotalCount,
       page: pricingRulesPage,
       setPage: setPricingRulesPage,
@@ -288,6 +291,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    };
 
    return {
+      pricingRulesLoading, pricingRulesError, retryPricingRules,
       products,
       catalogCount: activeTab === 'pricing' ? catalog.data?.count || 0 : filteredProducts.length,
       catalogLoading: catalog.isFetching,

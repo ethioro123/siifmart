@@ -27,7 +27,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
    const currentCondition = newRule.condition || 'Stock > X';
 
    return (
-      <Modal isOpen={isOpen} onClose={onClose} title="New Pricing Rule">
+      <Modal isOpen={isOpen} onClose={() => { if (!isSubmitting) onClose(); }} title="New Pricing Rule">
          <div className="space-y-4">
             <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-start gap-2.5 text-xs text-[var(--theme-text-secondary)]">
                <Info size={16} className="text-[var(--theme-accent)] shrink-0 mt-0.5" />
@@ -78,14 +78,14 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                {errors.targetCategory && <p className="text-[11px] text-rose-500 mt-1">{errors.targetCategory}</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <div className="space-y-1">
                   <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Trigger Condition</label>
                   <select
                      disabled={isSubmitting}
                      className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-medium cursor-pointer transition-colors"
                      value={newRule.condition || 'Stock > X'}
-                     onChange={(e) => setNewRule({ ...newRule, condition: e.target.value as any })}
+                     onChange={(e) => setNewRule({ ...newRule, condition: e.target.value as PricingRule['condition'] })}
                      aria-label="Trigger Condition"
                   >
                      <option value="Stock > X">Stock &gt; X</option>
@@ -122,19 +122,19 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                {currentCondition === 'Expiry < X Days' && 'Triggers when calendar days until product expiration is within threshold.'}
             </p>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <div className="space-y-1">
                   <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Action</label>
                   <select
                      disabled={isSubmitting}
                      className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-medium cursor-pointer transition-colors"
                      value={newRule.action || 'Decrease Price %'}
-                     onChange={(e) => setNewRule({ ...newRule, action: e.target.value as any })}
+                     onChange={(e) => setNewRule({ ...newRule, action: e.target.value as PricingRule['action'] })}
                      aria-label="Action"
                   >
                      <option value="Decrease Price %">Decrease Price %</option>
                      <option value="Increase Price %">Increase Price %</option>
-                     <option value="Set to Cost + Margin">Set to Cost + Margin %</option>
+                     <option value="Set to Cost + Margin">Set Gross Selling Margin %</option>
                   </select>
                </div>
                <div className="space-y-1">

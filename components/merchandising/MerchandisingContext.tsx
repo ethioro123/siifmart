@@ -69,6 +69,9 @@ export interface MerchandisingContextType {
    setIsRuleModalOpen: (open: boolean) => void;
    newRule: Partial<PricingRule>;
    setNewRule: React.Dispatch<React.SetStateAction<Partial<PricingRule>>>;
+   pricingRulesLoading: boolean;
+   pricingRulesError: string | null;
+   retryPricingRules: () => void;
    pricingRulesTotalCount: number;
    pricingRulesPage: number;
    setPricingRulesPage: (page: number) => void;
@@ -127,7 +130,7 @@ export interface MerchandisingContextType {
    handleRunSimulation: () => void;
    handleShelfSwap: (productId: string) => void;
    handleMoveToShelf: (shelfName: string) => void;
-   submitPlanogram: (changes: Array<{ product: Product; shelfPosition: string }>) => Promise<void>;
+   submitPlanogram: (changes: Array<{ product: Product; shelfPosition: string }>, customReason?: string) => Promise<any>;
 
    runPricingRule: (rule: PricingRule) => Promise<void>;
    toggleRuleStatus: (id: string) => void;

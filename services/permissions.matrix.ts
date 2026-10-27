@@ -164,8 +164,9 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'sales.view', 'sales.view_reports', 'sales.refund'
     ],
     vendor_relations_manager: [
-        'dashboard.view',
-        'procurement.view', 'pricing.view', 'inventory.view'
+        'dashboard.view', 'admin.view',
+        'procurement.view', 'pricing.view', 'inventory.view',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
     ],
 
     // ═══ LEVEL 8: DEPUTY MANAGERS, SUPERVISORS & TEAM LEADERS ═══
