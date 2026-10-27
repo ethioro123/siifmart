@@ -69,10 +69,11 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     ],
     regional_procurement_manager: [
         'dashboard.view', 'admin.view',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po',
         'inventory.view', 'inventory.transfer',
         'pricing.view',
-        'customers.view', 'customers.view_history'
+        'sales.view', 'sales.view_reports',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
     ],
     regional_merchandising_manager: [
         'dashboard.view', 'inventory.view', 'pricing.view', 'pricing.edit',

@@ -450,14 +450,14 @@ export const UnitTab: React.FC<Props> = ({
                 {!canDirectEdit && (
                     <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
                         <AlertTriangle size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs font-medium text-amber-700 dark:text-amber-300">Selling config changes require CEO approval. Your save will submit a change request.</p>
+                        <p className="text-xs font-medium text-amber-700 dark:text-amber-300">Selling config changes require regional Operations, Supply Chain and Merchandising approval. Your save will submit a change request.</p>
                     </div>
                 )}
 
                 <button onClick={handleSaveUnit} disabled={isSaving}
                     className="w-full py-3 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl font-semibold text-xs uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-opacity">
                     {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
-                    <span>{isSaving ? 'Saving...' : 'Save Selling Configuration'}</span>
+                    <span>{isSaving ? 'Saving...' : 'Submit selling configuration proposal'}</span>
                 </button>
             </div>
         </div>

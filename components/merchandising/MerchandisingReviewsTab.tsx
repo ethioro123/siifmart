@@ -78,6 +78,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
       queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['price_manager_catalog'] });
 
       if (result.action === 'reject') {
         addNotification('success', 'Proposal has been rejected.');

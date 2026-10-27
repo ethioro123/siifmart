@@ -27,8 +27,15 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     const isWarehouseSite = siteType && ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
     const isStoreSite = siteType && ['Store', 'Retail', 'POS'].includes(siteType);
 
-    // 1. Regional Command: Regional Operations and Department Managers command from /regional-ops
-    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_procurement_manager', 'regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(role)) {
+    // 1. Regional Command: Regional Operations and Department Managers command from /regional-ops on their Regional Hub
+    if (role === 'regional_procurement_manager') {
+        if (!siteType || siteType === 'Administration' || siteType === 'Administrative') {
+            return '/regional-ops';
+        }
+        return '/procurement';
+    }
+
+    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(role)) {
         return '/regional-ops';
     }
 

@@ -15,7 +15,10 @@ describe('Merchandising Whole-Number Rule Invariant', () => {
         stock: 45,
         minStock: 10,
         unit: 'piece',
-        salesVelocity: 'Low'
+        salesVelocity: 'Low',
+        siteId: 'site-et-01',
+        image: '',
+        status: 'active'
     };
 
     it('always outputs an integer for Decrease Price % rules even with fractional calculations', () => {

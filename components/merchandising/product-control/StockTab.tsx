@@ -111,7 +111,7 @@ export const StockTab: React.FC<Props> = ({
                 className="w-full py-2.5 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl font-semibold text-xs disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-opacity"
             >
                 {isSaving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                <span>{isSaving ? 'Saving...' : 'Save Stock Policies'}</span>
+                <span>{isSaving ? 'Saving...' : 'Submit stock policy proposal'}</span>
             </button>
         </div>
     );

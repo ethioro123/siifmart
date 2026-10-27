@@ -1,3 +1,4 @@
+import { sellingMargin, productSiteName } from '../../../utils/priceManager';
 import React from 'react';
 import {
     ChevronUp, ChevronDown, Package, Map, Edit2, Save, Trash2, XCircle
@@ -117,9 +118,10 @@ export const PricingProductsTable: React.FC = () => {
                 <tbody className="divide-y divide-[var(--theme-border-subtle)]">
                     {paginatedProducts.map(p => {
                         const isEditing = editingId === p.id;
-                        const cost = isEditing ? editForm.cost : (p.costPrice || p.price * 0.7);
+                        const cost = isEditing ? editForm.cost : p.costPrice;
                         const retail = isEditing ? editForm.price : p.price;
-                        const margin = getMargin(retail, cost);
+                        const actualMargin = sellingMargin(isEditing ? { ...p, price: editForm.price, costPrice: editForm.cost, salePrice: editForm.salePrice, isOnSale: editForm.isOnSale } : p);
+                        const margin = actualMargin ?? 0;
                         const compVariance = p.competitorPrice ? ((retail - p.competitorPrice) / p.competitorPrice) * 100 : 0;
 
                         return (
@@ -183,7 +185,7 @@ export const PricingProductsTable: React.FC = () => {
 
                                 {/* Location */}
                                 <td className="p-4 text-xs font-medium text-[var(--theme-text-primary)]">
-                                    {sites.find(s => s.id === p.siteId)?.name || 'Unknown Site'}
+                                    {productSiteName(p, sites)}
                                 </td>
 
                                 {/* Retail Price */}
@@ -205,9 +207,10 @@ export const PricingProductsTable: React.FC = () => {
                                                 <span className="text-[10px] text-[var(--theme-text-primary)] font-medium uppercase">Price:</span>
                                                 <input
                                                     type="number"
+                                                    step="1"
                                                     className="w-24 bg-[var(--theme-bg-card)] border border-[var(--theme-accent)] rounded-xl px-2 py-1 text-right text-[var(--theme-text-primary)] outline-none font-mono text-xs font-semibold tabular-nums focus:ring-1 focus:ring-[var(--theme-accent)]"
                                                     value={editForm.price}
-                                                    onChange={(e) => setEditForm({ ...editForm, price: parseFloat(e.target.value) || 0 })}
+                                                    onChange={(e) => setEditForm({ ...editForm, price: Math.round(parseFloat(e.target.value) || 0) })}
                                                     aria-label="Retail Price"
                                                 />
                                             </div>
@@ -217,7 +220,7 @@ export const PricingProductsTable: React.FC = () => {
                                             <span className="text-[var(--theme-text-primary)] font-mono font-semibold text-xs tabular-nums">
                                                 {currencySymbol} {retail.toLocaleString()}
                                             </span>
-                                            <span className="text-[10px] text-[var(--theme-text-secondary)] font-mono tabular-nums">Cost: {cost.toLocaleString()}</span>
+                                            <span className="text-[10px] text-[var(--theme-text-secondary)] font-mono tabular-nums">Cost: {cost !== undefined ? cost.toLocaleString() : 'N/A'}</span>
                                         </div>
                                     )}
                                 </td>
@@ -254,7 +257,7 @@ export const PricingProductsTable: React.FC = () => {
                                                 : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                                         }`}
                                     >
-                                        {margin.toFixed(1)}%
+                                        {actualMargin === null ? 'Cost unavailable' : `${actualMargin.toFixed(1)}%`}
                                     </span>
                                 </td>
 
@@ -284,9 +287,10 @@ export const PricingProductsTable: React.FC = () => {
                                             {editForm.isOnSale && (
                                                 <input
                                                     type="number"
+                                                    step="1"
                                                     className="w-16 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-center text-[var(--theme-text-primary)] outline-none font-mono tabular-nums py-0.5"
                                                     value={editForm.salePrice}
-                                                    onChange={(e) => setEditForm({ ...editForm, salePrice: parseFloat(e.target.value) || 0 })}
+                                                    onChange={(e) => setEditForm({ ...editForm, salePrice: Math.round(parseFloat(e.target.value) || 0) })}
                                                     placeholder="Promo"
                                                     aria-label="Promo Sale Price"
                                                 />
@@ -312,8 +316,8 @@ export const PricingProductsTable: React.FC = () => {
                                             <button
                                                 onClick={() => handleSavePrice(p.id)}
                                                 className="p-1.5 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/20 rounded-xl border border-[var(--theme-accent)]/20 transition-colors cursor-pointer"
-                                                title="Save Changes"
-                                                aria-label="Save Changes"
+                                                title="Review price proposals"
+                                                aria-label="Review price proposals"
                                             >
                                                 <Save size={14} />
                                             </button>

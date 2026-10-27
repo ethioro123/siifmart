@@ -1,3 +1,4 @@
+import { computeMarginPct, effectivePrice } from '../../../utils/pricingGovernance';
 import React from 'react';
 import {
     TrendingUp, TrendingDown, Lock, Store, Globe, SlidersHorizontal,
@@ -42,8 +43,8 @@ export const PricingTab: React.FC<Props> = ({
     allProducts,
     currencySymbol = 'ETB'
 }) => {
-    const margin = pricingCfg.price > 0 && pricingCfg.costPrice > 0
-        ? ((pricingCfg.price - pricingCfg.costPrice) / pricingCfg.price * 100) : 0;
+    const actualMargin = computeMarginPct(effectivePrice(pricingCfg), pricingCfg.costPrice);
+    const margin = actualMargin ?? 0;
     const compDiff = pricingCfg.competitorPrice > 0
         ? ((pricingCfg.price - pricingCfg.competitorPrice) / pricingCfg.competitorPrice * 100) : null;
 
@@ -53,9 +54,9 @@ export const PricingTab: React.FC<Props> = ({
                 margin < 15 ? 'bg-rose-500/10 border-rose-500/20' : margin > 40 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/20'
             }`}>
                 <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--theme-text-secondary)]">Gross Margin</p>
+                    <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--theme-text-secondary)]">Margin at selling price</p>
                     <p className={`text-2xl font-bold font-mono tabular-nums ${margin < 15 ? 'text-rose-600 dark:text-rose-400' : margin > 40 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                        {margin.toFixed(1)}%
+                        {actualMargin === null ? 'Cost unavailable' : `${actualMargin.toFixed(1)}%`}
                     </p>
                 </div>
                 {compDiff !== null && (
@@ -105,7 +106,7 @@ export const PricingTab: React.FC<Props> = ({
                     <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1.5">Competitor Price</label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] font-mono">{currencySymbol}</span>
-                        <input type="number" min="0" step="1" value={pricingCfg.competitorPrice || ''} disabled={!canDirectEdit}
+                        <input type="number" min="0" step="1" value={pricingCfg.competitorPrice || ''} disabled
                             onChange={e => setPricingCfg(c => ({ ...c, competitorPrice: Math.round(parseFloat(e.target.value) || 0) }))}
                             placeholder="0"
                             className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-3 py-2 text-sm font-mono tabular-nums text-right text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors" />
@@ -133,7 +134,7 @@ export const PricingTab: React.FC<Props> = ({
             </div>
 
             {/* Location Target Scope */}
-            {canDirectEdit ? <div className="space-y-3 pt-2 border-t border-[var(--theme-border)]">
+            <div className="space-y-3 pt-2 border-t border-[var(--theme-border)]">
                 <label className="text-xs font-medium text-[var(--theme-text-secondary)] block">Pricing Target Scope (Locations)</label>
                 <div className="grid grid-cols-3 gap-2">
                     <button
@@ -281,12 +282,13 @@ export const PricingTab: React.FC<Props> = ({
                         )}
                     </div>
                 )}
-            </div> : <p className="text-xs text-[var(--theme-text-secondary)]">This proposal applies to the selected product location. Use Price Manager to propose changes across your authorized territory.</p>}
+            </div>
 
+            <p className="text-xs text-[var(--theme-text-secondary)]">Prices round to the nearest whole number. Recorded cost is retained separately at each location. Proposals require regional Operations, Supply Chain and Merchandising approval; below-floor prices also require Finance signoff.</p>
             <button onClick={handleSavePricing} disabled={isSaving}
                 className="w-full py-2.5 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl font-semibold text-xs transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer">
                 {isSaving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                {isSaving ? 'Saving...' : canDirectEdit ? 'Save Pricing' : 'Submit Price Proposal'}
+                {isSaving ? 'Preparing…' : 'Review price proposals'}
             </button>
         </div>
     );

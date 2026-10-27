@@ -234,7 +234,7 @@ export default function Procurement() {
                 <div className="flex items-center gap-3">
                     {/* Maker-Checker Sign-off Hub Badge */}
                     {(() => {
-                        const isApproverRole = Boolean(user?.role && ['country_commercial_director', 'regional_procurement_manager', 'country_managing_director', 'group_ceo'].includes(user.role));
+                        const isApproverRole = Boolean(user?.role && ['country_commercial_director', 'regional_procurement_manager', 'regional_operations_manager', 'country_managing_director', 'group_ceo'].includes(user.role));
                         if (pendingSignOffsCount === 0) return null;
 
                         return isApproverRole ? (
@@ -287,7 +287,7 @@ export default function Procurement() {
             {/* Navigation Tabs */}
             <div role="group" aria-label="Procurement sections" className="inline-flex p-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 flex-wrap w-fit">
                 {(isRegionalStaff
-                    ? (['overview', 'orders', 'suppliers', 'inbound_qc'] as const)
+                    ? (['overview', 'orders', 'suppliers', 'vendor_relations', 'inbound_qc'] as const)
                     : (['overview', 'orders', 'suppliers', 'vendor_relations', 'customs_import', 'inbound_qc'] as const)
                 ).map(tab => {
                     const isActive = activeTab === tab;

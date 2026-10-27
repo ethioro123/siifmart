@@ -105,6 +105,7 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
             queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
             queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            queryClient.invalidateQueries({ queryKey: ['price_manager_catalog'] });
 
             if ('applied' in data && !data.applied) {
                 addNotification('info', `Approval recorded (${data.approvalCount}/3): ${data.change.productName}`);

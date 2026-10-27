@@ -30,7 +30,7 @@ export const BulkDiscountModal: React.FC<BulkDiscountModalProps> = ({
          <div className="space-y-4">
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-[11px] font-medium">
                <ShieldAlert size={14} className="shrink-0 text-amber-600 dark:text-amber-400" />
-               <span>Corporate Margin Tripwire: Any markdown pushing gross margin below 15.0% automatically routes to Corporate Finance for co-approval.</span>
+               <span>Proposals need regional Operations, Supply Chain and Merchandising approval. Prices below the 15% margin floor also need independent Finance signoff. Selling prices round to whole numbers.</span>
             </div>
 
             <p className="text-xs text-[var(--theme-text-secondary)]">
@@ -39,7 +39,7 @@ export const BulkDiscountModal: React.FC<BulkDiscountModalProps> = ({
             <div>
                <label className="text-xs font-medium text-[var(--theme-text-secondary)] mb-1 block">Discount Percentage</label>
                <input
-                  type="number"
+                  type="number" min="0.01" max="99.99" step="0.01"
                   className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-medium tabular-nums focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors"
                   placeholder="e.g. 20 for 20% off"
                   value={bulkDiscountValue}
@@ -60,9 +60,9 @@ export const BulkDiscountModal: React.FC<BulkDiscountModalProps> = ({
                {isSubmitting ? (
                   <>
                      <Loader2 size={16} className="animate-spin" />
-                     <span>Applying...</span>
+                     <span>Preparing preview…</span>
                   </>
-               ) : `Apply ${bulkDiscountValue}% Discount`}
+               ) : `Review ${bulkDiscountValue}% discount`}
             </button>
          </div>
       </Modal>
