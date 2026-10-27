@@ -6,9 +6,14 @@ import { canWorkerPerformJob } from '../../utils/fulfillmentRoles';
 
 describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030)', () => {
     describe('Logistics Manager (SOP-MGT-028, Rank 80)', () => {
-        it('allows access to warehouse fulfillment and inventory modules', () => {
+        it('allows access to warehouse fulfillment, inventory, procurement, regional-ops, sales, and employees modules', () => {
+            expect(canAccessModule('regional_supply_chain_manager', 'dashboard')).toBe(true);
+            expect(canAccessModule('regional_supply_chain_manager', 'regional-ops')).toBe(true);
             expect(canAccessModule('regional_supply_chain_manager', 'warehouse')).toBe(true);
             expect(canAccessModule('regional_supply_chain_manager', 'inventory')).toBe(true);
+            expect(canAccessModule('regional_supply_chain_manager', 'procurement')).toBe(true);
+            expect(canAccessModule('regional_supply_chain_manager', 'sales')).toBe(true);
+            expect(canAccessModule('regional_supply_chain_manager', 'employees')).toBe(true);
         });
 
         it('blocks access to POS till, central finance, and system settings modules', () => {
@@ -19,10 +24,18 @@ describe('Site Operational Managers Governance Engine (SOP-028, SOP-029, SOP-030
             expect(canAccessModule('regional_supply_chain_manager', 'admin')).toBe(false);
         });
 
-        it('grants transit dispatch, transfer, and fleet staging permissions', () => {
+        it('grants transit dispatch, transfer, inbound PO receiving, and workforce management permissions while enforcing segregation of duties', () => {
             expect(authService.checkPermission('regional_supply_chain_manager', 'warehouse.dispatch')).toBe(true);
+            expect(authService.checkPermission('regional_supply_chain_manager', 'warehouse.view_tasks')).toBe(true);
             expect(authService.checkPermission('regional_supply_chain_manager', 'inventory.transfer')).toBe(true);
             expect(authService.checkPermission('regional_supply_chain_manager', 'warehouse.receive')).toBe(true);
+            expect(authService.checkPermission('regional_supply_chain_manager', 'procurement.view')).toBe(true);
+            expect(authService.checkPermission('regional_supply_chain_manager', 'procurement.receive')).toBe(true);
+            expect(authService.checkPermission('regional_supply_chain_manager', 'sales.view')).toBe(true);
+            expect(authService.checkPermission('regional_supply_chain_manager', 'employees.view')).toBe(true);
+            expect(authService.checkPermission('regional_supply_chain_manager', 'employees.manage_attendance')).toBe(true);
+            expect(authService.checkPermission('regional_supply_chain_manager', 'procurement.create_po')).toBe(false);
+            expect(authService.checkPermission('regional_supply_chain_manager', 'procurement.approve_po')).toBe(false);
             expect(authService.checkPermission('regional_supply_chain_manager', 'pos.create_sale')).toBe(false);
         });
 
