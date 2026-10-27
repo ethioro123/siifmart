@@ -151,7 +151,11 @@ export const FulfillmentContent: React.FC = () => {
             )}
 
             {canAccessTab(activeTab) && (
-                <>
+                <React.Suspense fallback={
+                    <div className="flex items-center justify-center p-12 text-xs text-[var(--theme-text-secondary)]">
+                        Loading...
+                    </div>
+                }>
             {/* --- DOCKS TAB --- */}
             {activeTab === 'DOCKS' && (
                 <DocksTab
@@ -362,7 +366,7 @@ export const FulfillmentContent: React.FC = () => {
                     />
                 )
             }
-                </>
+                </React.Suspense>
             )}
         </div >
     );

@@ -4,6 +4,7 @@ import { formatDateTime, formatCompactNumber } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import Pagination from '../../shared/Pagination';
 import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface ReturnsHistoryProps {
     sales: any[];
@@ -12,6 +13,7 @@ interface ReturnsHistoryProps {
 const RETURN_HISTORY_PER_PAGE = 10;
 
 export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
+    const { t } = useLanguage();
     const [returnHistorySearch, setReturnHistorySearch] = useState('');
     const [returnHistoryPage, setReturnHistoryPage] = useState(1);
 

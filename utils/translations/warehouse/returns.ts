@@ -260,5 +260,16 @@ export const returns: any = {
     statusHeader: { en: 'Status', am: 'ሁኔታ', or: 'Haala' },
     cancelWord: { en: 'Cancel', am: 'ሰርዝ', or: 'Haqi' },
     backWord: { en: 'Back', am: 'ተመለስ', or: 'Duubatti' },
-    doneWord: { en: 'Done', am: 'ተጠናቋል', or: 'Xumurame' }
+    doneWord: { en: 'Done', am: 'ተጠናቋል', or: 'Xumurame' },
+    submittingWord: { en: 'Submitting...', am: 'በማስገባት ላይ...', or: 'Ergaa jira...' },
+    jobPrefix: { en: 'Job {id}', am: 'ስራ {id}', or: 'Hojii {id}' },
+    qtyHeader: { en: 'Qty', am: 'ብዛት', or: 'Baay\'ina' },
+    conditionHeader: { en: 'Condition', am: 'ሁኔታ', or: 'Haala' },
+    receivedQtyPrefix: { en: 'Received: {qty}', am: 'የተቀበለው: {qty}', or: 'Kan Fudhatame: {qty}' },
+    pickedQtyPrefix: { en: 'Picked: {qty}', am: 'የተመረጠ: {qty}', or: 'Kan Guurame: {qty}' },
+    reasonWrongItemPicked: { en: 'Wrong Item Picked', am: 'የተሳሳተ ዕቃ ተመርጧል', or: 'Meeshaa Dogoggoraatu Fudhatame' },
+    reasonOverstock: { en: 'Overstock', am: 'ትርፍ ክምችት', or: 'Kuusaadhaa Ol / Heddummina' },
+    reasonCustomerRefused: { en: 'Customer Refused', am: 'ደንበኛ አልተቀበለም', or: 'Maamilli Dide' },
+    reasonQualityIssue: { en: 'Quality Issue', am: 'የጥራት ችግር', or: 'Rakkoo Qulqullinaa' },
+    conditionExpired: { en: 'Expired', am: 'ጊዜው ያለፈበት', or: 'Yeroon kan Darbe' }
 };
