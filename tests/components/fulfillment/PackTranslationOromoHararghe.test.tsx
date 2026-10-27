@@ -37,11 +37,10 @@ describe('WMS Operations - Pack Tab East Hararghe (Harargee Bahaa) Localization'
     it('faithfully applies East Hararghe (Harargee Bahaa) commercial dialect terminology', () => {
         // Root Packing: Saamsuu / Saamsaa / Paakeejii
         expect(dict.or).toBe('Saamsuu Meeshaa');
-        expect(getOr('packQueue').toLowerCase()).toContain('saams');
         expect(getOr('packJobs').toLowerCase()).toContain('saams');
-        expect(getOr('packHistory').toLowerCase()).toContain('saams');
+        expect(getOr('startPacking').toLowerCase()).toContain('saams');
         expect(getOr('startScanningAndPack').toLowerCase()).toContain('saams');
-        expect(getOr('confirmPack').toLowerCase()).toContain('saams');
+        expect(getOr('confirmPackCaps').toLowerCase()).toContain('saams');
         expect(getOr('completeAndSeal').toLowerCase()).toContain('saams');
 
         // CRITICAL: Ensure predatory term "saamuu" (robbery/looting) is NEVER used standalone for packing
@@ -57,22 +56,22 @@ describe('WMS Operations - Pack Tab East Hararghe (Harargee Bahaa) Localization'
         });
 
         // Discrepancy & Variance uses Baqiyyaa
-        expect(getOr('packDiscrepancy').toLowerCase()).toContain('baqiyyaa');
-        expect(getOr('packVarianceWarning').toLowerCase()).toContain('baqiyyaa');
+        expect(getOr('flagDiscrepancy').toLowerCase()).toContain('baqiyyaa');
+        expect(getOr('packingWeightVarianceWarning').toLowerCase()).toContain('baqiyyaa');
 
         // Blind carton count uses Mirkaneessa Ija-Cufaa Saanduqaa
         expect(getOr('blindCartonVerification').toLowerCase()).toContain('ija-cufaa');
-        expect(getOr('blindCountPrompt').toLowerCase()).toContain('saanduqa');
+        expect(getOr('enterPhysicalQtyInCarton').toLowerCase()).toContain('saanduqa');
 
         // Weigh & Seal uses Madaaluu fi Saamsuu
-        expect(getOr('step3WeighSeal').toLowerCase()).toContain('madaaluu fi saamsuu');
-        expect(getOr('step3Subtitle').toLowerCase()).toContain('miizana');
+        expect(getOr('weighAndSeal').toLowerCase()).toContain('madaaluu fi saamsuu');
+        expect(getOr('scaleWeightVerification').toLowerCase()).toContain('madaal');
 
         // Packaging directives: Cold chain, Tamper tape, Fragile protection
         expect(getOr('coldChain').toLowerCase()).toContain('qabbana');
         expect(getOr('bubbleWrap').toLowerCase()).toContain('huubboo');
         expect(getOr('icePacks').toLowerCase()).toContain('cabbee');
-        expect(getOr('tamperSecuritySeal').toLowerCase()).toContain('teepii nageenyaa');
+        expect(getOr('securityTamperTape').toLowerCase()).toContain('teepii nageenyaa');
     });
 
     it('provides valid parameterized translation templates', () => {
@@ -87,16 +86,25 @@ describe('WMS Operations - Pack Tab East Hararghe (Harargee Bahaa) Localization'
         expect(getOr('linesVerifiedSimple')).toContain('{completed}');
         expect(getOr('linesVerifiedSimple')).toContain('{total}');
 
-        expect(getEn('recordsCount')).toContain('{count}');
-        expect(getAm('recordsCount')).toContain('{count}');
-        expect(getOr('recordsCount')).toContain('{count}');
-
-        expect(getEn('moreCount')).toContain('{n}');
-        expect(getAm('moreCount')).toContain('{n}');
-        expect(getOr('moreCount')).toContain('{n}');
+        expect(getEn('manifestItemsAwaitingScan')).toContain('{count}');
+        expect(getAm('manifestItemsAwaitingScan')).toContain('{count}');
+        expect(getOr('manifestItemsAwaitingScan')).toContain('{count}');
 
         expect(getEn('countInUnit')).toContain('{unit}');
         expect(getAm('countInUnit')).toContain('{unit}');
         expect(getOr('countInUnit')).toContain('{unit}');
+
+        expect(getEn('packingWeightVarianceWarning')).toContain('{weight}');
+        expect(getEn('packingWeightVarianceWarning')).toContain('{variance}');
+        expect(getEn('packingWeightVarianceWarning')).toContain('{expected}');
+        expect(getEn('packingWeightVarianceWarning')).toContain('{tolerance}');
+        expect(getAm('packingWeightVarianceWarning')).toContain('{weight}');
+        expect(getAm('packingWeightVarianceWarning')).toContain('{variance}');
+        expect(getAm('packingWeightVarianceWarning')).toContain('{expected}');
+        expect(getAm('packingWeightVarianceWarning')).toContain('{tolerance}');
+        expect(getOr('packingWeightVarianceWarning')).toContain('{weight}');
+        expect(getOr('packingWeightVarianceWarning')).toContain('{variance}');
+        expect(getOr('packingWeightVarianceWarning')).toContain('{expected}');
+        expect(getOr('packingWeightVarianceWarning')).toContain('{tolerance}');
     });
 });
