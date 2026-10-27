@@ -10,6 +10,7 @@ import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations
 import { expensesService } from '../../services/expenses.service';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
+import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
 import { logger } from '../../utils/logger';
 
 interface RegionalProcurementDeskProps {
@@ -38,13 +39,22 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
   currencySymbol
 }) => {
   const { user } = useStore();
-  const { addNotification, sites } = useData();
+  const { addNotification, sites, regions } = useData();
   const { approvePOMutation } = usePurchaseOrderMutations();
   const [activeTab, setActiveTab] = useState<'autonomous' | 'escalated' | 'expenses'>('autonomous');
   const [pendingExpenses, setPendingExpenses] = useState<ExpenseRecord[]>([]);
   const [loadingExpenses, setLoadingExpenses] = useState(false);
 
   const AUTONOMOUS_EXPENSE_LIMIT = 25_000;
+  const canApprovePettyCash = Boolean(
+    user?.role && [
+      'group_ceo',
+      'country_managing_director',
+      'country_finance_director',
+      'regional_operations_manager',
+      'regional_finance_manager'
+    ].includes(user.role)
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -241,15 +251,43 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                   <span className="font-mono font-bold text-sm text-[var(--theme-text-primary)]">
                     {formatCompactNumber(po.totalAmount, { currency: currencySymbol })}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => approvePOMutation.mutate(po)}
-                    disabled={approvePOMutation.isPending}
-                    className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Approve PO</span>
-                  </button>
+                  {(() => {
+                    const policy = getPoApprovalPolicy({
+                      po,
+                      role: user?.role,
+                      actorName: user?.name,
+                      actorRegionCode: user?.regionCode || user?.region_code || currentRegion?.code,
+                      regions,
+                      sites
+                    });
+                    if (policy.isCreator && user?.role !== 'group_ceo') {
+                      return (
+                        <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                          Created by You — Dual Control Required
+                        </span>
+                      );
+                    }
+                    if (!policy.canApprove) {
+                      return (
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          Awaiting Procurement Lead
+                        </span>
+                      );
+                    }
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => approvePOMutation.mutate(po)}
+                        disabled={approvePOMutation.isPending}
+                        className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Approve PO</span>
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             ))}

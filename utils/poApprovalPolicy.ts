@@ -27,8 +27,8 @@ export function getPoApprovalPolicy({ po, role, actorName, actorRegionCode, regi
     const isCreator = Boolean(actorName && [po.createdBy, po.requestedBy]
         .some(name => name?.trim().toLowerCase() === actorName.trim().toLowerCase()));
     const isOpen = po.status === 'Draft' || po.status === 'Pending';
-    const isRegionalProcurement = role === 'regional_procurement_manager';
-    const isHqProcurement = role === 'country_commercial_director' || role === 'group_ceo';
+    const isRegionalProcurement = role === 'regional_procurement_manager' || role === 'regional_operations_manager';
+    const isHqProcurement = role === 'country_commercial_director' || role === 'country_managing_director' || role === 'country_operations_director' || role === 'group_ceo';
     const canApprove = isOpen && !isCreator && hasConfiguredLimit &&
         ((isRegionalProcurement && regionCode === actorRegionCode && limit != null && !needsFinanceClearance) ||
             (isHqProcurement && (!needsFinanceClearance || financeCleared)));
