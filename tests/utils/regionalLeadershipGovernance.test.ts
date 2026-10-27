@@ -42,6 +42,25 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
         });
     });
 
+    describe('Area Operations Manager (area_operations_manager)', () => {
+        it('authorizes regional command, store/warehouse monitoring, and intra-regional transfers while blocking PO creation', () => {
+            expect(canAccessRoute('area_operations_manager', '/regional-ops')).toBe(true);
+            expect(canAccessRoute('area_operations_manager', '/wms-dashboard')).toBe(true);
+            expect(canAccessRoute('area_operations_manager', '/pos-dashboard')).toBe(true);
+            expect(hasPermission('area_operations_manager', 'ACCESS_REGIONAL_OPS')).toBe(true);
+            expect(hasPermission('area_operations_manager', 'TRANSFER_STOCK')).toBe(true);
+            expect(hasPermission('area_operations_manager', 'APPROVE_PO')).toBe(true);
+            expect(hasPermission('area_operations_manager', 'CREATE_PO')).toBe(false);
+            expect(hasPermission('area_operations_manager', 'PROCESS_SALE')).toBe(false);
+        });
+
+        it('authorizes recruiting store/warehouse captains and frontline staff while blocking regional/national executives', () => {
+            expect(canEmployRole('area_operations_manager', 'store_manager')).toBe(true);
+            expect(canEmployRole('area_operations_manager', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('area_operations_manager', 'regional_operations_manager')).toBe(false);
+        });
+    });
+
     describe('Regional Finance Manager (regional_finance_manager)', () => {
         it('authorizes regional financial review, revenue inspection, and expense creation', () => {
             expect(hasPermission('regional_finance_manager', 'ACCESS_FINANCE')).toBe(true);
