@@ -51,11 +51,11 @@ export const PricingTab: React.FC<Props> = ({
     return (
         <div className="space-y-4">
             <div className={`p-3.5 rounded-2xl border flex items-center justify-between ${
-                margin < 15 ? 'bg-rose-500/10 border-rose-500/20' : margin > 40 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/20'
+                actualMargin === null ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]' : margin < 15 ? 'bg-rose-500/10 border-rose-500/20' : margin > 40 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/20'
             }`}>
                 <div>
                     <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--theme-text-secondary)]">Margin at selling price</p>
-                    <p className={`text-2xl font-bold font-mono tabular-nums ${margin < 15 ? 'text-rose-600 dark:text-rose-400' : margin > 40 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                    <p className={`text-2xl font-bold font-mono tabular-nums ${actualMargin === null ? 'text-[var(--theme-text-secondary)]' : margin < 15 ? 'text-rose-600 dark:text-rose-400' : margin > 40 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
                         {actualMargin === null ? 'Cost unavailable' : `${actualMargin.toFixed(1)}%`}
                     </p>
                 </div>
@@ -93,7 +93,7 @@ export const PricingTab: React.FC<Props> = ({
                         </div>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] font-mono">{currencySymbol}</span>
-                            <input type="number" value={pricingCfg.costPrice}
+                            <input type="number" value={pricingCfg.costPrice > 0 ? pricingCfg.costPrice : ''} placeholder="Unavailable"
                                 readOnly
                                 disabled
                                 aria-label="Cost Price (COGS) - Read-only from PO"

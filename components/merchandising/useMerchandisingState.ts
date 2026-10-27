@@ -246,6 +246,8 @@ export const useMerchandisingState = (): MerchandisingContextType => {
                }
             }
          });
+         const unavailableCosts = rule.action.includes('Margin') ? ruleProducts.filter(p => p.costPrice === undefined || p.costPrice <= 0).length : 0;
+         if (unavailableCosts) addNotification('info', `Skipped ${unavailableCosts} product records whose costs are unavailable in this view.`);
          if (changes.length) batch.stagePriceBatch(changes, `Rule '${rule.name}'`);
          else addNotification('info', `Rule '${rule.name}' matched no products needing a price change.`);
       } catch (e) {
