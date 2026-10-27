@@ -73,6 +73,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       filteredProducts: cachedFilteredProducts
    } = useMerchandisingFilters({ products: cachedProducts, getMargin });
    useEffect(() => { setCurrentPage(1); setFilters(previous => ({ ...previous, sites: [] })); }, [activeCountry, activeRegionCode]);
+   useEffect(() => { setSelectedMarkdownProduct(null); }, [activeCountry, activeRegionCode, activeSite?.id]);
    const catalog = usePriceManagerCatalog({ country: activeCountry, search: searchTerm, filters, sort: sortConfig, page: currentPage, pageSize: itemsPerPage }, activeTab === 'pricing');
    const products = activeTab === 'pricing' ? catalog.data?.data || [] : cachedProducts;
    const filteredProducts = activeTab === 'pricing' ? products : cachedFilteredProducts;
@@ -336,8 +337,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    };
 
    const calculateMarkdown = () => {
-      setIsMarkdownSimulating(true);
-      setTimeout(() => setIsMarkdownSimulating(false), 1500);
+      setIsMarkdownSimulating(false);
    };
 
    return {

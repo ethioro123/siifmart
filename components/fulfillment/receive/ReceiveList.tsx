@@ -84,7 +84,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                         {t('warehouse.noApprovedManifests')}
                     </p>
                     <p className="text-[11px] sm:text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5 sm:mt-1">
-                        Approved POs appear at their destination warehouse or DC. Receivers see tasks assigned to them; ask the warehouse manager to assign the RECEIVE task in Fulfillment → Assign.
+                        {t('warehouse.approvedPOsNotice') || 'Approved POs appear at their destination warehouse or DC. Receivers see tasks assigned to them; ask the warehouse manager to assign the RECEIVE task in Fulfillment → Assign.'}
                     </p>
                 </div>
             </div>
@@ -143,7 +143,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                             {isActiveReceiveJob && (
                                                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--theme-accent)] uppercase">
                                                     <span className="h-1.5 w-1.5 rounded-full bg-[var(--theme-accent)]" />
-                                                    Active
+                                                    {t('warehouse.activeBadge') || 'Active'}
                                                 </span>
                                             )}
                                         </div>
@@ -166,10 +166,10 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                             </summary>
 
                             {!po.lineItems?.length && <div className="mb-4 space-y-2">
-                                <p className="text-sm text-[var(--theme-text-secondary)]">Open this manifest’s items to begin receiving. Stock changes only after you confirm the receipt.</p>
+                                <p className="text-sm text-[var(--theme-text-secondary)]">{t('warehouse.openManifestItemsPrompt') || 'Open this manifest’s items to begin receiving. Stock changes only after you confirm the receipt.'}</p>
                                 {manifestError(po.id) && <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">{manifestError(po.id)}</p>}
                                 <button type="button" onClick={() => loadManifest(po.id)} disabled={isLoadingManifest(po.id)} className="min-h-11 px-4 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-sm font-semibold disabled:opacity-50">
-                                    {isLoadingManifest(po.id) ? 'Loading items…' : 'Load items to receive'}
+                                    {isLoadingManifest(po.id) ? (t('warehouse.loadingItems') || 'Loading items…') : (t('warehouse.loadItemsToReceive') || 'Load items to receive')}
                                 </button>
                             </div>}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 sm:gap-3 md:gap-4">
@@ -232,7 +232,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                     }`}>
                                                                         {receivedQty}
                                                                         {isBlindReceiving && !isComplete ? (
-                                                                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">received · blind count</span>
+                                                                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">{t('warehouse.blindCountBadge') || 'received · blind count'}</span>
                                                                         ) : (
                                                                             <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                         )}
@@ -247,7 +247,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 }`}>
                                                                     {receivedQty}
                                                                     {isBlindReceiving && !isComplete ? (
-                                                                        <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">received · blind count</span>
+                                                                        <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">{t('warehouse.blindCountBadge') || 'received · blind count'}</span>
                                                                     ) : (
                                                                         <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                     )}
@@ -378,7 +378,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                             disabled={isSubmitting}
                                             className="px-4 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold rounded-xl transition-all disabled:opacity-50 min-h-[44px] cursor-pointer touch-manipulation"
                                         >
-                                            Review
+                                            {t('warehouse.reviewAction') || 'Review'}
                                         </button>
                                         <button
                                             type="button"

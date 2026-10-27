@@ -281,9 +281,9 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             date.getFullYear() === now.getFullYear();
 
         if (isToday) {
-            if (diffInSeconds < 60) return 'Just now';
-            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-            return `${Math.floor(diffInSeconds / 3600)}h ago`;
+            if (diffInSeconds < 60) return t('warehouse.justNow') || 'Just now';
+            if (diffInSeconds < 3600) return t('warehouse.minutesAgo', { count: Math.floor(diffInSeconds / 60) }) || `${Math.floor(diffInSeconds / 60)}m ago`;
+            return t('warehouse.hoursAgo', { count: Math.floor(diffInSeconds / 3600) }) || `${Math.floor(diffInSeconds / 3600)}h ago`;
         }
 
         // For older dates: Show Date AND Time as requested
@@ -367,7 +367,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                             )}
                                             {item.isPartial && (
                                                 <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                                                    Partial
+                                                    {t('warehouse.partial') || 'Partial'}
                                                 </span>
                                             )}
                                             {item.varianceText && (
@@ -375,7 +375,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                             )}
                                             {item.type === 'JOB' && ((item.rawData as any)?.lineItems || (item.rawData as any)?.line_items || []).some((li: any) => (li.returnedQty || li.returned_qty) > 0) && (
                                                 <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                                                    Returned
+                                                    {t('warehouse.returned') || 'Returned'}
                                                 </span>
                                             )}
                                         </div>
@@ -385,7 +385,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                 {/* Footer: User & Details */}
                                 <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-3 mt-auto">
                                     <div className="flex flex-col min-w-0 pr-2">
-                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">By</span>
+                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">{t('warehouse.by') || 'By'}</span>
                                         <span className="text-xs font-semibold text-[var(--theme-text-primary)] break-words leading-tight">
                                             {item.resolvedUser?.name} {item.resolvedUser?.displayId && <span className="font-mono text-[var(--theme-text-secondary)] font-normal">({item.resolvedUser.displayId})</span>}
                                         </span>

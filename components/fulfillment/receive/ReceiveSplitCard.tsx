@@ -32,7 +32,7 @@ interface ReceiveSplitCardProps {
         onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
         onPaste: (e: React.ClipboardEvent<HTMLInputElement>) => void;
     };
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
@@ -67,12 +67,12 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                 <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                     <div className="flex items-center gap-2">
                         <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] font-mono border border-[var(--theme-border)]">
-                            Split #{index + 1}
+                            {t('warehouse.splitNum', { num: index + 1 }) || `Split #${index + 1}`}
                         </span>
                         {parsedBatch.isStandard && (
                             <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono flex items-center gap-1">
                                 <Calendar size={13} className="text-[var(--theme-text-secondary)]" />
-                                Date Rcvd: {parsedBatch.formattedDate || 'Today'}
+                                {t('warehouse.dateReceived') || 'Date Rcvd:'} {parsedBatch.formattedDate || (t('warehouse.today') || 'Today')}
                             </span>
                         )}
                     </div>
@@ -82,7 +82,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             onClick={onRemoveVariant}
                             className="p-2 text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
                             title={t('warehouse.removeScan')}
-                            aria-label="Remove split"
+                            aria-label={t('warehouse.removeScan') || 'Remove split'}
                         >
                             <Trash2 size={16} />
                         </button>
@@ -174,15 +174,15 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                     <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                             <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5 flex items-center gap-1.5">
-                                <Layers size={13} className="text-[var(--theme-text-secondary)]" /> Batch / Lot No
+                                <Layers size={13} className="text-[var(--theme-text-secondary)]" /> {t('warehouse.batchLotNo') || 'Batch / Lot No'}
                             </label>
                             <button
                                 type="button"
                                 onClick={handleAutoGenerateLot}
                                 className="text-[11px] font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-1 uppercase tracking-wider transition-colors"
-                                title="Reset to standard date-received lot format"
+                                title={t('warehouse.autoGenerate') || 'Reset to standard date-received lot format'}
                             >
-                                <Sparkles size={11} /> Auto-Generate
+                                <Sparkles size={11} /> {t('warehouse.autoGenerate') || 'Auto-Generate'}
                             </button>
                         </div>
                         <input
@@ -191,7 +191,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             onChange={(e) => onUpdateVariant({ batchNumber: e.target.value })}
                             placeholder="e.g. LOT-20261003-KEGR001-01"
                             className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono tracking-wide text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                            aria-label="Batch Number"
+                            aria-label={t('warehouse.batchLotNo') || 'Batch Number'}
                         />
                         <p className="text-[11px] text-[var(--theme-text-secondary)] pl-0.5 font-mono">
                             Format: LOT-YYYYMMDD-[SKU]-[SEQ] or Supplier Lot

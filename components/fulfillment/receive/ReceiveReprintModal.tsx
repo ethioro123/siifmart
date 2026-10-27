@@ -33,7 +33,7 @@ interface ReceiveReprintModalProps {
     labelType?: 'LPN' | 'ITEM';
     setLabelType?: (val: 'LPN' | 'ITEM') => void;
     printPriceTagAt?: 'receive' | 'putaway' | 'store';
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
@@ -95,7 +95,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                             }`}
                         >
                             <Box size={14} />
-                            Putaway & Carton LPN (Recommended)
+                            {t('warehouse.putawayCartonLpn') || 'Putaway & Carton LPN (Recommended)'}
                         </button>
                         <button
                             type="button"
@@ -106,7 +106,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                             }`}
                         >
                             <Tags size={14} />
-                            Unit Barcode Sticker
+                            {t('warehouse.unitBarcodeSticker') || 'Unit Barcode Sticker'}
                         </button>
                     </div>
 
@@ -124,7 +124,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                         </div>
 
                         <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col justify-between shadow-sm">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-2">Label copies</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-2">{t('warehouse.labelCopies') || 'Label copies'}</p>
                             <div className="flex items-center justify-center gap-3">
                                 <button
                                     onClick={() => setReprintItem({ ...reprintItem, copies: Math.max(1, (reprintItem.copies ?? 1) - 1) })}
@@ -137,8 +137,8 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                     type="number"
                                     inputMode="decimal"
                                     pattern="[0-9]*"
-                                    title="Label copies"
-                                    aria-label="Label copies"
+                                    title={t('warehouse.labelCopies') || 'Label copies'}
+                                    aria-label={t('warehouse.labelCopies') || 'Label copies'}
                                     value={reprintItem.copies ?? 1}
                                     onChange={(e) => setReprintItem({ ...reprintItem, copies: Math.min(500, Math.max(1, parseInt(e.target.value) || 1)) })}
                                     className="w-20 bg-transparent border-none text-center text-xl font-bold text-[var(--theme-text-primary)] focus:outline-none tabular-nums font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -154,7 +154,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                         </div>
                     </div>
 
-                    <p className="text-xs text-[var(--theme-text-secondary)]">Counted quantity on this label: {reprintItem.qty} units. Copies do not change the received quantity.</p>
+                    <p className="text-xs text-[var(--theme-text-secondary)]">{t('warehouse.countedQtyOnLabelNotice', { count: reprintItem.qty }) || `Counted quantity on this label: ${reprintItem.qty} units. Copies do not change the received quantity.`}</p>
                     {/* Size Selector */}
                     <div className="space-y-2">
                         <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">

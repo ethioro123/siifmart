@@ -88,18 +88,18 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                         <div className="p-4 md:p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-center shadow-sm">
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1.5">{t('warehouse.totalOrdered')}</p>
                             <p className="text-xl md:text-2xl font-bold text-[var(--theme-text-primary)] tabular-nums font-mono leading-none">
-                                {stats.totalExpectedSellable} <span className="text-xs text-[var(--theme-text-secondary)] font-normal">units</span>
+                                {stats.totalExpectedSellable} <span className="text-xs text-[var(--theme-text-secondary)] font-normal">{t('warehouse.unitsLabel')}</span>
                             </p>
                             {stats.totalExpectedSellable !== stats.totalOrderedCases && (
                                 <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-1">
-                                    ({stats.totalOrderedCases} ordered {stats.totalOrderedCases === 1 ? 'package' : 'packages'})
+                                    ({stats.totalOrderedCases} {stats.totalOrderedCases === 1 ? (t('warehouse.package') || 'package') : (t('warehouse.packages') || 'packages')})
                                 </p>
                             )}
                         </div>
                         <div className={`p-4 md:p-5 rounded-2xl border text-center transition-all shadow-sm ${isFullyReceived ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'}`}>
                             <p className="text-[11px] uppercase font-semibold tracking-wider mb-1.5 text-[var(--theme-text-secondary)]">{t('warehouse.totalReceived')}</p>
                             <p className="text-xl md:text-2xl font-bold tabular-nums font-mono leading-none">
-                                {stats.totalReceivedSellable} <span className="text-xs opacity-75 font-normal">units</span>
+                                {stats.totalReceivedSellable} <span className="text-xs opacity-75 font-normal">{t('warehouse.unitsLabel')}</span>
                             </p>
                         </div>
                     </div>
@@ -146,14 +146,14 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                                         <td className="p-3 md:p-4 text-center text-[var(--theme-text-secondary)] font-medium tabular-nums font-mono text-xs md:text-sm">
                                             {item.expectedSellable}
                                             {item.expectedSellable !== item.quantity && (
-                                                <div className="text-[11px] text-[var(--theme-text-secondary)] font-normal">({item.quantity} pkgs)</div>
+                                                <div className="text-[11px] text-[var(--theme-text-secondary)] font-normal">({item.quantity} {t('warehouse.pkgs') || 'pkgs'})</div>
                                             )}
                                         </td>
                                         <td className="p-3 md:p-4 text-center font-semibold text-[var(--theme-text-primary)] tabular-nums font-mono text-xs md:text-sm">
                                             {item.received}
                                             {(item.unitsPerOrderUnit || 1) > 1 && (
                                                 <div className="text-[11px] text-[var(--theme-text-secondary)] font-normal">
-                                                    ({Math.round((item.received / item.unitsPerOrderUnit) * 10) / 10} pkgs)
+                                                    ({Math.round((item.received / item.unitsPerOrderUnit) * 10) / 10} {t('warehouse.pkgs') || 'pkgs'})
                                                 </div>
                                             )}
                                         </td>
@@ -162,7 +162,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                                                 item.status === 'Partial' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
                                                     'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                                 }`}>
-                                                {item.status}
+                                                {item.status === 'Complete' ? (t('warehouse.statusComplete') || 'Complete') : item.status === 'Partial' ? (t('warehouse.statusPartial') || 'Partial') : (t('warehouse.statusPending') || item.status)}
                                             </span>
                                         </td>
                                     </tr>

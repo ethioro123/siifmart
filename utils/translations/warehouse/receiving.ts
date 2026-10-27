@@ -226,4 +226,13 @@ export const receiving: TranslationBlock = {
     by: { en: 'By', am: 'በ', or: 'Kan' },
     stepInspectionRequired: { en: 'Items must be counted and inspected before dock handover.', am: 'ዕቃዎች ከመተላለፋቸው በፊት መቆጠር እና መፈተሽ አለባቸው።', or: 'Meeshaaleen buufata irratti dabarfamuu dura lakkaa\'amanii fi qoratamu qabu.' },
     mappedToProduct: { en: 'Mapped to {name}', am: 'ከ{name} ጋር ተገናኝቷል', or: '{name} wajjin walqabateera' },
+    manifestExpected: { en: 'Manifest Expected', am: 'ከማኒፌስት የሚጠበቅ', or: 'Gabaasa Irraa Kan Eegamu' },
+    previouslyReceived: { en: 'Previously Received', am: 'ቀደም ሲል የተቀበለው', or: 'Kanaan Dura Kan Fudhatame' },
+    intakeStatus: { en: 'Intake Status', am: 'የቅበላ ሁኔታ', or: 'Haala Simannaa' },
+    readyForQualityAudit: { en: 'Ready for Quality Audit', am: 'ለጥራት ኦዲት ዝግጁ', or: 'To\'annoo Qulqullinaaf Qophaa\'aa' },
+    statusComplete: { en: 'Complete', am: 'የተጠናቀቀ', or: 'Xumurame' },
+    statusPartial: { en: 'Partial', am: 'ከፊል', or: 'Gariixee' },
+    statusPending: { en: 'Pending', am: 'በመጠባበቅ ላይ', or: 'Eeggataa Jira' },
+    pkgs: { en: 'pkgs', am: 'ጥቅሎች', or: 'paak.' },
+    itemReceipt: { en: 'Item Receipt', am: 'የዕቃ ደረሰኝ', or: 'Nagahee Meeshaa' },
 };

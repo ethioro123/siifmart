@@ -32,8 +32,31 @@ export const computeProductSalesMetrics = (
     let revenue30d = 0;
     let matchedOrderCount = 0;
 
+    const EXCLUDED_STATUSES = new Set([
+        'Pending', 'pending',
+        'Refunded', 'refunded',
+        'Cancelled', 'cancelled',
+        'Draft', 'draft',
+        'Void', 'void',
+        'Rejected', 'rejected'
+    ]);
+
     for (const order of orders) {
-        if (order.status === 'Refunded') continue;
+        if (!order.status || EXCLUDED_STATUSES.has(order.status)) continue;
+
+        // Multi-Country Sovereignty: Kenya and Ethiopia data never query or merge across borders
+        const orderCountry = order.countryCode || (order as any).country_code || (order as any).country;
+        const productCountry = (product as any).countryCode || (product as any).country_code || (product as any).country;
+        if (productCountry && orderCountry && productCountry.toUpperCase() !== orderCountry.toUpperCase()) {
+            continue;
+        }
+
+        // Zero-Trust Site Isolation: Prevent another location's sales from inflating this location's forecast
+        const orderSiteId = order.siteId || (order as any).site_id;
+        const productSiteId = product.siteId || (product as any).site_id;
+        if (productSiteId && orderSiteId && productSiteId !== orderSiteId) {
+            continue;
+        }
 
         const orderDate = new Date(order.date || order.createdAt || (order as { created_at?: string }).created_at || 0).getTime();
         const ageMs = nowMs - orderDate;

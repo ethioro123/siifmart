@@ -350,7 +350,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                     )}
                 </div>
 
-                {step === 'QUALITY' && !countsValid && <p role="status" className="px-4 py-2 text-xs text-[var(--theme-text-secondary)]">Enter a positive physical count for each split, or remove unused splits, before continuing.</p>}
+                {step === 'QUALITY' && !countsValid && <p role="status" className="px-4 py-2 text-xs text-[var(--theme-text-secondary)]">{t('warehouse.enterPositiveCountAlert') || 'Enter a positive physical count for each split, or remove unused splits, before continuing.'}</p>}
                 {/* Bottom Navigation Toolbar */}
                 <div className="p-3 md:p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex items-center justify-between gap-3 shrink-0">
                     <div>
@@ -372,7 +372,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider flex items-center gap-2 hover:border-[var(--theme-accent)]/30 transition-colors active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 <ArrowLeft size={16} />
-                                <span>Back</span>
+                                <span>{t('warehouse.back') || 'Back'}</span>
                             </button>
                         )}
                     </div>
@@ -384,7 +384,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 onClick={() => setStep('QUALITY')}
                                 className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                             >
-                                <span>Start Quality & Count</span>
+                                <span>{t('warehouse.startQualityAndCount') || 'Start Quality & Count'}</span>
                                 <ArrowRight size={16} />
                             </button>
                         )}
@@ -401,7 +401,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 }`}
                             >
                                 {!countsValid && <Lock size={14} className="text-[var(--theme-text-muted)]" />}
-                                <span>{countsValid ? 'Review & Handover' : 'Count Items to Proceed'}</span>
+                                <span>{countsValid ? (t('warehouse.reviewAndHandover') || 'Review & Handover') : (t('warehouse.countItemsToProceed') || 'Count Items to Proceed')}</span>
                                 <ArrowRight size={16} />
                             </button>
                         )}
@@ -418,7 +418,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 ) : (
                                     <>
                                         <Check size={18} />
-                                        <span>Confirm & Create Putaway</span>
+                                        <span>{t('warehouse.confirmAndCreatePutaway') || 'Confirm & Create Putaway'}</span>
                                     </>
                                 )}
                             </button>

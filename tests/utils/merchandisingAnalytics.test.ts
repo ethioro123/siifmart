@@ -109,6 +109,78 @@ describe('Merchandising Analytics Engine', () => {
         expect(metrics.stockoutRisk).toBe(true); // < 7 days
     });
 
+    it('strictly excludes pending, draft, cancelled, and void sales from demand calculations', () => {
+        const orders: SaleRecord[] = [
+            {
+                id: 'ord-pending',
+                siteId: 'site-1',
+                date: '2026-10-10T10:00:00Z',
+                subtotal: 300,
+                tax: 0,
+                total: 300,
+                method: 'Cash',
+                status: 'Pending', // Pending sale should NEVER inflate demand
+                items: [{ ...baseProduct, quantity: 20, price: 150 }]
+            },
+            {
+                id: 'ord-cancelled',
+                siteId: 'site-1',
+                date: '2026-10-10T10:00:00Z',
+                subtotal: 300,
+                tax: 0,
+                total: 300,
+                method: 'Cash',
+                status: 'Cancelled',
+                items: [{ ...baseProduct, quantity: 15, price: 150 }]
+            },
+            {
+                id: 'ord-completed',
+                siteId: 'site-1',
+                date: '2026-10-10T10:00:00Z',
+                subtotal: 150,
+                tax: 0,
+                total: 150,
+                method: 'Cash',
+                status: 'Completed',
+                items: [{ ...baseProduct, quantity: 5, price: 150 }]
+            }
+        ];
+
+        const metrics = computeProductSalesMetrics(baseProduct, orders, now);
+        expect(metrics.unitsSold30d).toBe(5);
+        expect(metrics.revenue30d).toBe(750);
+    });
+
+    it('strictly prevents another store location sale with the same SKU from inflating this store forecast', () => {
+        const orders: SaleRecord[] = [
+            {
+                id: 'ord-store-2',
+                siteId: 'site-2', // Different location!
+                date: '2026-10-10T10:00:00Z',
+                subtotal: 3000,
+                tax: 0,
+                total: 3000,
+                method: 'Cash',
+                status: 'Completed',
+                items: [{ ...baseProduct, quantity: 20, price: 150 }] // Same SKU
+            },
+            {
+                id: 'ord-store-1',
+                siteId: 'site-1', // Correct location
+                date: '2026-10-10T10:00:00Z',
+                subtotal: 300,
+                tax: 0,
+                total: 300,
+                method: 'Cash',
+                status: 'Completed',
+                items: [{ ...baseProduct, quantity: 2, price: 150 }]
+            }
+        ];
+
+        const metrics = computeProductSalesMetrics(baseProduct, orders, now);
+        expect(metrics.unitsSold30d).toBe(2); // Only site-1 sale should count
+    });
+
     it('indexes catalog metrics efficiently with buildCatalogSalesMetricsIndex', () => {
         const index = buildCatalogSalesMetricsIndex([baseProduct], [], now);
         expect(index.has(baseProduct.id)).toBe(true);

@@ -71,7 +71,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             }}
                             aria-label={t('warehouse.scanBarcodeOrSku')}
                             title={t('warehouse.scanBarcodeOrSku')}
-                            placeholder="Scan barcode / SKU, or search PO, supplier..."
+                            placeholder={t('warehouse.searchReceivePlaceholder') || 'Scan barcode / SKU, or search PO, supplier...'}
                             autoComplete="off"
                             className="w-full h-9 sm:h-12 pl-9 sm:pl-12 pr-8 sm:pr-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-lg sm:rounded-xl text-[var(--theme-text-primary)] font-medium text-xs sm:text-sm focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] focus:outline-none transition-colors placeholder:text-[var(--theme-text-secondary)]/60"
                         />
@@ -80,8 +80,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                 type="button"
                                 onClick={() => setReceiveSearch('')}
                                 className="absolute inset-y-0 right-2 flex items-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer p-1"
-                                title="Clear search"
-                                aria-label="Clear search"
+                                title={t('warehouse.clearSearch') || 'Clear search'}
+                                aria-label={t('warehouse.clearSearch') || 'Clear search'}
                             >
                                 <X size={14} />
                             </button>
@@ -123,7 +123,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         {/* Mobile queue indicator */}
                         <div className="flex items-center gap-1.5 min-w-0">
                             <Truck size={13} className="text-[var(--theme-accent)] shrink-0 sm:hidden" />
-                            <span className="text-xs font-bold text-[var(--theme-text-primary)] md:hidden">Queue</span>
+                            <span className="text-xs font-bold text-[var(--theme-text-primary)] md:hidden">{t('warehouse.queueShort') || 'Queue'}</span>
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                 {filteredReceiveOrders.length}

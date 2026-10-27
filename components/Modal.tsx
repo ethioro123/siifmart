@@ -61,7 +61,15 @@ export default function Modal({
   const isSide = variant === 'side';
 
   const modalContent = (
-    <div className={`fixed inset-0 ${zIndex} flex ${isSide ? 'justify-end' : 'items-center justify-center'} ${mobileFullScreen ? 'p-0 sm:p-6' : 'p-4 sm:p-6'} overflow-hidden print:static print:block print:p-0 print:bg-white`}>
+    <div
+      style={{
+        paddingTop: isSide ? undefined : 'max(1rem, calc(var(--app-top-inset, 0px) + env(safe-area-inset-top, 0px) + 1rem))',
+        paddingBottom: isSide ? undefined : 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 1rem))',
+        paddingLeft: isSide ? undefined : 'max(0.75rem, calc(env(safe-area-inset-left, 0px) + 0.75rem))',
+        paddingRight: isSide ? undefined : 'max(0.75rem, calc(env(safe-area-inset-right, 0px) + 0.75rem))'
+      }}
+      className={`fixed inset-0 ${zIndex} flex ${isSide ? 'justify-end' : 'items-center justify-center'} ${mobileFullScreen ? 'p-0 sm:p-6' : 'p-3 sm:p-6'} overflow-hidden print:static print:block print:p-0 print:bg-white`}
+    >
       {/* Backdrop with blur and darken */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity print:hidden"
@@ -70,8 +78,11 @@ export default function Modal({
 
       {/* Modal Content */}
       <div
-        style={{ backgroundColor: 'var(--theme-bg-panel)' }}
-        className={`relative w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} ${mobileFullScreen ? 'h-[100dvh] sm:h-auto rounded-none sm:rounded-3xl' : 'rounded-3xl'} animate-in fade-in zoom-in duration-200`} bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-[var(--shadow-modal)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : mobileFullScreen ? 'max-h-[100dvh] sm:max-h-[90dvh]' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}
+        style={{
+          backgroundColor: 'var(--theme-bg-panel)',
+          maxHeight: isSide ? '100%' : 'calc(100dvh - var(--app-top-inset, 0px) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 2.5rem)'
+        }}
+        className={`relative w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} ${mobileFullScreen ? 'h-[100dvh] sm:h-auto rounded-none sm:rounded-3xl' : 'rounded-3xl'} animate-in fade-in zoom-in duration-200`} bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-[var(--shadow-modal)] transform transition-all flex flex-col my-auto print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}
       >
 
         {/* Header */}

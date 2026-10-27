@@ -103,6 +103,11 @@ export default function App() {
   const { user, loading } = useStore();
   const { activeSite, cleanupAdminProducts, isDataInitialLoading, loadError, loadingProgress, settings } = useData();
 
+  React.useEffect(() => {
+    const isStaging = import.meta.env.MODE === 'staging';
+    document.documentElement.style.setProperty('--app-top-inset', isStaging ? '1.5rem' : '0px');
+  }, []);
+
   // Sync document title and brand accent color from system configuration
   React.useEffect(() => {
     if (settings?.storeName) {

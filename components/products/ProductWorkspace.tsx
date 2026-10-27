@@ -115,9 +115,26 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
     const inputCls = 'w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm font-mono font-medium text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors';
 
     return createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-5" role="dialog" aria-modal="true" aria-labelledby={titleId} ref={dialogRef}>
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
-            <div className="relative bg-[var(--theme-bg-card)] rounded-3xl shadow-2xl w-full max-w-5xl max-h-[94dvh] flex flex-col border border-[var(--theme-border)] overflow-hidden">
+        <div
+            className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-y-auto"
+            style={{
+                paddingTop: 'max(1rem, calc(var(--app-top-inset, 0px) + env(safe-area-inset-top, 0px) + 1rem))',
+                paddingBottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 1rem))',
+                paddingLeft: 'max(0.75rem, calc(env(safe-area-inset-left, 0px) + 0.75rem))',
+                paddingRight: 'max(0.75rem, calc(env(safe-area-inset-right, 0px) + 0.75rem))'
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            ref={dialogRef}
+        >
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-md" onClick={onClose} />
+            <div
+                className="relative bg-[var(--theme-bg-card)] rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-5xl flex flex-col border border-[var(--theme-border)] overflow-hidden my-auto"
+                style={{
+                    maxHeight: 'calc(100dvh - var(--app-top-inset, 0px) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 2.5rem)'
+                }}
+            >
 
                 <PriceBatchPreview batch={proposals.priceBatch} failures={proposals.batchFailures} sites={sites} currency={dynamicCurrency} pending={isSaving} onConfirm={handleConfirmPrice} onClose={proposals.cancelPricing} />
                 {/* Header */}
