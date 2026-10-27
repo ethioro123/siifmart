@@ -168,6 +168,36 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
         });
     });
 
+    describe('Regional Merchandising Manager (regional_merchandising_manager)', () => {
+        it('authorizes regional merchandising intelligence, price/promo governance, inventory & sales visibility, and merchandising team onboarding', () => {
+            expect(hasPermission('regional_merchandising_manager', 'ACCESS_REGIONAL_OPS')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'ACCESS_PRICING')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'EDIT_PRICE')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'CREATE_PROMOTION')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'APPROVE_PRICE_CHANGE')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'ACCESS_INVENTORY')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'VIEW_SALES_REPORTS')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'ACCESS_EMPLOYEES')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'ADD_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'EDIT_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_merchandising_manager', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(canAccessRoute('regional_merchandising_manager', '/regional-ops')).toBe(true);
+            expect(canAccessRoute('regional_merchandising_manager', '/pricing')).toBe(true);
+            expect(canAccessRoute('regional_merchandising_manager', '/inventory')).toBe(true);
+            expect(canAccessRoute('regional_merchandising_manager', '/sales')).toBe(true);
+            expect(canAccessRoute('regional_merchandising_manager', '/employees')).toBe(true);
+            expect(canEmployRole('regional_merchandising_manager', 'merchandising_specialist')).toBe(true);
+            expect(canEmployRole('regional_merchandising_manager', 'merchandiser')).toBe(true);
+        });
+
+        it('strictly denies physical stock adjustments, PO creation, cashier sales processing, and payroll management', () => {
+            expect(hasPermission('regional_merchandising_manager', 'ADJUST_STOCK')).toBe(false);
+            expect(hasPermission('regional_merchandising_manager', 'CREATE_PO')).toBe(false);
+            expect(hasPermission('regional_merchandising_manager', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('regional_merchandising_manager', 'PROCESS_PAYROLL')).toBe(false);
+        });
+    });
+
     describe('Regional Security Manager (regional_security_manager)', () => {
         it('authorizes system audit inspection, loss prevention logs, and pos telemetry monitoring', () => {
             expect(hasPermission('regional_security_manager', 'VIEW_AUDIT_LOGS')).toBe(true);
