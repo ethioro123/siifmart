@@ -29,23 +29,12 @@ interface ProductDetailsModalProps {
     onEdit?: (product: Product) => void;
 }
 
-const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { label: string; value: React.ReactNode; icon?: any; colorClass?: string; highlight?: boolean }) => {
-    return (
-        <div className={`p-3 rounded-xl flex items-start gap-3 border ${
-            highlight 
-                ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-400/5 dark:border-amber-400/10' 
-                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
-        }`}>
-            {Icon && <Icon size={14} className={`mt-0.5 flex-shrink-0 ${colorClass || 'text-[var(--theme-text-primary)]'}`} />}
-            <div className="space-y-0.5 min-w-0 flex-1">
-                <span className="text-[11px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block">{label}</span>
-                <div className="text-xs font-semibold text-[var(--theme-text-primary)] leading-tight">
-                    {value !== undefined && value !== null && value !== '' ? value : <span className="text-[var(--theme-text-muted)] font-medium">—</span>}
-                </div>
-            </div>
-        </div>
-    );
-};
+const DetailField = ({ label, value }: { label: string; value: React.ReactNode; icon?: React.ElementType; colorClass?: string; highlight?: boolean }) => (
+    <div className="min-w-0 space-y-1.5 py-2">
+        <dt className="text-sm text-[var(--theme-text-secondary)]">{label}</dt>
+        <dd className="text-sm leading-relaxed text-[var(--theme-text-primary)] break-words">{value !== undefined && value !== null && value !== '' ? value : '—'}</dd>
+    </div>
+);
 
 export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ product, isOpen, onClose, currencySymbol, onEdit }) => {
     const { movements, employees, refreshData, deleteProduct, updateProduct, allProducts, sites, activeSite, effectiveCountry, settings } = useData();
@@ -227,19 +216,19 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     );
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Product Profile & Inventory Console" size="xl" footer={modalFooter}>
-            <div className="flex flex-col gap-6 text-[var(--theme-text-primary)]">
+        <Modal isOpen={isOpen} onClose={onClose} title="Product details" size="xl" footer={modalFooter}>
+            <div className="flex flex-col gap-3 text-[var(--theme-text-primary)]">
                 {/* Executive Hero Product Profile Header */}
                 <ProductProfileHeader product={product} showCostPrice={showCostPrice} currencySymbol={activeCurrency} />
 
                 {/* Multi-Site & Store Stock Locations */}
-                <ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} />
+                <details className="border-b border-[var(--theme-border)] pb-4"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Stock locations</summary><ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} /></details>
 
-                <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+                <details className="border-b border-[var(--theme-border)] pb-4 space-y-4"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Product specifications</summary>
                     <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2.5">
                         <div className="flex items-center gap-2">
                             <Info size={14} className="text-[var(--theme-text-secondary)]" />
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Product Specifications</h3>
+                            <h3 className="text-sm font-medium text-[var(--theme-text-primary)]">Product Specifications</h3>
                         </div>
                         <button
                             type="button"
@@ -254,7 +243,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     {(() => {
                         const smartProfile = resolveSmartProductAttributes(product, allProducts, activeCurrency);
                         return (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
                                 <DetailField label="SKU" value={product.sku} icon={Hash} />
                                 <DetailField label="Barcodes" value={barcodeList.length > 0 ? <span className="font-mono">{barcodeList.join(', ')}</span> : null} icon={ScanBarcode} />
                                 <DetailField label="Brand" value={smartProfile.brand} icon={Building2} highlight={Boolean(smartProfile.brand)} />
@@ -289,17 +278,16 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                             </div>
                         );
                     })()}
-                </div>
-
-                <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+                </details>
+                <details className="border-b border-[var(--theme-border)] pb-4 space-y-4"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Pricing details</summary>
                     <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
                         <DollarSign size={14} className="text-[var(--theme-text-secondary)]" />
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Financial & Pricing Details</h3>
+                        <h3 className="text-sm font-medium text-[var(--theme-text-primary)]">Financial & Pricing Details</h3>
                     </div>
                     {(() => {
                         const smartProfile = resolveSmartProductAttributes(product, allProducts, activeCurrency);
                         return (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
                                 <DetailField label="Retail Price" value={`${activeCurrency} ${formatPriceValue(product.price)}`} icon={DollarSign} />
                                 <DetailField label="Unit Price Equiv." value={smartProfile.unitPriceLabel} icon={Tag} highlight={Boolean(smartProfile.unitPriceLabel)} />
                                 <DetailField label="Promo Price" value={salePrice > 0 ? `${activeCurrency} ${formatPriceValue(salePrice)}` : null} icon={Tag} highlight />
@@ -316,16 +304,15 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                             </div>
                         );
                     })()}
-                </div>
+                </details>
 
-                <ProductAttributesPanel product={product} currencySymbol={activeCurrency} />
-
+                <details className="border-b border-[var(--theme-border)] pb-4"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Stock policies and activity</summary>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
                         <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2.5">
                             <div className="flex items-center gap-2">
                                 <Layers size={14} className="text-[var(--theme-text-secondary)]" />
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Stock Policies</h3>
+                                <h3 className="text-sm font-medium text-[var(--theme-text-primary)]">Stock Policies</h3>
                             </div>
                             {canEditThresholds && !isEditingThresholds && (
                                 <button onClick={() => setIsEditingThresholds(true)} className="px-2.5 py-1 text-[11px] font-bold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)] transition-colors cursor-pointer">
@@ -357,7 +344,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                     </div>
                                 </div>
                                 <div className="flex gap-2 justify-end pt-1">
-                                    <button onClick={() => setIsEditingThresholds(false)} className="px-3 py-1.5 text-[11px] font-semibold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] rounded-xl border border-[var(--theme-border)] transition-colors cursor-pointer">Cancel</button>
+                                    <button onClick={() => setIsEditingThresholds(false)} className="px-3 py-1.5 text-sm font-normal uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] rounded-xl border border-[var(--theme-border)] transition-colors cursor-pointer">Cancel</button>
                                     <button onClick={async () => {
                                         setIsSaving(true);
                                         try {
@@ -428,7 +415,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
                         <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
                             <TrendingUp size={14} className="text-[var(--theme-text-secondary)]" />
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Restock Log & Audits</h3>
+                            <h3 className="text-sm font-medium text-[var(--theme-text-primary)]">Restock Log & Audits</h3>
                         </div>
                         {recentReceives.length > 0 ? (
                             <div className="space-y-3 pl-2 border-l border-[var(--theme-border)] ml-2 max-h-[140px] overflow-y-auto">
@@ -447,11 +434,12 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     </div>
                 </div>
 
-                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-[11px] leading-relaxed font-mono">
-                    <span className="text-[var(--theme-text-muted)] font-bold uppercase block mb-1">Catalog Description Spec:</span>
+                </details>
+                <details className="border-b border-[var(--theme-border)] pb-4 text-sm leading-relaxed"><summary className="min-h-[44px] cursor-pointer py-3 text-base font-medium focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Description</summary>
+
                     <span className="text-[var(--theme-text-primary)] font-bold">{systemDesc || '—'}</span>
-                    {customAttrs?.descriptive?.keyFeatures && <p className="mt-2 text-[var(--theme-text-secondary)] italic">Features: {customAttrs.descriptive.keyFeatures}</p>}
-                </div>
+                    {customAttrs?.descriptive?.keyFeatures && <p className="mt-2 text-[var(--theme-text-secondary)]">{customAttrs.descriptive.keyFeatures}</p>}
+                </details>
             </div>
             {product && (
                 <SmartUnitConfigModal
