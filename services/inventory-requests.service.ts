@@ -1,7 +1,23 @@
 import { supabase } from '../lib/supabase';
-import type { PendingInventoryChange } from '../types';
+import type { PendingInventoryChange, Product } from '../types';
 import { productEditFields } from '../utils/productEditApproval';
 import { logger } from '../utils/logger';
+
+export interface MerchandisingRequestsResult {
+    data: PendingInventoryChange[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    hasMore: boolean;
+}
+
+export interface GetMerchandisingOptions {
+    page?: number;
+    limit?: number;
+    status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'all';
+    regionCode?: string;
+}
 
 export const inventoryRequestsService = {
     async rejectProductEdit(requestId: string, reason: string): Promise<void> {
@@ -23,25 +39,111 @@ export const inventoryRequestsService = {
         if (error) throw error;
     },
 
-    async getMerchandisingPending(countryCode: string, limit = 100): Promise<PendingInventoryChange[]> {
-        const { data, error } = await supabase.from('inventory_requests')
-            .select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_at,status,proposed_changes,adjustment_reason,finance_approved_by_employee_id,requested_by_employee_id,product_edit_approvals')
+    async getMerchandisingRequests(
+        countryCode: string,
+        options: GetMerchandisingOptions = {}
+    ): Promise<MerchandisingRequestsResult> {
+        const page = Math.max(1, options.page || 1);
+        const pageSize = Math.max(1, Math.min(100, options.limit || 25));
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+
+        let query = supabase.from('inventory_requests')
+            .select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_at,status,proposed_changes,adjustment_reason,finance_approved_by_employee_id,requested_by_employee_id,product_edit_approvals,rejection_reason,rejected_by,rejected_at,approved_by,approved_at', { count: 'exact' })
             .eq('country_code', countryCode.toUpperCase())
-            .eq('status', 'pending')
-            .eq('change_type', 'edit')
+            .eq('change_type', 'edit');
+
+        if (options.status && options.status !== 'all') {
+            if (options.status === 'completed') {
+                query = query.in('status', ['approved', 'rejected']);
+            } else {
+                query = query.eq('status', options.status);
+            }
+        } else if (!options.status) {
+            query = query.eq('status', 'pending');
+        }
+
+        if (options.regionCode) {
+            query = query.eq('region_code', options.regionCode);
+        }
+
+        const { data, error, count } = await query
             .order('requested_at', { ascending: false })
-            .limit(limit);
+            .range(from, to);
+
         if (error) throw error;
-        return (data || []).map((r: any) => ({
-            id: r.id, productId: r.product_id, productName: r.product_name,
-            productSku: r.product_sku, siteId: r.site_id,
-            countryCode: r.country_code, regionCode: r.region_code,
-            changeType: r.change_type, requestedBy: r.requested_by,
-            requestedAt: r.requested_at, status: r.status,
-            proposedChanges: r.proposed_changes, adjustmentReason: r.adjustment_reason,
+
+        const totalCount = count || 0;
+        const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+        const hasMore = page < totalPages;
+
+        const rawItems = data || [];
+        const productIds = Array.from(new Set(rawItems.map((r: any) => r.product_id).filter(Boolean)));
+        const productMap = new Map<string, Partial<Product>>();
+
+        if (productIds.length > 0) {
+            const { data: prods } = await supabase.from('products')
+                .select('id,name,sku,price,cost_price,sale_price,is_on_sale,stock,min_stock,max_stock,category,brand,image,description')
+                .in('id', productIds);
+
+            (prods || []).forEach((p: any) => {
+                productMap.set(p.id, {
+                    id: p.id,
+                    name: p.name,
+                    sku: p.sku,
+                    price: p.price,
+                    costPrice: p.cost_price,
+                    salePrice: p.sale_price,
+                    isOnSale: p.is_on_sale,
+                    stock: p.stock,
+                    minStock: p.min_stock,
+                    maxStock: p.max_stock,
+                    category: p.category,
+                    brand: p.brand,
+                    image: p.image,
+                    description: p.description
+                });
+            });
+        }
+
+        const items: PendingInventoryChange[] = rawItems.map((r: any) => ({
+            id: r.id,
+            productId: r.product_id,
+            productName: r.product_name,
+            productSku: r.product_sku,
+            siteId: r.site_id,
+            countryCode: r.country_code,
+            regionCode: r.region_code,
+            changeType: r.change_type,
+            requestedBy: r.requested_by,
+            requestedAt: r.requested_at,
+            status: r.status,
+            proposedChanges: r.proposed_changes,
+            adjustmentReason: r.adjustment_reason,
             financeApprovedByEmployeeId: r.finance_approved_by_employee_id,
-            requestedByEmployeeId: r.requested_by_employee_id, productEditApprovals: r.product_edit_approvals
+            requestedByEmployeeId: r.requested_by_employee_id,
+            productEditApprovals: r.product_edit_approvals,
+            rejectionReason: r.rejection_reason,
+            rejectedBy: r.rejected_by,
+            rejectedAt: r.rejected_at,
+            approvedBy: r.approved_by,
+            approvedAt: r.approved_at,
+            currentProduct: r.product_id ? productMap.get(r.product_id) : undefined
         }));
+
+        return {
+            data: items,
+            totalCount,
+            page,
+            pageSize,
+            totalPages,
+            hasMore
+        };
+    },
+
+    async getMerchandisingPending(countryCode: string, limit = 100): Promise<PendingInventoryChange[]> {
+        const result = await this.getMerchandisingRequests(countryCode, { limit, status: 'pending' });
+        return result.data;
     },
     async getAll(siteId?: string, countryCode?: string, limit: number = 25, regionCode?: string): Promise<PendingInventoryChange[]> {
         // RULE 10: 25-record shelf limit

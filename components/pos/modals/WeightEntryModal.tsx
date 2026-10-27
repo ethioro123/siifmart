@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Scale, X } from 'lucide-react';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatPriceValue } from '../../../utils/formatting';
 import { getSellUnit } from '../../../utils/units';
@@ -12,6 +13,7 @@ interface WeightEntryModalProps {
 
 /** Inline weight/quantity entry modal for decimal-unit products */
 export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onConfirm, onCancel }) => {
+    const { t } = useLanguage();
     const [value, setValue] = useState('');
     const unit = getSellUnit(product.unit);
     const effectivePrice = product.isOnSale && product.salePrice ? product.salePrice : product.price;
@@ -33,7 +35,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                         <div className="min-w-0">
                             <h3 className="text-[var(--theme-text-primary)] text-sm font-bold leading-tight truncate">{product.name}</h3>
                             <p className="text-xs text-[var(--theme-text-secondary)] font-medium truncate">
-                                {CURRENCY_SYMBOL} {formatPriceValue(effectivePrice)} per {unit.shortLabel}
+                                {CURRENCY_SYMBOL} {formatPriceValue(effectivePrice)} {t('pos.perUnit', { unit: unit.shortLabel })}
                             </p>
                         </div>
                     </div>
@@ -45,7 +47,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                 {/* Input */}
                 <div className="p-5">
                     <label className="text-xs text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block mb-2">
-                        Enter {unit.label}
+                        {t('pos.enterUnit', { unit: unit.label })}
                     </label>
                     <div className="flex items-center gap-2">
                         <input
@@ -97,7 +99,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                     {/* Line total preview */}
                     {numericValue > 0 && (
                         <div className="mt-4 p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex justify-between items-center shadow-xs">
-                            <span className="text-xs text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider">Line Total</span>
+                            <span className="text-xs text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider">{t('pos.lineTotal')}</span>
                             <span className="text-lg text-[var(--theme-primary)] font-bold tabular-nums font-mono">
                                 {CURRENCY_SYMBOL} {lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
@@ -111,14 +113,14 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                         onClick={onCancel}
                         className="flex-1 py-3 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl font-bold text-xs transition-colors border border-[var(--theme-border)] cursor-pointer shadow-xs"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         onClick={() => numericValue > 0 && onConfirm(numericValue)}
                         disabled={numericValue <= 0}
                         className="flex-1 py-3 bg-[var(--theme-primary)] disabled:opacity-30 text-[var(--theme-primary-text)] border border-transparent disabled:cursor-not-allowed rounded-xl font-bold text-xs transition-colors uppercase tracking-wider cursor-pointer shadow-xs"
                     >
-                        Add to Cart
+                        {t('pos.addToCart')}
                     </button>
                 </div>
             </div>

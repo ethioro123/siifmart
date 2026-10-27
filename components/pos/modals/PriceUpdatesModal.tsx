@@ -50,14 +50,14 @@ export const PriceUpdatesModal: React.FC = () => {
         <Modal
             isOpen={isPriceUpdatesModalOpen}
             onClose={() => setIsPriceUpdatesModalOpen(false)}
-            title="Product Price History"
+            title={t('pos.productPriceHistory')}
             size="lg"
         >
             <div className="p-4 space-y-4">
                 <div className="flex flex-wrap justify-between items-center gap-2 text-sm text-[var(--theme-text-secondary)]">
-                    <p>Full history for this store, newest first.</p>
+                    <p>{t('pos.fullHistoryForStore')}</p>
                     <span className="px-2.5 py-1 rounded-full bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-xs font-semibold">
-                        {unreviewedPriceUpdateCount} unreviewed in the last 7 days
+                        {t('pos.unreviewedInLast7Days', { count: unreviewedPriceUpdateCount })}
                     </span>
                 </div>
 
@@ -78,19 +78,19 @@ export const PriceUpdatesModal: React.FC = () => {
                 {productPriceHistory.length === 0 ? (
                     <div className="text-center py-10 text-[var(--theme-text-muted)] font-medium">
                         <CheckCheck size={40} className="mx-auto mb-2 opacity-40 text-[var(--theme-primary)]" aria-hidden="true" />
-                        <p className="text-sm">{isPriceHistoryLoading ? 'Loading price history…' : 'No price changes have been recorded for this store yet.'}</p>
+                        <p className="text-sm">{isPriceHistoryLoading ? t('pos.loadingPriceHistory') : t('pos.noPriceChangesRecorded')}</p>
                     </div>
                 ) : (
                     <div className="max-h-[60vh] overflow-auto border border-[var(--theme-border)] rounded-xl">
                         <table className="w-full min-w-[760px] text-left bg-transparent">
                             <thead className="bg-[var(--theme-thead-bg)] text-xs uppercase text-[var(--theme-thead-text)] sticky top-0 font-bold border-b border-[var(--theme-border)]">
                                 <tr>
-                                    <th className="p-3 tracking-wider">Product</th>
-                                    <th className="p-3 text-right tracking-wider">Previous POS price</th>
-                                    <th className="p-3 text-right tracking-wider">New POS price</th>
-                                    <th className="p-3 tracking-wider">Changed</th>
-                                    <th className="p-3 tracking-wider">Changed by</th>
-                                    <th className="p-3 tracking-wider">Review</th>
+                                    <th className="p-3 tracking-wider">{t('pos.product')}</th>
+                                    <th className="p-3 text-right tracking-wider">{t('pos.previousPosPrice')}</th>
+                                    <th className="p-3 text-right tracking-wider">{t('pos.newPosPrice')}</th>
+                                    <th className="p-3 tracking-wider">{t('pos.changed')}</th>
+                                    <th className="p-3 tracking-wider">{t('pos.changedBy')}</th>
+                                    <th className="p-3 tracking-wider">{t('pos.review')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[var(--theme-border)]">
@@ -116,7 +116,7 @@ export const PriceUpdatesModal: React.FC = () => {
                                             <span className={`inline-flex px-2 py-1 rounded-full border text-[10px] font-bold uppercase whitespace-nowrap ${entry.reviewed_by_me
                                                 ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]'
                                                 : 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]'}`}>
-                                                {entry.reviewed_by_me ? 'Reviewed' : 'New'}
+                                                {entry.reviewed_by_me ? t('pos.reviewed') : t('pos.new')}
                                             </span>
                                         </td>
                                     </tr>
@@ -129,9 +129,9 @@ export const PriceUpdatesModal: React.FC = () => {
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[var(--theme-border)]">
                     {hasMorePriceHistory ? (
                         <Button variant="secondary" onClick={loadMorePriceHistory} disabled={isLoadingMorePriceHistory}>
-                            {isLoadingMorePriceHistory ? 'Loading…' : 'Load older changes'}
+                            {isLoadingMorePriceHistory ? t('common.loading') : t('pos.loadOlderChanges')}
                         </Button>
-                    ) : <span className="text-xs text-[var(--theme-text-muted)]">End of price history</span>}
+                    ) : <span className="text-xs text-[var(--theme-text-muted)]">{t('pos.endOfPriceHistory')}</span>}
                     <div className="flex gap-3 ml-auto">
                         <Button variant="secondary" onClick={() => setIsPriceUpdatesModalOpen(false)}>
                             {t('common.close')}
@@ -139,7 +139,7 @@ export const PriceUpdatesModal: React.FC = () => {
                         {pendingIds.length > 0 && (
                             <Button variant="primary" onClick={handleMarkReviewed} disabled={isMarkingReviewed}>
                                 <CheckCheck size={16} />
-                                {isMarkingReviewed ? 'Saving…' : 'Mark this page reviewed'}
+                                {isMarkingReviewed ? t('common.loading') : t('pos.markThisPageReviewed')}
                             </Button>
                         )}
                     </div>
