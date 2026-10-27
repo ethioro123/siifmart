@@ -53,7 +53,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
 
     const ITEMS_PER_PAGE = 20;
     const isCEO = user?.role === 'group_ceo';
-    const isProcurementManager = ['country_commercial_director', 'regional_procurement_manager', 'group_ceo'].includes(user?.role || '');
+    const isProcurementManager = ['country_commercial_director', 'regional_procurement_manager', 'regional_operations_manager', 'country_managing_director', 'country_operations_director', 'group_ceo'].includes(user?.role || '');
     const isOperationalDirector = ['regional_operations_manager', 'regional_procurement_manager', 'country_operations_director'].includes(user?.role || '');
     const canApprove = isProcurementManager;
 

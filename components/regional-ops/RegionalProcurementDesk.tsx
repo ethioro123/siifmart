@@ -400,14 +400,21 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                     </div>
 
                     {isAutonomous ? (
-                      <button
-                        type="button"
-                        onClick={() => handleApproveExpense(expense)}
-                        className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Authorize Petty Cash</span>
-                      </button>
+                      canApprovePettyCash ? (
+                        <button
+                          type="button"
+                          onClick={() => handleApproveExpense(expense)}
+                          className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Authorize Petty Cash</span>
+                        </button>
+                      ) : (
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          Awaiting Regional Finance / Ops
+                        </span>
+                      )
                     ) : (
                       <span className="text-xs text-purple-600 dark:text-purple-400 font-semibold flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />

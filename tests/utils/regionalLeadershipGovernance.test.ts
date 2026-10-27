@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { hasPermission, authService } from '../../utils/permissions';
 import { canAccessRoute, canAccessSite } from '../../services/auth.rbac';
 import { canEmployRole } from '../../utils/roles';
+import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
 
 describe('Regional Leadership & Field Supervisors Governance Suite', () => {
     describe('Regional Operations Manager (regional_operations_manager)', () => {
@@ -58,6 +59,51 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
             expect(canEmployRole('area_operations_manager', 'store_manager')).toBe(true);
             expect(canEmployRole('area_operations_manager', 'warehouse_manager')).toBe(true);
             expect(canEmployRole('area_operations_manager', 'regional_operations_manager')).toBe(false);
+        });
+    });
+
+    describe('Regional Procurement Manager (regional_procurement_manager)', () => {
+        it('authorizes procurement, PO creation/approval, demand sales reports, and team management while stripping dock self-receiving and PO hard-delete', () => {
+            expect(canAccessRoute('regional_procurement_manager', '/regional-ops')).toBe(true);
+            expect(canAccessRoute('regional_procurement_manager', '/procurement')).toBe(true);
+            expect(canAccessRoute('regional_procurement_manager', '/inventory')).toBe(true);
+            expect(canAccessRoute('regional_procurement_manager', '/sales')).toBe(true);
+            expect(canAccessRoute('regional_procurement_manager', '/employees')).toBe(true);
+            expect(hasPermission('regional_procurement_manager', 'CREATE_PO')).toBe(true);
+            expect(hasPermission('regional_procurement_manager', 'APPROVE_PO')).toBe(true);
+            expect(hasPermission('regional_procurement_manager', 'MANAGE_SUPPLIERS')).toBe(true);
+            expect(hasPermission('regional_procurement_manager', 'RECEIVE_PO')).toBe(false);
+            expect(hasPermission('regional_procurement_manager', 'DELETE_PO')).toBe(false);
+            expect(authService.checkPermission('regional_procurement_manager', 'procurement.receive')).toBe(false);
+            expect(authService.checkPermission('regional_procurement_manager', 'procurement.delete_po')).toBe(false);
+            expect(authService.checkPermission('regional_procurement_manager', 'employees.view')).toBe(true);
+        });
+
+        it('enforces Maker-Checker dual control on autonomous PO approval and blocks self-approval', () => {
+            const regions = [{ id: 'reg-1', code: 'ET-OR', name: 'Oromia', country: 'ET', status: 'active', autonomous_po_limit: 500000 }] as any[];
+            const sites = [{ id: 'site-wh-1', name: 'Adama DC', type: 'Warehouse', country: 'ET', region_code: 'ET-OR' }] as any[];
+
+            const selfCreatedPolicy = getPoApprovalPolicy({
+                po: { id: 'po-1', siteId: 'site-wh-1', region_code: 'ET-OR', status: 'Pending', totalAmount: 120000, createdBy: 'Bekele Tadesse' } as any,
+                role: 'regional_procurement_manager',
+                actorName: 'Bekele Tadesse',
+                actorRegionCode: 'ET-OR',
+                regions,
+                sites
+            });
+            expect(selfCreatedPolicy.isCreator).toBe(true);
+            expect(selfCreatedPolicy.canApprove).toBe(false);
+
+            const peerCreatedPolicy = getPoApprovalPolicy({
+                po: { id: 'po-2', siteId: 'site-wh-1', region_code: 'ET-OR', status: 'Pending', totalAmount: 120000, createdBy: 'Almaz Buyer' } as any,
+                role: 'regional_procurement_manager',
+                actorName: 'Bekele Tadesse',
+                actorRegionCode: 'ET-OR',
+                regions,
+                sites
+            });
+            expect(peerCreatedPolicy.isCreator).toBe(false);
+            expect(peerCreatedPolicy.canApprove).toBe(true);
         });
     });
 
