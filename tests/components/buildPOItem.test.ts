@@ -14,6 +14,10 @@ describe('PO item preparation', () => {
         expect(result.errors).toBeUndefined();
         expect(result.item).toMatchObject({ retailPrice: 0, brand: '', unitCost: 25, totalCost: 250 });
     });
+    it('preserves decimal supplier costs and line totals', async () => {
+        const result = await buildPOItem({ ...input, currentCost: 25.23, currentQty: 3 });
+        expect(result.item).toMatchObject({ unitCost: 25.23, totalCost: 75.69 });
+    });
     it('requires a brand or an explicit unbranded choice', async () => {
         const result = await buildPOItem({ ...input, customAttributes: { ...input.customAttributes, identity: {} } });
         expect(result.errors?.brand).toBeTruthy();
