@@ -21,7 +21,11 @@ export interface GetMerchandisingOptions {
 
 export const inventoryRequestsService = {
     async rejectProductEdit(requestId: string, reason: string): Promise<void> {
-        const { error } = await supabase.rpc('reject_product_edit', { p_request_id: requestId, p_reason: reason });
+        const trimmed = (reason || '').trim();
+        if (!trimmed) {
+            throw new Error('A rejection reason is required');
+        }
+        const { error } = await supabase.rpc('reject_product_edit', { p_request_id: requestId, p_reason: trimmed });
         if (error) throw error;
     },
     async approveProductEdit(requestId: string): Promise<{ applied: boolean; approvalCount: number }> {

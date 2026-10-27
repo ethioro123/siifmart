@@ -268,7 +268,8 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          const changes: PriceChangeInput[] = [];
          products.forEach(p => {
             if (matchRuleProduct(p, rule)) {
-               const newPrice = parseFloat(calculateRulePrice(p, rule).toFixed(2));
+               // Merchandising Whole-Number Rule: Prices must strictly be integers rounded to the nearest whole number
+               const newPrice = Math.round(calculateRulePrice(p, rule));
                if (newPrice > 0 && newPrice !== p.price) {
                   changes.push({ product: p, proposal: { price: newPrice, costPrice: p.costPrice, salePrice: p.salePrice, isOnSale: p.isOnSale } });
                }
@@ -308,7 +309,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          const matchingRule = activeRules.find(r => matchRuleProduct(p, r));
          if (matchingRule) {
             impactedCount++;
-            const newPrice = calculateRulePrice(p, matchingRule);
+            const newPrice = Math.round(calculateRulePrice(p, matchingRule));
             // Price elasticity multiplier: price drop increases volume, price hike softens volume
             const elasticityFactor = newPrice < p.price ? 1.25 : 0.88;
             const projectedSales = Math.round(estSales * elasticityFactor);

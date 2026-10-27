@@ -1,6 +1,7 @@
 import React from 'react';
 import { Filter, X, RotateCcw, Tag, Scale, Zap, Activity, Clock, Layers, Folder, Coins, Sparkles, Check } from 'lucide-react';
 import { usePOS } from '../POSContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
 
 interface POSFilterSidebarProps {
@@ -16,6 +17,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
     availableBrands,
     activeFiltersCount
 }) => {
+    const { t } = useLanguage();
     const {
         categories,
         selectedCategory,
@@ -73,7 +75,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                         <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                             <Filter size={16} />
                         </div>
-                        <h2 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">Filters & Sort</h2>
+                        <h2 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">{t('pos.filtersAndSort')}</h2>
                         {activeFiltersCount > 0 && (
                             <span className="bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[11px] font-bold px-2 py-0.5 rounded-full">
                                 {activeFiltersCount}
@@ -95,13 +97,13 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                     {/* Department Selector */}
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Department</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('pos.department')}</label>
                             {selectedDepartment !== 'All' && (
                                 <button
                                     onClick={() => setSelectedDepartment('All')}
                                     className="text-xs font-bold text-[var(--theme-primary)] hover:underline cursor-pointer"
                                 >
-                                    Reset to All
+                                    {t('pos.resetToAll')}
                                 </button>
                             )}
                         </div>
@@ -125,13 +127,13 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                     {categories.length > 1 && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Category</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('common.category')}</label>
                                 {selectedCategory !== 'All' && (
                                     <button
                                         onClick={() => setSelectedCategory('All')}
                                         className="text-xs font-bold text-[var(--theme-primary)] hover:underline cursor-pointer"
                                     >
-                                        Reset to All
+                                        {t('pos.resetToAll')}
                                     </button>
                                 )}
                             </div>
@@ -154,7 +156,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
 
                     {/* Sort Options */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Sort Products By</label>
+                        <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('pos.sortProductsBy')}</label>
                         <div className="grid grid-cols-2 gap-2">
                             {[
                                 { id: 'default', label: 'Default' },
@@ -182,25 +184,25 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
 
                     {/* Price Range Filter */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Price Range</label>
+                        <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('pos.priceRange')}</label>
                         <div className="flex items-center gap-3">
                             <div className="flex-1 flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2">
                                 <span className="text-[var(--theme-text-muted)] text-xs font-bold mr-1.5">{CURRENCY_SYMBOL}</span>
                                 <input
                                     type="number"
-                                    placeholder="Min"
+                                    placeholder={t('pos.minPrice')}
                                     aria-label="Minimum Price"
                                     className="bg-transparent border-none w-full text-xs font-bold text-[var(--theme-text-primary)] outline-none"
                                     value={minPriceFilter}
                                     onChange={(e) => setMinPriceFilter(e.target.value)}
                                 />
                             </div>
-                            <span className="text-[var(--theme-text-secondary)] text-xs font-bold">to</span>
+                            <span className="text-[var(--theme-text-secondary)] text-xs font-bold">{t('common.rangeSeparator')}</span>
                             <div className="flex-1 flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2">
                                 <span className="text-[var(--theme-text-muted)] text-xs font-bold mr-1.5">{CURRENCY_SYMBOL}</span>
                                 <input
                                     type="number"
-                                    placeholder="Max"
+                                    placeholder={t('pos.maxPrice')}
                                     aria-label="Maximum Price"
                                     className="bg-transparent border-none w-full text-xs font-bold text-[var(--theme-text-primary)] outline-none"
                                     value={maxPriceFilter}
@@ -241,7 +243,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
 
                     {/* Velocity Options */}
                     <div className="space-y-2">
-                        <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">Sales Velocity</label>
+                        <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('pos.salesVelocity')}</label>
                         <div className="flex gap-2">
                             {[
                                 { id: 'Fast', label: 'Fast', icon: Zap, color: 'text-amber-500' },
@@ -268,17 +270,17 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
 
                     {/* Stock Status Switch */}
                     <div className="space-y-2">
-                        <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">Stock Availability</label>
+                        <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('pos.stockAvailability')}</label>
                         <select
                             value={stockStatusFilter}
                             onChange={(e) => setStockStatusFilter(e.target.value as any)}
                             aria-label="Stock Availability Selector"
                             className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer tracking-tight"
                         >
-                            <option value="all">Show All Items</option>
-                            <option value="in_stock">In Stock Only</option>
-                            <option value="low_stock">Low Stock Alerts Only</option>
-                            <option value="out_of_stock">Out of Stock Only</option>
+                            <option value="all">{t('pos.showAllItems')}</option>
+                            <option value="in_stock">{t('pos.inStockOnly')}</option>
+                            <option value="low_stock">{t('pos.lowStockAlertsOnly')}</option>
+                            <option value="out_of_stock">{t('pos.outOfStockOnly')}</option>
                         </select>
                     </div>
 
@@ -292,7 +294,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                 <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
                                     <Tag className="w-3.5 h-3.5" />
                                 </div>
-                                <span>Only Promotional Items</span>
+                                <span>{t('pos.onlyPromotionalItems')}</span>
                             </span>
                             <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors ${onSaleOnly ? 'bg-rose-500' : 'bg-[var(--theme-border)]'}`}>
                                 <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${onSaleOnly ? 'translate-x-3.5' : 'translate-x-0'}`} />
@@ -307,7 +309,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                 <div className="w-7 h-7 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0">
                                     <Scale className="w-3.5 h-3.5" />
                                 </div>
-                                <span>Competitor Price-Matched</span>
+                                <span>{t('pos.competitorPriceMatched')}</span>
                             </span>
                             <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors ${competitorMatchedOnly ? 'bg-[var(--theme-primary)]' : 'bg-[var(--theme-border)]'}`}>
                                 <div className={`w-3.5 h-3.5 rounded-full bg-[var(--theme-primary-text)] transition-transform ${competitorMatchedOnly ? 'translate-x-3.5' : 'translate-x-0'}`} />
@@ -323,13 +325,13 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                         className="flex-1 py-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs rounded-2xl transition-all border border-[var(--theme-border)] flex items-center justify-center gap-2 active:scale-95 cursor-pointer tracking-tight shadow-xs"
                     >
                         <RotateCcw size={13} />
-                        <span>Reset All</span>
+                        <span>{t('pos.resetAll')}</span>
                     </button>
                     <button
                         onClick={onClose}
                         className="flex-1 py-3.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-semibold text-xs rounded-2xl transition-all shadow-xs active:scale-95 cursor-pointer tracking-tight"
                     >
-                        Apply Filters
+                        {t('pos.applyFilters')}
                     </button>
                 </div>
             </div>

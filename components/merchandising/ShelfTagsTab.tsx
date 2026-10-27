@@ -201,8 +201,8 @@ export const ShelfTagsTab: React.FC = () => {
                             <span className="absolute left-3 top-2 text-xs text-[var(--theme-text-secondary)]">{currencySymbol}</span>
                             <input
                                 type="number"
-                                step="0.01"
-                                placeholder="0.00"
+                                step="1"
+                                placeholder="0"
                                 value={auditShelfPrice}
                                 onChange={e => setAuditShelfPrice(e.target.value)}
                                 className="w-full pl-8 pr-3 py-2 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl text-xs font-mono text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)]"

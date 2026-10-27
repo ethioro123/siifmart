@@ -100,7 +100,7 @@ export const ForecastTab: React.FC = () => {
                quantity: suggestedBuy,
                unitCost: unitCost,
                totalCost: Math.round(suggestedBuy * unitCost * 100) / 100,
-               retailPrice: product.price || Math.round(unitCost * 1.3 * 100) / 100,
+               retailPrice: product.price ? Math.round(product.price) : Math.round(unitCost * 1.3),
                identityType: 'known',
                category: product.category || 'General',
                brand: product.brand,

@@ -25,7 +25,7 @@ export const PrintReceiptModal: React.FC = () => {
         <Modal
             isOpen={isReceiptModalOpen}
             onClose={handleCloseReceipt}
-            title="Payment Success"
+            title={t('pos.paymentSuccess')}
             size="md"
         >
             <div className="flex flex-col items-center py-6 animate-in zoom-in-95 duration-300 relative overflow-hidden">

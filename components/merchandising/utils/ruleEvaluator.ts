@@ -33,15 +33,16 @@ export const calculateRulePrice = (p: Product, rule: PricingRule): number => {
    const val = rule.value || 0;
    const cost = p.costPrice || (p.price * 0.7);
 
+   let calculatedPrice = p.price;
    if (action.includes('Decrease')) {
-      return Math.max(cost, p.price * (1 - (val / 100)));
-   }
-   if (action.includes('Increase')) {
-      return p.price * (1 + (val / 100));
-   }
-   if (action.includes('Margin')) {
+      calculatedPrice = Math.max(cost, p.price * (1 - (val / 100)));
+   } else if (action.includes('Increase')) {
+      calculatedPrice = p.price * (1 + (val / 100));
+   } else if (action.includes('Margin')) {
       const targetMargin = Math.min(90, Math.max(5, val));
-      return cost / (1 - (targetMargin / 100));
+      calculatedPrice = cost / (1 - (targetMargin / 100));
    }
-   return p.price;
+
+   // Merchandising Whole-Number Invariant: Never allow fractions. Always round to nearest whole number.
+   return Math.round(calculatedPrice);
 };

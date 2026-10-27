@@ -23,7 +23,7 @@ export interface LanguageOption {
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
     country: Country;
     countryProfile: CountryProfile;
     isKenya: boolean;
@@ -111,7 +111,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         return formatLocalizedPrice(amount, currency);
     };
 
-    const t = (path: string): string => {
+    const t = (path: string, params?: Record<string, string | number>): string => {
         const keys = path.split('.');
         let current: any = TRANSLATIONS;
 
@@ -122,16 +122,20 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
             current = current[key];
         }
 
+        let result = path;
         if (typeof current === 'object' && current[language]) {
-            return current[language];
+            result = current[language];
+        } else if (typeof current === 'object' && current['en']) {
+            result = current['en'];
         }
 
-        // Fallback to English if specific language missing
-        if (typeof current === 'object' && current['en']) {
-            return current['en'];
+        if (params && typeof result === 'string') {
+            for (const [paramKey, paramVal] of Object.entries(params)) {
+                result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramVal));
+            }
         }
 
-        return path;
+        return result;
     };
 
     return (
@@ -156,7 +160,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
 const fallbackLanguageContext: LanguageContextType = {
     language: 'en',
     setLanguage: () => {},
-    t: (path: string): string => {
+    t: (path: string, params?: Record<string, string | number>): string => {
         const keys = path.split('.');
         let current: any = TRANSLATIONS;
         for (const key of keys) {
@@ -165,10 +169,16 @@ const fallbackLanguageContext: LanguageContextType = {
             }
             current = current[key];
         }
+        let result = path;
         if (typeof current === 'object' && current['en']) {
-            return current['en'];
+            result = current['en'];
         }
-        return path;
+        if (params && typeof result === 'string') {
+            for (const [paramKey, paramVal] of Object.entries(params)) {
+                result = result.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramVal));
+            }
+        }
+        return result;
     },
     country: 'ET',
     countryProfile: getCountryProfile('ET'),

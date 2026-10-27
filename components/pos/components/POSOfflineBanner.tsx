@@ -1,8 +1,10 @@
 import React from 'react';
 import { WifiOff, RefreshCw, Zap, CheckCircle2 } from 'lucide-react';
 import { useData } from '../../../contexts/DataContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 export const POSOfflineBanner: React.FC = () => {
+    const { t } = useLanguage();
     const { posSyncStatus, posPendingSyncCount, triggerSync } = useData();
     const isOffline = posSyncStatus === 'offline' || !navigator.onLine;
     const hasPending = (posPendingSyncCount || 0) > 0;
@@ -33,14 +35,14 @@ export const POSOfflineBanner: React.FC = () => {
 
                 <div className="flex items-center gap-2">
                     <span className="font-bold uppercase tracking-wider text-xs px-2 py-0.5 rounded-md bg-black/10 dark:bg-white/10">
-                        {posSyncStatus === 'syncing' ? 'Sync in progress' : isOffline ? 'Offline Terminal' : 'Ready to Sync'}
+                        {posSyncStatus === 'syncing' ? t('pos.syncInProgress') : isOffline ? t('pos.offlineTerminal') : t('pos.readyToSync')}
                     </span>
                     <span>
                         {posSyncStatus === 'syncing'
-                            ? `Uploading ${posPendingSyncCount || 0} queued offline transaction${posPendingSyncCount !== 1 ? 's' : ''} to cloud...`
+                            ? t('pos.uploadingQueuedTransactions').replace('{count}', String(posPendingSyncCount || 0))
                             : isOffline
-                            ? `POS running offline. Barcode scanning, receipt printing, and sales are fully operational.`
-                            : `Network reconnected. ${posPendingSyncCount || 0} offline transaction${posPendingSyncCount !== 1 ? 's' : ''} ready to sync.`}
+                            ? t('pos.posRunningOffline')
+                            : t('pos.networkReconnected').replace('{count}', String(posPendingSyncCount || 0))}
                     </span>
                 </div>
             </div>
@@ -48,7 +50,7 @@ export const POSOfflineBanner: React.FC = () => {
             <div className="flex items-center gap-3">
                 {hasPending && (
                     <span className="text-xs font-mono bg-black/10 dark:bg-white/10 px-2.5 py-0.5 rounded-full font-bold">
-                        {posPendingSyncCount} Queued
+                        {posPendingSyncCount} {t('pos.queued')}
                     </span>
                 )}
                 {navigator.onLine && (
@@ -58,7 +60,7 @@ export const POSOfflineBanner: React.FC = () => {
                         className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                     >
                         <RefreshCw size={13} className={posSyncStatus === 'syncing' ? 'animate-spin' : ''} />
-                        Sync Now
+                        {t('pos.syncNow')}
                     </button>
                 )}
             </div>

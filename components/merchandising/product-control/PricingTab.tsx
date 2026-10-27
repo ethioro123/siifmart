@@ -73,10 +73,10 @@ export const PricingTab: React.FC<Props> = ({
                 <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1.5">Retail Price</label>
                 <div className="relative">
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-accent)] font-semibold font-mono">{currencySymbol}</span>
-                    <input type="number" min="0" step="0.01" value={pricingCfg.price}
+                    <input type="number" min="0" step="1" value={pricingCfg.price}
                         aria-label="Retail Price"
                         title="Retail Price"
-                        onChange={e => setPricingCfg(c => ({ ...c, price: parseFloat(e.target.value) || 0 }))}
+                        onChange={e => setPricingCfg(c => ({ ...c, price: Math.round(parseFloat(e.target.value) || 0) }))}
                         className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-9 pr-3 py-2.5 text-base font-semibold font-mono tabular-nums text-right text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors" />
                 </div>
             </div>
@@ -105,8 +105,8 @@ export const PricingTab: React.FC<Props> = ({
                     <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1.5">Competitor Price</label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] font-mono">{currencySymbol}</span>
-                        <input type="number" min="0" step="0.01" value={pricingCfg.competitorPrice || ''} disabled={!canDirectEdit}
-                            onChange={e => setPricingCfg(c => ({ ...c, competitorPrice: parseFloat(e.target.value) || 0 }))}
+                        <input type="number" min="0" step="1" value={pricingCfg.competitorPrice || ''} disabled={!canDirectEdit}
+                            onChange={e => setPricingCfg(c => ({ ...c, competitorPrice: Math.round(parseFloat(e.target.value) || 0) }))}
                             placeholder="0"
                             className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-3 py-2 text-sm font-mono tabular-nums text-right text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors" />
                     </div>
@@ -124,8 +124,8 @@ export const PricingTab: React.FC<Props> = ({
                 {pricingCfg.isOnSale && (
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-600 dark:text-amber-400 font-mono">{currencySymbol}</span>
-                        <input type="number" min="0" step="0.01" value={pricingCfg.salePrice || ''}
-                            onChange={e => setPricingCfg(c => ({ ...c, salePrice: parseFloat(e.target.value) || 0 }))}
+                        <input type="number" min="0" step="1" value={pricingCfg.salePrice || ''}
+                            onChange={e => setPricingCfg(c => ({ ...c, salePrice: Math.round(parseFloat(e.target.value) || 0) }))}
                             placeholder="Sale price..."
                             className="w-full bg-[var(--theme-bg-card)] border border-amber-500/30 rounded-xl pl-8 pr-3 py-2 text-sm font-mono tabular-nums text-right text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-amber-500" />
                     </div>
