@@ -4,6 +4,7 @@ import { Package, CheckCircle } from 'lucide-react';
 import { WMSJob, Product } from '../../../../types';
 import { getProductForItem, getItemMeasureQty as getItemMeasureQtyShared } from '../utils/packItemHelpers';
 import { formatProductSize } from '../../../../utils/units';
+import { useLanguage } from '../../../../contexts/LanguageContext';
 
 interface PackJobItemCardProps {
     item: any;
@@ -16,6 +17,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
     job,
     products,
 }) => {
+    const { t } = useLanguage();
     const product = getProductForItem(item, job, products);
     const measureQty = getItemMeasureQtyShared(item, job, products, product);
     const requiredAmount = measureQty || item.expectedQty || 1;
@@ -50,7 +52,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                             <h4 className={`text-xs font-semibold tracking-tight truncate uppercase leading-snug ${isDone ? 'text-[var(--theme-text-secondary)] opacity-70' : 'text-[var(--theme-text-primary)]'}`}>
-                                {item.name || product?.name || 'Unknown SKU'}
+                                {item.name || product?.name || (t('warehouse.unknownSku') || 'Unknown SKU')}
                             </h4>
                             {/* Mobile-only status pill in top row */}
                             <span className={`sm:hidden px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border shrink-0 flex items-center gap-1 ${
@@ -60,9 +62,9 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                             }`}>
                                 {isDone ? (
                                     <>
-                                        <CheckCircle size={10} /> Packed
+                                        <CheckCircle size={10} /> {t('warehouse.packing.packed') || 'Packed'}
                                     </>
-                                ) : 'Pending'}
+                                ) : (t('warehouse.pending') || 'Pending')}
                             </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-1.5 mt-1">
@@ -88,7 +90,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                 <div className="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)]/60 shrink-0">
                     <div className="text-left sm:text-right">
                         <span className={`text-xs font-mono tabular-nums font-semibold ${isDone ? 'text-green-600 dark:text-green-400' : 'text-[var(--theme-text-primary)]'}`}>
-                            {packed} <span className="text-[var(--theme-text-secondary)] font-normal">packed</span>
+                            {packed} <span className="text-[var(--theme-text-secondary)] font-normal">{t('warehouse.packing.packed') || 'packed'}</span>
                         </span>
                     </div>
 
@@ -101,9 +103,9 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                         }`}>
                             {isDone ? (
                                 <>
-                                    <CheckCircle size={11} /> Packed
+                                    <CheckCircle size={11} /> {t('warehouse.packing.packed') || 'Packed'}
                                 </>
-                            ) : 'Pending'}
+                            ) : (t('warehouse.pending') || 'Pending')}
                         </span>
                     </div>
                 </div>

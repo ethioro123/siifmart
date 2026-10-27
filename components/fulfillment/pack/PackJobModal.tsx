@@ -163,20 +163,27 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
             return;
         }
         if (packPolicy.requirePackSecuritySeal && !sealSerialNumber.trim()) {
-            alert('Security Tamper Seal serial number is required before completing packing.');
+            alert(t('warehouse.securityTamperSealRequired') || 'Security Tamper Seal serial number is required before completing packing.');
             setStep('WEIGH');
             return;
         }
         if (packPolicy.requirePackCartonWeight) {
             const weightNum = parseFloat(scaleWeight);
             if (!weightNum || weightNum <= 0) {
-                alert('Carton scale weight is required before completing packing.');
+                alert(t('warehouse.cartonScaleWeightRequired') || 'Carton scale weight is required before completing packing.');
                 setStep('WEIGH');
                 return;
             }
             const variancePct = Math.abs(weightNum - expectedWeightKg) / (expectedWeightKg || 1) * 100;
             if (variancePct > packPolicy.packWeightTolerancePct) {
-                if (!confirm(`Warning: Scale weight (${weightNum}kg) varies by ${variancePct.toFixed(1)}% from expected (${expectedWeightKg}kg). Tolerance is ±${packPolicy.packWeightTolerancePct}%. Proceed anyway?`)) {
+                const warningMsg = t('warehouse.packingWeightVarianceWarning')
+                    ? t('warehouse.packingWeightVarianceWarning')
+                        .replace('{weight}', String(weightNum))
+                        .replace('{variance}', variancePct.toFixed(1))
+                        .replace('{expected}', String(expectedWeightKg))
+                        .replace('{tolerance}', String(packPolicy.packWeightTolerancePct))
+                    : `Warning: Scale weight (${weightNum}kg) varies by ${variancePct.toFixed(1)}% from expected (${expectedWeightKg}kg). Tolerance is ±${packPolicy.packWeightTolerancePct}%. Proceed anyway?`;
+                if (!confirm(warningMsg)) {
                     return;
                 }
             }
@@ -198,7 +205,15 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     t={t}
                 />
 
-                {onFlagDiscrepancy && <button type="button" onClick={onFlagDiscrepancy} className="min-h-[44px] border-b border-[var(--theme-border)] px-4 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Physical discrepancy / supervisor reconciliation</button>}
+                {onFlagDiscrepancy && (
+                    <button
+                        type="button"
+                        onClick={onFlagDiscrepancy}
+                        className="min-h-[44px] border-b border-[var(--theme-border)] px-4 text-sm text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                    >
+                        {t('warehouse.physicalDiscrepancyReconciliation') || t('warehouse.physicalDiscrepancy') || 'Physical discrepancy / supervisor reconciliation'}
+                    </button>
+                )}
                 {/* Step Indicator */}
                 <PackStepIndicator
                     currentStep={step}

@@ -62,14 +62,14 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                     <CheckCircle size={32} className="text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <h1 className="mt-3 text-xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-300">
-                    All items packed
+                    {t('warehouse.packing.allItemsPacked') || 'All items packed'}
                 </h1>
                 <p className="mt-1 text-xs sm:text-base text-[var(--theme-text-secondary)]">
-                    Continue to carton, weigh and label steps.
+                    {t('warehouse.packing.continueToCartonWeighLabel') || 'Continue to carton, weigh and label steps.'}
                 </p>
                 <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 px-3 py-1 text-xs sm:text-sm font-mono font-semibold text-emerald-700 dark:text-emerald-300">
                     <CheckCircle size={14} />
-                    {totalLines} job lines verified
+                    {t('warehouse.packing.linesVerified') ? t('warehouse.packing.linesVerified').replace('{total}', String(totalLines)) : `${totalLines} job lines verified`}
                 </p>
             </div>
         );
@@ -99,7 +99,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                     )}
                     <div className="min-w-0 flex-1">
                         <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">
-                            {showError ? 'Scan issue' : 'Saved'}
+                            {showError ? (t('warehouse.packing.scanIssue') || 'Scan issue') : (t('warehouse.packing.saved') || 'Saved')}
                         </p>
                         <p className="text-xs sm:text-sm font-bold leading-snug break-words">
                             {showError ? errorMsg : successMsg}
@@ -118,7 +118,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                     }`}
                 >
                     {step === 'CONFIRM_QTY' ? <CheckCircle size={15} /> : <ScanLine size={15} />}
-                    <span>{step === 'CONFIRM_QTY' ? 'Item matched' : 'Pack this item'}</span>
+                    <span>{step === 'CONFIRM_QTY' ? (t('warehouse.packing.itemMatched') || 'Item matched') : (t('warehouse.packing.packThisItem') || 'Pack this item')}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -129,11 +129,11 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                             className="inline-flex items-center gap-1 rounded-full border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] px-2.5 py-1 text-[11px] font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[32px]"
                         >
                             <ArrowLeft size={12} />
-                            Rescan
+                            {t('warehouse.packing.rescan') || 'Rescan'}
                         </button>
                     )}
                     <span className="rounded-full border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-2.5 py-1 text-[11px] sm:text-xs font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)]">
-                        {packedCount} / {totalLines} lines
+                        {t('warehouse.packing.linesVerifiedSimple') ? t('warehouse.packing.linesVerifiedSimple').replace('{completed}', String(packedCount)).replace('{total}', String(totalLines)) : `${packedCount} / ${totalLines} lines`}
                     </span>
                 </div>
             </div>
@@ -155,17 +155,17 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                 <div className="min-w-0 flex-1">
                     <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                         {step === 'CONFIRM_QTY'
-                            ? 'Count the physical quantity in the carton'
-                            : 'Scan the displayed SKU or barcode'}
+                            ? (t('warehouse.packing.countPhysicalQtyInCarton') || 'Count the physical quantity in the carton')
+                            : (t('warehouse.packing.scanDisplayedSkuOrBarcode') || 'Scan the displayed SKU or barcode')}
                     </p>
                     <h1 className="mt-0.5 text-lg sm:text-2xl md:text-3xl leading-snug font-bold text-[var(--theme-text-primary)] line-clamp-2 break-words">
-                        {item?.name || product?.name || 'No remaining items'}
+                        {item?.name || product?.name || (t('warehouse.packing.noRemainingItems') || 'No remaining items')}
                     </h1>
 
                     {/* Identifiers & Attributes */}
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
                         <span className="rounded-lg border border-[var(--theme-accent)]/25 bg-[var(--theme-accent)]/10 px-2 py-0.5 text-xs sm:text-sm font-mono tabular-nums font-bold text-[var(--theme-accent)] break-all">
-                            {item?.sku || product?.sku || 'SKU unavailable'}
+                            {item?.sku || product?.sku || (t('warehouse.packing.skuUnavailable') || 'SKU unavailable')}
                         </span>
                         {(item?.location || product?.location) && (
                             <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 text-xs sm:text-sm font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)] break-all">
@@ -186,13 +186,13 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                         {isCold && (
                             <span className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/25 bg-cyan-500/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">
                                 <ThermometerSnowflake size={12} />
-                                Cold Chain
+                                {t('warehouse.packing.coldChain') || 'Cold Chain'}
                             </span>
                         )}
                         {isFragile && (
                             <span className="inline-flex items-center gap-1 rounded-lg border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
                                 <AlertTriangle size={12} />
-                                Fragile
+                                {t('warehouse.packing.fragile') || 'Fragile'}
                             </span>
                         )}
                     </div>
@@ -203,17 +203,17 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
             <div className="rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-3 py-2 flex items-center justify-between gap-2">
                 <div className="min-w-0">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                        {step === 'CONFIRM_QTY' ? 'Blind Carton Verification' : 'Scanner Ready'}
+                        {step === 'CONFIRM_QTY' ? (t('warehouse.packing.blindCartonVerification') || 'Blind Carton Verification') : (t('warehouse.packing.scannerReady') || 'Scanner Ready')}
                     </p>
                     <p className="text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)] truncate">
                         {step === 'CONFIRM_QTY'
-                            ? 'Enter what is physically in the carton'
+                            ? (t('warehouse.packing.enterPhysicalQtyInCarton') || 'Enter what is physically in the carton')
                             : t('warehouse.scanProductBarcode')}
                     </p>
                 </div>
                 {step === 'CONFIRM_QTY' && unitLabel && (
                     <span className="shrink-0 rounded-lg border border-[var(--theme-accent)]/30 bg-[var(--theme-accent)]/10 px-2.5 py-1 text-xs font-mono font-bold uppercase text-[var(--theme-accent)]">
-                        Count in {unitLabel}
+                        {t('warehouse.packing.countInUnit') ? t('warehouse.packing.countInUnit').replace('{unit}', unitLabel) : `Count in ${unitLabel}`}
                     </span>
                 )}
             </div>

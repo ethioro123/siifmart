@@ -58,10 +58,10 @@ export const PackGlobalScanBar: React.FC<PackGlobalScanBarProps> = ({
                         onKeyDown={scanOnlyHandlers.onKeyDown}
                         onPaste={scanOnlyHandlers.onPaste}
                         disabled={isScanning}
-                        aria-label="Scan Product Barcode"
-                        title="Scan Product Barcode"
+                        aria-label={t('warehouse.scanProductBarcode') || 'Scan Product Barcode'}
+                        title={t('warehouse.scanProductBarcode') || 'Scan Product Barcode'}
                         className="flex-1 bg-transparent text-[var(--theme-text-primary)] text-xs sm:text-base font-mono tracking-wider outline-none placeholder:text-[var(--theme-text-secondary)] disabled:opacity-50"
-                        placeholder="Scan Order, Job #, or SKU..."
+                        placeholder={t('warehouse.scanOrderOrJobPrompt') || 'Scan Order, Job #, or SKU...'}
                         autoComplete="off"
                     />
                     {scanInput && (

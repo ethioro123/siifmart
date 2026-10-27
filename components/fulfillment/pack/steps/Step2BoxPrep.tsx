@@ -60,14 +60,14 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                     <div>
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)]">
-                                Smart Recommendation
+                                {t('warehouse.packing.smartRecommendation') || 'Smart Recommendation'}
                             </span>
                             <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[11px] font-mono font-semibold text-[var(--theme-text-primary)]">
                                 Est. {expectedWeightKg.toFixed(2)} kg
                             </span>
                         </div>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
-                            Suggested container:{' '}
+                            {t('warehouse.packing.suggestedContainer') || 'Suggested container'}:{' '}
                             <strong className="text-[var(--theme-text-primary)] font-bold">{recommendedBoxSize}</strong>
                             {hasColdItems && ' · Cold chain item detected (Cool Box & Ice recommended)'}
                             {hasFragileItems && ' · Delicate item detected (Bubble wrap recommended)'}
@@ -91,7 +91,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                         }}
                         className="px-3.5 py-2 rounded-xl bg-[var(--theme-accent)] text-white text-xs font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity active:scale-95 shrink-0 cursor-pointer touch-manipulation"
                     >
-                        Apply Suggested
+                        {t('warehouse.packing.applySuggested') || 'Apply Suggested'}
                     </button>
                 )}
             </div>
@@ -104,7 +104,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                         {t('warehouse.boxSize') || 'Container Selection'}
                     </span>
                     <span className="text-xs font-mono font-bold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-2.5 py-1 rounded-lg">
-                        Selected: {boxSize}
+                        {t('warehouse.packing.selected') || 'Selected'}: {boxSize}
                     </span>
                 </div>
 
@@ -130,7 +130,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                                             ? 'bg-white text-[var(--theme-accent)] shadow-sm'
                                             : 'bg-[var(--theme-accent)] text-white'
                                     }`}>
-                                        Recommended
+                                        {t('warehouse.packing.recommended') || 'Recommended'}
                                     </span>
                                 )}
                                 <div className="flex items-center justify-between">
@@ -155,7 +155,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                         <ShieldAlert size={16} className="text-amber-500" />
                         {t('warehouse.packingOptions') || 'Protection & Directives'}
                     </span>
-                    <span className="text-xs font-mono text-[var(--theme-text-secondary)]">Printed on Shipping Label</span>
+                    <span className="text-xs font-mono text-[var(--theme-text-secondary)]">{t('warehouse.packing.printedOnShippingLabel') || 'Printed on Shipping Label'}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -177,7 +177,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                             <div className="text-left min-w-0">
                                 <p className="text-xs font-semibold uppercase truncate text-[var(--theme-text-primary)]">{t('warehouse.packing.fragile') || 'Fragile Handling'}</p>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">Glass / delicate seal</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">{t('warehouse.packing.fragileDesc') || 'Glass / delicate seal'}</span>
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
@@ -205,7 +205,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                             <div className="text-left min-w-0">
                                 <p className="text-xs font-semibold uppercase truncate text-[var(--theme-text-primary)]">{t('warehouse.packing.bubbleWrap') || 'Bubble Wrap'}</p>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">Multi-layer cushion</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">{t('warehouse.packing.bubbleWrapDesc') || 'Multi-layer cushion'}</span>
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
@@ -232,8 +232,8 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                                 <ArrowUp size={15} />
                             </div>
                             <div className="text-left min-w-0">
-                                <p className="text-xs font-semibold uppercase truncate text-[var(--theme-text-primary)]">This Side Up</p>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">Upright orientation</span>
+                                <p className="text-xs font-semibold uppercase truncate text-[var(--theme-text-primary)]">{t('warehouse.packing.thisSideUp') || 'This Side Up'}</p>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">{t('warehouse.packing.thisSideUpDesc') || 'Upright orientation'}</span>
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
@@ -260,8 +260,8 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                                 <Lock size={15} />
                             </div>
                             <div className="text-left min-w-0">
-                                <p className="text-xs font-semibold uppercase truncate text-[var(--theme-text-primary)]">Security Tamper Tape</p>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">Anti-theft void seal</span>
+                                <p className="text-xs font-semibold uppercase truncate text-[var(--theme-text-primary)]">{t('warehouse.packing.securityTamperTape') || 'Security Tamper Tape'}</p>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">{t('warehouse.packing.securityTamperTapeDesc') || 'Anti-theft void seal'}</span>
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
@@ -289,7 +289,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                             <div className="text-left min-w-0">
                                 <p className="text-xs font-semibold uppercase truncate text-[var(--theme-text-primary)]">{t('warehouse.packing.icePacks') || 'Ice Packs / Chilled Preservation'}</p>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">Keep cold chain items below critical threshold</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">{t('warehouse.packing.icePacksDesc') || 'Keep cold chain items below critical threshold'}</span>
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${

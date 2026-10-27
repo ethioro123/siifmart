@@ -54,7 +54,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                         className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider flex items-center gap-2 hover:border-[var(--theme-accent)]/30 transition-colors active:scale-95 cursor-pointer touch-manipulation"
                     >
                         <ArrowLeft size={16} />
-                        <span>Back</span>
+                        <span>{t('warehouse.back') || 'Back'}</span>
                     </button>
                 )}
 
@@ -84,7 +84,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                         onClick={() => void onAdvanceToScanning()}
                         className="min-h-[48px] w-full sm:w-auto min-w-0 px-3 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-bold text-[11px] sm:text-xs md:text-sm uppercase tracking-wide sm:tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation whitespace-nowrap"
                     >
-                        <span>Start Scanning &amp; Pack</span>
+                        <span>{t('warehouse.packing.startScanningAndPack') || 'Start Scanning & Pack'}</span>
                         <ArrowRight size={16} />
                     </button>
                 )}
@@ -96,7 +96,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                         className="min-h-[44px] px-4 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 touch-manipulation cursor-pointer"
                     >
                         {isFullyPacked ? <ArrowRight size={16} /> : <ScanLine size={16} />}
-                        <span>{isFullyPacked ? 'Carton & Prep' : 'Resume Item Scanning'}</span>
+                        <span>{isFullyPacked ? (t('warehouse.packing.cartonAndPrep') || 'Carton & Prep') : (t('warehouse.packing.resumeItemScanning') || 'Resume Item Scanning')}</span>
                     </button>
                 )}
 
@@ -106,7 +106,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                         onClick={() => setStep('WEIGH')}
                         className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                     >
-                        <span>Weigh & Seal</span>
+                        <span>{t('warehouse.packing.weighAndSeal') || 'Weigh & Seal'}</span>
                         <ArrowRight size={16} />
                     </button>
                 )}
@@ -117,7 +117,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                         onClick={() => setStep('FINISH')}
                         className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                     >
-                        <span>Label & Finish</span>
+                        <span>{t('warehouse.packing.labelAndFinish') || 'Label & Finish'}</span>
                         <ArrowRight size={16} />
                     </button>
                 )}
@@ -134,7 +134,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                         ) : (
                             <>
                                 <CheckCircle size={16} />
-                                <span>Complete & Seal</span>
+                                <span>{t('warehouse.packing.completeAndSeal') || 'Complete & Seal'}</span>
                             </>
                         )}
                     </button>

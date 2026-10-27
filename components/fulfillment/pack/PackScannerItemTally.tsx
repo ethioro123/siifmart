@@ -3,6 +3,7 @@ import React from 'react';
 import { CheckCircle, Clock, Package } from 'lucide-react';
 import { Product } from '../../../types';
 import { formatProductSize } from '../../../utils/units';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface PackScannerItemTallyProps {
     packedItems: any[];
@@ -20,6 +21,7 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
     totalItems,
     getProduct,
 }) => {
+    const { t } = useLanguage();
     const queuedItems = unpackedItems.filter(
         (item, index) => index > 0 || (activeItemSku && item?.sku !== activeItemSku)
     );
@@ -34,10 +36,10 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                     <div className="flex items-center justify-between mb-1.5 px-1">
                         <h4 className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
                             <Clock size={13} className="text-[var(--theme-accent)]" />
-                            Up Next in Tote (Scan Any Order)
+                            {t('warehouse.packing.upNextInTote') || 'Up Next in Tote (Scan Any Order)'}
                         </h4>
                         <span className="text-[11px] font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-full border border-[var(--theme-border)]">
-                            {queuedItems.length} more
+                            {queuedItems.length} {t('warehouse.moreItems') || 'more'}
                         </span>
                     </div>
 
@@ -82,7 +84,7 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                                     </div>
 
                                     <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-lg">
-                                        Scan Ready
+                                        {t('warehouse.packing.scanReady') || 'Scan Ready'}
                                     </span>
                                 </div>
                             );
@@ -97,7 +99,7 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                     <div className="flex items-center justify-between mb-1.5 px-1">
                         <h4 className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
                             <CheckCircle size={13} className="text-emerald-500" />
-                            Packed Items
+                            {t('warehouse.packing.packedItems') || 'Packed Items'}
                         </h4>
                         <span className="text-[11px] font-mono tabular-nums font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                             {packedItems.length} / {totalItems}
@@ -119,7 +121,7 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                                 >
                                     <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden shrink-0">
                                         {product?.image ? (
-                                            <img src={product.image} alt="" className="w-full h-full object-cover" />
+                                             <img src={product.image} alt="" className="w-full h-full object-cover" />
                                         ) : (
                                             <Package size={15} className="text-emerald-600 dark:text-emerald-400" />
                                         )}
@@ -147,10 +149,10 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                                                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                                                 : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                                         }`}>
-                                            {packed} packed
+                                            {packed} {t('warehouse.packing.packed') || 'packed'}
                                         </span>
                                         {isDone && (
-                                            <CheckCircle size={15} className="text-emerald-500 shrink-0" aria-label="Done" />
+                                            <CheckCircle size={15} className="text-emerald-500 shrink-0" aria-label={t('warehouse.completed') || 'Done'} />
                                         )}
                                     </div>
                                 </div>

@@ -158,7 +158,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 setQtyVal('');
             } else {
                 playBeep('error');
-                setErrorMsg('Item not found in this Pack job.');
+                setErrorMsg(t('warehouse.itemNotFound') || 'Item not found in this Pack job.');
                 setShowError(true);
                 setInputVal('');
                 setTimeout(() => {
@@ -175,7 +175,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             const finalQty = qty;
             if (!Number.isFinite(finalQty) || finalQty < 0) {
                 playBeep('error');
-                setErrorMsg('Enter the quantity physically packed.');
+                setErrorMsg(t('warehouse.packing.enterQuantityPacked') || 'Enter the quantity physically packed.');
                 setShowError(true);
                 setTimeout(() => setShowError(false), 2000);
                 return;
@@ -184,7 +184,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             if (!isExactPackQuantity(finalQty, expectedCases)) {
                 if (onFlagDiscrepancy) { onFlagDiscrepancy(matchedIndex, finalQty); return; }
                 playBeep('error');
-                setErrorMsg('The packed quantity does not match this job. Report the difference to a supervisor.');
+                setErrorMsg(t('warehouse.packing.packQtyMismatchReportVariance') || 'The packed quantity does not match this job. Report the difference to a supervisor.');
                 setShowError(true);
                 setTimeout(() => setShowError(false), 2500);
                 return;
@@ -194,7 +194,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             setIsSubmitting(true);
             try {
                 await onConfirmPack(matchedIndex, finalQty);
-                setSuccessMsg(`Packed ${finalQty}x ${matchedItem.name}`);
+                setSuccessMsg(`${t('warehouse.packing.packed') || 'Packed'} ${finalQty}x ${matchedItem.name}`);
                 setShowSuccess(true);
                 playBeep('success');
                 setTimeout(() => {
@@ -205,7 +205,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 }, 1500);
             } catch (err: any) {
                 playBeep('error');
-                setErrorMsg(err.message || 'Saving failed');
+                setErrorMsg(err.message || t('warehouse.savingFailed') || 'Saving failed');
                 setShowError(true);
                 setTimeout(() => {
                     setShowError(false);
@@ -246,13 +246,13 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         <div className="min-w-0">
                             <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight truncate">
                                 {isFullyPacked
-                                    ? 'All Items Verified'
+                                    ? (t('warehouse.packing.allItemsVerified') || 'All Items Verified')
                                     : step === 'SCAN'
                                         ? t('warehouse.scanProductBarcode')
                                         : t('warehouse.confirmQty')}
                             </h3>
                             <p className="text-xs text-[var(--theme-accent)] font-mono tabular-nums font-bold truncate">
-                                JOB: {formatJobId(job)}
+                                {t('warehouse.job') || 'JOB'}: {formatJobId(job)}
                             </p>
                         </div>
                     </div>
@@ -267,8 +267,8 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                 if (document.fullscreenElement) document.exitFullscreen();
                                 else document.documentElement.requestFullscreen();
                             }}
-                            title="Toggle Fullscreen"
-                            aria-label="Toggle Fullscreen"
+                            title={t('warehouse.toggleFullscreen') || 'Toggle Fullscreen'}
+                            aria-label={t('warehouse.toggleFullscreen') || 'Toggle Fullscreen'}
                             className="hidden sm:flex p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] items-center justify-center"
                         >
                             <Maximize2 size={18} />
@@ -280,7 +280,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 <div
                     className="mt-2.5 h-2 rounded-full bg-[var(--theme-bg-subtle)] overflow-hidden"
                     role="progressbar"
-                    aria-label="Pack mission progress"
+                    aria-label={t('warehouse.progress') || 'Pack mission progress'}
                     aria-valuenow={packedItems.length}
                     aria-valuemin={0}
                     aria-valuemax={totalItems}
@@ -339,12 +339,12 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                                 type="number"
                                                 inputMode="decimal"
                                                 pattern="[0-9]*"
-                                                aria-label="Confirm quantity"
-                                                title="Confirm quantity"
+                                                aria-label={t('warehouse.confirmQty') || 'Confirm quantity'}
+                                                title={t('warehouse.confirmQty') || 'Confirm quantity'}
                                                 value={qtyVal}
                                                 onChange={(e) => setQtyVal(e.target.value)}
                                                 className="flex-1 min-w-0 bg-transparent py-2.5 px-3 text-center text-3xl sm:text-4xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 outline-none min-h-[58px]"
-                                                placeholder="QTY"
+                                                placeholder={t('warehouse.qty') || 'QTY'}
                                                 autoFocus
                                             />
                                             <div className="bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-l border-[var(--theme-border)] px-3.5 py-2.5 text-xs font-mono font-bold uppercase flex items-center justify-center shrink-0">
@@ -374,7 +374,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                                 disabled={isProcessing || isSubmitting}
                                                 className="py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-xs font-bold uppercase tracking-wider transition-transform active:scale-95 touch-manipulation min-h-[44px]"
                                             >
-                                                Clear
+                                                {t('warehouse.clear') || 'Clear'}
                                             </button>
                                         </div>
                                     </div>
@@ -382,8 +382,8 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     <input
                                         ref={inputRef}
                                         type="text"
-                                        aria-label="Scan barcode"
-                                        title="Scan barcode"
+                                        aria-label={t('warehouse.scanBarcode') || 'Scan barcode'}
+                                        title={t('warehouse.scanBarcode') || 'Scan barcode'}
                                         value={inputVal}
                                         onChange={(e) => setInputVal(e.target.value)}
                                         onKeyDown={scanOnlyHandlers.onKeyDown}
@@ -393,7 +393,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                         autoCorrect="off"
                                         spellCheck={false}
                                         className="w-full bg-[var(--theme-bg-app)] border-2 rounded-2xl py-3 px-4 text-center text-xl sm:text-2xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/40 focus:outline-none relative z-10 shadow-xs transition-colors border-[var(--theme-border)] focus:border-[var(--theme-accent)] min-h-[58px] sm:min-h-[64px]"
-                                        placeholder="SCAN REQUIRED SKU OR BARCODE"
+                                        placeholder={t('warehouse.packing.scanRequiredSkuOrBarcode') || 'SCAN REQUIRED SKU OR BARCODE'}
                                         autoFocus
                                         disabled={isProcessing || isSubmitting || showSuccess}
                                     />
@@ -417,7 +417,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     className="px-3.5 py-3.5 min-h-[52px] sm:min-h-[56px] rounded-2xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shrink-0 transition-transform active:scale-[0.98]"
                                 >
                                     <ArrowLeft size={16} />
-                                    <span className="hidden xs:inline">Rescan</span>
+                                    <span className="hidden xs:inline">{t('warehouse.packing.rescan') || 'Rescan'}</span>
                                 </button>
                             )}
 
@@ -443,11 +443,11 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     <CheckCircle size={18} />
                                 )}
                                 {isProcessing || isSubmitting
-                                    ? 'Saving...'
+                                    ? (t('warehouse.saving') || 'Saving...')
                                     : isFullyPacked
-                                        ? 'Review carton & seal'
+                                        ? (t('warehouse.packing.reviewCartonAndSeal') || 'Review carton & seal')
                                         : step === 'CONFIRM_QTY'
-                                            ? 'CONFIRM PACK'
+                                            ? (t('warehouse.packing.confirmPackCaps') || 'CONFIRM PACK')
                                             : t('warehouse.scanSkuToConfirm')}
                             </button>
                         </div>

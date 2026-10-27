@@ -46,17 +46,17 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                         </div>
                         <div>
                             <h3 className="text-sm font-bold uppercase tracking-wide text-[var(--theme-text-primary)]">
-                                Scale Weight Verification
+                                {t('warehouse.packing.scaleWeightVerification') || 'Scale Weight Verification'}
                             </h3>
                             <span className="text-[11px] text-[var(--theme-text-secondary)]">
-                                Place packed carton onto packing bench scale
+                                {t('warehouse.packing.placeCartonOnScale') || 'Place packed carton onto packing bench scale'}
                             </span>
                         </div>
                     </div>
 
                     <div className="text-right">
                         <span className="text-[11px] font-mono text-[var(--theme-text-secondary)] block uppercase">
-                            Expected Gross Weight
+                            {t('warehouse.packing.expectedGrossWeight') || 'Expected Gross Weight'}
                         </span>
                         <span className="text-sm md:text-base font-mono font-bold text-[var(--theme-text-primary)]">
                             {expectedWeightKg.toFixed(2)} kg
@@ -72,7 +72,7 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                             step="0.05"
                             min="0"
                             inputMode="decimal"
-                            aria-label="Scale gross weight"
+                            aria-label={t('warehouse.packing.scaleGrossWeight') || 'Scale gross weight'}
                             placeholder="0.00"
                             value={scaleWeight}
                             onChange={(e) => setScaleWeight(e.target.value)}
@@ -128,17 +128,17 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                             </div>
                             <div>
                                 <h3 className="text-sm font-bold uppercase tracking-wide text-[var(--theme-text-primary)]">
-                                    Security Tamper Seal
+                                    {t('warehouse.packing.securityTamperTape') || 'Security Tamper Seal'}
                                 </h3>
                                 <span className="text-[11px] text-[var(--theme-text-secondary)]">
-                                    Affix anti-theft void seal tape and record serial number
+                                    {t('warehouse.packing.affixTamperSeal') || 'Affix anti-theft void seal tape and record serial number'}
                                 </span>
                             </div>
                         </div>
 
                         {requireSeal && (
                             <span className="px-2.5 py-1 rounded-md bg-red-500/10 border border-red-500/20 text-xs font-bold font-mono text-red-600 dark:text-red-400 uppercase">
-                                Mandatory Policy
+                                {t('warehouse.packing.mandatoryPolicy') || 'Mandatory Policy'}
                             </span>
                         )}
                     </div>
@@ -146,8 +146,8 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                     <div className="relative">
                         <input
                             type="text"
-                            aria-label="Tamper seal serial number"
-                            placeholder="Scan or type seal serial (e.g. SEAL-8921)..."
+                            aria-label={t('warehouse.packing.sealSerialNumber') || 'Tamper seal serial number'}
+                            placeholder={t('warehouse.packing.scanSealSerialPrompt') || 'Scan or type seal serial (e.g. SEAL-8921)...'}
                             value={sealSerialNumber}
                             onChange={(e) => setSealSerialNumber(e.target.value)}
                             className="w-full bg-[var(--theme-bg-subtle)] border-2 border-[var(--theme-border)] focus:border-purple-500 rounded-2xl py-3 pl-10 pr-4 font-mono font-bold text-sm md:text-base text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] uppercase outline-none min-h-[50px] transition-colors"

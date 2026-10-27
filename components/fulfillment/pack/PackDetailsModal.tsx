@@ -343,7 +343,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             >
                                 <Printer size={14} className="text-[var(--theme-accent)]" />
                                 <span className="hidden sm:inline">{t('warehouse.reprintPackLabel') || 'Reprint Label'}</span>
-                                <span className="sm:hidden">Print</span>
+                                <span className="sm:hidden">{t('warehouse.print') || 'Print'}</span>
                             </button>
 
                             {isPrintMenuOpen && (

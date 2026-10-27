@@ -186,8 +186,8 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                                 <ArrowUp size={13} />
                             </div>
                             <div className="text-left min-w-0">
-                                <p className="text-xs font-semibold uppercase leading-tight truncate text-[var(--theme-text-primary)]">This Side Up</p>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">Keep upright orientation</span>
+                                <p className="text-xs font-semibold uppercase leading-tight truncate text-[var(--theme-text-primary)]">{t('warehouse.packing.thisSideUp') || 'This Side Up'}</p>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">{t('warehouse.packing.thisSideUpDesc') || 'Keep upright orientation'}</span>
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
@@ -217,8 +217,8 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                                 <Lock size={13} />
                             </div>
                             <div className="text-left min-w-0">
-                                <p className="text-xs font-semibold uppercase leading-tight truncate text-[var(--theme-text-primary)]">Security Tamper Tape</p>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">Anti-theft void seal</span>
+                                <p className="text-xs font-semibold uppercase leading-tight truncate text-[var(--theme-text-primary)]">{t('warehouse.packing.securityTamperTape') || 'Security Tamper Tape'}</p>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">{t('warehouse.packing.securityTamperTapeDesc') || 'Anti-theft void seal'}</span>
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
@@ -232,12 +232,12 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     {(packingMaterials.securitySeal || requireSeal) && (
                         <div className="p-2.5 bg-purple-500/10 border border-purple-500/20 rounded-xl space-y-1.5">
                             <label className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 flex items-center justify-between uppercase">
-                                <span className="flex items-center gap-1.5"><Lock size={12} /> Seal Serial Number</span>
-                                {requireSeal && <span className="text-[11px] text-red-500 font-mono font-semibold">Required</span>}
+                                <span className="flex items-center gap-1.5"><Lock size={12} /> {t('warehouse.packing.sealSerialNumber') || 'Seal Serial Number'}</span>
+                                {requireSeal && <span className="text-[11px] text-red-500 font-mono font-semibold">{t('warehouse.required') || 'Required'}</span>}
                             </label>
                             <input
                                 type="text"
-                                placeholder="Scan or type seal serial (e.g. SEAL-8921)..."
+                                placeholder={t('warehouse.packing.scanSealSerialPrompt') || 'Scan or type seal serial (e.g. SEAL-8921)...'}
                                 value={sealSerialNumber || ''}
                                 onChange={(e) => setSealSerialNumber?.(e.target.value)}
                                 className="w-full bg-[var(--theme-bg-card)] border border-purple-300 dark:border-purple-500/30 rounded-xl px-3 py-2 text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none uppercase min-h-[44px]"
@@ -263,7 +263,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                             </div>
                             <div className="text-left min-w-0">
                                 <p className="text-xs font-semibold uppercase leading-tight truncate text-[var(--theme-text-primary)]">{t('warehouse.packing.icePacks') || 'Ice Packs / Chilled'}</p>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">Cold chain preservation</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] block truncate">{t('warehouse.packing.coldChainPreservation') || 'Cold chain preservation'}</span>
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${

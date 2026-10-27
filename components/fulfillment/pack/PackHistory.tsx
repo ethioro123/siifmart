@@ -326,7 +326,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                         {productNames.length > 0 && (
                                             <p className="text-[11px] text-[var(--theme-text-secondary)] line-clamp-1 break-words pt-0.5">
                                                 {productNames.slice(0, 2).join(', ')}
-                                                {productNames.length > 2 && <span className="text-[var(--theme-accent)] font-semibold"> +{productNames.length - 2} more</span>}
+                                                {productNames.length > 2 && <span className="text-[var(--theme-accent)] font-semibold"> +{productNames.length - 2} {t('warehouse.moreItems') || 'more'}</span>}
                                             </p>
                                         )}
                                     </div>
@@ -352,7 +352,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                     title={t('warehouse.packing.returnItemsToWarehouse') || 'Return to warehouse'}
                                                 >
                                                     <Undo2 size={12} />
-                                                    <span className="hidden sm:inline">Return</span>
+                                                    <span className="hidden sm:inline">{t('warehouse.packing.returnItems') || 'Return'}</span>
                                                 </button>
                                             )}
 
@@ -363,7 +363,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                 title={t('warehouse.packing.reprintPackLabel') || 'Reprint Shipping Label'}
                                             >
                                                 <Printer size={13} className="text-[var(--theme-accent)]" />
-                                                <span className="hidden sm:inline">Print</span>
+                                                <span className="hidden sm:inline">{t('warehouse.print') || 'Print'}</span>
                                             </button>
                                         </div>
                                     </div>
@@ -380,7 +380,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                 onClick={() => setSearch('')}
                                 className="text-xs text-[var(--theme-accent)] font-semibold uppercase tracking-wider hover:underline pt-1"
                             >
-                                Clear search query
+                                {t('warehouse.clearSearch') || 'Clear search query'}
                             </button>
                         )}
                     </div>
@@ -424,7 +424,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                             <button
                                 onClick={() => setOpenPrintJob(null)}
                                 className="p-1.5 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]"
-                                aria-label="Close"
+                                aria-label={t('common.close') || 'Close'}
                             >
                                 <X size={16} />
                             </button>

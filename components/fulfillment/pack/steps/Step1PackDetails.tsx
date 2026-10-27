@@ -40,7 +40,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                             <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)] shrink-0">
-                                Pack Mission Overview
+                                {t('warehouse.packing.overviewAndDirectives') || 'Pack Mission Overview'}
                             </span>
                             <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[11px] font-mono font-semibold text-[var(--theme-text-primary)] shrink-0">
                                 #{formatJobId(job)}
@@ -52,7 +52,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                             )}
                         </div>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-1 break-words whitespace-normal leading-relaxed">
-                            Review parcel destination, handling directives, and cargo manifest before scanning.
+                            {t('warehouse.packing.packMissionOverviewDesc') || 'Review parcel destination, handling directives, and cargo manifest before scanning.'}
                         </p>
                     </div>
                 </div>
@@ -66,7 +66,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                     <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)] gap-2">
                         <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5 shrink-0">
                             <MapPin size={13} className="text-[var(--theme-accent)]" />
-                            Destination
+                            {t('warehouse.destination') || 'Destination'}
                         </span>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${
                             job.priority === 'Critical' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' :
@@ -94,7 +94,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                     <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
                         <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
                             <Package size={13} className="text-[var(--theme-accent)]" />
-                            Cargo Scale
+                            {t('warehouse.packing.cargoScale') || 'Cargo Scale'}
                         </span>
                         <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-primary)]">
                             Est. {expectedWeightKg} kg
@@ -102,8 +102,8 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                     </div>
                     <div className="pt-3 grid grid-cols-2 gap-2">
                         <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-                            <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)] block">Line Items</span>
-                            <span className="text-base font-mono font-bold text-[var(--theme-text-primary)]">{totalItems} Lines</span>
+                            <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)] block">{t('warehouse.packing.lineItems') || 'Line Items'}</span>
+                            <span className="text-base font-mono font-bold text-[var(--theme-text-primary)]">{totalItems} {t('warehouse.packing.lines') || 'Lines'}</span>
                         </div>
                     </div>
                 </div>
@@ -113,7 +113,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                     <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
                         <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
                             <ShieldCheck size={13} className="text-[var(--theme-accent)]" />
-                            Packaging Directives
+                            {t('warehouse.packing.packagingDirectives') || 'Packaging Directives'}
                         </span>
                         <span className="text-[10px] uppercase font-bold text-green-600 dark:text-green-400">
                             Zero-Trust
@@ -123,23 +123,23 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                         {hasColdItems && (
                             <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20 flex items-center gap-1.5">
                                 <ThermometerSnowflake size={13} />
-                                Cold Chain (Ice / Thermal)
+                                {t('warehouse.packing.coldChainIceThermal') || 'Cold Chain (Ice / Thermal)'}
                             </span>
                         )}
                         {hasFragileItems && (
                             <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 flex items-center gap-1.5">
                                 <AlertTriangle size={13} />
-                                Fragile (Cushion Wrap)
+                                {t('warehouse.packing.fragileCushion') || 'Fragile (Cushion Wrap)'}
                             </span>
                         )}
                         {!hasColdItems && !hasFragileItems && (
                             <span className="px-2.5 py-1 rounded-lg text-xs font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-                                Standard Corrugated Carton
+                                {t('warehouse.packing.standardCorrugated') || 'Standard Corrugated Carton'}
                             </span>
                         )}
                         <span className="px-2.5 py-1 rounded-lg text-xs font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center gap-1">
                             <UserCheck size={12} />
-                            Mandatory Barcode Scan
+                            {t('warehouse.packing.mandatoryBarcodeScan') || 'Mandatory Barcode Scan'}
                         </span>
                     </div>
                 </div>
@@ -150,10 +150,10 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                 <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
                     <span className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider flex items-center gap-2">
                         <Box size={14} className="text-[var(--theme-accent)]" />
-                        Manifest Items Awaiting Scan ({totalItems})
+                        {t('warehouse.packing.manifestItemsAwaitingScan') ? t('warehouse.packing.manifestItemsAwaitingScan').replace('{count}', String(totalItems)) : `Manifest Items Awaiting Scan (${totalItems})`}
                     </span>
                     <span className="text-xs text-[var(--theme-text-muted)] font-medium">
-                        Verification required in next step
+                        {t('warehouse.packing.verificationRequiredInNextStep') || 'Verification required in next step'}
                     </span>
                 </div>
 
@@ -185,7 +185,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
 
                                 <div className="text-right shrink-0">
                                     <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider block">
-                                        Scan Required
+                                        {t('warehouse.packing.scanRequired') || 'Scan Required'}
                                     </span>
                                 </div>
                             </div>
