@@ -1,3 +1,4 @@
+import { priceManagerService } from '../../services/price-manager.service';
 import { usePriceManagerCatalog } from '../../hooks/usePriceManagerCatalog';
 import { usePriceManagerBatch } from '../../hooks/usePriceManagerBatch';
 import { useState, useMemo, useEffect } from 'react';
@@ -33,7 +34,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       sales,
       refreshData,
       effectiveCountry,
-      settings
+      settings, activeSite, activeRegionCode
    } = useData();
 
    const activeCountry = (effectiveCountry || settings?.country || 'ET') as Country;
@@ -71,6 +72,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       handleSort,
       filteredProducts: cachedFilteredProducts
    } = useMerchandisingFilters({ products: cachedProducts, getMargin });
+   useEffect(() => { setCurrentPage(1); setFilters(previous => ({ ...previous, sites: [] })); }, [activeCountry, activeRegionCode]);
    const catalog = usePriceManagerCatalog({ country: activeCountry, search: searchTerm, filters, sort: sortConfig, page: currentPage, pageSize: itemsPerPage }, activeTab === 'pricing');
    const products = activeTab === 'pricing' ? catalog.data?.data || [] : cachedProducts;
    const filteredProducts = activeTab === 'pricing' ? products : cachedFilteredProducts;
@@ -90,7 +92,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
    const batch = usePriceManagerBatch({ products: filteredProducts, selectedIds, setSelectedIds, submit: submitPriceChanges, setIsSubmitting,
-      scopeKey: JSON.stringify([activeCountry, activeTab, searchTerm, filters, sortConfig, currentPage, itemsPerPage]) });
+      scopeKey: JSON.stringify([activeCountry, activeSite?.id, activeRegionCode, activeTab, searchTerm, filters, sortConfig, currentPage, itemsPerPage]) });
 
    // Promo Modal
    const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
@@ -234,7 +236,8 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       setIsSubmitting(true);
       try {
          const changes: PriceChangeInput[] = [];
-         products.forEach(p => {
+         const ruleProducts = await priceManagerService.getMatchingTargets(activeCountry, { sites: activeRegionCode ? (sites.length ? sites.map(site => site.id) : ['no-matching-regional-sites']) : [] });
+         ruleProducts.forEach(p => {
             if (matchRuleProduct(p, rule)) {
                // Merchandising Whole-Number Rule: Prices must strictly be integers rounded to the nearest whole number
                const newPrice = Math.round(calculateRulePrice(p, rule));
@@ -297,7 +300,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
 
       setSimResult({ rev: revDeltaPct, margin: margDeltaPct });
       setIsSimulating(false);
-      addNotification('success', `Simulation complete: Analyzed ${impactedCount} affected SKUs.`);
+      addNotification('success', `Simulation on loaded records with recorded costs: ${impactedCount} affected product records.`);
    };
 
    const handleShelfSwap = async (productId: string) => {

@@ -24,7 +24,7 @@ export function PriceBatchPreview({ batch, failures = [], sites, currency, pendi
                         const margin = sellingMargin(normalized);
                         const failure = failures.find(item => item.productId === product.id);
                         return <tr key={product.id} className="border-t border-[var(--theme-border)]"><td className="p-3">{product.name}<p className="text-xs text-[var(--theme-text-secondary)]">{product.sku} · {productSiteName(product, sites)}</p>{(validation || failure) && <p className="text-xs text-[var(--theme-danger)]">{validation || failure?.message}</p>}</td>
-                            <td className="p-3 whitespace-nowrap">{currency} {formatPriceValue(effectivePrice(product) || 0)} → {formatPriceValue(effectivePrice(normalized) || 0)}</td>
+                            <td className="p-3 whitespace-nowrap">{currency} {formatPriceValue(effectivePrice(product) || 0)} → {formatPriceValue(effectivePrice(normalized) || 0)}<p className="text-xs text-[var(--theme-text-secondary)]">Regular {formatPriceValue(product.price)} → {formatPriceValue(normalized.price)}</p></td>
                             <td className="p-3">{margin === null ? 'Cost unavailable' : `${margin.toFixed(1)}%${margin < 15 ? ' · Finance signoff' : ''}`}</td></tr>;
                     })}</tbody></table>
             </div>

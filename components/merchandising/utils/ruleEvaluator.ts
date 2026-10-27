@@ -1,6 +1,6 @@
 import { Product, PricingRule } from '../../../types';
 
-export const matchRuleProduct = (p: Product, rule: PricingRule): boolean => {
+export const matchRuleProduct = (p: Product, rule: PricingRule, now = Date.now()): boolean => {
    const target = (rule.targetCategory || '').trim().toLowerCase();
    const cat = (p.category || '').trim().toLowerCase();
    const matchesCategory = !target || target === 'all' || cat === target || (Boolean(cat) && (cat.startsWith(target + ' > ') || cat.startsWith(target + ' › ')));
@@ -18,7 +18,9 @@ export const matchRuleProduct = (p: Product, rule: PricingRule): boolean => {
    }
    if (cond.includes('Expiry') || cond.includes('Days')) {
       if (p.expiryDate) {
-         const diffDays = (new Date(p.expiryDate).getTime() - Date.now()) / (1000 * 3600 * 24);
+         const expiry = new Date(p.expiryDate);
+         expiry.setHours(23, 59, 59, 999);
+         const diffDays = (expiry.getTime() - now) / (1000 * 3600 * 24);
          return Number.isFinite(diffDays) && diffDays >= 0 && diffDays <= threshold;
       }
       return false;

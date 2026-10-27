@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Product } from '../types';
 import { discountedProposal, type PriceBatch, type PriceBatchResult, type PriceChangeInput } from '../utils/priceManager';
 
@@ -8,6 +8,9 @@ interface Input {
     setIsSubmitting: (value: boolean) => void;
 }
 export function usePriceManagerBatch({ products, selectedIds, setSelectedIds, scopeKey, submit, setIsSubmitting }: Input) {
+    const inFlight = useRef(false);
+    const activeScope = useRef(scopeKey);
+    activeScope.current = scopeKey;
     const [priceBatch, setPriceBatch] = useState<PriceBatch | null>(null);
     const [batchFailures, setBatchFailures] = useState<PriceBatchResult['failures']>([]);
     useEffect(() => { setSelectedIds(new Set()); setPriceBatch(null); setBatchFailures([]); }, [scopeKey]);
@@ -28,14 +31,17 @@ export function usePriceManagerBatch({ products, selectedIds, setSelectedIds, sc
         stagePriceBatch(changes, `Prices ending in ${target}`);
     };
     const confirmPriceBatch = async () => {
-        if (!priceBatch) return;
+        if (!priceBatch || inFlight.current) return;
+        inFlight.current = true;
+        const submittedScope = scopeKey;
         setIsSubmitting(true);
         try {
             const result = await submit(priceBatch.changes, priceBatch.source);
+            if (activeScope.current !== submittedScope) return;
             setSelectedIds(new Set([...selectedIds].filter(id => !result.submittedIds.includes(id))));
             setBatchFailures(result.failures);
             setPriceBatch(result.failures.length ? { ...priceBatch, changes: priceBatch.changes.filter(change => result.failures.some(failure => failure.productId === change.product.id)) } : null);
-        } finally { setIsSubmitting(false); }
+        } finally { inFlight.current = false; setIsSubmitting(false); }
     };
     return { priceBatch, batchFailures, stagePriceBatch, stageDiscount, stageEnding, confirmPriceBatch, cancelPriceBatch: () => setPriceBatch(null) };
 }

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useData } from '../contexts/DataContext';
+import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useStore } from '../contexts/CentralStore';
 import { useCreateInventoryRequestMutation } from './useInventoryRequestMutations';
@@ -12,6 +13,7 @@ import type { PricingConfig } from '../components/merchandising/product-control/
 import type { StockConfig } from '../components/merchandising/product-control/StockTab';
 
 export function useProductControlProposals(product: Product | null, country: string, onSaved?: () => void) {
+    const { activeRegionCode, sites } = useData();
     const { user, showToast } = useStore();
     const createRequest = useCreateInventoryRequestMutation();
     const { submit } = useSubmitPriceChanges(country);
@@ -19,6 +21,7 @@ export function useProductControlProposals(product: Product | null, country: str
     const [isSaving, setIsSaving] = useState(false);
     const [priceBatch, setPriceBatch] = useState<PriceBatch | null>(null);
     const [batchFailures, setBatchFailures] = useState<PriceBatchResult['failures']>([]);
+    useEffect(() => { setPriceBatch(null); setBatchFailures([]); }, [product?.id, country, activeRegionCode]);
     const savePatch = async (patch: Partial<Product>, reason: string) => {
         if (!product) return;
         setIsSaving(true);
@@ -61,7 +64,9 @@ export function useProductControlProposals(product: Product | null, country: str
         try {
             // Cost is taken from each target's recorded data, never copied from another location.
             const requested = normalizePriceProposal({ price: cfg.price, salePrice: cfg.salePrice, isOnSale: cfg.isOnSale });
-            const targets = cfg.scope === 'single' ? [product] : await priceManagerService.getSkuTargets(country, product.sku, cfg.scope === 'custom' ? cfg.selectedSiteIds : undefined);
+            const regionalIds = activeRegionCode ? sites.filter(site => (site.regionCode || site.region_code) === activeRegionCode).map(site => site.id) : undefined;
+            const targetIds = cfg.scope === 'custom' ? cfg.selectedSiteIds.filter(id => !regionalIds || regionalIds.includes(id)) : regionalIds;
+            const targets = cfg.scope === 'single' ? [product] : await priceManagerService.getSkuTargets(country, product.sku, targetIds);
             if (!targets.length) throw new Error('No product records found in the selected authorized locations.');
             setBatchFailures([]);
             setPriceBatch({ source: 'Product control pricing update', changes: targets.map(target => ({ product: target, proposal: { ...requested, costPrice: target.costPrice } })) });

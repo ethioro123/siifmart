@@ -3,7 +3,7 @@ import { discountedProposal, normalizePriceProposal, sellingMargin, submitPriceB
 import { matchRuleProduct, calculateRulePrice } from '../../components/merchandising/utils/ruleEvaluator';
 import type { Product, PricingRule } from '../../types';
 const product = { id: 'a', name: 'Diapers', sku: 'SKU', siteId: 'site', price: 100, costPrice: 70, category: 'Baby', stock: 5 } as Product;
-const rule = (patch: Partial<PricingRule>) => ({ targetCategory: 'Baby', threshold: 10, ...patch } as PricingRule);
+const rule = (patch: Record<string, unknown>) => ({ targetCategory: 'Baby', threshold: 10, ...patch } as PricingRule);
 describe('Price Manager governance and whole-number pricing', () => {
     it('preserves intentional whole-number rounding and exact recorded cost', () => {
         expect(discountedProposal({ ...product, price: 19.95, costPrice: 10.23 }, 10)).toMatchObject({ price: 20, salePrice: 18, costPrice: 10.23 });
@@ -27,13 +27,16 @@ describe('Price Manager governance and whole-number pricing', () => {
         expect(result.failures).toEqual([{ productId: 'b', message: 'Denied' }]);
     });
     it('does not match unknown expiry, expired dates, unknown rules or missing categories', () => {
-        expect(matchRuleProduct(product, rule({ condition: 'Days to Expiry < X' }))).toBe(false);
-        expect(matchRuleProduct({ ...product, expiryDate: '2020-01-01' }, rule({ condition: 'Days to Expiry < X' }))).toBe(false);
+        expect(matchRuleProduct(product, rule({ condition: 'Expiry < X Days' }))).toBe(false);
+        expect(matchRuleProduct({ ...product, expiryDate: '2020-01-01' }, rule({ condition: 'Expiry < X Days' }))).toBe(false);
         expect(matchRuleProduct(product, rule({ condition: 'Unknown' }))).toBe(false);
-        expect(matchRuleProduct({ ...product, category: '' }, rule({ condition: 'Stock < X' }))).toBe(false);
+        expect(matchRuleProduct({ ...product, stock: 50, category: '' }, rule({ condition: 'Stock > X' }))).toBe(false);
+    });
+    it('includes goods expiring today without including already expired goods', () => {
+        expect(matchRuleProduct({ ...product, expiryDate: '2026-10-28' }, rule({ condition: 'Expiry < X Days', threshold: 1 }), new Date('2026-10-28T12:00:00').getTime())).toBe(true);
     });
     it('never invents costs for target-margin rules and keeps rule outputs whole', () => {
-        expect(calculateRulePrice({ ...product, costPrice: undefined }, rule({ action: 'Target Margin %', value: 50 }))).toBe(product.price);
+        expect(calculateRulePrice({ ...product, costPrice: undefined }, rule({ action: 'Set to Cost + Margin', value: 50 }))).toBe(product.price);
         expect(calculateRulePrice(product, rule({ action: 'Increase Price %', value: 3.7 }))).toBe(104);
     });
 });

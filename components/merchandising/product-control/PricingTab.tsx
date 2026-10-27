@@ -172,7 +172,7 @@ export const PricingTab: React.FC<Props> = ({
                             </div>
                             {pricingCfg.scope === 'all' && <Check size={13} className="text-white" />}
                         </div>
-                        <p className={`text-[10px] leading-tight ${pricingCfg.scope === 'all' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>Sync price uniform across all network stores.</p>
+                        <p className={`text-[10px] leading-tight ${pricingCfg.scope === 'all' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>Propose prices for matching records in your authorized territory.</p>
                     </button>
 
                     <button
@@ -198,7 +198,7 @@ export const PricingTab: React.FC<Props> = ({
                             </div>
                             {pricingCfg.scope === 'custom' && <Check size={13} className="text-white" />}
                         </div>
-                        <p className={`text-[10px] leading-tight ${pricingCfg.scope === 'custom' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>Choose which stores get updated vs left out.</p>
+                        <p className={`text-[10px] leading-tight ${pricingCfg.scope === 'custom' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>Propose prices for matching records at selected locations.</p>
                     </button>
                 </div>
 

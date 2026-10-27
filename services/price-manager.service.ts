@@ -20,10 +20,13 @@ export const priceManagerService = {
     },
     async getSkuTargets(country: string, sku: string, siteIds?: string[]): Promise<Product[]> {
         if (siteIds && siteIds.length === 0) throw new Error('Select at least one location.');
+        return this.getMatchingTargets(country, { sku, sites: siteIds || [] });
+    },
+    async getMatchingTargets(country: string, filters: PriceCatalogInput['filters']): Promise<Product[]> {
         const targets: Product[] = [];
         let page = 1;
         while (true) {
-            const result = await this.getPage({ country, filters: { sku, sites: siteIds || [] }, page, pageSize: 100 });
+            const result = await this.getPage({ country, filters, page, pageSize: 100 });
             targets.push(...result.data);
             if (targets.length >= result.count || result.data.length === 0) break;
             page++;

@@ -1,3 +1,6 @@
+import { PriceBatchPreview } from '../components/merchandising/components/PriceBatchPreview';
+import { sellingMargin } from '../utils/priceManager';
+import { effectivePrice } from '../utils/pricingGovernance';
 import React, { useMemo } from 'react';
 import { Tags, Target, TrendingUp, DollarSign, LineChart as LineChartIcon, TrendingDown, BrainCircuit, Layers, Percent, Tag, ClipboardCheck } from 'lucide-react';
 
@@ -74,8 +77,8 @@ export default function Pricing() {
       if (!products || products.length === 0) {
          return { avgMargin: '—', priceIndex: '—' };
       }
-      const marginProducts = products.filter(p => p.price > 0 && (p.costPrice || 0) > 0);
-      const totalMargin = marginProducts.reduce((sum, p) => sum + (((p.price - p.costPrice!) / p.price) * 100), 0);
+      const marginProducts = products.filter(p => sellingMargin(p) !== null);
+      const totalMargin = marginProducts.reduce((sum, p) => sum + (sellingMargin(p) || 0), 0);
       const calculatedAvgMargin = marginProducts.length > 0
          ? (totalMargin / marginProducts.length).toFixed(1) + '%'
          : '—';
@@ -83,7 +86,7 @@ export default function Pricing() {
 
       const compProducts = pricedProducts.filter(p => p.competitorPrice && p.competitorPrice > 0);
       const calculatedPriceIndex = compProducts.length > 0
-         ? ((compProducts.reduce((sum, p) => sum + (p.price / p.competitorPrice!), 0) / compProducts.length) * 100).toFixed(1)
+         ? ((compProducts.reduce((sum, p) => sum + ((effectivePrice(p) || 0) / p.competitorPrice!), 0) / compProducts.length) * 100).toFixed(1)
          : '—';
 
       return { avgMargin: calculatedAvgMargin, priceIndex: calculatedPriceIndex };
@@ -110,12 +113,12 @@ export default function Pricing() {
                <div className="flex items-center gap-2.5 flex-wrap">
                   <div className="px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full flex items-center gap-2">
                      <Target size={14} className="text-[var(--theme-accent)]" />
-                     <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Price Index:</span>
+                     <span className="text-xs text-[var(--theme-text-secondary)] font-medium">{activeTab === 'pricing' ? 'Page Price Index:' : 'Price Index:'}</span>
                      <span className="text-xs font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums">{priceIndex}</span>
                   </div>
                   <div className="px-3.5 py-1.5 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-full flex items-center gap-2">
                      <TrendingUp size={14} className="text-[var(--theme-status-success-text)]" aria-hidden="true" />
-                     <span className="text-xs text-[var(--theme-status-success-text)] font-medium">Avg Margin:</span>
+                     <span className="text-xs text-[var(--theme-status-success-text)] font-medium">{activeTab === 'pricing' ? 'Page Avg Margin:' : 'Avg Margin:'}</span>
                      <span className="text-xs font-semibold text-[var(--theme-status-success-text)] font-mono tabular-nums">{avgMargin}</span>
                   </div>
                </div>
@@ -284,6 +287,7 @@ export default function Pricing() {
                currencySymbol={currencySymbol}
             />
 
+            <PriceBatchPreview batch={state.priceBatch} failures={state.batchFailures} sites={sites} currency={currencySymbol} pending={isSubmitting} onConfirm={state.confirmPriceBatch} onClose={state.cancelPriceBatch} />
             {/* --- PRODUCT CONTROL MODAL --- */}
             <ProductControlModal
                product={selectedControlProduct}

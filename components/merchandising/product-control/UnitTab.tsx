@@ -280,53 +280,7 @@ export const UnitTab: React.FC<Props> = ({
                     </div>
                     <div className="p-5 space-y-5">
 
-                        {/* Step 0: Location Scope Application */}
-                        <div>
-                            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] mb-2 flex items-center gap-2">
-                                <span className="w-5 h-5 rounded-full bg-[var(--theme-accent)] text-white text-[11px] flex items-center justify-center font-semibold flex-shrink-0 shadow-sm">0</span>
-                                Apply to Location(s)
-                            </p>
-                            <div className="grid grid-cols-3 gap-2">
-                                <button type="button" onClick={() => setUnitCfg(c => ({ ...c, scope: 'single' }))}
-                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${ (unitCfg.scope || 'single') === 'single' ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-white shadow-sm' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/50' }`}>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <p className="text-xs font-semibold uppercase">Certain Location</p>
-                                        {(unitCfg.scope || 'single') === 'single' && <Check size={14} className="text-white" />}
-                                    </div>
-                                    <p className={`text-[10px] leading-tight ${ (unitCfg.scope || 'single') === 'single' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]' }`}>This store only</p>
-                                </button>
-                                <button type="button" onClick={() => setUnitCfg(c => ({ ...c, scope: 'custom', selectedSiteIds: c.selectedSiteIds?.length ? c.selectedSiteIds : (sites || []).map(s => s.id) }))}
-                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${ unitCfg.scope === 'custom' ? 'bg-amber-600 border-amber-600 text-white shadow-sm' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-amber-600/50' }`}>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <p className="text-xs font-semibold uppercase">Several Places</p>
-                                        {unitCfg.scope === 'custom' && <Check size={14} className="text-white" />}
-                                    </div>
-                                    <p className={`text-[10px] leading-tight ${ unitCfg.scope === 'custom' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]' }`}>{(unitCfg.selectedSiteIds || []).length} site(s) selected</p>
-                                </button>
-                                <button type="button" onClick={() => setUnitCfg(c => ({ ...c, scope: 'all' }))}
-                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${ unitCfg.scope === 'all' ? 'bg-blue-600 border-blue-600 text-white shadow-sm' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-blue-600/50' }`}>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <p className="text-xs font-semibold uppercase">All Locations</p>
-                                        {unitCfg.scope === 'all' && <Check size={14} className="text-white" />}
-                                    </div>
-                                    <p className={`text-[10px] leading-tight ${ unitCfg.scope === 'all' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]' }`}>Global network</p>
-                                </button>
-                            </div>
-                            {unitCfg.scope === 'custom' && sites && sites.length > 0 && (
-                                <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded-xl grid grid-cols-2 gap-1.5 max-h-32 overflow-y-auto">
-                                    {sites.map(site => (
-                                        <label key={site.id} className="flex items-center gap-2 text-xs font-medium text-[var(--theme-text-primary)] cursor-pointer p-1 hover:bg-white/5 rounded-lg">
-                                            <input type="checkbox" checked={(unitCfg.selectedSiteIds || []).includes(site.id)}
-                                                onChange={e => {
-                                                    const cur = unitCfg.selectedSiteIds || [];
-                                                    setUnitCfg(c => ({ ...c, selectedSiteIds: e.target.checked ? [...cur, site.id] : cur.filter(id => id !== site.id) }));
-                                                }} className="rounded border-[var(--theme-border)] text-[var(--theme-accent)] focus:ring-[var(--theme-accent)]" />
-                                            <span className="truncate">{site.name}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        <p className="text-xs text-[var(--theme-text-secondary)]">This selling configuration proposal applies to this product location. Pricing proposals can target multiple authorized locations from the Pricing tab.</p>
 
                         {/* Step 1: Selling mode */}
                         <div>

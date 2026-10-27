@@ -1,3 +1,4 @@
+import { effectivePrice } from '../../../utils/pricingGovernance';
 import { sellingMargin, productSiteName } from '../../../utils/priceManager';
 import React from 'react';
 import {
@@ -78,7 +79,7 @@ export const PricingProductsTable: React.FC = () => {
                             onClick={() => handleSort('price')}
                         >
                             <div className="flex items-center justify-end gap-1.5">
-                                <span className={sortConfig.key === 'price' ? 'text-[var(--theme-accent)]' : ''}>Retail Price</span>
+                                <span className={sortConfig.key === 'price' ? 'text-[var(--theme-accent)]' : ''}>Selling Price</span>
                                 {sortConfig.key === 'price' && (
                                     sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[var(--theme-accent)]" /> : <ChevronDown size={13} className="text-[var(--theme-accent)]" />
                                 )}
@@ -175,7 +176,7 @@ export const PricingProductsTable: React.FC = () => {
                                                 <p className="text-[11px] text-[var(--theme-text-secondary)]">{p.category}</p>
                                                 {p.sku && products.filter(pi => pi.sku === p.sku).length > 1 && (
                                                     <span className="text-[10px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-medium">
-                                                        <Map size={10} /> {products.filter(pi => pi.sku === p.sku).length} Locations
+                                                        <Map size={10} /> {products.filter(pi => pi.sku === p.sku).length} records on page
                                                     </span>
                                                 )}
                                             </div>
@@ -218,7 +219,7 @@ export const PricingProductsTable: React.FC = () => {
                                     ) : (
                                         <div className="flex flex-col items-end">
                                             <span className="text-[var(--theme-text-primary)] font-mono font-semibold text-xs tabular-nums">
-                                                {currencySymbol} {retail.toLocaleString()}
+                                                {currencySymbol} {(effectivePrice(p) || 0).toLocaleString()}
                                             </span>
                                             <span className="text-[10px] text-[var(--theme-text-secondary)] font-mono tabular-nums">Cost: {cost !== undefined ? cost.toLocaleString() : 'N/A'}</span>
                                         </div>
