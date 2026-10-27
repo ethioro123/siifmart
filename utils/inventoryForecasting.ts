@@ -5,25 +5,34 @@ import { calculateAverageDailySales, calculateReorderPoint } from './inventory';
 // STOCK FORECASTING
 // ============================================================================
 
+const EXCLUDED_SALE_STATUSES = new Set(['Pending', 'pending', 'Refunded', 'refunded', 'Cancelled', 'cancelled', 'Draft', 'draft', 'Void', 'void']);
+
 /**
  * Forecast demand for next period using simple moving average
  */
 export function forecastDemand(
     productId: string,
     salesHistory: SaleRecord[],
-    periods: number = 7
+    periods: number = 7,
+    siteId?: string
 ): number {
-    const recentSales = salesHistory
+    const validSales = (salesHistory || []).filter(sale => {
+        if (!sale.status || EXCLUDED_SALE_STATUSES.has(sale.status)) return false;
+        if (siteId && sale.siteId && sale.siteId !== siteId) return false;
+        return true;
+    });
+
+    const recentSales = validSales
         .slice(0, periods)
         .map(sale => {
-            const item = sale.items.find(i => i.id === productId);
+            const item = sale.items.find(i => i.id === productId || (i as any).productId === productId);
             return item ? item.quantity : 0;
         });
 
     if (recentSales.length === 0) return 0;
 
     const average = recentSales.reduce((sum, qty) => sum + qty, 0) / recentSales.length;
-    return Math.ceil(average);
+    return Math.round(average);
 }
 
 /**
@@ -32,13 +41,20 @@ export function forecastDemand(
 export function forecastWithTrend(
     productId: string,
     salesHistory: SaleRecord[],
-    periodsAhead: number = 7
+    periodsAhead: number = 7,
+    siteId?: string
 ): number {
+    const validSales = (salesHistory || []).filter(sale => {
+        if (!sale.status || EXCLUDED_SALE_STATUSES.has(sale.status)) return false;
+        if (siteId && sale.siteId && sale.siteId !== siteId) return false;
+        return true;
+    });
+
     const quantities: number[] = [];
 
-    for (let i = 0; i < Math.min(30, salesHistory.length); i++) {
-        const sale = salesHistory[i];
-        const item = sale.items.find(it => it.id === productId);
+    for (let i = 0; i < Math.min(30, validSales.length); i++) {
+        const sale = validSales[i];
+        const item = sale.items.find(it => it.id === productId || (it as any).productId === productId);
         quantities.push(item ? item.quantity : 0);
     }
 

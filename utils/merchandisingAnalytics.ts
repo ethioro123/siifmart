@@ -45,7 +45,7 @@ export const computeProductSalesMetrics = (
         if (!order.status || EXCLUDED_STATUSES.has(order.status)) continue;
 
         // Multi-Country Sovereignty: Kenya and Ethiopia data never query or merge across borders
-        const orderCountry = order.countryCode || (order as any).country_code || (order as any).country;
+        const orderCountry = (order as any).countryCode || (order as any).country_code || (order as any).country;
         const productCountry = (product as any).countryCode || (product as any).country_code || (product as any).country;
         if (productCountry && orderCountry && productCountry.toUpperCase() !== orderCountry.toUpperCase()) {
             continue;

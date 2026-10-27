@@ -114,24 +114,30 @@ export function calculateReorderPoint(
     return Math.ceil(reorderPoint);
 }
 
+const EXCLUDED_INVENTORY_SALE_STATUSES = new Set(['Pending', 'pending', 'Refunded', 'refunded', 'Cancelled', 'cancelled', 'Draft', 'draft', 'Void', 'void']);
+
 /**
  * Calculate average daily sales for a product
  */
 export function calculateAverageDailySales(
     productId: string,
     salesHistory: SaleRecord[],
-    days: number = 30
+    days: number = 30,
+    siteId?: string
 ): number {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    const relevantSales = salesHistory.filter(sale =>
-        new Date(sale.date) >= cutoffDate
-    );
+    const relevantSales = (salesHistory || []).filter(sale => {
+        if (!sale.status || EXCLUDED_INVENTORY_SALE_STATUSES.has(sale.status)) return false;
+        if (siteId && sale.siteId && sale.siteId !== siteId) return false;
+        const sDate = new Date(sale.date || (sale as any).createdAt || 0);
+        return sDate >= cutoffDate;
+    });
 
     let totalQuantity = 0;
     for (const sale of relevantSales) {
-        const item = sale.items.find(i => i.id === productId);
+        const item = sale.items.find(i => i.id === productId || (i as any).productId === productId);
         if (item) totalQuantity += item.quantity;
     }
 

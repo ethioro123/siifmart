@@ -26,6 +26,22 @@ export const mapPricingRuleRow = (row: PricingRuleRow): PricingRule => ({
     isActive: row.is_active
 });
 
+export interface PricingRulesPageInput {
+    countryCode: string;
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    status?: 'all' | 'enabled' | 'paused';
+}
+
+export interface PricingRulesPageResult {
+    rules: PricingRule[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
 export const pricingRulesService = {
     /** Rules are always scoped to a single country (sovereignty). */
     async getAll(countryCode: string): Promise<PricingRule[]> {
@@ -42,17 +58,80 @@ export const pricingRulesService = {
         return ((data || []) as PricingRuleRow[]).map(mapPricingRuleRow);
     },
 
+    /** Returns all active rules for cross-rule simulation and conflict detection. */
+    async getAllActive(countryCode: string): Promise<PricingRule[]> {
+        const { data, error } = await supabase
+            .from('pricing_rules')
+            .select(COLUMNS)
+            .eq('country_code', countryCode.toUpperCase())
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .limit(100);
+        if (error) {
+            logger.error('pricingRulesService', 'getAllActive failed', error);
+            throw error;
+        }
+        return ((data || []) as PricingRuleRow[]).map(mapPricingRuleRow);
+    },
+
+    /** Bounded pagination, search and status filtering for pricing rules. */
+    async getPage(input: PricingRulesPageInput): Promise<PricingRulesPageResult> {
+        const pageSize = Math.max(1, Math.min(input.pageSize || 25, 100));
+        const page = Math.max(1, input.page || 1);
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+
+        let query = supabase
+            .from('pricing_rules')
+            .select(COLUMNS, { count: 'exact' })
+            .eq('country_code', input.countryCode.toUpperCase());
+
+        if (input.status === 'enabled') {
+            query = query.eq('is_active', true);
+        } else if (input.status === 'paused') {
+            query = query.eq('is_active', false);
+        }
+
+        if (input.search && input.search.trim()) {
+            query = query.ilike('name', `%${input.search.trim()}%`);
+        }
+
+        const { data, count, error } = await query
+            .order('created_at', { ascending: false })
+            .range(from, to);
+
+        if (error) {
+            logger.error('pricingRulesService', 'getPage failed', error);
+            throw error;
+        }
+
+        const totalCount = count ?? 0;
+        const rules = ((data || []) as PricingRuleRow[]).map(mapPricingRuleRow);
+        return {
+            rules,
+            totalCount,
+            page,
+            pageSize,
+            totalPages: Math.max(1, Math.ceil(totalCount / pageSize))
+        };
+    },
+
     async create(rule: Omit<PricingRule, 'id'>, countryCode: string, createdBy: string): Promise<PricingRule> {
+        // Normalize action identifier to match database CHECK constraint
+        const normalizedAction: PricingRule['action'] = (rule.action as any) === 'Set Margin %' || rule.action?.includes('Margin')
+            ? 'Set to Cost + Margin'
+            : rule.action;
+
         const { data, error } = await supabase
             .from('pricing_rules')
             .insert({
                 country_code: countryCode.toUpperCase(),
-                name: rule.name,
+                name: rule.name.trim(),
                 target_category: rule.targetCategory,
                 condition: rule.condition,
-                threshold: rule.threshold,
-                action: rule.action,
-                value: rule.value,
+                threshold: Math.round(Number(rule.threshold) || 0),
+                action: normalizedAction,
+                value: Math.round(Number(rule.value) || 0),
                 is_active: rule.isActive,
                 created_by: createdBy
             })

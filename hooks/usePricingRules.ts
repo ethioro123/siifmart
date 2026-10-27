@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { pricingRulesService } from '../services/pricing-rules.service';
 import { useStore } from '../contexts/CentralStore';
@@ -7,16 +8,27 @@ import { logger } from '../utils/logger';
 
 const KEY = 'pricing_rules';
 
-/** Persisted, country-scoped pricing rules. Loaded only when Merchandising is mounted. */
+/** Persisted, country-scoped pricing rules with bounded pagination, search, and filters. */
 export function usePricingRules(countryCode: string) {
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(25);
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'enabled' | 'paused'>('all');
+
     const queryClient = useQueryClient();
     const { user } = useStore();
     const { addNotification } = useData();
 
     const query = useQuery({
-        queryKey: [KEY, countryCode],
-        queryFn: () => pricingRulesService.getAll(countryCode),
-        staleTime: 10 * 60 * 1000
+        queryKey: [KEY, countryCode, page, pageSize, search, statusFilter],
+        queryFn: () => pricingRulesService.getPage({
+            countryCode,
+            page,
+            pageSize,
+            search,
+            status: statusFilter
+        }),
+        staleTime: 5 * 60 * 1000
     });
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: [KEY, countryCode] });
@@ -26,7 +38,7 @@ export function usePricingRules(countryCode: string) {
             pricingRulesService.create(rule, countryCode, user?.name || 'Unknown'),
         onSuccess: (rule) => {
             invalidate();
-            addNotification('success', `Automation Rule '${rule.name}' saved.`);
+            addNotification('success', `Pricing Rule '${rule.name}' saved and enabled.`);
         },
         onError: (error: Error) => {
             logger.error('usePricingRules', 'create failed', error);
@@ -47,7 +59,7 @@ export function usePricingRules(countryCode: string) {
         mutationFn: (id: string) => pricingRulesService.remove(id),
         onSuccess: () => {
             invalidate();
-            addNotification('info', 'Automation Rule deleted');
+            addNotification('info', 'Pricing Rule deleted');
         },
         onError: (error: Error) => {
             logger.error('usePricingRules', 'delete failed', error);
@@ -55,5 +67,22 @@ export function usePricingRules(countryCode: string) {
         }
     });
 
-    return { rules: query.data ?? [], isLoading: query.isLoading, createRule, toggleRule, deleteRule };
+    return {
+        rules: query.data?.rules ?? [],
+        totalCount: query.data?.totalCount ?? 0,
+        totalPages: query.data?.totalPages ?? 1,
+        page,
+        setPage,
+        pageSize,
+        setPageSize,
+        search,
+        setSearch,
+        statusFilter,
+        setStatusFilter,
+        isLoading: query.isLoading,
+        createRule,
+        toggleRule,
+        deleteRule,
+        fetchAllActive: () => pricingRulesService.getAllActive(countryCode)
+    };
 }

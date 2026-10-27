@@ -33,6 +33,7 @@ export interface Product {
   shelfPosition?: ShelfPosition | string;
   competitorPrice?: number;
   salesVelocity?: 'High' | 'Medium' | 'Low';
+  unitsSold30d?: number; // Recorded units sold over the last 30 days
   posReceivedAt?: string; // Timestamp when product was received/scanned at POS
   pos_received_at?: string; // Supabase compatibility
   posReceivedBy?: string; // Who received the product at POS

@@ -54,6 +54,9 @@ export const salesService = {
             if (filters.status && filters.status !== 'All') {
                 query = query.eq('status', filters.status);
             }
+            if (filters.countryCode) {
+                query = query.eq('country_code', filters.countryCode.toUpperCase());
+            }
             if (filters.method && filters.method !== 'All') {
                 query = query.eq('payment_method', filters.method);
             }

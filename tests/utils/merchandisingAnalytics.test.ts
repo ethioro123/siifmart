@@ -130,7 +130,7 @@ describe('Merchandising Analytics Engine', () => {
                 tax: 0,
                 total: 300,
                 method: 'Cash',
-                status: 'Cancelled',
+                status: 'Cancelled' as any,
                 items: [{ ...baseProduct, quantity: 15, price: 150 }]
             },
             {

@@ -31,7 +31,7 @@ export interface SaleRecord {
   taxBreakdown?: { name: string; rate: number; amount: number; compound: boolean }[];
   total: number;
   method: PaymentMethod;
-  status: 'Completed' | 'Pending' | 'Refunded' | 'Partially Refunded';
+  status: 'Completed' | 'Pending' | 'Refunded' | 'Partially Refunded' | 'Cancelled' | 'Void';
   items: CartItem[];
   itemCount?: number;
   amountTendered?: number;
@@ -50,6 +50,8 @@ export interface SaleRecord {
   mobilePaymentChannel?: string;
   mobileTransactionRef?: string;
   customerPhone?: string;
+  countryCode?: string;
+  country_code?: string;
 }
 
 export type ReturnReason = 'Defective' | 'Expired' | 'Customer Changed Mind' | 'Wrong Item';
