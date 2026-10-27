@@ -11,6 +11,8 @@ export const receiving: TranslationBlock = {
 
     // RECEIVE Tab UI
     scanBarcodeOrSku: { en: 'Scan barcode or enter SKU...', am: 'ባርኮድ ስካን ወይም SKU ያስገቡ...', or: 'Baarkoodii iskaanii ykn SKU galchi...' },
+    searchReceivePlaceholder: { en: 'Scan barcode / SKU, or search PO, supplier...', am: 'ባርኮድ / SKU ስካን ያድርጉ፣ ወይም PO፣ አቅራቢ ይፈልጉ...', or: 'Baarkoodii / SKU iskaan godhi, ykn PO, dhiyeessaa barbaadi...' },
+    clearSearch: { en: 'Clear search', am: 'ፍለጋ አጽዳ', or: 'Barbaacha Haqi' },
     submitScan: { en: 'Submit', am: 'አስገባ', or: 'Galchi' },
     goScan: { en: 'Go', am: 'ሂድ', or: 'Deemi' },
     unresolvedBarcodes: { en: 'Unresolved Barcodes', am: 'ያልተፈቱ ባርኮዶች', or: 'Baarkoodii Hin Furamne' },
@@ -23,6 +25,7 @@ export const receiving: TranslationBlock = {
     variantLabel: { en: 'Variant', am: 'ልዩነት', or: 'Gosoota' },
     newLabel: { en: 'New', am: 'አዲስ', or: 'Haaraa' },
     unitsLabel: { en: 'Units', am: 'ክፍሎች', or: 'Kutaa' },
+    unitsCount: { en: '{count} Units', am: '{count} ክፍሎች', or: '{count} Kutaa' },
     progressLabel: { en: 'Progress', am: 'ሂደት', or: 'Adeemsa' },
     reprintLabel: { en: 'Reprint Label', am: 'መለያ እንደገና አትም', or: 'Leeblii Irra Maxxansi' },
     receiveAction: { en: 'Receive', am: 'ተቀበል', or: 'Fudhachuu' },
@@ -38,16 +41,23 @@ export const receiving: TranslationBlock = {
     itemPlural: { en: 'items', am: 'ዕቃዎች', or: 'meeshalee' },
     receiveItemsTitle: { en: 'Receive Items', am: 'ዕቃዎችን ተቀበል', or: 'Meeshaa Fudhadhu' },
     noHistoryFound: { en: 'No history found', am: 'ምንም ታሪክ አልተገኘም', or: 'Seenaan hin argamne' },
-    searchManifestSupplier: { en: 'Search Manifest / Supplier...', am: 'ዝርዝር / አቅራቢ ፈልግ...', or: 'Gabaasa / Qophessaa Barbaadi...' },
+    searchManifestSupplier: { en: 'Search Manifest / Supplier...', am: 'ዝርዝር / አቅራቢ ፈልግ...', or: 'Gabaasa / Dhiyeessaa Barbaadi...' },
 
     // Receiving Section
     noApprovedPOs: { en: 'No Approved Purchase Orders', am: 'ምንም የተጸድቁ የግዢ ትዕዛዞች የሉም', or: 'Ajajoota bittaa mirkaneeffaman hin jiran' },
     approvedPOsWillAppear: { en: 'Approved Purchase Orders will appear here.', am: 'የተፈቀዱ የግዢ ትዕዛዞች እዚህ ይታያሉ።', or: 'Ajajoonni bittaa mirkanaa\'an asitti mul\'atu.' },
     noApprovedManifests: { en: 'No Approved Manifests', am: 'ምንም የተጸድቁ ዝርዝሮች የሉም', or: 'Gabaasa mirkanaa\'e hin jiru' },
     approvedManifestsWillAppear: { en: 'Approved Manifests will appear here.', am: 'የተፈቀዱ ዝርዝሮች እዚህ ይታያሉ።', or: 'Gabaasaaleen mirkanaa\'an asitti mul\'atu.' },
+    approvedPOsNotice: {
+        en: 'Approved POs appear at their destination warehouse or DC. Receivers see tasks assigned to them; ask the warehouse manager to assign the RECEIVE task in Fulfillment → Assign.',
+        am: 'የጸደቁ የግዢ ትዕዛዞች በመድረሻ መጋዘናቸው ወይም DC ይታያሉ። ተቀባዮች የተመደቡላቸውን ስራዎች ያያሉ፤ የመጋዘኑ ስራ አስኪያጅ በFulfillment → Assign ውስጥ የመቀበል ስራ እንዲመድብ ይጠይቁ።',
+        or: 'Ajajoonni bittaa mirkanaa\'an manna-kuusaa ykn DC geessaa irratti mul\'atu. Fudhattoonni hojii isaaniif ramadame argu; hogganaa manna-kuusaa Fulfillment → Assign keessatti hojii FUDHANNAA akka ramadu gaafadhaa.'
+    },
     unloadingRequired: { en: 'Unloading Not Complete', am: 'ማውረድ አልተጠናቀቀም', or: 'Buusiisuun Hin Xumuramne' },
     unloadingMustComplete: { en: 'Please confirm unloading at the dock before receiving', am: 'መቀበል ከመጀመርዎ በፊት እባክዎ በመርከቡ ማውረድን ያረጋግጡ', or: 'Maaloo fudhachuu dura buufata irratti buusisuu mirkaneessi' },
     receivingQueue: { en: 'Receiving Queue', am: 'የመቀበያ ወረፋ', or: 'Tarree Fudhannaa' },
+    queueShort: { en: 'Queue', am: 'ወረፋ', or: 'Tarree' },
+    activeBadge: { en: 'Active', am: 'ንቁ', or: 'Hojjataa Jira' },
     noItemsReceivedYet: { en: 'No items received yet', am: 'ምንም ዕቃዎች እስካሁን አልተቀበሉም', or: 'Meeshaleen ammaatti hin fudhatamne' },
     reprintLabels: { en: 'Reprint labels for this item', am: 'ለዚህ ዕቃ መለያዎችን እንደገና አትም', or: 'Meesha kanaaf mallattoolee irra deebi\'ii maxxansi' },
     generateNewSKU: { en: 'Generate New SKU', am: 'አዲስ SKU ፍጠር', or: 'SKU Haaraa Uumu' },
@@ -62,7 +72,7 @@ export const receiving: TranslationBlock = {
 
     // Additional receiving tab keys
     scanDiagnostics: { en: 'Scan Diagnostics', am: 'የምርመራ ውጤት', or: 'Gabaasa Iskaanii' },
-    process: { en: 'Process', am: 'ማቀነባበር', or: 'Adeemsi' },
+    process: { en: 'Process', am: 'ማቀነባበር', or: 'Hojjadhu' },
     history: { en: 'History', am: 'ታሪክ', or: 'Seenaa' },
     pendingManifests: { en: 'Pending Manifests', am: 'በመጠባበቅ ላይ ያሉ ዝርዝሮች', or: 'Gabaasa Eeggataa Jiru' },
     awaitingProcessing: { en: 'Awaiting Processing', am: 'ሂደት በመጠባበቅ ላይ', or: 'Hojii Eeggachaa jira' },
@@ -74,6 +84,22 @@ export const receiving: TranslationBlock = {
     inboundVerified: { en: 'Inbound Verified', am: 'ገቢው ተረጋግጧል', or: 'Seensi Mirkanaa\'eera' },
     awaitingFinalManifest: { en: 'Awaiting final manifest authentication', am: 'የመጨረሻውን ዝርዝር ማረጋገጫ በመጠባበቅ ላይ', or: 'Mirkaneessa gabaasa dhumaa eeggachaa' },
     authenticateManifest: { en: 'Authenticate Manifest', am: 'ዝርዝሩን አረጋግጥ', or: 'Gabaasa Mirkaneessi' },
+    reviewAction: { en: 'Review', am: 'ከልስ', or: 'Irra Deebi\'ii Ilaali' },
+    openManifestItemsPrompt: {
+        en: 'Open this manifest’s items to begin receiving. Stock changes only after you confirm the receipt.',
+        am: 'መቀበል ለመጀመር የዚህን ማኒፌስት ዕቃዎች ይክፈቱ። ክምችት የሚቀየረው ቅበላውን ካረጋገጡ በኋላ ብቻ ነው።',
+        or: 'Fudhachuu jalqabuuf meeshaalee gabaasa kanaa bani. Qabeenyi kan jijjiiramu erga fudhannaa mirkaneessite qofa.'
+    },
+    loadingItems: { en: 'Loading items…', am: 'ዕቃዎች እየጫኑ ነው…', or: 'Meeshaaleen fe\'amaa jiru…' },
+    loadItemsToReceive: { en: 'Load items to receive', am: 'ለመቀበል ዕቃዎችን ጫን', or: 'Meeshaalee fudhataman fe\'i' },
+    blindCountBadge: { en: 'received · blind count', am: 'ተቀብሏል · የዕውር ቆጠራ', or: 'fudhatameera · lakkoofsa ija-cufaa' },
+    blindAudit: { en: 'Blind Audit', am: 'የዕውር ኦዲት', or: 'To\'annoo Ija-Cufaa' },
+    blindModeActiveTitle: { en: 'Zero-Trust Blind Receiving Mode Active', am: 'የዜሮ-እምነት ዕውር ቅበላ ሁኔታ ነቅቷል', or: 'Haalli Lakkoofsa Ija-Cufaa Hojiirra Jira' },
+    blindModeActiveDesc: {
+        en: 'Expected piece quantities are masked to enforce unbiased physical count at intake dock.',
+        am: 'ትክክለኛውን አካላዊ ቆጠራ በመርከቡ ላይ ለማስከበር የሚጠበቁ የዕቃ ብዛቶች ተደብቀዋል።',
+        or: 'Lakkoofsi sirrii fi loogii hin qabne akka gaggeeffamuuf baay\'inni eegamu dhokfameera.'
+    },
     resolveUnknownBarcode: { en: 'Resolve Unknown Barcode', am: 'ያልታወቀ ባርኮድ ፍታ', or: 'Baarkoodii Hin Beekamne Furi' },
     searchProductToMap: { en: 'Search product to map...', am: 'ለማገናኘት ምርት ፈልግ...', or: 'Meeshaa walqabsiisuuf barbaadi...' },
     advancedPrinting: { en: 'Advanced Printing', am: 'የላቀ ህትመት', or: 'Maxxansa Leeblii' },
@@ -88,7 +114,7 @@ export const receiving: TranslationBlock = {
     generateLabels: { en: 'Generate Labels', am: 'መለያዎችን ፍጠር', or: 'Leebliwwan Uumi' },
     totalOrdered: { en: 'Total Ordered', am: 'ጠቅላላ የታዘዘ', or: 'Waliigala Ajajame' },
     totalReceived: { en: 'Total Received', am: 'ጠቅላላ የተቀበለ', or: 'Waliigala Fudhatame' },
-    discrepancyDetected: { en: 'Discrepancy Detected', am: 'ልዩነት ተገኝቷል', or: 'Garaagarummaan Argameera' },
+    discrepancyDetected: { en: 'Discrepancy Detected', am: 'ልዩነት ተገኝቷል', or: 'Baqiyyaan Argameera' },
     missingItems: { en: 'missing items', am: 'የጎደሉ ዕቃዎች', or: 'meeshalee hir\'atan' },
     partialReceipt: { en: 'Partial Receipt', am: 'ከፊል ቅበላ', or: 'Fudhannaa Gariixee' },
     productAttributes: { en: 'Product Attributes', am: 'የምርት መገለጫዎች', or: 'Amaloota Oomishaa' },
@@ -134,4 +160,70 @@ export const receiving: TranslationBlock = {
     bayFullAssignNew: { en: 'Primary Bay Full? Assign Alternate Bay', am: 'ዋናው ቦታ ሞልቷል? አዲስ ቦታ መድብ', or: 'Bakki duraa guuteeraa? Bakka haaraa ramadi' },
     overflowModeActive: { en: 'OVERFLOW MODE: Primary bay full — scanning alternate storage bay', am: 'የትርፍ ቦታ ሁኔታ፡ ዋናው ቦታ ስለሞላ አዲስ ቦታ እየተፈለገ ነው', or: 'HAALA DABALATAA: Bakki duraa guuteera — bakka dabalataa barbaadaa jira' },
     existingLocations: { en: 'Existing Stock Locations for SKU', am: 'ለዚህ SKU ያሉ ነባር ቦታዎች', or: 'Bakkeewwan meeshaa kanaa kan turan' },
+
+    // Step Indicator & Modal Workflow
+    manifestIntake: { en: 'Manifest Intake', am: 'የማኒፌስት ቅበላ', or: 'Simannaa Gabaasa Meeshaa' },
+    poAndOrigin: { en: 'PO & Origin', am: 'PO እና መነሻ', or: 'PO fi Madda' },
+    qualityBatch: { en: 'Quality & Count', am: 'ጥራት እና ቆጠራ', or: 'Qulqullina fi Lakkoofsa' },
+    countedStatus: { en: 'Counted', am: 'ተቆጥሯል', or: 'Lakkaa\'ameera' },
+    lotExpiryQty: { en: 'Lot, Expiry & Qty', am: 'ሎት፣ ማለቂያ እና ብዛት', or: 'Lottii, Yeroo fi Baay\'ina' },
+    dockHandover: { en: 'Review & Handover', am: 'ግምገማ እና ርክክብ', or: 'Irra-Deebii fi Dabarsuu' },
+    lockedCountReq: { en: 'Locked (Count Req)', am: 'ተቆልፏል (ቆጠራ ያስፈልጋል)', or: 'Cufamaadha (Lakkoofsa Barbaada)' },
+    printAndPutaway: { en: 'Print & Putaway', am: 'አትም እና አስቀምጥ', or: 'Maxxansi fi Kaa\'i' },
+    startQualityAndCount: { en: 'Start Quality & Count', am: 'ጥራት እና ቆጠራ ጀምር', or: 'Qulqullina fi Lakkoofsa Jalqabi' },
+    reviewAndHandover: { en: 'Review & Handover', am: 'ግምገማ እና ርክክብ', or: 'Irra-Deebii fi Dabarsuu' },
+    countItemsToProceed: { en: 'Count Items to Proceed', am: 'ለመቀጠል ዕቃዎችን ይቁጠሩ', or: 'Itti Fufuuf Meeshaalee Lakkaa\'i' },
+    confirmAndCreatePutaway: { en: 'Confirm & Create Putaway', am: 'አረጋግጥ እና የማስቀመጥ ስራ ፍጠር', or: 'Mirkaneessi fi Kaawwisa Uumi' },
+    back: { en: 'Back', am: 'ተመለስ', or: 'Duubatti' },
+    enterPositiveCountAlert: {
+        en: 'Enter a positive physical count for each split, or remove unused splits, before continuing.',
+        am: 'እባክዎ ከመቀጠልዎ በፊት ለእያንዳንዱ ክፍል ትክክለኛ የቆጠራ ብዛት ያስገቡ ወይም ያልተጠቀሙባቸውን ክፍሎች ያስወግዱ።',
+        or: 'Maaloo itti fufuu dura baay\'ina lakkoofsaa sirrii galchi, ykn kutaalee hin barbaachifne haqi.'
+    },
+    inboundManifestIntake: { en: 'Inbound Manifest Intake', am: 'የገቢ ማኒፌስት ቅበላ', or: 'Simannaa Gabaasa Meeshaa Galu' },
+    expected: { en: 'Expected', am: 'የሚጠበቀው', or: 'Kan Eegamu' },
+    intakeCount: { en: 'Intake Count', am: 'የቅበላ ቆጠራ', or: 'Lakkoofsa Simannaa' },
+    addSplit: { en: 'Add Split', am: 'ክፍል ጨምር', or: 'Kutaa Dabali' },
+    splitNum: { en: 'Split #{num}', am: 'ክፍል #{num}', or: 'Kutaa #{num}' },
+    reviewBeforeSaving: { en: 'Review before saving receipt', am: 'ደረሰኙን ከማስቀመጥዎ በፊት ይገምግሙ', or: 'Fudhannaa galmeessuu dura irra deebi\'ii ilaali' },
+    countedNotSaved: { en: '{count} Counted · Not saved', am: '{count} ተቆጥሯል · አልተቀመጠም', or: '{count} Lakkaa\'ame · Hin Galmoofne' },
+    recordedSplitsTitle: { en: 'Recorded Pallet / Lot Splits', am: 'የተመዘገቡ የፓሌት / ሎት ክፍሎች', or: 'Kutaalee Paaleettii / Lottii Galmaa\'an' },
+    dockHandoverActionsTitle: { en: 'Dock Handover & Storage Slotting Actions', am: 'የመርከብ ርክክብ እና የማከማቻ ቦታ እርምጃዎች', or: 'Hojiiwwan Dabarsaa Buufataa fi Bakka Kaawwisaa' },
+    printPalletAndIntakeLabels: { en: 'Print Pallet & Intake Labels', am: 'የፓሌት እና የቅበላ መለያዎችን አትም', or: 'Leeblii Paaleettii fi Seensaa Maxxansi' },
+    dateReceived: { en: 'Date Rcvd:', am: 'የተቀበለበት ቀን:', or: 'Guyyaa Fudhatame:' },
+    today: { en: 'Today', am: 'ዛሬ', or: 'Har\'a' },
+    autoGenerate: { en: 'Auto-Generate', am: 'በራስ-ሰር አመንጭ', or: 'Ofumaan Uumi' },
+    batchLotNo: { en: 'Batch / Lot No', am: 'የባች / ሎት ቁጥር', or: 'Lakkoofsa Baachii / Lottii' },
+    package: { en: 'package', am: 'ጥቅል', or: 'paakeejii' },
+    packages: { en: 'packages', am: 'ጥቅሎች', or: 'paakeejiiwwan' },
+    labelCopies: { en: 'Label copies', am: 'የመለያ ቅጂዎች', or: 'Koppiiwwan Leeblii' },
+    countedQtyOnLabelNotice: {
+        en: 'Counted quantity on this label: {count} units. Copies do not change the received quantity.',
+        am: 'በዚህ መለያ ላይ የተቆጠረው ብዛት፡ {count} ክፍሎች። ቅጂዎች የተቀበሉትን ብዛት አይቀይሩም።',
+        or: 'Baay\'inni leeblii kana irratti lakkaa\'ame: kutaa {count}. Koppiin baay\'ina fudhatame hin jijjiiru.'
+    },
+    intakeLabelSizeNotice: {
+        en: 'Intake labels require Medium (3 × 2 in) or larger for readable lot details and scannable codes.',
+        am: 'የቅበላ መለያዎች ለሚነበቡ የሎት ዝርዝሮች እና ለሚቃኙ ኮዶች መካከለኛ (3 × 2 ኢንች) ወይም ከዚያ በላይ ያስፈልጋቸዋል።',
+        or: 'Leebliin seensaa odeeffannoo lottii fi koodii dubbifamuuf Giddugaleessa (incii 3 × 2) ykn isaa ol barbaada.'
+    },
+    putawayCartonLpn: { en: 'Putaway & Carton LPN (Recommended)', am: 'የማስቀመጫ እና የካርቶን LPN (የሚመከር)', or: 'LPN Kaawwisaa fi Kaartoonii (Kan Filatamu)' },
+    unitBarcodeSticker: { en: 'Unit Barcode Sticker', am: 'የክፍል ባርኮድ ተለጣፊ', or: 'Waraqaa Baarkoodii Kutaa' },
+    inventoryLabelModeNotice: {
+        en: 'Inventory Label Mode: Inbound receiving labels identify SKU, batch & barcode. Retail shelf price tags are printed in POS Command / Store Shelf Hub to maintain scanner price parity.',
+        am: 'የክምችት መለያ ሁኔታ፡ የገቢ ቅበላ መለያዎች SKU፣ ባች እና ባርኮድን ይለያሉ። የችርቻሮ መደርደሪያ ዋጋ መለያዎች የዋጋ ተመሳሳይነትን ለመጠበቅ በPOS Command / Store Shelf Hub ይታተማሉ።',
+        or: 'Haala Leeblii Qabeenyaa: Leebliin simannaa seensaa SKU, baachii fi baarkoodii adda baasa. Gatiin meeshaa suuqii walsimsiisuuf POS Command / Wiirtuu Suuqii keessatti maxxanfama.'
+    },
+    printOutputPreview: { en: 'Print Output Preview', am: 'የህትመት ውጤት ቅድመ-ዕይታ', or: 'Dur-Agarsiisa Maxxansaa' },
+    labelLayout: { en: 'Label layout', am: 'የመለያ አቀማመጥ', or: 'Boca Leeblii' },
+
+    // History Relative Time and Badges
+    justNow: { en: 'Just now', am: 'አሁን', or: 'Amma' },
+    minutesAgo: { en: '{count}m ago', am: 'ከ{count}ደቂቃ በፊት', or: 'Daqiiqaa {count} dura' },
+    hoursAgo: { en: '{count}h ago', am: 'ከ{count}ሰዓት በፊት', or: 'Sa\'aatii {count} dura' },
+    partial: { en: 'Partial', am: 'ከፊል', or: 'Gariixee' },
+    returned: { en: 'Returned', am: 'የተመለሰ', or: 'Kan Deebi\'e' },
+    by: { en: 'By', am: 'በ', or: 'Kan' },
+    stepInspectionRequired: { en: 'Items must be counted and inspected before dock handover.', am: 'ዕቃዎች ከመተላለፋቸው በፊት መቆጠር እና መፈተሽ አለባቸው።', or: 'Meeshaaleen buufata irratti dabarfamuu dura lakkaa\'amanii fi qoratamu qabu.' },
+    mappedToProduct: { en: 'Mapped to {name}', am: 'ከ{name} ጋር ተገናኝቷል', or: '{name} wajjin walqabateera' },
 };
