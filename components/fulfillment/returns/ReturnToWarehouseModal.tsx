@@ -29,6 +29,27 @@ const RETURN_REASONS = [
 
 const RETURN_CONDITIONS = ['Good', 'Damaged', 'Expired'];
 
+const getReasonLabel = (reason: string, t: any) => {
+    switch (reason) {
+        case 'Wrong Item Picked': return t('warehouse.reasonWrongItemPicked');
+        case 'Damaged': return t('warehouse.conditionDamaged');
+        case 'Overstock': return t('warehouse.reasonOverstock');
+        case 'Customer Refused': return t('warehouse.reasonCustomerRefused');
+        case 'Quality Issue': return t('warehouse.reasonQualityIssue');
+        case 'Expired': return t('warehouse.conditionExpired');
+        default: return reason;
+    }
+};
+
+const getConditionLabel = (condition: string, t: any) => {
+    switch (condition) {
+        case 'Good': return t('warehouse.conditionGood');
+        case 'Damaged': return t('warehouse.conditionDamaged');
+        case 'Expired': return t('warehouse.conditionExpired');
+        default: return condition;
+    }
+};
+
 interface ReturnItem {
     productId: string;
     name: string;
@@ -152,7 +173,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                     }
 
                     if (activeDownstream.length > 0) {
-                        addNotification('info', `${activeDownstream.length} active job(s) cancelled due to return`);
+                        addNotification('info', t('warehouse.activeJobsCancelledNotice', { count: activeDownstream.length }));
                     }
                 } catch (markErr: any) {
                     logger.error('ReturnToWarehouseModal', 'Failed to mark job items as returned:', markErr);
@@ -160,9 +181,9 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
             }
 
             setStep('done');
-            addNotification('success', `${selectedItems.length} item(s) submitted for return approval`);
+            addNotification('success', t('warehouse.itemsSubmittedForReturnApproval', { count: selectedItems.length }));
         } catch (err: any) {
-            addNotification('alert', 'Failed to submit return: ' + (err.message || 'Unknown error'));
+            addNotification('alert', t('warehouse.failedToSubmitReturn') + (err.message || 'Unknown error'));
         } finally {
             setIsSubmitting(false);
         }
@@ -180,15 +201,15 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                         </div>
                         <div>
                             <h2 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight leading-tight">
-                                {returnType === 'procurement' ? 'Return to Supplier / Warehouse' : 'Return to Warehouse'}
+                                {returnType === 'procurement' ? t('warehouse.returnToSupplierWarehouseTitle') : t('warehouse.returnToWarehouseTitle')}
                             </h2>
-                            <p className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5">Job {formatJobId(job)}</p>
+                            <p className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5">{t('warehouse.jobPrefix', { id: formatJobId(job) })}</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
                         aria-label="Close"
-                        className="w-10 h-10 min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] rounded-full transition-colors shrink-0 touch-manipulation"
+                        className="w-10 h-10 min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] rounded-full transition-colors shrink-0 touch-manipulation cursor-pointer"
                     >
                         <X size={18} />
                     </button>
@@ -202,19 +223,19 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                                 <CheckCircle className="text-emerald-500" size={32} />
                             </div>
                             <div className="text-center space-y-1.5">
-                                <h3 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">{t('warehouse.driverHub.jobCompletedSuccess') || 'Return Submitted'}</h3>
+                                <h3 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">{t('warehouse.returnSubmittedTitle')}</h3>
                                 <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm">
-                                    {selectedItems.length} item(s) are now pending {returnType === 'procurement' ? 'procurement manager' : 'warehouse manager'} approval.
+                                    {t('warehouse.itemsPendingApprovalNotice', { count: selectedItems.length, role: returnType === 'procurement' ? t('warehouse.procurementManagerRole') : t('warehouse.warehouseManagerRole') })}
                                 </p>
                                 <p className="text-[var(--theme-text-muted)] text-xs">
-                                    Once approved, stock will be added back to the warehouse inventory.
+                                    {t('warehouse.onceApprovedStockAddedNotice')}
                                 </p>
                             </div>
                             <button
                                 onClick={onClose}
                                 className="min-h-[44px] px-8 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl font-semibold text-xs transition-all active:scale-[0.98] touch-manipulation cursor-pointer"
                             >
-                                {t('warehouse.driverHub.done') || 'Done'}
+                                {t('warehouse.doneWord')}
                             </button>
                         </div>
                     ) : step === 'confirm' ? (
@@ -223,7 +244,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                             <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3.5">
                                 <AlertTriangle className="text-amber-500 shrink-0" size={18} />
                                 <p className="text-amber-600 dark:text-amber-300 text-xs sm:text-sm font-semibold leading-snug">
-                                    This will create <span className="font-bold text-[var(--theme-text-primary)]">{selectedItems.length}</span> pending stock adjustment(s) requiring {returnType === 'procurement' ? 'procurement manager / super admin' : 'warehouse manager'} approval.
+                                    {t('warehouse.confirmReturnStockAdjustmentWarning', { count: selectedItems.length, role: returnType === 'procurement' ? t('warehouse.procurementOrSuperAdminRole') : t('warehouse.warehouseManagerRole') })}
                                 </p>
                             </div>
 
@@ -231,10 +252,10 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                                 <table className="w-full min-w-[500px] text-left text-sm">
                                     <thead className="text-[11px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] uppercase font-semibold tracking-wider border-b border-[var(--theme-border)]">
                                         <tr>
-                                            <th className="px-4 py-3">Product</th>
-                                            <th className="px-4 py-3 text-center">Qty</th>
-                                            <th className="px-4 py-3">Reason</th>
-                                            <th className="px-4 py-3">Condition</th>
+                                            <th className="px-4 py-3">{t('warehouse.productHeader')}</th>
+                                            <th className="px-4 py-3 text-center">{t('warehouse.qtyHeader')}</th>
+                                            <th className="px-4 py-3">{t('warehouse.reasonHeader')}</th>
+                                            <th className="px-4 py-3">{t('warehouse.conditionHeader')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[var(--theme-border)]">
@@ -249,13 +270,13 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                                                         {item.returnQty}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-[var(--theme-text-secondary)] text-xs">{item.reason}</td>
+                                                <td className="px-4 py-3 text-[var(--theme-text-secondary)] text-xs">{getReasonLabel(item.reason, t)}</td>
                                                 <td className="px-4 py-3">
                                                     <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold ${item.condition === 'Good' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' :
                                                         item.condition === 'Damaged' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' :
                                                             'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
                                                         }`}>
-                                                        {item.condition}
+                                                        {getConditionLabel(item.condition, t)}
                                                     </span>
                                                 </td>
                                             </tr>
@@ -267,7 +288,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                     ) : (
                         <>
                             {/* Select Step */}
-                            <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm">Select items to return to warehouse inventory. A stock adjustment will be created pending manager approval.</p>
+                            <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm">{t('warehouse.returnModalInstructions')}</p>
 
                             <div className="space-y-3">
                                 {returnItems.map((item, idx) => (
@@ -291,14 +312,14 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                                                 <p className="text-[var(--theme-text-secondary)] text-[11px] font-mono">{item.sku}</p>
                                             </div>
                                             <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums whitespace-nowrap">
-                                                {returnType === 'procurement' ? 'Received' : 'Picked'}: {item.maxQty}
+                                                {returnType === 'procurement' ? t('warehouse.receivedQtyPrefix', { qty: item.maxQty }) : t('warehouse.pickedQtyPrefix', { qty: item.maxQty })}
                                             </span>
                                         </div>
 
                                         {item.selected && (
                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 pt-3 border-t border-[var(--theme-border)]">
                                                 <div>
-                                                    <label className="text-xs text-[var(--theme-text-secondary)] font-medium block mb-1">Return Qty</label>
+                                                    <label className="text-xs text-[var(--theme-text-secondary)] font-medium block mb-1">{t('warehouse.returnQtyLabel')}</label>
                                                     <input
                                                         type="number"
                                                         min={1}
@@ -309,29 +330,29 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                                                             handleFieldChange(idx, 'returnQty', val);
                                                         }}
                                                         className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-2.5 text-[var(--theme-text-primary)] text-sm font-mono font-bold focus:border-[var(--theme-primary)] focus:outline-none transition-colors touch-manipulation tabular-nums"
-                                                        aria-label="Return Quantity"
+                                                        aria-label={t('warehouse.returnQtyLabel')}
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs text-[var(--theme-text-secondary)] font-medium block mb-1">Reason</label>
+                                                    <label className="text-xs text-[var(--theme-text-secondary)] font-medium block mb-1">{t('warehouse.reasonLabel')}</label>
                                                     <select
                                                         value={item.reason}
                                                         onChange={(e) => handleFieldChange(idx, 'reason', e.target.value)}
                                                         className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-2.5 text-[var(--theme-text-primary)] text-sm focus:border-[var(--theme-primary)] focus:outline-none transition-colors touch-manipulation"
-                                                        aria-label="Return Reason"
+                                                        aria-label={t('warehouse.reasonLabel')}
                                                     >
-                                                        {RETURN_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+                                                        {RETURN_REASONS.map(r => <option key={r} value={r}>{getReasonLabel(r, t)}</option>)}
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label className="text-xs text-[var(--theme-text-secondary)] font-medium block mb-1">Condition</label>
+                                                    <label className="text-xs text-[var(--theme-text-secondary)] font-medium block mb-1">{t('warehouse.conditionLabel')}</label>
                                                     <select
                                                         value={item.condition}
                                                         onChange={(e) => handleFieldChange(idx, 'condition', e.target.value)}
                                                         className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-2.5 text-[var(--theme-text-primary)] text-sm focus:border-[var(--theme-primary)] focus:outline-none transition-colors touch-manipulation"
-                                                        aria-label="Item Condition"
+                                                        aria-label={t('warehouse.conditionLabel')}
                                                     >
-                                                        {RETURN_CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                                                        {RETURN_CONDITIONS.map(c => <option key={c} value={c}>{getConditionLabel(c, t)}</option>)}
                                                     </select>
                                                 </div>
                                             </div>
@@ -348,9 +369,9 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                     <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex items-center justify-between shrink-0">
                         <button
                             onClick={step === 'confirm' ? () => setStep('select') : onClose}
-                            className="min-h-[44px] px-5 py-2.5 rounded-xl border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] font-semibold text-xs transition-all touch-manipulation"
+                            className="min-h-[44px] px-5 py-2.5 rounded-xl border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] font-semibold text-xs transition-all touch-manipulation cursor-pointer"
                         >
-                            {step === 'confirm' ? 'Back' : 'Cancel'}
+                            {step === 'confirm' ? t('warehouse.backWord') : t('warehouse.cancelWord')}
                         </button>
 
                         {step === 'select' ? (
@@ -363,7 +384,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                                     }`}
                             >
                                 <Package size={16} />
-                                Review ({selectedItems.length})
+                                {t('warehouse.reviewCountButton', { count: selectedItems.length })}
                             </button>
                         ) : (
                             <button
@@ -372,7 +393,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                                 className="min-h-[44px] px-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 touch-manipulation active:scale-[0.98] cursor-pointer"
                             >
                                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Undo2 size={16} />}
-                                {isSubmitting ? 'Submitting...' : 'Submit for Approval'}
+                                {isSubmitting ? t('warehouse.submittingWord') : t('warehouse.submitForApprovalButton')}
                             </button>
                         )}
                     </div>

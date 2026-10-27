@@ -57,9 +57,9 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                 <div>
                     <h4 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2 uppercase tracking-wide">
                         <HistoryIcon size={18} className="text-[var(--theme-text-secondary)]" />
-                        Returns History
+                        {t('warehouse.returnsHistory')}
                     </h4>
-                    <p className="text-[var(--theme-text-secondary)] text-[11px]">Recent processed returns and refunds</p>
+                    <p className="text-[var(--theme-text-secondary)] text-[11px]">{t('warehouse.returnsHistorySubtitle')}</p>
                 </div>
 
                 {/* History Search */}
@@ -67,7 +67,7 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={15} />
                     <input
                         type="text"
-                        placeholder="Search history..."
+                        placeholder={t('warehouse.searchHistoryPlaceholder')}
                         value={returnHistorySearch}
                         onChange={(e) => setReturnHistorySearch(e.target.value)}
                         className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-4 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-primary transition-all touch-manipulation"
@@ -80,20 +80,20 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="text-xs text-[var(--theme-text-secondary)] border-b border-[var(--theme-border)] uppercase font-semibold tracking-wider bg-[var(--theme-bg-subtle)]">
-                                <th className="p-4">Date</th>
-                                <th className="p-4">Sale ID</th>
-                                <th className="p-4">Customer</th>
-                                <th className="p-4">Processed By</th>
-                                <th className="p-4">Items</th>
-                                <th className="p-4 text-right">Total Refund</th>
-                                <th className="p-4 text-center">Status</th>
+                                <th className="p-4">{t('warehouse.dateHeader')}</th>
+                                <th className="p-4">{t('warehouse.saleIdHeader')}</th>
+                                <th className="p-4">{t('warehouse.customerHeader')}</th>
+                                <th className="p-4">{t('warehouse.processedByColon')}</th>
+                                <th className="p-4">{t('warehouse.itemsHeader')}</th>
+                                <th className="p-4 text-right">{t('warehouse.totalRefundLabel')}</th>
+                                <th className="p-4 text-center">{t('warehouse.statusHeader')}</th>
                             </tr>
                         </thead>
                         <tbody className="text-sm divide-y divide-[var(--theme-border)]">
                             {paginatedRefundedSales.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="p-12 text-center text-[var(--theme-text-secondary)] italic">
-                                        No return history found matching your search.
+                                        {t('warehouse.noReturnHistoryFound')}
                                     </td>
                                 </tr>
                             ) : (
@@ -111,14 +111,14 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                                         <tr key={sale.id} className="hover:bg-[var(--theme-bg-subtle)] transition-colors">
                                             <td className="p-4 text-[var(--theme-text-secondary)] font-mono text-[11px] tabular-nums">{formatDateTime(sale.date)}</td>
                                             <td className="p-4 font-mono font-bold text-[var(--theme-text-primary)] text-xs">{sale.id}</td>
-                                            <td className="p-4 text-[var(--theme-text-primary)] font-medium text-xs">{sale.customerName || sale.customer_name || 'Walk-in Customer'}</td>
+                                            <td className="p-4 text-[var(--theme-text-primary)] font-medium text-xs">{sale.customerName || sale.customer_name || t('warehouse.walkInCustomer')}</td>
                                             <td className="p-4 text-[var(--theme-text-secondary)] text-xs">
                                                 <div className="flex items-center gap-1.5">
                                                     <UserCheck size={13} className="text-primary shrink-0" />
                                                     <span className="break-words leading-tight">{processedBy}</span>
                                                 </div>
                                             </td>
-                                            <td className="p-4 text-[var(--theme-text-secondary)] text-xs font-mono tabular-nums">{sale.items?.length || 0} Products</td>
+                                            <td className="p-4 text-[var(--theme-text-secondary)] text-xs font-mono tabular-nums">{t('warehouse.productsCount', { count: sale.items?.length || 0 })}</td>
                                             <td className="p-4 text-right text-primary font-mono font-bold tabular-nums text-xs">
                                                 {formatCompactNumber(sale.total, { currency: CURRENCY_SYMBOL })}
                                             </td>
@@ -143,7 +143,7 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                         itemsPerPage={RETURN_HISTORY_PER_PAGE}
                         onPageChange={setReturnHistoryPage}
                         isLoading={false}
-                        itemName="returns"
+                        itemName={t('warehouse.returns')}
                         className="bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)]"
                     />
                 )}

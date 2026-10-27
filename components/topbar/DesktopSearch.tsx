@@ -27,13 +27,16 @@ export function DesktopSearch({
       <div className="topbar-desktop-search relative hidden lg:block" ref={containerRef}>
          <form
             onSubmit={handleSearch}
-            className="flex items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 min-h-[40px] h-10 focus-within:border-[var(--theme-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 focus-within:bg-[var(--theme-bg-card)] transition-all group shadow-xs"
+            className="relative flex items-center"
          >
-            <Search size={16} className="text-[var(--theme-text-secondary)] group-focus-within:text-[var(--theme-accent)] transition-colors shrink-0" />
+            <Search
+               size={14}
+               className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none transition-colors"
+            />
             <input
                type="text"
                placeholder="Search..."
-               className="bg-transparent border-none focus:ring-0 text-xs sm:text-sm text-[var(--theme-text-primary)] ml-2.5 w-44 md:w-56 lg:w-64 focus-within:w-72 placeholder:text-[var(--theme-text-secondary)]/60 outline-none font-medium tracking-tight transition-all"
+               className="w-40 md:w-48 lg:w-52 h-8 min-h-[32px] pl-8 pr-12 text-xs font-medium text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 !bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all shadow-xs"
                value={searchValue}
                onChange={(e) => {
                   setSearchValue(e.target.value);
@@ -42,23 +45,25 @@ export function DesktopSearch({
                }}
                onFocus={() => searchValue.length >= 2 && setIsSearchOpen(true)}
             />
-            {searchValue.trim() ? (
-               <button
-                  type="button"
-                  onClick={() => {
-                     setSearchValue('');
-                     setIsSearchOpen(false);
-                  }}
-                  className="w-5 h-5 rounded-md hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-90 shrink-0 ml-1.5"
-                  aria-label="Clear Search"
-               >
-                  <X size={13} />
-               </button>
-            ) : (
-               <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono text-[var(--theme-text-secondary)] shadow-xs select-none shrink-0 ml-1.5">
-                  <span className="text-xs leading-none">⌘</span><span className="leading-none">K</span>
-               </kbd>
-            )}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center pointer-events-auto">
+               {searchValue.trim() ? (
+                  <button
+                     type="button"
+                     onClick={() => {
+                        setSearchValue('');
+                        setIsSearchOpen(false);
+                     }}
+                     className="w-4 h-4 rounded-md text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] flex items-center justify-center transition-colors cursor-pointer active:scale-90"
+                     aria-label="Clear Search"
+                  >
+                     <X size={12} />
+                  </button>
+               ) : (
+                  <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-[var(--theme-bg-card)]/80 border border-[var(--theme-border)] text-[9px] font-mono text-[var(--theme-text-secondary)] select-none pointer-events-none">
+                     <span className="text-[10px] leading-none">⌘</span><span className="leading-none">K</span>
+                  </kbd>
+               )}
+            </div>
          </form>
 
          {/* Search Results Dropdown */}

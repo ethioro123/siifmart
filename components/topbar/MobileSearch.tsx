@@ -31,13 +31,13 @@ export function MobileSearch({
             >
                <X size={20} />
             </button>
-            <div className="flex-1 relative flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 min-h-[40px] focus-within:border-[var(--theme-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 focus-within:bg-[var(--theme-bg-card)] transition-all">
-               <Search size={16} className="text-[var(--theme-text-secondary)] shrink-0" />
+            <div className="flex-1 relative flex items-center">
+               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                <input
                   autoFocus
                   type="text"
                   placeholder="Search..."
-                  className="w-full bg-transparent border-none ml-2.5 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 outline-none text-sm font-medium tracking-tight"
+                  className="w-full h-9 min-h-[36px] pl-9 pr-9 text-xs sm:text-sm font-medium text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 !bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all"
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
                />
@@ -45,7 +45,7 @@ export function MobileSearch({
                   <button
                      type="button"
                      onClick={() => setSearchValue('')}
-                     className="w-5 h-5 rounded-md hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-90 shrink-0"
+                     className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer active:scale-90"
                      aria-label="Clear Search"
                   >
                      <X size={13} />
