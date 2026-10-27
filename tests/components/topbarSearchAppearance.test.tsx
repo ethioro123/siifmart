@@ -87,10 +87,10 @@ describe('Global Search Bar Appearance & Alignment', () => {
     const input = screen.getByPlaceholderText('Search...');
     expect(input).toBeDefined();
 
-    // Check rounded-xl and no blue square inside the search input container
+    // Check rounded-xl and seamless background on input element
+    expect(input.className).toContain('rounded-xl');
+    expect(input.className).toContain('!bg-[var(--theme-bg-subtle)]');
     const searchContainer = input.parentElement;
-    expect(searchContainer?.className).toContain('rounded-xl');
-    expect(searchContainer?.className).not.toContain('rounded-2xl');
     expect(searchContainer?.querySelector('.bg-blue-500\\/10')).toBeNull();
   });
 });
