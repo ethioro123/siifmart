@@ -33,7 +33,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
         const raw = quantities[item.productId] ?? '';
         const quantity = Number(raw);
         if (!raw.trim() || !Number.isFinite(quantity) || quantity < 0) {
-            addNotification('alert', 'Enter the physical quantity counted.');
+            addNotification('alert', t('warehouse.enterPhysicalQtyCounted'));
             return;
         }
         setSavingId(item.productId);
@@ -41,7 +41,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
             await onRecordCount(item.productId, quantity);
             setQuantities((current) => ({ ...current, [item.productId]: '' }));
         } catch (error) {
-            addNotification('alert', error instanceof Error ? error.message : 'Unable to save this count.');
+            addNotification('alert', error instanceof Error ? error.message : t('warehouse.unableToSaveCount'));
         } finally {
             setSavingId(null);
         }
@@ -49,14 +49,14 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
 
     const finish = async () => {
         if (!canFinish) {
-            addNotification('info', 'A second authenticated worker must recount every variance before submission.');
+            addNotification('info', t('warehouse.secondWorkerRecountNotice'));
             return;
         }
         setIsFinishing(true);
         try {
             await onComplete();
         } catch (error) {
-            addNotification('alert', error instanceof Error ? error.message : 'Unable to complete this count session.');
+            addNotification('alert', error instanceof Error ? error.message : t('warehouse.unableToCompleteCountSession'));
         } finally {
             setIsFinishing(false);
         }
@@ -67,7 +67,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
         try {
             await onStart(type);
         } catch (error) {
-            addNotification('alert', error instanceof Error ? error.message : 'Unable to start a count session.');
+            addNotification('alert', error instanceof Error ? error.message : t('warehouse.unableToStartCountSession'));
         } finally {
             setIsStarting(false);
         }
@@ -82,7 +82,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                     className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 text-left hover:border-[var(--theme-accent)]/40 disabled:opacity-60"
                 >
                     <span className="flex items-center gap-3 font-semibold text-[var(--theme-text-primary)]"><RotateCcw size={20} />{t('warehouse.dailyCycleCount')}</span>
-                    <span className="block mt-2 text-xs text-[var(--theme-text-secondary)]">Start a site-scoped blind count. The expected quantities stay on the server.</span>
+                    <span className="block mt-2 text-xs text-[var(--theme-text-secondary)]">{t('warehouse.dailyCycleCountDesc')}</span>
                 </button>
                 <button
                     disabled={isLoading || isStarting}
@@ -90,7 +90,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                     className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 text-left hover:border-[var(--theme-accent)]/40 disabled:opacity-60"
                 >
                     <span className="flex items-center gap-3 font-semibold text-[var(--theme-text-primary)]"><Search size={20} />{t('warehouse.spotCheck')}</span>
-                    <span className="block mt-2 text-xs text-[var(--theme-text-secondary)]">Select a small random sample from this site.</span>
+                    <span className="block mt-2 text-xs text-[var(--theme-text-secondary)]">{t('warehouse.spotCheckDesc')}</span>
                 </button>
             </div>
         );
@@ -100,7 +100,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
         <div className="space-y-3">
             <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-[var(--theme-text-primary)]">
                 <AlertTriangle size={18} className="shrink-0 text-amber-600" />
-                <span>Blind count in progress. Record the quantity physically present; expected quantities are withheld.</span>
+                <span>{t('warehouse.blindCountNotice')}</span>
             </div>
 
             {items.map((item) => {
@@ -115,15 +115,15 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                             <div className="min-w-0">
                                 <p className="truncate text-sm font-semibold text-[var(--theme-text-primary)]">{item.name}</p>
                                 <p className="truncate font-mono text-[11px] text-[var(--theme-text-secondary)]">{item.location || t('warehouse.nA')} · {item.sku}</p>
-                                {item.hasVariance && <p className="mt-1 text-xs font-semibold text-amber-600">Variance detected · independent recount required</p>}
-                                {item.status === 'Counted' && !item.hasVariance && <p className="mt-1 text-xs font-semibold text-emerald-600">Count recorded</p>}
+                                {item.hasVariance && <p className="mt-1 text-xs font-semibold text-amber-600">{t('warehouse.varianceDetectedRecount')}</p>}
+                                {item.status === 'Counted' && !item.hasVariance && <p className="mt-1 text-xs font-semibold text-emerald-600">{t('warehouse.countRecorded')}</p>}
                             </div>
                         </div>
                         {mayEnterCount ? (
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number" min="0" step="any" inputMode="decimal"
-                                    aria-label={`Physical count for ${item.sku}`}
+                                    aria-label={t('warehouse.physicalCountForSku', { sku: item.sku })}
                                     value={quantities[item.productId] ?? ''}
                                     onChange={(event) => setQuantities((current) => ({ ...current, [item.productId]: event.target.value }))}
                                     className="min-h-[44px] w-24 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-2 text-center font-mono text-lg text-[var(--theme-text-primary)]"
@@ -133,10 +133,19 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                     type="button" disabled={savingId === item.productId || isLoading}
                                     onClick={() => void saveCount(item)}
                                     className="min-h-[44px] rounded-xl bg-[var(--theme-accent)] px-3 text-sm font-semibold text-white disabled:opacity-60"
-                                >{savingId === item.productId ? 'Saving…' : item.canCount && item.status !== 'Pending' ? 'Recount' : 'Record'}</button>
+                                >
+                                    {savingId === item.productId
+                                        ? t('warehouse.savingProgress')
+                                        : item.canCount && item.status !== 'Pending'
+                                            ? t('warehouse.recountWord')
+                                            : t('warehouse.recordWord')}
+                                </button>
                             </div>
                         ) : (
-                            <span className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-text-secondary)]"><CheckCircle size={16} />{item.status === 'Recount Required' ? 'Waiting for another worker' : 'Saved'}</span>
+                            <span className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-text-secondary)]">
+                                <CheckCircle size={16} />
+                                {item.status === 'Recount Required' ? t('warehouse.waitingForAnotherWorker') : t('warehouse.savedWord')}
+                            </span>
                         )}
                     </div>
                 );
@@ -145,7 +154,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
             <div className="flex justify-end border-t border-[var(--theme-border)] pt-3">
                 <button type="button" disabled={!canFinish || isFinishing || isLoading} onClick={() => void finish()}
                     className="flex min-h-[44px] items-center gap-2 rounded-xl bg-[var(--theme-accent)] px-5 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
-                    <Send size={16} />{isFinishing ? 'Submitting…' : 'Complete and submit variances'}
+                    <Send size={16} />{isFinishing ? t('warehouse.submittingProgress') : t('warehouse.completeAndSubmitVariances')}
                 </button>
             </div>
         </div>

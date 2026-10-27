@@ -149,7 +149,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                         <div className="flex justify-between items-end gap-2 pt-2 border-t border-[var(--theme-border)]">
                                             <div className="min-w-0 flex-1">
                                                 <p className="text-xs font-medium text-[var(--theme-text-primary)] break-words leading-tight">
-                                                    {product?.name || 'Unknown Item'}
+                                                    {product?.name || t('warehouse.unknownItem')}
                                                 </p>
                                                 <p className="text-[11px] font-mono tabular-nums text-[var(--theme-text-secondary)] mt-0.5">
                                                     {formatDateTime(m.date)}
@@ -175,7 +175,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                 totalItems={filteredCountHistory.length}
                                 itemsPerPage={COUNT_HISTORY_PER_PAGE}
                                 onPageChange={setCountHistoryPage}
-                                itemName="history"
+                                itemName={t('warehouse.historyItemName') || 'history'}
                             />
                         </div>
                     </>
