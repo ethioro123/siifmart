@@ -35,7 +35,7 @@ BEGIN
 END $$;
 SET LOCAL ROLE authenticated;
 DO $$
-DECLARE request_id uuid; stale_id uuid; self_id uuid; result jsonb; role_name text; actor_id text; attempted boolean;
+DECLARE request_id uuid; stale_id uuid; self_id uuid; ceo_proposal_id uuid; result jsonb; role_name text; actor_id text; attempted boolean;
 BEGIN
  INSERT INTO public.inventory_requests(product_id,site_id,product_name,product_sku,change_type,status,country_code,proposed_changes)
  VALUES(current_setting('test.product'),current_setting('test.site'),current_setting('test.name'),'REGRESSION','edit','pending',
@@ -61,6 +61,10 @@ BEGIN
   EXCEPTION WHEN raise_exception THEN NULL; END;
   IF attempted THEN RAISE EXCEPTION 'Unauthorized approver passed: %',role_name; END IF;
  END LOOP;
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',current_setting('test.ceo'),'role','authenticated')::text,true);
+ INSERT INTO public.inventory_requests(product_id,site_id,product_name,product_sku,change_type,status,country_code,proposed_changes)
+ VALUES(current_setting('test.product'),current_setting('test.site'),current_setting('test.name'),'REGRESSION','edit','pending',
+ current_setting('test.country'),jsonb_build_object('name',current_setting('test.name')||' CEO proposal')) RETURNING id INTO ceo_proposal_id;
  -- Approval JSON cannot be forged through direct PATCH.
  attempted:=false;
  BEGIN UPDATE public.inventory_requests SET product_edit_approvals='[{"role":"regional_operations_manager"}]' WHERE id=request_id; attempted:=FOUND;
@@ -85,6 +89,8 @@ BEGIN
  BEGIN PERFORM public.approve_product_edit(stale_id); attempted:=true;
  EXCEPTION WHEN raise_exception THEN NULL; END;
  IF attempted THEN RAISE EXCEPTION 'Stale proposal approval was accepted'; END IF;
+ PERFORM public.reject_product_edit(ceo_proposal_id,'Regression rejection');
+ IF (SELECT status FROM public.inventory_requests WHERE id=ceo_proposal_id)<>'rejected' THEN RAISE EXCEPTION 'Regional rejection not saved'; END IF;
  IF result<>jsonb_build_object('applied',true,'approvalCount',3) THEN RAISE EXCEPTION 'Third approval did not apply'; END IF;
  IF NOT EXISTS(SELECT 1 FROM public.products WHERE id::text=current_setting('test.product')
  AND name=current_setting('test.name')||' [approval regression]' AND stock::text=current_setting('test.stock')) THEN
