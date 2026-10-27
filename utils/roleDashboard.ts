@@ -49,7 +49,14 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         return '/pricing';
     }
 
-    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_hr_manager', 'regional_security_manager'].includes(role)) {
+    if (role === 'regional_hr_manager') {
+        if (!siteType || siteType === 'Administration' || siteType === 'Administrative') {
+            return '/regional-ops';
+        }
+        return '/employees';
+    }
+
+    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_security_manager'].includes(role)) {
         return '/regional-ops';
     }
 

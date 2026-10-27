@@ -5,6 +5,7 @@ import {
   Building2, ArrowLeft, Activity, DollarSign, CreditCard, Trophy
 } from 'lucide-react';
 import { useRegionalOperationsData } from '../hooks/useRegionalOperationsData';
+import { useStore } from '../contexts/CentralStore';
 import { formatCompactNumber } from '../utils/formatting';
 import { getCountryProfile } from '../utils/localization';
 
@@ -21,9 +22,33 @@ import { RegionalVelocityDeck } from '../components/regional-ops/RegionalVelocit
 
 type RegionalDeskTab = 'facilities' | 'leaderboard' | 'transfers' | 'procurement' | 'workforce' | 'loss_prevention';
 
+function getDefaultRegionalDeskTab(role?: string): RegionalDeskTab {
+  switch (role) {
+    case 'regional_hr_manager':
+    case 'hr_generalist':
+    case 'talent_recruiter':
+    case 'training_coordinator':
+      return 'workforce';
+    case 'regional_procurement_manager':
+    case 'vendor_relations_manager':
+    case 'buyer':
+      return 'procurement';
+    case 'regional_logistics_manager':
+    case 'regional_supply_chain_manager':
+      return 'transfers';
+    case 'regional_security_manager':
+    case 'regional_compliance_manager':
+    case 'store_operations_auditor':
+      return 'loss_prevention';
+    default:
+      return 'facilities';
+  }
+}
+
 export default function RegionalOperations() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<RegionalDeskTab>('facilities');
+  const { user } = useStore();
+  const [activeTab, setActiveTab] = useState<RegionalDeskTab>(() => getDefaultRegionalDeskTab(user?.role));
 
   const {
     regionCode,
