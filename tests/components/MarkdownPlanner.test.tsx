@@ -9,6 +9,7 @@ import type { Product } from '../../types';
 const mocks=vi.hoisted(()=>({country:'ET',site:'site',siteType:'Store',send:vi.fn(),pending:false,catalog:vi.fn()}));
 const product={id:'p',name:'Coffee',sku:'ET-COF',siteId:'site',price:100,costPrice:70,stock:100,status:'active'} as Product;
 vi.mock('../../components/merchandising/MerchandisingContext',()=>({useMerchandising:()=>({activeCountry:mocks.country,currencySymbol:'ETB'})}));
+vi.mock('../../contexts/CentralStore',()=>({useStore:()=>({user:{id:'user'}})}));
 vi.mock('../../contexts/DataContext',()=>({useData:()=>({activeSite:{id:mocks.site,type:mocks.siteType},sales:[]})}));
 vi.mock('../../hooks/usePriceManagerCatalog',()=>({usePriceManagerCatalog:(input:unknown)=>{mocks.catalog(input);return {data:{data:[product],count:1},isFetching:false,isError:false};}}));
 vi.mock('../../hooks/useMarkdownProposal',()=>({useMarkdownProposal:()=>({send:mocks.send,busy:false,feedback:null,pending:{isSuccess:true,isFetching:false,data:{data:mocks.pending?[{id:'pending'}]:[]}}})}));

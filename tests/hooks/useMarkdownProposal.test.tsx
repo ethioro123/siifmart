@@ -46,3 +46,8 @@ it('cancels pending submission when the planner is unmounted on a scope change',
  let sending!:Promise<void>;act(()=>{sending=result.current.send(90,target());});unmount();
  await act(async()=>{release({data:{data:[]}});await sending;});expect(mocks.submit).not.toHaveBeenCalled();
 });
+it('allows a fresh plan after an explicit refresh confirms no pending edit',async()=>{
+ const {result}=renderHook(()=>useMarkdownProposal(product,'ET','scope'));
+ await act(async()=>{await result.current.send(90,target());});expect(result.current.feedback?.saved).toBe(true);
+ await act(async()=>{await result.current.refresh();});expect(result.current.feedback).toBeNull();
+});

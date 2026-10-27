@@ -37,5 +37,9 @@ export function useMarkdownProposal(product: Product | null, country: string, sc
             setResult({key:selectedKey,saved:false,message:error instanceof Error ? error.message : 'Proposal could not be submitted.'});
         } finally { lock.current=false; setBusy(false); }
     };
-    return {send,busy,pending,feedback};
+    const refresh = async () => {
+        const check = await pending.refetch();
+        if (!check.error && check.data && !check.data.data.length) setResult(null);
+    };
+    return {send,busy,pending,feedback,refresh};
 }

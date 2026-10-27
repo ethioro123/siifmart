@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Calculator, Search, Send } from 'lucide-react';
 import { useMerchandising } from './MerchandisingContext';
+import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { usePriceManagerCatalog } from '../../hooks/usePriceManagerCatalog';
 import { useMarkdownProposal } from '../../hooks/useMarkdownProposal';
 import { calculateMarkdownGlidePath, localDateInput, validateMarkdownProduct, validateTargetExitDate, type MarkdownGlidePathSimulation } from '../../utils/markdownGlidePath';
 import { computeProductSalesMetrics } from '../../utils/merchandisingAnalytics';
+import { productSiteName } from '../../utils/priceManager';
 import { isHqFacilitySite, isRegionalAdminFacilitySite } from '../../utils/roleSegregation';
 import { MarkdownPlanResults } from './MarkdownPlanResults';
 
@@ -14,14 +16,15 @@ const button='min-h-[44px] rounded-xl px-4 text-sm font-medium border border-[va
 
 export const MarkdownTab:React.FC=()=>{
     const {activeCountry,currencySymbol}=useMerchandising();
+    const {user}=useStore();
     const {activeSite,activeRegionCode}=useData();
-    const scope=JSON.stringify([activeCountry,activeSite?.id,activeRegionCode]);
+    const scope=JSON.stringify([user?.id,activeCountry,activeSite?.id,activeRegionCode]);
     // Remount local inputs, selection and proposal feedback atomically when the authorized scope changes.
     return <MarkdownPlanner key={scope} country={activeCountry} currency={currencySymbol} scope={scope}/>;
 };
 
 function MarkdownPlanner({country,currency,scope}:{country:string;currency:string;scope:string}) {
-    const {activeSite,sales}=useData();
+    const {activeSite,sales,sites}=useData();
     const [search,setSearch]=useState(''), [query,setQuery]=useState(''), [page,setPage]=useState(1);
     const [selectedId,setSelectedId]=useState(''), [deadline,setDeadline]=useState('');
     const [selectedStage,setSelectedStage]=useState(-1), [error,setError]=useState('');
@@ -33,7 +36,7 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
     const validation=validateMarkdownProduct(product,metrics);
     const signature=JSON.stringify([scope,product,deadline,metrics?.unitsSold30d,metrics?.dailyRunRate,localDateInput(new Date())]);
     const plan=generated?.signature===signature ? generated.plan : null;
-    const {send,busy,pending,feedback}=useMarkdownProposal(product,country,scope);
+    const {send,busy,pending,feedback,refresh}=useMarkdownProposal(product,country,scope);
     const price=product ? Math.round(product.isOnSale ? product.salePrice || product.price : product.price) : 0;
     const stage=plan?.stages[selectedStage];
     const pendingEdit=!!pending.data?.data.length;
@@ -62,12 +65,12 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
                 {catalog.isError && <div role="alert" className="text-sm"><p>Products could not be loaded.</p><button type="button" className={button} onClick={()=>catalog.refetch()}>Retry products</button></div>}
                 <label htmlFor="markdown-product" className="block text-sm font-medium">Product</label>
                 <select id="markdown-product" className={control} value={selectedId} disabled={catalog.isFetching || busy} onChange={e=>{setSelectedId(e.target.value);setGenerated(null);setError('');}}>
-                    <option value="">Select a product</option>{products.map(p=><option key={p.id} value={p.id}>{p.name} · {p.sku} · {Math.round(p.stock)} units</option>)}
+                    <option value="">Select a product</option>{products.map(p=><option key={p.id} value={p.id}>{p.name} · {p.sku} · {productSiteName(p,sites || [])} · {Math.round(p.stock)} units</option>)}
                 </select>
                 {!catalog.isFetching && !catalog.isError && !products.length && <p className="text-sm text-[var(--theme-text-secondary)]">No matching products. Try another name or SKU.</p>}
                 {(catalog.data?.count || 0)>25 && <nav aria-label="Product pages" className="flex items-center justify-between gap-2 text-sm"><button type="button" className={button} disabled={page===1 || catalog.isFetching || busy} onClick={()=>{setPage(page-1);setSelectedId('');}}>Previous</button><span>{page} / {Math.ceil((catalog.data?.count || 0)/25)}</span><button type="button" className={button} disabled={page*25>=(catalog.data?.count || 0) || catalog.isFetching || busy} onClick={()=>{setPage(page+1);setSelectedId('');}}>Next</button></nav>}
                 {product && <dl className="space-y-2 text-sm border-y border-[var(--theme-border)] py-3">
-                    {[["On-hand stock",`${Math.round(product.stock)} ${product.unit || 'units'}`],["Current selling price",money(price)],["Recorded cost",Number.isFinite(product.costPrice) ? money(product.costPrice!) : 'Unavailable'],["Available sales, last 30 days",`${Math.round(metrics?.unitsSold30d || 0)} units`],["Recorded expiry",product.expiryDate || 'Not recorded']].map(([label,value])=><div key={label} className="flex flex-wrap justify-between gap-2"><dt className="text-[var(--theme-text-secondary)]">{label}</dt><dd className="tabular-nums break-words">{value}</dd></div>)}
+                    {[["Facility",productSiteName(product,sites || [])],["On-hand stock",`${Math.round(product.stock)} ${product.unit || 'units'}`],["Current selling price",money(price)],["Recorded cost",Number.isFinite(product.costPrice) ? money(product.costPrice!) : 'Unavailable'],["Available sales, last 30 days",`${Math.round(metrics?.unitsSold30d || 0)} units`],["Recorded expiry",product.expiryDate || 'Not recorded']].map(([label,value])=><div key={label} className="flex flex-wrap justify-between gap-2"><dt className="text-[var(--theme-text-secondary)]">{label}</dt><dd className="tabular-nums break-words">{value}</dd></div>)}
                 </dl>}
                 {product && !validation.isValid && <ul className="text-sm text-[var(--theme-status-warning-text)] list-disc pl-4">{validation.reasons.map(reason=><li key={reason}>{reason}</li>)}</ul>}
                 {product && validation.hasZeroVelocity && <p className="text-sm text-[var(--theme-text-secondary)]">Insufficient positive sales history. This scenario estimates zero sales; a discount is not evidence of new demand.</p>}
@@ -84,6 +87,7 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
                     {!confirmed && !pending.isError && <p role="status" className="text-sm">Checking pending approvals…</p>}
                     {selectedStage<0 && <p className="text-sm">No eligible lower price in this plan. The current selling price, recorded cost or remaining stock prevents a further markdown.</p>}
                     {feedback && <p role={feedback.saved ? 'status' : 'alert'} className="text-sm">{feedback.message}</p>}
+                    {(pendingEdit || feedback?.saved) && <button type="button" className={button} disabled={busy || catalog.isFetching || pending.isFetching} onClick={async()=>{setGenerated(null);await catalog.refetch();await refresh();}}>Refresh product and approval status</button>}
                     <button type="button" className={`${button} w-full sm:w-auto flex items-center justify-center gap-2`} disabled={!stage || !confirmed || pendingEdit || busy || !!feedback?.saved || catalog.isFetching} onClick={()=>stage && send(stage.price,deadline)}><Send size={18}/>{busy ? 'Submitting…' : `Submit selected price for approval${stage ? ` · ${money(stage.price)}` : ''}`}</button>
                 </div>}
             </div>

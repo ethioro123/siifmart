@@ -139,6 +139,8 @@ export interface PendingInventoryChange {
   proposedChanges?: Partial<Product>;
   proposalBaseline?: Record<string, unknown> | null;
   proposed_changes?: Partial<Product>; // Supabase compatibility
+  layoutRevisionId?: string;
+  layout_revision_id?: string;
   adjustmentType?: 'IN' | 'OUT';
   adjustment_type?: 'IN' | 'OUT'; // Supabase compatibility
   adjustmentQty?: number;

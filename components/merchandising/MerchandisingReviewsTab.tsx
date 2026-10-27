@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, CheckCircle, ChevronLeft, ChevronRight, XCircle, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle, ChevronLeft, ChevronRight, XCircle, Clock, Layers } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { inventoryRequestsService } from '../../services/inventory-requests.service';
@@ -292,6 +292,12 @@ export const MerchandisingReviewsTab: React.FC = () => {
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
                           <XCircle size={11} />
                           Rejected
+                        </span>
+                      )}
+                      {(request.layoutRevisionId || request.layout_revision_id) && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20" title="Part of an atomic planogram layout revision; approved and applied together">
+                          <Layers size={11} />
+                          Layout Revision
                         </span>
                       )}
                     </div>

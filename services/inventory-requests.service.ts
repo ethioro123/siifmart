@@ -45,6 +45,22 @@ export const inventoryRequestsService = {
         if (error) throw error;
     },
 
+    async submitPlanogramLayoutRevision(
+        siteId: string,
+        countryCode: string,
+        changes: Array<{ productId: string; shelfPosition: string }>,
+        reason?: string
+    ): Promise<{ revisionId: string; count: number; requestIds: string[] }> {
+        const { data, error } = await supabase.rpc('submit_planogram_layout_revision', {
+            p_site_id: siteId,
+            p_country_code: countryCode.toUpperCase(),
+            p_changes: changes,
+            p_reason: reason || 'MERCHANDISING: planogram layout revision'
+        });
+        if (error) throw error;
+        return data;
+    },
+
     async getMerchandisingRequests(
         countryCode: string,
         options: GetMerchandisingOptions = {}
@@ -55,7 +71,7 @@ export const inventoryRequestsService = {
         const to = from + pageSize - 1;
 
         let query = supabase.from('inventory_requests')
-            .select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_at,status,proposed_changes,adjustment_reason,finance_approved_by_employee_id,requested_by_employee_id,product_edit_approvals,product_edit_baseline,rejection_reason,rejected_by,rejected_at,approved_by,approved_at', { count: 'exact' })
+            .select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_at,status,proposed_changes,adjustment_reason,finance_approved_by_employee_id,requested_by_employee_id,product_edit_approvals,product_edit_baseline,rejection_reason,rejected_by,rejected_at,approved_by,approved_at,layout_revision_id', { count: 'exact' })
             .eq('country_code', countryCode.toUpperCase())
             .eq('change_type', 'edit');
 
@@ -137,6 +153,8 @@ export const inventoryRequestsService = {
             rejectedAt: r.rejected_at,
             approvedBy: r.approved_by,
             approvedAt: r.approved_at,
+            layoutRevisionId: r.layout_revision_id,
+            layout_revision_id: r.layout_revision_id,
             currentProduct: r.product_id ? productMap.get(r.product_id) : undefined
         }));
 
