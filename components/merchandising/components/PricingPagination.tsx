@@ -4,16 +4,16 @@ import { useMerchandising } from '../MerchandisingContext';
 
 export const PricingPagination: React.FC = () => {
     const {
-        filteredProducts,
+        filteredProducts, catalogCount,
         currentPage,
         setCurrentPage,
         itemsPerPage,
         setItemsPerPage
     } = useMerchandising();
 
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const totalPages = Math.ceil(catalogCount / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
+    const endIndex = Math.min(startIndex + itemsPerPage, catalogCount);
 
     const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
@@ -38,7 +38,7 @@ export const PricingPagination: React.FC = () => {
         return pages;
     };
 
-    if (filteredProducts.length === 0) return null;
+    if (catalogCount === 0) return null;
 
     return (
         <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex flex-wrap gap-4 items-center justify-between">
@@ -46,7 +46,7 @@ export const PricingPagination: React.FC = () => {
             <div className="text-xs text-[var(--theme-text-secondary)] font-medium">
                 Showing{' '}
                 <span className="font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">
-                    {filteredProducts.length === 0 ? 0 : startIndex + 1}
+                    {catalogCount === 0 ? 0 : startIndex + 1}
                 </span>{' '}
                 to{' '}
                 <span className="font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">
@@ -54,7 +54,7 @@ export const PricingPagination: React.FC = () => {
                 </span>{' '}
                 of{' '}
                 <span className="font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">
-                    {filteredProducts.length}
+                    {catalogCount}
                 </span>{' '}
                 products
             </div>

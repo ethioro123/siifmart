@@ -24,6 +24,7 @@
 - **Real-Time Audit & Blind Controls**: Shift float, drops, and Z-Reports sync to Supabase in real time (never `localStorage`). Preserve blind counts and blind transfer receiving (hide expected quantities).
 - **Branch Scope**: Branch users only see their active `siteId`. Propagate mutations only to systems that depend on the event, using explicit contracts, idempotency, retries, and country-scoped correlation; avoid speculative fan-out.
 - **Operations & Catalog**: Floor roles (`picker`, `packer`, `receiver`, `inventory_specialist`, `forklift_operator`, `stock_clerk`) and `driver` are interchangeable on internal jobs (`PICK`, `PACK`, `RECEIVE`, `PUTAWAY`, `COUNT`, `TRANSFER`, `REPLENISH`, `WASTE`, `RETURNS`, `LABELS`). `DRIVER`/`DELIVERY`/`DISPATCH` jobs are locked to verified drivers. Catalog is strictly Halal: no liquor, beer, wine, or spirits anywhere (catalog, mocks, examples). Use cooking oil, baby formula, coffee, etc.
+- **Merchandising Whole-Number Rule**: All merchandising calculations, prices, automated pricing rules, markdown decay stages, promotional values, and forecasted quantities must strictly be whole numbers (integers). Fractions or decimals are never permitted in merchandising. Whenever any calculation or percentage yields a fraction, it must always be rounded to the nearest whole number (`Math.round()`).
 
 ### Database & SQL Governance
 - **Rule 9 (Persistent Migration File is Paramount)**: For ANY database change, save the complete SQL in a persistent `/migrations/YYYYMMDD_description.sql` file on disk before execution.

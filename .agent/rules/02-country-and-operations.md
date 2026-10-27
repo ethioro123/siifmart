@@ -63,6 +63,7 @@ const canApprove = ['group_ceo', 'CEO'].includes(user?.role || '');
 - **Zero Autonomous Price Changes**: Branch managers and cashiers have zero authority to alter prices or create custom discounts. All markdowns require HQ approval.
 - **Campaign & Voucher Isolation**: Promotional campaigns (e.g. Mashujaa Day vs Enkutatash) and discount vouchers are country-bound. Kenyan vouchers return "Invalid code" at Ethiopian registers.
 - **Perishable Markdowns & Forecasting**: Perishable markdown schedules and AI demand forecasting models train and execute exclusively on local country sales history.
+- **Merchandising Whole-Number Rule**: All merchandising calculations, prices, automated pricing rules, markdown decay stages, promotional values, and forecasted quantities must strictly be whole numbers (integers). Fractions or decimals are never permitted in merchandising. Whenever any calculation or percentage yields a fraction, it must always be rounded to the nearest whole number (`Math.round()`).
 
 ### 3. Settings & System Configuration Separation Rules
 - **Independent Country Values**: Any operational or legal setting that can differ by country (tax, tender, fiscal format, approval limits, workflow policy) must have an explicit country key and independent values. A value for one country must never silently inherit from or override another.

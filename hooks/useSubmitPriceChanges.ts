@@ -2,14 +2,9 @@ import { useCallback } from 'react';
 import { useCreateInventoryRequestMutation } from './useInventoryRequestMutations';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
-import type { Product } from '../types';
+import { submitPriceBatch, type PriceChangeInput } from '../utils/priceManager';
+export type { PriceChangeInput } from '../utils/priceManager';
 import { buildPriceChangeRequest, isBelowMarginFloor, type PriceProposal } from '../utils/pricingGovernance';
-import { logger } from '../utils/logger';
-
-export interface PriceChangeInput {
-    product: Product;
-    proposal: PriceProposal;
-}
 
 /**
  * Submits price changes for the authorized merchandising lead (inventory_requests).
@@ -23,25 +18,12 @@ export function useSubmitPriceChanges(countryCode: string) {
     const submit = useCallback(
         async (changes: PriceChangeInput[], source: string) => {
             const requestedBy = user?.name || user?.email || 'Unknown';
-            let submitted = 0;
-            let financeFlagged = 0;
-            try {
-                for (const { product, proposal } of changes) {
-                    const req = buildPriceChangeRequest({ product, proposal, requestedBy, countryCode, source });
-                    await createRequest.mutateAsync(req);
-                    submitted++;
-                    if (isBelowMarginFloor(req.proposedChanges ?? {})) financeFlagged++;
-                }
-            } catch (error) {
-                logger.error('useSubmitPriceChanges', 'submit failed', error as Error);
-            }
-            if (submitted > 0) {
-                addNotification(
-                    'success',
-                    `${submitted} price change${submitted === 1 ? '' : 's'} sent for merchandising approval${financeFlagged ? ` (${financeFlagged} need Finance co-approval)` : ''}.`
-                );
-            }
-            return { submitted, financeFlagged };
+            const result = await submitPriceBatch(changes, async ({ product, proposal }) => {
+                await createRequest.mutateAsync(buildPriceChangeRequest({ product, proposal, requestedBy, countryCode, source }));
+            }, isBelowMarginFloor);
+            if (result.submitted > 0) addNotification('success', `${result.submitted} price proposal(s) submitted for Operations, Supply Chain and Merchandising approval${result.financeFlagged ? `; ${result.financeFlagged} also require Finance signoff` : ''}.`);
+            if (result.failures.length) addNotification('alert', `${result.failures.length} proposal(s) were not submitted. Their selections are retained for retry.`);
+            return result;
         },
         [user, countryCode, createRequest, addNotification]
     );

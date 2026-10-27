@@ -1,4 +1,6 @@
-import { useState, useMemo } from 'react';
+import { usePriceManagerCatalog } from '../../hooks/usePriceManagerCatalog';
+import { usePriceManagerBatch } from '../../hooks/usePriceManagerBatch';
+import { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../contexts/DataContext';
 import { CURRENCY_SYMBOL } from '../../constants';
 import type { Product, Promotion, PricingRule } from '../../types';
@@ -21,7 +23,7 @@ const getMargin = (price: number, cost: number) => {
 export const useMerchandisingState = (): MerchandisingContextType => {
    const {
       addNotification,
-      allProducts: products,
+      allProducts: cachedProducts,
       updateProduct,
       updatePricesBySKU,
       promotions,
@@ -50,7 +52,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    const { submit: submitPriceChanges } = useSubmitPriceChanges(activeCountry);
    const { submitPlanogram } = useSubmitMerchandisingChanges(activeCountry);
    const { create: createCampaignProposal } = useMerchandisingCampaigns(activeCountry);
-   const salesMetricsIndex = useMemo(() => buildCatalogSalesMetricsIndex(products || [], sales || []), [products, sales]);
+   
 
    // Filtering and Sorting custom hook
    const {
@@ -67,8 +69,15 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       filters,
       setFilters,
       handleSort,
-      filteredProducts
-   } = useMerchandisingFilters({ products, getMargin });
+      filteredProducts: cachedFilteredProducts
+   } = useMerchandisingFilters({ products: cachedProducts, getMargin });
+   const catalog = usePriceManagerCatalog({ country: activeCountry, search: searchTerm, filters, sort: sortConfig, page: currentPage, pageSize: itemsPerPage }, activeTab === 'pricing');
+   const products = activeTab === 'pricing' ? catalog.data?.data || [] : cachedProducts;
+   const filteredProducts = activeTab === 'pricing' ? products : cachedFilteredProducts;
+   const salesMetricsIndex = useMemo(() => buildCatalogSalesMetricsIndex(products || [], sales || []), [products, sales]);
+   useEffect(() => {
+      if (activeTab === 'pricing' && catalog.data && currentPage > Math.max(1, Math.ceil(catalog.data.count / itemsPerPage))) setCurrentPage(1);
+   }, [catalog.data, currentPage, itemsPerPage, activeTab]);
 
    // Edit State
    const [editingId, setEditingId] = useState<string | null>(null);
@@ -79,6 +88,9 @@ export const useMerchandisingState = (): MerchandisingContextType => {
 
    // Bulk Action State
    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+   const batch = usePriceManagerBatch({ products: filteredProducts, selectedIds, setSelectedIds, submit: submitPriceChanges, setIsSubmitting,
+      scopeKey: JSON.stringify([activeCountry, activeTab, searchTerm, filters, sortConfig, currentPage, itemsPerPage]) });
 
    // Promo Modal
    const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
@@ -148,7 +160,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       setEditingId(p.id);
       setEditForm({
          price: p.price,
-         cost: p.costPrice || p.price * 0.7,
+         cost: p.costPrice ?? 0,
          salePrice: p.salePrice || Math.round(p.price * 0.9),
          isOnSale: p.isOnSale || false,
          applyToAll: true
@@ -169,11 +181,8 @@ export const useMerchandisingState = (): MerchandisingContextType => {
             const targets = editForm.applyToAll && product.sku
                ? products.filter(p => p.sku === product.sku)
                : [product];
-            const { submitted } = await submitPriceChanges(
-               targets.map(p => ({ product: p, proposal })),
-               'Manual price edit'
-            );
-            if (submitted > 0) setEditingId(null);
+            batch.stagePriceBatch(targets.map(p => ({ product: p, proposal })), 'Manual price edit');
+            setEditingId(null);
          }
       } catch (error) {
          logger.error('useMerchandisingState', "Error saving price:", error);
@@ -198,53 +207,12 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    };
 
    const handleApplyBulkDiscount = async () => {
-      if (!bulkDiscountValue) return;
-      setIsSubmitting(true);
-      try {
-         const pct = parseFloat(bulkDiscountValue) / 100;
-         const changes: PriceChangeInput[] = products
-            .filter(p => selectedIds.has(p.id))
-            .map(p => ({
-               product: p,
-               proposal: { price: p.price, costPrice: p.costPrice, isOnSale: true, salePrice: Math.round(p.price * (1 - pct)) }
-            }));
-         const { submitted } = await submitPriceChanges(changes, `Bulk ${bulkDiscountValue}% discount`);
-         if (submitted > 0) setSelectedIds(new Set());
-         setIsBulkDiscountModalOpen(false);
-         setBulkDiscountValue('');
-      } catch (e) {
-         logger.error('useMerchandisingState', 'caught error', e as Error);
-         addNotification('alert', 'Failed to submit bulk discount');
-      } finally {
-         setIsSubmitting(false);
-      }
+      try { batch.stageDiscount(Number(bulkDiscountValue)); setIsBulkDiscountModalOpen(false); }
+      catch (error) { addNotification('alert', (error as Error).message); }
    };
-
-   // --- PSYCHOLOGICAL PRICING ---
    const applyPsychologicalPricing = async (target: '5' | '0') => {
-      setIsSubmitting(true);
-      try {
-         const changes: PriceChangeInput[] = [];
-         const targetList = selectedIds.size > 0 ? products.filter(p => selectedIds.has(p.id)) : filteredProducts;
-
-         targetList.forEach(p => {
-            const current = Math.round(p.price);
-            const nextPrice = target === '5'
-               ? (current % 10 === 5 ? current : Math.floor((current - 1) / 10) * 10 + 5)
-               : Math.floor((current - 1) / 10) * 10;
-            if (nextPrice !== current && nextPrice > 0) {
-               changes.push({ product: p, proposal: { price: nextPrice, costPrice: p.costPrice, salePrice: p.salePrice, isOnSale: p.isOnSale } });
-            }
-         });
-
-         const { submitted } = await submitPriceChanges(changes, `Psychological pricing (.${target})`);
-         if (submitted > 0 && selectedIds.size > 0) setSelectedIds(new Set());
-      } catch (e) {
-         logger.error('useMerchandisingState', 'caught error', e as Error);
-         addNotification('alert', 'Failed to submit price changes');
-      } finally {
-         setIsSubmitting(false);
-      }
+      try { batch.stageEnding(target); }
+      catch (error) { addNotification('info', (error as Error).message); }
    };
 
    const handleCreateRule = () => {
@@ -275,8 +243,8 @@ export const useMerchandisingState = (): MerchandisingContextType => {
                }
             }
          });
-         const { submitted } = await submitPriceChanges(changes, `Rule '${rule.name}'`);
-         if (submitted === 0) addNotification('info', `Rule '${rule.name}' matched no products needing a price change.`);
+         if (changes.length) batch.stagePriceBatch(changes, `Rule '${rule.name}'`);
+         else addNotification('info', `Rule '${rule.name}' matched no products needing a price change.`);
       } catch (e) {
          logger.error('useMerchandisingState', 'caught error', e as Error);
          addNotification('alert', 'Failed to run pricing rule');
@@ -298,7 +266,8 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       const activeRules = pricingRules.filter(r => r.isActive);
 
       products.forEach(p => {
-         const cost = p.costPrice || (p.price * 0.7);
+         const cost = p.costPrice;
+         if (cost === undefined || cost <= 0) return;
          const estSales = p.salesVelocity === 'High' ? 35 : p.salesVelocity === 'Medium' ? 18 : 6;
          const currentRev = p.price * estSales;
          const currentMarg = (p.price - cost) * estSales;
@@ -368,6 +337,11 @@ export const useMerchandisingState = (): MerchandisingContextType => {
 
    return {
       products,
+      catalogCount: activeTab === 'pricing' ? catalog.data?.count || 0 : filteredProducts.length,
+      catalogLoading: catalog.isFetching,
+      catalogError: catalog.error instanceof Error ? catalog.error.message : null,
+      priceBatch: batch.priceBatch, batchFailures: batch.batchFailures,
+      confirmPriceBatch: batch.confirmPriceBatch, cancelPriceBatch: batch.cancelPriceBatch,
       promotions: countryPromotions,
       sites,
       allOrders: sales || [],

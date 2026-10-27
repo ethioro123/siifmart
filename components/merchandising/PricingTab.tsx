@@ -1,3 +1,4 @@
+import { PriceBatchPreview } from './components/PriceBatchPreview';
 import React from 'react';
 import {
    Search, SlidersHorizontal, Zap, Percent, Loader2
@@ -19,7 +20,7 @@ export const PricingTab: React.FC = () => {
       isSubmitting,
       applyPsychologicalPricing,
       selectedIds,
-      applyBulkSale
+      applyBulkSale, catalogCount, catalogLoading, catalogError, priceBatch, batchFailures, sites, currencySymbol, confirmPriceBatch, cancelPriceBatch
    } = useMerchandising();
 
    const activeFilterCount = Object.values(filters).filter(v => Array.isArray(v) ? v.length > 0 : v !== null && v !== '').length;
@@ -70,9 +71,9 @@ export const PricingTab: React.FC = () => {
                   <button
                      type="button"
                      onClick={() => applyPsychologicalPricing('5')}
-                     disabled={isSubmitting}
+                     disabled={isSubmitting || catalogLoading}
                      className="h-10 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all active:scale-[0.98] cursor-pointer"
-                     title="Round prices to end in 5 (e.g., 700 -> 695)"
+                     title="Preview ending-in-5 proposals for selected records or this page"
                   >
                      {isSubmitting ? (
                         <Loader2 size={13} className="animate-spin" />
@@ -84,9 +85,9 @@ export const PricingTab: React.FC = () => {
                   <button
                      type="button"
                      onClick={() => applyPsychologicalPricing('0')}
-                     disabled={isSubmitting}
+                     disabled={isSubmitting || catalogLoading}
                      className="h-10 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all active:scale-[0.98] cursor-pointer"
-                     title="Round prices to end in 0 (e.g., 700 -> 690)"
+                     title="Preview ending-in-0 proposals for selected records or this page"
                   >
                      {isSubmitting ? (
                         <Loader2 size={13} className="animate-spin" />
@@ -111,6 +112,10 @@ export const PricingTab: React.FC = () => {
             <PricingFiltersPanel />
          </div>
 
+         <p className="px-5 py-3 text-sm text-[var(--theme-text-secondary)]">{catalogLoading ? 'Loading authorized catalog…' : `${catalogCount} product records match. ${selectedIds.size} selected on this page.`} Actions show a preview before submission.</p>
+         {catalogError && <p role="alert" className="px-5 py-3 text-sm text-[var(--theme-danger)]">Could not load catalog: {catalogError}</p>}
+         {!catalogLoading && !catalogError && catalogCount === 0 && <p className="px-5 py-3 text-sm">No products match your search in your authorized locations.</p>}
+         <PriceBatchPreview batch={priceBatch} failures={batchFailures} sites={sites} currency={currencySymbol} pending={isSubmitting} onConfirm={confirmPriceBatch} onClose={cancelPriceBatch} />
          {/* Products Table grid list */}
          <PricingProductsTable />
 

@@ -1,3 +1,4 @@
+import type { PriceBatch, PriceBatchResult } from '../../utils/priceManager';
 import React, { createContext, useContext } from 'react';
 import type { Product, Promotion, PricingRule } from '../../types';
 import type { ProductSalesMetrics } from '../../utils/merchandisingAnalytics';
@@ -18,6 +19,9 @@ export interface MerchandisingFilters {
 export interface MerchandisingContextType {
    // Data from DataContext
    products: Product[];
+   catalogCount: number; catalogLoading: boolean; catalogError: string | null;
+   priceBatch: PriceBatch | null; batchFailures: PriceBatchResult['failures'];
+   confirmPriceBatch: () => Promise<void>; cancelPriceBatch: () => void;
    promotions: Promotion[];
    sites: any[];
    allOrders: any[];

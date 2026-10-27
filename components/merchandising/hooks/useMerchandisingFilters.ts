@@ -1,3 +1,4 @@
+import { sellingMargin } from '../../../utils/priceManager';
 import { useState, useMemo, useEffect } from 'react';
 import type { Product } from '../../../types';
 import type { MerchandisingFilters } from '../MerchandisingContext';
@@ -81,8 +82,8 @@ export const useMerchandisingFilters = ({
         // Margin Range Filter
         if (filters.minMargin !== '' || filters.maxMargin !== '') {
             result = result.filter(p => {
-                const cost = p.costPrice || p.price * 0.7;
-                const margin = getMargin(p.price, cost);
+                const margin = sellingMargin(p);
+                if (margin === null) return false;
                 const min = filters.minMargin !== '' ? parseFloat(filters.minMargin) : -Infinity;
                 const max = filters.maxMargin !== '' ? parseFloat(filters.maxMargin) : Infinity;
                 return margin >= min && margin <= max;
@@ -95,8 +96,8 @@ export const useMerchandisingFilters = ({
             let valB: any;
 
             if (sortConfig.key === 'margin') {
-                valA = getMargin(a.price, a.costPrice || a.price * 0.7);
-                valB = getMargin(b.price, b.costPrice || b.price * 0.7);
+                valA = sellingMargin(a);
+                valB = sellingMargin(b);
             } else {
                 valA = a[sortConfig.key as keyof Product];
                 valB = b[sortConfig.key as keyof Product];

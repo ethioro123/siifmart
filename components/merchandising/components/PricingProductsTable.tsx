@@ -31,7 +31,7 @@ export const PricingProductsTable: React.FC = () => {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+    const paginatedProducts = filteredProducts;
 
     return (
         <div className="overflow-x-auto">
@@ -42,7 +42,7 @@ export const PricingProductsTable: React.FC = () => {
                             <input
                                 type="checkbox"
                                 className="accent-[var(--theme-accent)] w-4 h-4 cursor-pointer rounded"
-                                aria-label="Select all products"
+                                aria-label="Select all products on this page"
                                 checked={selectedIds.size === filteredProducts.length && filteredProducts.length > 0}
                                 onChange={toggleSelectAll}
                             />
