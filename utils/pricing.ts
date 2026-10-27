@@ -141,7 +141,8 @@ export function calculateDynamicPrice(
     const minPrice = basePrice * 1.1; // At least 10% margin
     const maxPrice = basePrice * 3; // Maximum 300% markup
 
-    return Math.round(Math.max(minPrice, Math.min(maxPrice, dynamicPrice)) * 100) / 100;
+    // Merchandising Whole-Number Rule: Must strictly be integer
+    return Math.round(Math.max(minPrice, Math.min(maxPrice, dynamicPrice)));
 }
 
 /**

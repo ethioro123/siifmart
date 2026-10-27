@@ -293,6 +293,48 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
         });
     });
 
+    describe('Regional Compliance Manager (regional_compliance_manager)', () => {
+        it('authorizes read-only audit inspection across finance, inventory, pos, pricing, sales, and compliance staff management', () => {
+            expect(hasPermission('regional_compliance_manager', 'VIEW_AUDIT_LOGS')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'ACCESS_FINANCE')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'VIEW_REVENUE')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'VIEW_EXPENSES')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'VIEW_PAYROLL')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'ACCESS_INVENTORY')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'VIEW_COST_PRICE')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'VIEW_POS_DASHBOARD')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'VIEW_ALL_TRANSACTIONS')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'ACCESS_PRICING')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'ADD_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'EDIT_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_compliance_manager', 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(canAccessRoute('regional_compliance_manager', '/regional-ops')).toBe(true);
+            expect(canAccessRoute('regional_compliance_manager', '/finance')).toBe(true);
+            expect(canAccessRoute('regional_compliance_manager', '/inventory')).toBe(true);
+            expect(canAccessRoute('regional_compliance_manager', '/pos-dashboard')).toBe(true);
+            expect(canAccessRoute('regional_compliance_manager', '/pricing')).toBe(true);
+            expect(canAccessRoute('regional_compliance_manager', '/employees')).toBe(true);
+            expect(canAccessRoute('regional_compliance_manager', '/settings')).toBe(true);
+        });
+
+        it('authorizes hiring of store operations auditor, auditor, and tax compliance officer roles only', () => {
+            expect(canEmployRole('regional_compliance_manager', 'store_operations_auditor')).toBe(true);
+            expect(canEmployRole('regional_compliance_manager', 'auditor')).toBe(true);
+            expect(canEmployRole('regional_compliance_manager', 'tax_compliance_officer')).toBe(true);
+            expect(canEmployRole('regional_compliance_manager', 'cashier')).toBe(false);
+            expect(canEmployRole('regional_compliance_manager', 'store_manager')).toBe(false);
+        });
+
+        it('strictly enforces read-only Segregation of Duties (no sales, stock edits, PO creation, expense entry, or pricing edits)', () => {
+            expect(hasPermission('regional_compliance_manager', 'PROCESS_SALE')).toBe(false);
+            expect(hasPermission('regional_compliance_manager', 'ADJUST_STOCK')).toBe(false);
+            expect(hasPermission('regional_compliance_manager', 'CREATE_PO')).toBe(false);
+            expect(hasPermission('regional_compliance_manager', 'ADD_EXPENSE')).toBe(false);
+            expect(hasPermission('regional_compliance_manager', 'PROCESS_PAYROLL')).toBe(false);
+            expect(hasPermission('regional_compliance_manager', 'EDIT_PRICE')).toBe(false);
+        });
+    });
+
     describe('Maker-Checker Segregation & Regional Autonomous Expense Caps', () => {
         it('enforces Maker-Checker: expense creator cannot approve their own expense', () => {
             const creatorId = 'emp-024';

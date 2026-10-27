@@ -6,14 +6,14 @@ import { MarkdownTab } from '../../components/merchandising/MarkdownTab';
 import { MarkdownPlanResults } from '../../components/merchandising/MarkdownPlanResults';
 import { calculateMarkdownGlidePath } from '../../utils/markdownGlidePath';
 import type { Product } from '../../types';
-const mocks=vi.hoisted(()=>({country:'ET',site:'site',send:vi.fn(),pending:false,catalog:vi.fn()}));
+const mocks=vi.hoisted(()=>({country:'ET',site:'site',siteType:'Store',send:vi.fn(),pending:false,catalog:vi.fn()}));
 const product={id:'p',name:'Coffee',sku:'ET-COF',siteId:'site',price:100,costPrice:70,stock:100,status:'active'} as Product;
 vi.mock('../../components/merchandising/MerchandisingContext',()=>({useMerchandising:()=>({activeCountry:mocks.country,currencySymbol:'ETB'})}));
-vi.mock('../../contexts/DataContext',()=>({useData:()=>({activeSite:{id:mocks.site},sales:[]})}));
+vi.mock('../../contexts/DataContext',()=>({useData:()=>({activeSite:{id:mocks.site,type:mocks.siteType},sales:[]})}));
 vi.mock('../../hooks/usePriceManagerCatalog',()=>({usePriceManagerCatalog:(input:unknown)=>{mocks.catalog(input);return {data:{data:[product],count:1},isFetching:false,isError:false};}}));
 vi.mock('../../hooks/useMarkdownProposal',()=>({useMarkdownProposal:()=>({send:mocks.send,busy:false,feedback:null,pending:{isSuccess:true,isFetching:false,data:{data:mocks.pending?[{id:'pending'}]:[]}}})}));
 vi.mock('recharts',()=>({ResponsiveContainer:()=>null,Area:()=>null,AreaChart:()=>null,CartesianGrid:()=>null,Tooltip:()=>null,XAxis:()=>null,YAxis:()=>null}));
-afterEach(cleanup);beforeEach(()=>{vi.clearAllMocks();mocks.country='ET';mocks.site='site';mocks.pending=false;});
+afterEach(cleanup);beforeEach(()=>{vi.clearAllMocks();mocks.country='ET';mocks.site='site';mocks.siteType='Store';mocks.pending=false;});
 const generate=()=>{
  fireEvent.change(screen.getByLabelText('Product'),{target:{value:'p'}});
  const target=new Date();target.setDate(target.getDate()+21);
@@ -45,4 +45,9 @@ it('makes exact stage values available as a table and keeps the chart secondary'
  render(<MarkdownPlanResults plan={plan} currency="ETB" selectedStage={1} currentPrice={100} onSelectStage={vi.fn()}/>);
  expect(screen.getAllByRole('row')).toHaveLength(plan.stages.length+1);expect(screen.getByText('View estimated stock trend').closest('details')?.open).toBe(false);
  expect(screen.getByText(/Estimates are not a sell-through guarantee/)).toBeTruthy();
+});
+
+it('keeps HQ catalog access while branch searches remain facility-scoped',()=>{
+ mocks.siteType='HQ';render(<MarkdownTab/>);
+ expect(mocks.catalog).toHaveBeenLastCalledWith(expect.objectContaining({country:'ET',pageSize:25,filters:{}}));
 });

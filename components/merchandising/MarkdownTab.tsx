@@ -39,7 +39,7 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
     const pendingEdit=!!pending.data?.data.length;
     const confirmed=pending.isSuccess && !pending.isFetching;
     const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
-    const money=(value:number)=>`${currency} ${Math.round(value).toLocaleString()}`;
+    const money=(value:number)=>Number.isFinite(value) ? `${currency} ${Math.round(value).toLocaleString()}` : 'Unavailable';
     const generate=()=>{
         setError('');
         const date=validateTargetExitDate(deadline);
@@ -67,7 +67,7 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
                 {!catalog.isFetching && !catalog.isError && !products.length && <p className="text-sm text-[var(--theme-text-secondary)]">No matching products. Try another name or SKU.</p>}
                 {(catalog.data?.count || 0)>25 && <nav aria-label="Product pages" className="flex items-center justify-between gap-2 text-sm"><button type="button" className={button} disabled={page===1 || catalog.isFetching || busy} onClick={()=>{setPage(page-1);setSelectedId('');}}>Previous</button><span>{page} / {Math.ceil((catalog.data?.count || 0)/25)}</span><button type="button" className={button} disabled={page*25>=(catalog.data?.count || 0) || catalog.isFetching || busy} onClick={()=>{setPage(page+1);setSelectedId('');}}>Next</button></nav>}
                 {product && <dl className="space-y-2 text-sm border-y border-[var(--theme-border)] py-3">
-                    {[["On-hand stock",`${Math.round(product.stock)} ${product.unit || 'units'}`],["Current selling price",money(price)],["Recorded cost",Number.isFinite(product.costPrice) ? money(product.costPrice!) : 'Not recorded'],["Available sales, last 30 days",`${Math.round(metrics?.unitsSold30d || 0)} units`],["Recorded expiry",product.expiryDate || 'Not recorded']].map(([label,value])=><div key={label} className="flex flex-wrap justify-between gap-2"><dt className="text-[var(--theme-text-secondary)]">{label}</dt><dd className="tabular-nums break-words">{value}</dd></div>)}
+                    {[["On-hand stock",`${Math.round(product.stock)} ${product.unit || 'units'}`],["Current selling price",money(price)],["Recorded cost",Number.isFinite(product.costPrice) ? money(product.costPrice!) : 'Unavailable'],["Available sales, last 30 days",`${Math.round(metrics?.unitsSold30d || 0)} units`],["Recorded expiry",product.expiryDate || 'Not recorded']].map(([label,value])=><div key={label} className="flex flex-wrap justify-between gap-2"><dt className="text-[var(--theme-text-secondary)]">{label}</dt><dd className="tabular-nums break-words">{value}</dd></div>)}
                 </dl>}
                 {product && !validation.isValid && <ul className="text-sm text-[var(--theme-status-warning-text)] list-disc pl-4">{validation.reasons.map(reason=><li key={reason}>{reason}</li>)}</ul>}
                 {product && validation.hasZeroVelocity && <p className="text-sm text-[var(--theme-text-secondary)]">Insufficient positive sales history. This scenario estimates zero sales; a discount is not evidence of new demand.</p>}

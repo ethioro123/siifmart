@@ -50,7 +50,7 @@ export const validateMarkdownProduct = (product: Product | null, metrics?: Produ
         ['costPrice', product.costPrice, 'Recorded cost']
     ] as const) {
         if (value === undefined || !Number.isFinite(value) || Math.round(value) <= 0) {
-            missingFields.push(field); reasons.push(`${label} must be a recorded positive number.`);
+            missingFields.push(field); reasons.push(field==='costPrice' ? 'A positive recorded cost must be available to this account. No estimated cost will be substituted.' : `${label} must be a recorded positive number.`);
         }
     }
     if (product.costPrice && Math.round(product.costPrice) > Math.round(product.price)) {
