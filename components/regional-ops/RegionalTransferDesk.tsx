@@ -34,6 +34,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [dispatchModalTransfer, setDispatchModalTransfer] = useState<TransferRecord | null>(null);
   const isHQUser = Boolean(user?.role && ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'regional_supply_chain_manager'].includes(user.role));
+  const canManageTransfers = Boolean(user?.role && ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_logistics_manager', 'warehouse_manager', 'inventory_manager', 'dispatch_supervisor'].includes(user.role));
 
   // Load regional transfers on mount
   React.useEffect(() => {
@@ -349,34 +350,22 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                   {transfer.status === 'Requested' && (() => {
                     const isInter = Boolean(transfer.isInterRegion || transfer.is_inter_region ||
                       (transfer.sourceRegionCode && transfer.destRegionCode && transfer.sourceRegionCode !== transfer.destRegionCode));
-                    const isHQ = isHQUser;
-
-                    if (isInter && !isHQ) {
-                      return (
-                        <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-[11px] font-semibold">
-                          Awaiting HQ Co-Sign
-                        </span>
-                      );
+                    if (isInter && !isHQUser) {
+                      return <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-[11px] font-semibold">Awaiting HQ Co-Sign</span>;
                     }
-
+                    if (!canManageTransfers) {
+                      return <span className="px-2.5 py-1 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] text-[11px] font-medium">Awaiting Logistics Sign-Off</span>;
+                    }
                     return (
-                      <button
-                        type="button"
-                        onClick={() => handleApprove(transfer.id)}
-                        className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                      >
+                      <button type="button" onClick={() => handleApprove(transfer.id)} className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>{isInter ? 'HQ Sign-Off' : 'Approve Rebalance'}</span>
                       </button>
                     );
                   })()}
 
-                  {transfer.status === 'Approved' && (
-                    <button
-                      type="button"
-                      onClick={() => setDispatchModalTransfer(transfer)}
-                      className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
-                    >
+                  {transfer.status === 'Approved' && canManageTransfers && (
+                    <button type="button" onClick={() => setDispatchModalTransfer(transfer)} className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
                       <Truck className="w-3.5 h-3.5" />
                       <span>Dispatch Driver</span>
                     </button>

@@ -97,7 +97,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'warehouse.view', 'warehouse.view_tasks', 'warehouse.dispatch', 'warehouse.receive', 'warehouse.putaway',
         'inventory.view', 'inventory.transfer',
         'procurement.view', 'procurement.receive',
-        'employees.view', 'employees.manage_attendance'
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance'
     ],
     regional_security_manager: [
         'dashboard.view', 'admin.view',

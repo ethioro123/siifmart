@@ -35,7 +35,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         return '/procurement';
     }
 
-    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(role)) {
+    if (role === 'regional_operations_manager' || role === 'area_operations_manager' || ['regional_finance_manager', 'regional_merchandising_manager', 'regional_hr_manager', 'regional_security_manager'].includes(role)) {
         return '/regional-ops';
     }
 
@@ -101,7 +101,8 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
 
         // 3. Level 6-10 - Warehouse & Logistics Roles (Direct sovereign role landing)
         case 'regional_supply_chain_manager':
-            if (siteType === 'Administration' || siteType === 'Administrative') return '/regional-ops';
+        case 'regional_logistics_manager':
+            if (!siteType || siteType === 'Administration' || siteType === 'Administrative') return '/regional-ops';
             if (isStoreSite) return '/inventory';
             return `/wms-ops?tab=${getDefaultFulfillmentTab(role)}`;
 

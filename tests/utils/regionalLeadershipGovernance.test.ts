@@ -3,6 +3,7 @@ import { hasPermission, authService } from '../../utils/permissions';
 import { canAccessRoute, canAccessSite } from '../../services/auth.rbac';
 import { canEmployRole } from '../../utils/roles';
 import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
+import { getVisibleFulfillmentTabs, getDefaultFulfillmentTab } from '../../utils/fulfillmentTabPermissions';
 
 describe('Regional Leadership & Field Supervisors Governance Suite', () => {
     describe('Regional Operations Manager (regional_operations_manager)', () => {
@@ -125,12 +126,21 @@ describe('Regional Leadership & Field Supervisors Governance Suite', () => {
     });
 
     describe('Regional Logistics Manager (regional_logistics_manager)', () => {
-        it('authorizes regional warehouse network, stock transfers, and fulfillment oversight', () => {
+        it('authorizes regional warehouse network, stock transfers, fulfillment tabs, and logistics team onboarding', () => {
             expect(hasPermission('regional_logistics_manager', 'ACCESS_WAREHOUSE')).toBe(true);
             expect(hasPermission('regional_logistics_manager', 'TRANSFER_STOCK')).toBe(true);
             expect(hasPermission('regional_logistics_manager', 'ASSIGN_TASKS')).toBe(true);
             expect(hasPermission('regional_logistics_manager', 'MANAGE_REPLENISHMENT')).toBe(true);
+            expect(hasPermission('regional_logistics_manager', 'ADD_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_logistics_manager', 'EDIT_EMPLOYEE')).toBe(true);
+            expect(hasPermission('regional_logistics_manager', 'APPROVE_EMPLOYEE')).toBe(true);
             expect(canAccessRoute('regional_logistics_manager', '/wms-ops')).toBe(true);
+            expect(getDefaultFulfillmentTab('regional_logistics_manager')).toBe('DOCKS');
+            expect(getVisibleFulfillmentTabs('regional_logistics_manager')).toEqual(
+                expect.arrayContaining(['DOCKS', 'DRIVER', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'REPLENISH', 'ASSIGN'])
+            );
+            expect(canEmployRole('regional_logistics_manager', 'transport_fleet_manager')).toBe(true);
+            expect(canEmployRole('regional_logistics_manager', 'driver')).toBe(true);
         });
 
         it('strictly denies general ledger export and corporate compensation changes', () => {
