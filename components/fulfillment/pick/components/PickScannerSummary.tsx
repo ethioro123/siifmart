@@ -18,13 +18,21 @@ export const PickScannerSummary: React.FC<PickScannerSummaryProps> = ({ job, t }
                 <PackageCheck size={30} />
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight">
-                Ready to complete
+                {t('warehouse.picking.readyToComplete') || 'Ready to complete'}
             </h2>
             <div className="mt-3 sm:mt-5 inline-flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3">
                 <span className="text-4xl sm:text-5xl leading-none font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{totalItems}</span>
                 <span className="text-left text-sm sm:text-base font-semibold text-[var(--theme-text-primary)]">
-                    {totalItems === 1 ? 'line verified' : 'lines verified'}
-                    <span className="block text-xs sm:text-sm font-medium text-[var(--theme-text-secondary)]">{picked ? `${picked} lines for packing · ${short} shortages` : 'No stock picked · no packing job will be created'}</span>
+                    {totalItems === 1
+                        ? (t('warehouse.picking.lineVerifiedSingular') || '1 line verified')
+                        : (t('warehouse.picking.lineVerifiedPlural') || '{count} lines verified').replace('{count}', String(totalItems))}
+                    <span className="block text-xs sm:text-sm font-medium text-[var(--theme-text-secondary)]">
+                        {picked
+                            ? (t('warehouse.picking.linesForPackingShortages') || '{picked} lines for packing · {short} shortages')
+                                .replace('{picked}', String(picked))
+                                .replace('{short}', String(short))
+                            : (t('warehouse.picking.noStockPickedNoPacking') || 'No stock picked · no packing job will be created')}
+                    </span>
                 </span>
             </div>
         </div>

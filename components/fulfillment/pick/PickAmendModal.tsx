@@ -390,7 +390,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                             >
                                 {isSubmitting
                                     ? <><Loader2 size={14} className="animate-spin" /> {t('warehouse.saving')}</>
-                                    : <><Send size={14} /> Submit Amendment & Stock Requests</>
+                                    : <><Send size={14} /> {t('warehouse.picking.submitAmendmentAndStockRequests') || 'Submit Amendment & Stock Requests'}</>
                                 }
                             </button>
                         </div>
