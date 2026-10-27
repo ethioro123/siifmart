@@ -30,10 +30,10 @@ describe('Global Search Bar Appearance & Alignment', () => {
     const input = screen.getByPlaceholderText('Search...');
     expect(input).toBeDefined();
 
-    // Check that form has rounded-xl (Apple design token) and NOT rounded-full (alien pill)
-    const form = container.querySelector('form');
-    expect(form?.className).toContain('rounded-xl');
-    expect(form?.className).not.toContain('rounded-full');
+    // Check that input element has rounded-xl and seamless !bg-[var(--theme-bg-subtle)] matching Putaway
+    expect(input.className).toContain('rounded-xl');
+    expect(input.className).toContain('!bg-[var(--theme-bg-subtle)]');
+    expect(input.className).toContain('min-h-[32px]');
 
     // Check that there is no blue circular wrapper around the search icon
     const blueCircle = container.querySelector('.bg-blue-500\\/10');
