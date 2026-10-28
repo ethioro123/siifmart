@@ -8,6 +8,7 @@ import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { native } from '../../../utils/native';
 import { audioFeedback } from '../../../utils/audioFeedback';
+import { logger } from '../../../utils/logger';
 import { Store, User, Clock, ShieldCheck, DollarSign, ArrowLeft, Monitor, CheckCircle2, Lock } from 'lucide-react';
 
 const PRESET_FLOATS = [1000, 2000, 3000, 5000];
@@ -68,7 +69,7 @@ export const StartShiftModal: React.FC = () => {
             await handleStartShift(floatNum, selectedCounter);
             setIsStartShiftModalOpen(false);
         } catch (err) {
-            console.error('Failed to start shift:', err);
+            logger.error('StartShiftModal', 'Failed to start shift:', err);
         } finally {
             setIsSubmitting(false);
         }

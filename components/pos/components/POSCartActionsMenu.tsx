@@ -43,7 +43,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
     return (
         <>
             <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
-            <div className="absolute bottom-full mb-2 right-0 w-60 bg-[var(--theme-bg-card)]/95 backdrop-blur-xl border border-[var(--theme-border)] rounded-2xl shadow-2xl p-1.5 z-20 space-y-0.5 animate-in slide-in-from-bottom-2 duration-200">
+            <div className="absolute bottom-full mb-2 right-0 w-60 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-lg p-1.5 z-20 space-y-0.5 animate-in slide-in-from-bottom-2 duration-200">
                 <Protected permission="ADD_PRODUCT">
                     <button
                         type="button"

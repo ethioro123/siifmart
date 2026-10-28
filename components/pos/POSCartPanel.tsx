@@ -282,8 +282,8 @@ export const POSCartPanel: React.FC = () => {
                                             type="button"
                                             role="switch"
                                             aria-checked={isRoundingEnabled}
-                                            aria-label="Cash rounding"
-                                            title="Toggle cash rounding"
+                                            aria-label={t('pos.cashRounding')}
+                                            title={t('pos.cashRounding')}
                                             onClick={() => setIsRoundingEnabled(!isRoundingEnabled)}
                                             className={`min-h-11 min-w-11 rounded-xl transition-colors relative shrink-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${isRoundingEnabled ? 'bg-[var(--theme-accent-muted)]' : 'bg-[var(--theme-bg-subtle)]'}`}
                                         >
@@ -333,7 +333,7 @@ export const POSCartPanel: React.FC = () => {
                             }}
                             disabled={cart.length === 0}
                             className="min-h-11 py-2 px-2 bg-[var(--theme-status-danger-bg)] enabled:hover:opacity-90 border border-[var(--theme-status-danger-border)] rounded-[10px] text-sm leading-5 font-semibold text-[var(--theme-status-danger-text)] flex items-center justify-center gap-1.5 disabled:cursor-not-allowed transition-colors tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
-                            title="Zero-Trust Void (Supervisor Auth Required)"
+                            title={t('pos.void')}
                         >
                             <div className="w-5 h-5 rounded-md bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
                                 <Trash2 size={16} />
