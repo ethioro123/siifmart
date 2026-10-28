@@ -191,7 +191,8 @@ export const useMerchandisingState = (): MerchandisingContextType => {
             code: newPromo.code.trim().toUpperCase(),
             type: newPromo.type,
             value: Math.round(Number(newPromo.value)),
-            expiryDate: newPromo.expiryDate
+            expiryDate: newPromo.expiryDate,
+            countryCode: activeCountry
          });
          addNotification('success', `Campaign '${newPromo.code.toUpperCase()}' submitted for governance approval.`);
          setIsPromoModalOpen(false);

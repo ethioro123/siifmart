@@ -44,7 +44,7 @@ export const shelfTagsService = {
       customAttrs.isHalal ||
       customAttrs.is_halal ||
       customAttrs.halalVerified ||
-      (typeof cert === 'string' && /^(100%\s*)?(certified\s*)?halal(\s*certified)?$/i.test(cert.trim()))
+      (typeof cert === 'string' && /^(100%\s*)?(certified[\s_-]*)?halal([\s_-]*certified)?$/i.test(cert.trim()))
     );
 
     return {
@@ -92,7 +92,7 @@ export const shelfTagsService = {
         customAttrs.isHalal ||
         customAttrs.is_halal ||
         customAttrs.halalVerified ||
-        (typeof cert === 'string' && /^(100%\s*)?(certified\s*)?halal(\s*certified)?$/i.test(cert.trim()))
+        (typeof cert === 'string' && /^(100%\s*)?(certified[\s_-]*)?halal([\s_-]*certified)?$/i.test(cert.trim()))
       );
 
       const prod: Product = {

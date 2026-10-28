@@ -28,11 +28,11 @@ export const isProductHalal = (product: Product | ShelfTagItem): boolean => {
     if (p.halalVerified === true) return true;
     if (p.storage && p.storage.halalVerified === true) return true;
     const cert = p.dietaryCert || (p.customAttributes && (p.customAttributes.dietaryCert || p.customAttributes.dietary_cert));
-    if (typeof cert === 'string' && /^(100%\s*)?(certified\s*)?halal(\s*certified)?$/i.test(cert.trim())) {
+    if (typeof cert === 'string' && /^(100%\s*)?(certified[\s_-]*)?halal([\s_-]*certified)?$/i.test(cert.trim())) {
         return true;
     }
     const comp = p.halalCompliance || (p.customAttributes && (p.customAttributes.halalCompliance || p.customAttributes.halal_compliance));
-    if (typeof comp === 'string' && /^(100%\s*)?(certified\s*)?halal(\s*certified)?|compliant$/i.test(comp.trim())) {
+    if (typeof comp === 'string' && /^(100%\s*)?(certified[\s_-]*)?halal([\s_-]*certified)?|compliant$/i.test(comp.trim())) {
         return true;
     }
     return false;

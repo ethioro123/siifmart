@@ -118,6 +118,7 @@ export const merchandisingCampaignsService = {
     type: 'PERCENTAGE' | 'FIXED';
     value: number;
     expiryDate: string;
+    countryCode?: string;
   }): Promise<void> {
     const cleanCode = input.code.trim().toUpperCase();
     if (!/^[A-Z0-9_-]{3,32}$/.test(cleanCode)) {
@@ -139,12 +140,17 @@ export const merchandisingCampaignsService = {
       throw new Error('Expiry date must be in the future');
     }
 
-    const { error } = await supabase.from('merchandising_campaign_proposals').insert({
+    const insertPayload: Record<string, any> = {
       code: cleanCode,
       discount_type: input.type,
       discount_value: wholeDiscount,
       expiry_date: input.expiryDate
-    });
+    };
+    if (input.countryCode) {
+      insertPayload.country_code = input.countryCode.trim().toUpperCase();
+    }
+
+    const { error } = await supabase.from('merchandising_campaign_proposals').insert(insertPayload);
     if (error) throw error;
   },
 
