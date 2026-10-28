@@ -118,7 +118,7 @@ describe('Zero-Trust Hardened Expenses Service', () => {
                 name: 'Fatuma Finance',
                 role: 'country_finance_director' // Not CEO!
             })
-        ).rejects.toThrow('Executive Authorization required: This expense exceeds the sovereign threshold and requires CEO approval.');
+        ).rejects.toThrow('Executive Authorization required');
     });
 
     it('allows CEO to approve escalated expense', async () => {

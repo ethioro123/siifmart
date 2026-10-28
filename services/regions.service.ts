@@ -105,7 +105,7 @@ export const regionsService = {
                 monthly_procurement_budget: Number(r.monthly_procurement_budget || 0),
                 autonomous_po_limit: r.autonomous_po_limit == null ? undefined : Number(r.autonomous_po_limit),
                 monthly_expense_budget: Number(r.monthly_expense_budget || 0),
-                autonomous_expense_limit: Number(r.autonomous_expense_limit || 25000),
+                autonomous_expense_limit: Number(r.autonomous_expense_limit || 2000000),
                 status: r.status || 'active',
                 created_at: r.created_at,
                 updated_at: r.updated_at
@@ -189,7 +189,7 @@ export const regionsService = {
                 monthly_procurement_budget: Number(data.monthly_procurement_budget || 0),
                 autonomous_po_limit: data.autonomous_po_limit == null ? undefined : Number(data.autonomous_po_limit),
                 monthly_expense_budget: Number(data.monthly_expense_budget || 0),
-                autonomous_expense_limit: Number(data.autonomous_expense_limit || 25000),
+                autonomous_expense_limit: Number(data.autonomous_expense_limit || 2000000),
                 status: data.status || 'active',
                 created_at: data.created_at,
                 updated_at: data.updated_at
@@ -230,7 +230,7 @@ export const regionsService = {
                 monthly_procurement_budget: input.monthly_procurement_budget ?? 0,
                 autonomous_po_limit: input.autonomous_po_limit,
                 monthly_expense_budget: input.monthly_expense_budget ?? 0,
-                autonomous_expense_limit: input.autonomous_expense_limit ?? 25000,
+                autonomous_expense_limit: input.autonomous_expense_limit ?? 2000000,
                 status: input.status || 'active',
                 last_change_reason: changeReason,
                 created_at: new Date().toISOString(),

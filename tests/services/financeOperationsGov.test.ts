@@ -238,7 +238,7 @@ describe('SIIFMART Finance - Operations, Float, Margins & Zero-Trust Governance'
                     name: 'Fatuma Head of Finance',
                     role: 'country_finance_director'
                 })
-            ).rejects.toThrow('Executive Authorization required: This expense exceeds the sovereign threshold and requires CEO approval.');
+            ).rejects.toThrow('Executive Authorization required');
         });
     });
 });

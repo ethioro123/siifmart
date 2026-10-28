@@ -65,23 +65,56 @@ export const ReturnModal: React.FC = () => {
             return;
         }
 
-        const matchesConfigured = customPin && entered === customPin;
+        const isCashRefund = refundMethod === 'CASH';
 
-        const hqStaff = (employees || []).filter(e =>
+        // Zero-Trust Treasury Invariant: Cash Refund Payouts at POS
+        // Retain Central HQ Finance 6-digit OTP dual control; store managers CANNOT approve cash payouts.
+        if (isCashRefund) {
+            if (entered.length !== 6) {
+                setPinError('Central HQ Policy: Physical cash payouts require a 6-digit Central HQ Finance OTP.');
+                setHqOtp('');
+                return;
+            }
+
+            // Store managers, assistant store managers, and shift supervisors are explicitly barred from cash payout approval
+            const centralHqFinanceStaff = (employees || []).filter(e =>
+                e.id !== user?.id &&
+                (!user?.code || e.code !== user.code) &&
+                ['group_ceo', 'group_cfo', 'country_managing_director', 'country_finance_director', 'cfo', 'finance_manager'].includes(e.role?.toLowerCase() || '')
+            );
+            const matchesHqFinance = centralHqFinanceStaff.some(m => m.code?.trim() && matchStaffPin(m.code.trim(), entered));
+            const matchesHqConfig = Boolean(settings?.centralHqCashRefundOtp && entered === settings.centralHqCashRefundOtp.trim());
+
+            if (matchesHqFinance || matchesHqConfig) {
+                setPinError('');
+                setIsPinStep(false);
+                const verifiedOtp = entered;
+                setHqOtp('');
+                handleProcessReturn(refundMethod, customerPhone, verifiedOtp);
+            } else {
+                setPinError('Zero-Trust Violation: Store managers cannot approve cash payouts. Central HQ Finance 6-digit OTP required.');
+                setHqOtp('');
+            }
+            return;
+        }
+
+        // Non-Cash Refunds (Store Credit, Digital Reversals): Store supervisory authentication
+        const matchesConfigured = Boolean(customPin && entered === customPin);
+        const supervisorStaff = (employees || []).filter(e =>
             e.id !== user?.id &&
             (!user?.code || e.code !== user.code) &&
             ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_finance_director', 'country_compliance_manager', 'auditor', 'store_manager', 'assistant_store_manager', 'shift_supervisor', 'regional_operations_manager'].includes(e.role?.toLowerCase() || '')
         );
-        const matchesHqStaff = hqStaff.some(m => m.code?.trim() && matchStaffPin(m.code.trim(), entered));
+        const matchesSupervisor = supervisorStaff.some(m => m.code?.trim() && matchStaffPin(m.code.trim(), entered));
 
-        if (matchesConfigured || matchesHqStaff) {
+        if (matchesConfigured || matchesSupervisor) {
             setPinError('');
             setIsPinStep(false);
             const verifiedOtp = entered;
             setHqOtp('');
             handleProcessReturn(refundMethod, customerPhone, verifiedOtp);
         } else {
-            setPinError(customPin || hqStaff.length > 0 
+            setPinError(customPin || supervisorStaff.length > 0 
                 ? 'Invalid Authorization PIN. A secondary manager or supervisor must authenticate.' 
                 : 'No Manager Security PIN configured in Settings. Refund rejected under Zero-Trust policy.');
             setHqOtp('');
@@ -152,7 +185,7 @@ export const ReturnModal: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={handleVerifyHqOtp}
-                                disabled={hqOtp.length < 4 || isProcessing}
+                                disabled={(refundMethod === 'CASH' ? hqOtp.length !== 6 : hqOtp.length < 4) || isProcessing}
                                 className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs uppercase tracking-wider"
                             >
                                 {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}

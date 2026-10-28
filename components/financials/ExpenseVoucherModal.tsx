@@ -30,7 +30,9 @@ export const ExpenseVoucherModal: React.FC<ExpenseVoucherModalProps> = ({
 }) => {
     if (!expense) return null;
 
-    const isCeoEscalated = Boolean(expense.escalatedToCeo);
+    const isCeoEscalated = Boolean(expense.escalatedToCeo) || expense.amount > 20000000;
+    const isCountrySignoff = expense.amount > 2000000 && !isCeoEscalated;
+    const isRegionalAutonomous = expense.amount <= 2000000;
 
     return (
         <Modal
@@ -73,14 +75,26 @@ export const ExpenseVoucherModal: React.FC<ExpenseVoucherModalProps> = ({
                     </span>
                 </div>
 
-                {/* CEO Escalation Banner */}
+                {/* Tier & Governance Banners */}
                 {isCeoEscalated && (
                     <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5 text-xs text-amber-700 dark:text-amber-300">
                         <Crown size={16} className="text-amber-500 shrink-0" />
                         <div>
-                            <span className="font-semibold">Executive Escalation:</span>
+                            <span className="font-semibold">Group Executive Authorization Required:</span>
                             <span className="ml-1">
-                                Amount exceeds standard branch approval limit. Requires sovereign CEO authorization.
+                                Amount exceeds country autonomous limit (20,000,000 {currencySymbol}). Requires Group CFO or Group CEO sign-off.
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {isCountrySignoff && (
+                    <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-2.5 text-xs text-blue-700 dark:text-blue-300">
+                        <ShieldCheck size={16} className="text-blue-500 shrink-0" />
+                        <div>
+                            <span className="font-semibold">Country Sign-Off Required:</span>
+                            <span className="ml-1">
+                                Amount exceeds regional limit (2,000,000 {currencySymbol}). Requires Country Finance Director or Country Managing Director sign-off.
                             </span>
                         </div>
                     </div>
