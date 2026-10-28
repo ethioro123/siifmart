@@ -1,4 +1,5 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeImage, shell } from 'electron';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { setupAppMenu } from './menu';
@@ -13,6 +14,17 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+function resolveBrandIconPath(): string {
+    const candidates = [
+        path.join(__dirname, '../build/icon.png'),
+        path.join(__dirname, '../public/icon-512.png'),
+        path.join(__dirname, '../public/icon.png'),
+        path.join(__dirname, '../dist/icon-512.png'),
+        path.join(__dirname, '../dist/icon.png')
+    ];
+    return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
+}
 
 // Explicitly set Application Name for macOS Menu Bar & Task Manager
 app.setName('SIIFMART');
@@ -42,15 +54,28 @@ if (!gotTheLock) {
 
 function createWindow(): void {
     const isDev = process.env.NODE_ENV === 'development' || !!process.env.VITE_DEV_SERVER_URL;
+    const iconPath = resolveBrandIconPath();
+    const appIcon = nativeImage.createFromPath(iconPath);
+
+    if (process.platform === 'darwin' && app.dock && !appIcon.isEmpty()) {
+        app.dock.setIcon(appIcon);
+    }
+
+    app.setAboutPanelOptions({
+        applicationName: 'SIIFMART',
+        applicationVersion: app.getVersion(),
+        copyright: 'Copyright © 2026 SIIFMART — Since 2026',
+        iconPath
+    });
 
     mainWindow = new BrowserWindow({
         width: 1440,
         height: 900,
         minWidth: 1024,
         minHeight: 700,
-        backgroundColor: '#151D18',
+        backgroundColor: '#09090B',
         title: 'SIIFMART',
-        icon: path.join(__dirname, '../public/icon.png'),
+        icon: !appIcon.isEmpty() ? appIcon : iconPath,
         show: false, // Wait until ready-to-show to prevent white flash
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
