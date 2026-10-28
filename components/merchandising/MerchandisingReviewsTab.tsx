@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { PRODUCT_APPROVAL_INBOX_KEY } from '../../utils/approvalInbox';
-import { PlanogramRevisionReview } from './planogram/PlanogramRevisionReview';
+import { ProposalReviewModal } from './components/ProposalReviewModal';
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, CheckCircle, ChevronLeft, ChevronRight, XCircle, Clock, Layers } from 'lucide-react';
@@ -35,13 +35,14 @@ export const MerchandisingReviewsTab: React.FC = () => {
   const [description, setDescription] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
   const [page, setPage] = useState(1);
-  const [layoutReview, setLayoutReview] = useState<PendingInventoryChange | null>(null);
+  const [selectedReview, setSelectedReview] = useState<PendingInventoryChange | null>(null);
   const [selectedRejectRequest, setSelectedRejectRequest] = useState<PendingInventoryChange | null>(null);
 
   const createRequest = useCreateInventoryRequestMutation();
   const country = (effectiveCountry || user?.country || 'ET').toUpperCase();
   const currencySymbol = country === 'KE' ? 'KES' : 'ETB';
   const role = (user?.role || '').toLowerCase();
+  useEffect(() => { setSelectedReview(null); }, [country, user?.id]);
   const queryClient = useQueryClient();
 
   const queryKey = ['merchandising_reviews', country, user?.regionCode, activeSite?.id, user?.id, statusFilter, page, focusedRequest, focusedRevision];
@@ -326,6 +327,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                     </p>
                   </div>
 
+                  <button type="button" onClick={() => setSelectedReview(request)} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-4 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={'Review proposal for ' + request.productName}>Review proposal</button>
                   {/* Actions for Pending Proposals */}
                   {isPending && (
                     <div className="flex flex-wrap items-center gap-2">
@@ -354,8 +356,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                           type="button"
                           disabled={decision.isPending || !canApprove}
                           onClick={() => {
-                            if (request.layoutRevisionId || request.layout_revision_id) setLayoutReview(request);
-                            else decision.mutate({ id: request.id, action: 'approve' });
+                            setSelectedReview(request);
                           }}
                           className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
                         >
@@ -425,10 +426,11 @@ export const MerchandisingReviewsTab: React.FC = () => {
         </div>
       )}
 
-      {layoutReview && <PlanogramRevisionReview request={layoutReview} country={country} submitting={decision.isPending}
-        onClose={() => setLayoutReview(null)} onApprove={async () => {
-          await decision.mutateAsync({ id: layoutReview.id, action: 'approve' });
-          setLayoutReview(null);
+      {selectedReview && <ProposalReviewModal key={selectedReview.id} request={requests.find(request => request.id === selectedReview.id) || selectedReview} country={country} currencySymbol={currencySymbol}
+        currentProduct={selectedReview.currentProduct || products.find(product => product.id === selectedReview.productId)} submitting={decision.isPending}
+        onClose={() => { if (!decision.isPending) setSelectedReview(null); }} onApprove={async () => {
+          await decision.mutateAsync({ id: selectedReview.id, action: 'approve' });
+          setSelectedReview(null);
         }} />}
       {/* Reject Modal */}
       <RejectProposalModal
