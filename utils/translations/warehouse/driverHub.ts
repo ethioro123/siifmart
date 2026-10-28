@@ -206,4 +206,18 @@ export const driverHub: TranslationBlock = {
     protocolFault: { en: 'Protocol fault. Identify profile.', am: 'የፕሮቶኮል ስህተት። መገለጫዎን ይለዩ።', or: 'Dogoggora pirotokoolii. Eenyummaa kee adda baasi.' },
     return: { en: 'Return', am: 'መልስ', or: 'Deebisi' },
     logEmpty: { en: 'Log Empty', am: 'ታሪክ ባዶ ነው', or: 'Galmeen Duudaa dha' },
+
+    // Driver Operations Alignment
+    outboundDispatch: { en: 'Outbound Dispatch', am: 'ወደ ውጭ የሚላክ', or: 'Ergaa Geejjibaa' },
+    activeCountSuffix: { en: '{count} Active', am: '{count} ንቁ', or: '{count} Hojirra Jira' },
+    recordArrival: { en: 'Record Arrival', am: 'መምጣቱን መዝግብ', or: 'Ga\'uu Galmeessi' },
+    assignedDriverOnly: { en: 'Assigned Driver Only', am: 'ለተመደበው አሽከርካሪ ብቻ', or: 'Konkolaachisaa Ramadame Qofa' },
+    loadedMissions: { en: 'Loaded Missions', am: 'የተጫኑ ተልእኮዎች', or: 'Ergawwan Fe\'aman' },
+    deliveryProgress: { en: 'Loaded Delivery Progress', am: 'የተጫነ የማድረስ ሂደት', or: 'Adeemsa Ergaa Fe\'amee' },
+    awaitingDispatchRelease: { en: 'Awaiting dispatch release ({count})', am: 'የስርጭት መልቀቅን በመጠባበቅ ላይ ({count})', or: 'Gadi-lakkisa ergaa eegaa jira ({count})' },
+    dispatchNotice: { en: 'Dispatch loads the dock, assigns transport, and records departure. Your active delivery appears below once released.', am: 'ስርጭት የመጫኛ ቦታውን ይጭናል፣ ትራንስፖርት ይመድባል፣ እና መነሳትን ይመዘግባል። አንዴ ከተለቀቀ በኋላ የእርስዎ ንቁ ማድረስ ከታች ይታያል።', or: 'Wiirtuun ergaa dookii fe\'a, geejjiba ramada, fi deemsa galmeessa. Ergaan kee yeroo gadi-lakkifamu asitti mul\'ata.' },
+    noStagedDeliveries: { en: 'No staged deliveries assigned to you.', am: 'ለእርስዎ የተመደበ ምንም ዝግጁ ማድረስ የለም።', or: 'Ergaan qophaa\'ee siif ramadame hin jiru.' },
+    deliveredBy: { en: 'Delivered By', am: 'ያደረሰው', or: 'Kan Geesse' },
+    confirmDelivery: { en: 'Confirm Delivery', am: 'ማድረስ አረጋግጥ', or: 'Ergaa Mirkaneessi' },
+    arrivalRecordedNotice: { en: 'Arrival recorded. Destination inspection is still required. Undelivered goods remain in transport custody until a return is received.', am: 'መምጣት ተመዝግቧል። የመድረሻ ምርመራ አሁንም ያስፈልጋል። ያልተረከቡ እቃዎች ተመላሽ እስኪደረግ ድረስ በትራንስፖርት ቁጥጥር ስር ይቆያሉ።', or: 'Ga\'uun galmaa\'eera. Sakatta\'iinsi iddoo geessituu barbaachisaa dha. Meeshaan hin geessifamin hamma deebiin fudhatamutti itti-gaafatamummaa geejjibaa jalatti tura.' },
 };

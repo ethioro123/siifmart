@@ -42,7 +42,7 @@ export const APPROVAL_QUEUES: Record<string, { label: string; area: string; href
   product_suggestions: { label: 'Product suggestions', area: 'Procurement', href: '/purchase-requests?view=suggestions', table: 'product_suggestions' },
   expenses: { label: 'Expense approvals', area: 'Finance', href: '/finance?tab=expenses', table: 'expenses' },
   margin: { label: 'Margin exceptions', area: 'Finance', href: '/finance?tab=margin', table: 'margin_approval_requests' },
-  transfers: { label: 'Transfer picking release', area: 'Transfers', href: '/wms-ops?tab=DISPATCH', table: 'wms_jobs' },
+  transfers: { label: 'Transfer picking release', area: 'Transfers', href: '/wms-ops?tab=TRANSFER', table: 'wms_jobs' },
   hiring_requests: { label: 'Hiring requisitions', area: 'HR', href: '/employees?approval=recruitment', table: 'job_requisitions' },
   candidate_hr: { label: 'Candidate HR checks', area: 'HR', href: '/employees?approval=recruitment', table: 'job_candidates' },
   candidate_finance: { label: 'Candidate salary sign-off', area: 'HR / Finance', href: '/employees?approval=recruitment', table: 'job_candidates' },

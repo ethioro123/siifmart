@@ -147,7 +147,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                                 className="px-3 sm:px-4 py-1.5 sm:py-2 min-h-[34px] sm:min-h-[44px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)] rounded-lg sm:rounded-xl text-xs font-semibold flex items-center justify-center gap-1 sm:gap-1.5 cursor-not-allowed opacity-60"
                                                                 title="Only the assigned driver can complete this mission"
                                                             >
-                                                                <CheckCircle size={12} className="sm:w-3.5 sm:h-3.5" /> Assigned Driver Only
+                                                                <CheckCircle size={12} className="sm:w-3.5 sm:h-3.5" /> {t('warehouse.driverHub.assignedDriverOnly')}
                                                             </button>
                                                         );
                                                     }
@@ -157,7 +157,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                             onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
                                                             className="px-3 sm:px-5 py-1.5 sm:py-2 min-h-[34px] sm:min-h-[44px] bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-lg sm:rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs active:scale-[0.98] transition-all touch-manipulation cursor-pointer"
                                                         >
-                                                            <CheckCircle size={14} className="sm:w-[15px] sm:h-[15px]" /> Record arrival
+                                                            <CheckCircle size={14} className="sm:w-[15px] sm:h-[15px]" /> {t('warehouse.driverHub.recordArrival')}
                                                         </button>
                                                     );
                                                 })()

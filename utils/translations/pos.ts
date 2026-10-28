@@ -1,6 +1,8 @@
+import { approvalInbox } from './approvalInbox';
 import { TranslationBlock } from './types';
 
 export const pos: TranslationBlock = {
+    approvals: approvalInbox,
     // Header & Navigation
     payNow: { en: 'Pay Now', am: 'አሁን ክፈል', or: 'Amma Kaffal' },
     clearCart: { en: 'Clear Cart', am: 'ጋሪውን አጽዳ', or: 'Kaartii Haqi' },

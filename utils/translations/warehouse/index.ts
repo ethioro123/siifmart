@@ -1,3 +1,4 @@
+import { approvalInbox } from '../approvalInbox';
 import { TranslationBlock } from '../types';
 import { core } from './core';
 import { driverHub } from './driverHub';
@@ -19,6 +20,7 @@ import { labels } from './labels';
 import { transfer } from './transfer';
 
 export const warehouse: TranslationBlock = {
+    approvals: approvalInbox,
     ...core,
     ...driverHub,
     driverHub,

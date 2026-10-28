@@ -41,7 +41,7 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
                             {activeCount !== undefined ? (
                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                    {activeCount} Active
+                                    {t('warehouse.driverHub.activeCountSuffix', { count: activeCount })}
                                 </span>
                             ) : (
                                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 shrink-0" />
@@ -64,7 +64,7 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-                {onDispatch && <button type="button" onClick={onDispatch} className="min-h-11 shrink-0 rounded-xl border border-[var(--theme-border)] px-3 text-xs font-semibold text-[var(--theme-primary)]">Outbound dispatch</button>}
+                {onDispatch && <button type="button" onClick={onDispatch} className="min-h-11 shrink-0 rounded-xl border border-[var(--theme-border)] px-3 text-xs font-semibold text-[var(--theme-primary)]">{t('warehouse.driverHub.outboundDispatch')}</button>}
                 <div className="bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-full border border-[var(--theme-border)] flex gap-1 w-full sm:w-auto flex-1 sm:flex-initial">
                     <button
                         onClick={() => setViewMode('Active')}
