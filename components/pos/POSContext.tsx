@@ -135,6 +135,12 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, []);
 
     useEffect(() => {
+        if (activeSite?.id) {
+            void refreshData(['products']);
+        }
+    }, [activeSite?.id, refreshData]);
+
+    useEffect(() => {
         if (!customerSearchTerm.trim()) {
             setServerCustomerResults([]);
             return;
