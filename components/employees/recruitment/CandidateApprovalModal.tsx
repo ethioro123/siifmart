@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     X, ShieldCheck, CheckCircle2, Clock, AlertCircle, 
-    Banknote, UserCheck, Sparkles, Building2, User 
+    Banknote, Sparkles, Building2, User, UserCheck, Flame
 } from 'lucide-react';
 import { recruitmentService } from '../../../services/recruitment.service';
 import type { JobCandidate, JobRequisition } from '../../../types/hr-advanced';
+import type { CandidateHiringRoute } from '../../../services/recruitment-delegation';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
 
@@ -29,37 +30,86 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
     const { sites, refreshData } = useData();
 
     const [hrNotes, setHrNotes] = useState('');
+    const [managerNotes, setManagerNotes] = useState('');
     const [financeSalary, setFinanceSalary] = useState(candidate?.offered_salary || (country === 'KE' ? 35000 : 12000));
     const [financeNotes, setFinanceNotes] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [route, setRoute] = useState<CandidateHiringRoute | null>(null);
+
+    const targetRole = candidate?.role || requisition?.role || 'stock_clerk';
+    const targetSiteId = candidate?.site_id || requisition?.site_id || user?.siteId || '';
+    const siteObj = sites.find(s => s.id === targetSiteId);
+
+    useEffect(() => {
+        if (candidate && isOpen) {
+            setFinanceSalary(candidate.offered_salary || (country === 'KE' ? 35000 : 12000));
+            recruitmentService.evaluateCandidateRoute({
+                siteId: targetSiteId,
+                role: targetRole,
+                offeredSalary: candidate.offered_salary,
+                countryCode: country
+            }).then(setRoute).catch(() => setRoute(null));
+        }
+    }, [candidate, isOpen, targetSiteId, targetRole, country]);
 
     if (!isOpen || !candidate) return null;
 
     const userRole = user?.role || '';
-    const isHR = ['country_hr_director', 'regional_hr_manager', 'hr_generalist', 'group_ceo', 'country_managing_director'].includes(userRole);
-    const isFinance = ['country_finance_director', 'regional_finance_manager', 'group_ceo', 'country_managing_director'].includes(userRole);
-    const isCEO = userRole === 'group_ceo' || userRole.toLowerCase() === 'group_ceo';
+    const isHR = ['country_hr_director', 'regional_hr_manager', 'hr_generalist', 'group_ceo', 'group_chro', 'country_managing_director'].includes(userRole);
+    const isHiringManager = [
+        'store_manager', 'warehouse_manager', 'facility_director', 'operations_manager',
+        'regional_operations_manager', 'country_operations_director', 'country_managing_director',
+        'country_hr_director', 'regional_hr_manager', 'hr_generalist', 'group_ceo', 'group_chro'
+    ].includes(userRole);
+    const isFinance = ['country_finance_director', 'regional_finance_manager', 'group_ceo', 'group_cfo', 'country_managing_director'].includes(userRole);
+    const isCEO = ['group_ceo', 'group_chro'].includes(userRole);
 
-    const targetRole = candidate.role || requisition?.role || 'stock_clerk';
-    const targetSiteId = candidate.site_id || requisition?.site_id || user?.siteId || '';
-    const siteObj = sites.find(s => s.id === targetSiteId);
+    const isOwnRecord = Boolean(
+        user?.name && candidate.name.toLowerCase() === user.name.toLowerCase() ||
+        user?.email && candidate.email.toLowerCase() === user.email.toLowerCase()
+    );
 
+    const isException = Boolean(candidate.is_salary_exception || candidate.is_quota_exception || route?.isException);
     const hasHRApproval = Boolean(candidate.hr_approved_at);
+    const hasManagerConfirm = Boolean(candidate.hiring_manager_approved_at);
     const hasFinanceApproval = Boolean(candidate.finance_approved_at);
-    const canActivateHire = (hasHRApproval && hasFinanceApproval) || isCEO;
+    const hasCMDApproval = Boolean(candidate.cmd_approved_at || candidate.group_approved_at);
+
+    const canActivateHire = isCEO || (
+        isException
+            ? (hasHRApproval && hasFinanceApproval && (hasCMDApproval || ['country_managing_director'].includes(userRole)))
+            : (hasHRApproval && (hasManagerConfirm || isHiringManager))
+    );
 
     const handleApproveHR = async () => {
         setIsProcessing(true);
         try {
             await recruitmentService.approveCandidateHR(
                 candidate.id,
-                { id: user?.id || 'hr', name: user?.name || 'HR Director', role: userRole },
+                { id: user?.id || 'hr', name: user?.name || 'HR Lead', role: userRole },
                 hrNotes.trim()
             );
-            showToast('Candidate passed HR identity & compliance vetting', 'success');
+            showToast('Candidate passed HR credential & compensation band vetting', 'success');
             onSuccess();
         } catch (err: any) {
-            showToast(err?.message || 'Failed HR approval', 'error');
+            showToast(err?.message || 'Failed HR clearance', 'error');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleConfirmManager = async () => {
+        setIsProcessing(true);
+        try {
+            await recruitmentService.confirmCandidateHiringManager(
+                candidate.id,
+                { id: user?.id || 'mgr', name: user?.name || 'Hiring Manager', role: userRole },
+                managerNotes.trim()
+            );
+            showToast('Hiring offer confirmed by Authorized Hiring Manager', 'success');
+            onSuccess();
+        } catch (err: any) {
+            showToast(err?.message || 'Failed hiring manager confirmation', 'error');
         } finally {
             setIsProcessing(false);
         }
@@ -74,7 +124,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                 Number(financeSalary),
                 financeNotes.trim()
             );
-            showToast('Salary band and budget authorized by Finance', 'success');
+            showToast('Salary exception authorized by Finance', 'success');
             onSuccess();
         } catch (err: any) {
             showToast(err?.message || 'Failed Finance approval', 'error');
@@ -106,7 +156,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
-            <div className="bg-[var(--theme-bg-panel)] rounded-3xl border border-[var(--theme-border)] shadow-[var(--shadow-modal)] p-6 max-w-xl w-full space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+            <div className="bg-[var(--theme-bg-panel)] rounded-3xl border border-[var(--theme-border)] shadow-[var(--shadow-modal)] p-6 max-w-xl w-full space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex items-start justify-between pb-3 border-b border-[var(--theme-border)]">
                     <div>
@@ -117,6 +167,15 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                             <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                                 Stage: {candidate.stage.toUpperCase()}
                             </span>
+                            {isException ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                    <Flame size={11} /> Exception Path
+                                </span>
+                            ) : (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                    <CheckCircle2 size={11} /> Delegated Fast-Path
+                                </span>
+                            )}
                         </div>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                             {candidate.email} • {candidate.phone}
@@ -131,8 +190,16 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                     </button>
                 </div>
 
-                {/* Assignment Details */}
-                <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs">
+                {/* Anti-Self-Approval Alert */}
+                {isOwnRecord && (
+                    <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
+                        <AlertCircle size={15} className="shrink-0" />
+                        <span>Separation of Duties: You cannot approve, clear, or confirm your own candidate profile.</span>
+                    </div>
+                )}
+
+                {/* Assignment & Governance Details */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs">
                     <div>
                         <span className="text-[var(--theme-text-muted)] block text-[10px] uppercase font-semibold">Location</span>
                         <span className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5 mt-0.5">
@@ -147,15 +214,19 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                             {targetRole}
                         </span>
                     </div>
+                    <div className="col-span-2 sm:col-span-1">
+                        <span className="text-[var(--theme-text-muted)] block text-[10px] uppercase font-semibold">Capacity Quota</span>
+                        <span className="font-semibold text-[var(--theme-text-primary)] mt-0.5 block">
+                            {route ? `${route.currentActive}/${route.approvedQuota} slots (${route.openSlots} open)` : 'Evaluating...'}
+                        </span>
+                    </div>
                 </div>
 
-                {/* 4-Eyes Pipeline Cards */}
+                {/* Governance Routing Steps */}
                 <div className="space-y-3">
-                    {/* HR Identity & Vetting Card */}
+                    {/* Step 1: HR Credentials & Salary Band Clearance */}
                     <div className={`p-4 rounded-2xl border transition-all ${
-                        hasHRApproval 
-                            ? 'bg-emerald-500/5 border-emerald-500/20' 
-                            : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                        hasHRApproval ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
                     }`}>
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -166,17 +237,17 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                 </div>
                                 <div>
                                     <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">
-                                        1. HR Compliance & Identity Vetting
+                                        1. HR Clearance (Credentials & Salary Band)
                                     </h5>
                                     <span className="text-[10px] text-[var(--theme-text-secondary)]">
-                                        National ID check, background clearance, right-to-work verification.
+                                        Identity verification, credentials, right-to-work, and standard pay band check.
                                     </span>
                                 </div>
                             </div>
                             {hasHRApproval ? (
                                 <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                     <CheckCircle2 size={13} />
-                                    <span>Approved</span>
+                                    <span>Cleared</span>
                                 </span>
                             ) : (
                                 <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
@@ -188,17 +259,17 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
 
                         {hasHRApproval ? (
                             <p className="text-xs text-[var(--theme-text-secondary)] pl-9">
-                                Verified by <strong className="text-[var(--theme-text-primary)]">{candidate.hr_approved_by}</strong> on {candidate.hr_approved_at?.slice(0, 10)}. {candidate.hr_notes && `"${candidate.hr_notes}"`}
+                                Cleared by <strong className="text-[var(--theme-text-primary)]">{candidate.hr_approved_by}</strong> on {candidate.hr_approved_at?.slice(0, 10)}. {candidate.hr_notes && `"${candidate.hr_notes}"`}
                             </p>
                         ) : (
                             <div className="pl-9 pt-1 space-y-2">
-                                {isHR ? (
+                                {isHR && !isOwnRecord ? (
                                     <>
                                         <input
                                             type="text"
                                             value={hrNotes}
                                             onChange={(e) => setHrNotes(e.target.value)}
-                                            placeholder="Optional vetting reference or notes..."
+                                            placeholder="Identity verified, background clear, salary within site band..."
                                             className="w-full h-8 px-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-xs text-[var(--theme-text-primary)] outline-none"
                                         />
                                         <button
@@ -208,94 +279,161 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                             className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
                                         >
                                             <ShieldCheck size={14} />
-                                            <span>Sign Off HR Vetting</span>
+                                            <span>Sign Off HR Clearance</span>
                                         </button>
                                     </>
                                 ) : (
                                     <p className="text-xs text-[var(--theme-text-muted)] italic">
-                                        Awaiting sign-off from HR Director or Corporate Admin.
+                                        Awaiting credential & compensation band clearance from HR Officer.
                                     </p>
                                 )}
                             </div>
                         )}
                     </div>
 
-                    {/* Finance Salary & Budget Card */}
-                    <div className={`p-4 rounded-2xl border transition-all ${
-                        hasFinanceApproval 
-                            ? 'bg-emerald-500/5 border-emerald-500/20' 
-                            : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
-                    }`}>
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                    hasFinanceApproval ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-emerald-500/10 text-emerald-600'
-                                }`}>
-                                    <Banknote size={16} />
+                    {/* Step 2 for Routine Hiring: Authorized Hiring Manager Confirmation */}
+                    {!isException ? (
+                        <div className={`p-4 rounded-2xl border transition-all ${
+                            hasManagerConfirm ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                        }`}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                                        hasManagerConfirm ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-blue-500/10 text-[#0071E3]'
+                                    }`}>
+                                        <UserCheck size={16} />
+                                    </div>
+                                    <div>
+                                        <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">
+                                            2. Authorized Hiring Manager Confirmation
+                                        </h5>
+                                        <span className="text-[10px] text-[var(--theme-text-secondary)]">
+                                            Facility / Store Manager confirms role offer within approved site headcount quota.
+                                        </span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">
-                                        2. Finance Salary & Budget Approval
-                                    </h5>
-                                    <span className="text-[10px] text-[var(--theme-text-secondary)]">
-                                        Compensation band review, departmental budget fit, minimum wage law.
+                                {hasManagerConfirm ? (
+                                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                        <CheckCircle2 size={13} />
+                                        <span>Confirmed</span>
                                     </span>
-                                </div>
+                                ) : (
+                                    <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                        <Clock size={13} />
+                                        <span>Pending</span>
+                                    </span>
+                                )}
                             </div>
-                            {hasFinanceApproval ? (
-                                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                                    <CheckCircle2 size={13} />
-                                    <span>Authorized</span>
-                                </span>
+
+                            {hasManagerConfirm ? (
+                                <p className="text-xs text-[var(--theme-text-secondary)] pl-9">
+                                    Offer confirmed by <strong className="text-[var(--theme-text-primary)]">{candidate.hiring_manager_approved_by}</strong> on {candidate.hiring_manager_approved_at?.slice(0, 10)}. {candidate.hiring_manager_notes && `"${candidate.hiring_manager_notes}"`}
+                                </p>
                             ) : (
-                                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                                    <Clock size={13} />
-                                    <span>Pending</span>
-                                </span>
+                                <div className="pl-9 pt-1 space-y-2">
+                                    {isHiringManager && !isOwnRecord ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={managerNotes}
+                                                onChange={(e) => setManagerNotes(e.target.value)}
+                                                placeholder="Offer confirmed for frontline shift roster..."
+                                                className="w-full h-8 px-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-xs text-[var(--theme-text-primary)] outline-none"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleConfirmManager}
+                                                disabled={isProcessing || !hasHRApproval}
+                                                className="h-8 px-3 rounded-lg bg-[#0071E3] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                            >
+                                                <UserCheck size={14} />
+                                                <span>Confirm Hiring Offer</span>
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <p className="text-xs text-[var(--theme-text-muted)] italic">
+                                            Awaiting confirmation from Store Manager or Facility Operations Lead.
+                                        </p>
+                                    )}
+                                </div>
                             )}
                         </div>
-
-                        {hasFinanceApproval ? (
-                            <p className="text-xs text-[var(--theme-text-secondary)] pl-9">
-                                Authorized at <strong className="text-[var(--theme-text-primary)] font-mono tabular-nums">{candidate.offered_salary?.toLocaleString()} {country === 'KE' ? 'KSh' : 'ETB'}</strong> by <strong className="text-[var(--theme-text-primary)]">{candidate.finance_approved_by}</strong> on {candidate.finance_approved_at?.slice(0, 10)}.
-                            </p>
-                        ) : (
-                            <div className="pl-9 pt-1 space-y-2">
-                                {isFinance ? (
-                                    <>
-                                        <div className="flex items-center gap-2">
-                                            <label className="text-xs text-[var(--theme-text-secondary)]">Authorized Salary:</label>
-                                            <input
-                                                type="number"
-                                                min="1000"
-                                                step="500"
-                                                value={financeSalary}
-                                                onChange={(e) => setFinanceSalary(Number(e.target.value))}
-                                                className="w-32 h-8 px-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-xs font-mono tabular-nums text-[var(--theme-text-primary)] outline-none"
-                                            />
-                                            <span className="text-xs text-[var(--theme-text-muted)] font-mono">{country === 'KE' ? 'KSh' : 'ETB'}</span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={handleApproveFinance}
-                                            disabled={isProcessing}
-                                            className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
-                                        >
-                                            <Banknote size={14} />
-                                            <span>Authorize Salary & Budget</span>
-                                        </button>
-                                    </>
+                    ) : (
+                        /* Step 2 for Exception Hiring: Finance Budget & Salary Exception Clearance */
+                        <div className={`p-4 rounded-2xl border transition-all ${
+                            hasFinanceApproval ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                        }`}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                                        hasFinanceApproval ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-emerald-500/10 text-emerald-600'
+                                    }`}>
+                                        <Banknote size={16} />
+                                    </div>
+                                    <div>
+                                        <h5 className="font-semibold text-xs text-[var(--theme-text-primary)]">
+                                            2. Finance Clearance (Salary & Quota Exception)
+                                        </h5>
+                                        <span className="text-[10px] text-[var(--theme-text-secondary)]">
+                                            Budget variance clearance & compensation variance authorization.
+                                        </span>
+                                    </div>
+                                </div>
+                                {hasFinanceApproval ? (
+                                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                        <CheckCircle2 size={13} />
+                                        <span>Authorized</span>
+                                    </span>
                                 ) : (
-                                    <p className="text-xs text-[var(--theme-text-muted)] italic">
-                                        Proposed salary: <span className="font-mono tabular-nums">{candidate.offered_salary?.toLocaleString() || 'Pending'} {country === 'KE' ? 'KSh' : 'ETB'}</span>. Awaiting sign-off from Finance Director.
-                                    </p>
+                                    <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                        <Clock size={13} />
+                                        <span>Pending</span>
+                                    </span>
                                 )}
                             </div>
-                        )}
-                    </div>
+
+                            {hasFinanceApproval ? (
+                                <p className="text-xs text-[var(--theme-text-secondary)] pl-9">
+                                    Authorized at <strong className="text-[var(--theme-text-primary)] font-mono tabular-nums">{candidate.offered_salary?.toLocaleString()} {country === 'KE' ? 'KSh' : 'ETB'}</strong> by <strong className="text-[var(--theme-text-primary)]">{candidate.finance_approved_by}</strong> on {candidate.finance_approved_at?.slice(0, 10)}.
+                                </p>
+                            ) : (
+                                <div className="pl-9 pt-1 space-y-2">
+                                    {isFinance && !isOwnRecord ? (
+                                        <>
+                                            <div className="flex items-center gap-2">
+                                                <label className="text-xs text-[var(--theme-text-secondary)]">Authorized Salary:</label>
+                                                <input
+                                                    type="number"
+                                                    min="1000"
+                                                    step="500"
+                                                    value={financeSalary}
+                                                    onChange={(e) => setFinanceSalary(Number(e.target.value))}
+                                                    className="w-32 h-8 px-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-xs font-mono tabular-nums text-[var(--theme-text-primary)] outline-none"
+                                                />
+                                                <span className="text-xs text-[var(--theme-text-muted)] font-mono">{country === 'KE' ? 'KSh' : 'ETB'}</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleApproveFinance}
+                                                disabled={isProcessing}
+                                                className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                            >
+                                                <Banknote size={14} />
+                                                <span>Authorize Salary & Exception</span>
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <p className="text-xs text-[var(--theme-text-muted)] italic">
+                                            Proposed salary: <span className="font-mono tabular-nums">{candidate.offered_salary?.toLocaleString() || 'Pending'} {country === 'KE' ? 'KSh' : 'ETB'}</span>. Awaiting Finance clearance.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
-                {/* Synaptic Activation Banner */}
+                {/* Activation Banner / Controls */}
                 {candidate.stage === 'hired' ? (
                     <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5">
                         <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
@@ -312,12 +450,16 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                             {canActivateHire ? (
                                 <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1.5">
                                     <CheckCircle2 size={14} />
-                                    <span>Dual-sign-off satisfied — ready for automatic activation.</span>
+                                    <span>Governance requirements satisfied — ready for automatic activation.</span>
                                 </span>
                             ) : (
                                 <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
                                     <AlertCircle size={14} />
-                                    <span>Requires HR compliance + Finance salary authorization.</span>
+                                    <span>
+                                        {isException
+                                            ? 'Requires HR clearance + Finance authorization + Country MD approval.'
+                                            : 'Requires HR clearance + Authorized Hiring Manager confirmation.'}
+                                    </span>
                                 </span>
                             )}
                         </div>
@@ -331,7 +473,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                             >
                                 Close
                             </button>
-                            {canActivateHire && (
+                            {canActivateHire && !isOwnRecord && (
                                 <button
                                     type="button"
                                     onClick={handleFinalizeActivation}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Check, X, TrendingUp, Clock, AlertCircle, Building2, Loader2, Sparkles } from 'lucide-react';
+import { ShieldCheck, Check, X, Clock, AlertCircle, Building2, Loader2, Sparkles, Banknote } from 'lucide-react';
 import Modal from '../../Modal';
 import type { HeadcountQuotaRequest } from '../../../types/employee';
 import { headcountQuotaService } from '../../../services/headcountQuota.service';
@@ -28,7 +28,11 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
   const [rejectionModalId, setRejectionModalId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  const canApprove = ['group_ceo', 'country_managing_director', 'country_hr_director', 'country_operations_director', 'regional_operations_manager'].includes(user?.role || '');
+  const userRole = user?.role || '';
+  const isHR = ['country_hr_director', 'regional_hr_manager', 'hr_generalist', 'country_managing_director', 'group_ceo', 'group_chro'].includes(userRole);
+  const isFinance = ['country_finance_director', 'regional_finance_manager', 'country_managing_director', 'group_ceo', 'group_cfo'].includes(userRole);
+  const isGroupExecutive = ['group_ceo', 'group_chro'].includes(userRole);
+  const isCountryMD = ['country_managing_director', 'group_ceo', 'group_chro', 'country_operations_director'].includes(userRole);
 
   const loadRequests = async () => {
     setIsLoading(true);
@@ -48,14 +52,51 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
     }
   }, [isOpen, effectiveCountry]);
 
+  const handleClearHR = async (req: HeadcountQuotaRequest) => {
+    setActionId(req.id);
+    try {
+      const ok = await headcountQuotaService.clearQuotaHR(req.id, user?.name || 'HR Officer');
+      if (ok) {
+        addNotification?.('success', 'HR workforce capacity cleared.');
+        await loadRequests();
+        onRequestsUpdated?.();
+      } else {
+        addNotification?.('alert', 'Failed to record HR clearance.');
+      }
+    } catch (err: any) {
+      addNotification?.('alert', err.message || 'HR clearance failed');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleClearFinance = async (req: HeadcountQuotaRequest) => {
+    setActionId(req.id);
+    try {
+      const ok = await headcountQuotaService.clearQuotaFinance(req.id, user?.name || 'Finance Officer');
+      if (ok) {
+        addNotification?.('success', 'Finance budget clearance granted.');
+        await loadRequests();
+        onRequestsUpdated?.();
+      } else {
+        addNotification?.('alert', 'Failed to record Finance clearance.');
+      }
+    } catch (err: any) {
+      addNotification?.('alert', err.message || 'Finance clearance failed');
+    } finally {
+      setActionId(null);
+    }
+  };
+
   const handleApprove = async (req: HeadcountQuotaRequest) => {
     setActionId(req.id);
     try {
       const success = await headcountQuotaService.reviewQuotaRequest(
         req.id,
         'APPROVED',
-        user?.name || 'Corporate Executive',
-        'Authorized by Corporate HQ executive operations desk.'
+        user?.name || 'Authorized Officer',
+        'Authorized under delegated headcount governance policy.',
+        userRole
       );
 
       if (success) {
@@ -82,8 +123,9 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
       const success = await headcountQuotaService.reviewQuotaRequest(
         req.id,
         'REJECTED',
-        user?.name || 'Corporate Executive',
-        rejectionReason.trim()
+        user?.name || 'Authorized Officer',
+        rejectionReason.trim(),
+        userRole
       );
 
       if (success) {
@@ -106,20 +148,20 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Headcount Quota Governance & Capacity Authorization" size="xl">
-      <div className="space-y-5 p-2">
+      <div className="space-y-4 p-2">
         {/* Header Summary */}
         <div className="p-4 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-[var(--theme-text-primary)]">
-                Corporate Headcount Ceiling Authority ({effectiveCountry || 'ET'})
+                Delegated Headcount Buffer Authority ({effectiveCountry || 'ET'})
               </span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
-                HQ Tier Governance
+                Tier 3 & 4 Governance
               </span>
             </div>
             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
-              Review and authorize facility staffing ceiling adjustments requested by regional administration offices.
+              National buffer (+10 slots) approved by Country MD; expansions &gt;10 escalate to Group CHRO / Group CEO.
             </p>
           </div>
 
@@ -130,7 +172,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                 key={status}
                 type="button"
                 onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   filterStatus === status
                     ? 'bg-[var(--theme-accent)] text-white shadow-xs'
                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -157,6 +199,13 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
             {filteredRequests.map(req => {
               const isActioning = actionId === req.id;
               const isRejecting = rejectionModalId === req.id;
+              const isRequester = Boolean(user?.name && req.requestedBy.toLowerCase() === user.name.toLowerCase());
+              const exceedsBuffer = req.increaseAmount > 10;
+              const hasHRCapture = Boolean(req.hrClearedBy);
+              const hasFinanceCapture = Boolean(req.financeClearedBy);
+              const canAuthorizeFinal = !isRequester && (
+                exceedsBuffer ? isGroupExecutive : isCountryMD
+              );
 
               return (
                 <div
@@ -174,9 +223,15 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
                         Region: {req.regionCode}
                       </span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                        {req.requestType === 'TEMPORARY_SURGE' ? 'Temporary Surge' : 'Permanent Expansion'}
-                      </span>
+                      {exceedsBuffer ? (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                          Group Escalation (&gt;10 Buffer)
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                          Country MD Buffer (≤10)
+                        </span>
+                      )}
                     </div>
 
                     <div className="text-right">
@@ -186,14 +241,28 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                     </div>
                   </div>
 
+                  {/* Clearances Status Row */}
+                  <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                    <span className={`px-2 py-0.5 rounded-md font-medium border ${
+                      hasHRCapture 
+                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
+                        : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                    }`}>
+                      {hasHRCapture ? `HR Cleared (${req.hrClearedBy})` : 'Awaiting HR Clearance'}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-md font-medium border ${
+                      hasFinanceCapture 
+                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
+                        : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                    }`}>
+                      {hasFinanceCapture ? `Finance Cleared (${req.financeClearedBy})` : 'Awaiting Finance Clearance'}
+                    </span>
+                  </div>
+
                   {/* Justification Box */}
                   <div className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]/60 text-xs space-y-1">
-                    <p className="font-medium text-[var(--theme-text-secondary)]">
-                      Operational Justification:
-                    </p>
-                    <p className="text-[var(--theme-text-primary)]">
-                      &ldquo;{req.reason}&rdquo;
-                    </p>
+                    <p className="font-medium text-[var(--theme-text-secondary)]">Operational Justification:</p>
+                    <p className="text-[var(--theme-text-primary)]">&ldquo;{req.reason}&rdquo;</p>
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[var(--theme-text-secondary)] pt-1">
@@ -202,9 +271,13 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                       {req.requestedAt && ` on ${new Date(req.requestedAt).toLocaleDateString()}`}
                     </span>
 
-                    {req.status === 'PENDING' && canApprove && (
-                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                        {isRejecting ? (
+                    {req.status === 'PENDING' && (
+                      <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
+                        {isRequester ? (
+                          <span className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                            <AlertCircle size={13} /> Maker-Checker: Requester cannot approve or clear
+                          </span>
+                        ) : isRejecting ? (
                           <div className="flex items-center gap-2">
                             <input
                               type="text"
@@ -217,33 +290,56 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                               type="button"
                               onClick={() => handleReject(req)}
                               disabled={isActioning}
-                              className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-colors"
+                              className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-colors cursor-pointer"
                             >
                               Confirm
                             </button>
                             <button
                               type="button"
                               onClick={() => setRejectionModalId(null)}
-                              className="px-2 py-1 rounded-lg text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]"
+                              className="px-2 py-1 rounded-lg text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] cursor-pointer"
                             >
                               Cancel
                             </button>
                           </div>
                         ) : (
                           <>
+                            {isHR && !hasHRCapture && (
+                              <button
+                                type="button"
+                                onClick={() => handleClearHR(req)}
+                                disabled={isActioning}
+                                className="px-2.5 py-1 rounded-lg border border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 text-xs font-semibold cursor-pointer"
+                              >
+                                Clear HR
+                              </button>
+                            )}
+
+                            {isFinance && !hasFinanceCapture && (
+                              <button
+                                type="button"
+                                onClick={() => handleClearFinance(req)}
+                                disabled={isActioning}
+                                className="px-2.5 py-1 rounded-lg border border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 text-xs font-semibold cursor-pointer"
+                              >
+                                Clear Finance
+                              </button>
+                            )}
+
                             <button
                               type="button"
                               onClick={() => setRejectionModalId(req.id)}
                               disabled={isActioning}
-                              className="px-3 py-1.5 rounded-lg border border-[var(--theme-border)] hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 font-semibold text-xs transition-colors"
+                              className="px-3 py-1.5 rounded-lg border border-[var(--theme-border)] hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 font-semibold text-xs transition-colors cursor-pointer"
                             >
                               Decline
                             </button>
+
                             <button
                               type="button"
                               onClick={() => handleApprove(req)}
-                              disabled={isActioning}
-                              className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-xs"
+                              disabled={isActioning || !canAuthorizeFinal}
+                              className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                             >
                               {isActioning ? (
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />

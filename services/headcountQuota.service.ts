@@ -273,6 +273,19 @@ export const headcountQuotaService = {
         requestedBy: r.requested_by,
         requestedByRole: r.requested_by_role,
         requestedAt: r.requested_at,
+        hrClearedBy: r.hr_cleared_by,
+        hrClearedAt: r.hr_cleared_at,
+        hrClearanceNotes: r.hr_clearance_notes,
+        financeClearedBy: r.finance_cleared_by,
+        financeClearedAt: r.finance_cleared_at,
+        financeClearanceNotes: r.finance_clearance_notes,
+        cmdApprovedBy: r.cmd_approved_by,
+        cmdApprovedAt: r.cmd_approved_at,
+        cmdNotes: r.cmd_notes,
+        escalatedToGroup: Boolean(r.escalated_to_group || (r.increase_amount > 10)),
+        groupApprovedBy: r.group_approved_by,
+        groupApprovedAt: r.group_approved_at,
+        groupNotes: r.group_notes,
         reviewedBy: r.reviewed_by,
         reviewedAt: r.reviewed_at,
         reviewNotes: r.review_notes
@@ -284,13 +297,62 @@ export const headcountQuotaService = {
   },
 
   /**
-   * Review (Approve / Reject) Headcount Quota Request by Corporate HQ
+   * HR Clearance on Headcount Quota Request
+   */
+  async clearQuotaHR(requestId: string, reviewerName: string, notes?: string): Promise<boolean> {
+    try {
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from('headcount_quota_requests')
+        .update({
+          hr_cleared_by: reviewerName,
+          hr_cleared_at: now,
+          hr_clearance_notes: notes || 'Workforce capacity and role requirements cleared by HR.',
+          updated_at: now
+        })
+        .eq('id', requestId);
+
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      logger.error('headcountQuotaService.clearQuotaHR', 'Failed HR clearance', err);
+      return false;
+    }
+  },
+
+  /**
+   * Finance Clearance on Headcount Quota Request
+   */
+  async clearQuotaFinance(requestId: string, reviewerName: string, notes?: string): Promise<boolean> {
+    try {
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from('headcount_quota_requests')
+        .update({
+          finance_cleared_by: reviewerName,
+          finance_cleared_at: now,
+          finance_clearance_notes: notes || 'Payroll budget impact and margins cleared by Finance.',
+          updated_at: now
+        })
+        .eq('id', requestId);
+
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      logger.error('headcountQuotaService.clearQuotaFinance', 'Failed Finance clearance', err);
+      return false;
+    }
+  },
+
+  /**
+   * Review (Approve / Reject) Headcount Quota Request by Corporate HQ / Country MD
    */
   async reviewQuotaRequest(
     requestId: string,
     decision: 'APPROVED' | 'REJECTED',
     reviewerName: string,
-    reviewNotes?: string
+    reviewNotes?: string,
+    reviewerRole?: string
   ): Promise<boolean> {
     try {
       const now = new Date().toISOString();
@@ -302,15 +364,49 @@ export const headcountQuotaService = {
 
       if (fetchErr || !request) throw fetchErr || new Error('Request not found');
 
+      // Maker-checker invariant: requester cannot approve
+      if (request.requested_by.trim().toLowerCase() === reviewerName.trim().toLowerCase()) {
+        throw new Error('Maker-Checker Violation: Requester cannot approve their own headcount quota request.');
+      }
+
+      const exceedsBuffer = request.increase_amount > 10;
+      const isExecutive = ['group_ceo', 'group_chro'].includes(reviewerRole || '');
+
+      if (decision === 'APPROVED' && exceedsBuffer && !isExecutive) {
+        // Escalate to Group Executive
+        await supabase
+          .from('headcount_quota_requests')
+          .update({
+            escalated_to_group: true,
+            review_notes: 'Exceeds country buffer of +10 slots. Escalated to Group CHRO / Group CEO.',
+            updated_at: now
+          })
+          .eq('id', requestId);
+
+        throw new Error('Policy Escalation: Headcount expansion exceeding +10 slots escalates to Group CHRO / Group CEO.');
+      }
+
+      const updatePayload: Record<string, any> = {
+        status: decision,
+        reviewed_by: reviewerName,
+        reviewed_at: now,
+        review_notes: reviewNotes || null,
+        updated_at: now
+      };
+
+      if (decision === 'APPROVED') {
+        if (isExecutive) {
+          updatePayload.group_approved_by = reviewerName;
+          updatePayload.group_approved_at = now;
+        } else {
+          updatePayload.cmd_approved_by = reviewerName;
+          updatePayload.cmd_approved_at = now;
+        }
+      }
+
       const { error: updateErr } = await supabase
         .from('headcount_quota_requests')
-        .update({
-          status: decision,
-          reviewed_by: reviewerName,
-          reviewed_at: now,
-          review_notes: reviewNotes || null,
-          updated_at: now
-        })
+        .update(updatePayload)
         .eq('id', requestId);
 
       if (updateErr) throw updateErr;
@@ -330,7 +426,7 @@ export const headcountQuotaService = {
       return true;
     } catch (err) {
       logger.error('headcountQuotaService.reviewQuotaRequest', 'Failed to review quota request', err);
-      return false;
+      throw err;
     }
   }
 };

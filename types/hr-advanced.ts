@@ -94,6 +94,17 @@ export interface JobCandidate {
     finance_approved_by?: string;
     finance_approved_at?: string;
     finance_notes?: string;
+    hiring_manager_approved_by?: string;
+    hiring_manager_approved_at?: string;
+    hiring_manager_notes?: string;
+    is_salary_exception?: boolean;
+    is_quota_exception?: boolean;
+    cmd_approved_by?: string;
+    cmd_approved_at?: string;
+    cmd_notes?: string;
+    group_approved_by?: string;
+    group_approved_at?: string;
+    group_notes?: string;
     hired_employee_id?: string;
     created_at: string;
     updated_at: string;

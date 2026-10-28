@@ -35,7 +35,7 @@ export default function SalaryApprovalQueueModal({
     const [rejectError, setRejectError] = useState<string>('');
 
     const country = (effectiveCountry || 'ET').toUpperCase();
-    const canApprove = ['group_ceo', 'country_managing_director', 'country_finance_director', 'group_cfo'].includes(user?.role || '');
+    const canApprove = ['group_ceo', 'group_chro', 'country_managing_director', 'country_finance_director', 'group_cfo'].includes(user?.role || '');
 
     const loadRequests = useCallback(async () => {
         setIsLoading(true);
@@ -342,7 +342,9 @@ export default function SalaryApprovalQueueModal({
                                                     {isActionDisabled && processingId !== req.id && (
                                                         <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
                                                             <AlertTriangle size={13} />
-                                                            Separation of Duties: Another manager must approve
+                                                            {isOwnRecord
+                                                                ? 'Zero-Trust: You cannot approve your own compensation adjustment'
+                                                                : 'Separation of Duties: Another manager must approve'}
                                                         </p>
                                                     )}
                                                     {!isActionDisabled && <div />}
