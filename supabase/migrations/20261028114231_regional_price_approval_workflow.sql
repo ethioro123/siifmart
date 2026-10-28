@@ -495,4 +495,5 @@ BEGIN
 END;
 $function$
 ;
+DO $$ BEGIN IF EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='public.inventory_requests'::regclass AND tgname='guard_merchandising_preparation') THEN ALTER TRIGGER guard_merchandising_preparation ON public.inventory_requests RENAME TO zz_merchandising_preparation; END IF; END; $$;
 COMMIT;
