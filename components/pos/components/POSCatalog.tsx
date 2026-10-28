@@ -31,7 +31,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
     const { filteredProducts, addToCart, cart } = usePOS();
 
     return (
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6">
             {filteredProducts.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-12">
                     <Box size={64} className="text-[var(--theme-text-muted)] mb-4 opacity-50" />
@@ -52,7 +52,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                 </div>
             ) : (
                 <>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-3.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
                         {paginatedProducts.map(product => {
                             const inCartItem = cart.find(i => i.id === product.id || (i as any).productId === product.id);
                             return (
@@ -65,15 +65,15 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                 }}
                                 disabled={product.stock <= 0}
                                 aria-label={`${product.name}, ${product.stock <= 0 ? t('common.outOfStock') : `${CURRENCY_SYMBOL} ${formatPriceValue(product.isOnSale && product.salePrice ? product.salePrice : product.price)}`}. Add to cart`}
-                                className={`text-left bg-[var(--theme-bg-card)] border rounded-[18px] p-3 hover:bg-[var(--theme-bg-card-hover)] transition-colors group relative overflow-hidden flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${product.stock <= 0 ? 'border-[var(--theme-status-danger-border)] opacity-70 cursor-not-allowed' : inCartItem ? 'border-[var(--theme-border-focus)] ring-1 ring-[var(--theme-border-focus)] shadow-sm' : 'border-[var(--theme-border)] hover:border-[var(--theme-border-strong)]'}`}
+                                className={`text-left bg-[var(--theme-bg-card)] border rounded-[20px] p-3 sm:p-3.5 hover:bg-[var(--theme-bg-card-hover)] transition-colors group relative overflow-hidden flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${product.stock <= 0 ? 'border-[var(--theme-status-danger-border)] opacity-70 cursor-not-allowed' : inCartItem ? 'border-[var(--theme-border-focus)] ring-1 ring-[var(--theme-border-focus)] shadow-sm' : 'border-[var(--theme-border-subtle)] hover:border-[var(--theme-border-strong)] hover:shadow-sm'}`}
                             >
-                                <div className="aspect-square rounded-xl bg-[var(--theme-bg-panel)] mb-2.5 overflow-hidden relative border border-[var(--theme-border-subtle)] flex items-center justify-center">
+                                <div className="aspect-[4/3] rounded-[15px] bg-[var(--theme-bg-panel)] mb-3 overflow-hidden relative flex items-center justify-center">
                                     {product.image && !product.image.includes('placeholder.com') ? (
                                         <>
                                             <img
                                                 src={product.image}
                                                 alt={product.name}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300 motion-reduce:transition-none"
                                                 loading="lazy"
                                                 onError={(e) => {
                                                     e.currentTarget.style.display = 'none';
@@ -140,29 +140,29 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                 </div>
 
                                 <div className="flex-1 flex flex-col min-w-0">
-                                    <h3 className="font-semibold text-[var(--theme-text-primary)] text-xs sm:text-[13px] line-clamp-2 min-h-[2rem] leading-snug mb-1.5 tracking-tight">{product.name}</h3>
+                                    <h3 className="font-semibold text-[var(--theme-text-primary)] text-[13px] sm:text-sm line-clamp-2 min-h-[2.5rem] leading-snug mb-2 tracking-tight">{product.name}</h3>
                                     {(() => {
                                         const badge = formatPackBadge(product);
                                         return badge ? (
-                                            <span className="inline-block mb-1 px-1.5 py-0.5 rounded-md bg-[var(--theme-pill-bg)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[10px] font-bold uppercase tracking-wider max-w-fit">
+                                            <span className="inline-block mb-2 px-2 py-1 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] text-[10px] font-semibold tracking-wide max-w-fit">
                                                 {badge}
                                             </span>
                                         ) : null;
                                     })()}
-                                    <div className="mt-auto pt-1.5 flex items-center justify-between border-t border-[var(--theme-border-subtle)]">
+                                    <div className="mt-auto pt-2.5 flex items-center justify-between border-t border-[var(--theme-border-subtle)]">
                                         <div className="flex flex-col min-w-0 pr-1">
                                             <div className="flex items-baseline gap-1 flex-wrap">
                                                 {product.isOnSale && product.salePrice ? (
                                                     <>
-                                                        <p className="text-[var(--theme-status-danger-text)] font-bold text-xs sm:text-sm font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-status-danger-text)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                        <p className="text-[var(--theme-status-danger-text)] font-bold text-sm sm:text-base font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-status-danger-text)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                                         <p className="text-[var(--theme-text-secondary)] text-xs line-through font-mono tabular-nums font-semibold">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
                                                     </>
                                                 ) : (
-                                                    <p className="text-[var(--theme-text-primary)] font-bold text-xs sm:text-sm font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-text-secondary)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                    <p className="text-[var(--theme-text-primary)] font-bold text-sm sm:text-base font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-text-secondary)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                                 )}
                                             </div>
                                         </div>
-                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 shrink-0 ${inCartItem ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] group-hover:bg-[var(--theme-bg-card-hover)] group-hover:text-[var(--theme-text-primary)]'}`}>
+                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors shrink-0 ${inCartItem ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] group-hover:bg-[var(--theme-primary)] group-hover:text-[var(--theme-primary-text)]'}`}>
                                             {inCartItem ? (
                                                 <span className="text-xs font-bold">{inCartItem.quantity}</span>
                                             ) : (
