@@ -1,4 +1,4 @@
-import { ProductApprovalInboxCard } from '../components/approvals/ProductApprovalInboxCard';
+import { ProductApprovalInboxButton } from '../components/approvals/ProductApprovalInboxButton';
 import { PriceBatchPreview } from '../components/merchandising/components/PriceBatchPreview';
 import { useSearchParams } from 'react-router-dom';
 import { sellingMargin } from '../utils/priceManager';
@@ -119,6 +119,7 @@ export default function Pricing() {
                   </p>
                </div>
                <div className="flex items-center gap-2.5 flex-wrap">
+                  <ProductApprovalInboxButton />
                   <div className="px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full flex items-center gap-2">
                      <Target size={14} className="text-[var(--theme-accent)]" />
                      <span className="text-xs text-[var(--theme-text-secondary)] font-medium">{activeTab === 'pricing' ? 'Page Price Index:' : 'Price Index:'}</span>
@@ -131,8 +132,6 @@ export default function Pricing() {
                   </div>
                </div>
             </div>
-
-            <ProductApprovalInboxCard />
 
             {/* Adaptive Regional Territory Lens */}
             <RegionalScopeBanner
