@@ -24,7 +24,7 @@ export default function POFinanceApprovalsTab() {
             <p className="text-sm">{count} awaiting finance clearance</p>
             {!rows.length && <p className="p-6 rounded-xl bg-[var(--theme-bg-subtle)]">No orders awaiting clearance on this page.</p>}
             <div className="grid gap-3">{rows.map(row => {
-                const ownOrder = [row.created_by, row.requested_by].some(name => name?.trim().toLowerCase() === user.name?.trim().toLowerCase());
+                const ownOrder = Boolean(user?.name) && [row.created_by, row.requested_by].some(name => name?.trim().toLowerCase() === user?.name?.trim().toLowerCase());
                 return <article key={row.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] p-4">
                     <div className="min-w-0"><h3 className="font-semibold break-words">{row.po_number || row.id} · {row.supplier_name}</h3>
                         <p className="text-sm">{row.currency} {Number(row.total_amount).toLocaleString()} · Regional limit: {row.currency} {Number(row.regional_limit).toLocaleString()}{Number(row.total_amount) > 100000000 ? ' · Group Finance (> 100M)' : ' · Country Finance'}</p>
