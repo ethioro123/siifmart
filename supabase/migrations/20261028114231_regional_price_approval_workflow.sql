@@ -242,7 +242,7 @@ BEGIN
  END IF;
  IF jsonb_typeof(NEW.proposed_changes)='object' THEN
   NEW.proposed_changes:=(SELECT coalesce(jsonb_object_agg(field.key,field.value),'{}') FROM jsonb_each(NEW.proposed_changes) field
-   WHERE private.product_edit_patch(jsonb_build_object(field.key,field.value)) IS DISTINCT FROM
+   WHERE private.product_edit_patch(jsonb_build_object(field.key,field.value))='{}' OR private.product_edit_patch(jsonb_build_object(field.key,field.value)) IS DISTINCT FROM
    (SELECT coalesce(jsonb_object_agg(k,to_jsonb(p)->k),'{}') FROM jsonb_object_keys(private.product_edit_patch(jsonb_build_object(field.key,field.value))) k));
  END IF;
  IF NEW.proposed_changes IS NULL OR jsonb_typeof(NEW.proposed_changes)<>'object'

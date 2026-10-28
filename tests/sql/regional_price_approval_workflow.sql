@@ -3,7 +3,7 @@ BEGIN;
 DO $test$
 DECLARE target public.sites%ROWTYPE; product public.products%ROWTYPE; requester uuid; regional uuid; commercial uuid; finance uuid; md uuid;
  other_regional uuid; foreign_commercial uuid; other_site public.sites%ROWTYPE; other_product public.products%ROWTYPE;
- request_id uuid; response jsonb; route jsonb; pprice numeric; snapshot jsonb;
+ request_id uuid; response jsonb; route jsonb; pprice numeric; snapshot jsonb; base_prices bigint; finance_before bigint; commercial_before bigint;
 BEGIN
  SELECT s.* INTO target FROM public.sites s WHERE s.type='Store' AND s.country='ET'
  AND EXISTS(SELECT 1 FROM public.products p WHERE p.site_id=s.id AND p.price>0 AND p.cost_price>0)
@@ -19,16 +19,20 @@ BEGIN
  SELECT e.id INTO foreign_commercial FROM public.employees e JOIN public.sites s ON s.id=e.site_id WHERE e.role='country_commercial_director' AND s.country<>target.country AND lower(e.status)='active' LIMIT 1;
  IF product.id IS NULL OR requester IS NULL OR regional IS NULL OR commercial IS NULL OR finance IS NULL OR md IS NULL OR other_regional IS NULL OR foreign_commercial IS NULL THEN RAISE EXCEPTION 'Missing staging price-workflow fixtures'; END IF;
  EXECUTE 'SET LOCAL ROLE authenticated';
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',regional,'role','authenticated')::text,true);
+ base_prices:=(public.get_my_price_approval_inbox(target.country)->>'priceCount')::bigint;
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',requester,'role','authenticated')::text,true);
  INSERT INTO public.inventory_requests(product_id,product_name,product_sku,site_id,country_code,change_type,status,requested_by,proposed_changes,adjustment_reason)
  VALUES(product.id::text,product.name,product.sku,target.id::text,target.country,'edit','pending','server replaces requester','{"price":10000,"costPrice":50,"isOnSale":false}','PRICE_CHANGE: price approval regression') RETURNING id INTO request_id;
  -- No percentage cap when margin complies, and no Operations/Supply Chain votes.
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',regional,'role','authenticated')::text,true);
  response:=public.get_price_approval_routes(ARRAY[request_id]); route:=response->request_id::text;
+ IF (public.get_my_price_approval_inbox(target.country)->>'priceCount')::bigint<>base_prices+1 THEN RAISE EXCEPTION 'Price inbox did not route regional approval'; END IF;
  IF NOT (route->>'canApprove')::boolean OR (route->>'requiresFinance')::boolean THEN RAISE EXCEPTION 'Compliant regional price not approvable: %',route; END IF;
  response:=public.approve_product_edit(request_id);
  IF response->>'workflow'<>'price' OR response->>'applied'<>'true' OR response->>'approvalCount'<>'1' THEN RAISE EXCEPTION 'Price did not apply with one approval: %',response; END IF;
  SELECT price INTO pprice FROM public.products WHERE id=product.id;
+ IF (public.get_my_price_approval_inbox(target.country)->>'priceCount')::bigint<>base_prices THEN RAISE EXCEPTION 'Approved price stayed in inbox'; END IF;
  IF pprice<>10000 THEN RAISE EXCEPTION 'Approved price not applied'; END IF;
  BEGIN PERFORM public.approve_product_edit(request_id); RAISE EXCEPTION 'Duplicate approval allowed'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;
  -- Exactly 15% margin remains regional; another region and another country are blocked.
@@ -50,7 +54,11 @@ BEGIN
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',regional,'role','authenticated')::text,true);
  BEGIN PERFORM public.finance_signoff_merchandising_price(request_id); RAISE EXCEPTION 'Regional manager cleared Finance'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',finance,'role','authenticated')::text,true);
+ finance_before:=(public.get_my_price_approval_inbox(target.country)->>'financeCount')::bigint;
+ response:=public.get_my_approval_inbox(target.country);
+ IF (SELECT (q->>'count')::bigint FROM jsonb_array_elements(response->'queues')q WHERE q->>'key'='price_finance') IS DISTINCT FROM finance_before THEN RAISE EXCEPTION 'Unified finance inbox disagrees with decision route'; END IF;
  PERFORM public.finance_signoff_merchandising_price(request_id);
+ IF (public.get_my_price_approval_inbox(target.country)->>'financeCount')::bigint<>finance_before-1 THEN RAISE EXCEPTION 'Cleared price stayed in Finance inbox'; END IF;
  BEGIN PERFORM public.approve_product_edit(request_id); RAISE EXCEPTION 'Finance gave final commercial approval'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',regional,'role','authenticated')::text,true);
  BEGIN PERFORM public.approve_product_edit(request_id); RAISE EXCEPTION 'Regional approved below-floor price after Finance'; EXCEPTION WHEN insufficient_privilege THEN NULL; END;
