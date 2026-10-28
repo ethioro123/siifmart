@@ -1,4 +1,4 @@
-import { ProductApprovalInboxCard } from '../components/approvals/ProductApprovalInboxCard';
+import { ProductApprovalInboxButton } from '../components/approvals/ProductApprovalInboxButton';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -139,7 +139,8 @@ export default function RegionalOperations() {
         </div>
 
         {/* Regional snapshot */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <ProductApprovalInboxButton />
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-xs">
             <Activity className="w-4 h-4 text-[var(--theme-accent)]" aria-hidden="true" />
             <span className="font-mono font-bold text-[var(--theme-text-primary)]">
@@ -154,8 +155,6 @@ export default function RegionalOperations() {
           </div>
         </div>
       </div>
-
-      <ProductApprovalInboxCard />
 
       {/* Autonomous Purchase Order Alert Banner */}
       {metrics.pendingAutonomousPOCount > 0 && (
