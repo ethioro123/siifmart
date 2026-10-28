@@ -31,6 +31,24 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
         resetAllFilters
     } = usePOS();
 
+    const closeButtonRef = React.useRef<HTMLButtonElement>(null);
+
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        const timer = setTimeout(() => closeButtonRef.current?.focus(), 50);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            clearTimeout(timer);
+        };
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     const departments = [
@@ -87,6 +105,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                         </div>
                     </div>
                     <button 
+                        ref={closeButtonRef}
                         type="button"
                         onClick={onClose}
                         title={t('common.close')}
@@ -164,10 +183,10 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                             type="button"
                                             key={cat}
                                             onClick={() => setSelectedCategory(cat)}
-                                            className={`min-h-8 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                                            className={`min-h-11 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center ${
                                                 isSelected
                                                     ? 'bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border-focus)] shadow-xs font-bold'
-                                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
+                                                    : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                             }`}
                                         >
                                             {cat === 'All' ? t('common.all') : cat}

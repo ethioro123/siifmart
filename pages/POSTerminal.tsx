@@ -31,7 +31,7 @@ const POSTerminalContent: React.FC = () => {
   if (needsStoreSelection) {
     return (
       <div className="h-full flex items-center justify-center p-4">
-        <div className="text-center p-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl max-w-md shadow-xl transition-all duration-300">
+        <div className="text-center p-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-[22px] max-w-md shadow-sm">
           <Logo variant="emblem" size={32} className="mx-auto mb-4 flex justify-center" />
           <h2 className="text-xl font-bold text-[var(--theme-text-primary)] mb-2">{t('pos.selectStore')}</h2>
           <p className="text-xs text-[var(--theme-text-secondary)] mb-6">
@@ -56,14 +56,14 @@ const POSTerminalContent: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full h-full min-h-[calc(100dvh-160px)]">
-      <div className="relative z-10 h-[calc(100dvh-140px)] flex flex-col lg:flex-row gap-6 animate-in fade-in duration-300">
+    <main className="relative w-full h-full min-h-[calc(100dvh-128px)] bg-[var(--theme-bg-app)]">
+      <div className="relative z-10 h-[calc(100dvh-128px)] min-h-[560px] flex flex-col lg:flex-row gap-4 p-3 sm:p-4 animate-in fade-in duration-300">
         <POSProductGrid />
         <POSCartPanel />
       </div>
 
       <POSModals />
-    </div>
+    </main>
   );
 };
 

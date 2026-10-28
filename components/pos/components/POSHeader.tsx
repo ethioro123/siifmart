@@ -47,7 +47,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
     const isNativeApp = typeof window !== 'undefined' && (window as any).Neutralino;
 
     return (
-        <div className="flex gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
             <button
                 type="button"
                 onClick={() => navigate('/')}
@@ -60,7 +60,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 </div>
             </button>
             <div className="flex-1 relative">
-                <div className="flex items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl px-3.5 py-2 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/15 focus-within:bg-[var(--theme-bg-card)] hover:border-[var(--theme-border-strong)] transition-all group shadow-2xs">
+                <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-[14px] px-3 py-1.5 focus-within:border-[var(--theme-border-focus)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 focus-within:bg-[var(--theme-bg-card)] transition-colors group">
                     <div className="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 group-focus-within:bg-blue-500 group-focus-within:text-white transition-all">
                         <Search size={14} />
                     </div>
@@ -69,7 +69,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                         type="text"
                         aria-label={t('pos.searchProducts') || 'Search or scan products'}
                         placeholder={t('pos.searchProducts') || 'Search products or scan barcode...'}
-                        className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] font-medium text-[13px] min-w-0 tracking-tight"
+                        className="bg-transparent border-none ml-2 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] font-medium text-sm min-w-0 tracking-tight"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={handleSearchKeyDown}

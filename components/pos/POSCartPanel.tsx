@@ -71,12 +71,12 @@ export const POSCartPanel: React.FC = () => {
         <>
             {/* Cart Panel: Desktop Side Panel / Mobile Full-Screen Sheet */}
             <div className={`
-                fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col transition-transform duration-300 ease-out
-                lg:static lg:w-[400px] lg:bg-[var(--theme-bg-card)] lg:border lg:border-[var(--theme-border)] lg:rounded-3xl lg:h-full lg:z-auto lg:transform-none lg:shadow-xs overflow-hidden isolate
+                fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col transition-transform duration-300 ease-out motion-reduce:transition-none
+                lg:static lg:w-[380px] xl:w-[400px] lg:bg-[var(--theme-bg-card)] lg:border lg:border-[var(--theme-border)] lg:rounded-[22px] lg:h-full lg:z-auto lg:transform-none overflow-hidden isolate
                 ${showCart ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
             `}>
                 {/* Header */}
-                <div className="pt-4 pb-3 px-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] lg:rounded-t-3xl flex items-center justify-between shrink-0">
+                <div className="pt-4 pb-3 px-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] lg:rounded-t-[22px] flex items-center justify-between shrink-0">
                     <button
                         type="button"
                         onClick={() => {

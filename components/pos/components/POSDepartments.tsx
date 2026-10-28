@@ -63,7 +63,7 @@ export const POSDepartments: React.FC = () => {
                         <Layers size={10} />
                     </span>
                     <span>{t('pos.deptLabel')} <strong className="font-semibold">{selectedDepartment}</strong></span>
-                    <button onClick={() => setSelectedDepartment('All')} title="Remove department filter" aria-label="Remove department filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setSelectedDepartment('All')} title={`${t('common.remove')} ${t('pos.deptLabel')}`} aria-label={`${t('common.remove')} ${t('pos.deptLabel')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
             
@@ -73,7 +73,7 @@ export const POSDepartments: React.FC = () => {
                         <Folder size={10} />
                     </span>
                     <span>{t('pos.catLabel')} <strong className="font-semibold">{selectedCategory}</strong></span>
-                    <button onClick={() => setSelectedCategory('All')} title="Remove category filter" aria-label="Remove category filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setSelectedCategory('All')} title={`${t('common.remove')} ${t('pos.catLabel')}`} aria-label={`${t('common.remove')} ${t('pos.catLabel')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
             
@@ -83,7 +83,7 @@ export const POSDepartments: React.FC = () => {
                         <Coins size={10} />
                     </span>
                     <span>{t('pos.minPrice')}: <strong className="font-semibold font-mono">{CURRENCY_SYMBOL} {minPriceFilter}</strong></span>
-                    <button onClick={() => setMinPriceFilter('')} title="Remove minimum price filter" aria-label="Remove minimum price filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setMinPriceFilter('')} title={`${t('common.remove')} ${t('pos.minPrice')}`} aria-label={`${t('common.remove')} ${t('pos.minPrice')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
@@ -93,7 +93,7 @@ export const POSDepartments: React.FC = () => {
                         <Coins size={10} />
                     </span>
                     <span>{t('pos.maxPrice')}: <strong className="font-semibold font-mono">{CURRENCY_SYMBOL} {maxPriceFilter}</strong></span>
-                    <button onClick={() => setMaxPriceFilter('')} title="Remove maximum price filter" aria-label="Remove maximum price filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setMaxPriceFilter('')} title={`${t('common.remove')} ${t('pos.maxPrice')}`} aria-label={`${t('common.remove')} ${t('pos.maxPrice')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
@@ -103,7 +103,7 @@ export const POSDepartments: React.FC = () => {
                         <Sparkles size={10} />
                     </span>
                     <span>{t('pos.brandLabel')} <strong className="font-semibold">{brand}</strong></span>
-                    <button onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))} title={`Remove brand filter: ${brand}`} aria-label={`Remove brand filter: ${brand}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))} title={`${t('common.remove')} ${brand}`} aria-label={`${t('common.remove')} ${brand}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             ))}
 
@@ -113,7 +113,7 @@ export const POSDepartments: React.FC = () => {
                         <Zap size={10} />
                     </span>
                     <span>{t('pos.velocityLabel')} <strong className="font-semibold">{vel}</strong></span>
-                    <button onClick={() => setSelectedVelocities(prev => prev.filter(v => v !== vel))} title={`Remove velocity filter: ${vel}`} aria-label={`Remove velocity filter: ${vel}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setSelectedVelocities(prev => prev.filter(v => v !== vel))} title={`${t('common.remove')} ${vel}`} aria-label={`${t('common.remove')} ${vel}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             ))}
 
@@ -123,7 +123,7 @@ export const POSDepartments: React.FC = () => {
                         <Package size={10} />
                     </span>
                     <span>{t('pos.stockLabel')} <strong className="font-semibold">{stockStatusFilter === 'in_stock' ? t('pos.inStockOnly') : stockStatusFilter === 'low_stock' ? t('pos.lowStockAlertsOnly') : t('pos.outOfStockOnly')}</strong></span>
-                    <button onClick={() => setStockStatusFilter('all')} title="Remove stock status filter" aria-label="Remove stock status filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setStockStatusFilter('all')} title={`${t('common.remove')} ${t('pos.stockLabel')}`} aria-label={`${t('common.remove')} ${t('pos.stockLabel')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
@@ -133,7 +133,7 @@ export const POSDepartments: React.FC = () => {
                         <Tag size={10} />
                     </span>
                     <strong className="font-semibold">{t('pos.onSale')}</strong>
-                    <button onClick={() => setOnSaleOnly(false)} title="Remove sale filter" aria-label="Remove sale filter" className="hover:bg-rose-500/25 hover:text-rose-600 text-rose-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setOnSaleOnly(false)} title={`${t('common.remove')} ${t('pos.onSale')}`} aria-label={`${t('common.remove')} ${t('pos.onSale')}`} className="hover:bg-rose-500/25 hover:text-rose-600 text-rose-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
@@ -143,7 +143,7 @@ export const POSDepartments: React.FC = () => {
                         <Scale size={10} />
                     </span>
                     <strong className="font-semibold">{t('pos.compPrice')}</strong>
-                    <button onClick={() => setCompetitorMatchedOnly(false)} title="Remove competitor price matched filter" aria-label="Remove competitor price matched filter" className="hover:bg-violet-500/25 hover:text-violet-600 text-violet-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setCompetitorMatchedOnly(false)} title={`${t('common.remove')} ${t('pos.compPrice')}`} aria-label={`${t('common.remove')} ${t('pos.compPrice')}`} className="hover:bg-violet-500/25 hover:text-violet-600 text-violet-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
@@ -153,7 +153,7 @@ export const POSDepartments: React.FC = () => {
                         <SlidersHorizontal size={10} />
                     </span>
                     <span>{t('pos.sortLabel')} <strong className="font-semibold">{sortBy === 'price-asc' ? t('pos.sortPriceAsc') : sortBy === 'price-desc' ? t('pos.sortPriceDesc') : sortBy === 'name-asc' ? t('pos.sortNameAsc') : sortBy}</strong></span>
-                    <button onClick={() => setSortBy('default')} title="Reset sorting to default" aria-label="Reset sorting to default" className="hover:bg-sky-500/25 hover:text-sky-600 text-sky-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button onClick={() => setSortBy('default')} title={`${t('common.remove')} ${t('pos.sortLabel')}`} aria-label={`${t('common.remove')} ${t('pos.sortLabel')}`} className="hover:bg-sky-500/25 hover:text-sky-600 text-sky-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
