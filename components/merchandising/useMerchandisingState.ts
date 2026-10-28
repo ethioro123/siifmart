@@ -1,7 +1,7 @@
 import { priceManagerService } from '../../services/price-manager.service';
 import { usePriceManagerCatalog } from '../../hooks/usePriceManagerCatalog';
 import { usePriceManagerBatch } from '../../hooks/usePriceManagerBatch';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '../../contexts/DataContext';
 import { CURRENCY_SYMBOL } from '../../constants';
 import type { Product, Promotion, PricingRule } from '../../types';
@@ -16,6 +16,7 @@ import { usePricingRulesActions } from './hooks/usePricingRulesActions';
 import { useSubmitPriceChanges, type PriceChangeInput } from '../../hooks/useSubmitPriceChanges';
 import { useSubmitMerchandisingChanges } from '../../hooks/useSubmitMerchandisingChanges';
 import { useMerchandisingCampaigns } from '../../hooks/useMerchandisingCampaigns';
+import { discountedProposal } from '../../utils/priceManager';
 import { buildCatalogSalesMetricsIndex } from '../../utils/merchandisingAnalytics';
 
 const getMargin = (price: number, cost: number) => {
@@ -94,7 +95,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    } = useMerchandisingFilters({ products: cachedProducts, getMargin });
    useEffect(() => { setCurrentPage(1); setFilters(previous => ({ ...previous, sites: [] })); }, [activeCountry, activeRegionCode]);
    useEffect(() => { setSelectedMarkdownProduct(null); }, [activeCountry, activeRegionCode, activeSite?.id]);
-   const catalog = usePriceManagerCatalog({ country: activeCountry, search: searchTerm, filters, sort: sortConfig, page: currentPage, pageSize: itemsPerPage }, activeTab === 'pricing');
+   const catalog = usePriceManagerCatalog({ country: activeCountry, grouped: true, search: searchTerm, filters, sort: sortConfig, page: currentPage, pageSize: itemsPerPage }, activeTab === 'pricing');
    const products = activeTab === 'pricing' ? catalog.data?.data || [] : cachedProducts;
    const filteredProducts = activeTab === 'pricing' ? products : cachedFilteredProducts;
    const salesMetricsIndex = useMemo(() => buildCatalogSalesMetricsIndex(products || [], sales || []), [products, sales]);
@@ -255,13 +256,40 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       if (selectedIds.size > 0) setIsBulkDiscountModalOpen(true);
    };
 
+   const expandSelectedPriceGroups = async (selectedOnly: boolean) => {
+      const representatives = selectedOnly ? filteredProducts.filter(product => selectedIds.has(product.id)) : filteredProducts;
+      const regionalIds = sites.filter(site => !activeRegionCode || (site.regionCode || site.region_code) === activeRegionCode).map(site => site.id);
+      const siteIds = filters.sites.length ? filters.sites.filter(id => regionalIds.includes(id)) : regionalIds;
+      if (!siteIds.length) throw new Error('No locations match the active scope.');
+      return priceManagerService.getGroupTargets(activeCountry, representatives, { ...filters, sites: siteIds });
+   };
+   const priceScope = JSON.stringify([activeCountry, activeRegionCode, activeSite?.id, searchTerm, filters, currentPage, itemsPerPage, sortConfig]);
+   const latestPriceScope = useRef(priceScope); latestPriceScope.current = priceScope;
    const handleApplyBulkDiscount = async () => {
-      try { batch.stageDiscount(Number(bulkDiscountValue)); setIsBulkDiscountModalOpen(false); }
-      catch (error) { addNotification('alert', (error as Error).message); }
+      const scope = priceScope;
+      setIsSubmitting(true);
+      try {
+         const targets = await expandSelectedPriceGroups(true);
+         if (scope !== latestPriceScope.current) return;
+         batch.stagePriceBatch(targets.map(product => ({ product, proposal: discountedProposal(product, Number(bulkDiscountValue)) })), 'Selected products · matching locations');
+         setIsBulkDiscountModalOpen(false);
+      } catch (error) { if (scope === latestPriceScope.current) addNotification('alert', (error as Error).message); }
+      finally { setIsSubmitting(false); }
    };
    const applyPsychologicalPricing = async (target: '5' | '0') => {
-      try { batch.stageEnding(target); }
-      catch (error) { addNotification('info', (error as Error).message); }
+      const scope = priceScope;
+      setIsSubmitting(true);
+      try {
+         const targets = await expandSelectedPriceGroups(selectedIds.size > 0);
+         if (scope !== latestPriceScope.current) return;
+         const changes = targets.flatMap(product => {
+            const current = Math.round(product.price);
+            const price = target === '5' ? (current % 10 === 5 ? current : Math.floor((current - 1) / 10) * 10 + 5) : Math.floor((current - 1) / 10) * 10;
+            return price > 0 && price !== current ? [{ product, proposal: { price, costPrice: product.costPrice, salePrice: product.salePrice, isOnSale: product.isOnSale } }] : [];
+         });
+         batch.stagePriceBatch(changes, `Selected products · matching locations · prices ending in ${target}`);
+      } catch (error) { if (scope === latestPriceScope.current) addNotification('info', (error as Error).message); }
+      finally { setIsSubmitting(false); }
    };
 
    const handleShelfSwap = async (productId: string) => {
@@ -396,6 +424,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       handleCreatePromo,
       handleEditClick,
       handleSavePrice,
+      previewLocationPrice: change => batch.stagePriceBatch([change], 'Selected location record'),
       handleApplyBulkDiscount,
       handleCreateRule,
       handleRunSimulation,

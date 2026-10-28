@@ -6,19 +6,25 @@ import type { Product, SaleRecord } from '../types';
 import type { MerchandisingFilters } from '../components/merchandising/MerchandisingContext';
 
 export interface PriceCatalogInput {
-    country: string; search?: string; filters?: Partial<MerchandisingFilters> & { sku?: string };
+    country: string; grouped?: boolean; search?: string; filters?: Partial<MerchandisingFilters> & { sku?: string };
     sort?: { key: string; direction: 'asc' | 'desc' }; page?: number; pageSize?: number;
 }
 export const priceManagerService = {
     async getPage(input: PriceCatalogInput): Promise<{ data: Product[]; count: number }> {
         const pageSize = Math.max(1, Math.min(input.pageSize || 25, 100));
         const { data, error } = await supabase.rpc('search_price_manager_products', {
-            p_country: input.country.toUpperCase(), p_filters: input.filters || {}, p_search: input.search || '',
+            p_country: input.country.toUpperCase(), p_filters: input.grouped ? { ...input.filters, groupBySku: true } : input.filters || {}, p_search: input.search || '',
             p_sort: input.sort?.key || 'name', p_direction: input.sort?.direction || 'asc',
             p_limit: pageSize, p_offset: Math.max(0, (input.page || 1) - 1) * pageSize,
         });
         if (error) throw error;
         return { data: (data?.data || []).map(_mapProduct), count: data?.count || 0 };
+    },
+    async getGroupTargets(country: string, representatives: Product[], filters: PriceCatalogInput['filters']): Promise<Product[]> {
+        const records = await Promise.all(representatives.map(product => product.sku
+            ? this.getMatchingTargets(country, { ...filters, sku: product.sku })
+            : Promise.resolve([product])));
+        return [...new Map(records.flat().map(product => [product.id, product])).values()];
     },
     async getRuleSalesMetrics(products: Product[], country: string) {
         const records: SaleRecord[] = [];

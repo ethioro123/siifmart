@@ -72,7 +72,7 @@ export const PricingTab: React.FC = () => {
                      onClick={() => applyPsychologicalPricing('5')}
                      disabled={isSubmitting || catalogLoading}
                      className="h-10 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all active:scale-[0.98] cursor-pointer"
-                     title="Preview ending-in-5 proposals for selected records or this page"
+                     title="Preview matching location records for selected products or this product page"
                   >
                      {isSubmitting ? (
                         <Loader2 size={13} className="animate-spin" />
@@ -86,7 +86,7 @@ export const PricingTab: React.FC = () => {
                      onClick={() => applyPsychologicalPricing('0')}
                      disabled={isSubmitting || catalogLoading}
                      className="h-10 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 transition-all active:scale-[0.98] cursor-pointer"
-                     title="Preview ending-in-0 proposals for selected records or this page"
+                     title="Preview matching location records for selected products or this product page"
                   >
                      {isSubmitting ? (
                         <Loader2 size={13} className="animate-spin" />
@@ -114,6 +114,7 @@ export const PricingTab: React.FC = () => {
          <p className="px-5 py-3 text-sm text-[var(--theme-text-secondary)]">{catalogLoading ? 'Loading authorized catalog…' : `${catalogCount} product records match. ${selectedIds.size} selected on this page.`} Actions show a preview before submission.</p>
          {catalogError && <p role="alert" className="px-5 py-3 text-sm text-[var(--theme-danger)]">Could not load catalog: {catalogError}</p>}
          {!catalogLoading && !catalogError && catalogCount === 0 && <p className="px-5 py-3 text-sm">No products match your search in your authorized locations.</p>}
+         <p className="px-5 py-3 text-xs text-[var(--theme-text-secondary)]">One row per product. Ranges cover matching locations. Bulk actions preview every matching location record before submission.</p>
          {/* Products Table grid list */}
          <PricingProductsTable />
 

@@ -1,5 +1,5 @@
 import type { SimulationResult } from './utils/simulationRunner';
-import type { PriceBatch, PriceBatchResult } from '../../utils/priceManager';
+import type { PriceBatch, PriceBatchResult, PriceChangeInput } from '../../utils/priceManager';
 import React, { createContext, useContext } from 'react';
 import type { Product, Promotion, PricingRule } from '../../types';
 import type { ProductSalesMetrics } from '../../utils/merchandisingAnalytics';
@@ -127,6 +127,7 @@ export interface MerchandisingContextType {
    handleCreatePromo: () => void;
    handleEditClick: (p: Product) => void;
    handleSavePrice: (id: string) => void;
+   previewLocationPrice: (change: PriceChangeInput) => void;
    handleApplyBulkDiscount: () => void;
    handleCreateRule: () => void;
    handleRunSimulation: () => void;
