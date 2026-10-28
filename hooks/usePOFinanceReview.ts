@@ -7,7 +7,7 @@ import { purchaseOrdersService } from '../services/purchase-orders.service';
 export function usePOFinanceReview(page: number, selectedId: string | null) {
     const { user } = useStore();
     const { effectiveCountry } = useData();
-    const enabled = user?.role === 'country_finance_director' && Boolean(effectiveCountry);
+    const enabled = ['country_finance_director', 'head_of_finance', 'group_cfo'].includes(user?.role || '') && Boolean(effectiveCountry);
     const scope = [effectiveCountry, user?.siteId, user?.id];
     const queue = useQuery({
         queryKey: ['po_finance_review', ...scope, page],

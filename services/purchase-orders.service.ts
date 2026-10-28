@@ -30,6 +30,7 @@ export const purchaseOrdersService = {
     getById,
     approve: purchaseOrdersApprovalService.approve,
     clearFinance: purchaseOrdersApprovalService.clearFinance,
+    recommendCountryMd: purchaseOrdersApprovalService.recommendCountryMd,
     reject: purchaseOrdersApprovalService.reject,
 
     async create(po: Omit<PurchaseOrder, 'created_at' | 'updated_at'>, items: any[]) {

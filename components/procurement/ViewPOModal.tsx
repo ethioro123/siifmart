@@ -33,7 +33,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     const { user, showToast } = useStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
-    const [approvalModal, setApprovalModal] = useState<{ isOpen: boolean; mode: 'approve' | 'reject' | 'finance' }>({
+    const [approvalModal, setApprovalModal] = useState<{ isOpen: boolean; mode: 'approve' | 'reject' | 'finance' | 'recommend' }>({
         isOpen: false,
         mode: 'approve'
     });
@@ -51,9 +51,10 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     if (!po) return null;
 
     const { limit: autonomousLimit, hasConfiguredLimit, needsFinanceClearance: isExceedingAutonomous,
-        financeCleared, isCreator, canApprove, canClearFinance } = getPoApprovalPolicy({
+        financeCleared, isCreator, canApprove, canClearFinance, canRecommendCountryMd, statusMessage } = getPoApprovalPolicy({
         po, role: user?.role, actorName: user?.name,
-        actorRegionCode: user?.regionCode || user?.region_code, regions, sites
+        actorRegionCode: user?.regionCode || user?.region_code,
+        actorCountryCode: user?.country || (user as any)?.country_code, regions, sites
     });
     const isCEO = user?.role === 'group_ceo';
     const isFinanceRole = user?.role === 'country_finance_director' || user?.role === 'regional_finance_manager';
@@ -83,12 +84,16 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                     approverName: user?.name || 'Authorized Manager',
                     approverRole: user.role,
                     reasonCode: reasonCode as any,
-                    notes: notes || 'Approved via PO Inspector modal'
+                    notes: notes || 'Approved via PO Inspector modal',
+                    approverCountry: user?.country || (user as any)?.country_code
                 });
                 showToast(`PO ${formatPONumber(po)} approved successfully`, 'success');
             } else if (approvalModal.mode === 'finance') {
                 await clearFinance.mutateAsync({ poId: po.id, reason: notes });
                 showToast(`Finance clearance recorded for PO ${formatPONumber(po)}`, 'success');
+            } else if (approvalModal.mode === 'recommend') {
+                await purchaseOrdersService.recommendCountryMd(po.id, notes);
+                showToast(`Country MD recommendation recorded for PO ${formatPONumber(po)}`, 'success');
             } else {
                 if (!user?.id || !user.role) throw new Error('Signed-in rejector identity is required.');
                 await purchaseOrdersService.reject({
@@ -377,15 +382,19 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 disabled={isSubmitting} className="h-11 px-5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full disabled:opacity-50">
                                 Record finance clearance
                             </button>}
+                            {canRecommendCountryMd && <button onClick={() => setApprovalModal({ isOpen: true, mode: 'recommend' })}
+                                disabled={isSubmitting} className="h-11 px-5 bg-amber-600 text-white font-semibold text-sm rounded-full disabled:opacity-50">
+                                Recommend PO (Country MD)
+                            </button>}
                             {isCEO && !canApprove && !isCreator && <button onClick={handleOpenReject}
                                 className="h-11 px-5 rounded-full border border-[var(--theme-border)] text-[var(--theme-text-primary)] text-sm">
                                 Reject
                             </button>}
                             <p className="text-xs text-[var(--theme-text-secondary)]">
-                                {!hasConfiguredLimit ? 'Approval is waiting for a configured regional PO limit.'
+                                {statusMessage || (!hasConfiguredLimit ? 'Approval is waiting for a configured regional PO limit.'
                                     : isCreator ? 'The creator or requester needs a different approver.'
                                     : isExceedingAutonomous ? `Regional limit: ${currencySymbol} ${autonomousLimit?.toLocaleString()}. ${financeCleared ? 'Finance clearance recorded; HQ procurement approval required.' : 'HQ finance clearance required before HQ procurement approval.'}`
-                                    : `Regional limit: ${currencySymbol} ${autonomousLimit?.toLocaleString() ?? 'not applicable'}. Awaiting procurement approval.`}
+                                    : `Regional limit: ${currencySymbol} ${autonomousLimit?.toLocaleString() ?? 'not applicable'}. Awaiting procurement approval.`)}
                             </p>
                         </div>
                     )}
