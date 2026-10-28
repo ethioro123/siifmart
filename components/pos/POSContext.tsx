@@ -134,15 +134,6 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, []);
 
-    const refreshDataRef = React.useRef(refreshData);
-    refreshDataRef.current = refreshData;
-
-    useEffect(() => {
-        if (activeSite?.id) {
-            void refreshDataRef.current(['products']);
-        }
-    }, [activeSite?.id]);
-
     useEffect(() => {
         if (!customerSearchTerm.trim()) {
             setServerCustomerResults([]);

@@ -43,17 +43,9 @@ export const StockListModal: React.FC = () => {
     const [selectedProduct, setSelectedProduct] = React.useState<any>(null);
     const [isPrintHubOpen, setIsPrintHubOpen] = React.useState(false);
     const [labelsToPrint, setLabelsToPrint] = React.useState<any[]>([]);
-    const { products, activeSite, refreshData } = useData();
+    const { products, activeSite } = useData();
     const { user } = useStore();
     const pageSize = 20;
-    const refreshDataRef = React.useRef(refreshData);
-    refreshDataRef.current = refreshData;
-
-    React.useEffect(() => {
-        if (isStockListOpen) {
-            void refreshDataRef.current(['products']);
-        }
-    }, [isStockListOpen, activeSite?.id]);
 
     const siteProducts = useMemo(() => {
         const siteId = activeSite?.id || user?.siteId;

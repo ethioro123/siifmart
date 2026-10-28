@@ -14,6 +14,8 @@ import {
 } from './products/products-mutations';
 import { ensureTransferReceiptProduct } from './products/products-transfer-receipt';
 
+export const PRODUCT_SELECT_COLUMNS: string = 'id,site_id,name,sku,category,price,cost_price,sale_price,is_on_sale,stock,status,location,expiry_date,batch_number,shelf_position,competitor_price,sales_velocity,image,created_at,updated_at,barcode,barcode_type,brand,size,unit,pack_quantity,approval_status,barcodes,price_updated_at,old_price,product_id,custom_attributes,description,min_stock,max_stock,pos_received_at,pos_received_by';
+
 export const productsService = {
     // Re-export helper methods for backward compatibility / context usages
     _mapProduct,
@@ -25,7 +27,7 @@ export const productsService = {
     async getAll(siteId?: string, limit?: number, offset?: number, filters?: any, sort?: { key: string, direction: 'asc' | 'desc' }, includeExactCount: boolean = true) {
         let query = supabase
             .from('products')
-            .select(filters?.forecast ? 'id,site_id,name,sku,category,price,cost_price,stock,status,expiry_date,min_stock,max_stock,pack_quantity,unit,size,brand,custom_attributes' : '*', includeExactCount ? { count: 'exact' } : undefined);
+            .select(filters?.forecast ? 'id,site_id,name,sku,category,price,cost_price,stock,status,expiry_date,min_stock,max_stock,pack_quantity,unit,size,brand,custom_attributes' : PRODUCT_SELECT_COLUMNS, includeExactCount ? { count: 'exact' } : undefined);
 
         if (sort && sort.key) {
             let column = sort.key;
@@ -134,7 +136,7 @@ export const productsService = {
     },
 
     async getByBarcode(barcode: string, siteId?: string) {
-        let query = supabase.from('products').select('*');
+        let query = supabase.from('products').select(PRODUCT_SELECT_COLUMNS);
         if (siteId) {
             query = query.eq('site_id', siteId);
         }
@@ -146,7 +148,7 @@ export const productsService = {
     async search(term: string, siteId?: string, limit: number = 20) {
         let query = supabase
             .from('products')
-            .select('*')
+            .select(PRODUCT_SELECT_COLUMNS)
             .or(`name.ilike.%${term}%,sku.ilike.%${term}%`)
             .limit(limit);
 
@@ -160,7 +162,7 @@ export const productsService = {
     },
 
     async getById(id: string, siteId?: string) {
-        let query = supabase.from('products').select('*').eq('id', id);
+        let query = supabase.from('products').select(PRODUCT_SELECT_COLUMNS).eq('id', id);
         if (siteId) {
             query = query.eq('site_id', siteId);
         }
@@ -174,7 +176,7 @@ export const productsService = {
         const cleanSku = sku.replace(/[-\s]/g, '').toUpperCase();
         let query = supabase
             .from('products')
-            .select('*')
+            .select(PRODUCT_SELECT_COLUMNS)
             .or(`sku.eq.${sku},sku.eq.${cleanSku}`);
         if (siteId) {
             query = query.eq('site_id', siteId);
@@ -190,7 +192,7 @@ export const productsService = {
         const cleanSku = sku.replace(/[-\s]/g, '').toUpperCase();
         const { data, error } = await supabase
             .from('products')
-            .select('*')
+            .select(PRODUCT_SELECT_COLUMNS)
             .or(`sku.eq.${sku},sku.eq.${cleanSku}`)
             .eq('site_id', siteId)
             .ilike('location', location)
@@ -206,7 +208,7 @@ export const productsService = {
         if (!sku || sku === 'N/A' || sku === 'TEMP') return [];
         let query = supabase
             .from('products')
-            .select('*')
+            .select(PRODUCT_SELECT_COLUMNS)
             .ilike('sku', sku.trim());
 
         if (siteIds && siteIds.length > 0) {
@@ -252,7 +254,7 @@ export const productsService = {
             .from('products')
             .update(updates)
             .eq('id', id)
-            .select()
+            .select(PRODUCT_SELECT_COLUMNS)
             .single();
 
         if (error) throw error;
@@ -262,7 +264,7 @@ export const productsService = {
     async getLowStock(threshold: number = 10, siteId?: string) {
         let query = supabase
             .from('products')
-            .select('*')
+            .select(PRODUCT_SELECT_COLUMNS)
             .lte('stock', threshold)
             .order('stock', { ascending: true });
 
@@ -278,7 +280,7 @@ export const productsService = {
     async getLowStockAcrossSites() {
         const { data, error } = await supabase
             .from('products')
-            .select('*')
+            .select(PRODUCT_SELECT_COLUMNS)
             .not('status', 'eq', 'archived');
 
         if (error) throw error;
@@ -290,7 +292,7 @@ export const productsService = {
     async getWarehouseStock(sku: string) {
         const { data, error } = await supabase
             .from('products')
-            .select('*')
+            .select(PRODUCT_SELECT_COLUMNS)
             .eq('sku', sku)
             .gt('stock', 0);
 

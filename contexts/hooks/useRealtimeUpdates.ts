@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { realtimeService } from '../../services/realtime.service';
 import { salesService, purchaseOrdersService } from '../../services/supabase.service';
 import { mapShiftRow } from '../../services/shifts.service';
+import { DATA_KEYS } from '../../hooks/useDataQueries';
 import type { Product, SaleRecord, Customer, PurchaseOrder, ShiftRecord } from '../../types';
 import { logger } from '../../utils/logger';
 
@@ -24,6 +26,8 @@ export function useRealtimeUpdates({
   setOrders,
   setShifts
 }: UseRealtimeUpdatesProps) {
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (!activeSiteId) return;
 
@@ -82,16 +86,25 @@ export function useRealtimeUpdates({
           const mapped = mapRealtimeProduct(payload);
           setProducts(prev => prev.some(p => p.id === mapped.id) ? prev : [mapped, ...prev]);
           setAllProducts(prev => prev.some(p => p.id === mapped.id) ? prev : [mapped, ...prev]);
+          queryClient.setQueryData<Product[]>(DATA_KEYS.products(activeSiteId), prev =>
+            prev ? (prev.some(p => p.id === mapped.id) ? prev : [mapped, ...prev]) : prev
+          );
         }
         else if (event === 'UPDATE') {
           const mapped = mapRealtimeProduct(payload);
           setProducts(prev => prev.map(p => p.id === payload.id ? { ...p, ...mapped } : p));
           setAllProducts(prev => prev.map(p => p.id === payload.id ? { ...p, ...mapped } : p));
+          queryClient.setQueryData<Product[]>(DATA_KEYS.products(activeSiteId), prev =>
+            prev ? prev.map(p => p.id === payload.id ? { ...p, ...mapped } : p) : prev
+          );
         }
         else if (event === 'DELETE') {
           const targetId = payload.old?.id || payload.id;
           setProducts(prev => prev.filter(p => p.id !== targetId));
           setAllProducts(prev => prev.filter(p => p.id !== targetId));
+          queryClient.setQueryData<Product[]>(DATA_KEYS.products(activeSiteId), prev =>
+            prev ? prev.filter(p => p.id !== targetId) : prev
+          );
         }
       },
       onSaleChange: (event, payload) => {
