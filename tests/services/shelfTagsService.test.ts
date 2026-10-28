@@ -40,7 +40,7 @@ describe('Shelf Tags Service Governance', () => {
             cost_price: 180.2,
             sale_price: 220.4,
             is_on_sale: true,
-            is_halal: true
+            custom_attributes: { isHalal: true }
          },
          error: null
       });

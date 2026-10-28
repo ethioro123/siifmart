@@ -27,7 +27,7 @@ export const shelfTagsService = {
 
     let query = supabase
       .from('products')
-      .select('id,site_id,sku,name,price,cost_price,sale_price,is_on_sale,category,shelf_position,is_halal,barcode,barcode_type')
+      .select('id,site_id,sku,name,price,cost_price,sale_price,is_on_sale,category,shelf_position,custom_attributes,barcode,barcode_type')
       .ilike('sku', sku.trim());
 
     if (siteId) {
@@ -37,6 +37,15 @@ export const shelfTagsService = {
     const { data, error } = await query.limit(1).maybeSingle();
     if (error) throw error;
     if (!data) return null;
+
+    const customAttrs = (data as any).custom_attributes || {};
+    const cert = customAttrs.dietaryCert || customAttrs.dietary_cert;
+    const isHalal = Boolean(
+      customAttrs.isHalal ||
+      customAttrs.is_halal ||
+      customAttrs.halalVerified ||
+      (typeof cert === 'string' && /^(100%\s*)?(certified\s*)?halal(\s*certified)?$/i.test(cert.trim()))
+    );
 
     return {
       id: data.id,
@@ -49,7 +58,9 @@ export const shelfTagsService = {
       isOnSale: Boolean(data.is_on_sale),
       category: data.category,
       shelfPosition: data.shelf_position,
-      isHalal: Boolean(data.is_halal),
+      isHalal,
+      dietaryCert: cert,
+      customAttributes: customAttrs,
       barcode: data.barcode,
       barcodeType: data.barcode_type
     } as unknown as Product;
@@ -64,7 +75,7 @@ export const shelfTagsService = {
 
     let query = supabase
       .from('products')
-      .select('id,site_id,sku,name,price,cost_price,sale_price,is_on_sale,category,shelf_position,is_halal,barcode,barcode_type')
+      .select('id,site_id,sku,name,price,cost_price,sale_price,is_on_sale,category,shelf_position,custom_attributes,barcode,barcode_type')
       .in('id', productIds);
 
     if (siteId) {
@@ -75,6 +86,15 @@ export const shelfTagsService = {
     if (error) throw error;
 
     (data || []).forEach((row: any) => {
+      const customAttrs = row.custom_attributes || {};
+      const cert = customAttrs.dietaryCert || customAttrs.dietary_cert;
+      const isHalal = Boolean(
+        customAttrs.isHalal ||
+        customAttrs.is_halal ||
+        customAttrs.halalVerified ||
+        (typeof cert === 'string' && /^(100%\s*)?(certified\s*)?halal(\s*certified)?$/i.test(cert.trim()))
+      );
+
       const prod: Product = {
         id: row.id,
         siteId: row.site_id,
@@ -86,7 +106,9 @@ export const shelfTagsService = {
         isOnSale: Boolean(row.is_on_sale),
         category: row.category,
         shelfPosition: row.shelf_position,
-        isHalal: Boolean(row.is_halal),
+        isHalal,
+        dietaryCert: cert,
+        customAttributes: customAttrs,
         barcode: row.barcode,
         barcodeType: row.barcode_type
       } as unknown as Product;

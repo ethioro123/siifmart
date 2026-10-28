@@ -11,6 +11,9 @@ describe('Shelf Tag Generator & Halal Proof Governance', () => {
       expect(isProductHalal({ halalVerified: true } as any)).toBe(true);
       expect(isProductHalal({ dietaryCert: 'HALAL' } as any)).toBe(true);
       expect(isProductHalal({ dietaryCert: 'certified_halal' } as any)).toBe(true);
+      expect(isProductHalal({ dietaryCert: '100% Halal Certified' } as any)).toBe(true);
+      expect(isProductHalal({ dietaryCert: '100% Certified Halal' } as any)).toBe(true);
+      expect(isProductHalal({ customAttributes: { dietaryCert: '100% Halal Certified' } } as any)).toBe(true);
       expect(isProductHalal({ halalCompliance: 'compliant' } as any)).toBe(true);
       expect(isProductHalal({ storage: { halalVerified: true } } as any)).toBe(true);
    });
