@@ -6,6 +6,10 @@ import { getById } from './purchase-orders.read';
 import { wmsJobsService } from './wms-jobs.service';
 import { regionsService } from './regions.service';
 
+export interface POApprovalExtendedPayload extends POApprovalPayload {
+  approverCountry?: string;
+}
+
 export const purchaseOrdersApprovalService = {
   async clearFinance(poId: string, reason: string) {
     if (!reason.trim()) throw new Error('A finance clearance reason is required.');
@@ -16,13 +20,24 @@ export const purchaseOrdersApprovalService = {
     if (error) throw new Error(error.message || 'Finance clearance was rejected.');
     return getById(poId);
   },
+
+  async recommendCountryMd(poId: string, notes: string) {
+    if (!notes.trim()) throw new Error('A recommendation note is required.');
+    const { error } = await supabase.rpc('recommend_purchase_order_country_md', {
+      p_po_id: poId,
+      p_notes: notes.trim()
+    });
+    if (error) throw new Error(error.message || 'Country MD recommendation was rejected.');
+    return getById(poId);
+  },
+
   /**
-   * Approves a Purchase Order using Zero-Trust 4-Eyes Governance.
+   * Approves a Purchase Order using Zero-Trust Delegated Governance (10M / 100M Limits).
    * Calls the PostgreSQL RPC `approve_purchase_order` (SECURITY DEFINER).
-   * Enforces self-approval block, mandatory reason code, role authorization, and monetary limits.
+   * Enforces self-approval block, country isolation, mandatory reason code, and monetary limits.
    */
-  async approve(payload: POApprovalPayload) {
-    const { poId, approverId, approverName, approverRole, reasonCode, notes = '', gpsCoords } = payload;
+  async approve(payload: POApprovalExtendedPayload) {
+    const { poId, approverId, approverName, approverRole, reasonCode, notes = '', gpsCoords, approverCountry } = payload;
 
     // 1. Client-Side Pre-Validation Guard (Instant UI Feedback)
     const currentPO = await getById(poId);
@@ -32,11 +47,16 @@ export const purchaseOrdersApprovalService = {
       throw new Error(`Cannot approve PO with status "${currentPO.status}". Must be Draft or Pending.`);
     }
 
-    if (!['group_ceo', 'country_commercial_director', 'regional_procurement_manager'].includes(approverRole)) {
-      throw new Error('Final purchase order approval requires a procurement lead.');
+    const authorizedRoles = [
+      'group_ceo', 'group_cfo', 'country_commercial_director', 'country_managing_director',
+      'country_operations_director', 'regional_procurement_manager', 'regional_operations_manager',
+      'head_of_procurement', 'super_admin'
+    ];
+    if (!authorizedRoles.includes(approverRole)) {
+      throw new Error('Final purchase order approval requires an authorized procurement lead or executive.');
     }
 
-    // 4-Eyes rule: Creator cannot approve their own PO
+    // Zero-Self-Approval: Creator or requester cannot approve their own PO
     const creatorName = currentPO.createdBy?.toLowerCase().trim();
     const requesterName = currentPO.requestedBy?.toLowerCase().trim();
     const approverLower = approverName.toLowerCase().trim();
@@ -44,26 +64,61 @@ export const purchaseOrdersApprovalService = {
       throw new Error('The creator or requester cannot approve their own purchase order.');
     }
 
+    // Country Isolation Guard
+    const poCountry = (currentPO.country_code || (currentPO as any).countryCode || '').toUpperCase();
+    if (approverCountry && !['group_ceo', 'group_cfo', 'super_admin'].includes(approverRole)) {
+      if (poCountry && approverCountry.toUpperCase() !== poCountry) {
+        throw new Error('Approver is outside the purchase order country.');
+      }
+    }
+
     // Mandatory structured reason code
     if (!reasonCode || !reasonCode.trim()) {
       throw new Error('Managerial Accountability Violation: Structured reason code is mandatory for PO approval.');
     }
 
-    // Dynamic Regional Autonomous PO Limit Check
+    // Thresholds: 10M Regional Autonomous Limit / 100M Country Limit
     const poRegionCode = currentPO.regionCode || (currentPO as any).region_code;
+    let autonomousLimit = 10_000_000;
     if (poRegionCode) {
       const region = await regionsService.getRegionByCode(poRegionCode);
-      if (!region || region.status !== 'active' || region.autonomous_po_limit == null) {
-        throw new Error('The region has no active configured PO approval limit.');
+      if (region && region.status === 'active' && region.autonomous_po_limit != null) {
+        autonomousLimit = Number(region.autonomous_po_limit);
       }
-      const autonomousLimit = Number(region.autonomous_po_limit);
-      if (currentPO.totalAmount > autonomousLimit) {
-        if (approverRole === 'regional_procurement_manager') {
-          throw new Error('This order exceeds the configured regional PO limit and requires HQ approval.');
-        }
-        if (!currentPO.finance_cleared_at) {
-          throw new Error('HQ finance clearance is required before approving this order.');
-        }
+    }
+    const countryLimit = 100_000_000;
+
+    const isFinanceCleared = Boolean(currentPO.finance_cleared_at || currentPO.financeClearedAt);
+    const isCountryMdRecommended = Boolean(
+      (currentPO as any).country_md_recommended_at || (currentPO as any).countryMdRecommendedAt
+    );
+
+    // Tier 1: PO <= 10M (Regional Autonomous Limit)
+    if (currentPO.totalAmount <= autonomousLimit) {
+      // Regional Procurement Manager can approve within assigned region; higher executives can also approve
+    }
+    // Tier 2: 10M < PO <= 100M (Country Autonomous Limit)
+    else if (currentPO.totalAmount <= countryLimit) {
+      if (approverRole === 'regional_procurement_manager') {
+        throw new Error('This order exceeds the configured regional PO limit and requires country leadership approval.');
+      }
+      if (!isFinanceCleared) {
+        throw new Error('Country finance clearance is required before approving this order.');
+      }
+      if (!['country_commercial_director', 'country_managing_director', 'head_of_procurement', 'group_cfo', 'group_ceo', 'super_admin'].includes(approverRole)) {
+        throw new Error('Order between 10M and 100M requires Country Commercial Director or Country MD approval.');
+      }
+    }
+    // Tier 3: PO > 100M (Above Country Autonomous Limit)
+    else {
+      if (!['group_cfo', 'group_ceo', 'super_admin'].includes(approverRole)) {
+        throw new Error('Orders above the 100M country limit require Group Executive (CFO/CEO) sign-off.');
+      }
+      if (!isCountryMdRecommended && approverRole !== 'super_admin') {
+        throw new Error('Orders above the 100M country limit require Country Managing Director recommendation.');
+      }
+      if (!isFinanceCleared) {
+        throw new Error('Group finance clearance is required before approving orders exceeding 100M.');
       }
     }
 
@@ -80,7 +135,7 @@ export const purchaseOrdersApprovalService = {
 
     if (rpcError) throw new Error(rpcError.message || 'Server rejected PO approval');
 
-    // 3. Auto-Trigger WMS Inbound Receiving Job for the approved PO
+    // 3. Auto-Trigger WMS Inbound Receiving Job for the approved PO (Atomic Handshake)
     let jobCreationError: Error | null = null;
     const maxAttempts = 2;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {

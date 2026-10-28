@@ -10,7 +10,7 @@ import {
 interface POApprovalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'approve' | 'reject' | 'finance';
+  mode: 'approve' | 'reject' | 'finance' | 'recommend';
   po: PurchaseOrder;
   onConfirm: (reasonCode: string, notes: string) => Promise<void>;
   isSubmitting: boolean;
@@ -62,7 +62,7 @@ const REJECTION_REASONS: { code: PORejectionReasonCode; label: string; desc: str
   },
   {
     code: 'PRICE_UNFAVORABLE',
-    label: 'Price Unfavorable',
+    label: 'Price UnFavorable',
     desc: 'Unit cost too high or margin falls below target'
   },
   {
@@ -109,12 +109,36 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
 
   const isApprove = mode === 'approve';
   const isFinance = mode === 'finance';
+  const isRecommend = mode === 'recommend';
   const reasons = isApprove ? APPROVAL_REASONS : REJECTION_REASONS;
+
+  const isGroupTier = po.totalAmount > 100_000_000;
+  const isCountryTier = po.totalAmount > 10_000_000 && !isGroupTier;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onConfirm(isFinance ? 'FINANCE_CLEARANCE' : selectedReason, notes.trim());
+    if (isFinance) {
+      await onConfirm('FINANCE_CLEARANCE', notes.trim());
+    } else if (isRecommend) {
+      await onConfirm('COUNTRY_MD_RECOMMENDATION', notes.trim());
+    } else {
+      await onConfirm(selectedReason, notes.trim());
+    }
   };
+
+  const modalTitle = isRecommend
+    ? 'Recommend PO (Country MD)'
+    : isFinance
+      ? isGroupTier
+        ? 'Clear Group Finance Budget & Terms'
+        : 'Clear Country Finance Budget & Terms'
+      : isApprove
+        ? isGroupTier
+          ? 'Authorize PO (Group Executive)'
+          : isCountryTier
+            ? 'Authorize PO (Country Commercial)'
+            : 'Authorize PO (Regional Autonomous)'
+        : 'Reject Purchase Order';
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -122,15 +146,15 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
         <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
           <div className="flex items-center gap-2.5">
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-              isApprove || isFinance
+              isApprove || isFinance || isRecommend
                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                 : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
             }`}>
-              {isApprove || isFinance ? <ShieldCheck size={20} /> : <XCircle size={20} />}
+              {isApprove || isFinance || isRecommend ? <ShieldCheck size={20} /> : <XCircle size={20} />}
             </div>
             <div>
               <h3 className="text-base font-bold tracking-tight text-[var(--theme-text-primary)]">
-                {isFinance ? 'Clear PO Budget and Terms' : isApprove ? 'Authorize Purchase Order' : 'Reject Purchase Order'}
+                {modalTitle}
               </h3>
               <p className="text-xs text-[var(--theme-text-secondary)] font-mono font-medium">
                 {formatPONumber(po)} • {po.currency} {po.totalAmount.toLocaleString()}
@@ -146,8 +170,18 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
           </button>
         </div>
 
+        {/* Tier badge indicator for context */}
+        {(isApprove || isRecommend) && (
+          <div className="px-3 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-secondary)] flex items-center justify-between">
+            <span className="font-medium">Governance Tier:</span>
+            <span className="font-semibold text-[var(--theme-text-primary)]">
+              {isGroupTier ? 'Group Tier (> 100M)' : isCountryTier ? 'Country Tier (10M - 100M)' : 'Regional Tier (≤ 10M)'}
+            </span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isFinance && <div>
+          {!isFinance && !isRecommend && <div>
             <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">
               Structured Reason Code *
             </label>
@@ -189,12 +223,24 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
 
           <div>
             <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">
-              {isFinance ? 'Finance Clearance Reason *' : 'Supervisory Notes (Optional)'}
+              {isRecommend
+                ? 'Country MD Recommendation Rationale *'
+                : isFinance
+                  ? 'Finance Clearance Reason *'
+                  : 'Supervisory Notes (Optional)'}
             </label>
             <textarea
               rows={2}
-              placeholder={isFinance ? 'Explain the budget and payment terms review...' : isApprove ? 'e.g. Verified dock capacity and price schedule...' : 'e.g. Request buyer to re-negotiate case pack discount...'}
-              required={isFinance}
+              placeholder={
+                isRecommend
+                  ? 'Explain the national operational necessity for spend exceeding 100M...'
+                  : isFinance
+                    ? 'Explain the budget and payment terms review...'
+                    : isApprove
+                      ? 'e.g. Verified dock capacity and price schedule...'
+                      : 'e.g. Request buyer to re-negotiate case pack discount...'
+              }
+              required={isFinance || isRecommend}
               value={notes}
               onChange={e => setNotes(e.target.value)}
               className="w-full p-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] resize-none"
@@ -214,14 +260,26 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
               type="submit"
               disabled={isSubmitting}
               className={`h-11 px-6 rounded-full text-xs font-semibold text-white shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer ${
-                isApprove || isFinance
+                isApprove || isFinance || isRecommend
                   ? 'bg-emerald-600 hover:bg-emerald-700'
                   : 'bg-rose-600 hover:bg-rose-700'
               }`}
             >
               {isSubmitting
-                ? (isFinance ? 'Recording clearance...' : isApprove ? 'Authorizing...' : 'Rejecting...')
-                : (isFinance ? 'Record Finance Clearance' : isApprove ? 'Confirm Approval' : 'Confirm Rejection')}
+                ? isRecommend
+                  ? 'Recording recommendation...'
+                  : isFinance
+                    ? 'Recording clearance...'
+                    : isApprove
+                      ? 'Authorizing...'
+                      : 'Rejecting...'
+                : isRecommend
+                  ? 'Submit Recommendation'
+                  : isFinance
+                    ? 'Record Finance Clearance'
+                    : isApprove
+                      ? 'Confirm Approval'
+                      : 'Confirm Rejection'}
             </button>
           </div>
         </form>
