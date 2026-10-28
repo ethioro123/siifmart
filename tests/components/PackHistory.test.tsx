@@ -136,7 +136,7 @@ describe('PackHistory mobile UX and interaction', () => {
         expect(screen.getByText('Baby Formula Milk 400g')).toBeTruthy();
 
         // Clear search using the clear button
-        const clearButton = screen.getByRole('button', { name: /clear search/i });
+        const clearButton = screen.getByRole('button', { name: /clear search|warehouse\.clearSearch/i });
         fireEvent.click(clearButton);
 
         expect(screen.getByText('Sunflower Cooking Oil 1L')).toBeTruthy();
@@ -154,7 +154,7 @@ describe('PackHistory mobile UX and interaction', () => {
         );
 
         // Find "With Returns" button
-        const returnsPill = screen.getByRole('button', { name: /With Returns/i });
+        const returnsPill = screen.getByRole('button', { name: /With Returns|warehouse\.withReturns/i });
         fireEvent.click(returnsPill);
 
         expect(screen.queryByText('Sunflower Cooking Oil 1L')).toBeNull();

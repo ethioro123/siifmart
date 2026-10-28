@@ -19,18 +19,19 @@ const setup=()=>{
 };
 afterEach(()=>{cleanup();vi.restoreAllMocks();});
 beforeEach(()=>{let now=100000;vi.spyOn(Date,'now').mockImplementation(()=>now+=1000);vi.spyOn(window,'confirm').mockReturnValue(true);});
+const noStockButtonRegex = /No stock in this bay|warehouse\.picking\.noStockInBay/i;
 const scanBay=async()=>{
  const input=screen.getByRole('textbox',{name:'Scan barcode'});
  fireEvent.change(input,{target:{value:encodeLocation('A-01-01','1234')}});
  fireEvent.submit(input.closest('form')!);
- await waitFor(()=>expect(screen.getByRole('button',{name:'No stock in this bay'})).toBeTruthy());
+ await waitFor(()=>expect(screen.getByRole('button',{name:noStockButtonRegex})).toBeTruthy());
 };
 describe('verified picking scanner',()=>{
  it('records an audited zero shortage only after scanning the source bay and entering a reason',async()=>{
   const {save,location}=setup();
-  expect(screen.queryByRole('button',{name:'No stock in this bay'})).toBeNull();
+  expect(screen.queryByRole('button',{name:noStockButtonRegex})).toBeNull();
   await scanBay();expect(location).toHaveBeenCalledWith(encodeLocation('A-01-01','1234'));
-  fireEvent.click(screen.getByRole('button',{name:'No stock in this bay'}));
+  fireEvent.click(screen.getByRole('button',{name:noStockButtonRegex}));
   const qty=screen.getByRole('spinbutton');expect((qty as HTMLInputElement).value).toBe('0');
   fireEvent.submit(qty.closest('form')!);expect(save).not.toHaveBeenCalled();
   fireEvent.change(screen.getByRole('textbox',{name:'Shortage reason'}),{target:{value:'Bin physically empty'}});
@@ -39,7 +40,7 @@ describe('verified picking scanner',()=>{
  });
  it('does not turn the empty-bin action into an unscanned positive pick',async()=>{
   const {save}=setup();await scanBay();
-  fireEvent.click(screen.getByRole('button',{name:'No stock in this bay'}));
+  fireEvent.click(screen.getByRole('button',{name:noStockButtonRegex}));
   const qty=screen.getByRole('spinbutton');fireEvent.change(qty,{target:{value:'2'}});
   fireEvent.submit(qty.closest('form')!);
   await waitFor(()=>expect(screen.getByText('Scan the product before recording a positive quantity.')).toBeTruthy());
