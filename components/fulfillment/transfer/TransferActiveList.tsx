@@ -111,14 +111,14 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
 
         const getLocalizedStatus = (status: string) => {
             switch (status) {
-                case 'Draft': return 'Draft';
+                case 'Draft': return t('warehouse.draft');
                 case 'Requested': return t('warehouse.requested');
-                case 'Approved': return t('warehouse.putaway.confirmLocation');
+                case 'Approved': return t('warehouse.approved');
                 case 'Picking': return t('warehouse.picking');
-                case 'Picked': return t('warehouse.picking') + ' (OK)';
+                case 'Picked': return t('warehouse.picked');
                 case 'Packed': return t('warehouse.packed');
-                case 'Shipped': return t('warehouse.inTransitLabel').split(' ')[0];
-                case 'In-Transit': return t('warehouse.inTransitLabel');
+                case 'Shipped': return t('warehouse.shipped');
+                case 'In-Transit': return t('warehouse.inTransit');
                 case 'Delivered': return t('warehouse.delivered');
                 case 'Received': return t('warehouse.received');
                 default: return status;
@@ -146,7 +146,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                     </span>
                     {(transfer.isInterRegion || (transfer.sourceRegionCode && transfer.destRegionCode && transfer.sourceRegionCode !== transfer.destRegionCode)) && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
-                            Inter-Region
+                            {t('warehouse.interRegionBadge')}
                         </span>
                     )}
                 </div>
@@ -172,12 +172,12 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                         className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-semibold text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none min-h-[44px] transition-colors shadow-sm"
                     >
                         <option value="ALL">{t('warehouse.allTransfers')}</option>
-                        <option value="Draft">Draft</option>
+                        <option value="Draft">{t('warehouse.draft')}</option>
                         <option value="Requested">{t('warehouse.requested')}</option>
                         <option value="Picking">{t('warehouse.picking')}</option>
                         <option value="Packed">{t('warehouse.packed')}</option>
-                        <option value="Shipped">{t('warehouse.inTransitLabel').split(' ')[0]}</option>
-                        <option value="In-Transit">{t('warehouse.inTransitLabel')}</option>
+                        <option value="Shipped">{t('warehouse.shipped')}</option>
+                        <option value="In-Transit">{t('warehouse.inTransit')}</option>
                         <option value="Delivered">{t('warehouse.delivered')}</option>
                         <option value="Received">{t('warehouse.received')}</option>
                     </select>

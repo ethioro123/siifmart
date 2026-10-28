@@ -413,10 +413,10 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                         className="w-full min-h-[44px] py-3.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all touch-manipulation active:scale-[0.99] cursor-pointer"
                     >
                         <ShieldCheck size={16} />
-                        {isLoadingVerification ? 'Loading transfer count…'
-                            : verificationMutation.isPending ? 'Saving verified count…'
-                            : receiptVerification?.status === 'verified' ? 'Review & Accept Receipt'
-                            : 'Submit Count & Accept Responsibility'}
+                        {isLoadingVerification ? t('warehouse.loadingTransferCount')
+                            : verificationMutation.isPending ? t('warehouse.savingVerifiedCount')
+                            : receiptVerification?.status === 'verified' ? t('warehouse.reviewAndAcceptReceipt')
+                            : t('warehouse.submitCountAndAcceptResponsibility')}
                     </button>
                 </div>
             </div>

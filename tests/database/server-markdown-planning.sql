@@ -75,14 +75,52 @@ BEGIN
 END; $$;
 RESET ROLE;
 DO $$
-DECLARE r public.inventory_requests%ROWTYPE; p public.products%ROWTYPE; country_deadline date;
+DECLARE r public.inventory_requests%ROWTYPE;
 BEGIN
  SELECT * INTO r FROM public.inventory_requests WHERE id=current_setting('test.markdown_request')::uuid;
  IF r.status<>'pending' OR r.proposed_changes ? 'costPrice' OR r.proposed_changes ? 'cost_price' OR r.approved_at IS NOT NULL THEN RAISE EXCEPTION 'TEST: approval or cost disclosure bypass'; END IF;
- SELECT * INTO p FROM public.products WHERE id=current_setting('test.markdown_product')::uuid;
- -- Test expiry using the product fixture when within the supported horizon; otherwise compare at submission below.
- country_deadline:=(now() AT TIME ZONE 'Africa/Addis_Ababa')::date+21;
- UPDATE private.markdown_plans SET request_id=NULL,deadline=country_deadline+400 WHERE id=current_setting('test.markdown_token')::uuid;
+ -- Test-only privileged fixture edits. The authenticated API below must detect every changed field.
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',auth.uid(),'role','service_role')::text,true);
+ UPDATE public.products SET expiry_date=(now() AT TIME ZONE 'Africa/Addis_Ababa')::date+2 WHERE id=current_setting('test.markdown_product')::uuid;
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',auth.uid(),'role','authenticated')::text,true);
 END; $$;
+SET LOCAL ROLE authenticated;
+DO $$
+DECLARE p uuid:=current_setting('test.markdown_product')::uuid; today date:=(now() AT TIME ZONE 'Africa/Addis_Ababa')::date; plan jsonb;
+BEGIN
+ BEGIN
+  PERFORM public.generate_markdown_plan(p,'ET',today+3);
+  RAISE EXCEPTION 'TEST: plan beyond recorded expiry accepted';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM NOT LIKE 'Deadline must be on or before recorded expiry%' THEN RAISE; END IF; END;
+ plan:=public.generate_markdown_plan(p,'ET',today+2);
+ PERFORM set_config('test.markdown_token',plan->>'token',true);
+END; $$;
+RESET ROLE;
+DO $$ BEGIN
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',auth.uid(),'role','service_role')::text,true);
+ UPDATE public.products SET cost_price=cost_price+1 WHERE id=current_setting('test.markdown_product')::uuid;
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',auth.uid(),'role','authenticated')::text,true);
+END; $$;
+SET LOCAL ROLE authenticated;
+DO $$ BEGIN
+ BEGIN
+  PERFORM public.submit_markdown_plan(current_setting('test.markdown_token')::uuid,1);
+  RAISE EXCEPTION 'TEST: actual cost change after planning accepted';
+ EXCEPTION WHEN serialization_failure THEN NULL; END;
+END; $$;
+RESET ROLE;
+DO $$ BEGIN
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',auth.uid(),'role','service_role')::text,true);
+ UPDATE public.products SET expiry_date=(now() AT TIME ZONE 'Africa/Addis_Ababa')::date-1 WHERE id=current_setting('test.markdown_product')::uuid;
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',auth.uid(),'role','authenticated')::text,true);
+END; $$;
+SET LOCAL ROLE authenticated;
+DO $$ BEGIN
+ BEGIN
+  PERFORM public.generate_markdown_plan(current_setting('test.markdown_product')::uuid,'ET',(now() AT TIME ZONE 'Africa/Addis_Ababa')::date+1);
+  RAISE EXCEPTION 'TEST: expired stock accepted';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM NOT LIKE 'Deadline must be on or before recorded expiry%' THEN RAISE; END IF; END;
+END; $$;
+RESET ROLE;
 ROLLBACK;
-SELECT 'PASS: full sales baseline, private cost protection, country denial, stale snapshot rejection, selected-price impact and pending idempotent proposal' AS result;
+SELECT 'PASS: complete 30-day sales, restricted cost, country denial, actual cost change rejection, expiry guards, selected impact and idempotent pending save' AS result;

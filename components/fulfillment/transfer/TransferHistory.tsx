@@ -197,7 +197,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                             <div className="flex items-center gap-1.5 shrink-0">
                                                 {(transfer.isInterRegion || (transfer.sourceRegionCode && transfer.destRegionCode && transfer.sourceRegionCode !== transfer.destRegionCode)) && (
                                                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
-                                                        Inter-Region
+                                                        {t('warehouse.interRegionBadge')}
                                                     </span>
                                                 )}
                                                 <span className={`text-[11px] px-2.5 py-0.5 rounded-full uppercase font-semibold border ${
@@ -207,7 +207,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                             ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20'
                                                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-[var(--theme-border)]'
                                                 }`}>
-                                                    {transfer.transferStatus === 'Received' ? t('warehouse.received') : isCancelled ? 'Cancelled' : (transfer.transferStatus || transfer.status)}
+                                                    {transfer.transferStatus === 'Received' ? t('warehouse.received') : isCancelled ? t('warehouse.cancelled') : (transfer.transferStatus || transfer.status)}
                                                 </span>
                                             </div>
                                         </div>
@@ -233,7 +233,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                 {/* Completed By Attribution */}
                                                 <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)] font-medium">
                                                     <User size={12} className="text-[var(--theme-accent)] shrink-0" />
-                                                    <span className="font-semibold text-[var(--theme-text-primary)]">Completed By:</span>
+                                                    <span className="font-semibold text-[var(--theme-text-primary)]">{t('warehouse.completedByLabel')}:</span>
                                                     <span className="break-words leading-tight">{getWorkerDisplay(transfer)}</span>
                                                 </div>
                                             </div>

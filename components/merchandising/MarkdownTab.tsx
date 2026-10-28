@@ -5,7 +5,8 @@ import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { usePriceManagerCatalog } from '../../hooks/usePriceManagerCatalog';
 import { useMarkdownProposal } from '../../hooks/useMarkdownProposal';
-import { localDateInput, validateTargetExitDate } from '../../utils/markdownGlidePath';
+import { validateTargetExitDate } from '../../utils/markdownGlidePath';
+import { markdownToday, markdownTomorrow } from '../../utils/markdownCalendar';
 import { useMarkdownPlan } from '../../hooks/useMarkdownPlan';
 import { productSiteName } from '../../utils/priceManager';
 import { isHqFacilitySite, isRegionalAdminFacilitySite } from '../../utils/roleSegregation';
@@ -31,7 +32,7 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
     const catalog=usePriceManagerCatalog({country,search:query,page,pageSize:25,filters:activeSite?.id && !isHqFacilitySite(activeSite) && !isRegionalAdminFacilitySite(activeSite) ? {sites:[activeSite.id]} : {}},true);
     const products=catalog.data?.data || [];
     const product=products.find(p=>p.id===selectedId) || null;
-    const signature=JSON.stringify([scope,product,deadline]);
+    const signature=JSON.stringify([scope,product,deadline,markdownToday(country)]);
     const planning=useMarkdownPlan(signature);
     const plan=planning.plan;
     const {send,busy,pending,feedback,refresh}=useMarkdownProposal(product,country,scope);
@@ -39,11 +40,11 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
     const stage=plan?.stages[selectedStage];
     const pendingEdit=!!pending.data?.data.length;
     const confirmed=pending.isSuccess && !pending.isFetching;
-    const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+    const tomorrow=markdownTomorrow(country);
     const money=(value:number)=>Number.isFinite(value) ? `${currency} ${Math.round(value).toLocaleString()}` : 'Unavailable';
     const generate=async()=>{
         setError('');
-        const date=validateTargetExitDate(deadline);
+        const date=validateTargetExitDate(deadline,new Date(`${markdownToday(country)}T12:00:00`));
         if (!product) {setError('Select a product.');return;}
         if (!date.isValid) {setError(date.errorReason || 'Choose a valid deadline.');return;}
         const next=await planning.generate(product.id,country,deadline);
@@ -69,7 +70,7 @@ function MarkdownPlanner({country,currency,scope}:{country:string;currency:strin
                     {[["Facility",productSiteName(product,sites || [])],["On-hand stock",`${Math.round(product.stock)} ${product.unit || 'units'}`],["Current selling price",money(price)],["Recorded cost",Number.isFinite(product.costPrice) ? money(product.costPrice!) : 'Unavailable'],["Recorded expiry",product.expiryDate || 'Not recorded']].map(([label,value])=><div key={label} className="flex flex-wrap justify-between gap-2"><dt className="text-[var(--theme-text-secondary)]">{label}</dt><dd className="tabular-nums break-words">{value}</dd></div>)}
                 </dl>}
                 <p className="text-sm text-[var(--theme-text-secondary)]">Recorded cost is checked privately by the server, including when your role cannot view it. Planning uses the complete 30-day completed-sales window for this product and facility.</p>
-                <div><label htmlFor="markdown-deadline" className="block text-sm font-medium mb-2">Target exit date</label><input id="markdown-deadline" type="date" className={control} value={deadline} min={localDateInput(tomorrow)} disabled={busy || planning.busy} aria-describedby={error ? 'markdown-error' : undefined} aria-invalid={!!error || !!planning.error} onChange={e=>{setDeadline(e.target.value);planning.clear();setError('');}}/></div>
+                <div><label htmlFor="markdown-deadline" className="block text-sm font-medium mb-2">Target exit date</label><input id="markdown-deadline" type="date" className={control} value={deadline} min={tomorrow} disabled={busy || planning.busy} aria-describedby={(error || planning.error) ? 'markdown-error' : undefined} aria-invalid={!!error || !!planning.error} onChange={e=>{setDeadline(e.target.value);planning.clear();setError('');}}/></div>
                 {(error || planning.error) && <p id="markdown-error" role="alert" className="text-sm">{error || planning.error}</p>}
                 <button type="button" onClick={generate} disabled={!product || catalog.isFetching || busy || planning.busy} className={`${button} w-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] flex items-center justify-center gap-2`}><Calculator size={18}/>{planning.busy ? 'Generating…' : 'Generate plan'}</button>
             </section>

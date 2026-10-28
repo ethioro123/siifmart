@@ -98,7 +98,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
                         className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[11px] uppercase font-semibold tracking-wider rounded-lg transition-colors flex items-center gap-1 min-h-[36px]"
                     >
                         <AlertTriangle size={12} />
-                        <span>Resolve</span>
+                        <span>{t('warehouse.resolveDiscrepancy')}</span>
                     </button>
                 )}
             </div>

@@ -16,6 +16,7 @@ import { waste } from './waste';
 import { returns } from './returns';
 import { assign } from './assign';
 import { labels } from './labels';
+import { transfer } from './transfer';
 
 export const warehouse: TranslationBlock = {
     ...core,
@@ -40,6 +41,8 @@ export const warehouse: TranslationBlock = {
     assign,
     ...labels,
     labels,
+    ...transfer,
+    transfer,
     ...misc,
     misc,
     ...modals,

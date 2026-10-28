@@ -16,6 +16,7 @@ import { TransferJobDetails } from './transfer/TransferJobDetails';
 import { QRScanner } from '../QRScanner';
 import { DiscrepancyResolutionModal } from './DiscrepancyResolutionModal';
 import { logger } from '../../utils/logger';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface TransferTabProps {
     activeTab: 'TRANSFER';
@@ -59,7 +60,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
     allProducts,
     filteredJobs,
     transfers,
-    t,
+    t: propT,
     addNotification,
     refreshData,
     wmsJobsService,
@@ -79,6 +80,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
     historicalJobs = [],
     loadHistoricalJobs
 }) => {
+    const { t } = useLanguage();
     // --- STATE ---
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
 
@@ -273,7 +275,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                     }`}
                 >
                     <Layout size={14} className="shrink-0" />
-                    <span>Smart Replenish</span>
+                    <span>{t('warehouse.smartReplenish')}</span>
                 </button>
             )}
             {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center' || ['group_ceo', 'country_managing_director', 'warehouse_manager', 'country_operations_director', 'country_supply_chain_director', 'regional_operations_manager'].includes(user?.role || '')) && (
@@ -286,7 +288,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                     }`}
                 >
                     <Layers size={14} className="shrink-0" />
-                    <span>Bulk Push</span>
+                    <span>{t('warehouse.bulkPush')}</span>
                 </button>
             )}
             <button
@@ -298,7 +300,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                 }`}
             >
                 <Plus size={14} className="shrink-0" />
-                <span>Request</span>
+                <span>{t('warehouse.requestTab')}</span>
             </button>
         </div>
     );

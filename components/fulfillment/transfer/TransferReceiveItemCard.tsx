@@ -134,9 +134,9 @@ export const TransferReceiveItemCard: React.FC<TransferReceiveItemCardProps> = (
                             className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs sm:text-sm text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] focus:outline-none touch-manipulation"
                             aria-label={`Condition for ${product?.name || 'item'}`}
                         >
-                            <option value="Good">{t('warehouse.good')}</option>
-                            <option value="Damaged">Damaged</option>
-                            <option value="Short">Short / Missing</option>
+                            <option value="Good">{t('warehouse.conditionGood')}</option>
+                            <option value="Damaged">{t('warehouse.conditionDamaged')}</option>
+                            <option value="Short">{t('warehouse.conditionShortMissing')}</option>
                         </select>
                     </div>
                 </div>
