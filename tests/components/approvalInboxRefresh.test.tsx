@@ -22,9 +22,9 @@ beforeEach(()=>{
 afterEach(()=>{cleanup();client.clear();});
 const show=()=>render(<QueryClientProvider client={client}><MemoryRouter><Probe /></MemoryRouter></QueryClientProvider>);
 describe('approval inbox freshness and isolation',()=>{
-  it('refreshes on navigation and successful mutations',async()=>{
+  it('reuses fresh navigation data and refreshes after successful mutations',async()=>{
     show(); await screen.findByText('2'); const initial=mocks.read.mock.calls.length;
-    fireEvent.click(screen.getByRole('button',{name:'Navigate'})); await waitFor(()=>expect(mocks.read.mock.calls.length).toBeGreaterThan(initial));
+    fireEvent.click(screen.getByRole('button',{name:'Navigate'})); await act(async()=>{}); expect(mocks.read).toHaveBeenCalledTimes(initial); expect(initial).toBe(1);
     const before=mocks.read.mock.calls.length;
     await act(async()=>{await client.getMutationCache().build(client,{mutationFn:async()=>true}).execute(undefined);});
     await waitFor(()=>expect(mocks.read.mock.calls.length).toBeGreaterThan(before));
