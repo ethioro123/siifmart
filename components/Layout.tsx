@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import NetworkStatusIndicator from './NetworkStatusIndicator';
+import { DesktopUpdateBanner } from './DesktopUpdateBanner';
 import { GhostModeBanner } from './GhostModeBanner';
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
@@ -37,6 +38,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
   return (
     <div className="flex h-[100dvh] min-h-[100dvh] text-gray-700 dark:text-gray-300 font-sans overflow-hidden transition-colors duration-300" style={{ backgroundColor: 'var(--bg-app)', paddingTop: import.meta.env.MODE === 'staging' ? 'calc(1.5rem + env(safe-area-inset-top, 0px))' : undefined, '--app-top-inset': import.meta.env.MODE === 'staging' ? '1.5rem' : '0px' } as React.CSSProperties}>
       <NetworkStatusIndicator />
+      <DesktopUpdateBanner />
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <GhostModeBanner />

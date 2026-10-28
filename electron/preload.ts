@@ -1,11 +1,31 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { PrintOptions, PrinterInfo } from '../types/electron';
+import type { PrintOptions, PrinterInfo, DesktopUpdateStatus } from '../types/electron';
 
 const electronAPI = {
     isElectron: true,
 
     getAppVersion: (): Promise<string> => {
         return ipcRenderer.invoke('app:get-version');
+    },
+
+    checkForUpdates: (): Promise<DesktopUpdateStatus> => {
+        return ipcRenderer.invoke('updater:check');
+    },
+
+    applyUpdate: (): Promise<{ applied: boolean }> => {
+        return ipcRenderer.invoke('updater:apply');
+    },
+
+    getUpdateStatus: (): Promise<DesktopUpdateStatus> => {
+        return ipcRenderer.invoke('updater:get-status');
+    },
+
+    onUpdateStatus: (callback: (state: DesktopUpdateStatus) => void): (() => void) => {
+        const handler = (_event: any, state: DesktopUpdateStatus) => callback(state);
+        ipcRenderer.on('updater:status', handler);
+        return () => {
+            ipcRenderer.removeListener('updater:status', handler);
+        };
     },
 
     getPrinters: (): Promise<PrinterInfo[]> => {

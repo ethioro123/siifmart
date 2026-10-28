@@ -28,9 +28,21 @@ export interface PrintOptions {
     pageSize?: 'A4' | 'A5' | 'A6' | 'Letter' | 'Legal' | { width: number; height: number };
 }
 
+export interface DesktopUpdateStatus {
+    status: 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'up-to-date' | 'error';
+    currentVersion: string;
+    availableVersion?: string;
+    lastCheckedAt?: string;
+    message?: string;
+}
+
 export interface ElectronAPI {
     isElectron: boolean;
     getAppVersion: () => Promise<string>;
+    checkForUpdates: () => Promise<DesktopUpdateStatus>;
+    applyUpdate: () => Promise<{ applied: boolean }>;
+    getUpdateStatus: () => Promise<DesktopUpdateStatus>;
+    onUpdateStatus: (callback: (state: DesktopUpdateStatus) => void) => () => void;
     getPrinters: () => Promise<PrinterInfo[]>;
     printDirect: (html: string, options?: PrintOptions) => Promise<{ success: boolean; error?: string }>;
     openCashDrawer: (printerName?: string) => Promise<{ success: boolean; error?: string }>;

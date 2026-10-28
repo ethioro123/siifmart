@@ -3,6 +3,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { setupAppMenu } from './menu';
 import { getSystemPrinters, printHtmlDirect, openCashDrawer, ElectronPrintOptions } from './printer';
+import {
+    setupAutoUpdater,
+    checkForDesktopUpdates,
+    applyDesktopUpdate,
+    getDesktopUpdateState,
+    isUrlReachable
+} from './updater';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,15 +80,36 @@ function createWindow(): void {
         }
     }, 1500);
 
-    // Load dev server or production dist
+    // Load dev server, live hosted PWA (with automatic offline fallback), or bundled dist
+    const localDistIndex = path.join(__dirname, '../dist/index.html');
+    const hostedDesktopUrl = process.env.SIIFMART_DESKTOP_URL || process.env.VITE_DESKTOP_APP_URL;
+
+    mainWindow.webContents.on('did-fail-load', (_event, _errorCode, _errorDescription, validatedURL) => {
+        if (mainWindow && validatedURL && !validatedURL.startsWith('file:')) {
+            mainWindow.loadFile(localDistIndex);
+        }
+    });
+
     if (process.env.VITE_DEV_SERVER_URL) {
         mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
         if (isDev) {
             mainWindow.webContents.openDevTools({ mode: 'detach' });
         }
+    } else if (hostedDesktopUrl) {
+        const currentWindow = mainWindow;
+        isUrlReachable(hostedDesktopUrl).then((reachable) => {
+            if (!currentWindow || currentWindow.isDestroyed()) return;
+            if (reachable) {
+                currentWindow.loadURL(hostedDesktopUrl);
+            } else {
+                currentWindow.loadFile(localDistIndex);
+            }
+        });
     } else {
-        mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+        mainWindow.loadFile(localDistIndex);
     }
+
+    setupAutoUpdater(mainWindow);
 
     // Open external links in default browser
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -100,6 +128,18 @@ function createWindow(): void {
 
 ipcMain.handle('app:get-version', () => {
     return app.getVersion();
+});
+
+ipcMain.handle('updater:check', async () => {
+    return checkForDesktopUpdates(mainWindow);
+});
+
+ipcMain.handle('updater:apply', () => {
+    return applyDesktopUpdate(mainWindow);
+});
+
+ipcMain.handle('updater:get-status', () => {
+    return getDesktopUpdateState();
 });
 
 ipcMain.handle('printer:get-list', async () => {

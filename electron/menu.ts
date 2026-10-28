@@ -1,4 +1,5 @@
 import { Menu, BrowserWindow, app, shell } from 'electron';
+import { checkForDesktopUpdates } from './updater';
 
 export function setupAppMenu(mainWindow: BrowserWindow): void {
     const isMac = process.platform === 'darwin';
@@ -94,6 +95,13 @@ export function setupAppMenu(mainWindow: BrowserWindow): void {
         {
             role: 'help' as const,
             submenu: [
+                {
+                    label: 'Check for Updates...',
+                    click: () => {
+                        void checkForDesktopUpdates(mainWindow);
+                    }
+                },
+                { type: 'separator' as const },
                 {
                     label: 'SiifMart Documentation',
                     click: async () => {

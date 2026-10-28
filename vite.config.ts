@@ -108,6 +108,20 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       aiReloadGatePlugin(),
+      {
+        name: 'siifmart-version-manifest',
+        generateBundle() {
+          this.emitFile({
+            type: 'asset',
+            fileName: 'version.json',
+            source: JSON.stringify({
+              version: process.env.npm_package_version || '3.6.1',
+              buildId: `${process.env.npm_package_version || '3.6.1'}-${Date.now()}`,
+              builtAt: new Date().toISOString()
+            }, null, 2)
+          });
+        }
+      },
       stagingQuickLoginPlugin({
         url: supabaseUrl, publicKey: modeEnv.VITE_SUPABASE_ANON_KEY,
         email: privateStagingEnv.SIIFMART_STAGING_ADMIN_EMAIL,
