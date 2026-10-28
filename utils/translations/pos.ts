@@ -2,7 +2,12 @@ import { approvalInbox } from './approvalInbox';
 import { TranslationBlock } from './types';
 
 export const pos: TranslationBlock = {
-    approvals: approvalInbox,
+    approvals: {
+        en: 'Approvals',
+        am: 'ማጽደቆች',
+        or: 'Raggaasifamoota',
+        ...approvalInbox,
+    },
     // Header & Navigation
     payNow: { en: 'Pay Now', am: 'አሁን ክፈል', or: 'Amma Kaffal' },
     clearCart: { en: 'Clear Cart', am: 'ጋሪውን አጽዳ', or: 'Kaartii Haqi' },
@@ -381,4 +386,20 @@ export const pos: TranslationBlock = {
     velocityLabel: { en: 'Velocity:', am: 'ፍጥነት:', or: 'Saffisa:' },
     stockLabel: { en: 'Stock:', am: 'ክምችት:', or: 'Suuqii:' },
     sortLabel: { en: 'Sort:', am: 'ደርድር:', or: 'Tartiiba:' },
+    sortDefault: { en: 'Default', am: 'መደበኛ', or: 'Durtii' },
+    sortNameAsc: { en: 'Name: A–Z', am: 'ስም፡ A–Z', or: 'Maqaa: A–Z' },
+    sortPriceAsc: { en: 'Price: Low to High', am: 'ዋጋ፡ ዝቅተኛ ወደ ከፍተኛ', or: 'Gatii: Xiqqaa gara Guddaatti' },
+    sortPriceDesc: { en: 'Price: High to Low', am: 'ዋጋ፡ ከፍተኛ ወደ ዝቅተኛ', or: 'Gatii: Guddaa gara Xiqqaatti' },
+    deptAll: { en: 'All Departments', am: 'ሁሉም ክፍሎች', or: 'Kutaa Hunda' },
+    deptFreshFood: { en: 'Fresh Food & Deli', am: 'ትኩስ ምግቦች', or: 'Nyaata Haaraa' },
+    deptPantry: { en: 'Pantry & Groceries', am: 'የጓዳ ሸቀጣ ሸቀጥ', or: 'Nyaata Gaanfaa & Shana' },
+    deptFrozen: { en: 'Frozen Food', am: 'የቀዘቀዙ ምግቦች', or: 'Nyaata Qabbanaa\'aa' },
+    deptHousehold: { en: 'Household & Personal', am: 'የቤት እና የግል መጠቀሚያ', or: 'Meeshaa Manaa & Dhuunfaa' },
+    deptGeneral: { en: 'General Merchandise', am: 'ጠቅላላ ሸቀጦች', or: 'Meeshaalee Waliigalaa' },
+    deptOther: { en: 'Other', am: 'ሌሎች', or: 'Kan Biraa' },
+    allStock: { en: 'All', am: 'ሁሉም', or: 'Hunda' },
+    inStock: { en: 'In Stock', am: 'በክምችት ውስጥ', or: 'Suuqii Keessa' },
+    lowStock: { en: 'Low Stock', am: 'ዝቅተኛ ክምችት', or: 'Dhumuuf Jira' },
+    promotionsOnly: { en: 'Promotions & Discounts Only', am: 'ማስተዋወቂያ እና ቅናሽ ብቻ', or: 'Beeksisa & Hifsa Qofa' },
+    categories: { en: 'Categories', am: 'ምድቦች', or: 'Ramaddiiwwan' },
 };

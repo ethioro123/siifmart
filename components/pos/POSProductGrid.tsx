@@ -40,8 +40,8 @@ export const POSProductGrid: React.FC = () => {
 
     const activeFiltersCount = useMemo(() => {
         let count = 0;
-        if (selectedDepartment) count++;
-        if (selectedCategory) count++;
+        if (selectedDepartment && selectedDepartment !== 'All') count++;
+        if (selectedCategory && selectedCategory !== 'All') count++;
         if (minPriceFilter || maxPriceFilter) count++;
         if (selectedBrands.length > 0) count++;
         if (selectedVelocities.length > 0) count++;
