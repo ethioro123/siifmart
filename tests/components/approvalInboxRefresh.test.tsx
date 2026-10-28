@@ -29,6 +29,13 @@ describe('approval inbox freshness and isolation',()=>{
     await act(async()=>{await client.getMutationCache().build(client,{mutationFn:async()=>true}).execute(undefined);});
     await waitFor(()=>expect(mocks.read.mock.calls.length).toBeGreaterThan(before));
   });
+  it('refreshes stale data on navigation',async()=>{
+    show(); await screen.findByText('2'); const before=mocks.read.mock.calls.length;
+    const key=[APPROVAL_INBOX_KEY,'ops-1','regional_operations_manager','ET','ADD','hq-1'];
+    act(()=>{client.setQueryData(key,client.getQueryData(key),{updatedAt:Date.now()-16_000});});
+    fireEvent.click(screen.getByRole('button',{name:'Navigate'}));
+    await waitFor(()=>expect(mocks.read.mock.calls.length).toBeGreaterThan(before));
+  });
   it('refreshes on live events and removes its subscription on unmount',async()=>{
     const view=show(); await screen.findByText('2'); await waitFor(()=>expect(mocks.handlers.length).toBeGreaterThan(0));
     const before=mocks.read.mock.calls.length; act(()=>mocks.handlers.at(-1)?.());
