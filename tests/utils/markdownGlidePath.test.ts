@@ -266,3 +266,11 @@ describe('Clearance model boundary regressions',()=>{
   expect(validateTargetExitDate('2026-10-05',new Date(2026,9,3,23,30)).durationDays).toBe(2);
  });
 });
+
+it('rejects clearance past expiry or with already-expired stock',()=>{
+ const product={id:'p',price:100,costPrice:70,stock:20,status:'active',expiryDate:'2026-11-02'} as Product;
+ const now=new Date(2026,9,28,12);
+ expect(calculateMarkdownGlidePath({product,now,targetExitDate:'2026-11-03'})).toBeNull();
+ expect(calculateMarkdownGlidePath({product,now,targetExitDate:'2026-11-02'})).not.toBeNull();
+ expect(calculateMarkdownGlidePath({product:{...product,expiryDate:'2026-10-27'},now,targetExitDate:'2026-11-01'})).toBeNull();
+});

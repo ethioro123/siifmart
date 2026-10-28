@@ -17,6 +17,7 @@ export interface ConsolidatedProductInventory {
     inTransitStock: number;
     effectiveInventory: number;
     minThreshold: number;
+    policyConflict?: string;
 }
 
 export interface ForecastDemandPoint {
@@ -76,11 +77,12 @@ export function consolidateInventoryBySku(
     products: Product[],
     openPOs: PurchaseOrder[] = [],
     openTransfers: TransferRecord[] = [],
-    scopedSiteId?: string
+    scopedSiteId?: string,
+    asOf = new Date()
 ): ConsolidatedProductInventory[] {
     const groups = new Map<string, { primary: Product; lots: Product[] }>();
 
-    for (const p of products || []) {
+    for (const p of [...(products || [])].sort((a, b) => a.id.localeCompare(b.id))) {
         if (scopedSiteId && p.siteId !== scopedSiteId) continue;
         if (p.status === 'archived' || p.name?.startsWith('Test') || p.sku?.startsWith('TEST')) {
             continue;
@@ -95,17 +97,11 @@ export function consolidateInventoryBySku(
             groups.set(compositeKey, { primary: p, lots: [p] });
         } else {
             existing.lots.push(p);
-            // Prefer an active lot with recorded cost or higher stock as primary
-            if (
-                (!existing.primary.costPrice && p.costPrice) ||
-                (p.stock && p.stock > (existing.primary.stock || 0))
-            ) {
-                existing.primary = p;
-            }
+
         }
     }
 
-    const now = new Date();
+    const now = asOf;
     const consolidatedList: ConsolidatedProductInventory[] = [];
 
     for (const { primary, lots } of groups.values()) {
@@ -175,6 +171,11 @@ export function consolidateInventoryBySku(
         const reservedStock = lots.reduce((sum, lot) => sum + Math.max(0, Number(lot.customAttributes?.reserved) || 0), 0);
         const effectiveInventory = (availableStock - reservedStock) + onOrderStock + inTransitStock;
 
+        const policy = (lot: Product) => JSON.stringify([lot.minStock ?? null, lot.maxStock ?? null,
+            productOrderUnits(lot), lot.unit || 'UNIT', lot.customAttributes?.logistics?.leadTimeDays ?? null,
+            lot.customAttributes?.procurement?.moq ?? null, Math.round(lot.costPrice || 0)]);
+        const policyConflict = lots.some(lot => policy(lot) !== policy(primary))
+            ? 'Lots have conflicting stock, buying, cost or packaging settings. Reconcile product policy before ordering.' : undefined;
         consolidatedList.push({
             sku,
             siteId,
@@ -187,7 +188,8 @@ export function consolidateInventoryBySku(
             onOrderStock: Math.round(onOrderStock),
             inTransitStock: Math.round(inTransitStock),
             effectiveInventory: Math.round(effectiveInventory),
-            minThreshold
+            minThreshold,
+            policyConflict
         });
     }
 
@@ -294,10 +296,10 @@ export function buildReplenishmentQueue(
         const { primaryProduct: p, onHand, onOrderStock, inTransitStock, reservedStock, effectiveInventory, minThreshold } = item;
         const metrics = salesMetricsIndex.get(p.id);
 
-        const runRate = (metrics?.unitsSold30d || 0) / 30;
+        const runRate = Math.round((metrics?.unitsSold30d || 0) / 30);
         const unitsSold30d = metrics?.unitsSold30d || 0;
         const leadTimeDays = Math.max(0, Math.round(p.customAttributes?.logistics?.leadTimeDays || 0));
-        const leadTimeDemand = Math.round(runRate * leadTimeDays);
+        const leadTimeDemand = Math.round((metrics?.unitsSold30d || 0) * leadTimeDays / 30);
 
         const safetyStock = minThreshold;
         const reorderPoint = Math.max(minThreshold, leadTimeDemand);
@@ -321,18 +323,19 @@ export function buildReplenishmentQueue(
         if (suggestedBuySellable <= 0) continue;
 
         // Gap 5: Calculate pack multipliers accurately for PO creation
-        const packSize = productOrderUnits(p);
+        const actualPackSize = productOrderUnits(p);
+        const packSize = Math.max(1, Math.round(actualPackSize));
         if (!Number.isFinite(packSize) || packSize <= 0) continue;
         const suggestedBuyPacks = Math.ceil(suggestedBuySellable / packSize);
         const effectiveOrderedUnits = Math.round(suggestedBuyPacks * packSize);
-        const blockedReason = p.maxStock !== undefined && p.maxStock > 0 && effectiveInventory + effectiveOrderedUnits > p.maxStock
-            ? 'Supplier pack or minimum order would exceed the recorded maximum stock. Review policy before ordering.' : undefined;
+        const blockedReason = item.policyConflict || (!Number.isSafeInteger(actualPackSize) ? 'Packaging conversion is fractional; configure whole selling units before ordering.' : undefined) || (p.maxStock !== undefined && p.maxStock > 0 && effectiveInventory + effectiveOrderedUnits > p.maxStock
+            ? 'Supplier pack or minimum order would exceed the recorded maximum stock. Review policy before ordering.' : undefined);
 
         // Gap 6: Unsupported cost guessing (70% or 50) is strictly eliminated
-        const unitCost = (typeof p.costPrice === 'number' && p.costPrice > 0) ? p.costPrice : 0;
+        const unitCost = (typeof p.costPrice === 'number' && Number.isFinite(p.costPrice) && p.costPrice > 0) ? Math.round(p.costPrice) : 0;
         const costUnrecorded = unitCost === 0;
-        const orderUnitCost = orderCostFromSellUnit(unitCost, packSize);
-        const totalCost = Math.round(suggestedBuyPacks * orderUnitCost * 100) / 100;
+        const orderUnitCost = Math.round(orderCostFromSellUnit(unitCost, packSize));
+        const totalCost = Math.round(suggestedBuyPacks * orderUnitCost);
 
         // Gap 12: Factual reasoning based strictly on observed data
         let reason = '';

@@ -67,7 +67,7 @@ describe('merchandising no longer writes prices directly', () => {
         expect(src).not.toContain('updateProduct(');
         expect(src).toContain('useMarkdownProposal');
         const hook = read('hooks/useMarkdownProposal.ts');
-        expect(hook).toContain('useSubmitPriceChanges');
+        expect(hook).toContain('markdownPlanningService.submit');
         expect(hook).not.toContain('updateProduct(');
     });
 

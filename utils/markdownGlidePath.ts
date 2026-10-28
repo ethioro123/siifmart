@@ -85,6 +85,10 @@ export const calculateMarkdownGlidePath = ({ product, targetExitDate, metrics, n
     if (!validateMarkdownProduct(product,metrics).isValid) return null;
     const date=validateTargetExitDate(targetExitDate,now);
     if (!date.isValid) return null;
+    if (product.expiryDate) {
+        const expiry=product.expiryDate.slice(0,10);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(expiry) || expiry<=localDateInput(now) || targetExitDate>expiry) return null;
+    }
     const {durationDays}=date;
     const initialStock=Math.round(product.stock), retailPrice=Math.round(product.price), costPrice=Math.round(product.costPrice!);
     const currentPrice=Math.round(product.isOnSale ? product.salePrice! : product.price);

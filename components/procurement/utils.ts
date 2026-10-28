@@ -1,3 +1,5 @@
+import { productOrderUnits } from '../../utils/productControlLogic';
+import type { Product } from '../../types';
 import { Building, Wheat, User, ShoppingBag, Truck } from 'lucide-react';
 import { SupplierType } from '../../types';
 
@@ -110,54 +112,12 @@ export const inferBulkPackaging = (item: any): { unitsPerOrderUnit: number; pack
 export const convertToSellableUnits = (orderQty: number, item: any): number => {
     if (!item || !orderQty) return orderQty || 0;
 
-    const attrs = item.customAttributes || item.custom_attributes;
-    const packQty = parseInt(attrs?.packaging?.packQty || '0') || item.packQuantity || item.pack_quantity || 0;
-    const caseSize = parseInt(attrs?.packaging?.caseSize || '0') || item.caseSize || item.case_size || 0;
-
-    // Step 1: Pack / Case Multipliers (for count-based selling, or general discrete items)
-    const hasCases = caseSize >= 1;
-    const hasPacks = packQty > 1 && !hasCases;
-    let unitsPerOrderUnit = hasCases ? caseSize * (packQty || 1) : hasPacks ? packQty : (item.packQuantity && item.packQuantity > 1 ? item.packQuantity : 1);
-
-    if (unitsPerOrderUnit <= 1) {
-        const inferred = inferBulkPackaging(item);
-        if (inferred.unitsPerOrderUnit > 1) {
-            unitsPerOrderUnit = inferred.unitsPerOrderUnit;
-        }
-    }
-
-    if (unitsPerOrderUnit > 1) {
-        return orderQty * unitsPerOrderUnit;
-    }
-
-    // Step 2: Size-based conversion ONLY for products explicitly sold by Weight or Volume (e.g. bulk walnuts sold by kg)
-    const sizeValue = parseFloat(item.size || attrs?.packaging?.unitSize || '0');
-    const sizeType = (attrs?.physical?.sizeType || attrs?.physical?.unit || '').toLowerCase().trim();
-    const sellUnit = (item.unit || attrs?.commercial?.sellUnit || '').toUpperCase().trim();
-    const sellBy = attrs?.commercial?.sellBy || (['KG', 'G', 'L', 'ML'].includes(sellUnit) ? (['KG', 'G'].includes(sellUnit) ? 'Weight' : 'Volume') : 'Unit');
-
-    if ((sellBy === 'Weight' || sellBy === 'Volume') && sizeValue > 0 && sizeType) {
-        let sizeInBase = sizeValue;
-        let sizeCategory = '';
-        if (['kg', 'kilogram', 'kilograms', 'kgs'].includes(sizeType)) { sizeInBase = sizeValue * 1000; sizeCategory = 'weight'; }
-        else if (['g', 'gram', 'grams', 'gr'].includes(sizeType)) { sizeInBase = sizeValue; sizeCategory = 'weight'; }
-        else if (['l', 'litre', 'liter', 'litres', 'liters', 'lt'].includes(sizeType)) { sizeInBase = sizeValue * 1000; sizeCategory = 'volume'; }
-        else if (['ml', 'millilitre', 'milliliter', 'millilitres', 'milliliters'].includes(sizeType)) { sizeInBase = sizeValue; sizeCategory = 'volume'; }
-
-        let sellInBase = 1;
-        let sellCategory = '';
-        if (sellUnit === 'KG') { sellInBase = 1000; sellCategory = 'weight'; }
-        else if (sellUnit === 'G') { sellInBase = 1; sellCategory = 'weight'; }
-        else if (sellUnit === 'L') { sellInBase = 1000; sellCategory = 'volume'; }
-        else if (sellUnit === 'ML') { sellInBase = 1; sellCategory = 'volume'; }
-
-        if (sizeCategory && sizeCategory === sellCategory && ['KG', 'G', 'L', 'ML'].includes(sellUnit)) {
-            const sellUnitsPerPackage = sizeInBase / sellInBase;
-            return orderQty * sellUnitsPerPackage;
-        }
-    }
-
-    return orderQty;
+    return orderQty * productOrderUnits({
+        ...item,
+        packQuantity: item.packQuantity ?? item.pack_quantity,
+        caseSize: item.caseSize ?? item.case_size,
+        customAttributes: item.customAttributes ?? item.custom_attributes,
+    } as Product);
 };
 
 export interface POItemPackagingSummary {
@@ -192,13 +152,6 @@ export const getPOItemPackagingSummary = (item: any, allProducts?: any[]): POIte
     let packageType = (attrs?.packaging?.packageType || item.packageType || item.package_type || '').trim();
 
     // Heuristic inference when packaging is missing:
-    if (packQty <= 1 && caseSize <= 0) {
-        const inferred = inferBulkPackaging(item);
-        if (inferred.unitsPerOrderUnit > 1) {
-            packQty = inferred.unitsPerOrderUnit;
-            if (!packageType) packageType = inferred.packageType;
-        }
-    }
 
     if (!packageType) {
         packageType = caseSize >= 1 ? 'Case' : packQty > 1 ? 'Pack' : '';
@@ -211,7 +164,7 @@ export const getPOItemPackagingSummary = (item: any, allProducts?: any[]): POIte
 
     const hasCases = caseSize >= 1;
     const hasPacks = packQty > 1 && !hasCases;
-    const unitsPerOrderUnit = hasCases ? caseSize * (packQty || 1) : hasPacks ? packQty : (item.packQuantity && item.packQuantity > 1 ? item.packQuantity : 1);
+    const unitsPerOrderUnit = convertToSellableUnits(1, item);
     const hasMultiplier = unitsPerOrderUnit > 1;
 
     const manifestQty = item.quantity || 0;

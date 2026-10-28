@@ -81,7 +81,7 @@ describe('Procurement Packaging & Sellable Units', () => {
             expect(sellableQty).toBe(144);
         });
 
-        it('converts PO AAAA0142 item even when customAttributes was missing from legacy DB', () => {
+        it('does not invent a pack multiplier from cost when legacy metadata is missing', () => {
             // Unmigrated DB record from probe: null customAttributes, cost 4200, retail 400
             const item = {
                 sku: 'KE-GR001',
@@ -93,7 +93,7 @@ describe('Procurement Packaging & Sellable Units', () => {
                 size: '1kg'
             };
             const sellableQty = convertToSellableUnits(12, item);
-            expect(sellableQty).toBe(144);
+            expect(sellableQty).toBe(12);
         });
 
         it('converts multi-tier case orders (5 cases of 4 packs of 6 = 120 units)', () => {
@@ -130,14 +130,14 @@ describe('Procurement Packaging & Sellable Units', () => {
 
             const summary = getPOItemPackagingSummary(poItem);
 
-            expect(summary.sellableQty).toBe(144);
+            expect(summary.sellableQty).toBe(12);
             expect(summary.manifestQty).toBe(12);
-            expect(summary.manifestUnitName).toBe('Bales');
-            expect(summary.hasMultiplier).toBe(true);
-            expect(summary.unitsPerOrderUnit).toBe(12);
-            expect(summary.costPerSellableUnit).toBe(350);
-            expect(summary.packBadge).toContain('Bale');
-            expect(summary.packDetail).toContain('12 Bales');
+            expect(summary.manifestUnitName).toBe('Units');
+            expect(summary.hasMultiplier).toBe(false);
+            expect(summary.unitsPerOrderUnit).toBe(1);
+            expect(summary.costPerSellableUnit).toBe(4200);
+            expect(summary.packBadge).toContain('Single Unit');
+            expect(summary.packDetail).toContain('12 Units');
         });
 
         it('handles formatPackBadge cleanly for bales, cartons, and cases', () => {

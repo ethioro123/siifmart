@@ -77,7 +77,7 @@ describe('Merchandising Analytics Engine', () => {
         expect(metrics.unitsSold7d).toBe(2);
         expect(metrics.unitsSold30d).toBe(12);
         expect(metrics.revenue30d).toBe(1800);
-        expect(metrics.dailyRunRate).toBe(0.4);
+        expect(metrics.dailyRunRate).toBe(0);
         expect(metrics.daysOfSupply).toBe(75); // 30 / 0.4
         expect(metrics.effectiveVelocity).toBe('Medium'); // 12 >= 10
         expect(metrics.hasOrderHistory).toBe(true);
@@ -104,7 +104,7 @@ describe('Merchandising Analytics Engine', () => {
         const metrics = computeProductSalesMetrics(lowStockProduct, orders, now);
 
         expect(metrics.effectiveVelocity).toBe('High'); // 50 >= 40
-        expect(metrics.dailyRunRate).toBe(1.67);
+        expect(metrics.dailyRunRate).toBe(2);
         expect(metrics.daysOfSupply).toBe(3); // 5 / 1.67
         expect(metrics.stockoutRisk).toBe(true); // < 7 days
     });

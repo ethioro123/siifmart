@@ -6,6 +6,7 @@ import { encodeLocation, extractSitePrefix } from '../../../utils/locationEncode
 import { Product, WarehouseZone, Site } from '../../../types';
 import { useLabelPrintJob } from '../../../hooks/useLabelPrintJob';
 import { findLabelProduct, validLabelCopies, MAX_LABEL_COPIES } from '../../../utils/labelSelection';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { BarcodeLabelPreviewCard } from './BarcodeLabelPreviewCard';
 import { BarcodeLabelPreviewModal } from './BarcodeLabelPreviewModal';
 import { AssignBayLocationSelector } from './AssignBayLocationSelector';
@@ -22,7 +23,7 @@ const LABEL_SIZES = {
 interface AssignLabelHubProps {
     filteredProducts: Product[];
     addNotification: (type: string, message: string) => void;
-    t: (key: string) => string;
+    t?: (key: string, params?: Record<string, any>) => string;
     zones: WarehouseZone[];
     onZoneUpdate: () => void;
     user: any;
@@ -35,6 +36,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     zones = [],
     activeSite
 }) => {
+    const { t } = useLanguage();
     // Label Printing State
     const [labelFormat, setLabelFormat] = useState<'BARCODE' | 'QR'>('BARCODE');
     const [labelSize, setLabelSize] = useState<keyof typeof LABEL_SIZES>('MEDIUM');
@@ -158,10 +160,10 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                     <div className="flex sm:hidden items-center justify-between gap-2 w-full mb-3">
                         <div className="flex items-center gap-1.5 min-w-0">
                             <Printer size={15} className="text-[var(--theme-accent)] shrink-0" />
-                            <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">Labels</span>
+                            <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">{t('warehouse.labels')}</span>
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
-                                {labelMode}
+                                {labelMode === 'PRODUCT' ? t('warehouse.productsMode') : t('warehouse.baysMode')}
                             </span>
                         </div>
                         <div className="flex bg-[var(--theme-bg-subtle)] p-0.5 rounded-lg border border-[var(--theme-border)] shrink-0">
@@ -169,13 +171,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
                                 className={`px-2.5 py-1 min-h-[44px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
                             >
-                                Products
+                                {t('warehouse.productsMode')}
                             </button>
                             <button
                                 onClick={() => { setLabelMode('BAY'); setLabelSize('MEDIUM'); }}
                                 className={`px-2.5 py-1 min-h-[44px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
                             >
-                                Bays
+                                {t('warehouse.baysMode')}
                             </button>
                         </div>
                     </div>
@@ -187,22 +189,22 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 <div className="p-2 bg-[var(--theme-accent)]/10 rounded-xl shrink-0">
                                     <Printer size={20} className="text-[var(--theme-accent)]" />
                                 </div>
-                                <span className="truncate">Label Printing Hub</span>
+                                <span className="truncate">{t('warehouse.labelPrintingHub')}</span>
                             </h3>
-                            <p className="text-xs text-[var(--theme-text-secondary)] mt-1 ml-10 sm:ml-11">Management & Identity Systems</p>
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-1 ml-10 sm:ml-11">{t('warehouse.managementAndIdentitySystems')}</p>
                         </div>
                         <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] w-full sm:w-auto">
                             <button
                                 onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
                                 className={`flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
-                                <Package size={14} className="inline mr-2 shrink-0" /> Products
+                                <Package size={14} className="inline mr-2 shrink-0" /> {t('warehouse.productsMode')}
                             </button>
                             <button
                                 onClick={() => { setLabelMode('BAY'); setLabelSize('MEDIUM'); }}
                                 className={`flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
-                                <Layout size={14} className="inline mr-2 shrink-0" /> Bays
+                                <Layout size={14} className="inline mr-2 shrink-0" /> {t('warehouse.baysMode')}
                             </button>
                         </div>
                     </div>
@@ -212,26 +214,26 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-xs uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)] flex items-center gap-2">
-                                    <Layers size={14} className="text-[var(--theme-accent)]" /> Format
+                                    <Layers size={14} className="text-[var(--theme-accent)]" /> {t('warehouse.formatLabel')}
                                 </label>
                                 <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
                                     <button
                                         onClick={() => setLabelFormat('BARCODE')}
                                         className={`flex-1 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'BARCODE' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
-                                        BARCODE
+                                        {t('warehouse.barcodeFormat')}
                                     </button>
                                     <button
                                         onClick={() => setLabelFormat('QR')}
                                         className={`flex-1 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'QR' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
-                                        QR CODE
+                                        {t('warehouse.qrCodeFormat')}
                                     </button>
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)] flex items-center gap-2">
-                                    <Layout size={14} className="text-[var(--theme-accent)]" /> Size
+                                    <Layout size={14} className="text-[var(--theme-accent)]" /> {t('warehouse.sizeLabel')}
                                 </label>
                                 <select
                                     title="Label Size"
@@ -257,12 +259,12 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     maxBays={maxBays}
                                 />
 
-                                {!zoneLetters.length && <p role="status" className="text-sm text-[var(--theme-text-secondary)]">No configured zones are available at this facility. Configure the warehouse layout before printing bay labels.</p>}
+                                {!zoneLetters.length && <p role="status" className="text-sm text-[var(--theme-text-secondary)]">{t('warehouse.noConfiguredZonesAvailable')}</p>}
                                 {/* LIVE PREVIEW */}
                                 <div className="bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] p-4 sm:p-5 relative overflow-hidden space-y-3">
                                     <div className="flex items-center justify-between">
                                         <div className="text-xs text-[var(--theme-text-muted)] uppercase font-semibold flex items-center gap-2">
-                                            Live Location Preview
+                                            {t('warehouse.liveLocationPreview')}
                                             <span className="text-[11px] text-[var(--theme-accent)] font-bold animate-pulse">LIVE</span>
                                         </div>
                                         <button
@@ -271,7 +273,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                             className="text-xs font-semibold text-[var(--theme-accent)] hover:underline flex items-center gap-1.5 touch-manipulation"
                                         >
                                             <Eye size={13} />
-                                            <span>Expand preview</span>
+                                            <span>{t('warehouse.expandPreviewButton')}</span>
                                         </button>
                                     </div>
 
@@ -298,7 +300,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         className="px-5 py-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation min-h-[44px]"
                                     >
                                         <Eye size={16} className="text-[var(--theme-accent)]" />
-                                        <span>QUICK PREVIEW</span>
+                                        <span>{t('warehouse.quickPreviewButton')}</span>
                                     </button>
                                     <button
                                         disabled={isPrinting || !zoneLetters.length}
@@ -306,7 +308,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         className="flex-1 min-h-[44px] py-3.5 bg-[var(--theme-accent)] text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation"
                                     >
                                         <Printer size={18} />
-                                        <span>GENERATE LOCATION LABEL</span>
+                                        <span>{t('warehouse.generateLocationLabelButton')}</span>
                                     </button>
                                 </div>
                             </div>
@@ -317,7 +319,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     <input
                                         title="Product SKU"
                                         className="woody-input w-full rounded-2xl p-4 !pl-12 text-sm border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] min-h-[44px]"
-                                        placeholder="Search Product Name or Scan SKU..."
+                                        placeholder={t('warehouse.searchProductOrScanSku')}
                                         value={searchSku}
                                         onChange={(e) => setSearchSku(e.target.value)}
                                     />
@@ -325,7 +327,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     {matchedProduct && (
                                         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[var(--theme-accent)]">
                                             <CheckCircle size={16} />
-                                            <span className="text-xs font-semibold uppercase tracking-wider hidden sm:inline">Matched</span>
+                                            <span className="text-xs font-semibold uppercase tracking-wider hidden sm:inline">{t('warehouse.matchedBadge')}</span>
                                         </div>
                                     )}
                                 </div>
@@ -337,7 +339,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                             <div className="flex flex-wrap gap-2 justify-between items-start">
                                                 <div>
                                                     <h4 className={`text-sm font-semibold mb-1 ${matchedProduct ? 'text-[var(--theme-text-primary)]' : 'text-amber-700 dark:text-amber-400'}`}>
-                                                        {matchedProduct ? matchedProduct.name : 'No unique product match — scan an exact SKU or barcode'}
+                                                        {matchedProduct ? matchedProduct.name : t('warehouse.noUniqueProductMatch')}
                                                     </h4>
                                                     <div className="flex flex-wrap gap-3 break-all text-xs font-mono tabular-nums tracking-wider">
                                                         <span className="text-[var(--theme-text-secondary)]">SKU: <span className="text-[var(--theme-text-primary)] font-bold">{matchedProduct ? matchedProduct.sku : searchSku}</span></span>
@@ -358,7 +360,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         <div className="bg-[var(--theme-bg-subtle)] p-3 sm:p-4 rounded-2xl border border-[var(--theme-border)] space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
-                                                    <Eye size={13} className="text-[var(--theme-accent)]" /> Live Barcode Preview
+                                                    <Eye size={13} className="text-[var(--theme-accent)]" /> {t('warehouse.liveBarcodePreview')}
                                                 </span>
                                                 <button
                                                     type="button"
@@ -366,7 +368,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                     className="text-xs font-semibold text-[var(--theme-accent)] hover:underline flex items-center gap-1 touch-manipulation"
                                                 >
                                                     <Eye size={12} />
-                                                    <span>Expand preview</span>
+                                                    <span>{t('warehouse.expandPreviewButton')}</span>
                                                 </button>
                                             </div>
                                             <BarcodeLabelPreviewCard
@@ -385,7 +387,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
 
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     <div className="w-full sm:w-1/3 flex flex-col justify-center bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] relative overflow-hidden group">
-                                        <div className="text-center text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider pt-2">PRINT QTY</div>
+                                        <div className="text-center text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider pt-2">{t('warehouse.printQtyHeader')}</div>
                                         <div className="flex items-center justify-between px-3 py-2">
                                             <button
                                                 type="button"
@@ -420,7 +422,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                 }`}
                                         >
                                             <Eye size={16} className={searchSku.trim() ? "text-[var(--theme-accent)]" : ""} />
-                                            <span>QUICK PREVIEW</span>
+                                            <span>{t('warehouse.quickPreviewButton')}</span>
                                         </button>
                                         <button
                                             disabled={!matchedProduct || isPrinting}
@@ -431,7 +433,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                 }`}
                                         >
                                             <Printer size={18} />
-                                            <span>PRINT PRODUCT {labelFormat === 'QR' ? 'QR' : 'BARCODE'}</span>
+                                            <span>{t('warehouse.printProductBarcodeButton', { format: labelFormat === 'QR' ? t('warehouse.qrCodeFormat') : t('warehouse.barcodeFormat') })}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -441,8 +443,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                         <Info size={16} className="text-[var(--theme-accent)]" />
                                     </div>
                                     <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
-                                        <span className="text-[var(--theme-accent)] font-bold uppercase mr-1">TIPS:</span>
-                                        Labels include price and category by default. For inventory tracking, use barcodes for faster scanning.
+                                        {t('warehouse.labelsTipsNotice')}
                                     </p>
                                 </div>
                             </div>

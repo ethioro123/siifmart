@@ -1,49 +1,29 @@
 import { supabase } from '../lib/supabase';
-import { productsService } from './products.service';
-import { salesService } from './sales.service';
-import { purchaseOrdersService } from './purchase-orders.service';
-import type { Product, PurchaseOrder, SaleRecord } from '../types';
-import type { TransferRecord } from '../types/infrastructure';
+import { _mapProduct } from './products/products-helpers';
+import type { Product } from '../types';
 
-/** Every page must succeed. Never substitute an incomplete cache for forecast evidence. */
-export async function collectForecastPages<T>(read: (offset: number, limit: number) => Promise<{ data: T[]; count: number }>): Promise<T[]> {
-    const result: T[] = [];
-    const size = 250;
-    for (let offset = 0; offset < 20000; offset += size) {
-        const page = await read(offset, size);
-        result.push(...page.data);
-        if (result.length >= page.count) return result;
-        if (!page.data.length) throw new Error('Forecast dataset changed while loading. Refresh to retry.');
-    }
-    throw new Error('Forecast exceeds the supported analysis size. Narrow the location scope.');
+export interface ForecastDemandBucket { sku: string; age_days: number; units: number; refund_uncertain: boolean }
+export interface ForecastIncomingBucket {
+    sku: string; expected_delivery: string | null; pack_quantity: number; case_size: number;
+    unit: string; size: string; custom_attributes: Product['customAttributes']; order_quantity: number; received_units: number;
 }
-
+export interface ForecastSnapshot {
+    products: Product[]; demand: ForecastDemandBucket[]; incoming: ForecastIncomingBucket[];
+    awaitingSkus: string[]; asOf: string; start: string;
+}
 export const merchandisingForecastService = {
-    async get(siteId: string, country: string) {
+    async get(siteId: string, country: string): Promise<ForecastSnapshot> {
         if (!siteId || siteId === 'All' || !country) throw new Error('Select a location to evaluate demand.');
-        const { data: site, error } = await supabase.from('sites').select('id,country').eq('id', siteId).eq('country', country).single();
+        const { data, error } = await supabase.rpc('merchandising_forecast_snapshot', { p_site: siteId, p_country: country });
         if (error) throw error;
-        if (!site) throw new Error('Location is unavailable in the selected country.');
-        const asOf = new Date().toISOString();
-        const start = new Date(Date.parse(asOf) - 30 * 86400000).toISOString();
-        const [products, sales30d, openPOs, openTransfers] = await Promise.all([
-            collectForecastPages<Product>((offset, limit) => productsService.getAll(siteId, limit, offset, { forecast: true }, { key: 'id', direction: 'asc' })),
-            collectForecastPages<SaleRecord>((offset, limit) => salesService.getAll(siteId, limit, offset, {
-                forecast: true, startDate: start, status: 'Completed', includeItems: true, countryCode: country,
-            })),
-            collectForecastPages<PurchaseOrder>((offset, limit) => purchaseOrdersService.getAll(siteId, limit, offset, { forecast: true, includeItems: true, countryCode: country })),
-            collectForecastPages<TransferRecord>(async (offset, limit) => {
-                const { data, count, error: transferError } = await supabase.from('transfers')
-                    .select('id,dest_site_id,status,transfer_status,items,country_code', { count: 'exact' })
-                    .eq('dest_site_id', siteId).eq('country_code', country)
-                    .order('id').range(offset, offset + limit - 1);
-                if (transferError) throw transferError;
-                return { count: count || 0, data: (data || []).map(row => ({
-                    id: row.id, destSiteId: row.dest_site_id, status: row.transfer_status || row.status,
-                    items: row.items, countryCode: row.country_code,
-                } as TransferRecord)) };
-            }),
-        ]);
-        return { products, sales30d, openPOs, openTransfers, asOf, start };
+        if (!data || !Array.isArray(data.products) || !Array.isArray(data.demand) || !Array.isArray(data.incoming) || !Array.isArray(data.awaitingSkus) || !Number.isFinite(Date.parse(data.asOf)) || !Number.isFinite(Date.parse(data.start))) throw new Error('Forecast snapshot is incomplete.');
+        return { ...data, products: data.products.map(_mapProduct) };
+    },
+    async request(productId: string, quantity: number): Promise<{ id: string; existing: boolean }> {
+        if (!productId || !Number.isSafeInteger(quantity) || quantity < 1) throw new Error('A product and positive whole quantity are required.');
+        const { data, error } = await supabase.rpc('request_forecast_replenishment', { p_product: productId, p_quantity: quantity });
+        if (error) throw error;
+        if (!data?.id) throw new Error('The server did not confirm a replenishment request.');
+        return data;
     },
 };

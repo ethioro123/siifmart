@@ -1,39 +1,48 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { MarkdownTab } from '../../components/merchandising/MarkdownTab';
 import { MarkdownPlanResults } from '../../components/merchandising/MarkdownPlanResults';
 import { calculateMarkdownGlidePath } from '../../utils/markdownGlidePath';
 import type { Product } from '../../types';
-const mocks=vi.hoisted(()=>({country:'ET',site:'site',siteType:'Store',send:vi.fn(),pending:false,catalog:vi.fn()}));
+const mocks=vi.hoisted(()=>({generate:vi.fn(),country:'ET',site:'site',siteType:'Store',send:vi.fn(),pending:false,catalog:vi.fn()}));
 const product={id:'p',name:'Coffee',sku:'ET-COF',siteId:'site',price:100,costPrice:70,stock:100,status:'active'} as Product;
+vi.mock('../../services/markdown-planning.service',()=>({markdownPlanningService:{generate:mocks.generate}}));
 vi.mock('../../components/merchandising/MerchandisingContext',()=>({useMerchandising:()=>({activeCountry:mocks.country,currencySymbol:'ETB'})}));
 vi.mock('../../contexts/CentralStore',()=>({useStore:()=>({user:{id:'user'}})}));
 vi.mock('../../contexts/DataContext',()=>({useData:()=>({activeSite:{id:mocks.site,type:mocks.siteType},sales:[]})}));
 vi.mock('../../hooks/usePriceManagerCatalog',()=>({usePriceManagerCatalog:(input:unknown)=>{mocks.catalog(input);return {data:{data:[product],count:1},isFetching:false,isError:false};}}));
 vi.mock('../../hooks/useMarkdownProposal',()=>({useMarkdownProposal:()=>({send:mocks.send,busy:false,feedback:null,pending:{isSuccess:true,isFetching:false,data:{data:mocks.pending?[{id:'pending'}]:[]}}})}));
 vi.mock('recharts',()=>({ResponsiveContainer:()=>null,Area:()=>null,AreaChart:()=>null,CartesianGrid:()=>null,Tooltip:()=>null,XAxis:()=>null,YAxis:()=>null}));
-afterEach(cleanup);beforeEach(()=>{vi.clearAllMocks();mocks.country='ET';mocks.site='site';mocks.siteType='Store';mocks.pending=false;});
-const generate=()=>{
+afterEach(cleanup);beforeEach(()=>{vi.clearAllMocks();mocks.country='ET';mocks.site='site';mocks.siteType='Store';mocks.pending=false;mocks.generate.mockImplementation(async()=>serverPlan());});
+const serverPlan=()=>{
+ const target=new Date();target.setDate(target.getDate()+21);
+ const deadline=`${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,'0')}-${String(target.getDate()).padStart(2,'0')}`;
+ const plan=calculateMarkdownGlidePath({product:{...product,costPrice:70},targetExitDate:deadline})!;
+ return {...plan,token:'token',deadline,asOf:new Date().toISOString(),windowStart:new Date().toISOString(),unitsSold30d:0,unitsSold7d:0,currentPrice:100,projectedMarginPct:null,totalLandedCost:null,costProtected:true,
+ stages:plan.stages.map(s=>({...s,selectedImpact:{units:0,remaining:100,revenue:0,revenueAtCurrentPrice:0,marginPct:null}}))};
+};
+const generate=async()=>{
  fireEvent.change(screen.getByLabelText('Product'),{target:{value:'p'}});
  const target=new Date();target.setDate(target.getDate()+21);
  fireEvent.change(screen.getByLabelText('Target exit date'),{target:{value:`${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,'0')}-${String(target.getDate()).padStart(2,'0')}`}});
  fireEvent.click(screen.getByRole('button',{name:'Generate plan'}));
+ await screen.findByRole('table');
 };
-it('shows a stage table, zero-history warning and submits one selected price',()=>{
- render(<MarkdownTab/>);generate();
- expect(screen.getByRole('table')).toBeTruthy();expect(screen.getByText(/Insufficient positive sales history/)).toBeTruthy();
- fireEvent.click(screen.getByRole('button',{name:/Submit selected price/}));expect(mocks.send).toHaveBeenCalledWith(90,expect.any(String));
+it('shows a stage table, zero-history warning and submits one selected price',async()=>{
+ render(<MarkdownTab/>);await generate();
+ expect(screen.getByRole('table')).toBeTruthy();expect(screen.getByText(/Recorded cost is checked privately/)).toBeTruthy();
+ fireEvent.click(screen.getByRole('button',{name:/Submit selected price/}));expect(mocks.send).toHaveBeenCalledWith(expect.objectContaining({token:'token'}),1);
  expect(screen.queryByText('100% Exit')).toBeNull();
 });
-it('resets the selection, date and results on country or site changes',()=>{
- const {rerender}=render(<MarkdownTab/>);generate();mocks.country='KE';mocks.site='new-site';rerender(<MarkdownTab/>);
+it('resets the selection, date and results on country or site changes',async()=>{
+ const {rerender}=render(<MarkdownTab/>);await generate();mocks.country='KE';mocks.site='new-site';rerender(<MarkdownTab/>);
  expect((screen.getByLabelText('Product') as HTMLSelectElement).value).toBe('');expect(screen.queryByRole('table')).toBeNull();
  expect((screen.getByLabelText('Target exit date') as HTMLInputElement).value).toBe('');
 });
-it('blocks submission for pending edits and invalidates the plan when its date changes',()=>{
- mocks.pending=true;render(<MarkdownTab/>);generate();expect((screen.getByRole('button',{name:/Submit selected price/}) as HTMLButtonElement).disabled).toBe(true);
+it('blocks submission for pending edits and invalidates the plan when its date changes',async()=>{
+ mocks.pending=true;render(<MarkdownTab/>);await generate();expect((screen.getByRole('button',{name:/Submit selected price/}) as HTMLButtonElement).disabled).toBe(true);
  fireEvent.change(screen.getByLabelText('Target exit date'),{target:{value:'2020-01-01'}});expect(screen.queryByRole('table')).toBeNull();
  fireEvent.click(screen.getByRole('button',{name:'Generate plan'}));expect(screen.getByRole('alert').textContent).toContain('future');
 });
@@ -51,4 +60,10 @@ it('makes exact stage values available as a table and keeps the chart secondary'
 it('keeps HQ catalog access while branch searches remain facility-scoped',()=>{
  mocks.siteType='HQ';render(<MarkdownTab/>);
  expect(mocks.catalog).toHaveBeenLastCalledWith(expect.objectContaining({country:'ET',pageSize:25,filters:{}}));
+});
+
+it('generates for a cost-restricted preparer and shows selected-price impact separately',async()=>{
+ const original=product.costPrice;product.costPrice=undefined;
+ try {render(<MarkdownTab/>);await generate();expect(screen.getByText(/Selected price impact/)).toBeTruthy();expect(screen.getByText('Restricted to authorized roles')).toBeTruthy();}
+ finally {product.costPrice=original;}
 });

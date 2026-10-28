@@ -65,9 +65,9 @@ export const computeProductSalesMetrics = (
         }
     }
 
-    const dailyRunRate = Number((unitsSold30d / 30).toFixed(2));
+    const dailyRunRate = Math.round(unitsSold30d / 30);
     const stock = Math.max(0, product.stock || 0);
-    const daysOfSupply = dailyRunRate > 0 ? Math.round(stock / dailyRunRate) : (stock > 0 ? 999 : 0);
+    const daysOfSupply = unitsSold30d > 0 ? Math.round(stock * 30 / unitsSold30d) : (stock > 0 ? 999 : 0);
 
     let effectiveVelocity: 'High' | 'Medium' | 'Low';
     if (matchedOrderCount > 0) {
@@ -87,9 +87,9 @@ export const computeProductSalesMetrics = (
 
     return {
         productId: product.id,
-        unitsSold7d,
-        unitsSold30d,
-        revenue30d: Number(revenue30d.toFixed(2)),
+        unitsSold7d: Math.round(unitsSold7d),
+        unitsSold30d: Math.round(unitsSold30d),
+        revenue30d: Math.round(revenue30d),
         dailyRunRate,
         daysOfSupply,
         effectiveVelocity,

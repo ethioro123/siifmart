@@ -8,10 +8,13 @@ interface Props {
     isLoading: boolean;
     totalProductsEvaluated: number;
     canCreatePO?: boolean;
+    canRequestInternal?: boolean;
+    requestPending?: boolean;
+    onRequestInternal?: (recommendation: ReplenishmentRecommendation) => void;
     onInitiatePO: (recommendation: ReplenishmentRecommendation) => void;
 }
 
-export function ReplenishmentTableSection({ recommendations, isLoading, totalProductsEvaluated, canCreatePO = false, onInitiatePO }: Props) {
+export function ReplenishmentTableSection({ recommendations, isLoading, totalProductsEvaluated, canCreatePO = false, canRequestInternal = false, requestPending = false, onRequestInternal, onInitiatePO }: Props) {
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [product, setProduct] = useState<Product | null>(null);
@@ -24,7 +27,7 @@ export function ReplenishmentTableSection({ recommendations, isLoading, totalPro
             <div><h3 className="font-semibold text-[var(--theme-text-primary)]">Replenishment review</h3><p className="text-sm text-[var(--theme-text-secondary)]">{recommendations.length} recommendations · {totalProductsEvaluated} location/SKU positions evaluated</p></div>
             <input aria-label="Search replenishment recommendations" placeholder="Search product or SKU" value={search} onChange={event => { setSearch(event.target.value); setPage(1); }} className="rounded-lg p-2 border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]" />
         </div>
-        {!canCreatePO && <p className="text-sm text-[var(--theme-text-secondary)]">Purchase drafts require a procurement role and a warehouse or distribution centre destination. Store requirements should be reviewed for internal replenishment.</p>}
+        {!canCreatePO && <p className="text-sm text-[var(--theme-text-secondary)]">Purchase drafts require a procurement role and a warehouse or distribution centre destination. Store requirements can be submitted as internal replenishment requests for source approval.</p>}
         {isLoading ? <p role="status">Loading analysis…</p> : rows.length === 0 ? <p className="text-sm text-[var(--theme-text-secondary)]">{search ? 'No matching recommendations.' : 'No recommendations from recorded sales and stock policy. Missing evidence does not establish sufficient stock.'}</p> : rows.map(rec => <article key={`${rec.siteId}:${rec.sku}`} className="rounded-xl border border-[var(--theme-border)] p-4 space-y-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div><button type="button" onClick={() => setProduct(rec.product)} className="font-semibold text-left text-[var(--theme-text-primary)] hover:underline">{rec.product.name}</button><p className="text-xs text-[var(--theme-text-secondary)]">{rec.sku} · Selling unit: {rec.product.unit || 'Unit'}</p></div>
@@ -40,10 +43,10 @@ export function ReplenishmentTableSection({ recommendations, isLoading, totalPro
                 <p>{rec.reason}</p><p>Net stock {rec.effectiveStock} · Recorded reservations {rec.reserved} · Minimum {rec.minThreshold}</p>
                 <p>Recorded lead time {rec.leadTimeDays ? `${rec.leadTimeDays} days` : 'not configured; no lead-time buffer added'}.</p>
                 <p>{rec.suggestedBuyPacks} supplier order units × {rec.packSize} selling units = {rec.effectiveOrderedUnits} selling units after pack rounding.</p>
-                <p>{rec.costUnrecorded ? 'Verified cost required before creating a draft.' : `Recorded cost per supplier order unit: ${rec.orderUnitCost.toFixed(2)}. Draft line total: ${rec.totalCost.toFixed(2)}.`}</p>
+                <p>{rec.costUnrecorded ? 'Verified cost required before creating a draft.' : `Cost per supplier order unit (rounded): ${rec.orderUnitCost}. Draft line total: ${rec.totalCost}.`}</p>
                 {rec.blockedReason && <p role="status">{rec.blockedReason}</p>}
             </div></details>
-            <button type="button" disabled={!canCreatePO || rec.costUnrecorded || Boolean(rec.blockedReason)} onClick={() => onInitiatePO(rec)} className="rounded-lg px-3 py-2 bg-[var(--theme-accent)] text-white text-sm disabled:opacity-50 focus-visible:outline focus-visible:outline-2">{rec.costUnrecorded ? 'Cost required' : rec.blockedReason ? 'Review stock policy' : 'Review purchase draft'}</button>
+            {canRequestInternal ? <button type="button" disabled={requestPending || Boolean(rec.blockedReason) || rec.suggestedBuySellable < 1} onClick={() => onRequestInternal?.(rec)} className="rounded-lg px-3 py-2 bg-[var(--theme-accent)] text-white text-sm disabled:opacity-50">{requestPending ? 'Submitting…' : 'Request internal replenishment'}</button> : <button type="button" disabled={!canCreatePO || rec.costUnrecorded || Boolean(rec.blockedReason)} onClick={() => onInitiatePO(rec)} className="rounded-lg px-3 py-2 bg-[var(--theme-accent)] text-white text-sm disabled:opacity-50 focus-visible:outline focus-visible:outline-2">{rec.costUnrecorded ? 'Cost required' : rec.blockedReason ? 'Review stock policy' : 'Review purchase draft'}</button>}
         </article>)}
         {pages > 1 && <nav aria-label="Replenishment pages" className="flex gap-4 items-center text-sm text-[var(--theme-text-primary)]"><button type="button" disabled={current === 1} onClick={() => setPage(current - 1)}>Previous</button><span>Page {current} of {pages} · {matches.length} matches</span><button type="button" disabled={current === pages} onClick={() => setPage(current + 1)}>Next</button></nav>}
         <ProductWorkspace product={product} isOpen={Boolean(product)} onClose={() => setProduct(null)} readOnly />

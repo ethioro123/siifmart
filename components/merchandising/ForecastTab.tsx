@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useMerchandising } from './MerchandisingContext';
 import { useMerchandisingForecastData } from '../../hooks/useMerchandisingForecastData';
 import { useData } from '../../contexts/DataContext';
@@ -6,14 +6,9 @@ import { CreatePOModal } from '../procurement/CreatePOModal';
 import { DemandChartSection } from './forecast/DemandChartSection';
 import { ForecastInsightsSection } from './forecast/ForecastInsightsSection';
 import { ReplenishmentTableSection } from './forecast/ReplenishmentTableSection';
-import {
-    consolidateInventoryBySku,
-    computeWeeklyDemand,
-    generateDemandChartData,
-    buildReplenishmentQueue,
-    type ReplenishmentRecommendation
-} from '../../utils/merchandisingForecast';
-import { buildCatalogSalesMetricsIndex } from '../../utils/merchandisingAnalytics';
+import { generateDemandChartData, type ReplenishmentRecommendation } from '../../utils/merchandisingForecast';
+import { analyzeForecastSnapshot } from '../../utils/forecastSnapshot';
+import { useForecastReplenishment } from '../../hooks/useForecastReplenishment';
 import { useStore } from '../../contexts/CentralStore';
 import { hasPermission } from '../../utils/permissions';
 import { initialUnitConfig } from '../../utils/productControlLogic';
@@ -27,40 +22,35 @@ export const ForecastTab: React.FC = () => {
     const [isPOModalOpen, setIsPOModalOpen] = useState(false);
     const [selectedPOProduct, setSelectedPOProduct] = useState<PurchaseOrder | null>(null);
 
-    useEffect(() => { setIsPOModalOpen(false); setSelectedPOProduct(null); }, [activeSite?.id, effectiveCountry]);
 
     // Rule 10 & Gap 4: Load 30-day completed sales dataset, open POs, and catalog products
     const { data: forecastDataset, isLoading, isError, isFetching, refetch } = useMerchandisingForecastData(true);
 
-    const activeProducts = forecastDataset?.products || [];
-    const sales30d = forecastDataset?.sales30d || [];
-    const openPOs = forecastDataset?.openPOs || [];
-    const openTransfers = forecastDataset?.openTransfers || [];
+    const request = useForecastReplenishment(effectiveCountry, activeSite?.id, user?.id);
+    const [requestMessage, setRequestMessage] = useState('');
+    const currentScope = `${effectiveCountry}:${activeSite?.id}:${user?.id}`;
+    const scopeRef = useRef(currentScope);
+    scopeRef.current = currentScope;
+    useEffect(() => { setIsPOModalOpen(false); setSelectedPOProduct(null); setRequestMessage(''); request.reset(); }, [activeSite?.id, effectiveCountry]);
 
-    // Pure 30-day POS sales metrics computed per product
-    const salesMetricsIndex = useMemo(() => {
-        return buildCatalogSalesMetricsIndex(activeProducts, sales30d, forecastDataset ? new Date(forecastDataset.asOf) : new Date());
-    }, [activeProducts, sales30d]);
-
-    // Gap 9: Consolidate inventory by SKU/site; Gap 8: Preserve minStock 0; Gap 7: Subtract pipeline
-    const consolidatedInventory = useMemo(() => {
-        return consolidateInventoryBySku(activeProducts, openPOs, openTransfers, activeSite?.id);
-    }, [activeProducts, openPOs, openTransfers, activeSite?.id]);
-
-    // Build replenishment recommendations
-    const recommendedOrders = useMemo(() => {
-        return buildReplenishmentQueue(consolidatedInventory, salesMetricsIndex);
-    }, [consolidatedInventory, salesMetricsIndex]);
-
-    // Gap 1: 4-week actual sales from real completed sales data
-    const weeklyDemand = useMemo(() => {
-        return computeWeeklyDemand(sales30d, activeSite?.id, effectiveCountry, forecastDataset ? new Date(forecastDataset.asOf) : new Date());
-    }, [sales30d, activeSite?.id, effectiveCountry]);
-
-    // Gap 1 & 2: Real regression forecast and statistical confidence (no fake 94.8% or stock multipliers)
-    const { chartData, confidencePct, confidenceLabel } = useMemo(() => {
-        return generateDemandChartData(weeklyDemand.weeklyActuals, weeklyDemand.totalSales, forecastDataset ? new Date(forecastDataset.asOf) : new Date());
-    }, [weeklyDemand]);
+    const analysis = useMemo(() => forecastDataset ? analyzeForecastSnapshot(forecastDataset) : null, [forecastDataset]);
+    const recommendedOrders = analysis?.recommendations || [];
+    const consolidatedInventory = analysis?.consolidated || [];
+    const weeklyDemand = { weeklyActuals: analysis?.weeklyActuals || [0, 0, 0, 0], totalSales: analysis?.totalSales || 0 };
+    const { chartData, confidencePct, confidenceLabel } = generateDemandChartData(weeklyDemand.weeklyActuals, weeklyDemand.totalSales, forecastDataset ? new Date(forecastDataset.asOf) : new Date());
+    const requestInternal = async (rec: ReplenishmentRecommendation) => {
+        if (rec.blockedReason || isFetching || isError || request.isPending) return;
+        const submittedScope = currentScope;
+        setRequestMessage('');
+        try {
+            const result = await request.mutateAsync({ productId: rec.product.id, quantity: rec.suggestedBuySellable, country: effectiveCountry!, siteId: activeSite!.id });
+            if (scopeRef.current !== submittedScope) return;
+            setRequestMessage(result.existing ? 'An active request already exists for this product. No duplicate was created.' : 'Internal replenishment request saved. Source approval is pending.');
+        } catch (error) {
+            if (scopeRef.current !== submittedScope) return;
+            setRequestMessage(error instanceof Error ? error.message : 'The request could not be saved.');
+        }
+    };
 
     // Gap 5 & 6: PO Initiation with accurate pack multiplier and zero cost guessing
     const handleInitiatePO = (rec: ReplenishmentRecommendation) => {
@@ -84,7 +74,7 @@ export const ForecastTab: React.FC = () => {
                     quantity: suggestedBuyPacks, // Gap 5: Order quantity in packs
                     packQuantity: Number(packaging.packOf) || 1,
                     caseSize: Number(packaging.caseOf) || 0,
-                    customAttributes: product.customAttributes,
+                    customAttributes: { ...(product.customAttributes || {}), packaging: { ...(product.customAttributes?.packaging || {}), packQty: Number(packaging.packOf) || 1, caseSize: Number(packaging.caseOf) || 0 } },
                     unitCost: orderUnitCost, // Gap 6: Accurate cost per pack, 0 if unrecorded
                     totalCost: totalCost,
                     retailPrice: product.price ? Math.round(product.price) : 0, // Gap 6: Actual retail or 0
@@ -108,12 +98,13 @@ export const ForecastTab: React.FC = () => {
         <div className="space-y-6 animate-in fade-in">
             <div className="text-sm text-[var(--theme-text-secondary)] space-y-2">
                 <p className="font-semibold text-[var(--theme-text-primary)]">{activeSite.name} · {effectiveCountry} · 30-day demand review</p>
-                <p>Completed, unrefunded sales only. Partial refunds are excluded until net line quantities are available. Baseline assumes the next 30 days match the observed period; seasonality and promotions are not modelled.</p>
+                <p>Completed sales form the baseline. Products with refunded receipts are flagged for reconciliation and blocked from ordering because historical net quantities are unavailable. Baseline assumes the next 30 days match the observed period; seasonality and promotions are not modelled.</p>
                 <p>Chart totals combine selling units across products; they are an activity trend, not a purchase quantity.</p>
-                <p>Stock includes recorded reservations, expired stock deductions and approved incoming orders. Arrival timing and unrecorded commitments require review.</p>
+                <p>Stock includes recorded reservations and expired stock deductions. Purchase orders offset demand only when their recorded delivery date precedes projected stockout. Other incoming stock requires review.</p>
                 {forecastDataset && <p>Observed {new Date(forecastDataset.start).toLocaleDateString()}–{new Date(forecastDataset.asOf).toLocaleDateString()} · Updated {new Date(forecastDataset.asOf).toLocaleTimeString()}</p>}
                 <button type="button" onClick={() => refetch()} disabled={isFetching}>{isFetching ? 'Refreshing…' : 'Refresh analysis'}</button>
             </div>
+            {requestMessage && <p role="status" className="text-sm text-[var(--theme-text-primary)]">{requestMessage}</p>}
             {/* Top Grid: Demand Forecast Chart + Replenishment Insights */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <DemandChartSection
@@ -138,6 +129,9 @@ export const ForecastTab: React.FC = () => {
                 totalProductsEvaluated={consolidatedInventory.length}
                 onInitiatePO={handleInitiatePO}
                 canCreatePO={canCreatePO && !isFetching}
+                canRequestInternal={['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'country_commercial_director', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_merchandising_manager', 'merchandising_specialist', 'merchandiser', 'store_manager', 'inventory_manager'].includes(user?.role || '') && !['Warehouse', 'Distribution Center', 'Administration'].includes(activeSite.type || '') && !isFetching}
+                onRequestInternal={requestInternal}
+                requestPending={request.isPending}
             />
 
             {/* Live Create PO Modal with verified recommendation */}
