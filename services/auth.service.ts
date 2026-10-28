@@ -166,41 +166,88 @@ export const authService = {
             console.warn('Failed to log logout event', e);
         }
 
+        try {
+            localStorage.removeItem('siifmart_offline_profile');
+        } catch {
+            // Safe ignore
+        }
+
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
+    },
+
+    getCachedAuthProfile(): UserProfile | null {
+        try {
+            const raw = localStorage.getItem('siifmart_offline_profile');
+            return raw ? (JSON.parse(raw) as UserProfile) : null;
+        } catch {
+            return null;
+        }
     },
 
     async getSession(): Promise<Session | null> {
         try {
             const { data: { session }, error } = await supabase.auth.getSession();
             if (error) {
-                console.warn('AuthService: getSession error, resetting session:', error.message);
-                if (error.message?.includes('Refresh Token') || (error as any).status === 400) {
+                const msg = (error.message || '').toLowerCase();
+                const isNetworkFailure = !navigator.onLine || msg.includes('fetch') || msg.includes('network');
+                if (!isNetworkFailure && (error.message?.includes('Refresh Token') || (error as any).status === 400)) {
+                    console.warn('AuthService: Invalid refresh token while online, resetting session:', error.message);
                     await supabase.auth.signOut().catch(() => {});
                 }
                 return null;
             }
             return session;
         } catch (e: any) {
-            console.warn('AuthService: getSession exception, resetting session:', e?.message);
-            await supabase.auth.signOut().catch(() => {});
+            const msg = String(e?.message || '').toLowerCase();
+            const isNetworkFailure = !navigator.onLine || msg.includes('fetch') || msg.includes('network');
+            if (!isNetworkFailure) {
+                console.warn('AuthService: getSession exception, resetting session:', e?.message);
+                await supabase.auth.signOut().catch(() => {});
+            }
             return null;
         }
     },
 
     async getCurrentUser(): Promise<User | null> {
-        const { data: { user } } = await supabase.auth.getUser();
-        return user;
+        try {
+            if (!navigator.onLine) {
+                const { data: { session } } = await supabase.auth.getSession();
+                return session?.user ?? null;
+            }
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) {
+                const { data: { session } } = await supabase.auth.getSession();
+                return session?.user ?? null;
+            }
+            return user;
+        } catch {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                return session?.user ?? null;
+            } catch {
+                return null;
+            }
+        }
     },
 
     async getCurrentAuthUser(): Promise<UserProfile | null> {
         try {
             const user = await this.getCurrentUser();
-            if (!user) return null;
+            if (!user) {
+                return !navigator.onLine ? this.getCachedAuthProfile() : null;
+            }
+
+            if (!navigator.onLine) {
+                const cached = this.getCachedAuthProfile();
+                if (cached && (!user.id || cached.id === user.id)) {
+                    return cached;
+                }
+            }
 
             const employee = await employeesService.getByEmail(user.email!);
 
-            return {
+            const profile: UserProfile = {
                 id: user.id,
                 email: user.email!,
                 name: employee.name,
@@ -216,9 +263,17 @@ export const authService = {
                 scope_level: employee.scopeLevel || (employee as any).scope_level,
                 country_code: employee.country || (employee as any).country_code
             };
+
+            try {
+                localStorage.setItem('siifmart_offline_profile', JSON.stringify(profile));
+            } catch {
+                // Safe ignore
+            }
+
+            return profile;
         } catch (error) {
-            console.warn('AuthService: Error getting auth user', error);
-            return null;
+            console.warn('AuthService: Error getting auth user, falling back to cached offline profile', error);
+            return this.getCachedAuthProfile();
         }
     },
 

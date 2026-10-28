@@ -109,8 +109,9 @@ function createWindow(): void {
     const localDistIndex = path.join(__dirname, '../dist/index.html');
     const hostedDesktopUrl = process.env.SIIFMART_DESKTOP_URL || process.env.VITE_DESKTOP_APP_URL;
 
-    mainWindow.webContents.on('did-fail-load', (_event, _errorCode, _errorDescription, validatedURL) => {
-        if (mainWindow && validatedURL && !validatedURL.startsWith('file:')) {
+    mainWindow.webContents.on('did-fail-load', (_event, errorCode, _errorDescription, validatedURL, isMainFrame) => {
+        if (!isMainFrame || errorCode === -3) return;
+        if (mainWindow && validatedURL && !validatedURL.startsWith('file:') && fs.existsSync(localDistIndex)) {
             mainWindow.loadFile(localDistIndex);
         }
     });

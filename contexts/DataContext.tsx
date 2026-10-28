@@ -147,6 +147,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
         items: s.items?.map((i: any) => i.category?.toLowerCase() === 'alcohol' ? { ...i, category: 'Beverages' } : i) || []
       }));
       setSales(sanitizedSales);
+      sanitizedSales.slice(0, 50).forEach(s => { void posDB.saveSale(s); });
     }
     if (queries.customers.data) {
       setCustomers(queries.customers.data);
@@ -171,16 +172,24 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   ]);
 
 
-  // Offline cold-start hydration from posDB
+  // Instant local & offline cold-start hydration from posDB
   useEffect(() => {
-    if (!navigator.onLine && activeSiteId) {
-      posDB.getCachedProducts(activeSiteId).then(cached => {
-        if (cached && cached.length > 0) setProducts(cached);
-      });
-      posDB.getCachedCustomers().then(cached => {
-        if (cached && cached.length > 0) setCustomers(cached);
-      });
-    }
+    if (!activeSiteId) return;
+    posDB.getCachedProducts(activeSiteId).then(cached => {
+      if (cached && cached.length > 0) {
+        setProducts(prev => (prev.length === 0 || !navigator.onLine ? cached : prev));
+      }
+    });
+    posDB.getCachedCustomers().then(cached => {
+      if (cached && cached.length > 0) {
+        setCustomers(prev => (prev.length === 0 || !navigator.onLine ? cached : prev));
+      }
+    });
+    posDB.getRecentSales(50).then(cached => {
+      if (cached && cached.length > 0) {
+        setSales(prev => (prev.length === 0 || !navigator.onLine ? cached : prev));
+      }
+    });
   }, [activeSiteId]);
 
 

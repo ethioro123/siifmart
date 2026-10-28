@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { sitesService, systemConfigService, productsService, salesService, purchaseOrdersService } from '../../services/supabase.service';
+import { posDB } from '../../services/db/pos.db';
 import { setGlobalTimezone } from '../../utils/formatting';
 import { DEFAULT_CONFIG } from '../DataContextDefaults';
 import { setCurrencySymbol } from '../../constants/categories';
@@ -119,6 +120,9 @@ export function useDataInitialization({
 
   const loadSites = useCallback(async () => {
     try {
+      if (!navigator.onLine) {
+        throw new Error('Offline mode — hydrating sites from local cache');
+      }
       const activeCountry = (settings?.country || 'ET') as Country;
       const loadedSites = await queryClient.fetchQuery({
         queryKey: ['sites', user?.id || 'anon', activeCountry],
@@ -188,7 +192,29 @@ export function useDataInitialization({
       } catch (e) {}
       if (cached) {
         setSites(JSON.parse(cached));
-        addNotification('info', 'Could not load the latest sites. Showing cached site data.');
+        if (navigator.onLine) {
+          addNotification('info', 'Could not load the latest sites. Showing cached site data.');
+        }
+        return;
+      }
+
+      if (user?.siteId) {
+        const activeCountry = ((user as any)?.country_code || (user as any)?.country || settings?.country || 'ET') as Country;
+        const prof = getCountryProfile(activeCountry);
+        const fallbackSite: Site = {
+          id: user.siteId,
+          code: user.siteId,
+          name: 'Assigned Branch',
+          type: 'Store',
+          address: '',
+          status: 'Active',
+          manager: user.name || '',
+          country: activeCountry,
+          currency: prof.currency,
+          isFulfillmentNode: false
+        };
+        setSites([fallbackSite]);
+        setActiveSiteId(user.siteId);
         return;
       }
 
@@ -200,31 +226,50 @@ export function useDataInitialization({
         setTimeout(loadSites, 5000);
       }
     }
-  }, [setSites, addNotification, setLoadError, queryClient, user?.id, settings?.country]);
+  }, [setSites, setActiveSiteId, addNotification, setLoadError, queryClient, user, settings?.country]);
 
   const loadSettings = useCallback(async () => {
-    try {
-      const loadedSettings = await systemConfigService.getSettings();
-      setSettings(loadedSettings);
-      if (loadedSettings.country === 'KE' || loadedSettings.currency === 'KES' || loadedSettings.currency === 'KSh') {
+    const applyResolvedSettings = (resolved: SystemConfig) => {
+      setSettings(resolved);
+      if (resolved.country === 'KE' || resolved.currency === 'KES' || resolved.currency === 'KSh') {
         setCurrencySymbol('KSh');
-      } else if (loadedSettings.currency) {
-        setCurrencySymbol(loadedSettings.currency);
+      } else if (resolved.currency) {
+        setCurrencySymbol(resolved.currency);
       } else {
-        const prof = getCountryProfile(loadedSettings.country);
+        const prof = getCountryProfile(resolved.country);
         setCurrencySymbol(prof.currencySymbol);
       }
+    };
+
+    try {
+      if (!navigator.onLine) {
+        const cachedOffline = await posDB.getCachedSettings();
+        if (cachedOffline) {
+          applyResolvedSettings(cachedOffline);
+          return;
+        }
+      }
+      const loadedSettings = await systemConfigService.getSettings();
+      applyResolvedSettings(loadedSettings);
+      void posDB.cacheSettings(loadedSettings);
     } catch (error: any) {
       logger.error('useDataInitialization', '❌ Failed to load system settings:', error?.message || error);
-      setSettings(DEFAULT_CONFIG);
-      const prof = getCountryProfile(DEFAULT_CONFIG.country);
-      setCurrencySymbol(prof.currencySymbol);
+      const cachedOffline = await posDB.getCachedSettings();
+      if (cachedOffline) {
+        applyResolvedSettings(cachedOffline);
+      } else {
+        applyResolvedSettings(DEFAULT_CONFIG);
+      }
     }
   }, [setSettings]);
 
   const hasLoadedGlobalRef = React.useRef(false);
 
   const loadGlobalData = useCallback(async () => {
+    if (!navigator.onLine) {
+      setIsDataInitialLoading(false);
+      return;
+    }
     try {
       // Egress optimization: Only global administrative roles need multi-site global batches on startup.
       // Branch workers only require local activeSite data (fetched via useDataQueries).

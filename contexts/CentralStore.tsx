@@ -154,7 +154,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           id: profile.id,
           name: profile.name,
           role: mappedRole as UserRole,
-          avatar: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=0D8ABC&color=fff`,
+          avatar: profile.avatar_url || '',
           title: profile.jobTitle || formatRole(rawRole),
           jobTitle: profile.jobTitle || formatRole(rawRole),
           siteId: profile.siteId,
@@ -336,14 +336,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     try {
       const session = await authService.getSession();
-      if (session?.user) {
+      if (session?.user || (!navigator.onLine && authService.getCachedAuthProfile())) {
         await syncUserProfile();
       } else {
         setUser(null);
       }
     } catch (error: any) {
       logger.warn('CentralStore', 'Session check failed:', error?.message);
-      setUser(null);
+      if (!navigator.onLine && authService.getCachedAuthProfile()) {
+        await syncUserProfile();
+      } else {
+        setUser(null);
+      }
     } finally {
       clearTimeout(failSafeTimeout);
       setLoading(false);
