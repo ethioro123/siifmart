@@ -112,7 +112,7 @@ export const POSCartPanel: React.FC = () => {
                 </div>
 
                 {/* Cart Items List */}
-                <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-2.5 sm:p-3 space-y-1 custom-scrollbar">
                     {cart.length === 0 ? (
                         <div className="h-full min-h-[220px] flex flex-col items-center justify-center text-center p-8 select-none animate-in fade-in duration-300">
                             <div className="w-14 h-14 rounded-2xl bg-[var(--theme-bg-subtle)] flex items-center justify-center mb-3 border border-[var(--theme-border)]">
@@ -128,17 +128,17 @@ export const POSCartPanel: React.FC = () => {
                             return (
                                 <div
                                     key={item.id}
-                                    className={`bg-[var(--theme-bg-card)] p-3.5 rounded-[18px] border ${stalePrice ? 'border-[var(--theme-status-warning-border)]' : 'border-[var(--theme-border-subtle)]'} flex flex-col gap-3 animate-in fade-in duration-200 hover:border-[var(--theme-border)] transition-colors`}
+                                    className={`bg-[var(--theme-bg-card)] px-2 py-0 rounded-xl border ${stalePrice ? 'border-[var(--theme-status-warning-border)]' : 'border-[var(--theme-border-subtle)]'} flex items-center gap-2 min-h-11 animate-in fade-in duration-200 hover:border-[var(--theme-border)] transition-colors`}
                                 >
-                                    <div className="min-w-0">
-                                        <h4 className="text-[var(--theme-text-primary)] text-sm font-semibold line-clamp-2 leading-snug">
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-[var(--theme-text-primary)] text-xs font-semibold truncate leading-tight">
                                              {item.name}
                                         </h4>
-                                        <p className="text-[var(--theme-text-secondary)] font-mono font-medium text-xs mt-1">
+                                        <p className="text-[var(--theme-text-secondary)] font-mono font-medium text-[10px] leading-tight mt-0.5 truncate">
                                             {CURRENCY_SYMBOL} {formatPriceValue(item.price)}{unit.code !== 'UNIT' ? `/${unit.shortLabel}` : ''}
                                         </p>
                                         {stalePrice && (
-                                            <div role="status" className="mt-2 p-2 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]">
+                                            <div role="status" className="mt-1 p-2 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]">
                                                 <p className="text-[11px] font-semibold">{t('pos.catalogPriceChangedTo', { price: `${CURRENCY_SYMBOL} ${formatPriceValue(stalePrice.currentPrice)}` })}</p>
                                                 <button
                                                     type="button"
@@ -152,9 +152,9 @@ export const POSCartPanel: React.FC = () => {
                                     </div>
 
                                     {/* Stepper / Quantity Controls */}
-                                    <div className="flex items-center gap-2 shrink-0">
+                                    <div className="flex items-center gap-1 shrink-0">
                                         {unit.allowDecimal ? (
-                                            <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-xl px-2 py-1 border border-[var(--theme-border-subtle)] gap-1">
+                                            <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-lg px-1.5 border border-[var(--theme-border-subtle)] gap-1 min-h-11">
                                                 <input
                                                     type="number"
                                                     aria-label={`Quantity of ${item.name} in ${unit.shortLabel}`}
@@ -170,7 +170,7 @@ export const POSCartPanel: React.FC = () => {
                                                 <span className="text-xs text-[var(--theme-text-secondary)] font-bold uppercase">{unit.shortLabel}</span>
                                             </div>
                                         ) : (
-                                            <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-xl p-0.5 border border-[var(--theme-border-subtle)]">
+                                            <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-lg p-0.5 border border-[var(--theme-border-subtle)] min-h-11">
                                                 <button
                                                     type="button"
                                                     onClick={() => {
@@ -182,7 +182,7 @@ export const POSCartPanel: React.FC = () => {
                                                 >
                                                     <Minus size={13} />
                                                 </button>
-                                                <span className="text-[var(--theme-text-primary)] font-bold text-xs w-6 text-center tabular-nums">
+                                                <span className="text-[var(--theme-text-primary)] font-bold text-xs w-5 text-center tabular-nums">
                                                     {item.quantity}
                                                 </span>
                                                 <button
@@ -199,7 +199,7 @@ export const POSCartPanel: React.FC = () => {
                                             </div>
                                         )}
 
-                                        <div className="ml-auto min-w-[5.5rem] text-right font-semibold text-sm text-[var(--theme-text-primary)] font-mono tabular-nums">
+                                        <div className="min-w-[4.5rem] text-right font-semibold text-xs text-[var(--theme-text-primary)] font-mono tabular-nums">
                                             {CURRENCY_SYMBOL} {formatPriceValue(item.price * item.quantity)}
                                         </div>
 
@@ -222,9 +222,9 @@ export const POSCartPanel: React.FC = () => {
                 </div>
 
                 {/* Bottom Summary & Payment Section */}
-                <div className="p-4 sm:p-5 bg-[var(--theme-bg-card)] border-t border-[var(--theme-border-subtle)] lg:rounded-b-[22px] shrink-0">
+                <div className="px-3 py-2.5 sm:px-4 sm:py-3 bg-[var(--theme-bg-card)] border-t border-[var(--theme-border-subtle)] lg:rounded-b-[22px] shrink-0">
                     {/* Collapsible Tax / Discount Details Toggle */}
-                    <div className="mb-3 space-y-2">
+                    <div className="mb-2 space-y-1">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-semibold text-[var(--theme-text-secondary)] tracking-tight">
@@ -296,18 +296,18 @@ export const POSCartPanel: React.FC = () => {
                         )}
 
                         {/* Grand Total Row */}
-                        <div className="flex justify-between items-baseline mt-2 px-4 py-3.5 rounded-2xl bg-[var(--theme-bg-subtle)]">
+                        <div className="flex justify-between items-baseline px-3 py-2 rounded-xl bg-[var(--theme-bg-subtle)]">
                             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 {t('pos.totalAmount')}
                             </span>
-                            <span className="text-2xl sm:text-[28px] font-bold font-mono text-[var(--theme-text-primary)] tracking-tight tabular-nums">
+                            <span className="text-xl sm:text-2xl font-bold font-mono text-[var(--theme-text-primary)] tracking-tight tabular-nums">
                                 {CURRENCY_SYMBOL} {total.toLocaleString()}
                             </span>
                         </div>
                     </div>
 
                     {/* Quick Functions Bar: Hold, Clear, More */}
-                    <div className="grid grid-cols-3 gap-2 mb-3">
+                    <div className="grid grid-cols-3 gap-1.5 mb-2">
                         <button
                             type="button"
                             onClick={() => {
@@ -382,7 +382,7 @@ export const POSCartPanel: React.FC = () => {
                             native.haptic();
                         }}
                         disabled={cart.length === 0}
-                        className="w-full min-h-14 py-4 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-sm font-semibold uppercase tracking-wider text-xs sm:text-sm select-none border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                            className="w-full min-h-14 py-2.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl flex items-center justify-center gap-2.5 transition-colors shadow-sm font-semibold uppercase tracking-wider text-xs sm:text-sm select-none border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <CreditCard size={18} />
                         <span>{t('pos.charge')} {CURRENCY_SYMBOL} {total.toLocaleString()}</span>
