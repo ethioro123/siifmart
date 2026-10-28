@@ -120,13 +120,19 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 qtyByProductId.set(item.id, (qtyByProductId.get(item.id) || 0) + item.quantity);
             }
 
-            setProducts(prev => prev.map(p => {
-                const soldQty = qtyByProductId.get(p.id);
-                if (soldQty === undefined) return p;
-                const newStock = Math.max(0, p.stock - soldQty);
-                const newStatus = newStock === 0 ? 'out_of_stock' : newStock < settings.lowStockThreshold ? 'low_stock' : 'active';
-                return { ...p, stock: newStock, status: newStatus as any };
-            }));
+            setProducts(prev => {
+                const next = prev.map(p => {
+                    const soldQty = qtyByProductId.get(p.id);
+                    if (soldQty === undefined) return p;
+                    const newStock = Math.max(0, p.stock - soldQty);
+                    const newStatus = newStock === 0 ? 'out_of_stock' : newStock < settings.lowStockThreshold ? 'low_stock' : 'active';
+                    return { ...p, stock: newStock, status: newStatus as any };
+                });
+                if (activeSite?.id) {
+                    void posDB.cacheProducts(activeSite.id, next);
+                }
+                return next;
+            });
 
             setAllProducts?.(prev => prev.map(p => {
                 const soldQty = qtyByProductId.get(p.id);

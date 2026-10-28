@@ -257,6 +257,12 @@ class POSDBService {
         if (DISABLE_IDB || this.disabled) return false;
         try {
             const db = await this.getDB();
+            if (payload?.id) {
+                const existing = await db.getAll('sync_queue');
+                if (existing.some(op => op.type === type && op.payload?.id === payload.id)) {
+                    return true;
+                }
+            }
             await db.add('sync_queue', {
                 type,
                 payload,
