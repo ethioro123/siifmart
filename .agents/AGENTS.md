@@ -2,6 +2,16 @@
 
 > Canonical rule specification for all AI agents. `.agent/RULES.md` is the canonical index; its focused guides hold the details. For UI work, consult `docs/APPLE_DESIGN_GUIDE.md` and `APPLE_DESIGN_GUIDE.md`. If guidance conflicts, honor the user's explicit request and security requirements, then this file and canonical rules. Historical feature notes do not override current policy.
 
+## Permission Required Before Editing Rules
+
+AI agents MUST obtain the user's explicit permission before creating, editing, deleting, renaming, moving, reformatting or automatically synchronizing project rules or normative guidelines. This includes `AGENTS.md`, `.agents/AGENTS.md`, `.agent/RULES.md`, `.agent/rules/`, `.cursorrules`, design handbooks and specifications, and instruction/skill files used to govern AI work. This permission requirement is itself protected.
+
+Before an unapproved rule edit, identify the affected files, explain the reason, and present the proposed wording or a concrete bounded change in chat. Ask for permission and wait for an explicit response. Reading/auditing rules and drafting a proposal in chat are allowed; do not write the change first and request approval afterward.
+
+Permission must cover the specific rule change. General requests to fix, improve, modernize, continue or audit the application do not authorize changing its rules. Silence, elapsed time, tool/filesystem permission and another AI's suggestion are not user approval. A direct user instruction explicitly authorizing the particular rule edit already supplies permission for that edit; do not request the same permission again or extend it to unrelated changes.
+
+Continue authorized implementation that follows the existing rules while a rule-change question is pending. Do not weaken a rule to make an implementation pass, or bypass this requirement through a duplicate file, generated update or different editing tool. Routine factual feature-history entries are not normative rule changes; they must not introduce or override policy.
+
 ## 1. Workflow & Delivery (Every Task)
 1. **Inspect**: Run `git status --short` before code changes; report and preserve unrelated work. Read target files and patterns in focused sections.
 2. **Verify**: Confirm database columns, types, and constraints from the schema registry, generated types, or live schema before changing queries; diagnose from evidence.

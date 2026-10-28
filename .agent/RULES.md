@@ -2,6 +2,10 @@
 
 This is the entry point for SIIFMART-specific work. Keep these rules consistent with the focused guides below. When two documents disagree, use this precedence: explicit user request, workspace `AGENTS.md`, this file, focused guides, then historical notes and feature records.
 
+## Rule-change permission
+
+Follow the protected **Permission Required Before Editing Rules** section in root `AGENTS.md`. Before any rule or normative-guideline change that the user has not explicitly authorized, describe the proposed change, ask the user for permission, and wait. General application work, automatic maintenance and filesystem access do not authorize rule edits. This applies to design specifications and to this permission rule itself. Explicit authorization for a particular change must not be extended to other rules.
+
 ## Required workflow
 
 1. At session start, inspect `git status --short`. Report existing changes before editing; preserve them unless the user asks otherwise.

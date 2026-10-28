@@ -55,6 +55,10 @@ Chapters 14–17 add exact component defaults and a [runnable visual reference](
 11. **Make all essential work accessible.** Keyboard, screen readers, 200% text, 400% zoom/reflow, touch, language variation and interrupted connectivity are normal design cases.
 12. **Prove quality in the rendered product.** A passing token name, screenshot at one width or automated check alone does not establish usability, accessibility or performance.
 
+## Rule-change permission
+
+This handbook and its normative chapters are protected project rules. AI must obtain the user's explicit permission for the specific proposed rule change before editing them, unless that particular edit was already explicitly authorized. A general request to improve or fix a screen does not authorize changing design rules. Follow the protected permission procedure in root `AGENTS.md`; propose unapproved wording in chat and wait before writing it.
+
 ## Authority and vocabulary
 
 User instructions, `AGENTS.md`, server-enforced policy and security invariants retain precedence. For visual and interaction decisions this handbook is canonical; root `APPLE_DESIGN_GUIDE.md` is a pointer, not a competing copy. The focused engineering guide must link here rather than restating a contradictory style system.

@@ -2,6 +2,7 @@
 
 Follow root `AGENTS.md`; `.agent/RULES.md` is the detailed index. Keep changes consistent with the focused guides.
 
+- Rule and normative-guideline edits require explicit user permission under root `AGENTS.md`. Propose unapproved changes in chat and wait before writing; ordinary fixes or filesystem access do not authorize changing rules. This requirement protects itself.
 - Inspect `git status --short` before code edits and preserve uncommitted work.
 - Split files over 500 lines before changing them. Run the project type check after code changes.
 - Enforce authorization, site scope, and country scope at trusted server/database boundaries.
