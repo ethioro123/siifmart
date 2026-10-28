@@ -152,7 +152,7 @@ export const POSDepartments: React.FC = () => {
                     <span className="w-4 h-4 rounded-full bg-sky-500/20 text-sky-500 flex items-center justify-center shrink-0">
                         <SlidersHorizontal size={10} />
                     </span>
-                    <span>{t('pos.sortLabel')} <strong className="font-semibold">{sortBy === 'price-asc' ? 'Price Asc' : sortBy === 'price-desc' ? 'Price Desc' : sortBy === 'name-asc' ? 'A-Z' : sortBy === 'name-desc' ? 'Z-A' : sortBy === 'stock-desc' ? 'Stock Desc' : sortBy === 'velocity-desc' ? 'Velocity' : 'Expiry'}</strong></span>
+                    <span>{t('pos.sortLabel')} <strong className="font-semibold">{sortBy === 'price-asc' ? t('pos.sortPriceAsc') : sortBy === 'price-desc' ? t('pos.sortPriceDesc') : sortBy === 'name-asc' ? t('pos.sortNameAsc') : sortBy}</strong></span>
                     <button onClick={() => setSortBy('default')} title="Reset sorting to default" aria-label="Reset sorting to default" className="hover:bg-sky-500/25 hover:text-sky-600 text-sky-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
