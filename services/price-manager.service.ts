@@ -49,7 +49,8 @@ export const priceManagerService = {
         while (true) {
             const result = await this.getPage({ country, filters, page, pageSize: 100 });
             targets.push(...result.data);
-            if (targets.length >= result.count || result.data.length === 0) break;
+            if (targets.length >= result.count) break;
+            if (result.data.length === 0) throw new Error('Catalog changed while loading. Retry the preview.');
             page++;
         }
         return targets;

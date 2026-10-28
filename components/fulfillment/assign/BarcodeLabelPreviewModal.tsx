@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Printer, CheckCircle2, AlertTriangle, Copy, Check, QrCode, ScanLine, Layers, Minus, Plus } from 'lucide-react';
 import { BarcodeLabelPreviewCard, BarcodeLabelPreviewCardProps } from './BarcodeLabelPreviewCard';
 import { validateBarcodeFormat } from '../../../utils/barcodeValidation';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface BarcodeLabelPreviewModalProps {
     isOpen: boolean;
@@ -24,6 +25,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
     onPrint,
     isPrinting = false
 }) => {
+    const { t } = useLanguage();
     const [copied, setCopied] = useState(false);
 
     // Keyboard support: Escape closes modal
@@ -64,10 +66,10 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                         </div>
                         <div className="min-w-0">
                             <h3 id="barcode-preview-title" className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] truncate">
-                                Barcode & Thermal Label Preview
+                                {t('warehouse.barcodeAndThermalPreviewTitle')}
                             </h3>
                             <p className="text-xs text-[var(--theme-text-secondary)] truncate">
-                                Live scannability check & 1:1 thermal layout before physical print
+                                {t('warehouse.scannabilityCheckSubtitle')}
                             </p>
                         </div>
                     </div>
@@ -78,29 +80,29 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                             <div className="hidden sm:flex bg-[var(--theme-bg-card)] p-0.5 rounded-xl border border-[var(--theme-border)] text-xs">
                                 <button
                                     onClick={() => onFormatChange('BARCODE')}
-                                    className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-colors ${previewData.format === 'BARCODE'
+                                    className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${previewData.format === 'BARCODE'
                                         ? 'bg-[var(--theme-accent)] text-white shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                 >
-                                    <ScanLine size={13} /> Barcode
+                                    <ScanLine size={13} /> {t('warehouse.barcodeFormat')}
                                 </button>
                                 <button
                                     onClick={() => onFormatChange('QR')}
-                                    className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-colors ${previewData.format === 'QR'
+                                    className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${previewData.format === 'QR'
                                         ? 'bg-[var(--theme-accent)] text-white shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                 >
-                                    <QrCode size={13} /> QR Code
+                                    <QrCode size={13} /> {t('warehouse.qrCodeFormat')}
                                 </button>
                             </div>
                         )}
 
                         <button
                             onClick={onClose}
-                            className="p-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
-                            aria-label="Close Preview"
+                            className="p-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-xl transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
+                            aria-label={t('warehouse.closePreviewButton')}
                         >
                             <X size={18} />
                         </button>
@@ -114,21 +116,21 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                         <div className="flex sm:hidden bg-[var(--theme-bg-card)] p-1 rounded-xl border border-[var(--theme-border)] text-xs">
                             <button
                                 onClick={() => onFormatChange('BARCODE')}
-                                className={`flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-colors ${previewData.format === 'BARCODE'
+                                className={`flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${previewData.format === 'BARCODE'
                                     ? 'bg-[var(--theme-accent)] text-white shadow-xs'
                                     : 'text-[var(--theme-text-secondary)]'
                                     }`}
                             >
-                                <ScanLine size={13} /> Barcode
+                                <ScanLine size={13} /> {t('warehouse.barcodeFormat')}
                             </button>
                             <button
                                 onClick={() => onFormatChange('QR')}
-                                className={`flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-colors ${previewData.format === 'QR'
+                                className={`flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${previewData.format === 'QR'
                                     ? 'bg-[var(--theme-accent)] text-white shadow-xs'
                                     : 'text-[var(--theme-text-secondary)]'
                                     }`}
                             >
-                                <QrCode size={13} /> QR Code
+                                <QrCode size={13} /> {t('warehouse.qrCodeFormat')}
                             </button>
                         </div>
                     )}
@@ -137,7 +139,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                         {/* Thermal Sticker Visual Card */}
                         <div className="md:col-span-7 flex flex-col items-center justify-center bg-[var(--theme-bg-subtle)] p-4 sm:p-6 rounded-2xl border border-[var(--theme-border)]">
                             <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-3 flex items-center gap-1.5">
-                                <Layers size={13} className="text-[var(--theme-accent)]" /> 1:1 Thermal Output Simulation
+                                <Layers size={13} className="text-[var(--theme-accent)]" /> {t('warehouse.thermalSimulationLabel')}
                             </div>
                             <BarcodeLabelPreviewCard
                                 {...previewData}
@@ -152,22 +154,22 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                             <div className="p-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] space-y-3">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                                        Optical Verification
+                                        {t('warehouse.opticalVerificationLabel')}
                                     </span>
                                     {isCodeValid ? (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                            <CheckCircle2 size={12} /> Scannable
+                                            <CheckCircle2 size={12} /> {t('warehouse.scannableBadge')}
                                         </span>
                                     ) : (
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                                            <AlertTriangle size={12} /> Review
+                                            <AlertTriangle size={12} /> {t('warehouse.reviewBadge')}
                                         </span>
                                     )}
                                 </div>
 
                                 <div>
                                     <div className="text-[11px] text-[var(--theme-text-secondary)] mb-1">
-                                        Scanner Emitted Value:
+                                        {t('warehouse.scannerEmittedValueLabel')}
                                     </div>
                                     <div className="flex items-center gap-2 p-2.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
                                         <span className="font-mono text-xs font-bold text-[var(--theme-text-primary)] truncate flex-1 tabular-nums">
@@ -175,7 +177,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                                         </span>
                                         <button
                                             onClick={handleCopyPayload}
-                                            className="p-1.5 hover:bg-[var(--theme-bg-card)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0"
+                                            className="p-1.5 hover:bg-[var(--theme-bg-card)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0 cursor-pointer"
                                             title="Copy scanner payload"
                                             aria-label="Copy scanner payload"
                                         >
@@ -186,13 +188,13 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
 
                                 <div className="text-[11px] text-[var(--theme-text-secondary)] space-y-1 pt-1 border-t border-[var(--theme-border)]">
                                     <div className="flex justify-between">
-                                        <span>Symbology:</span>
+                                        <span>{t('warehouse.symbologyLabel')}</span>
                                         <span className="font-mono font-semibold text-[var(--theme-text-primary)]">
                                             {previewData.format === 'QR' ? 'QR Matrix 2D' : 'Code 128 (GS1)'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span>Label Preset:</span>
+                                        <span>{t('warehouse.labelPresetLabel')}</span>
                                         <span className="font-mono font-semibold text-[var(--theme-text-primary)]">
                                             {previewData.size || 'MEDIUM'}
                                         </span>
@@ -205,14 +207,14 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                                 <div className="p-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] flex items-center justify-between">
                                     <div>
                                         <div className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                                            Print Copies
+                                            {t('warehouse.printCopiesTitle')}
                                         </div>
-                                        <div className="text-[11px] text-[var(--theme-text-muted)]">Batch quantity</div>
+                                        <div className="text-[11px] text-[var(--theme-text-muted)]">{t('warehouse.batchQuantitySubtitle')}</div>
                                     </div>
                                     <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
                                         <button
                                             onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-                                            className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors"
+                                            className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer"
                                             aria-label="Decrease quantity"
                                         >
                                             <Minus size={14} />
@@ -222,7 +224,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                                         </span>
                                         <button
                                             onClick={() => onQuantityChange(quantity + 1)}
-                                            className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors"
+                                            className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer"
                                             aria-label="Increase quantity"
                                         >
                                             <Plus size={14} />
@@ -238,19 +240,19 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                 <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex items-center justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2.5 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px]"
+                        className="px-4 py-2.5 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] cursor-pointer"
                     >
-                        Close Preview
+                        {t('warehouse.closePreviewButton')}
                     </button>
                     <button
                         onClick={() => {
                             onPrint();
                         }}
                         disabled={isPrinting || !previewData.code?.trim()}
-                        className="px-6 py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 text-white font-semibold text-xs min-h-[44px] flex items-center gap-2 shadow-xs transition-all disabled:opacity-50 touch-manipulation"
+                        className="px-6 py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 text-white font-semibold text-xs min-h-[44px] flex items-center gap-2 shadow-xs transition-all disabled:opacity-50 touch-manipulation cursor-pointer"
                     >
                         <Printer size={16} />
-                        <span>Print {quantity > 1 ? `${quantity} Labels` : 'Label'} Now</span>
+                        <span>{quantity > 1 ? t('warehouse.printLabelsNowButton', { count: quantity }) : t('warehouse.printSingleLabelNowButton')}</span>
                     </button>
                 </div>
             </div>

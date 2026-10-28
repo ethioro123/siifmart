@@ -1,10 +1,14 @@
 import type { Product, PricingRule } from '../../../types';
 import type { ProductSalesMetrics } from '../../../utils/merchandisingAnalytics';
-import { matchRuleProduct, calculateRulePrice } from './ruleEvaluator';
+import { effectivePrice } from '../../../utils/pricingGovernance';
+import { rulePriceProposal } from './ruleProposal';
+import { matchRuleProduct } from './ruleEvaluator';
 
 export interface SimulationResult {
    rev: number;
-   margin: number;
+   margin: number | null;
+   profitChange: number;
+   invalidPrices: number;
    impactedCount: number;
 }
 
@@ -18,6 +22,7 @@ export function runMerchandisingSimulation(
    let totalCurrentMargin = 0;
    let totalProjectedMargin = 0;
    let impactedCount = 0;
+   let invalidPrices = 0;
 
    simProducts.forEach(p => {
       const cost = p.costPrice;
@@ -26,26 +31,26 @@ export function runMerchandisingSimulation(
       const estSales = salesMetricsIndex.get(p.id)?.unitsSold30d ?? p.unitsSold30d;
       if (estSales === undefined || !Number.isFinite(estSales) || estSales < 0) return;
 
-      const currentRev = Math.round(p.price * estSales);
-      const currentMarg = Math.round((p.price - cost) * estSales);
+      const currentPrice = effectivePrice(p) ?? p.price;
+      const currentRev = Math.round(currentPrice * estSales);
+      const currentMarg = Math.round((currentPrice - cost) * estSales);
 
       totalCurrentRevenue += currentRev;
       totalCurrentMargin += currentMarg;
 
       const matchingRule = activeRules.filter(rule => rule.isActive).find(r => matchRuleProduct(p, r, { sales30d: estSales }));
+      let newPrice = currentPrice;
       if (matchingRule) {
-         impactedCount++;
-         const newPrice = Math.round(calculateRulePrice(p, matchingRule));
-         const elasticityFactor = 1; // Constant-volume scenario, not a demand forecast.
-         const projectedSales = Math.round(estSales * elasticityFactor);
-         const projRev = Math.round(newPrice * projectedSales);
-         const projMarg = Math.round((newPrice - cost) * projectedSales);
-         totalProjectedRevenue += projRev;
-         totalProjectedMargin += projMarg;
-      } else {
-         totalProjectedRevenue += currentRev;
-         totalProjectedMargin += currentMarg;
+         try {
+            const proposal = rulePriceProposal(p, matchingRule);
+            newPrice = effectivePrice(proposal) ?? proposal.price;
+            if (newPrice !== currentPrice) impactedCount++;
+         } catch {
+            invalidPrices++;
+         }
       }
+      totalProjectedRevenue += Math.round(newPrice * estSales);
+      totalProjectedMargin += Math.round((newPrice - cost) * estSales);
    });
 
    // Merchandising Whole-Number Rule: Delta percentages rounded strictly to integers
@@ -54,11 +59,13 @@ export function runMerchandisingSimulation(
       : 0;
    const margDeltaPct = totalCurrentMargin > 0
       ? Math.round(((totalProjectedMargin - totalCurrentMargin) / totalCurrentMargin) * 100)
-      : 0;
+      : null;
 
    return {
       rev: revDeltaPct,
       margin: margDeltaPct,
+      profitChange: Math.round(totalProjectedMargin - totalCurrentMargin),
+      invalidPrices,
       impactedCount
    };
 }

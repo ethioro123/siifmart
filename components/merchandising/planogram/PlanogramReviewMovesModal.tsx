@@ -19,7 +19,7 @@ export function PlanogramReviewMovesModal({ isOpen, onClose, moves, onConfirm, i
   const selectedMoves = moves.filter(move => selected.has(move.productId));
   return <dialog ref={dialog} aria-labelledby="planogram-review-title" onCancel={event => {
     event.preventDefault(); if (!isSubmitting) onClose();
-  }} className="m-auto w-[calc(100%-2rem)] max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-5 text-[var(--theme-text-primary)] backdrop:bg-black/60">
+  }} className="m-auto w-[calc(100%_-_2rem)] max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-5 text-[var(--theme-text-primary)] backdrop:bg-black/60">
     <h2 id="planogram-review-title" className="text-lg font-semibold">Review suggested shelf moves</h2>
     <p className="mt-2 text-sm text-[var(--theme-text-secondary)]">Candidates use recorded sales from loaded completed orders. Check weight, available space, storage requirements and category fit in store before selecting moves.</p>
     <fieldset disabled={isSubmitting} className="my-4 space-y-3">

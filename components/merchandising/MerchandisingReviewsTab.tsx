@@ -1,3 +1,4 @@
+import { PlanogramRevisionReview } from './planogram/PlanogramRevisionReview';
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, CheckCircle, ChevronLeft, ChevronRight, XCircle, Clock, Layers } from 'lucide-react';
@@ -28,6 +29,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
   const [description, setDescription] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
   const [page, setPage] = useState(1);
+  const [layoutReview, setLayoutReview] = useState<PendingInventoryChange | null>(null);
   const [selectedRejectRequest, setSelectedRejectRequest] = useState<PendingInventoryChange | null>(null);
 
   const createRequest = useCreateInventoryRequestMutation();
@@ -337,7 +339,10 @@ export const MerchandisingReviewsTab: React.FC = () => {
                         <button
                           type="button"
                           disabled={decision.isPending || !canApprove}
-                          onClick={() => decision.mutate({ id: request.id, action: 'approve' })}
+                          onClick={() => {
+                            if (request.layoutRevisionId || request.layout_revision_id) setLayoutReview(request);
+                            else decision.mutate({ id: request.id, action: 'approve' });
+                          }}
                           className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
                         >
                           Record regional approval
@@ -406,6 +411,11 @@ export const MerchandisingReviewsTab: React.FC = () => {
         </div>
       )}
 
+      {layoutReview && <PlanogramRevisionReview request={layoutReview} country={country} submitting={decision.isPending}
+        onClose={() => setLayoutReview(null)} onApprove={async () => {
+          await decision.mutateAsync({ id: layoutReview.id, action: 'approve' });
+          setLayoutReview(null);
+        }} />}
       {/* Reject Modal */}
       <RejectProposalModal
         isOpen={Boolean(selectedRejectRequest)}

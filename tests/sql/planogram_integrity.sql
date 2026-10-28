@@ -19,15 +19,15 @@ BEGIN
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',requester,'role','authenticated')::text,true);
  -- Supplied country cannot override the target site's country.
  BEGIN
-  PERFORM public.submit_planogram_layout_revision(target.id::text,'KE',changes,'staging rollback test');
+  PERFORM public.submit_planogram_layout_revision(target.id::text,'KE',changes,'MERCHANDISING: staging rollback test');
   RAISE EXCEPTION 'Expected country scope rejection';
  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
- response:=public.submit_planogram_layout_revision(target.id::text,target.country,changes,'staging rollback test');
+ response:=public.submit_planogram_layout_revision(target.id::text,target.country,changes,'MERCHANDISING: staging rollback test');
  revision:=(response->>'revisionId')::uuid;
  IF (response->>'count')::integer<>2 THEN RAISE EXCEPTION 'Expected two submitted moves'; END IF;
  SELECT id INTO request_id FROM public.inventory_requests WHERE layout_revision_id=revision ORDER BY id LIMIT 1;
  BEGIN
-  PERFORM public.submit_planogram_layout_revision(target.id::text,target.country,changes,'duplicate rollback test');
+  PERFORM public.submit_planogram_layout_revision(target.id::text,target.country,changes,'MERCHANDISING: duplicate rollback test');
   RAISE EXCEPTION 'Duplicate submission was accepted';
  EXCEPTION WHEN raise_exception THEN
   IF SQLERRM<>'This product already has a pending shelf proposal' THEN RAISE; END IF;
@@ -45,6 +45,36 @@ BEGIN
  END LOOP;
  SELECT count(*) INTO row_count FROM public.inventory_requests WHERE layout_revision_id=revision AND status='approved';
  IF row_count<>2 OR NOT (response->>'applied')::boolean THEN RAISE EXCEPTION 'Complete layout was not applied'; END IF;
+ -- Create a second revision; make its last product stale before the final vote.
+ SELECT jsonb_agg(jsonb_build_object('productId',p.id,'shelfPosition',CASE WHEN p.shelf_position='Eye Level' THEN 'Bottom Shelf' ELSE 'Eye Level' END))
+ INTO changes FROM public.products p WHERE p.id=ANY(ids);
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',requester,'role','authenticated')::text,true);
+ response:=public.submit_planogram_layout_revision(target.id::text,target.country,changes,'MERCHANDISING: stale baseline rollback test');
+ revision:=(response->>'revisionId')::uuid;
+ SELECT id INTO request_id FROM public.inventory_requests WHERE layout_revision_id=revision ORDER BY id LIMIT 1;
+ FOREACH required_role IN ARRAY ARRAY['regional_operations_manager','regional_supply_chain_manager'] LOOP
+  SELECT e.id INTO approver FROM public.employees e JOIN public.sites home ON home.id=e.site_id
+  WHERE e.role=required_role AND e.region_code=target.region_code AND home.country=target.country AND lower(coalesce(e.status,'active'))='active' LIMIT 1;
+  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',approver,'role','authenticated')::text,true);
+  PERFORM public.approve_product_edit(request_id);
+ END LOOP;
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('role','service_role')::text,true);
+ UPDATE public.products SET shelf_position='Checkout' WHERE id=ids[2];
+ SELECT jsonb_object_agg(p.id::text,to_jsonb(p)->'shelf_position') INTO initial_positions FROM public.products p WHERE p.id=ANY(ids);
+ SELECT e.id INTO approver FROM public.employees e JOIN public.sites home ON home.id=e.site_id
+ WHERE e.role='regional_merchandising_manager' AND e.region_code=target.region_code AND home.country=target.country AND lower(coalesce(e.status,'active'))='active' LIMIT 1;
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',approver,'role','authenticated')::text,true);
+ BEGIN
+  PERFORM public.approve_product_edit(request_id);
+  RAISE EXCEPTION 'Stale layout revision was applied';
+ EXCEPTION WHEN raise_exception THEN
+  IF SQLERRM<>'Product changed since this proposal; submit a fresh edit' THEN RAISE; END IF;
+ END;
+ IF EXISTS(SELECT 1 FROM public.inventory_requests WHERE layout_revision_id=revision AND status<>'pending')
+ OR (SELECT jsonb_object_agg(p.id::text,to_jsonb(p)->'shelf_position') FROM public.products p WHERE p.id=ANY(ids)) IS DISTINCT FROM initial_positions THEN
+  RAISE EXCEPTION 'Stale revision partially applied';
+ END IF;
+
 END;
 $$;
 ROLLBACK;

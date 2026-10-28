@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { inventoryRequestsService } from '../services/inventory-requests.service';
-import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import type { Product, ShelfPosition } from '../types';
 
@@ -16,7 +15,6 @@ export const VALID_SHELF_POSITIONS: ShelfPosition[] = [
 ];
 
 export function useSubmitMerchandisingChanges(countryCode: string) {
-  const { user } = useStore();
   const { addNotification } = useData();
   const queryClient = useQueryClient();
 
@@ -70,7 +68,7 @@ export function useSubmitMerchandisingChanges(countryCode: string) {
 
     addNotification(
       'success',
-      `Layout revision (${result.count} product${result.count === 1 ? '' : 's'}) submitted atomically for regional lead approval.`
+      `Layout revision (${result.count} product${result.count === 1 ? '' : 's'}) submitted for Operations, Supply Chain and Merchandising approval.`
     );
 
     return result;

@@ -6,7 +6,7 @@ vi.mock('../../lib/supabase', () => ({ supabase: {} }));
 import { priceManagerService } from '../../services/price-manager.service';
 const product = { id: 'p', sku: 'ET-COFFEE', siteId: 's', price: 100, stock: 5 } as Product;
 describe('Smart Rules sales coverage', () => {
-    beforeEach(() => { getAll.mockReset(); });
+    beforeEach(() => { getAll.mockReset(); vi.restoreAllMocks(); });
     it('requests completed country/site-scoped sales with items and accepts verified zero sales', async () => {
         getAll.mockResolvedValue({ data: [], count: 0 });
         const result = await priceManagerService.getRuleSalesMetrics([product], 'ET');
@@ -21,4 +21,11 @@ describe('Smart Rules sales coverage', () => {
         getAll.mockRejectedValue(new Error('Unavailable'));
         await expect(priceManagerService.getRuleSalesMetrics([product], 'ET')).rejects.toThrow('Unavailable');
     });
+    it('rejects an empty catalog page before the reported count is reached', async () => {
+        vi.spyOn(priceManagerService, 'getPage')
+            .mockResolvedValueOnce({ data: [product], count: 2 })
+            .mockResolvedValueOnce({ data: [], count: 2 });
+        await expect(priceManagerService.getMatchingTargets('ET', {})).rejects.toThrow('Catalog changed');
+    });
+
 });

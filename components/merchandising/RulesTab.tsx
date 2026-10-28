@@ -35,7 +35,7 @@ export const RulesTab: React.FC = () => {
       toggleRuleStatus,
       deleteRule,
       setIsRuleModalOpen,
-      simResult,
+      simResult, currencySymbol,
       handleRunSimulation,
       isSimulating
    } = useMerchandising();
@@ -303,6 +303,8 @@ export const RulesTab: React.FC = () => {
                   </p>
                </div>
 
+               <p className="text-xs text-[var(--theme-text-secondary)] mb-3">Active sale prices are preserved. Invalid proposals are excluded. Profit percentage change is unavailable when current gross profit is zero or negative.</p>
+               {simResult && <p role="status" className="text-sm text-[var(--theme-text-primary)] mb-3">Gross profit change: {currencySymbol} {simResult.profitChange > 0 ? '+' : ''}{simResult.profitChange}. Selling price changes: {simResult.impactedCount}. Invalid proposals: {simResult.invalidPrices}.</p>}
                {/* Projection Results */}
                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-3">
                   <div className="flex justify-between items-center text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
@@ -323,10 +325,10 @@ export const RulesTab: React.FC = () => {
                      <span className="text-[var(--theme-text-secondary)] font-medium">Est. Gross Profit Delta</span>
                      <span
                         className={`font-mono font-semibold tabular-nums ${
-                           simResult && simResult.margin < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                           !simResult || simResult.margin === null ? 'text-[var(--theme-text-primary)]' : simResult.profitChange < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
                         }`}
                      >
-                        {simResult ? `${simResult.margin > 0 ? '+' : ''}${Math.round(simResult.margin)}%` : '--'}
+                        {simResult ? simResult.margin === null ? 'Not available' : `${simResult.margin > 0 ? '+' : ''}${simResult.margin}%` : '--'}
                      </span>
                   </div>
                </div>

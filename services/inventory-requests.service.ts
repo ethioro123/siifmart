@@ -13,6 +13,7 @@ export interface MerchandisingRequestsResult {
 }
 
 export interface GetMerchandisingOptions {
+    layoutRevisionId?: string;
     page?: number;
     limit?: number;
     status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'all';
@@ -85,6 +86,7 @@ export const inventoryRequestsService = {
             query = query.eq('status', 'pending');
         }
 
+        if (options.layoutRevisionId) query = query.eq('layout_revision_id', options.layoutRevisionId);
         if (options.productId) query = query.eq('product_id', options.productId);
         if (options.siteId) query = query.eq('site_id', options.siteId);
         if (options.regionCode) {

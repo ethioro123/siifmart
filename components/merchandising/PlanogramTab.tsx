@@ -59,7 +59,7 @@ export const PlanogramTab: React.FC = () => {
   }, [activeCountry, activeSite?.id, storeSites, setSwapSource]);
 
   // 2. Fetch pending inventory requests for this store
-  const { data: pendingData, isLoading: pendingLoading, error: pendingError } = useQuery({
+  const { data: pendingData, isLoading: pendingLoading, error: pendingError, refetch: retryPending } = useQuery({
     queryKey: ['planogram_pending_requests', activeCountry, selectedStoreId, user?.id],
     queryFn: () => inventoryRequestsService.getMerchandisingRequests(activeCountry, {
       siteId: selectedStoreId,
@@ -207,6 +207,7 @@ export const PlanogramTab: React.FC = () => {
   return (
     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl shadow-sm overflow-hidden animate-in fade-in space-y-5 p-5 sm:p-6">
       {/* Top Header: Fixture & Physical Context Selector */}
+      <fieldset disabled={isSubmittingRevision} className="min-w-0">
       <PlanogramFixtureSelector
         stores={storeSites}
         selectedStoreId={selectedStoreId}
@@ -222,6 +223,7 @@ export const PlanogramTab: React.FC = () => {
         onToggleHeatmap={() => setShowHeatmap(!showHeatmap)}
       />
 
+      </fieldset>
       {/* Proposal Progression Status Banner */}
       <div className="px-4 py-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-3">
@@ -237,7 +239,7 @@ export const PlanogramTab: React.FC = () => {
               pendingCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-[var(--theme-text-secondary)]'
             }`}>
               <Clock size={13} />
-              <span>{pendingCount} Pending Product Moves</span>
+              <span>{pendingCount} Loaded Pending Moves</span>
             </span>
             <span>→</span>
             <span>3 Regional Approvals Required</span>
@@ -255,8 +257,9 @@ export const PlanogramTab: React.FC = () => {
         </button>
       </div>
 
+      {pendingData?.hasMore && <p className="text-sm text-[var(--theme-text-secondary)]">Additional pending proposals are available in Reviews. Submission checks for duplicates across all proposals.</p>}
       {pendingLoading && <p role="status">Loading pending placement proposals…</p>}
-      {pendingError && <p role="alert">Pending proposals could not be loaded. Refresh before submitting changes.</p>}
+      {pendingError && <p role="alert">Pending proposals could not be loaded. <button type="button" className="underline" onClick={() => retryPending()}>Retry</button></p>}
       {!storeProducts.length && <p role="status">No loaded products for this store. Select a store with an available catalog.</p>}
       <p className="text-sm text-[var(--theme-text-secondary)]">Store-level shelf positions. Product dimensions, facings, fixture capacity and physical completion are not recorded here. Sales reflect loaded completed orders.</p>
       {/* Selected Product Sticky Panel */}

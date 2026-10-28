@@ -5,13 +5,16 @@ import type { PriceChangeInput } from '../../../hooks/useSubmitPriceChanges';
 import type { ProductSalesMetrics } from '../../../utils/merchandisingAnalytics';
 import { priceManagerService } from '../../../services/price-manager.service';
 import { pricingRulesService } from '../../../services/pricing-rules.service';
-import { matchRuleProduct, calculateRulePrice, validatePricingRule } from '../utils/ruleEvaluator';
+import { buildRuleChanges } from '../utils/ruleProposal';
+import type { SimulationResult } from '../utils/simulationRunner';
+import { validatePricingRule } from '../utils/ruleEvaluator';
 import { runMerchandisingSimulation } from '../utils/simulationRunner';
 import { logger } from '../../../utils/logger';
 
 interface PricingRulesActionsProps {
    activeCountry: Country;
    activeRegionCode?: string;
+   workspaceScope: string;
    sites: Array<{ id: string }>;
    salesMetricsIndex: Map<string, ProductSalesMetrics>;
    createRule: { mutateAsync: (rule: Omit<PricingRule, 'id'>) => Promise<PricingRule>; isPending: boolean };
@@ -28,6 +31,7 @@ interface PricingRulesActionsProps {
 export function usePricingRulesActions({
    activeCountry,
    activeRegionCode,
+   workspaceScope,
    sites,
    salesMetricsIndex,
    createRule,
@@ -48,10 +52,10 @@ export function usePricingRulesActions({
       isActive: true
    });
    const [ruleValidationErrors, setRuleValidationErrors] = useState<Record<string, string>>({});
-   const [simResult, setSimResult] = useState<{ rev: number; margin: number } | null>(null);
+   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
    const [isSimulating, setIsSimulating] = useState(false);
 
-   const scope = `${activeCountry}:${activeRegionCode || ''}:${sites.map(site => site.id).sort().join(',')}`;
+   const scope = `${workspaceScope}:${activeCountry}:${activeRegionCode || ''}:${sites.map(site => site.id).sort().join(',')}`;
    const scopeRef = useRef(scope);
    scopeRef.current = scope;
    useEffect(() => { setSimResult(null); }, [scope, pricingRules]);
@@ -88,7 +92,6 @@ export function usePricingRulesActions({
       const requestScope = scope;
       setIsSubmitting(true);
       try {
-         const changes: PriceChangeInput[] = [];
          const ruleProducts = await priceManagerService.getMatchingTargets(activeCountry, {
             sites: activeRegionCode ? (sites.length ? sites.map(site => site.id) : ['no-matching-regional-sites']) : []
          });
@@ -96,21 +99,9 @@ export function usePricingRulesActions({
          const recordedMetrics = rule.condition === 'Sales < X'
             ? await priceManagerService.getRuleSalesMetrics(ruleProducts, activeCountry) : new Map<string, ProductSalesMetrics>();
          if (scopeRef.current !== requestScope) return;
-         ruleProducts.forEach(p => {
-            const unitsSold30d = recordedMetrics.get(p.id)?.unitsSold30d;
-            if (matchRuleProduct(p, rule, { sales30d: unitsSold30d })) {
-               // Merchandising Whole-Number Rule: Prices must strictly be integers rounded to the nearest whole number
-               const newPrice = Math.round(calculateRulePrice(p, rule));
-               if (newPrice > 0 && newPrice !== p.price) {
-                  changes.push({ product: p, proposal: { price: newPrice, costPrice: p.costPrice, salePrice: p.salePrice, isOnSale: p.isOnSale } });
-               }
-            }
-         });
-
-         const unavailableCosts = (rule.action === 'Set to Cost + Margin' || rule.action.includes('Margin'))
-            ? ruleProducts.filter(p => p.costPrice === undefined || p.costPrice <= 0).length
-            : 0;
-         if (unavailableCosts) addNotification('info', `Skipped ${unavailableCosts} product records whose costs are unavailable.`);
+         const { changes, missingCosts, invalidPrices } = buildRuleChanges(ruleProducts, rule, recordedMetrics);
+         if (missingCosts) addNotification('info', `Skipped ${missingCosts} matching product records whose costs are unavailable.`);
+         if (invalidPrices) addNotification('info', `Skipped ${invalidPrices} matching product records with invalid price or sale-price combinations.`);
 
          if (changes.length) {
             batch.stagePriceBatch(changes, `Rule '${rule.name}'`);
@@ -149,6 +140,7 @@ export function usePricingRulesActions({
          if (scopeRef.current !== requestScope) return;
          const result = runMerchandisingSimulation(simProducts, activeRules, recordedMetrics);
          setSimResult(result);
+         if (result.invalidPrices) addNotification('info', `Scenario excluded ${result.invalidPrices} invalid price proposals; their current prices were retained.`);
          addNotification('info', `Constant-volume scenario: ${result.impactedCount} product records affected. Products without recorded sales or costs are excluded.`);
       } catch (err) {
          logger.error('usePricingRulesActions', 'simulation failed', err as Error);

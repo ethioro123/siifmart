@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface AssignBayLocationSelectorProps {
     bayConfig: { zone: string; aisle: string; bay: string };
@@ -15,15 +16,16 @@ export const AssignBayLocationSelector: React.FC<AssignBayLocationSelectorProps>
     maxAisles,
     maxBays
 }) => {
+    const { t } = useLanguage();
     return (
         <div className="grid grid-cols-3 gap-3">
             <div>
                 <label className="text-xs uppercase font-semibold text-[var(--theme-text-secondary)] mb-1.5 block">
-                    Zone ({zoneLetters[0]}–{zoneLetters[zoneLetters.length - 1]})
+                    {t('warehouse.zoneFieldLabel', { min: zoneLetters[0] || 'A', max: zoneLetters[zoneLetters.length - 1] || 'Z' })}
                 </label>
                 <select
-                    title="Zone"
-                    className="w-full bg-[var(--theme-bg-app)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm font-semibold min-h-[44px] outline-none"
+                    title={t('warehouse.zoneTitle')}
+                    className="w-full bg-[var(--theme-bg-app)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm font-semibold min-h-[44px] outline-none cursor-pointer"
                     value={bayConfig.zone}
                     onChange={(e) => setBayConfig({ ...bayConfig, zone: e.target.value })}
                 >
@@ -32,11 +34,11 @@ export const AssignBayLocationSelector: React.FC<AssignBayLocationSelectorProps>
             </div>
             <div>
                 <label className="text-xs uppercase font-semibold text-[var(--theme-text-secondary)] mb-1.5 block">
-                    Aisle (1–{maxAisles})
+                    {t('warehouse.aisleFieldLabel', { max: maxAisles })}
                 </label>
                 <select
-                    title="Aisle"
-                    className="w-full bg-[var(--theme-bg-app)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm font-semibold min-h-[44px] outline-none"
+                    title={t('warehouse.aisleTitle')}
+                    className="w-full bg-[var(--theme-bg-app)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm font-semibold min-h-[44px] outline-none cursor-pointer"
                     value={bayConfig.aisle}
                     onChange={(e) => setBayConfig({ ...bayConfig, aisle: e.target.value })}
                 >
@@ -48,11 +50,11 @@ export const AssignBayLocationSelector: React.FC<AssignBayLocationSelectorProps>
             </div>
             <div>
                 <label className="text-xs uppercase font-semibold text-[var(--theme-text-secondary)] mb-1.5 block">
-                    Bay (1–{maxBays})
+                    {t('warehouse.bayFieldLabel', { max: maxBays })}
                 </label>
                 <select
-                    title="Bay"
-                    className="w-full bg-[var(--theme-bg-app)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm font-semibold min-h-[44px] outline-none"
+                    title={t('warehouse.bayTitle')}
+                    className="w-full bg-[var(--theme-bg-app)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm font-semibold min-h-[44px] outline-none cursor-pointer"
                     value={bayConfig.bay}
                     onChange={(e) => setBayConfig({ ...bayConfig, bay: e.target.value })}
                 >

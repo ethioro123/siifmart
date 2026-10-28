@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarcodeGraphic } from './BarcodeGraphic';
 import { MapPin, Tag } from 'lucide-react';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 export interface BarcodeLabelPreviewCardProps {
     type: 'PRODUCT' | 'BAY';
@@ -39,6 +40,7 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
     isModal = false,
     className = ''
 }) => {
+    const { t } = useLanguage();
     const formattedPrice = typeof price === 'number'
         ? `${currency} ${price.toFixed(2)}`
         : price
@@ -65,14 +67,14 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
                         <>
                             <MapPin size={13} className="text-slate-500 shrink-0" />
                             <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider truncate">
-                                {siteName || siteCode || 'Warehouse'} Location
+                                {t('warehouse.warehouseLocationSuffix', { facility: siteName || siteCode || 'Warehouse' })}
                             </span>
                         </>
                     ) : (
                         <>
                             <Tag size={13} className="text-slate-500 shrink-0" />
                             <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider truncate">
-                                {category || 'Inventory Product'}
+                                {category || t('warehouse.inventoryProductFallback')}
                             </span>
                         </>
                     )}
@@ -116,13 +118,17 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
                     {/* Price and Category Tag Bar */}
                     <div className="grid grid-cols-2 gap-2 pt-2 border-t border-dashed border-slate-300 text-xs">
                         <div className="bg-slate-50 p-2 rounded-lg border border-slate-200 text-center">
-                            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Retail Price</span>
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                {t('warehouse.retailPriceLabel')}
+                            </span>
                             <span className="block font-black text-slate-900 text-xs sm:text-sm font-mono tabular-nums">
                                 {formattedPrice || `${currency} --`}
                             </span>
                         </div>
                         <div className="bg-slate-50 p-2 rounded-lg border border-slate-200 text-center">
-                            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Classification</span>
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                {t('warehouse.classificationLabel')}
+                            </span>
                             <span className="block font-bold text-slate-800 text-xs sm:text-sm truncate">
                                 {category || 'General'}
                             </span>
@@ -134,7 +140,9 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
                 <div className="space-y-3">
                     {/* Big Human Location Label */}
                     <div className="text-center py-1">
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Location Identifier</div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                            {t('warehouse.locationIdentifierLabel')}
+                        </div>
                         <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tracking-wider tabular-nums">
                             {humanLabel || title}
                         </div>
@@ -159,15 +167,21 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
                     {/* Coordinates breakdown */}
                     <div className="grid grid-cols-3 gap-2 pt-1 border-t border-dashed border-slate-300 text-center">
                         <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                            <span className="block text-[9px] font-bold uppercase text-slate-500">Zone</span>
+                            <span className="block text-[9px] font-bold uppercase text-slate-500">
+                                {t('warehouse.zoneTitle')}
+                            </span>
                             <span className="font-extrabold text-xs text-slate-900">{zone || '--'}</span>
                         </div>
                         <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                            <span className="block text-[9px] font-bold uppercase text-slate-500">Aisle</span>
+                            <span className="block text-[9px] font-bold uppercase text-slate-500">
+                                {t('warehouse.aisleTitle')}
+                            </span>
                             <span className="font-extrabold text-xs text-slate-900">{aisle || '--'}</span>
                         </div>
                         <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                            <span className="block text-[9px] font-bold uppercase text-slate-500">Bay</span>
+                            <span className="block text-[9px] font-bold uppercase text-slate-500">
+                                {t('warehouse.bayTitle')}
+                            </span>
                             <span className="font-extrabold text-xs text-slate-900">{bay || '--'}</span>
                         </div>
                     </div>
@@ -176,8 +190,8 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
 
             {/* Subtle Thermal Cut Marks / Peel Indication */}
             <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                <span>Thermal Direct Paper</span>
-                <span>Scannable 100% Contrast</span>
+                <span>{t('warehouse.thermalDirectPaper')}</span>
+                <span>{t('warehouse.scannableHighContrast')}</span>
             </div>
         </div>
     );

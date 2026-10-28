@@ -1,3 +1,4 @@
+import type { SimulationResult } from './utils/simulationRunner';
 import type { PriceBatch, PriceBatchResult } from '../../utils/priceManager';
 import React, { createContext, useContext } from 'react';
 import type { Product, Promotion, PricingRule } from '../../types';
@@ -103,8 +104,8 @@ export interface MerchandisingContextType {
    setIsMarkdownSimulating: (sim: boolean) => void;
 
    // Forecast/Simulation
-   simResult: { rev: number; margin: number } | null;
-   setSimResult: (res: { rev: number; margin: number } | null) => void;
+   simResult: SimulationResult | null;
+   setSimResult: (res: SimulationResult | null) => void;
    isSimulating: boolean;
    setIsSimulating: (sim: boolean) => void;
 

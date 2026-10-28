@@ -134,6 +134,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       deleteRuleById,
       handleRunSimulation
    } = usePricingRulesActions({
+      workspaceScope: JSON.stringify([activeTab, activeSite?.id, searchTerm, filters, sortConfig, currentPage, itemsPerPage]),
       activeCountry,
       activeRegionCode: activeRegionCode || undefined,
       sites: sites || [],

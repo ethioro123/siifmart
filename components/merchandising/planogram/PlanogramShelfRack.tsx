@@ -46,7 +46,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
             {fixture.label}
           </h4>
           <p className="text-[11px] text-[var(--theme-text-secondary)]">
-            {fixture.tiers.length} Active {fixture.tiers.length === 1 ? 'Tier' : 'Tiers'} · Select an item to swap or reposition
+            {fixture.tiers.length} Placement {fixture.tiers.length === 1 ? 'Tier' : 'Tiers'} · Select an item to swap or reposition
           </p>
         </div>
 
