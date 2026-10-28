@@ -31,6 +31,7 @@ export const APPROVAL_INBOX_ROLES = new Set([
   "warehouse_manager"
 ]);
 export const APPROVAL_QUEUES: Record<string, { label: string; area: string; href: string; table: string }> = {
+  inventory: { label: 'Inventory requests', area: 'Inventory', href: '/inventory?tab=pending', table: 'inventory_requests' },
   product: { label: 'Product changes', area: 'Merchandising', href: '/pricing?tab=reviews', table: 'inventory_requests' },
   price: { label: 'Price changes', area: 'Merchandising', href: '/pricing?tab=reviews', table: 'inventory_requests' },
   planogram: { label: 'Shelf layouts', area: 'Merchandising', href: '/pricing?tab=reviews', table: 'inventory_requests' },

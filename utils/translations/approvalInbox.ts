@@ -12,5 +12,6 @@ export const approvalInbox: TranslationBlock = {
   areaFinance: { en: 'Finance', am: 'ፋይናንስ', or: 'Faayinaansii' },
   areaHR: { en: 'HR', am: 'የሰው ኃይል', or: 'Humna namaa' },
   areaHRFinance: { en: 'HR / Finance', am: 'የሰው ኃይል / ፋይናንስ', or: 'Humna namaa / Faayinaansii' },
+  areaInventory: { en: 'Inventory', am: 'ክምችት', or: 'Kuusaa' },
   areaTransfers: { en: 'Transfers', am: 'ዝውውሮች', or: 'Dabarsa' }
 };

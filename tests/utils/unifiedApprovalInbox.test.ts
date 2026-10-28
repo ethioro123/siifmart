@@ -11,6 +11,7 @@ describe('approval inbox contract', () => {
     expect(approvalSummaryLabel(1,0)).toBe('1 approval task awaiting your review');
   });
   it('uses local allowlisted review destinations', () => {
+    expect(APPROVAL_QUEUES.inventory.href).toBe('/inventory?tab=pending');
     expect(Object.values(APPROVAL_QUEUES).every(q => q.href.startsWith('/') && !q.href.startsWith('//'))).toBe(true);
   });
   it('provides all global WMS/POS notices in every supported language', () => {
