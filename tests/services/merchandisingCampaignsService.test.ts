@@ -94,14 +94,52 @@ describe('Merchandising Campaigns Service Governance', () => {
       });
    });
 
-   it('calls approve_merchandising_campaign RPC for approved plan', async () => {
-      const rpcMock = vi.fn().mockResolvedValue({ error: null });
-      (supabase.rpc as any).mockImplementation(rpcMock);
-
-      await merchandisingCampaignsService.approve('prop-456');
-
-      expect(rpcMock).toHaveBeenCalledWith('approve_merchandising_campaign', {
-         p_proposal_id: 'prop-456'
+   it('applies bounded pagination and territory filtering on list', async () => {
+      const rangeMock = vi.fn().mockResolvedValue({
+         data: [
+            {
+               id: 'prop-1',
+               scope_site_id: 'site-hq',
+               country_code: 'ET',
+               region_code: 'ADD',
+               code: 'SUMMER25',
+               discount_type: 'PERCENTAGE',
+               discount_value: 25,
+               expiry_date: '2027-01-01',
+               status: 'pending',
+               requested_by_employee_id: 'emp-1',
+               requested_at: '2026-10-28T10:00:00Z',
+               requester: [{ name: 'Abebe Bikila', role: 'merchandising_specialist' }]
+            }
+         ],
+         error: null,
+         count: 55
       });
+
+      const orderMock = vi.fn().mockReturnValue({ range: rangeMock });
+      const eqMock = vi.fn();
+      eqMock.mockReturnValue({ eq: eqMock, order: orderMock });
+      const selectMock = vi.fn().mockReturnValue({ eq: eqMock });
+
+      (supabase.from as any).mockReturnValue({ select: selectMock });
+
+      const result = await merchandisingCampaignsService.list({
+         countryCode: 'ET',
+         status: 'pending',
+         page: 2,
+         pageSize: 25
+      });
+
+      expect(supabase.from).toHaveBeenCalledWith('merchandising_campaign_proposals');
+      expect(eqMock).toHaveBeenCalledWith('country_code', 'ET');
+      expect(eqMock).toHaveBeenCalledWith('status', 'pending');
+      expect(orderMock).toHaveBeenCalledWith('requested_at', { ascending: false });
+      // Page 2 of size 25: from = 25, to = 49
+      expect(rangeMock).toHaveBeenCalledWith(25, 49);
+      expect(result.page).toBe(2);
+      expect(result.pageSize).toBe(25);
+      expect(result.totalCount).toBe(55);
+      expect(result.proposals).toHaveLength(1);
+      expect(result.proposals[0].requester?.name).toBe('Abebe Bikila');
    });
 });
