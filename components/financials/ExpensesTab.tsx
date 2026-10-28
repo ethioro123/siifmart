@@ -20,6 +20,7 @@ import { useFinance } from './FinanceContext';
 import { formatCompactNumber } from '../../utils/formatting';
 import { ExpenseRecord } from '../../types/expense';
 import { ExpenseVoucherModal } from './ExpenseVoucherModal';
+import { ExpenseMetricRibbon } from './ExpenseMetricRibbon';
 
 export const ExpensesTab: React.FC = () => {
     const {
@@ -42,7 +43,18 @@ export const ExpensesTab: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [inspectingExpense, setInspectingExpense] = useState<ExpenseRecord | null>(null);
 
-    const canApproveRole = ['country_finance_director', 'regional_finance_manager', 'country_operations_director', 'regional_operations_manager', 'country_managing_director', 'managing_director', 'group_ceo'].includes(user?.role?.toLowerCase() || '');
+    const canApproveRole = [
+        'country_finance_director',
+        'regional_finance_manager',
+        'country_operations_director',
+        'regional_operations_manager',
+        'country_managing_director',
+        'managing_director',
+        'group_ceo',
+        'group_cfo',
+        'cfo',
+        'super_admin'
+    ].includes(user?.role?.toLowerCase() || '');
 
     // Summary metrics
     const stats = useMemo(() => {
@@ -80,70 +92,7 @@ export const ExpensesTab: React.FC = () => {
     return (
         <div className="space-y-4">
             {/* Executive Metric Ribbon */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
-                    <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
-                        Active Period Outlays
-                    </span>
-                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-text-primary)] font-mono tabular-nums mt-1">
-                        {currencySymbol} {stats.totalOutlay.toLocaleString()}
-                    </h4>
-                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
-                        Excluding soft-voided vouchers
-                    </p>
-                </div>
-
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
-                    <div className="flex items-center justify-between">
-                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
-                            Pending 4-Eyes
-                        </span>
-                        <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                            <Clock size={13} />
-                        </div>
-                    </div>
-                    <h4 className="text-xl font-semibold tracking-tight text-amber-600 dark:text-amber-400 font-mono tabular-nums mt-1">
-                        {stats.pendingCount}
-                    </h4>
-                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
-                        Awaiting supervisory sign-off
-                    </p>
-                </div>
-
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
-                    <div className="flex items-center justify-between">
-                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
-                            Settled / Approved
-                        </span>
-                        <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                            <CheckCircle2 size={13} />
-                        </div>
-                    </div>
-                    <h4 className="text-xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
-                        {stats.approvedOrPaidCount}
-                    </h4>
-                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
-                        Verified disbursement ledger
-                    </p>
-                </div>
-
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
-                    <div className="flex items-center justify-between">
-                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
-                            Voided Audit Trail
-                        </span>
-                        <div className="w-6 h-6 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] flex items-center justify-center">
-                            <ShieldAlert size={13} />
-                        </div>
-                    </div>
-                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-text-primary)] font-mono tabular-nums mt-1">
-                        {stats.voidedCount}
-                    </h4>
-                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
-                        Permanent compliance trail
-                    </p>
-                </div>
-            </div>
+            <ExpenseMetricRibbon stats={stats} currencySymbol={currencySymbol} />
 
             {/* Table Container */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
@@ -227,13 +176,42 @@ export const ExpensesTab: React.FC = () => {
                             ) : displayedExpenses.length > 0 ? (
                                 displayedExpenses.map(exp => {
                                     const isCreator = Boolean(
-                                        (exp.createdById && exp.createdById === (user?.id || user?.employeeId)) ||
-                                        (exp.createdByName && exp.createdByName === user?.name)
+                                        (exp.createdById && (exp.createdById === user?.id || exp.createdById === user?.employeeId)) ||
+                                        (exp.createdByName && exp.createdByName.trim().toLowerCase() === user?.name?.trim().toLowerCase())
                                     );
-                                    const isCeoEscalated = Boolean(exp.escalatedToCeo);
-                                    const userIsCeo = ['group_ceo'].includes(user?.role);
-                                    const blockedByEscalation = isCeoEscalated && !userIsCeo;
-                                    const approveDisabled = isSubmitting || isCreator || blockedByEscalation;
+
+                                    const isCeoEscalated = Boolean(exp.escalatedToCeo) || exp.amount > 20000000;
+                                    const isRegionalEscalated = exp.amount > 2000000 && !isCeoEscalated;
+                                    const isRegionalAutonomous = exp.amount <= 2000000;
+
+                                    const userRole = (user?.role || '').toLowerCase();
+                                    const userIsCeo = ['group_ceo', 'group_cfo', 'cfo', 'super_admin'].includes(userRole);
+                                    const userIsCountryDirector = userIsCeo || [
+                                        'country_finance_director',
+                                        'country_managing_director',
+                                        'country_operations_director',
+                                        'managing_director',
+                                        'finance_manager'
+                                    ].includes(userRole);
+
+                                    // Country Isolation
+                                    const userCountry = (user?.countryCode || user?.country || 'ET').toUpperCase();
+                                    const expCountry = (exp.countryCode || exp.country_code || 'ET').toUpperCase();
+                                    const isCrossBorder = !userIsCeo && userCountry !== expCountry;
+
+                                    const blockedByCeoEscalation = isCeoEscalated && !userIsCeo;
+                                    const blockedByRegionalCap = isRegionalEscalated && !userIsCountryDirector;
+                                    const approveDisabled = isSubmitting || isCreator || isCrossBorder || blockedByCeoEscalation || blockedByRegionalCap;
+
+                                    const approveTooltip = isCreator
+                                        ? 'Maker-Checker Violation: Creator cannot approve their own expense (Zero Self-Approval)'
+                                        : isCrossBorder
+                                            ? `Country Isolation: Approver in ${userCountry} cannot approve expenses in ${expCountry}`
+                                            : blockedByCeoEscalation
+                                                ? 'Executive Escalation (> 20M): Requires Group CFO / Group CEO sign-off'
+                                                : blockedByRegionalCap
+                                                    ? 'Regional Cap Exceeded (> 2M): Requires Country Finance Director sign-off'
+                                                    : 'Approve Expense';
 
                                     return (
                                         <tr
@@ -257,10 +235,20 @@ export const ExpensesTab: React.FC = () => {
                                                     }`}>
                                                         {exp.description}
                                                     </span>
-                                                    {isCeoEscalated && (
+                                                    {isCeoEscalated ? (
                                                         <span className="inline-flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium mt-0.5">
                                                             <Crown size={12} className="text-amber-500 shrink-0" />
-                                                            <span>Escalated to CEO (Threshold Exceeded)</span>
+                                                            <span>Escalated to Group HQ (&gt; 20M)</span>
+                                                        </span>
+                                                    ) : isRegionalEscalated ? (
+                                                        <span className="inline-flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 font-medium mt-0.5">
+                                                            <ShieldCheck size={12} className="text-blue-500 shrink-0" />
+                                                            <span>Country Sign-Off Required (&gt; 2M)</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
+                                                            <ShieldCheck size={12} className="text-emerald-500 shrink-0" />
+                                                            <span>Regional Autonomous (≤ 2M)</span>
                                                         </span>
                                                     )}
                                                     {exp.voidReason && (
@@ -337,13 +325,7 @@ export const ExpensesTab: React.FC = () => {
                                                                         ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/40 cursor-not-allowed'
                                                                         : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                                                                 }`}
-                                                                title={
-                                                                    isCreator
-                                                                        ? 'Maker-Checker Violation: Creator cannot approve their own expense'
-                                                                        : blockedByEscalation
-                                                                            ? 'Escalated to CEO: Requires Executive Sign-off'
-                                                                            : 'Approve Expense'
-                                                                }
+                                                                title={approveTooltip}
                                                                 aria-label="Approve Expense"
                                                             >
                                                                 <Check size={14} />

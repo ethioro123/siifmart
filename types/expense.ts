@@ -52,13 +52,13 @@ export interface ExpenseRecord {
     paymentRef?: string;
     payment_ref?: string;
 
-    // CEO Escalation Governance (Country threshold gating)
+    // CEO Escalation Governance (Country threshold gating > 20M)
     escalatedToCeo?: boolean;
     escalated_to_ceo?: boolean;
     escalationReason?: string;
     escalation_reason?: string;
 
-    // Regional Governance & HQ Escalation
+    // Regional Governance & HQ Escalation (> 2M)
     regionCode?: string;
     region_code?: string;
     requiresHqApproval?: boolean;
@@ -68,6 +68,12 @@ export interface ExpenseRecord {
     hqApprovedAt?: string;
     hq_approved_at?: string;
 
+    // Calibrated Delegated Limits
+    regionalLimit?: number;
+    regional_limit?: number;
+    countryLimit?: number;
+    country_limit?: number;
+
     createdAt?: string;
     created_at?: string;
     updatedAt?: string;
@@ -76,7 +82,9 @@ export interface ExpenseRecord {
 
 export interface ExpenseThresholdConfig {
     countryCode: string;
-    ceoApprovalThreshold: number; // e.g. 50,000 ETB or 50,000 KSh
+    regionalExpenseLimit: number; // 2,000,000 ETB / KES
+    countryExpenseLimit: number;  // 20,000,000 ETB / KES
+    ceoApprovalThreshold: number; // 20,000,000 ETB / KES
     requirePaymentRef: boolean;
     autoFlagAnomalousVariance: boolean;
 }

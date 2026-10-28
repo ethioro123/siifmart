@@ -294,7 +294,8 @@ export function useFinancialsState() {
          const approverUser = {
             id: user?.id || user?.employeeId || 'FIN-MGR-001',
             name: user?.name || 'Country Finance Director',
-            role: user?.role || 'country_finance_director'
+            role: user?.role || 'country_finance_director',
+            countryCode: user?.country_code || (user as any)?.countryCode || (user as any)?.country || effectiveCountry || 'ET'
          };
          const updated = await expensesService.approve(id, approverUser);
          setLocalExpenses(prev => prev.map(e => e.id === id ? updated : e));

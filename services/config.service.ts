@@ -182,7 +182,7 @@ export const systemConfigService = {
             defaultVatRate: overrides?.defaultVatRate ?? data.default_vat_rate ?? (isKe ? 16 : 15),
             withholdingTax: overrides?.withholdingTax ?? data.withholding_tax ?? 2,
             maxPettyCash: overrides?.maxPettyCash ?? data.max_petty_cash ?? 5000,
-            expenseApprovalLimit: overrides?.expenseApprovalLimit ?? data.expense_approval_limit ?? 10000,
+            expenseApprovalLimit: overrides?.expenseApprovalLimit ?? data.expense_approval_limit ?? 20000000,
             defaultCreditLimit: overrides?.defaultCreditLimit ?? data.default_credit_limit ?? 50000,
             receivingLogic: configuredReceivingLogic === 'verified' ? 'verified' : 'blind',
             qcSamplingRate: overrides?.qcSamplingRate ?? data.qc_sampling_rate ?? 10,

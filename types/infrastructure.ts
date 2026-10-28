@@ -201,6 +201,7 @@ export interface SystemConfig {
   poPriceApplyAt?: 'receive' | 'putaway';
   printPriceTagAt?: 'receive' | 'putaway' | 'store';
   managerSecurityPin?: string;
+  centralHqCashRefundOtp?: string;
   blindCloseEnforced?: boolean;
   requireRefundManagerPin?: boolean;
   highValueBarcodeLockThreshold?: number;

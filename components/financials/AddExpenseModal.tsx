@@ -15,8 +15,11 @@ export const AddExpenseModal: React.FC = () => {
         settings
     } = useFinance();
 
-    const threshold = settings?.expenseApprovalLimit || 50000;
-    const isEscalated = Number(newExpData.amount || 0) > threshold;
+    const regionalLimit = 2000000;
+    const countryLimit = settings?.expenseApprovalLimit || 20000000;
+    const amountVal = Number(newExpData.amount || 0);
+    const isEscalatedToCeo = amountVal > countryLimit;
+    const isRegionalEscalated = amountVal > regionalLimit && !isEscalatedToCeo;
 
     const inputBase = "w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors placeholder:text-[var(--theme-text-secondary)]/50";
     const labelBase = "text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5 block";
@@ -87,11 +90,20 @@ export const AddExpenseModal: React.FC = () => {
                     </select>
                 </div>
 
-                {isEscalated && (
+                {isEscalatedToCeo && (
                     <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5 text-xs text-amber-700 dark:text-amber-300">
                         <AlertCircle size={16} className="shrink-0 text-amber-500" />
                         <span>
-                            Amount exceeds threshold ({currencySymbol} {threshold.toLocaleString()}). Requires <strong className="font-semibold">Executive CEO Sign-Off</strong>.
+                            Amount exceeds country autonomous limit ({currencySymbol} {countryLimit.toLocaleString()}). Requires <strong className="font-semibold">Group CFO / Group CEO Executive Sign-Off</strong>.
+                        </span>
+                    </div>
+                )}
+
+                {isRegionalEscalated && (
+                    <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-2.5 text-xs text-blue-700 dark:text-blue-300">
+                        <AlertCircle size={16} className="shrink-0 text-blue-500" />
+                        <span>
+                            Amount exceeds regional autonomous limit ({currencySymbol} {regionalLimit.toLocaleString()}). Requires <strong className="font-semibold">Country Finance Director Sign-Off</strong>.
                         </span>
                     </div>
                 )}
