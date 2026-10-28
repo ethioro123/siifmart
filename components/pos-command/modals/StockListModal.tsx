@@ -12,8 +12,7 @@ import { getSellUnit, formatStockDisplay } from '../../../utils/units';
 import { formatProductDisplayName } from '../../procurement/utils';
 import { resolveSmartProductAttributes } from '../../../utils/groceryAttributes';
 import {
-    Printer, TrendingUp, Package, CheckCheck,
-    AlertTriangle, AlertCircle, Sparkles, X, Search, Tag, Scale
+    Printer, CheckCheck, X, Search
 } from 'lucide-react';
 
 type StockFilterMode = 'ALL' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'PRICE_UPDATED' | 'STOCK_UPDATED' | 'ON_SALE' | 'BY_WEIGHT_VOLUME' | 'UNSEEN';
@@ -109,110 +108,201 @@ export const StockListModal: React.FC = () => {
 
     React.useEffect(() => { setCurrentPage(1); }, [stockSearch, activeFilter, selectedCategory]);
 
-    const filterTabs: Array<{ id: StockFilterMode; label: string; icon?: React.ReactNode; color: string; activeColor: string; count: number }> = [
-        { id: 'ALL', label: t('posCommand.filterAll'), color: 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)]', activeColor: 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs', count: filterCounts.all },
-        { id: 'LOW_STOCK', label: t('posCommand.filterLowStock'), icon: <AlertTriangle size={13} />, color: 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20', activeColor: 'bg-amber-500 text-white shadow-xs', count: filterCounts.lowStock },
-        { id: 'OUT_OF_STOCK', label: t('posCommand.filterOutOfStock'), icon: <AlertCircle size={13} />, color: 'bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20', activeColor: 'bg-red-600 text-white shadow-xs', count: filterCounts.outOfStock },
-        { id: 'PRICE_UPDATED', label: t('posCommand.filterPriceUpdated'), icon: <TrendingUp size={13} />, color: 'bg-blue-500/10 text-blue-500 border border-blue-500/20 hover:bg-blue-500/20', activeColor: 'bg-blue-600 text-white shadow-xs', count: filterCounts.priceUpdated },
-        { id: 'STOCK_UPDATED', label: t('posCommand.filterStockUpdated'), icon: <Package size={13} />, color: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20', activeColor: 'bg-emerald-600 text-white shadow-xs', count: filterCounts.stockUpdated },
-        { id: 'ON_SALE', label: t('posCommand.filterOnSale'), icon: <Tag size={13} />, color: 'bg-purple-500/10 text-purple-500 border border-purple-500/20 hover:bg-purple-500/20', activeColor: 'bg-purple-600 text-white shadow-xs', count: filterCounts.onSale },
-        { id: 'BY_WEIGHT_VOLUME', label: t('posCommand.filterWeightedVol'), icon: <Scale size={13} />, color: 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 hover:bg-cyan-500/20', activeColor: 'bg-cyan-600 text-white shadow-xs', count: filterCounts.weighted },
-    ];
+    const filterTabs = useMemo(() => {
+        const tabs: Array<{ id: StockFilterMode; label: string; count: number; dotColor?: string; alwaysShow?: boolean }> = [
+            { id: 'ALL', label: t('posCommand.filterAll'), count: filterCounts.all, alwaysShow: true },
+            { id: 'UNSEEN', label: t('posCommand.filterUnseenUpdates'), count: filterCounts.unseen, dotColor: 'bg-amber-500' },
+            { id: 'LOW_STOCK', label: t('posCommand.filterLowStock'), count: filterCounts.lowStock, dotColor: filterCounts.lowStock > 0 ? 'bg-amber-500' : undefined, alwaysShow: true },
+            { id: 'OUT_OF_STOCK', label: t('posCommand.filterOutOfStock'), count: filterCounts.outOfStock, dotColor: filterCounts.outOfStock > 0 ? 'bg-red-500' : undefined, alwaysShow: true },
+            { id: 'PRICE_UPDATED', label: t('posCommand.filterPriceUpdated'), count: filterCounts.priceUpdated },
+            { id: 'STOCK_UPDATED', label: t('posCommand.filterStockUpdated'), count: filterCounts.stockUpdated },
+            { id: 'ON_SALE', label: t('posCommand.filterOnSale'), count: filterCounts.onSale },
+            { id: 'BY_WEIGHT_VOLUME', label: t('posCommand.filterWeightedVol'), count: filterCounts.weighted },
+        ];
+        return tabs.filter(tab => tab.alwaysShow || tab.count > 0 || activeFilter === tab.id);
+    }, [t, filterCounts, activeFilter]);
+
+    const hasActiveFilters = activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' || Boolean(stockSearch);
 
     return (
-        <Modal isOpen={isStockListOpen} onClose={() => setIsStockListOpen(false)} title={`${t('posCommand.stockLookupHeader')} - ${activeSite?.name || t('posCommand.currentLocation')}`} size="xl">
-            <div className="space-y-4">
-                {filterCounts.unseen > 0 && (
-                    <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                        <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shrink-0">{filterCounts.unseen > 99 ? '99+' : filterCounts.unseen}</span>
-                            <p className="text-xs font-semibold text-amber-500">{t('posCommand.productsUpdatedRecently', { count: filterCounts.unseen })}</p>
-                        </div>
-                        <button type="button" onClick={markUpdatesAsRead} title="Mark all updates as read" aria-label="Mark all updates as read" className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all flex items-center gap-1 cursor-pointer">
-                            <CheckCheck size={13} className="text-emerald-300" /><span>{t('posCommand.markAllAsRead')}</span>
-                        </button>
+        <Modal isOpen={isStockListOpen} onClose={() => setIsStockListOpen(false)} title={`${t('posCommand.stockLookupHeader')} — ${activeSite?.name || t('posCommand.currentLocation')}`} size="xl">
+            <div className="space-y-3">
+                {/* Primary Search & Control Toolbar */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex-1 min-w-[220px] min-h-[44px] flex items-center gap-2 bg-[var(--theme-input-bg)] px-3 rounded-xl border border-[var(--theme-border)] focus-within:border-[var(--theme-border-focus)] transition-colors">
+                        <Search className="w-4 h-4 text-[var(--theme-text-muted)] shrink-0" />
+                        <input
+                            type="text"
+                            value={stockSearch}
+                            onChange={(e) => setStockSearch(e.target.value)}
+                            placeholder={t('posCommand.searchStockPlaceholder')}
+                            className="flex-1 bg-transparent border-none outline-none text-[var(--theme-text-primary)] text-xs placeholder:text-[var(--theme-text-muted)]"
+                            autoFocus
+                        />
+                        {stockSearch && (
+                            <button
+                                type="button"
+                                onClick={() => setStockSearch('')}
+                                title={t('posCommand.resetFilters')}
+                                aria-label={t('posCommand.resetFilters')}
+                                className="w-6 h-6 rounded-full hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                                <X size={13} />
+                            </button>
+                        )}
                     </div>
-                )}
 
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
-                    {filterTabs.map(tab => (
-                        <button key={tab.id} type="button" onClick={() => setActiveFilter(tab.id)} title={`Filter by ${tab.label}`} aria-label={`Filter by ${tab.label}`} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${activeFilter === tab.id ? tab.activeColor : tab.color}`}>
-                            {tab.icon}<span>{tab.label}</span><span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/15 dark:bg-white/15 font-bold">{tab.count}</span>
-                        </button>
-                    ))}
-                    {filterCounts.unseen > 0 && (
-                        <button type="button" onClick={() => setActiveFilter('UNSEEN')} title="Filter by unseen updates" aria-label="Filter by unseen updates" className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${activeFilter === 'UNSEEN' ? 'bg-amber-600 text-white shadow-xs' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20'}`}>
-                            <Sparkles size={13} /><span>{t('posCommand.filterUnseenUpdates')}</span><span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-600 text-white font-bold">{filterCounts.unseen}</span>
-                        </button>
-                    )}
-                    {(activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' || stockSearch) && (
-                        <button type="button" onClick={() => { setActiveFilter('ALL'); setSelectedCategory('ALL_CATEGORIES'); setStockSearch(''); }} className="px-2.5 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-full text-xs font-semibold transition-all flex items-center gap-1 shrink-0 cursor-pointer ml-auto" title="Reset all filters" aria-label="Reset all filters">
-                            <X size={13} /><span>{t('posCommand.resetFilters')}</span>
-                        </button>
-                    )}
-                </div>
-
-                {/* Apple Liquid Glass Product Search Bar */}
-                <div className="flex flex-wrap items-center gap-2.5 bg-[var(--theme-input-bg)] p-1.5 pl-2.5 rounded-2xl border border-[var(--theme-border)] focus-within:border-[var(--theme-border-focus)] transition-all shadow-2xs">
-                    <div className="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                        <Search className="w-3.5 h-3.5" />
-                    </div>
-                    <input type="text" value={stockSearch} onChange={(e) => setStockSearch(e.target.value)} placeholder={t('posCommand.searchStockPlaceholder')} className="flex-1 bg-transparent border-none outline-none text-[var(--theme-text-primary)] px-1 py-1 text-xs placeholder:text-[var(--theme-text-muted)] min-w-[150px]" autoFocus />
-                    {stockSearch && (
-                        <button type="button" onClick={() => setStockSearch('')} title="Clear search" aria-label="Clear search" className="w-6 h-6 rounded-full hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer mr-1">
-                            <X size={13} />
-                        </button>
-                    )}
                     {availableCategories.length > 0 && (
-                        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer focus:border-[var(--theme-border-focus)] shadow-2xs" title="Filter by Category" aria-label="Filter by Category">
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="min-h-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl px-3 text-xs font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer focus:border-[var(--theme-border-focus)] transition-colors"
+                            title={t('posCommand.allCategoriesCount', { count: availableCategories.length })}
+                            aria-label={t('posCommand.allCategoriesCount', { count: availableCategories.length })}
+                        >
                             <option value="ALL_CATEGORIES">{t('posCommand.allCategoriesCount', { count: availableCategories.length })}</option>
                             {availableCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                     )}
-                    <button type="button" onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }} title="Print product barcode and price labels" aria-label="Print product barcode and price labels" className="px-3.5 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer shadow-xs">
-                        <Printer size={13} className="opacity-90" /><span>{t('posCommand.printLabels')}</span>
+
+                    <button
+                        type="button"
+                        onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }}
+                        title={t('posCommand.printLabels')}
+                        aria-label={t('posCommand.printLabels')}
+                        className="min-h-[44px] px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                    >
+                        <Printer size={14} className="text-[var(--theme-text-secondary)]" />
+                        <span>{t('posCommand.printLabels')}</span>
                     </button>
                 </div>
 
-                <div className="overflow-x-auto rounded-2xl border border-[var(--theme-border)] isolate">
+                {/* Streamlined Filter Strip & Inline Unseen Actions */}
+                <div className="flex items-center justify-between gap-2 border-b border-[var(--theme-border)] pb-2.5">
+                    <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+                        {filterTabs.map(tab => {
+                            const isActive = activeFilter === tab.id;
+                            const isZero = tab.count === 0 && !isActive;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    type="button"
+                                    onClick={() => setActiveFilter(tab.id)}
+                                    title={tab.label}
+                                    aria-label={`${tab.label} (${tab.count})`}
+                                    aria-pressed={isActive}
+                                    className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                                        isActive
+                                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]'
+                                            : `bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] ${isZero ? 'opacity-50' : ''}`
+                                    }`}
+                                >
+                                    {tab.dotColor && !isActive && <span className={`w-1.5 h-1.5 rounded-full ${tab.dotColor} shrink-0`} />}
+                                    <span>{tab.label}</span>
+                                    <span className={`text-[11px] font-mono tabular-nums ${isActive ? 'opacity-85' : 'text-[var(--theme-text-muted)]'}`}>
+                                        {tab.count}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        {filterCounts.unseen > 0 && (
+                            <button
+                                type="button"
+                                onClick={markUpdatesAsRead}
+                                title={t('posCommand.markAllAsRead')}
+                                aria-label={t('posCommand.markAllAsRead')}
+                                className="h-8 px-2.5 rounded-lg text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                            >
+                                <CheckCheck size={13} className="text-emerald-500" />
+                                <span className="hidden sm:inline">{t('posCommand.markAllAsRead')}</span>
+                            </button>
+                        )}
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                onClick={() => { setActiveFilter('ALL'); setSelectedCategory('ALL_CATEGORIES'); setStockSearch(''); }}
+                                title={t('posCommand.resetFilters')}
+                                aria-label={t('posCommand.resetFilters')}
+                                className="h-8 px-2.5 rounded-lg text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                            >
+                                <X size={13} />
+                                <span>{t('posCommand.resetFilters')}</span>
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Product Table */}
+                <div className="overflow-x-auto rounded-xl border border-[var(--theme-border)] isolate">
                     <table className="w-full text-sm">
                         <thead className="text-[var(--theme-thead-text)] bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                             <tr>
-                                <th className="text-left p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.product')}</th>
-                                <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.price')}</th>
-                                <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.stock')}</th>
-                                <th className="text-right p-3 font-semibold uppercase tracking-wider text-[10px]">{t('common.actions') || 'Actions'}</th>
+                                <th className="text-left py-2.5 px-3.5 font-medium text-[11px] uppercase tracking-wider">{t('inventory.product')}</th>
+                                <th className="text-right py-2.5 px-3.5 font-medium text-[11px] uppercase tracking-wider">{t('inventory.price')}</th>
+                                <th className="text-right py-2.5 px-3.5 font-medium text-[11px] uppercase tracking-wider">{t('inventory.stock')}</th>
+                                <th className="text-right py-2.5 px-3.5 font-medium text-[11px] uppercase tracking-wider">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--theme-border)]">
                             {paginatedProducts.map(product => {
                                 const stock = product.stock || 0;
                                 const minimum = product.minStock && product.minStock > 0 ? product.minStock : 10;
-                                const stockLabel = stock <= 0 ? 'Out of stock' : stock < minimum ? 'Low stock' : '';
-                                return <tr key={product.id} onClick={() => setSelectedProduct(product)} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer">
-                                    <td className="p-3 max-w-[22rem]">
-                                        <button type="button" onClick={() => setSelectedProduct(product)} className="text-left rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={`View details for ${product.name}`}>
-                                            <span className="block font-medium text-[var(--theme-text-primary)]">{formatProductDisplayName(product) || product.name}</span>
-                                            <span className="block mt-1 text-xs font-mono text-[var(--theme-text-secondary)]">{product.sku}</span>
-                                        </button>
-                                    </td>
-                                    <td className="p-3 text-right whitespace-nowrap font-mono tabular-nums text-[var(--theme-text-primary)]">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</td>
-                                    <td className="p-3 text-right whitespace-nowrap">
-                                        <span className="font-mono tabular-nums text-[var(--theme-text-primary)]">{formatStockDisplay(stock, product)}</span>
-                                        {stockLabel && <span className="block mt-1 text-xs text-[var(--theme-text-secondary)]">{stockLabel}</span>}
-                                    </td>
-                                    <td className="p-3" onClick={event => event.stopPropagation()}>
-                                        <div className="flex justify-end items-center gap-2">
-                                            <button type="button" onClick={() => setSelectedProduct(product)} className="min-h-[44px] px-3 rounded-lg border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{t('posCommand.productDetails')}</button>
-                                            <button type="button" onClick={() => { setLabelsToPrint([{ product, quantity: 1 }]); setIsPrintHubOpen(true); }} aria-label={`Print label for ${product.name}`} title="Print label" className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"><Printer size={16}/></button>
-                                        </div>
-                                    </td>
-                                </tr>;
+                                const stockLabel = stock <= 0 ? t('posCommand.filterOutOfStock') : stock < minimum ? t('posCommand.filterLowStock') : '';
+                                const flags = getUpdateFlags(product, lastSeenUpdates);
+                                return (
+                                    <tr key={product.id} onClick={() => setSelectedProduct(product)} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer">
+                                        <td className="py-2.5 px-3.5 max-w-[22rem]">
+                                            <button type="button" onClick={() => setSelectedProduct(product)} className="text-left rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={`${t('posCommand.productDetails')}: ${product.name}`}>
+                                                <span className="flex items-center gap-1.5 font-medium text-[var(--theme-text-primary)]">
+                                                    {flags.isUnseen && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />}
+                                                    <span className="truncate">{formatProductDisplayName(product) || product.name}</span>
+                                                </span>
+                                                <span className="block mt-0.5 text-xs font-mono text-[var(--theme-text-secondary)]">
+                                                    {product.sku}{product.category ? ` · ${product.category}` : ''}
+                                                </span>
+                                            </button>
+                                        </td>
+                                        <td className="py-2.5 px-3.5 text-right whitespace-nowrap font-mono tabular-nums font-medium text-[var(--theme-text-primary)]">
+                                            {CURRENCY_SYMBOL} {formatPriceValue(product.price)}
+                                        </td>
+                                        <td className="py-2.5 px-3.5 text-right whitespace-nowrap">
+                                            <span className="font-mono tabular-nums text-[var(--theme-text-primary)]">{formatStockDisplay(stock, product)}</span>
+                                            {stockLabel && (
+                                                <span className={`block mt-0.5 text-[11px] font-medium ${stock <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
+                                                    {stockLabel}
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="py-2.5 px-3.5" onClick={event => event.stopPropagation()}>
+                                            <div className="flex justify-end items-center gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSelectedProduct(product)}
+                                                    className="min-h-[44px] px-3 rounded-lg border border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-xs font-medium text-[var(--theme-text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                >
+                                                    {t('posCommand.productDetails')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setLabelsToPrint([{ product, quantity: 1 }]); setIsPrintHubOpen(true); }}
+                                                    aria-label={`${t('posCommand.printLabels')}: ${product.name}`}
+                                                    title={t('posCommand.printLabels')}
+                                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                >
+                                                    <Printer size={15} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
                             })}
                             {filteredProducts.length === 0 && (
                                 <tr>
-                                    <td colSpan={4} className="p-8 text-center text-[var(--theme-text-secondary)] font-medium">
-                                        {activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' ? t('posCommand.noProductsMatchingFilters') : t('posCommand.noProductsLocation')}
+                                    <td colSpan={4} className="p-8 text-center text-[var(--theme-text-secondary)] text-xs font-medium">
+                                        {hasActiveFilters ? t('posCommand.noProductsMatchingFilters') : t('posCommand.noProductsLocation')}
                                     </td>
                                 </tr>
                             )}
@@ -221,13 +311,33 @@ export const StockListModal: React.FC = () => {
                 </div>
 
                 {filteredProducts.length > 0 && (
-                    <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-4 bg-transparent mt-4">
-                        <div className="text-xs text-[var(--theme-text-secondary)] flex items-center gap-2">
-                            <span>{t('common.page')} {currentPage} / {totalPages}</span><span className="opacity-50">|</span><span>{filteredProducts.length} {t('inventory.products')}</span>
+                    <div className="flex items-center justify-between pt-2">
+                        <div className="text-xs text-[var(--theme-text-secondary)] flex items-center gap-2 tabular-nums">
+                            <span>{t('common.page')} {currentPage} / {totalPages}</span>
+                            <span className="opacity-40">·</span>
+                            <span>{filteredProducts.length} {t('inventory.products')}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage <= 1} title="Previous page" aria-label="Previous page" className="px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-[10px] font-bold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer">{t('common.previous')}</button>
-                            <button onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage >= totalPages} title="Next page" aria-label="Next page" className="px-3.5 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 text-[10px] font-bold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer">{t('common.next')}</button>
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage <= 1}
+                                title={t('common.previous')}
+                                aria-label={t('common.previous')}
+                                className="min-h-[36px] px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-medium rounded-lg border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            >
+                                {t('common.previous')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage >= totalPages}
+                                title={t('common.next')}
+                                aria-label={t('common.next')}
+                                className="min-h-[36px] px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-medium rounded-lg border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            >
+                                {t('common.next')}
+                            </button>
                         </div>
                     </div>
                 )}
