@@ -1,4 +1,5 @@
 import type { TranslationBlock } from './types';
+
 export const approvalInbox: TranslationBlock = {
   title: { en: 'Approvals', am: 'ማጽደቆች', or: 'Raggaasifamoota' },
   yourApprovals: { en: 'Your approvals', am: 'የእርስዎ ማጽደቆች', or: 'Raggaasifamoota kee' },
@@ -7,6 +8,21 @@ export const approvalInbox: TranslationBlock = {
   unavailable: { en: 'Approval inbox unavailable. Open it to retry.', am: 'የማጽደቅ ሳጥኑ አይገኝም። እንደገና ለመሞከር ይክፈቱ።', or: 'Saanduqni raggaasifamaa hin argamu. Irra deebi’uuf bani.' },
   partial: { en: 'Some queues could not be checked.', am: 'አንዳንድ ወረፋዎች ሊጣሩ አልቻሉም።', or: 'Tarreewwan tokko tokko sakatta’amuu hin dandeenye.' },
   open: { en: 'Open approval inbox', am: 'የማጽደቅ ሳጥን ክፈት', or: 'Saanduqa raggaasifamaa bani' },
+  subtitle: { en: 'Your next review steps across departments, within your authorized country and region.', am: 'በተፈቀደልዎ ሀገር እና ክልል ውስጥ በመምሪያዎች መካከል ያሉ ቀጣይ የግምገማ እርምጃዎችዎ።', or: 'Tarkaanfiiwwan gamaaggamaa itti aanan dameelee gidduutti, biyya fi naannoo heyyamametti.' },
+  refresh: { en: 'Refresh', am: 'አድስ', or: 'Haaromsi' },
+  review: { en: 'Review', am: 'ግምገማ', or: 'Gamaaggami' },
+  awaitingReview: { en: '{count} awaiting review', am: '{count} ግምገማ ይጠብቃሉ', or: '{count} gamaaggama eegaa jiru' },
+  noQueuesAssigned: { en: 'No approval queues are assigned to your role.', am: 'ለእርስዎ ሚና የተመደበ የማጽደቅ ወረፋ የለም።', or: 'Tarreen raggaasisaa qooda keetiif ramadame hin jiru.' },
+  inboxError: { en: 'The inbox could not be loaded. Refresh to retry. Pending totals are unavailable.', am: 'የማጽደቅ ሳጥኑን መጫን አልተቻለም። እንደገና ለመሞከር ያድሱ። የሚጠብቁ ድምሮች አይገኙም።', or: 'Saanduqa fe’uun hin danda’amne. Irra deebi’uuf haaromsi. Dimshaashni eegaa jiru hin jiru.' },
+  unavailableQueue: { en: 'Unavailable in this environment or for this account. Pending count could not be verified.', am: 'በዚህ አካባቢ ወይም ለዚህ መለያ አይገኝም። የሚጠብቀው ቁጥር ሊረጋገጥ አልቻለም።', or: 'Naannoo kanatti ykn herrega kanaaf hin argamu. Lakkoofsi eegaa jiru hin mirkanoofne.' },
+  governanceNotice: { en: 'Counts reflect delegated review steps. Specialist clearances must precede final line sign-off where required.', am: 'ቁጥሮች የተወከሉ የግምገማ እርምጃዎችን ያንፀባርቃሉ። በሚፈለግበት ቦታ የባለሙያ ማረጋገጫ ከመጨረሻው መስመር ማጽደቅ በፊት መቅደም አለበት።', or: 'Lakkoofsonni tarkaanfii gamaaggama bakka-bu’iinsaa agarsiisu. Bakka barbaachisutti mirkaneessi ogeessaa raggaasisa dhumaa dura ta’uu qaba.' },
+  specialistClearance: { en: 'Specialist Clearance', am: 'የባለሙያ ማረጋገጫ', or: 'Mirkaneessa Ogeessaa' },
+  finalLineApproval: { en: 'Final Line Approval', am: 'የመጨረሻ መስመር ማጽደቅ', or: 'Raggaasisa Sadarkaa Dhumaa' },
+  financeClearanceRequired: { en: 'Finance Clearance Required', am: 'የፋይናንስ ማረጋገጫ ያስፈልጋል', or: 'Mirkaneessi Faayinaansii Barbaachisaadha' },
+  hrBandClearance: { en: 'HR Band Clearance', am: 'የሰው ኃይል እርከን ማረጋገጫ', or: 'Mirkaneessa Sadarkaa Humna Namaa' },
+  filterAll: { en: 'All reviews', am: 'ሁሉም ግምገማዎች', or: 'Gamaaggama hunda' },
+  filterClearances: { en: 'Specialist Clearances', am: 'የባለሙያ ማረጋገጫዎች', or: 'Mirkaneessota ogeessotaa' },
+  filterFinal: { en: 'Final Line Approvals', am: 'የመጨረሻ መስመር ማጽደቆች', or: 'Raggaasisa sadarkaa dhumaa' },
   areaMerchandising: { en: 'Merchandising', am: 'የሸቀጦች አደረጃጀት', or: 'Qindaa’ina meeshaalee' },
   areaProcurement: { en: 'Procurement', am: 'ግዥ', or: 'Bittaa' },
   areaFinance: { en: 'Finance', am: 'ፋይናንስ', or: 'Faayinaansii' },
