@@ -80,7 +80,7 @@ export function useProductControlProposals(product: Product | null, country: str
             const result = await submit(priceBatch.changes, priceBatch.source);
             setBatchFailures(result.failures);
             setPriceBatch(result.failures.length ? { ...priceBatch, changes: priceBatch.changes.filter(change => result.failures.some(failure => failure.productId === change.product.id)) } : null);
-            if (result.submitted) { setLastSubmitted(`${result.submitted} price proposal(s)`); onSaved?.(); }
+            if (result.submitted) { setLastSubmitted(`${result.proposalCount} scoped price proposal(s) for ${result.submitted} locations`); onSaved?.(); }
             return result.submitted > 0 && result.failures.length === 0;
         } finally { setIsSaving(false); }
     };

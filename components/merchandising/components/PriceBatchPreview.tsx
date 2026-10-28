@@ -14,8 +14,8 @@ export function PriceBatchPreview({ batch, failures = [], sites, currency, pendi
     const locations = new Set(batch.changes.map(change => change.product.siteId || change.product.site_id));
     return <Modal isOpen onClose={() => { if (!pending) onClose(); }} title="Review price proposals" size="xl" zIndex="z-[10010]">
         <div className="space-y-4 text-[var(--theme-text-primary)]">
-            <p>{batch.source} · {batch.changes.length} product record(s) across {locations.size} location(s).</p>
-            <p className="text-sm text-[var(--theme-text-secondary)]">Selling prices round to the nearest whole number. Submission creates proposals; Operations, Supply Chain and Merchandising must approve before prices change. Below-floor prices also require Finance signoff.</p>
+            <p>{batch.source} · {new Set(batch.changes.map(change => change.product.sku)).size} scoped proposal(s) · {batch.changes.length} product record(s) across {locations.size} location(s).</p>
+            <p className="text-sm text-[var(--theme-text-secondary)]">Selling prices round to the nearest whole number. Each SKU creates one proposal covering the selected locations. Independent commercial approval applies all included locations together. If any location falls below 15% margin, Country Finance clearance is required first.</p>
             <div className="max-h-[50vh] overflow-auto rounded-xl border border-[var(--theme-border)]">
                 <table className="w-full text-left text-sm"><thead><tr><th className="p-3">Product / location</th><th className="p-3">Selling price</th><th className="p-3">Proposed margin</th></tr></thead>
                     <tbody>{batch.changes.map(({ product, proposal }) => {

@@ -4,7 +4,7 @@ import { computeMarginPct, effectivePrice, type PriceProposal } from './pricingG
 export interface PriceChangeInput { product: Product; proposal: PriceProposal }
 export interface PriceBatch { source: string; changes: PriceChangeInput[] }
 export interface PriceBatchResult {
-    submitted: number; financeFlagged: number; submittedIds: string[];
+    submitted: number; proposalCount?: number; financeFlagged: number; submittedIds: string[];
     failures: Array<{ productId: string; message: string }>;
 }
 export function sellingMargin(product: Partial<Product>): number | null {

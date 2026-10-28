@@ -1,35 +1,26 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
-import { useCreateInventoryRequestMutation } from './useInventoryRequestMutations';
-import { useStore } from '../contexts/CentralStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { APPROVAL_INBOX_KEY } from '../utils/unifiedApprovalInbox';
+import { PRODUCT_APPROVAL_INBOX_KEY } from '../utils/approvalInbox';
 import { useData } from '../contexts/DataContext';
-import { submitPriceBatch, type PriceChangeInput } from '../utils/priceManager';
+import { submitScopedPriceProposals } from '../services/scoped-price-proposals.service';
+import type { PriceChangeInput } from '../utils/priceManager';
 export type { PriceChangeInput } from '../utils/priceManager';
-import { buildPriceChangeRequest, isBelowMarginFloor, type PriceProposal } from '../utils/pricingGovernance';
 
-/**
- * Submits price changes for the authorized merchandising lead (inventory_requests).
- * Returns the number of requests submitted and how many need Finance co-approval.
- */
+/** One proposal per SKU and selected scope, with atomic per-location validation. */
 export function useSubmitPriceChanges(countryCode: string) {
     const queryClient = useQueryClient();
-    const { user } = useStore();
     const { addNotification } = useData();
-    const createRequest = useCreateInventoryRequestMutation();
-
-    const submit = useCallback(
-        async (changes: PriceChangeInput[], source: string) => {
-            const requestedBy = user?.name || user?.email || 'Unknown';
-            const result = await submitPriceBatch(changes, async ({ product, proposal }) => {
-                await createRequest.mutateAsync(buildPriceChangeRequest({ product, proposal, requestedBy, countryCode, source }));
-            }, isBelowMarginFloor);
-            if (result.submitted > 0) addNotification('success', `${result.submitted} price proposal(s) submitted for Operations, Supply Chain and Merchandising approval${result.financeFlagged ? `; ${result.financeFlagged} also require Finance signoff` : ''}.`);
-            if (result.failures.length) addNotification('alert', `${result.failures.length} proposal(s) were not submitted. Their selections are retained for retry.`);
-            if (result.submitted) { queryClient.invalidateQueries({ queryKey: ['product_pending_changes'] }); queryClient.invalidateQueries({ queryKey: ['product_change_history'] }); }
-            return result;
+    const mutation = useMutation({
+        mutationFn: ({ changes, source }: { changes: PriceChangeInput[]; source: string }) =>
+            submitScopedPriceProposals(countryCode, changes, source),
+        onSuccess: result => {
+            if (result.submitted) {
+                addNotification('success', `${result.proposalCount} scoped price proposal(s) saved for ${result.submitted} product location(s).${result.financeFlagged ? ` ${result.financeFlagged} location(s) require Finance clearance before commercial approval.` : ' Independent commercial approval is required.'}`);
+                for (const key of ['product_pending_changes', 'product_change_history', 'merchandising_reviews', PRODUCT_APPROVAL_INBOX_KEY, APPROVAL_INBOX_KEY])
+                    void queryClient.invalidateQueries({ queryKey: [key] });
+            }
+            if (result.failures.length) addNotification('alert', `${result.failures.length} product location(s) could not be submitted. Their selections are retained for retry.`);
         },
-        [user, countryCode, createRequest, addNotification]
-    );
-
-    return { submit, isPending: createRequest.isPending };
+    });
+    return { submit: (changes: PriceChangeInput[], source: string) => mutation.mutateAsync({ changes, source }), isPending: mutation.isPending };
 }

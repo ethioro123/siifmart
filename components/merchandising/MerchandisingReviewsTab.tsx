@@ -268,7 +268,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
 
           {requests.map(request => {
             const site = (sites || []).find(site => (site.id === request.siteId || site.code === request.siteId) && site.country === country);
-            const siteLabel = site ? `${site.name} · ${site.code}` : 'Site unavailable';
+            const siteLabel = request.priceApprovalRoute?.targetCount ? `${request.priceApprovalRoute.scopeLabel} · ${request.priceApprovalRoute.targetCount} locations` : site ? `${site.name} · ${site.code}` : 'Site unavailable';
             const isPrice = isPriceProposal(request);
             const baselineProduct = request.currentProduct || products.find(p => p.id === request.productId);
             const canApprove = !proposalApprovalBlock(request,user,baselineProduct);
@@ -363,11 +363,11 @@ export const MerchandisingReviewsTab: React.FC = () => {
                 </div>
 
                 {/* Structured Before-and-After Comparison Diff View */}
-                <ProposalDiffView
+                {request.priceApprovalRoute?.targetCount ? <p className="mt-3 text-sm text-[var(--theme-text-secondary)]">One scoped proposal · Lowest proposed location margin: {request.priceApprovalRoute.minMarginPct}% · Open Review proposal to inspect all locations.</p> : <ProposalDiffView
                   request={request}
                   currentProduct={baselineProduct}
                   currencySymbol={currencySymbol}
-                />
+                />}
 
                 {/* 3-Way Regional Approval Progress */}
                 <div className="pt-2">

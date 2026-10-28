@@ -1,3 +1,4 @@
+import { ScopedPriceTargets } from './ScopedPriceTargets';
 import { isPriceProposal } from '../../../utils/priceApproval';
 import React, { useState } from 'react';
 import Modal from '../../Modal';
@@ -23,7 +24,7 @@ export function ProposalReviewModal({ request, currentProduct, country, currency
       <button type="button" disabled={Boolean(block) || submitting} onClick={() => void confirm()} className="min-h-11 rounded-xl bg-[var(--theme-accent)] px-4 text-[var(--theme-btn-primary-text)] disabled:opacity-50">{submitting ? 'Recording approval…' : isPriceProposal(request) ? 'Approve price change' : 'Record regional approval'}</button></div>}>
     <h3 className="font-semibold text-[var(--theme-text-primary)]">{request.productName}</h3>
     <p className="mt-1 text-sm text-[var(--theme-text-secondary)]">SKU: {request.productSku} · Requested by {request.requestedBy} · {request.status}</p>
-    <ProposalDiffView request={request} currentProduct={currentProduct || request.currentProduct} currencySymbol={currencySymbol} />
+    {request.priceApprovalRoute?.targetCount ? <ScopedPriceTargets key={request.id} request={request} country={country} currency={currencySymbol} /> : <ProposalDiffView request={request} currentProduct={currentProduct || request.currentProduct} currencySymbol={currencySymbol} />}
     <div className="mt-4"><ProductEditApprovalProgress request={request} /></div>
     {block && <p role="status" className="mt-4 text-sm text-[var(--theme-text-secondary)]">{block}</p>}
     {error && <p role="alert" className="mt-4 text-sm text-[var(--theme-status-danger-text)]">{error}</p>}
