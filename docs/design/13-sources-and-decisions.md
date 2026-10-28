@@ -33,6 +33,10 @@ This handbook is original SIIFMART product guidance informed by those sources an
 
 Some Apple documentation pages expose JavaScript shells or markdown alternatives that individual research tools cannot retrieve. This edition uses verified official indexed text and the accessible official video transcript for its cited platform claims. It avoids inventing detailed typography or animation prescriptions from an unreadable page.
 
+## Revision B: additional primary references
+
+The 29 October 2026 refinement establishes a platform-neutral SIIFMART language. [Material foundations](https://m3.material.io/foundations/) inform the separation of tokens, interaction states and adaptive layout. [Fluent principles](https://fluent2.microsoft.design/design-principles) inform coherent, human-centered experiences across tools. Their visual identities and native measurements are not copied as mandatory web specifications. Our exact component dimensions and reference palette are explicit internal choices, supported by the reference checks.
+
 ## Internal implementation evidence
 
 Inspected `styles/theme.css`, `index.css`, `hooks/useTheme.ts`, `components/ThemeSelector.tsx`, `components/shared/Button.tsx`, `components/shared/PageHeader.tsx`, `components/Modal.tsx`, the compact product-approval patterns, `AGENTS.md` and the focused engineering guide. This is a bounded implementation review, not a screen-by-screen product audit.
@@ -57,3 +61,5 @@ The theme defines colors, radii, spacing, control heights and motion values. The
 ## Change log
 
 **29 October 2026:** Replaced the short UI guide with a comprehensive standard and thirteen linked reference chapters. Added the root entry point. Reconciled the focused engineering guide's compulsory-material and Fulfillment-only fallback language with a task-led, accessible, measured approach. Runtime styles and application components are unchanged by this documentation task; adoption requires normal implementation and verification.
+
+**29 October 2026, Revision B:** Added chapters 14–17: precise component anatomy, state/theme contracts, adaptive/data defaults and a runnable reference board. Added solid-color contrast checking and isolated Playwright reference tests. Existing production tokens and UI remain unchanged; shared-component migration requires normal verification.

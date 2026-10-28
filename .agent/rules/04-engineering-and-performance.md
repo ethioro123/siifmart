@@ -62,9 +62,10 @@ import { ROLES } from '../constants';
 <div style={{ width: `${percentage}%` }} />
 ```
 
-### Design standard — 29 October 2026
+### Design standard — 29 October 2026, Revision B
 
 - Follow the canonical [SIIFMART Design Standard](../../docs/APPLE_DESIGN_GUIDE.md) and its focused chapters. The repository-root `APPLE_DESIGN_GUIDE.md` is an entry-point pointer, not a second specification.
+- Chapters 14–17 define platform-neutral component anatomy, exact defaults, state/theme pairs, adaptive behavior and runnable reference checks. Use these for deliberately migrated shared components; do not assume the reference palette is already deployed.
 - `styles/theme.css` owns semantic colors, radii, spacing, control sizes, motion values and existing material utilities; `index.css` maps them into Tailwind. These are SIIFMART values, not official Apple web presets.
 - Preserve the corporate wordmark in `components/Logo.tsx`; use the shared neutral primary-action, accent and semantic-status roles throughout the application.
 - Readable content surfaces are the default for tables, forms, financial evidence, modal bodies and scanning work. Restrained material may enhance navigation or temporary chrome only when legibility and measured rendering support it. Existing `.glass-*` classes are optional utilities, not mandatory visual tiers.

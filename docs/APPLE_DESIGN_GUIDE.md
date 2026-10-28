@@ -1,10 +1,10 @@
 # SIIFMART Design Standard
 
-**Edition:** 29 October 2026 · **Status:** authoritative internal design specification · **Audience:** product, design, engineering and QA.
+**Edition:** 29 October 2026, Revision B · **Status:** authoritative internal design specification · **Audience:** product, design, engineering and QA.
 
 SIIFMART should feel composed, precise and immediate. People should recognize the next action, understand the business consequence, and trust the result. Our design quality comes from the relationships between information, controls and feedback, supported by disciplined visual craft. Every module must work convincingly in daily use, including a country director's large desktop, a store supervisor's phone and a warehouse worker's scanner.
 
-This is SIIFMART's Apple-inspired web standard. It interprets current Apple guidance for our React, Tailwind and browser-based product. It is not an Apple specification, a native-framework implementation, or a claim that our existing screens already conform. Numerical design targets below are SIIFMART decisions unless an external standard is explicitly identified. Native Apple points and web CSS pixels are different units; CSS approximations do not reproduce native Liquid Glass.
+This is SIIFMART's own platform-neutral web standard: modern elegance through simplicity, precision and readable operational information. It draws selectively on Apple, Material and Fluent guidance for our React, Tailwind and browser-based product. It is not an Apple specification, a native-framework implementation, or a claim that our existing screens already conform. Numerical design targets below are SIIFMART decisions unless an external standard is explicitly identified. Native Apple points and web CSS pixels are different units; CSS approximations do not reproduce native Liquid Glass.
 
 ## What changed in this edition
 
@@ -29,8 +29,16 @@ The verified 2026 Apple direction includes refinement of Liquid Glass, stronger 
 | [11 · Engineering and performance](design/11-engineering-and-performance.md) | Shared components, browser capability, data freshness and measurable speed |
 | [12 · Review, acceptance and rollout](design/12-review-and-rollout.md) | Definition of done, evidence, severity, migration and maintenance |
 | [13 · Sources and design decisions](design/13-sources-and-decisions.md) | Verified references, source boundaries and rationale |
+| [14 · Precise component contracts](design/14-component-contracts.md) | Exact dimensions, anatomy, density, spacing and behavior for controls and overlays |
+| [15 · State and theme specification](design/15-states-and-theme-pairs.md) | Explicit light/dark pairings, state priority and verified reference colors |
+| [16 · Layout and data contracts](design/16-layout-and-data-contracts.md) | Breakpoints, gutters, header, inspector, table and chart composition |
+| [17 · Reference and visual acceptance](design/17-reference-and-visual-acceptance.md) | Runnable component board, reference tests and baseline-review discipline |
 
 Chapters form one standard. Read the relevant workflow chapter together with accessibility and verification before implementing. Do not treat a visual chapter as permission to weaken a business or security rule.
+
+## Revision B: implementation precision
+
+Chapters 14–17 add exact component defaults and a [runnable visual reference](design/examples/component-reference.html). They define our own restrained visual language without requiring an Apple look. The reference palette is a contrast-checked migration target; it is not silently applied to production styles. Exact defaults refine prior chapter ranges, while content growth, localization, accessibility and security retain precedence. The reference checker and focused browser tests verify the artifact; they do not certify unrelated production screens.
 
 ## The essential rules
 
