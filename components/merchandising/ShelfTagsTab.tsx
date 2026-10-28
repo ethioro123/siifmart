@@ -222,9 +222,9 @@ export const ShelfTagsTab: React.FC = () => {
 
          {/* Floor Price Parity Scanner Bar */}
          <ShelfTagParityVerifier
-            activeSite={activeSite}
+            activeSite={activeSite || null}
             allSites={sites || []}
-            onSelectFacility={selectSite}
+            onSelectFacility={setActiveSite}
             currencySymbol={currencySymbol}
             scopeKey={scopeKey}
             onDiscrepancyDetected={handleDiscrepancyDetected}

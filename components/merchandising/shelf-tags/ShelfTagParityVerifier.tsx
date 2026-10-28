@@ -4,7 +4,7 @@ import type { Product } from '../../../types';
 import { shelfTagsService, ShelfTagAuditRecord } from '../../../services/shelf-tags.service';
 
 interface ShelfTagParityVerifierProps {
-   activeSite: { id: string; name: string; code?: string } | null;
+   activeSite: { id: string; name: string; code?: string } | null | undefined;
    allSites: Array<{ id: string; name: string; code?: string }>;
    onSelectFacility: (siteId: string) => void;
    currencySymbol: string;
