@@ -15,9 +15,9 @@ The screen manages store-level shelf positions. Zone/aisle/bay identifiers and p
 
 ## Database deployment
 
-- `migrations/20261028_planogram_integrity.sql`: applied to SIIFMART Staging (`utykzifrblpyxlvlknsm`). Production application is pending.
-- `migrations/20261028_restore_product_edit_foundation.sql`: saved but not applied. Production lacks `private.product_edit_votes`, the baseline/approval columns and the helper functions its existing product approval RPC references. Staging already has these prerequisites.
-- Automatic approval review rejected the production foundation restore because it changes shared product-edit tables, RLS policies, triggers and security functions. Explicit approval is needed before applying that restore and then the integrity migration to production (`zdgzpxvorwinugjufkvb`).
+- `migrations/20261028_planogram_integrity.sql`: applied to SIIFMART Staging (`utykzifrblpyxlvlknsm`) and production (`zdgzpxvorwinugjufkvb`). Production migration version: `20261028102523`.
+- `migrations/20261028_restore_product_edit_foundation.sql`: applied to production with explicit user approval. Production migration version: `20261028102514`. Restored the missing private vote table, baseline/approval columns and product-edit guard helpers. Staging already had these prerequisites.
+- Production deployment completed on 28 October 2026 after the user approved both saved migrations. No outstanding deployment blocker remains for these migrations.
 
 ## Verification
 
@@ -26,3 +26,5 @@ The screen manages store-level shelf positions. Zone/aisle/bay identifiers and p
 - `tests/sql/planogram_integrity.sql` passed on staging inside a transaction that is rolled back. It verifies country rejection, duplicate prevention, no application before all three votes, complete two-product application, stale baseline rejection and rollback of partial application.
 - TypeScript, application build and file-size checks passed during this work. Existing test import logging and build bundle-size/browser-data warnings remain unrelated.
 - Staging security advisors still return existing project-wide findings; this change does not claim to resolve those unrelated findings.
+
+Production verification confirmed both migration records, the enabled request guard, vote-table RLS, grouped decision handling, stale-data and duplicate guards. Anonymous RPC execution and direct authenticated access to the private vote table/helper are denied. An unauthenticated submission check passed inside a rolled-back transaction; no real production requests were approved for testing. Existing project-wide security advisor findings remain outside this deployment.
