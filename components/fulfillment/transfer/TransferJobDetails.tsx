@@ -309,7 +309,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 {/* Footer */}
                 <div className="px-5 sm:px-6 py-3 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex flex-wrap items-center justify-between gap-3 shrink-0 z-10">
                     <div className="flex items-center gap-2 text-xs font-medium text-[var(--theme-text-secondary)]">
-                        <span className="text-[11px] text-[var(--theme-accent)] font-semibold uppercase tracking-wider">Route:</span>
+                        <span className="text-[11px] text-[var(--theme-accent)] font-semibold uppercase tracking-wider">{t('warehouse.routeLabel')}:</span>
                         {(() => {
                             const srcSite = sites.find(x => x.id === selectedJob.sourceSiteId);
                             const destSite = sites.find(x => x.id === selectedJob.destSiteId);
@@ -335,7 +335,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-green-600 hover:bg-green-700 text-white shadow-sm transition-opacity flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 {loading === 'approve' ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
-                                <span>Approve</span>
+                                <span>{t('warehouse.approveTransfer')}</span>
                             </button>
                         )}
                         {['Requested', 'Draft', 'Pending'].includes(transferStatus) && isManager && (
@@ -345,7 +345,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 {loading === 'reject' ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
-                                <span>Reject</span>
+                                <span>{t('warehouse.rejectTransfer')}</span>
                             </button>
                         )}
                         {deletionPerm.canDelete && (
@@ -355,7 +355,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-bg-subtle)] hover:bg-red-500 hover:text-white border border-[var(--theme-border)] text-[var(--theme-text-secondary)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 {loading === 'delete' ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                                <span>Delete Manifest</span>
+                                <span>{t('warehouse.deleteManifest')}</span>
                             </button>
                         )}
                         {canInspectTransferArrival(selectedJob, user?.role, activeSite?.id) && (

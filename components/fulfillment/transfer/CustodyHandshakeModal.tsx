@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ShieldCheck, AlertTriangle, CheckCircle, Truck, UserCheck, X } from 'lucide-react';
 import { WMSJob, ReceivingItem, Product, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface CustodyHandshakeModalProps {
     isOpen: boolean;
@@ -33,6 +34,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
     verifiedHasDiscrepancy,
     verifiedDiscrepancyCount
 }) => {
+    const { t } = useLanguage();
     const isBlindReceiving = true;
 
     if (!isOpen) return null;
@@ -67,10 +69,10 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         </div>
                         <div>
                             <h3 className="text-base font-bold text-[var(--theme-text-primary)] tracking-tight">
-                                Receipt Accountability
+                                {t('warehouse.receiptAccountability')}
                             </h3>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
-                                Blind count recorded to the signed-in receiver
+                                {t('warehouse.blindCountRecordedToReceiver')}
                             </p>
                         </div>
                     </div>
@@ -89,26 +91,25 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                     
                     {/* Legal Custody Notice */}
                     <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] leading-relaxed font-normal">
-                            <span className="font-bold text-[var(--theme-text-primary)] uppercase mr-1">Receipt record:</span>
-                            The quantities and condition you entered will be saved under your employee identity when you accept this delivery.
+                        {t('warehouse.legalCustodyNotice')}
                     </div>
 
                     {/* Parties Handshake Card */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="p-3.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
                             <div className="flex items-center gap-1.5 mb-1 text-[11px] font-semibold text-amber-500 uppercase tracking-wider">
-                                <Truck size={14} /> Relinquishing Custody
+                                <Truck size={14} /> {t('warehouse.relinquishingCustody')}
                             </div>
                             <p className="font-bold text-[var(--theme-text-primary)] break-words text-sm leading-tight">{driverName}</p>
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">Transit Driver / Courier</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{t('warehouse.transitDriverCourier')}</p>
                         </div>
 
                         <div className="p-3.5 rounded-xl border border-primary/20 bg-primary/5">
                             <div className="flex items-center gap-1.5 mb-1 text-[11px] font-semibold text-primary uppercase tracking-wider">
-                                <UserCheck size={14} /> Assuming Custody
+                                <UserCheck size={14} /> {t('warehouse.assumingCustody')}
                             </div>
                             <p className="font-bold text-[var(--theme-text-primary)] break-words text-sm leading-tight">{currentUser?.name || 'Receiver Staff'}</p>
-                            <p className="text-[11px] text-primary font-mono">Store Receiving Custodian</p>
+                            <p className="text-[11px] text-primary font-mono">{t('warehouse.storeReceivingCustodian')}</p>
                         </div>
                     </div>
 
@@ -117,9 +118,9 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center gap-3">
                             <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <div>
-                                <p className="font-bold text-sm tracking-tight">Count matched the dispatch record</p>
+                                <p className="font-bold text-sm tracking-tight">{t('warehouse.countMatchedDispatchRecord')}</p>
                                 <p className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">
-                                    All units received in Good Condition matching manifest ({formatJobId(activeTransferJob)}).
+                                    {t('warehouse.allUnitsGoodCondition', { jobId: formatJobId(activeTransferJob) })}
                                 </p>
                             </div>
                         </div>
@@ -130,11 +131,11 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                                 <div>
                                     <p className="font-bold tracking-tight">
                                         {totalDiscrepantUnits > 0
-                                            ? `Receipt variance recorded (${totalDiscrepantUnits} unit${totalDiscrepantUnits === 1 ? '' : 's'})`
-                                            : `Condition issue recorded (${discrepantItems.length} line item${discrepantItems.length === 1 ? '' : 's'})`}
+                                            ? t('warehouse.receiptVarianceRecorded', { count: totalDiscrepantUnits })
+                                            : t('warehouse.conditionIssueRecorded', { count: discrepantItems.length })}
                                     </p>
                                     <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80 mt-0.5">
-                                        The quantities and condition you entered will be saved as received and attributed to you.
+                                        {t('warehouse.varianceAttributionNotice')}
                                     </p>
                                 </div>
                             </div>
@@ -176,7 +177,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         disabled={isSubmitting}
                         className="min-h-[44px] px-4 py-2.5 rounded-xl border border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-semibold hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-all text-xs touch-manipulation"
                     >
-                        Revise Counts
+                        {t('warehouse.reviseCounts')}
                     </button>
                     <button
                         onClick={handleExecute}
@@ -189,7 +190,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         }`}
                     >
                         <ShieldCheck size={16} />
-                        {isSubmitting ? 'Recording Receipt...' : hasDiscrepancy ? 'Accept Variance & Take Custody' : 'Confirm Receipt & Take Custody'}
+                        {isSubmitting ? 'Recording Receipt...' : hasDiscrepancy ? t('warehouse.acceptVarianceAndTakeCustody') : t('warehouse.confirmReceiptAndTakeCustody')}
                     </button>
                 </div>
             </div>
