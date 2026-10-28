@@ -28,7 +28,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
   const focusedRequest = searchParams.get('requestId') || undefined;
   const focusedRevision = searchParams.get('revisionId') || undefined;
   useEffect(() => { setPage(1); }, [focusedRequest, focusedRevision]);
-  const { addNotification, effectiveCountry, activeSite, sites } = useData();
+  const { addNotification, effectiveCountry, activeSite, countrySites: sites } = useData();
   const { products } = useMerchandising();
   const [productId, setProductId] = useState('');
   const [name, setName] = useState('');

@@ -7,7 +7,7 @@ import { MemoryRouter } from 'react-router-dom';
 import type { PendingInventoryChange } from '../../types';
 const mocks=vi.hoisted(()=>({ role:'group_ceo', read:vi.fn(), approve:vi.fn(), notify:vi.fn(), sites:[] as Array<{id:string;code:string;name:string;country:string}> }));
 vi.mock('../../contexts/CentralStore',()=>({useStore:()=>({user:{id:'actor',role:mocks.role,name:'Regional actor',country:'ET'}})}));
-vi.mock('../../contexts/DataContext',()=>({useData:()=>({effectiveCountry:'ET',activeSite:{id:'hq'},sites:mocks.sites,addNotification:mocks.notify})}));
+vi.mock('../../contexts/DataContext',()=>({useData:()=>({effectiveCountry:'ET',activeSite:{id:'hq'},countrySites:mocks.sites,addNotification:mocks.notify})}));
 vi.mock('../../components/merchandising/MerchandisingContext',()=>({useMerchandising:()=>({products:[]})}));
 vi.mock('../../services/inventory-requests.service',()=>({inventoryRequestsService:{getMerchandisingRequests:mocks.read,approveProductEdit:mocks.approve}}));
 vi.mock('../../hooks/useInventoryRequestMutations',()=>({useCreateInventoryRequestMutation:()=>({isPending:false})}));
