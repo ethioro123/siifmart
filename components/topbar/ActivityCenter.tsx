@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, CheckCircle2, AlertTriangle, Info, Clock, Trash2, Layout, CheckSquare, ListTodo, Plus, Send, Calendar, UserPlus, Activity } from 'lucide-react';
+import { Bell, X, CheckCircle2, AlertTriangle, Info, Clock, Trash2, Layout, CheckSquare } from 'lucide-react';
 import { formatRelativeTime } from '../../utils/formatting';
-import { getEmployeeJobTitle } from '../../utils/roles';
 
 interface ActivityCenterProps {
    notifRef: React.RefObject<HTMLDivElement | null>;
@@ -18,16 +17,7 @@ interface ActivityCenterProps {
    handleTaskStatusChange: (id: string, status: 'Pending' | 'In-Progress' | 'Completed') => void;
    tasksICreated: any[];
    handleMarkAllRead: () => void;
-   showQuickAssign: boolean;
-   setShowQuickAssign: (val: boolean) => void;
-   quickTaskTitle: string;
-   setQuickTaskTitle: (val: string) => void;
-   quickTaskPriority: 'High' | 'Medium' | 'Low';
-   setQuickTaskPriority: (val: 'High' | 'Medium' | 'Low') => void;
-   quickTaskAssignee: string;
-   setQuickTaskAssignee: (val: string) => void;
-   handleQuickAssign: () => void;
-   visibleEmployees: any[];
+
 }
 
 export function ActivityCenter({
@@ -45,16 +35,7 @@ export function ActivityCenter({
    handleTaskStatusChange,
    tasksICreated,
    handleMarkAllRead,
-   showQuickAssign,
-   setShowQuickAssign,
-   quickTaskTitle,
-   setQuickTaskTitle,
-   quickTaskPriority,
-   setQuickTaskPriority,
-   quickTaskAssignee,
-   setQuickTaskAssignee,
-   handleQuickAssign,
-   visibleEmployees
+
 }: ActivityCenterProps) {
    const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -227,72 +208,6 @@ export function ActivityCenter({
                         </div>
                      ) : notifTab === 'tasks' ? (
                         <div className="p-2 space-y-2">
-                           {/* Quick Task Toggle */}
-                           <button
-                              onClick={() => setShowQuickAssign(!showQuickAssign)}
-                              className="w-full flex items-center justify-between p-2 rounded-lg bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20 transition-all group"
-                           >
-                              <div className="flex items-center gap-2">
-                                 <Plus size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:rotate-90 transition-transform" />
-                                 <span className="text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wider">Quick Task Assign</span>
-                              </div>
-                              <div className="px-1.5 py-0.5 rounded bg-stone-200/60 dark:bg-black/30 text-[9px] font-bold text-stone-400 dark:text-gray-400">ALT+N</div>
-                           </button>
-
-                           {showQuickAssign && (
-                              <div className="p-3 bg-black/30 rounded-xl border border-white/10 animate-in slide-in-from-top-2">
-                                 <div className="space-y-3">
-                                    <div className="relative">
-                                       <ListTodo size={12} className="absolute left-2.5 top-3 text-stone-400 dark:text-gray-500" />
-                                       <input
-                                          type="text"
-                                          placeholder="Awaiting intelligence..."
-                                          className="w-full bg-white dark:bg-black/50 border border-[#E2DCCE] dark:border-white/10 rounded-lg pl-8 pr-3 py-2 text-xs text-[#1E3F27] dark:text-white placeholder-stone-400 dark:placeholder-gray-600 outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50"
-                                          value={quickTaskTitle}
-                                          onChange={e => setQuickTaskTitle(e.target.value)}
-                                       />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                       <div className="bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 flex items-center gap-2">
-                                          <Calendar size={12} className="text-gray-500" />
-                                          <select
-                                             className="bg-transparent text-white text-[10px] outline-none border-none flex-1 font-bold"
-                                             value={quickTaskPriority}
-                                             onChange={e => setQuickTaskPriority(e.target.value as 'High' | 'Medium' | 'Low')}
-                                             title="Select Priority"
-                                          >
-                                             <option value="Normal" className="bg-gray-800">Normal</option>
-                                             <option value="Urgent" className="bg-gray-800">Urgent</option>
-                                             <option value="Low" className="bg-gray-800">Low</option>
-                                          </select>
-                                       </div>
-                                       <div className="bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 flex items-center gap-2">
-                                          <UserPlus size={12} className="text-gray-500 transition-colors" />
-                                          <select
-                                             className="bg-transparent text-white text-[10px] outline-none border-none flex-1 font-bold truncate"
-                                             value={quickTaskAssignee}
-                                             onChange={e => setQuickTaskAssignee(e.target.value)}
-                                             title="Select Assignee"
-                                          >
-                                             <option value="">Select employee...</option>
-                                             {visibleEmployees.map(emp => (
-                                                <option key={emp.id} value={emp.id}>{emp.name} ({getEmployeeJobTitle(emp)})</option>
-                                             ))}
-                                          </select>
-                                       </div>
-                                    </div>
-                                    <button
-                                       onClick={handleQuickAssign}
-                                       disabled={!quickTaskTitle.trim() || !quickTaskAssignee}
-                                       className="w-full py-2 bg-[#2C5E3B] dark:bg-[#A9CBA2] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-white dark:text-[#1E3B24] font-bold text-xs rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                    >
-                                       <Send size={12} />
-                                       Assign Task
-                                    </button>
-                                 </div>
-                              </div>
-                           )}
-
                            {/* Task List */}
                            <div className="space-y-1 mt-2">
                               {tasksAssignedToMe.length > 0 ? (

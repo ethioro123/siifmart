@@ -12,7 +12,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { tasksService } from '../services/supabase.service';
 import { authService } from '../services/auth.service';
 import { supabase } from '../lib/supabase';
-import { canAccessModule, canViewAllEmployees } from '../utils/permissions';
+import { canAccessModule } from '../utils/permissions';
 
 // Sub-components
 import { LocationBadge } from './topbar/LocationBadge';
@@ -100,10 +100,6 @@ export default function TopBar() {
       return () => window.removeEventListener('keydown', handleGlobalKeyDown);
    }, []);
 
-   const [showQuickAssign, setShowQuickAssign] = useState(false);
-   const [quickTaskTitle, setQuickTaskTitle] = useState('');
-   const [quickTaskPriority, setQuickTaskPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
-   const [quickTaskAssignee, setQuickTaskAssignee] = useState('');
    const [isRefreshing, setIsRefreshing] = useState(false);
    const [todayJobs, setTodayJobs] = useState<{ type: string; count: number }[]>([]);
    const [todayJobsTotal, setTodayJobsTotal] = useState(0);
@@ -155,14 +151,6 @@ export default function TopBar() {
          emp.name.toLowerCase() === user.name.toLowerCase()
       ) || null;
    }, [user, employees]);
-
-   const visibleEmployees = useMemo(() => {
-      if (!user) return [];
-      if (canViewAllEmployees(user.role)) return employees;
-      const userSiteId = currentEmployee?.siteId || currentEmployee?.site_id || user.siteId;
-      if (!userSiteId) return employees;
-      return employees.filter(emp => emp.siteId === userSiteId || emp.site_id === userSiteId);
-   }, [user, currentEmployee, employees]);
 
    // Gamification
    const currentUserPoints = useMemo(() => {
@@ -313,30 +301,6 @@ export default function TopBar() {
       }
    };
 
-   const handleQuickAssign = async () => {
-      if (!quickTaskTitle.trim() || !quickTaskAssignee) return;
-      try {
-         const creatorId = currentEmployee?.id || user?.id || '';
-         const newTask = await tasksService.create({
-            title: quickTaskTitle.trim(),
-            description: '',
-            assignedTo: quickTaskAssignee,
-            status: 'Pending',
-            priority: quickTaskPriority,
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            createdBy: creatorId
-         });
-         if (newTask) {
-            setTasks([...tasks, newTask]);
-            addNotification('success', 'Task assigned successfully!');
-            setQuickTaskTitle('');
-            setQuickTaskAssignee('');
-            setShowQuickAssign(false);
-         }
-      } catch (err) {
-         addNotification('alert', 'Failed to create task');
-      }
-   };
    const handleRefresh = async () => {
       if (isRefreshing) return;
       setIsRefreshing(true);
@@ -442,16 +406,6 @@ export default function TopBar() {
                handleTaskStatusChange={handleTaskStatusChange}
                tasksICreated={tasksICreated}
                handleMarkAllRead={() => { markNotificationsRead(); setIsNotifOpen(false); }}
-               showQuickAssign={showQuickAssign}
-               setShowQuickAssign={setShowQuickAssign}
-               quickTaskTitle={quickTaskTitle}
-               setQuickTaskTitle={setQuickTaskTitle}
-               quickTaskPriority={quickTaskPriority}
-               setQuickTaskPriority={setQuickTaskPriority}
-               quickTaskAssignee={quickTaskAssignee}
-               setQuickTaskAssignee={setQuickTaskAssignee}
-               handleQuickAssign={handleQuickAssign}
-               visibleEmployees={visibleEmployees}
             />
 
             <UserMenu 
