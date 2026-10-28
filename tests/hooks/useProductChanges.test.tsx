@@ -21,8 +21,12 @@ describe('Product-specific change history', () => {
         expect(mocks.requests).toHaveBeenCalledWith('ET', expect.objectContaining({ siteId: 'store', productId: 'milk', status: 'pending' }));
         rerender({ enabled: true });
         await waitFor(() => expect(result.current.prices.isSuccess).toBe(true));
-        expect(mocks.prices).toHaveBeenCalledWith('store', 'ET', 'milk', 10, 10);
+        expect(mocks.prices).toHaveBeenCalledWith('store', 'ET', 'milk', 10, 10,expect.objectContaining({since:expect.any(String),search:''}));
         expect(mocks.requests).toHaveBeenCalledWith('ET', expect.objectContaining({ page: 2, limit: 10, productId: 'milk', siteId: 'store', status: 'all' }));
+        await act(async()=>result.current.setHistoryWindow('all'));
+        await waitFor(()=>expect(mocks.prices).toHaveBeenLastCalledWith('store','ET','milk',10,10,{since:null,search:''}));
+        await act(async()=>result.current.setHistorySearch('Director'));
+        await waitFor(()=>expect(mocks.prices).toHaveBeenLastCalledWith('store','ET','milk',10,10,{since:null,search:'Director'}));
         mocks.approve.mockResolvedValue({ applied: true, approvalCount: 3 });
         const invalidate = vi.spyOn(cache, 'invalidateQueries');
         await act(async () => { await result.current.decision.mutateAsync({ id: 'request', action: 'approve' }); });

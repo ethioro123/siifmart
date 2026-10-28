@@ -20,17 +20,17 @@ export interface ProductPriceHistoryEntry {
     actor_name: string | null;
     changed_at: string;
     reviewed_by_me: boolean;
+    request_id?:string|null;currency?:string|null;reason?:string|null;requester_name?:string|null;finance_approver_name?:string|null;
 }
 
 const HISTORY_PROJECTION = 'id, product_id, site_id, country_code, product_name, sku, old_regular_price, new_regular_price, old_sale_price, new_sale_price, old_is_on_sale, new_is_on_sale, old_effective_price, new_effective_price, actor_id, actor_name, changed_at';
 
 export const productPriceHistoryService = {
-    async listByProduct(siteId: string, country: string, productId: string, offset = 0, limit = 10): Promise<ProductPriceHistoryEntry[]> {
-        const { data, error } = await supabase.from('product_price_history').select(HISTORY_PROJECTION)
-            .eq('site_id', siteId).eq('country_code', country.toUpperCase()).eq('product_id', productId)
-            .order('changed_at', { ascending: false }).range(Math.max(0, offset), Math.max(0, offset) + Math.min(50, Math.max(1, limit)) - 1);
+    async listByProduct(siteId: string, country: string, productId: string, offset = 0, limit = 10, filters?: { since?:string|null;search?:string }): Promise<ProductPriceHistoryEntry[]> {
+        const { data, error } = await supabase.rpc('list_product_price_history', {p_site_id:siteId,p_country_code:country.toUpperCase(),p_product_id:productId,
+            p_offset:Math.max(0,offset),p_limit:Math.min(50,Math.max(1,limit)),p_since:filters?.since??null,p_search:filters?.search?.trim()||null});
         if (error) throw error;
-        return (data || []).map(row => ({ ...row, reviewed_by_me: false })) as ProductPriceHistoryEntry[];
+        return (data || []).map((row:Omit<ProductPriceHistoryEntry,'reviewed_by_me'>) => ({ ...row, reviewed_by_me: false }));
     },
     async listBySite(siteId: string, offset = 0, limit = 50): Promise<ProductPriceHistoryEntry[]> {
         const { data, error } = await supabase

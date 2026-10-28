@@ -61,7 +61,7 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
 
     const [historyPage, setHistoryPage] = useState(1);
     const canEdit = !readOnly && getRoleHierarchy(user?.role || '') >= 70;
-    const changes = useProductChanges(isOpen ? product : null, activeCountry, historyPage, activeTab === 'history' && isOpen);
+    const changes = useProductChanges(isOpen ? product : null, activeCountry, historyPage, activeTab === 'history' && isOpen,setHistoryPage);
     const [unitCfg, setUnitCfg] = useState<UnitConfig>({
         sellMode: 'count', sellUnit: 'UNIT', physicalQty: '', physicalUnit: 'g', packOf: '', caseOf: '', label: '', scope: 'single', selectedSiteIds: []
     });
