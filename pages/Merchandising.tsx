@@ -76,8 +76,10 @@ export default function Pricing() {
       setIsProductControlOpen,
       selectedControlProduct,
       refreshData,
-      currencySymbol
+      currencySymbol,
+      activeCountry
    } = state;
+   const { activeRegionCode } = useData();
 
    const { avgMargin, priceIndex } = useMemo(() => {
       if (!products || products.length === 0) {
@@ -259,6 +261,8 @@ export default function Pricing() {
                handleCreatePromo={handleCreatePromo}
                isSubmitting={isSubmitting}
                currencySymbol={currencySymbol}
+               activeCountry={activeCountry}
+               activeRegionCode={activeRegionCode}
             />
 
             {/* Create Rule Modal */}

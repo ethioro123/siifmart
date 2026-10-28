@@ -4,7 +4,7 @@ DO $test$
 DECLARE target public.sites%ROWTYPE; foreign_site public.sites%ROWTYPE; product public.products%ROWTYPE;
  director uuid; regional uuid; requester uuid; v_request_id uuid; applied_history uuid; response jsonb;
  expired_history uuid:=gen_random_uuid(); held_history uuid:=gen_random_uuid(); foreign_history uuid:=gen_random_uuid(); recent_history uuid:=gen_random_uuid();
- rejected_request uuid:=gen_random_uuid(); held_request uuid:=gen_random_uuid(); pending_request uuid:=gen_random_uuid(); obsolete_product uuid:=gen_random_uuid();
+ rejected_request uuid:=gen_random_uuid(); held_request uuid:=gen_random_uuid(); pending_request uuid:=gen_random_uuid(); obsolete_product uuid:=gen_random_uuid(); unknown_request uuid:=gen_random_uuid();
 BEGIN
  SELECT s.* INTO target FROM public.sites s WHERE s.country='ET' AND s.type='Store' AND EXISTS(SELECT 1 FROM public.products p WHERE p.site_id=s.id AND p.cost_price>0)
  AND EXISTS(SELECT 1 FROM public.employees e WHERE e.role='merchandising_specialist' AND e.region_code=s.region_code AND lower(e.status)='active') ORDER BY s.id LIMIT 1;
@@ -38,7 +38,8 @@ BEGIN
  INSERT INTO public.inventory_requests(id,product_id,product_name,product_sku,site_id,country_code,change_type,status,requested_by,requested_at,rejected_at,proposed_changes)
  VALUES(rejected_request,obsolete_product::text,'Old rejected coffee','ET-OLD',target.id::text,target.country,'edit','rejected','Fixture requester',now()-interval '3 years',now()-interval '3 years','{"price":200}'),
  (held_request,product.id::text,product.name,product.sku,target.id::text,target.country,'edit','rejected','Fixture requester',now()-interval '3 years',now()-interval '3 years','{"price":200}'),
- (pending_request,obsolete_product::text,'Pending coffee','ET-PENDING',target.id::text,target.country,'edit','pending','Fixture requester',now()-interval '3 years',NULL,'{"price":200}');
+ (pending_request,obsolete_product::text,'Pending coffee','ET-PENDING',target.id::text,target.country,'edit','pending','Fixture requester',now()-interval '3 years',NULL,'{"price":200}'),
+ (unknown_request,obsolete_product::text,'Legacy coffee','ET-UNKNOWN',target.id::text,target.country,'edit','rejected','Fixture requester',now()-interval '20 years',NULL,'{"price":200}');
  ALTER TABLE public.inventory_requests ENABLE TRIGGER z_product_edit_request_guard;
  BEGIN UPDATE public.product_price_history SET new_effective_price=999 WHERE id=applied_history; RAISE EXCEPTION 'Applied history update allowed'; EXCEPTION WHEN raise_exception THEN IF SQLERRM='Applied history update allowed' THEN RAISE; END IF; END;
  BEGIN DELETE FROM public.product_price_history WHERE id=recent_history; RAISE EXCEPTION 'Under-ten-year history deleted'; EXCEPTION WHEN raise_exception THEN IF SQLERRM='Under-ten-year history deleted' THEN RAISE; END IF; END;
@@ -47,6 +48,7 @@ BEGIN
  response:=private.prune_product_price_history(target.country,250);
  IF EXISTS(SELECT 1 FROM public.product_price_history WHERE id=expired_history) THEN RAISE EXCEPTION 'Expired history was not pruned'; END IF;
  IF NOT EXISTS(SELECT 1 FROM public.product_price_history WHERE id=held_history) OR NOT EXISTS(SELECT 1 FROM public.product_price_history WHERE id=foreign_history) OR NOT EXISTS(SELECT 1 FROM public.product_price_history WHERE id=recent_history) THEN RAISE EXCEPTION 'Cleanup lost held, foreign or unexpired history'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.inventory_requests WHERE id=unknown_request) THEN RAISE EXCEPTION 'Unknown decision timestamp was guessed for cleanup'; END IF;
  IF EXISTS(SELECT 1 FROM public.inventory_requests WHERE id=rejected_request) OR NOT EXISTS(SELECT 1 FROM public.inventory_requests WHERE id=held_request) OR NOT EXISTS(SELECT 1 FROM public.inventory_requests WHERE id=pending_request) THEN RAISE EXCEPTION 'Proposal retention/hold boundary failed'; END IF;
  EXECUTE 'SET LOCAL ROLE authenticated';
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',requester,'role','authenticated')::text,true);

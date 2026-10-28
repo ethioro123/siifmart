@@ -1,11 +1,8 @@
 import { supabase } from '../lib/supabase';
-import type { JobRequisition, JobCandidate, RequisitionStatus, CandidateStage } from '../types/hr-advanced';
+import type { JobRequisition, JobCandidate, CandidateStage } from '../types/hr-advanced';
 import { systemLogsService } from './system-logs.service';
-import { employeesService } from './employees.service';
 import { SYSTEM_ROLES } from '../utils/roles';
 import { logger } from '../utils/logger';
-import { createAuthAccountForNewHire } from '../utils/employeeAuthHelper';
-
 import {
     getLocalReqs,
     saveLocalReqs,
@@ -14,6 +11,13 @@ import {
     mapDBToReq,
     mapDBToCand
 } from './recruitment-storage';
+import {
+    isHRLead,
+    isFinanceLead,
+    isAuthorizedHiringManager,
+    evaluateCandidateHiringRoute,
+    provisionActivatedEmployee
+} from './recruitment-delegation';
 
 export const recruitmentService = {
     async fetchRequisitions(countryCode: string = 'ET'): Promise<JobRequisition[]> {
@@ -62,48 +66,36 @@ export const recruitmentService = {
             updated_at: now
         };
 
-        {
-            const { data: dbData, error } = await supabase
-                .from('job_requisitions')
-                .insert([{
-                    id: newRecord.id,
-                    country_code: country,
-                    site_id: newRecord.site_id,
-                    title: newRecord.title,
-                    department: newRecord.department,
-                    role: newRecord.role,
-                    headcount: newRecord.headcount,
-                    target_salary: newRecord.target_salary,
-                    status: 'pending_hq_approval',
-                    justification: newRecord.justification,
-                    requested_by: newRecord.requested_by,
-                    requested_by_role: newRecord.requested_by_role
-                }])
-                .select()
-                .single();
+        const { data: dbData, error } = await supabase
+            .from('job_requisitions')
+            .insert([{
+                id: newRecord.id,
+                country_code: country,
+                site_id: newRecord.site_id,
+                title: newRecord.title,
+                department: newRecord.department,
+                role: newRecord.role,
+                headcount: newRecord.headcount,
+                target_salary: newRecord.target_salary,
+                status: 'pending_hq_approval',
+                justification: newRecord.justification,
+                requested_by: newRecord.requested_by,
+                requested_by_role: newRecord.requested_by_role
+            }])
+            .select()
+            .single();
 
-            if (error) throw new Error(`Failed to save requisition: ${error.message}`);
-            if (dbData) {
-                saveLocalReqs([mapDBToReq(dbData)]);
-            }
-        }
+        if (error) throw new Error(`Failed to save requisition: ${error.message}`);
+        if (dbData) saveLocalReqs([mapDBToReq(dbData)]);
 
-        // Synaptic Neural Mesh: Audit log
         try {
             await systemLogsService.create({
                 user_name: data.requested_by,
                 action: 'JOB_REQUISITION_CREATED',
                 module: 'Human Resources',
-                details: JSON.stringify({
-                    reqId: newRecord.id,
-                    role: data.role,
-                    headcount: data.headcount,
-                    country
-                })
+                details: JSON.stringify({ reqId: newRecord.id, role: data.role, headcount: data.headcount, country })
             });
-        } catch {
-            // Safe
-        }
+        } catch { /* safe */ }
 
         return newRecord;
     },
@@ -115,25 +107,17 @@ export const recruitmentService = {
         const reqs = getLocalReqs();
         const existing = reqs.find(r => r.id === requisitionId);
 
-        // 4-Eyes rule: Requester cannot approve their own requisition
         if (existing && existing.requested_by === approver.name) {
             throw new Error('Maker-Checker violation: Requester cannot approve their own headcount requisition.');
         }
 
         const now = new Date().toISOString();
-        {
-            const { error } = await supabase
-                .from('job_requisitions')
-                .update({
-                    status: 'approved',
-                    approved_by: approver.name,
-                    approved_at: now,
-                    updated_at: now
-                })
-                .eq('id', requisitionId);
+        const { error } = await supabase
+            .from('job_requisitions')
+            .update({ status: 'approved', approved_by: approver.name, approved_at: now, updated_at: now })
+            .eq('id', requisitionId);
 
-            if (error) throw new Error(`Failed to approve requisition: ${error.message}`);
-        }
+        if (error) throw new Error(`Failed to approve requisition: ${error.message}`);
 
         const updated = reqs.map(r => r.id === requisitionId ? {
             ...r,
@@ -151,9 +135,7 @@ export const recruitmentService = {
                 module: 'Human Resources',
                 details: JSON.stringify({ requisitionId, approverRole: approver.role })
             });
-        } catch {
-            // Safe
-        }
+        } catch { /* safe */ }
 
         return true;
     },
@@ -167,9 +149,7 @@ export const recruitmentService = {
                 .eq('country_code', country)
                 .order('created_at', { ascending: false });
 
-            if (requisitionId) {
-                query = query.eq('requisition_id', requisitionId);
-            }
+            if (requisitionId) query = query.eq('requisition_id', requisitionId);
 
             const { data, error } = await query;
             if (error) {
@@ -194,6 +174,7 @@ export const recruitmentService = {
         country_code: string;
         requisition_id?: string;
         site_id?: string;
+        role?: string;
         name: string;
         email: string;
         phone: string;
@@ -230,14 +211,12 @@ export const recruitmentService = {
             offered_salary?: number;
             site_id?: string;
             role?: string;
+            is_salary_exception?: boolean;
+            is_quota_exception?: boolean;
         }
     ): Promise<boolean> {
         const now = new Date().toISOString();
-        const updatePayload = {
-            stage,
-            ...evaluation,
-            updated_at: now
-        };
+        const updatePayload = { stage, ...evaluation, updated_at: now };
 
         const { error } = await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
         if (error) throw new Error(`Failed to update candidate: ${error.message}`);
@@ -249,13 +228,10 @@ export const recruitmentService = {
 
     canManageHiring(userRole: string): boolean {
         const found = SYSTEM_ROLES.find(r => r.id === userRole);
-        if (!found) return false;
-        // Levels 1 through 8 (Executives, Directors, Regional Department Managers, Facility Captains, Dept Managers & Shift Supervisors) can initiate headcount requisitions
-        return found.level <= 8;
+        return found ? found.level <= 8 : false;
     },
 
     canManageCandidates(userRole: string): boolean {
-        // Talent Recruiters and HR staff can source and manage candidate pipelines
         if (userRole === 'talent_recruiter' || userRole === 'hr_generalist') return true;
         return this.canManageHiring(userRole);
     },
@@ -267,26 +243,30 @@ export const recruitmentService = {
 
     getAllowedRolesForManager(userRole: string): typeof SYSTEM_ROLES {
         const userLevel = this.getUserRoleLevel(userRole);
-        // Strict hierarchy: managers can ONLY hire for roles strictly below their rank (level > userLevel)
         return SYSTEM_ROLES.filter(r => r.level > userLevel);
     },
+
+    evaluateCandidateRoute: evaluateCandidateHiringRoute,
 
     async approveCandidateHR(
         candidateId: string,
         approver: { id: string; name: string; role: string },
         notes?: string
     ): Promise<boolean> {
-        const normRole = (approver.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-        const isHR = ['country_hr_director', 'regional_hr_manager', 'hr_generalist', 'country_managing_director', 'group_ceo'].includes(normRole);
-        if (!isHR) {
+        if (!isHRLead(approver.role)) {
             throw new Error('4-Eyes Violation: Only HR leadership can perform candidate identity & compliance approval.');
+        }
+
+        const candidate = getLocalCands().find(c => c.id === candidateId);
+        if (candidate && (candidate.name.toLowerCase() === approver.name.toLowerCase() || candidate.email.toLowerCase() === approver.name.toLowerCase())) {
+            throw new Error('Zero-Trust Anti-Fraud Violation: You cannot approve your own HR candidate clearance.');
         }
 
         const now = new Date().toISOString();
         const updatePayload = {
             hr_approved_by: approver.name,
             hr_approved_at: now,
-            hr_notes: notes || 'Identity, credentials & right-to-work verified.',
+            hr_notes: notes || 'Identity, credentials & compensation band cleared.',
             updated_at: now
         };
 
@@ -312,14 +292,17 @@ export const recruitmentService = {
         offeredSalary: number,
         notes?: string
     ): Promise<boolean> {
-        const normRole = (approver.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
-        const isFinance = ['country_finance_director', 'regional_finance_manager', 'country_managing_director', 'group_ceo'].includes(normRole);
-        if (!isFinance) {
+        if (!isFinanceLead(approver.role)) {
             throw new Error('4-Eyes Violation: Only Finance leadership can authorize salary and compensation bands.');
         }
 
         if (!offeredSalary || offeredSalary <= 0) {
             throw new Error('Offered salary must be greater than zero.');
+        }
+
+        const candidate = getLocalCands().find(c => c.id === candidateId);
+        if (candidate && (candidate.name.toLowerCase() === approver.name.toLowerCase() || candidate.email.toLowerCase() === approver.name.toLowerCase())) {
+            throw new Error('Zero-Trust Anti-Fraud Violation: You cannot approve your own Finance salary clearance.');
         }
 
         const now = new Date().toISOString();
@@ -347,6 +330,49 @@ export const recruitmentService = {
         return true;
     },
 
+    async confirmCandidateHiringManager(
+        candidateId: string,
+        approver: { id: string; name: string; role: string },
+        notes?: string
+    ): Promise<boolean> {
+        if (!isAuthorizedHiringManager(approver.role)) {
+            throw new Error('Delegation Violation: Only Authorized Hiring Managers or Operations Leads can confirm hiring offers.');
+        }
+
+        const candidate = getLocalCands().find(c => c.id === candidateId);
+        if (candidate && (candidate.name.toLowerCase() === approver.name.toLowerCase() || candidate.email.toLowerCase() === approver.name.toLowerCase())) {
+            throw new Error('Zero-Trust Anti-Fraud Violation: You cannot confirm your own hiring offer.');
+        }
+
+        if (!candidate?.hr_approved_at) {
+            throw new Error('Gating Violation: HR credentials and compensation band clearance is required before confirming offer.');
+        }
+
+        const now = new Date().toISOString();
+        const updatePayload = {
+            hiring_manager_approved_by: approver.name,
+            hiring_manager_approved_at: now,
+            hiring_manager_notes: notes || 'Hiring offer confirmed within approved site headcount quota.',
+            stage: 'offered' as CandidateStage,
+            updated_at: now
+        };
+
+        const { error } = await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
+        if (error) throw new Error(`Failed to record Hiring Manager confirmation: ${error.message}`);
+
+        const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
+        saveLocalCands(cands);
+
+        await systemLogsService.create({
+            user_name: approver.name,
+            action: 'CANDIDATE_OFFER_CONFIRMED_BY_MANAGER',
+            module: 'Human Resources',
+            details: JSON.stringify({ candidateId, approverRole: approver.role, notes })
+        });
+
+        return true;
+    },
+
     async finalizeAndActivateHire(
         candidateId: string,
         actor: { id: string; name: string; role: string },
@@ -357,17 +383,30 @@ export const recruitmentService = {
         const candidate = getLocalCands().find(c => c.id === candidateId);
         if (!candidate) throw new Error('Candidate not found.');
 
-        const isCEO = actor.role === 'group_ceo';
+        const isCEO = actor.role === 'group_ceo' || actor.role === 'group_chro';
         if (!isCEO) {
             if (!candidate.hr_approved_at) {
                 throw new Error('Zero-Trust Guard: Mandatory HR identity verification required before hire activation.');
             }
-            if (!candidate.finance_approved_at) {
-                throw new Error('Zero-Trust Guard: Mandatory Finance salary approval required before hire activation.');
+
+            const isException = Boolean(candidate.is_salary_exception || candidate.is_quota_exception);
+            if (isException) {
+                if (!candidate.finance_approved_at) {
+                    throw new Error('Zero-Trust Guard: Unbudgeted headcount or salary exceptions require Finance clearance.');
+                }
+                const hasExecutiveSignoff = Boolean(candidate.cmd_approved_at || candidate.group_approved_at) ||
+                    ['country_managing_director', 'group_ceo', 'group_chro'].includes(actor.role);
+                if (!hasExecutiveSignoff) {
+                    throw new Error('Zero-Trust Guard: Unbudgeted exceptions require Country MD or Group Executive approval.');
+                }
+            } else {
+                const hasManagerConfirm = Boolean(candidate.hiring_manager_approved_at) || isAuthorizedHiringManager(actor.role);
+                if (!hasManagerConfirm) {
+                    throw new Error('Delegation Guard: Authorized Hiring Manager confirmation is required before hire activation.');
+                }
             }
         }
 
-        // Resolve site from params, candidate, or requisition
         let targetSiteId = siteId || candidate.site_id;
         let targetRole = role || candidate.role;
         let targetDept = department;
@@ -381,61 +420,20 @@ export const recruitmentService = {
             }
         }
 
-        if (!targetSiteId) {
-            throw new Error('Operating site location is mandatory for hire activation.');
-        }
+        if (!targetSiteId) throw new Error('Operating site location is mandatory for hire activation.');
 
         const finalRole = (targetRole || 'stock_clerk') as any;
         const finalDept = targetDept || 'Operations';
         const finalSalary = candidate.offered_salary || 0;
         const now = new Date().toISOString();
-        const joinDate = now.split('T')[0];
 
-        const assignedCode = await employeesService.getNextCode(candidate.country_code);
-        const numericPin = assignedCode.replace(/\D/g, '').slice(-4) || '1234';
-        const defaultPwd = `SiifMart@${numericPin}`;
-        let employeeId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `emp-${Date.now()}`;
-
-        try {
-            const nameParts = candidate.name.trim().split(' ');
-            const authRes = await createAuthAccountForNewHire({
-                signupEmail: candidate.email.toLowerCase(),
-                password: defaultPwd,
-                firstName: nameParts[0] || 'Staff',
-                lastName: nameParts.slice(1).join(' ') || 'Member',
-                role: finalRole,
-                siteId: targetSiteId,
-                employeeCode: assignedCode,
-                fallbackEmployeeId: employeeId
-            });
-            employeeId = authRes.employeeId;
-            if (typeof window !== 'undefined') {
-                localStorage.setItem(`siifmart_temp_pwd_${employeeId}`, defaultPwd);
-                localStorage.setItem(`siifmart_temp_pwd_by_code_${assignedCode.toLowerCase()}`, defaultPwd);
-            }
-        } catch (e) {
-            logger.warn('recruitmentService', 'Failed to provision auth user during hire activation', { error: String(e) });
-        }
-
-        // Provision into public.employees
-        const newEmployee = await employeesService.create({
-            id: employeeId,
-            code: assignedCode,
-            name: candidate.name,
-            email: candidate.email.toLowerCase(),
-            phone: candidate.phone,
-            role: finalRole,
-            siteId: targetSiteId,
-            department: finalDept,
-            salary: finalSalary,
-            status: 'Active',
-            joinDate,
-            avatar: '',
-            performanceScore: 100,
-            specialization: 'Floor Operations',
-            attendanceRate: 100,
-            badges: ['New Hire']
-        });
+        const newEmployee = await provisionActivatedEmployee(
+            candidate,
+            targetSiteId,
+            finalRole,
+            finalDept,
+            finalSalary
+        );
 
         const updatePayload = {
             stage: 'hired' as const,
@@ -447,9 +445,7 @@ export const recruitmentService = {
 
         try {
             await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
-        } catch {
-            // fallback handled
-        }
+        } catch { /* fallback */ }
 
         const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
         saveLocalCands(cands);

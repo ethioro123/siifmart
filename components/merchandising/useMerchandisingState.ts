@@ -187,13 +187,18 @@ export const useMerchandisingState = (): MerchandisingContextType => {
 
       setIsSubmitting(true);
       try {
-         await createCampaignProposal.mutateAsync({ code: newPromo.code, type: newPromo.type, value: newPromo.value, expiryDate: newPromo.expiryDate });
-         addNotification('success', `Campaign '${newPromo.code}' submitted for lead approval.`);
+         await createCampaignProposal.mutateAsync({
+            code: newPromo.code.trim().toUpperCase(),
+            type: newPromo.type,
+            value: Math.round(Number(newPromo.value)),
+            expiryDate: newPromo.expiryDate
+         });
+         addNotification('success', `Campaign '${newPromo.code.toUpperCase()}' submitted for governance approval.`);
          setIsPromoModalOpen(false);
-         setNewPromo({ type: 'PERCENTAGE' });
+         setNewPromo({ type: 'PERCENTAGE', code: '', value: 0, expiryDate: '' });
       } catch (error) {
          logger.error('useMerchandisingState', 'Failed to create promotion:', error as Error);
-         addNotification('alert', 'Failed to submit campaign proposal');
+         addNotification('alert', (error as Error)?.message || 'Failed to submit campaign proposal');
       } finally {
          setIsSubmitting(false);
       }

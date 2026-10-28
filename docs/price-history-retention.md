@@ -5,7 +5,7 @@ Applied on 2026-10-28. This is the selected SIIFMART business retention policy; 
 ## Periods and enforcement
 
 - Applied product price history and its approval requests: 10 calendar years from the recorded change/approval. Updates to applied history are prohibited; corrections are new price changes.
-- Rejected price proposals: 2 calendar years from rejection (or the available request timestamp for legacy rows). Pending approvals never expire as drafts.
+- Rejected price proposals: 2 calendar years from rejection. Legacy completed requests without a verified decision timestamp remain protected instead of guessing their expiry. Pending approvals never expire as drafts.
 - Unsaved price edits are session-only UI state. There is no persisted price-draft table or cancelled-price status to purge; no new draft persistence was introduced. Session-only drafts are discarded sooner than the proposed 90-day maximum.
 - Product-level audit/dispute holds preserve all associated price history and proposals indefinitely until an authorized release. Released records are eligible only when their normal retention period has also elapsed.
 - History records have product IDs/name/SKU snapshots independent of a product FK; the existing site FK prevents removal of a site with retained history. Approval requests cannot be removed while a linked history record remains.
@@ -33,6 +33,7 @@ Saved migrations (each mirrored in `supabase/migrations/`) applied to staging `u
 - `migrations/20261028_price_history_retention.sql`
 - `migrations/20261028_price_history_read_rpc.sql`
 - `migrations/20261028_price_retention_scan_indexes.sql`
+- `migrations/20261028_price_retention_unknown_dates.sql`
 
 Both environments have the active daily cron job, immutable-history trigger, invoker public read/hold wrappers, anonymous execution denied, and no authenticated permission to read private evidence or execute cleanup. No production business records were deleted or repriced during verification. The first scheduled run will remove only eligible expired, non-held records.
 
