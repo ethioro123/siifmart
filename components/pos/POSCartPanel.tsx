@@ -76,7 +76,7 @@ export const POSCartPanel: React.FC = () => {
                 ${showCart ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
             `}>
                 {/* Header */}
-                <div className="pt-4 pb-3 px-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] lg:rounded-t-[22px] flex items-center justify-between shrink-0">
+                <div className="py-1.5 px-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] lg:rounded-t-[22px] flex items-center justify-between shrink-0">
                     <button
                         type="button"
                         onClick={() => {
@@ -112,7 +112,7 @@ export const POSCartPanel: React.FC = () => {
                 </div>
 
                 {/* Cart Items List */}
-                <div className="flex-1 overflow-y-auto p-2.5 sm:p-3 space-y-1 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-1 custom-scrollbar">
                     {cart.length === 0 ? (
                         <div className="h-full min-h-[220px] flex flex-col items-center justify-center text-center p-8 select-none animate-in fade-in duration-300">
                             <div className="w-14 h-14 rounded-2xl bg-[var(--theme-bg-subtle)] flex items-center justify-center mb-3 border border-[var(--theme-border)]">
@@ -222,9 +222,9 @@ export const POSCartPanel: React.FC = () => {
                 </div>
 
                 {/* Bottom Summary & Payment Section */}
-                <div className="px-3 py-2.5 sm:px-4 sm:py-3 bg-[var(--theme-bg-card)] border-t border-[var(--theme-border-subtle)] lg:rounded-b-[22px] shrink-0">
+                <div className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-t border-[var(--theme-border-subtle)] lg:rounded-b-[22px] shrink-0">
                     {/* Collapsible Tax / Discount Details Toggle */}
-                    <div className="mb-2 space-y-1">
+                    <div className="mb-1 space-y-1">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-semibold text-[var(--theme-text-secondary)] tracking-tight">
@@ -296,7 +296,7 @@ export const POSCartPanel: React.FC = () => {
                         )}
 
                         {/* Grand Total Row */}
-                        <div className="flex justify-between items-baseline px-3 py-2 rounded-xl bg-[var(--theme-bg-subtle)]">
+                        <div className="flex justify-between items-baseline px-3 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)]">
                             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 {t('pos.totalAmount')}
                             </span>
@@ -307,7 +307,7 @@ export const POSCartPanel: React.FC = () => {
                     </div>
 
                     {/* Quick Functions Bar: Hold, Clear, More */}
-                    <div className="grid grid-cols-3 gap-1.5 mb-2">
+                    <div className="grid grid-cols-3 gap-1.5 mb-1">
                         <button
                             type="button"
                             onClick={() => {
