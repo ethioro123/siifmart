@@ -43,7 +43,7 @@ Chapters 14–17 add exact component defaults and a [runnable visual reference](
 ## The essential rules
 
 1. **Lead with the work.** Give the page one clear identity and a recognizable primary task. Keep secondary diagnostics and historical detail behind deliberate disclosure.
-2. **Use a stable visual hierarchy.** Canvas, content and controls have distinct roles. Use spacing and alignment before adding another border, card, color or material.
+2. **Use a stable visual hierarchy.** Canvas, content and controls have distinct roles. Use spacing and alignment before adding another border, card, color or material. Open sections are the default; component panel specifications apply only when a bounded surface has a real purpose.
 3. **Keep data surfaces clear.** Tables, forms, financial totals, price comparisons and scanning screens use readable solid surfaces. Material treatment is optional and localized to navigation or temporary chrome.
 4. **Honor user appearance choices.** System is the default. Respect explicit Light/Dark choices, contrast needs, reduced motion and a solid-surface fallback. Performance fallbacks apply in every module when needed.
 5. **Design at the actual density.** Administration can support comparison-heavy layouts; POS and Fulfillment need fast, reachable actions. Neither requires tiny text or giant dashboard decorations.

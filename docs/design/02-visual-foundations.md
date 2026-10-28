@@ -70,3 +70,13 @@ Represent selection through more than hue: use label weight, shape, a marker or 
 ## Visual acceptance
 
 Review the complete theme pair with real long text, error text, disabled controls and selected rows. Check material surfaces over the lightest, darkest and most visually busy underlying content they can actually encounter. Inspect focus and contrast without relying on shadows. If the effect adds distraction, obscures evidence or slows repeated work, use the solid treatment and retain the same layout quality.
+
+## Composition correction: open sections before containers
+
+A component's radius and padding apply only when its boundary is justified. They are not instructions to wrap every section in a panel. The normal page composition is open sections with shared alignment and 24–32 pixels of separation. Use typography to establish groups before adding a surface change. Avoid a rounded page shell containing rounded cards containing further boxed groups.
+
+Use a bounded panel for a genuinely independent object, an inspector or an overlapping temporary surface. If ordinary content already sits on a readable canvas, keep it on that canvas. A table's row structure does not require another surrounding card. Preserve essential input boundaries and focus cues; removing decorative boxes must not make interaction ambiguous.
+
+Read-only metadata should read as data, not resemble an editable input. A compact approval entry need not have a permanent strong outline when its label and count are clear. Keep exceptional states available without placing disabled and busy demonstration controls alongside the principal live action. A reference gallery should distinguish component samples from the composition intended for a real task.
+
+Overlays inherit the active theme and keep a readable solid surface. Do not open a hardcoded light dialog from a dark workspace. Review composition at 320, 390 and 1440 pixels as well as under enlarged text. More rounding is not a remedy for too many containers; remove the unnecessary grouping boundary first.

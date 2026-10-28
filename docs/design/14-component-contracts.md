@@ -92,3 +92,13 @@ Tooltips have 8 × 12 padding, 12 / 16 text, max width 280 and no exclusive task
 Toast width is min(360, viewport minus 32), padding 16, gap 12, with a 44-pixel dismiss/action target when present. A routine success may remain for 5 seconds; errors or actions requiring attention persist or have a durable visible equivalent. Never let a timeout be the only route to a critical recovery action.
 
 Empty states use a plain heading 18 / 24, body 14 / 20, max readable width 440 and one relevant action. Skeletons reserve actual content geometry and never imitate real money. Progress indicators show a percentage only when measured. Avatars are 32 for rows and 40 for identity summaries; initials and names remain available when an image fails.
+
+## Composition correction: open sections before containers
+
+A component's radius and padding apply only when its boundary is justified. They are not instructions to wrap every section in a panel. The normal page composition is open sections with shared alignment and 24–32 pixels of separation. Use typography to establish groups before adding a surface change. Avoid a rounded page shell containing rounded cards containing further boxed groups.
+
+Use a bounded panel for a genuinely independent object, an inspector or an overlapping temporary surface. If ordinary content already sits on a readable canvas, keep it on that canvas. A table's row structure does not require another surrounding card. Preserve essential input boundaries and focus cues; removing decorative boxes must not make interaction ambiguous.
+
+Read-only metadata should read as data, not resemble an editable input. A compact approval entry need not have a permanent strong outline when its label and count are clear. Keep exceptional states available without placing disabled and busy demonstration controls alongside the principal live action. A reference gallery should distinguish component samples from the composition intended for a real task.
+
+Overlays inherit the active theme and keep a readable solid surface. Do not open a hardcoded light dialog from a dark workspace. Review composition at 320, 390 and 1440 pixels as well as under enlarged text. More rounding is not a remedy for too many containers; remove the unnecessary grouping boundary first.

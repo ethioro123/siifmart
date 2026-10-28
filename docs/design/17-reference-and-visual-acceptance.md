@@ -24,7 +24,7 @@ Use deterministic synthetic data, stable timestamps, fixed locale and no externa
 
 | Fixture | Viewports | Modes | Acceptance |
 |---|---|---|---|
-| Component board | 390 × 844; 1440 × 1000 | Light and Dark shown side by side/stacked | No page overflow, clipped required labels or unexpected baseline change |
+| Component board | 320 × 1000; 390 × 1000; 1440 × 1000 | Light and Dark shown side by side/stacked | No page overflow, clipped required labels or unexpected baseline change |
 | Buttons and fields | 320; 768; 1440 widths | Both themes; keyboard focus; reduced motion | Stable targets, readable labels, preserved focus/error cues |
 | Data workspace | Narrow and wide | Selected, empty, failure, long names | Accurate identity, localized table overflow only, visible actions |
 | Dialog/menu | Narrow and wide with scroll | Keyboard; zoom; long translated text | Contained and restored focus; no obscured controls |
@@ -49,3 +49,5 @@ Run `npx playwright test --config tests/design/playwright.config.ts` for the foc
 A component is ready for broad reuse when dimensions, states, semantics, themes, resizing and keyboard behavior conform; reference and behavioral tests pass; and its affected callers have been inspected. A class-name assertion alone does not meet this gate. A screenshot alone does not prove correct focus, selected scope or a confirmed database outcome.
 
 When the specification and a prior chapter differ in an exact internal measurement, chapters 14–16 provide the refined default; accessibility, business and security requirements still win. Record a justified content-driven deviation where necessary. Do not seek extra human permission merely to document an already-authorized implementation choice.
+
+Composition review: the reference uses open sections, unboxed read-only metadata, a quiet approval entry and disclosed exceptional control samples. Dialogs inherit the triggering board’s theme. Browser checks cover these boundaries and theme continuity before screenshots are accepted.
