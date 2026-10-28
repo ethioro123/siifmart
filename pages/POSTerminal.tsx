@@ -57,7 +57,7 @@ const POSTerminalContent: React.FC = () => {
 
   return (
     <main className="relative w-full h-full min-h-[calc(100dvh-128px)] bg-[var(--theme-bg-app)]">
-      <div className="relative z-10 h-[calc(100dvh-128px)] min-h-[560px] flex flex-col lg:flex-row gap-4 p-3 sm:p-4 animate-in fade-in duration-300">
+      <div className="relative z-10 h-[calc(100dvh-128px)] min-h-[560px] flex flex-col lg:flex-row gap-4 p-3 sm:p-4 animate-in fade-in duration-300 motion-reduce:animate-none">
         <POSProductGrid />
         <POSCartPanel />
       </div>

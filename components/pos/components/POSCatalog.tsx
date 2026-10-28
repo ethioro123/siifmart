@@ -52,7 +52,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                 </div>
             ) : (
                 <>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
                         {paginatedProducts.map(product => {
                             const inCartItem = cart.find(i => i.id === product.id || (i as any).productId === product.id);
                             return (
@@ -65,9 +65,9 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                 }}
                                 disabled={product.stock <= 0}
                                 aria-label={`${product.name}, ${product.stock <= 0 ? t('common.outOfStock') : `${CURRENCY_SYMBOL} ${formatPriceValue(product.isOnSale && product.salePrice ? product.salePrice : product.price)}`}. Add to cart`}
-                                className={`text-left bg-[var(--theme-bg-card)] border rounded-[20px] p-3 sm:p-3.5 hover:bg-[var(--theme-bg-card-hover)] transition-colors group relative overflow-hidden flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${product.stock <= 0 ? 'border-[var(--theme-status-danger-border)] opacity-70 cursor-not-allowed' : inCartItem ? 'border-[var(--theme-border-focus)] ring-1 ring-[var(--theme-border-focus)] shadow-sm' : 'border-[var(--theme-border-subtle)] hover:border-[var(--theme-border-strong)] hover:shadow-sm'}`}
+                                className={`text-left bg-[var(--theme-bg-card)] border rounded-[14px] p-3 sm:p-3.5 transition-colors group relative overflow-hidden flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${product.stock <= 0 ? 'border-[var(--theme-status-danger-border)] cursor-not-allowed' : inCartItem ? 'bg-[var(--theme-bg-card-hover)] border-[var(--theme-border-focus)] ring-1 ring-[var(--theme-border-focus)] shadow-sm' : 'border-[var(--theme-border-subtle)] hover:bg-[var(--theme-bg-card-hover)] hover:border-[var(--theme-border-strong)] hover:shadow-sm'} disabled:hover:bg-[var(--theme-bg-card)] disabled:hover:shadow-none`}
                             >
-                                <div className="aspect-[4/3] rounded-[15px] bg-[var(--theme-bg-panel)] mb-3 overflow-hidden relative flex items-center justify-center">
+                                <div className="aspect-[4/3] rounded-[10px] bg-[var(--theme-bg-panel)] mb-3 overflow-hidden relative flex items-center justify-center">
                                     {product.image && !product.image.includes('placeholder.com') ? (
                                         <>
                                             <img
@@ -105,7 +105,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         }
 
                                         return (
-                                            <div className={`absolute top-1.5 right-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-wider shadow-xs flex items-center gap-0.5 ${colorClasses}`}>
+                                            <div className={`absolute top-1.5 right-1.5 min-h-6 px-2 rounded-full text-xs leading-4 font-semibold shadow-xs flex items-center gap-1 ${colorClasses}`}>
                                                 {isOutOfStock ? (
                                                     <span>{t('common.outOfStock')}</span>
                                                 ) : (
@@ -121,7 +121,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         if (priceTime !== null) {
                                             if (priceTime > cutoff) {
                                                 return (
-                                                    <span className="absolute top-1.5 left-1.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1 z-10">
+                                                    <span className="absolute top-1.5 left-1.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] min-h-6 px-2 rounded-full text-xs leading-4 font-semibold uppercase shadow-xs flex items-center gap-1 z-10">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info)]" aria-hidden="true" />
                                                         {t('pos.changed')}
                                                     </span>
@@ -130,7 +130,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         }
                                         if (product.isOnSale) {
                                             return (
-                                                <div className="absolute top-1.5 left-1.5 bg-rose-500 px-2 py-0.5 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider shadow-xs">
+                                                <div className="absolute top-1.5 left-1.5 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] min-h-6 px-2 rounded-full text-xs leading-4 font-semibold uppercase shadow-xs flex items-center">
                                                     {t('pos.sale')}
                                                 </div>
                                             );
@@ -140,11 +140,11 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                 </div>
 
                                 <div className="flex-1 flex flex-col min-w-0">
-                                    <h3 className="font-semibold text-[var(--theme-text-primary)] text-[13px] sm:text-sm line-clamp-2 min-h-[2.5rem] leading-snug mb-2 tracking-tight">{product.name}</h3>
+                                    <h3 className="font-semibold text-[var(--theme-text-primary)] text-sm leading-5 mb-2 tracking-tight whitespace-normal break-words">{product.name}</h3>
                                     {(() => {
                                         const badge = formatPackBadge(product);
                                         return badge ? (
-                                            <span className="inline-block mb-2 px-2 py-1 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] text-[10px] font-semibold tracking-wide max-w-fit">
+                                            <span className="inline-block mb-2 px-2 py-1 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] text-xs leading-4 font-semibold tracking-wide max-w-fit">
                                                 {badge}
                                             </span>
                                         ) : null;
@@ -166,7 +166,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                             {inCartItem ? (
                                                 <span className="text-xs font-bold">{inCartItem.quantity}</span>
                                             ) : (
-                                                <Plus size={13} />
+                                                <Plus size={16} />
                                             )}
                                         </div>
                                     </div>
