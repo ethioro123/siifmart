@@ -102,6 +102,13 @@ BEGIN
  VALUES(product.id::text,product.name,product.sku,target.id::text,target.country,'edit','pending','fixture','{"price":150,"name":"Coffee changed"}','PRICE_CHANGE: mixed regression');
  RAISE EXCEPTION 'Mixed price/detail shortcut allowed';
  EXCEPTION WHEN raise_exception THEN IF SQLERRM='Mixed price/detail shortcut allowed' THEN RAISE; END IF; END;
+ -- Unknown fields remain subject to the original explicit product-edit allowlist.
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',regional,'role','authenticated')::text,true);
+ BEGIN
+ INSERT INTO public.inventory_requests(product_id,product_name,product_sku,site_id,country_code,change_type,status,requested_by,proposed_changes,adjustment_reason)
+ VALUES(product.id::text,product.name,product.sku,target.id::text,target.country,'edit','pending','fixture','{"name":"Coffee guarded","stock":999999}','Product attributes update');
+ RAISE EXCEPTION 'Unknown fields escaped product-edit allowlist';
+ EXCEPTION WHEN raise_exception THEN IF SQLERRM='Unknown fields escaped product-edit allowlist' THEN RAISE; END IF; END;
  EXECUTE 'RESET ROLE';
  IF (SELECT count(*) FROM private.product_edit_votes v JOIN public.inventory_requests r ON r.id=v.request_id WHERE r.product_id=product.id::text AND r.adjustment_reason LIKE 'PRICE_CHANGE:%regression%')<>0 THEN RAISE EXCEPTION 'Price changes inserted three-way votes'; END IF;
 END;
