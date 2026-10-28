@@ -3,7 +3,7 @@ import { Truck, RefreshCw } from 'lucide-react';
 import { User, Site } from '../../../types';
 
 interface DriverHeaderProps {
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
     user: User | null;
     employees: any[];
     activeSite: Site | null;

@@ -41,7 +41,7 @@ interface DriverTabProps {
     wmsJobsService: any;
     addProduct: any;
     jobs: WMSJob[]; // Needed for parent transfer updates
-    t: (key: string) => string;
+    t: (key: string, params?: Record<string, string | number>) => string;
     loadHistoricalJobs?: (limit?: number) => Promise<void>;
 }
 
@@ -166,7 +166,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                     >
                         <div className="flex items-center gap-2">
                             <Activity size={14} className="text-[var(--theme-primary)]" />
-                            <span>Shift Summary & Actions</span>
+                            <span>{t('warehouse.driverHub.shiftSummaryActions')}</span>
                         </div>
                         <ChevronDown size={14} className={`text-[var(--theme-text-muted)] transition-transform duration-300 ${showControlCenter ? 'rotate-180' : ''}`} />
                     </button>
@@ -199,9 +199,9 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                             </div>
                             <input
                                 type="text"
-                                placeholder="Find mission by ID, Dest, or TRK..."
-                                aria-label="Search Missions"
-                                title="Search Missions"
+                                placeholder={t('warehouse.driverHub.searchMissionsPlaceholder')}
+                                aria-label={t('warehouse.driverHub.searchMissions')}
+                                title={t('warehouse.driverHub.searchMissions')}
                                 value={globalSearch}
                                 onChange={(e) => setGlobalSearch(e.target.value)}
                                 className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-primary)] focus:ring-1 focus:ring-[var(--theme-primary)]/20 shadow-xs transition-colors min-h-[44px]"
@@ -209,8 +209,8 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                             {globalSearch && (
                                 <button 
                                     onClick={() => setGlobalSearch('')}
-                                    aria-label="Clear search"
-                                    title="Clear search"
+                                    aria-label={t('warehouse.driverHub.clearSearch')}
+                                    title={t('warehouse.driverHub.clearSearch')}
                                     className="absolute inset-y-0 right-3 flex items-center text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors p-1"
                                 >
                                     <X size={15} />

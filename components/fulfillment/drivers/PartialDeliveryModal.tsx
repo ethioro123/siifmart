@@ -156,7 +156,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                         </div>
                         <div>
                             <h3 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">
-                                {hasUndelivered ? t('warehouse.driverHub.partialDelivery') : 'Confirm Delivery'}
+                                {hasUndelivered ? t('warehouse.driverHub.partialDelivery') : t('warehouse.driverHub.confirmDelivery')}
                             </h3>
                             <p className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5">
                                 {formatJobId(job)} → {destSite?.name || t('warehouse.driverHub.localHub')}
@@ -179,12 +179,12 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                             <CheckCircle size={30} className="text-emerald-500" />
                         </div>
                         <h4 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight mb-2">
-                            {hasUndelivered ? t('warehouse.driverHub.partialDeliveryLogged') : 'Delivery Completed Successfully'}
+                            {hasUndelivered ? t('warehouse.driverHub.partialDeliveryLogged') : t('warehouse.driverHub.jobCompleted')}
                         </h4>
                         <p className="text-xs text-[var(--theme-text-secondary)] max-w-xs leading-relaxed">
                             <strong className="text-emerald-500 font-mono tabular-nums">{totalDelivered}</strong> {t('warehouse.driverHub.to')} <strong className="text-[var(--theme-text-primary)] font-mono tabular-nums">{totalDispatched}</strong> {t('warehouse.driverHub.units').toLowerCase()} {t('warehouse.driverHub.delivered').toLowerCase()} {t('warehouse.driverHub.to').toLowerCase()} {destSite?.name || t('warehouse.driverHub.localHub')}.
                         </p>
-                        <p className="text-[11px] text-[var(--theme-text-muted)] mt-2">Arrival recorded. Destination inspection is still required. Undelivered goods remain in transport custody until a return is received.</p>
+                        <p className="text-[11px] text-[var(--theme-text-muted)] mt-2">{t('warehouse.driverHub.arrivalRecordedNotice')}</p>
                         <button
                             onClick={onClose}
                             className="mt-6 min-h-[44px] px-8 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-semibold text-xs rounded-xl transition-all active:scale-[0.98] touch-manipulation cursor-pointer"
@@ -240,8 +240,8 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                                         min={0}
                                                         max={line.dispatched}
                                                         value={line.delivered}
-                                                        aria-label="Delivered quantity"
-                                                        title="Delivered quantity"
+                                                        aria-label={t('warehouse.driverHub.deliveredQuantities')}
+                                                        title={t('warehouse.driverHub.deliveredQuantities')}
                                                         onChange={e => setLineDelivered(i, e.target.value)}
                                                         className={`w-16 min-h-[38px] text-center text-xs font-bold font-mono tabular-nums border rounded-xl px-2 py-1 focus:outline-none transition-colors ${isShort
                                                             ? 'border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 focus:border-amber-500'
@@ -254,7 +254,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                         {isShort && (
                                             <div className="mt-2 flex justify-end">
                                                 <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                                                    {line.dispatched - (deliveredVal || 0)} units remain in transport custody until inspected
+                                                    {line.dispatched - (deliveredVal || 0)} {t('warehouse.driverHub.undeliveredReturned')}
                                                 </span>
                                             </div>
                                         )}
@@ -286,7 +286,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                 ) : hasUndelivered ? (
                                     <>{t('warehouse.driverHub.next')} <ArrowRight size={14} /></>
                                 ) : (
-                                    <>Confirm Delivery <CheckCircle size={14} /></>
+                                    <>{t('warehouse.driverHub.confirmDelivery')} <CheckCircle size={14} /></>
                                 )}
                             </button>
                         </div>
@@ -320,8 +320,8 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                     value={notes}
                                     onChange={e => setNotes(e.target.value)}
                                     placeholder={t('warehouse.driverHub.driverNotes')}
-                                    aria-label="Driver Notes"
-                                    title="Driver Notes"
+                                    aria-label={t('warehouse.driverHub.driverNotes')}
+                                    title={t('warehouse.driverHub.driverNotes')}
                                     rows={3}
                                     className="w-full text-xs border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-3 sm:px-4 py-2.5 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-colors resize-none"
                                 />

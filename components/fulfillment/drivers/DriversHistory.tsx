@@ -160,7 +160,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                                             <div className="flex items-center gap-1.5 mt-1 text-xs text-[var(--theme-text-secondary)]">
                                                 <UserCheck size={13} className="text-[var(--theme-primary)] shrink-0" />
                                                 <span className="truncate">
-                                                    Delivered By: {job.resolvedUser?.name || 'Driver'}{job.resolvedUser?.displayId ? ` (${job.resolvedUser.displayId})` : ''}
+                                                    {t('warehouse.driverHub.deliveredBy')}: {job.resolvedUser?.name || t('warehouse.driverHub.driver')}{job.resolvedUser?.displayId ? ` (${job.resolvedUser.displayId})` : ''}
                                                 </span>
                                             </div>
                                         </div>
