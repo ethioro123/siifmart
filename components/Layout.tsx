@@ -1,3 +1,4 @@
+import { ApprovalInboxNotice } from './approvals/ApprovalInboxNotice';
 import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -42,6 +43,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
         <TopBar />
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 pb-20 md:pb-6 scroll-smooth">
           <div className="w-full space-y-6">
+            <ApprovalInboxNotice />
             {children}
           </div>
         </main>

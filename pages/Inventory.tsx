@@ -1,3 +1,4 @@
+import { useApprovalDestination } from '../hooks/useApprovalDestination';
 import { isStockReview } from '../utils/inventoryReviewRouting';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -58,6 +59,7 @@ export default function Inventory() {
     // --- TAB STATE ---
     const isNativeApp = native.isNative();
     const [activeTab, setActiveTab] = useState<Tab>(isNativeApp ? 'stock' : 'overview');
+    useApprovalDestination(params => { if (params.get('tab')==='pending') setActiveTab('pending'); });
 
     // Notification states
     const [hasViewedBarcodeAudit, setHasViewedBarcodeAudit] = useState(false);

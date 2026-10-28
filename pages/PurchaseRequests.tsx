@@ -1,3 +1,4 @@
+import { useApprovalDestination } from '../hooks/useApprovalDestination';
 import React, { useMemo, useState } from 'react';
 import { Check, ClipboardList, Lightbulb, Plus, X, Search, Package, MapPin } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
@@ -53,6 +54,7 @@ export default function PurchaseRequests() {
   const [poDraft, setPoDraft] = useState<Partial<PurchaseOrder> | null>(null);
   const [decisionReasons, setDecisionReasons] = useState<Record<string, string>>({});
   const [view, setView] = useState<'stock' | 'suggestions'>('stock');
+  useApprovalDestination(params => { const view=params.get('view'); if (view==='stock' || view==='suggestions') setView(view); });
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [suggestedName, setSuggestedName] = useState('');

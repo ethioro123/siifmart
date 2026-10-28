@@ -9,6 +9,7 @@ import { logger } from '../../../utils/logger';
 import { SingleProductAllocation } from './components/SingleProductAllocation';
 import { WaveDistributionAllocations } from './components/WaveDistributionAllocations';
 import { buildTransferLineItem } from './transferQuantity';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface BulkDistributionModalProps {
     isOpen: boolean;
@@ -39,6 +40,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     logSystemEvent,
     renderTabs
 }) => {
+    const { t } = useLanguage();
     const { settings } = useData();
     const isRestricted = !['group_ceo', 'country_managing_director'].includes(user?.role || '') && !!user?.siteId;
     const submitLock = useRef(false);
@@ -291,10 +293,10 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             <div className="min-w-0 flex-1">
                                 <h2 id="bulk-distribution-title" className="text-base sm:text-lg md:text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2 tracking-tight">
                                     <Layers className="text-primary shrink-0" size={20} />
-                                    <span className="break-words">Bulk distribution</span>
+                                    <span className="break-words">{t('warehouse.bulkDistributionTitle')}</span>
                                 </h2>
                                 <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm leading-relaxed mt-1 break-words">
-                                    Plan store allocations from one warehouse or DC
+                                    {t('warehouse.bulkDistributionSubtitle')}
                                 </p>
                             </div>
                             <button
@@ -329,7 +331,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                     : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                                     }`}
                             >
-                                <div className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">Single product</div>
+                                <div className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">{t('warehouse.singleProductMode')}</div>
 
                             </button>
                             <button
@@ -339,14 +341,14 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                     : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                                     }`}
                             >
-                                <div className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">Multiple products</div>
+                                <div className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">{t('warehouse.multipleProductsMode')}</div>
 
                             </button>
                         </div>
 
                         {/* Source Selection */}
                         <div className="bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)]">
-                            <label htmlFor="source-warehouse-select" className="block text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">Distribution Source</label>
+                            <label htmlFor="source-warehouse-select" className="block text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">{t('warehouse.distributionSource')}</label>
                             <select
                                 id="source-warehouse-select"
                                 value={bulkDistributionSourceSite}
@@ -368,7 +370,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                     <option value={activeSite?.id || bulkDistributionSourceSite}>{activeSite?.name || 'Current Site'}</option>
                                 ) : (
                                     <>
-                                        <option value="">Select Distribution Source</option>
+                                        <option value="">{t('warehouse.selectDistributionSource')}</option>
                                         {sites.filter(site => ['Warehouse', 'Distribution Center'].includes(site.type) && site.country === activeSite?.country).map(site => (
                                             <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
                                         ))}
@@ -460,7 +462,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 }`}
                         >
                             <Truck size={16} />
-                            {isSubmitting ? 'Submitting requests…' : 'Submit for approval'}
+                            {isSubmitting ? t('warehouse.submittingRequests') : t('warehouse.submitForApproval')}
                         </button>
                     </div>
                 </div>

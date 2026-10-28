@@ -1,3 +1,4 @@
+import { useApprovalDestination } from '../hooks/useApprovalDestination';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Briefcase, User, Network, Calendar, UserPlus, Lock, Shield, AlertTriangle } from 'lucide-react';
@@ -66,6 +67,8 @@ export default function Employees() {
    const [isQuotaApprovalModalOpen, setIsQuotaApprovalModalOpen] = useState(false);
    const [pendingQuotaCount, setPendingQuotaCount] = useState(0);
    const [pendingPayrollRun, setPendingPayrollRun] = useState<PayrollRun | null>(null);
+
+   useApprovalDestination(params => { const queue=params.get('approval'); if (queue==='salary') setIsSalaryQueueOpen(true); if (queue==='changes') setIsChangeApprovalModalOpen(true); if (queue==='headcount') setIsQuotaApprovalModalOpen(true); if (queue==='recruitment') setViewMode('recruitment'); if (queue==='onboarding') { setViewMode('directory'); setFilterStatus('Pending Approval'); setCurrentPage(1); } });
 
    const refreshPendingSalary = useCallback(async () => {
       try {

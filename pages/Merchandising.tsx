@@ -33,7 +33,7 @@ import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBan
 export default function Pricing() {
    const state = useMerchandisingState();
    const [searchParams] = useSearchParams();
-   useEffect(() => { if (searchParams.get('tab') === 'reviews') state.setActiveTab('reviews'); }, [searchParams, state.setActiveTab]);
+   useEffect(() => { if (searchParams.get('tab') === 'reviews') state.setActiveTab('reviews'); else if (searchParams.get('tab') === 'promos') state.setActiveTab('promos'); }, [searchParams, state.setActiveTab]);
    const { user } = useStore();
    const { isRegionalUser } = useData();
 

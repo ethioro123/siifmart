@@ -1,3 +1,4 @@
+import { useApprovalDestination } from '../hooks/useApprovalDestination';
 import { getProcurementScope, filterProcurementSites } from '../utils/procurementScope';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Truck, Plus, Filter, Download, RefreshCw, ShieldAlert, Clock } from 'lucide-react';
@@ -42,6 +43,7 @@ export default function Procurement() {
 
     // UI State
     const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'suppliers' | 'vendor_relations' | 'customs_import' | 'inbound_qc'>('overview');
+    useApprovalDestination(params => { if (params.get('tab')==='orders') setActiveTab('orders'); });
     const [loading, setLoading] = useState(false);
 
     // Data State

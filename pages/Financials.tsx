@@ -1,3 +1,4 @@
+import { useApprovalDestination } from '../hooks/useApprovalDestination';
 import POFinanceApprovalsTab from '../components/financials/POFinanceApprovalsTab';
 import React from 'react';
 import {
@@ -44,6 +45,7 @@ import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBan
 
 export default function Finance() {
    const state = useFinancialsState();
+   useApprovalDestination(params => { const tab=params.get('tab'); if (tab && ['po_approvals','expenses','margin','payroll'].includes(tab)) state.setActiveTab(tab); });
    const { user } = useStore();
    const { isRegionalUser, effectiveCountry, regions, activeRegionCode } = useData();
 

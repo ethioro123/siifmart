@@ -20,6 +20,7 @@ const NetworkView = lazy(() => import('./pages/NetworkView'));
 const SettingsPage = lazy(() => import('./pages/Settings'));
 const Roadmap = lazy(() => import('./pages/Roadmap'));
 const Procurement = lazy(() => import('./pages/Procurement'));
+const Approvals = lazy(() => import('./pages/Approvals'));
 const PurchaseRequests = lazy(() => import('./pages/PurchaseRequests'));
 const Customers = lazy(() => import('./pages/Customers'));
 const SalesHistory = lazy(() => import('./pages/SalesHistory'));
@@ -308,6 +309,7 @@ export default function App() {
               </ProtectedRoute>
             } />
 
+            <Route path="/approvals" element={<ProtectedRoute><ModuleErrorBoundary moduleName="Approvals"><Approvals /></ModuleErrorBoundary></ProtectedRoute>} />
             <Route path="/purchase-requests" element={
               <ProtectedRoute>
                 <ModuleErrorBoundary moduleName="Purchase Requests">

@@ -1,6 +1,13 @@
+import type { UnifiedApprovalInbox } from '../types/unifiedApprovalInbox';
 import { supabase } from '../lib/supabase';
 import type { ProductApprovalInbox } from '../types/approvalInbox';
 export const approvalInboxService = {
+  async allReviews(countryCode: string): Promise<UnifiedApprovalInbox> {
+    const { data, error } = await supabase.rpc('get_my_approval_inbox', { p_country_code: countryCode.toUpperCase() });
+    if (error) throw error;
+    if (!data || !Array.isArray(data.queues)) throw new Error('Invalid approval inbox response');
+    return data as UnifiedApprovalInbox;
+  },
   async productReviews(countryCode: string): Promise<ProductApprovalInbox> {
     const { data, error } = await supabase.rpc('get_my_product_approval_inbox', {
       p_country_code: countryCode.toUpperCase(), p_limit: 5

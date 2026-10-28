@@ -343,7 +343,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                 <option value={activeSite?.id || transferSourceSite}>{activeSite?.name || 'Current Site'}</option>
                                             ) : (
                                                 <>
-                                                    <option value="">Select Source Site</option>
+                                                    <option value="">{t('warehouse.selectSourceSite')}</option>
                                                     {sites.filter(site => ['Warehouse', 'Distribution Center'].includes(site.type)).map(site => (
                                                         <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
                                                     ))}
@@ -360,7 +360,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                             className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation"
                                             aria-label="Select Destination Site"
                                         >
-                                            <option value="">Select Destination</option>
+                                            <option value="">{t('warehouse.selectDestinationSite')}</option>
                                             {sites.filter(s => {
                                                 const isSelf = s.id === (transferSourceSite || activeSite?.id);
                                                 const isAdminSite = s.type === 'Administration';
@@ -422,7 +422,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                             type="text"
                                             value={transferNote}
                                             onChange={(e) => setTransferNote(e.target.value)}
-                                            placeholder="Reason for transfer..."
+                                            placeholder={t('warehouse.transferReasonPlaceholder')}
                                             className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation"
                                         />
                                     </div>
@@ -438,7 +438,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                     onClick={() => setIsReviewMode(false)}
                                     className="min-h-[44px] px-4 py-2 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] font-semibold text-xs uppercase tracking-wider transition-colors touch-manipulation"
                                 >
-                                    Back to Edit
+                                    {t('warehouse.backToEdit')}
                                 </button>
                                 <button
                                     onClick={handleCreateTransfer}
