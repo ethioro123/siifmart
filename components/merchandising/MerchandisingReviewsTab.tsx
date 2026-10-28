@@ -28,7 +28,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
   const focusedRequest = searchParams.get('requestId') || undefined;
   const focusedRevision = searchParams.get('revisionId') || undefined;
   useEffect(() => { setPage(1); }, [focusedRequest, focusedRevision]);
-  const { addNotification, effectiveCountry, activeSite } = useData();
+  const { addNotification, effectiveCountry, activeSite, sites } = useData();
   const { products } = useMerchandising();
   const [productId, setProductId] = useState('');
   const [name, setName] = useState('');
@@ -267,6 +267,8 @@ export const MerchandisingReviewsTab: React.FC = () => {
           </div>
 
           {requests.map(request => {
+            const site = (sites || []).find(site => (site.id === request.siteId || site.code === request.siteId) && site.country === country);
+            const siteLabel = site ? `${site.name} · ${site.code}` : 'Site unavailable';
             const isPrice = isPriceProposal(request);
             const baselineProduct = request.currentProduct || products.find(p => p.id === request.productId);
             const canApprove = !proposalApprovalBlock(request,user,baselineProduct);
@@ -316,7 +318,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                       <span className="font-mono">{request.productSku}</span> · Requested by {request.requestedBy}
                     </p>
                     <p className="text-xs text-[var(--theme-text-secondary)]">
-                      Region: <span className="font-medium text-[var(--theme-text-primary)]">{request.regionCode || country}</span> · Site: <span className="font-medium text-[var(--theme-text-primary)]">{request.siteId}</span> · Submitted {new Date(request.requestedAt).toLocaleDateString()}
+                      Region: <span className="font-medium text-[var(--theme-text-primary)]">{request.regionCode || country}</span> · Site: <span className="font-medium text-[var(--theme-text-primary)]">{siteLabel}</span> · Submitted {new Date(request.requestedAt).toLocaleDateString()}
                     </p>
                   </div>
 
