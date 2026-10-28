@@ -1,3 +1,4 @@
+import { isApprovalReviewRoute } from '../utils/approvalReviewRoute';
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useStore } from '../contexts/CentralStore';
@@ -35,6 +36,8 @@ export function ProtectedRoute({
   const normalizedRole = (user?.role || '').toLowerCase().trim().replace(/[\s-]/g, '_');
   const isExecutive = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director'].includes(normalizedRole);
 
+  const isAuthorizedReview = canAccessModule(user?.role, module || '') && isApprovalReviewRoute(normalizedRole, module, location.pathname, location.search);
+
   // 1. Check authentication
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -55,7 +58,7 @@ export function ProtectedRoute({
       : isPosMobile
         ? ['pos', 'sales', 'customers', 'profile', 'location']
         : ['profile', 'location'];
-    if (module && !allowedMobileModules.includes(module)) {
+    if (module && !allowedMobileModules.includes(module) && !isAuthorizedReview) {
       const fallback = redirectTo || mobileRoute;
       const fallbackPath = fallback.split('?')[0];
       return <Navigate to={fallbackPath === location.pathname ? '/profile' : fallback} replace />;
@@ -66,7 +69,7 @@ export function ProtectedRoute({
   if (activeSite) {
 
     const isSpecialistForModule = (mod: string): boolean => {
-      if (isExecutive) return true;
+      if (isExecutive || (mod === module && isAuthorizedReview)) return true;
       if (mod === 'pricing') return ['country_commercial_director', 'merchandising_specialist', 'regional_merchandising_manager', 'merchandiser'].includes(normalizedRole);
       if (mod === 'finance') return ['country_finance_director', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'country_compliance_manager', 'auditor'].includes(normalizedRole);
       if (mod === 'procurement') return ['country_commercial_director', 'country_supply_chain_director', 'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager', 'customs_import_specialist'].includes(normalizedRole);
@@ -98,7 +101,7 @@ export function ProtectedRoute({
         if (!isSpecialistForModule('finance')) blockedInStore.push('finance');
         blockedInStore.push('admin', 'settings');
       }
-      if (module && blockedInStore.includes(module)) {
+      if (module && blockedInStore.includes(module) && !isAuthorizedReview) {
         logger.warn('ProtectedRoute', `Blocked module "${module}" while active site is POS Store (${activeSite.name})`);
         const fallback = redirectTo || getRoleDashboardRoute(user.role, activeSite?.type);
         const fallbackPath = fallback.split('?')[0];
