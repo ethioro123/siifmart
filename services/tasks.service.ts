@@ -1,12 +1,15 @@
 import { supabase } from '../lib/supabase';
 import type { EmployeeTask } from '../types';
+import { logger } from '../utils/logger';
+
+const TASK_COLUMNS = 'id, title, description, assigned_to, status, priority, due_date, site_id, created_by, region_code, task_type';
 
 export const tasksService = {
     async getAll(siteId?: string, limit: number = 25, regionCode?: string): Promise<EmployeeTask[]> {
         try {
             let query = supabase
                 .from('employee_tasks')
-                .select('*')
+                .select(TASK_COLUMNS)
                 .order('due_date', { ascending: true });
 
             if (siteId) {
@@ -22,13 +25,13 @@ export const tasksService = {
             const { data, error } = await query;
 
             if (error) {
-                console.error('Error fetching tasks:', error);
+                logger.error('tasksService', 'Error fetching tasks:', error);
                 return [];
             }
 
             return (data || []).map(this._mapTask);
         } catch (error) {
-            console.error('Error in tasksService.getAll:', error);
+            logger.error('tasksService', 'Error in tasksService.getAll:', error as Error);
             return [];
         }
     },
@@ -41,18 +44,18 @@ export const tasksService = {
         try {
             const { data, error } = await supabase
                 .from('employee_tasks')
-                .select('*')
+                .select(TASK_COLUMNS)
                 .eq('id', id)
                 .single();
 
             if (error) {
-                console.error('Error fetching task:', error);
+                logger.error('tasksService', 'Error fetching task by id:', error);
                 return null;
             }
 
             return this._mapTask(data);
         } catch (error) {
-            console.error('Error in tasksService.getById:', error);
+            logger.error('tasksService', 'Error in tasksService.getById:', error as Error);
             return null;
         }
     },
@@ -61,50 +64,89 @@ export const tasksService = {
         try {
             const { data, error } = await supabase
                 .from('employee_tasks')
-                .select('*')
+                .select(TASK_COLUMNS)
                 .eq('assigned_to', employeeId)
                 .order('due_date', { ascending: true });
 
             if (error) {
-                console.error('Error fetching tasks for employee:', error);
+                logger.error('tasksService', 'Error fetching tasks for employee:', error);
                 return [];
             }
 
             return (data || []).map(this._mapTask);
         } catch (error) {
-            console.error('Error in tasksService.getByEmployee:', error);
+            logger.error('tasksService', 'Error in tasksService.getByEmployee:', error as Error);
             return [];
         }
     },
 
     async create(task: Omit<EmployeeTask, 'id'>): Promise<EmployeeTask | null> {
         try {
-            const dbTask = {
+            let siteId = task.siteId || (task as any).site_id || null;
+            let regionCode = task.regionCode || (task as any).region_code || null;
+
+            // Resolve site_id from assigned employee if omitted
+            if (!siteId && task.assignedTo) {
+                const { data: emp } = await supabase
+                    .from('employees')
+                    .select('site_id, region_code')
+                    .eq('id', task.assignedTo)
+                    .maybeSingle();
+
+                if (emp?.site_id) {
+                    siteId = emp.site_id;
+                    if (!regionCode && emp.region_code) {
+                        regionCode = emp.region_code;
+                    }
+                }
+            }
+
+            // Fallback to active creator's site scope if still missing
+            if (!siteId) {
+                const { data: { user: authUser } } = await supabase.auth.getUser();
+                if (authUser?.id) {
+                    const { data: creatorEmp } = await supabase
+                        .from('employees')
+                        .select('site_id, region_code')
+                        .eq('id', authUser.id)
+                        .maybeSingle();
+
+                    if (creatorEmp?.site_id) {
+                        siteId = creatorEmp.site_id;
+                        if (!regionCode && creatorEmp.region_code) {
+                            regionCode = creatorEmp.region_code;
+                        }
+                    }
+                }
+            }
+
+            const dbTask: any = {
                 title: task.title,
-                description: task.description,
+                description: task.description || '',
                 assigned_to: task.assignedTo,
                 status: task.status || 'Pending',
                 priority: task.priority || 'Medium',
                 due_date: task.dueDate,
+                site_id: siteId,
                 created_by: task.createdBy || null,
-                region_code: task.regionCode || (task as any).region_code || null,
+                region_code: regionCode,
                 task_type: task.taskType || (task as any).task_type || 'GENERAL'
             };
 
             const { data, error } = await supabase
                 .from('employee_tasks')
                 .insert(dbTask)
-                .select()
+                .select(TASK_COLUMNS)
                 .single();
 
             if (error) {
-                console.error('Error creating task:', error);
+                logger.error('tasksService', 'Error creating task in database:', error);
                 return null;
             }
 
             return this._mapTask(data);
         } catch (error) {
-            console.error('Error in tasksService.create:', error);
+            logger.error('tasksService', 'Error in tasksService.create:', error as Error);
             return null;
         }
     },
@@ -121,6 +163,9 @@ export const tasksService = {
             if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
             if (updates.regionCode !== undefined) dbUpdates.region_code = updates.regionCode;
             if (updates.taskType !== undefined) dbUpdates.task_type = updates.taskType;
+            if (updates.siteId !== undefined) dbUpdates.site_id = updates.siteId;
+            if ((updates as any).site_id !== undefined) dbUpdates.site_id = (updates as any).site_id;
+            if (updates.createdBy !== undefined) dbUpdates.created_by = updates.createdBy;
 
             dbUpdates.updated_at = new Date().toISOString();
 
@@ -128,17 +173,17 @@ export const tasksService = {
                 .from('employee_tasks')
                 .update(dbUpdates)
                 .eq('id', id)
-                .select()
+                .select(TASK_COLUMNS)
                 .single();
 
             if (error) {
-                console.error('Error updating task:', error);
+                logger.error('tasksService', 'Error updating task in database:', error);
                 return null;
             }
 
             return this._mapTask(data);
         } catch (error) {
-            console.error('Error in tasksService.update:', error);
+            logger.error('tasksService', 'Error in tasksService.update:', error as Error);
             return null;
         }
     },
@@ -151,13 +196,13 @@ export const tasksService = {
                 .eq('id', id);
 
             if (error) {
-                console.error('Error deleting task:', error);
+                logger.error('tasksService', 'Error deleting task:', error);
                 return false;
             }
 
             return true;
         } catch (error) {
-            console.error('Error in tasksService.delete:', error);
+            logger.error('tasksService', 'Error in tasksService.delete:', error as Error);
             return false;
         }
     },
@@ -171,9 +216,13 @@ export const tasksService = {
             status: data.status as EmployeeTask['status'],
             priority: data.priority as EmployeeTask['priority'],
             dueDate: data.due_date,
+            siteId: data.site_id,
+            site_id: data.site_id,
             createdBy: data.created_by,
             regionCode: data.region_code,
-            taskType: data.task_type
+            region_code: data.region_code,
+            taskType: data.task_type,
+            task_type: data.task_type
         };
     }
 };

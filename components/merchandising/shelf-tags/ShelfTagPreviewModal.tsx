@@ -1,5 +1,5 @@
-import React from 'react';
-import { Printer, X, Tag, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Printer, X, Tag, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import Modal from '../../Modal';
 import type { ShelfTagItem, ShelfTagMediaSize } from '../../../utils/labels/ShelfTagGenerator';
 import { isProductHalal } from '../../../utils/labels/ShelfTagGenerator';
@@ -25,9 +25,12 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
    onConfirmPrint,
    isPrinting
 }) => {
+   const [previewIndex, setPreviewIndex] = useState(0);
+
    if (!isOpen || items.length === 0) return null;
 
-   const previewItem = items[0];
+   const activeIdx = Math.min(previewIndex, items.length - 1);
+   const previewItem = items[activeIdx] || items[0];
    const regularWhole = Math.round(Number(previewItem.regularPrice) || 0);
    const saleWhole = previewItem.salePrice && previewItem.salePrice > 0 ? Math.round(Number(previewItem.salePrice)) : null;
    const effectivePrice = previewItem.isOnSale && saleWhole && saleWhole > 0 ? saleWhole : regularWhole;
@@ -63,8 +66,32 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
 
             {/* Visual Tag Mockup */}
             <div className="flex flex-col items-center justify-center p-6 bg-stone-100 dark:bg-stone-900 rounded-2xl border border-[var(--theme-border)]">
-               <div className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">
-                  Sample Tag Preview (1 of {items.length})
+               <div className="flex items-center justify-between w-full max-w-xs mb-2">
+                  <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                     Sample Tag Preview ({activeIdx + 1} of {items.length})
+                  </span>
+                  {items.length > 1 && (
+                     <div className="flex items-center gap-1">
+                        <button
+                           type="button"
+                           disabled={activeIdx <= 0}
+                           onClick={() => setPreviewIndex((i) => Math.max(0, i - 1))}
+                           className="p-1 rounded bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] disabled:opacity-30"
+                           aria-label="Previous preview tag"
+                        >
+                           <ChevronLeft size={12} />
+                        </button>
+                        <button
+                           type="button"
+                           disabled={activeIdx >= items.length - 1}
+                           onClick={() => setPreviewIndex((i) => Math.min(items.length - 1, i + 1))}
+                           className="p-1 rounded bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] disabled:opacity-30"
+                           aria-label="Next preview tag"
+                        >
+                           <ChevronRight size={12} />
+                        </button>
+                     </div>
+                  )}
                </div>
 
                <div className={`bg-white text-black border-2 border-black rounded-md p-3.5 shadow-md flex flex-col justify-between transition-all ${

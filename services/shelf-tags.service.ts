@@ -22,13 +22,14 @@ export const shelfTagsService = {
    * Fetches the authoritative product record directly from Supabase for a given site & SKU,
    * bypassing stale client caches.
    */
-  async fetchAuthoritativeProduct(siteId: string, sku: string): Promise<Product | null> {
-    if (!sku.trim()) return null;
+  async fetchAuthoritativeProduct(siteId: string, skuOrBarcode: string): Promise<Product | null> {
+    const cleanTerm = skuOrBarcode.trim();
+    if (!cleanTerm) return null;
 
     let query = supabase
       .from('products')
       .select('id,site_id,sku,name,price,cost_price,sale_price,is_on_sale,category,shelf_position,custom_attributes,barcode,barcode_type')
-      .ilike('sku', sku.trim());
+      .or(`sku.ilike.${cleanTerm},barcode.eq.${cleanTerm}`);
 
     if (siteId) {
       query = query.eq('site_id', siteId);

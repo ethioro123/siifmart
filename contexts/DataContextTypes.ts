@@ -31,7 +31,7 @@ export interface DataContextType {
   systemLogs: SystemLog[];
   promotions: Promotion[];
   tasks: EmployeeTask[];
-  setTasks: (tasks: EmployeeTask[]) => void;
+  setTasks: (tasks: EmployeeTask[] | ((prev: EmployeeTask[]) => EmployeeTask[])) => void;
 
   // Regional Governance Lens
   regions: Region[];

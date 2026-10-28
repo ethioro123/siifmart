@@ -76,13 +76,10 @@ export const ShelfTagsTab: React.FC = () => {
    }, []);
 
    // Queue tag from discrepancy
-   const handleQueueTag = useCallback((sku: string) => {
-      const prod = scopedProducts.find(p => (p.sku || '').toUpperCase() === sku.toUpperCase());
-      if (prod) {
-         setSelectedProductIds(prev => new Set(prev).add(prod.id));
-         addNotification('info', `Queued replacement tag for ${prod.sku}`);
-      }
-   }, [scopedProducts, addNotification]);
+   const handleQueueTag = useCallback((productId: string, sku?: string) => {
+      setSelectedProductIds(prev => new Set(prev).add(productId));
+      addNotification('info', `Queued replacement tag for ${sku || 'item'}`);
+   }, [addNotification]);
 
    const handleDiscrepancyDetected = useCallback((rec: ShelfTagAuditRecord, product: Product) => {
       setAuditRecords(shelfTagsService.getStoredAuditRecords(scopeKey));
@@ -246,6 +243,7 @@ export const ShelfTagsTab: React.FC = () => {
             selectedIds={selectedProductIds}
             onToggleSelect={toggleSelect}
             onToggleSelectAll={toggleSelectAll}
+            onPruneSelection={setSelectedProductIds}
             onOpenPreview={handleOpenPreview}
             onPrintSelected={handlePrintExecution}
             isPrinting={isPrinting}

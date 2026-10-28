@@ -14,6 +14,7 @@ import {
 } from '../utils/employeeProfileData';
 import { leaveRequestsService } from '../services/leave-requests.service';
 import { employeeDocumentsService } from '../services/employee-documents.service';
+import { tasksService } from '../services/tasks.service';
 import { getRoleHierarchy } from '../utils/roles';
 import { isSovereignCEO } from '../utils/employeeGovernance';
 
@@ -21,7 +22,7 @@ interface UseStaffProfileProps {
     employee: Employee;
     user: any;
     allTasks: EmployeeTask[];
-    setTasks: (tasks: EmployeeTask[]) => void;
+    setTasks: (tasks: EmployeeTask[] | ((prev: EmployeeTask[]) => EmployeeTask[])) => void;
     updateEmployee: (emp: Employee, user: string) => void | Promise<void>;
     addNotification: (type: 'success' | 'alert' | 'info', message: string) => void;
     updateUserAvatar: (url: string) => void;
@@ -61,6 +62,7 @@ export function useStaffProfile({
     // Tasks state
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskPriority, setNewTaskPriority] = useState<'Low' | 'Medium' | 'High'>('Medium');
+    const [isSavingTask, setIsSavingTask] = useState(false);
 
     // Documents state
     const [documents, setDocuments] = useState<EmployeeDocument[]>(() => getEmployeeDocuments(employee.id));
@@ -75,32 +77,76 @@ export function useStaffProfile({
     const profilePhotoInputRef = useRef<HTMLInputElement>(null);
     const documentInputRef = useRef<HTMLInputElement>(null);
 
-    // Sync documents and leaves when target employee switches
+    // Sync documents, leaves, and persisted tasks when target employee switches
     useEffect(() => {
         setDocuments(getEmployeeDocuments(employee.id));
         setLeaveRequests(getEmployeeLeaveRequests(employee.id));
+
+        let isMounted = true;
+        tasksService.getByEmployee(employee.id).then(empTasks => {
+            if (!isMounted || !Array.isArray(empTasks)) return;
+            setTasks(prevTasks => {
+                const currentTasks = Array.isArray(prevTasks) ? prevTasks : allTasks;
+                const otherTasks = currentTasks.filter(t => t.assignedTo !== employee.id);
+                return [...otherTasks, ...empTasks];
+            });
+        });
+        return () => { isMounted = false; };
     }, [employee.id]);
 
-    const handleAddTask = () => {
-        if (!newTaskTitle.trim()) return;
-        const newTask: EmployeeTask = {
-            id: `T-${Date.now()}`,
-            title: newTaskTitle.trim(),
-            description: 'Manual Assignment',
-            assignedTo: employee.id,
-            status: 'Pending',
-            priority: newTaskPriority,
-            dueDate: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]
-        };
-        setTasks([...allTasks, newTask]);
-        setNewTaskTitle('');
-        addNotification('success', `Task assigned to ${employee.name}`);
+    const handleAddTask = async () => {
+        if (!newTaskTitle.trim() || isSavingTask) return;
+        setIsSavingTask(true);
+        const targetSiteId = employee.siteId || (employee as any).site_id || user?.siteId || (user as any).site_id;
+        const targetRegionCode = employee.regionCode || (employee as any).region_code || user?.regionCode || (user as any).region_code;
+        const dueDate = new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0];
+
+        try {
+            const savedTask = await tasksService.create({
+                title: newTaskTitle.trim(),
+                description: 'Manual Assignment',
+                assignedTo: employee.id,
+                status: 'Pending',
+                priority: newTaskPriority,
+                dueDate,
+                siteId: targetSiteId,
+                createdBy: user?.name || user?.id || 'Manager',
+                regionCode: targetRegionCode,
+                taskType: 'GENERAL'
+            });
+
+            if (savedTask && savedTask.id) {
+                setTasks(prevTasks => {
+                    const current = Array.isArray(prevTasks) ? prevTasks : allTasks;
+                    return [...current.filter(t => t.id !== savedTask.id), savedTask];
+                });
+                setNewTaskTitle('');
+                addNotification('success', `Task assigned to ${employee.name}`);
+            } else {
+                addNotification('alert', 'Failed to assign task. Please verify site assignment and permissions.');
+            }
+        } catch (error: any) {
+            addNotification('alert', error?.message || 'Failed to assign task.');
+        } finally {
+            setIsSavingTask(false);
+        }
     };
 
-    const handleCompleteTask = (taskId: string) => {
-        const updated = allTasks.map(t => (t.id === taskId ? { ...t, status: 'Completed' as const } : t));
-        setTasks(updated);
-        addNotification('success', 'Task marked as completed');
+    const handleCompleteTask = async (taskId: string) => {
+        try {
+            const updated = await tasksService.update(taskId, { status: 'Completed' });
+            if (updated) {
+                setTasks(prevTasks => {
+                    const current = Array.isArray(prevTasks) ? prevTasks : allTasks;
+                    return current.map(t => t.id === taskId ? updated : t);
+                });
+                addNotification('success', 'Task marked as completed');
+            } else {
+                addNotification('alert', 'Failed to complete task. Please check permissions.');
+            }
+        } catch (error: any) {
+            addNotification('alert', error?.message || 'Failed to complete task.');
+        }
     };
 
     const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -317,6 +363,7 @@ export function useStaffProfile({
         isEditorOpen, setIsEditorOpen,
         newTaskTitle, setNewTaskTitle,
         newTaskPriority, setNewTaskPriority,
+        isSavingTask,
         handleAddTask, handleCompleteTask,
         documents, handleDocumentUpload, handleDeleteDocument,
         leaveRequests, handleRequestTimeOff, handleApproveLeave, handleRejectLeave,

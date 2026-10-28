@@ -8,6 +8,8 @@ export interface EmployeeTask {
   status: 'Pending' | 'In-Progress' | 'Completed';
   priority: 'High' | 'Medium' | 'Low';
   dueDate: string;
+  siteId?: string;
+  site_id?: string;
   createdBy?: string; // Employee ID or name of who created the task
   regionCode?: string;
   region_code?: string;

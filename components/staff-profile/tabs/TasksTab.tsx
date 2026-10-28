@@ -10,8 +10,8 @@ interface TasksTabProps {
     setNewTaskTitle: (value: string) => void;
     newTaskPriority: 'Low' | 'Medium' | 'High';
     setNewTaskPriority: (value: 'Low' | 'Medium' | 'High') => void;
-    handleAddTask: () => void;
-    handleCompleteTask: (id: string) => void;
+    handleAddTask: () => void | Promise<void>;
+    handleCompleteTask: (id: string) => void | Promise<void>;
 }
 
 export default function TasksTab({

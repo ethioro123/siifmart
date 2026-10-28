@@ -6,7 +6,7 @@ interface ShelfTagAuditHistoryProps {
    records: ShelfTagAuditRecord[];
    currencySymbol: string;
    onUpdateStatus: (id: string, status: ShelfTagAuditRecord['status']) => void;
-   onQueueTag: (sku: string) => void;
+   onQueueTag: (productId: string, sku?: string) => void;
 }
 
 export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
@@ -29,7 +29,7 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
             </span>
          </div>
 
-         <div className="overflow-x-auto">
+         <div className="overflow-x-auto max-h-80 overflow-y-auto rounded-xl border border-[var(--theme-border)]">
             <table className="w-full text-left text-xs">
                <thead>
                   <tr className="bg-[var(--theme-bg-panel)] border-b border-[var(--theme-border)] text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">
@@ -96,7 +96,7 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
                                           <button
                                              type="button"
                                              onClick={() => {
-                                                onQueueTag(rec.sku);
+                                                onQueueTag(rec.productId, rec.sku);
                                                 onUpdateStatus(rec.id, 'tag_queued');
                                              }}
                                              className="px-2.5 py-1 rounded-lg border border-[var(--theme-border)] text-[11px] font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]"

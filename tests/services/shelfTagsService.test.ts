@@ -47,15 +47,15 @@ describe('Shelf Tags Service Governance', () => {
 
       const limitMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
       const eqMock = vi.fn().mockReturnValue({ limit: limitMock });
-      const ilikeMock = vi.fn().mockReturnValue({ eq: eqMock });
-      const selectMock = vi.fn().mockReturnValue({ ilike: ilikeMock });
+      const orMock = vi.fn().mockReturnValue({ eq: eqMock });
+      const selectMock = vi.fn().mockReturnValue({ or: orMock });
 
       (supabase.from as any).mockReturnValue({ select: selectMock });
 
       const prod = await shelfTagsService.fetchAuthoritativeProduct('site-bole', 'ET-COF-01');
 
       expect(supabase.from).toHaveBeenCalledWith('products');
-      expect(ilikeMock).toHaveBeenCalledWith('sku', 'ET-COF-01');
+      expect(orMock).toHaveBeenCalledWith('sku.ilike.ET-COF-01,barcode.eq.ET-COF-01');
       expect(eqMock).toHaveBeenCalledWith('site_id', 'site-bole');
       expect(prod).not.toBeNull();
       expect(prod?.price).toBe(251); // Math.round(250.75)

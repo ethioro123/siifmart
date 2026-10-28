@@ -18,6 +18,7 @@ interface ShelfTagCatalogProps {
    selectedIds: Set<string>;
    onToggleSelect: (id: string) => void;
    onToggleSelectAll: (allFilteredIds: string[]) => void;
+   onPruneSelection?: (prunedIds: Set<string>) => void;
    onOpenPreview: () => void;
    onPrintSelected: () => void;
    isPrinting: boolean;
@@ -29,6 +30,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
    selectedIds,
    onToggleSelect,
    onToggleSelectAll,
+   onPruneSelection,
    onOpenPreview,
    onPrintSelected,
    isPrinting
@@ -67,6 +69,25 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
    }, [products, searchTerm, selectedCategory, selectedShelfPosition, filterOnlySales]);
 
    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
+
+   // Clamp page if total pages decreases
+   React.useEffect(() => {
+      if (page > totalPages) {
+         setPage(1);
+      }
+   }, [page, totalPages]);
+
+   // Prune selection: ensure filtered-out products do not remain selected for printing
+   React.useEffect(() => {
+      if (!onPruneSelection || selectedIds.size === 0) return;
+      const validSet = new Set(filteredProducts.map(p => p.id));
+      const hasFilteredOut = Array.from(selectedIds).some(id => !validSet.has(id));
+      if (hasFilteredOut) {
+         const pruned = new Set(Array.from(selectedIds).filter(id => validSet.has(id)));
+         onPruneSelection(pruned);
+      }
+   }, [filteredProducts, selectedIds, onPruneSelection]);
+
    const paginatedProducts = useMemo(() => {
       const start = (page - 1) * pageSize;
       return filteredProducts.slice(start, start + pageSize);

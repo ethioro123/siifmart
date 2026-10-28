@@ -43,6 +43,11 @@ export const PromosTab: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rejectModalProposal, setRejectModalProposal] = useState<CampaignProposal | null>(null);
 
+  // Scope change reset: reset to page 1 when country or region changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCountry, activeRegionCode]);
+
   const {
     proposals = [],
     totalCount = 0,
@@ -60,6 +65,14 @@ export const PromosTab: React.FC = () => {
   });
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  // Clamp current page if total pages decreases
+  React.useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
   const userRole = (user?.role || '').toLowerCase();
   const isApprover = APPROVERS.has(userRole);
 

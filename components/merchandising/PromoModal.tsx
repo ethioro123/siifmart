@@ -34,6 +34,11 @@ export const PromoModal: React.FC<PromoModalProps> = ({
    const isPercentage = newPromo.type === 'PERCENTAGE';
    const valueValid = wholeValue > 0 && (!isPercentage || wholeValue <= 100);
 
+   const minExpiryDate = useMemo(() => {
+      const d = new Date(Date.now() + 86400000);
+      return d.toISOString().split('T')[0];
+   }, []);
+
    const expiryDate = newPromo.expiryDate || '';
    const isExpiryValid = useMemo(() => {
       if (!expiryDate) return false;
@@ -147,6 +152,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                </div>
                <input
                   type="date"
+                  min={minExpiryDate}
                   className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none focus:ring-1 transition-colors ${
                      expiryDate && !isExpiryValid
                         ? 'border-rose-500/60 focus:ring-rose-500'
