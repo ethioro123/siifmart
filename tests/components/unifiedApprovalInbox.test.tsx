@@ -134,6 +134,29 @@ describe('cross-department approval inbox', () => {
     expect(screen.queryByRole('link')).toBeNull();
   });
 
+  it('never renders notice when there are 0 approval tasks', () => {
+    query.data = { total: 0, unavailable: 1, checkedAt: 'now', queues: [] };
+    show(<ApprovalInboxNotice />);
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Open approval inbox' })).toBeNull();
+  });
+
+  it('does not render notice on functional or operational pages', () => {
+    render(
+      <MemoryRouter initialEntries={['/inventory']}>
+        <ApprovalInboxNotice />
+      </MemoryRouter>
+    );
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
+  it('allows reviewer to dismiss notice on dashboard', () => {
+    show(<ApprovalInboxNotice />);
+    expect(screen.getByRole('status')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss notice' }));
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
   it('renders visual badges distinguishing specialist clearances from final line approvals', () => {
     show(<Approvals />);
     const specialistBadge = screen.getByTestId('badge-po_finance');
