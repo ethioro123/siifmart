@@ -51,3 +51,9 @@ A component is ready for broad reuse when dimensions, states, semantics, themes,
 When the specification and a prior chapter differ in an exact internal measurement, chapters 14–16 provide the refined default; accessibility, business and security requirements still win. Record a justified content-driven deviation where necessary. Do not seek extra human permission merely to document an already-authorized implementation choice.
 
 Composition review: the reference uses open sections, unboxed read-only metadata, a quiet approval entry and disclosed exceptional control samples. Dialogs inherit the triggering board’s theme. Browser checks cover these boundaries and theme continuity before screenshots are accepted.
+
+## Enlargement and validation regression coverage
+
+The reference uses rem-based typography and explicit 1rem input text, so field values do not inherit smaller label sizing. Browser checks cover 200% root-text enlargement at 320 CSS pixels, page reflow, usable dialog closure and keyboard-only review with visible focus and restoration. This is a text-enlargement/reflow check, not a substitute for testing actual browser 400% zoom or real assistive technology.
+
+The palette checker matches each role and theme to its exact specification table cell, rather than accepting a hex value merely because it appears somewhere in the document. Run `python3 tests/design/test_reference_checks.py` for negative regressions: swapped role values and insufficient contrast must fail. These checks protect the reference; migrating live shared components still requires their own rendered and behavioral verification.
