@@ -8,7 +8,7 @@ DECLARE target public.sites%ROWTYPE; dest uuid; ops uuid; proc uuid; hr uuid; fi
  sample record; queue text; n bigint; expected bigint; wrong_country text;
 BEGIN
  SELECT s.* INTO target FROM public.sites s JOIN public.regions r ON r.code=s.region_code
- WHERE s.type IN ('Warehouse','Distribution Center') AND s.country='ET' AND r.autonomous_po_limit>0 AND lower(r.status)='active'
+ WHERE EXISTS(SELECT 1 FROM public.suppliers v WHERE v.region_code=s.region_code AND v.country_code=s.country AND lower(v.verification_status)='verified' AND lower(v.type) IS DISTINCT FROM 'one-time') AND s.type IN ('Warehouse','Distribution Center') AND s.country='ET' AND r.autonomous_po_limit>0 AND lower(r.status)='active'
  AND EXISTS(SELECT 1 FROM public.employees e WHERE e.role='regional_operations_manager' AND e.region_code=s.region_code AND lower(e.status)='active')
  AND EXISTS(SELECT 1 FROM public.employees e WHERE e.role='regional_procurement_manager' AND e.region_code=s.region_code AND lower(e.status)='active')
  AND EXISTS(SELECT 1 FROM public.employees e WHERE e.role='regional_hr_manager' AND e.region_code=s.region_code AND lower(e.status)='active') ORDER BY s.id LIMIT 1;

@@ -15,3 +15,16 @@ describe('scoped approval inbox read', () => {
     await expect(approvalInboxService.productReviews('ET')).rejects.toBe(error);
   });
 });
+describe('all-department inbox read', () => {
+  it('uses authenticated identity rather than passing a role or employee ID', async () => {
+    const data = { total: 1, unavailable: 0, queues: [{key:'expenses',count:1,status:'ready'}], checkedAt: 'now' };
+    rpc.mockResolvedValue({data,error:null}); expect(await approvalInboxService.allReviews('ke')).toEqual(data);
+    expect(rpc).toHaveBeenCalledWith('get_my_approval_inbox',{p_country_code:'KE'});
+  });
+  it('propagates unavailable responses rather than zero-filling', async () => {
+    rpc.mockResolvedValue({data:null,error:new Error('Permission denied')});
+    await expect(approvalInboxService.allReviews('ET')).rejects.toThrow('Permission denied');
+    rpc.mockResolvedValue({data:{},error:null});
+    await expect(approvalInboxService.allReviews('ET')).rejects.toThrow('Invalid approval inbox response');
+  });
+});

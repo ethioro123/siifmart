@@ -1,5 +1,7 @@
 # Regional product approval inbox
 
+The global header is now the unified inbox described in `unified-approval-inbox.md`. The product-specific card and RPC below remain available.
+
 Regional Operations, Supply Chain and Merchandising managers see a persistent Product approvals count in the header. Regional Operations and Merchandising landing pages show the oldest five pending requests and links to the relevant review queue. Other landing pages retain the header count.
 
 This inbox covers product edits, price changes and shelf-layout revisions requiring those three departmental votes. Existing procurement alerts remain separate. It does not claim to cover HR, finance or every approval workflow.
