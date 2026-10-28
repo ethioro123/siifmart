@@ -46,12 +46,14 @@ export const StockListModal: React.FC = () => {
     const { products, activeSite, refreshData } = useData();
     const { user } = useStore();
     const pageSize = 20;
+    const refreshDataRef = React.useRef(refreshData);
+    refreshDataRef.current = refreshData;
 
     React.useEffect(() => {
         if (isStockListOpen) {
-            void refreshData(['products']);
+            void refreshDataRef.current(['products']);
         }
-    }, [isStockListOpen, activeSite?.id, refreshData]);
+    }, [isStockListOpen, activeSite?.id]);
 
     const siteProducts = useMemo(() => {
         const siteId = activeSite?.id || user?.siteId;

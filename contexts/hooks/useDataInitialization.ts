@@ -314,13 +314,16 @@ export function useDataInitialization({
     }
   }, [settings.timezone]);
 
+  const queriesRef = React.useRef(queries);
+  queriesRef.current = queries;
+
   const refreshData = useCallback(async (scopes?: import('../DataContextTypes').RefreshDataScope[]) => {
     if (activeSiteId) {
-      await queries.refetchAll(scopes);
+      await queriesRef.current.refetchAll(scopes);
     } else {
       await loadGlobalData();
     }
-  }, [activeSiteId, queries, loadGlobalData]);
+  }, [activeSiteId, loadGlobalData]);
 
   return {
     loadSites,
