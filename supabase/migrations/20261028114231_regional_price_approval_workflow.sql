@@ -15,12 +15,10 @@ CREATE TABLE private.price_change_decisions (
 ALTER TABLE private.price_change_clearances ENABLE ROW LEVEL SECURITY;
 ALTER TABLE private.price_change_decisions ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON private.price_change_clearances,private.price_change_decisions FROM PUBLIC,anon,authenticated;
-CREATE FUNCTION private.is_price_change(proposal jsonb) RETURNS boolean
-LANGUAGE sql IMMUTABLE SET search_path='' AS $$
+CREATE FUNCTION private.is_price_change(proposal jsonb) RETURNS boolean LANGUAGE sql IMMUTABLE SET search_path='' AS $$
  SELECT coalesce(jsonb_typeof(proposal)='object' AND proposal ?| ARRAY['price','costPrice','salePrice','isOnSale'],false);
 $$;
-CREATE FUNCTION private.price_review_scope(target_site text,target_country text) RETURNS boolean
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
+CREATE FUNCTION private.price_review_scope(target_site text,target_country text) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
  SELECT EXISTS(SELECT 1 FROM public.employees e JOIN public.sites home ON home.id=e.site_id JOIN public.sites target ON target.id::text=target_site
  WHERE e.id=auth.uid() AND lower(coalesce(e.status,'active'))='active'
  AND upper(home.country)=upper(target.country) AND upper(target.country)=upper(target_country)
@@ -36,8 +34,7 @@ CREATE POLICY price_workflow_prepare ON public.inventory_requests FOR INSERT TO 
  AND private.price_review_scope(site_id,country_code) AND public.get_my_role() IN ('country_commercial_director','country_managing_director','regional_merchandising_manager'));
 CREATE POLICY price_workflow_products_read ON public.products FOR SELECT TO authenticated
  USING(EXISTS(SELECT 1 FROM public.sites s WHERE s.id=products.site_id AND private.price_review_scope(s.id::text,s.country)));
-CREATE FUNCTION private.price_approval_route(request_id uuid) RETURNS jsonb
-LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
+CREATE FUNCTION private.price_approval_route(request_id uuid) RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
 DECLARE r public.inventory_requests%ROWTYPE; p public.products%ROWTYPE; next_p public.products%ROWTYPE;
  actor public.employees%ROWTYPE; requester_role text; snapshot jsonb; baseline jsonb;
  effective numeric; needs_finance boolean; clearance boolean; elevated boolean; self_request boolean;
@@ -86,8 +83,7 @@ END;
 $$;
 REVOKE ALL ON FUNCTION private.price_approval_route(uuid) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION private.price_approval_route(uuid) TO authenticated;
-CREATE FUNCTION public.get_price_approval_routes(p_request_ids uuid[]) RETURNS jsonb
-LANGUAGE plpgsql STABLE SECURITY INVOKER SET search_path='' AS $$
+CREATE FUNCTION public.get_price_approval_routes(p_request_ids uuid[]) RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY INVOKER SET search_path='' AS $$
 DECLARE result jsonb;
 BEGIN
  IF auth.uid() IS NULL OR coalesce(array_length(p_request_ids,1),0)>100 THEN RAISE EXCEPTION 'Authenticated bounded price review required' USING ERRCODE='42501'; END IF;
@@ -99,15 +95,13 @@ $$;
 REVOKE ALL ON FUNCTION public.get_price_approval_routes(uuid[]) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.get_price_approval_routes(uuid[]) TO authenticated;
 -- Private decision evidence prevents forged session settings from authorizing writes.
-CREATE FUNCTION private.price_decision_matches(product_id uuid,site_id uuid) RETURNS boolean
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
+CREATE FUNCTION private.price_decision_matches(product_id uuid,site_id uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
  SELECT EXISTS(SELECT 1 FROM public.inventory_requests r JOIN private.price_change_decisions d ON d.request_id=r.id
  WHERE r.id::text=current_setting('app.price_change_decision_id',true) AND r.product_id=product_id::text AND r.site_id=site_id::text
  AND r.status='pending' AND d.employee_id=auth.uid() AND d.proposed_changes=r.proposed_changes);
 $$;
 REVOKE ALL ON FUNCTION private.price_decision_matches(uuid,uuid) FROM PUBLIC,anon,authenticated;
-CREATE FUNCTION private.approve_price_change(request_id uuid) RETURNS jsonb
-LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+CREATE FUNCTION private.approve_price_change(request_id uuid) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE r public.inventory_requests%ROWTYPE; p public.products%ROWTYPE; actor public.employees%ROWTYPE; route jsonb; updated public.products%ROWTYPE;
 BEGIN
  SELECT * INTO r FROM public.inventory_requests WHERE id=request_id FOR UPDATE;
@@ -129,8 +123,7 @@ BEGIN
 END;
 $$;
 REVOKE ALL ON FUNCTION private.approve_price_change(uuid) FROM PUBLIC,anon,authenticated;
-CREATE FUNCTION private.clear_price_change_finance(request_id uuid) RETURNS void
-LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+CREATE FUNCTION private.clear_price_change_finance(request_id uuid) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE r public.inventory_requests%ROWTYPE; route jsonb;
 BEGIN
  SELECT * INTO r FROM public.inventory_requests WHERE id=request_id FOR UPDATE;
@@ -138,7 +131,7 @@ BEGIN
  route:=private.price_approval_route(request_id);
  IF NOT coalesce((route->>'canFinance')::boolean,false) THEN RAISE EXCEPTION '%',coalesce(route->>'block','Country Finance Director clearance authority required') USING ERRCODE='42501'; END IF;
  INSERT INTO private.price_change_clearances(request_id,employee_id,pricing_baseline) VALUES(r.id,auth.uid(),route->'pricingBaseline')
- ON CONFLICT(request_id) DO UPDATE SET employee_id=excluded.employee_id,pricing_baseline=excluded.pricing_baseline,cleared_at=now();
+ ON CONFLICT ON CONSTRAINT price_change_clearances_pkey DO UPDATE SET employee_id=excluded.employee_id,pricing_baseline=excluded.pricing_baseline,cleared_at=now();
  PERFORM set_config('app.merchandising_finance_signoff_id',r.id::text,true);
  UPDATE public.inventory_requests SET finance_approved_by_employee_id=auth.uid(),finance_approved_at=now() WHERE id=r.id;
  PERFORM set_config('app.merchandising_finance_signoff_id','',true);
@@ -149,13 +142,10 @@ END;
 $$;
 REVOKE ALL ON FUNCTION private.clear_price_change_finance(uuid) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION private.clear_price_change_finance(uuid) TO authenticated;
-CREATE OR REPLACE FUNCTION public.finance_signoff_merchandising_price(p_request_id uuid) RETURNS void
-LANGUAGE sql SECURITY INVOKER SET search_path='' AS $$ SELECT private.clear_price_change_finance(p_request_id); $$;
+CREATE OR REPLACE FUNCTION public.finance_signoff_merchandising_price(p_request_id uuid) RETURNS void LANGUAGE sql SECURITY INVOKER SET search_path='' AS $$ SELECT private.clear_price_change_finance(p_request_id); $$;
 REVOKE ALL ON FUNCTION public.finance_signoff_merchandising_price(uuid) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.finance_signoff_merchandising_price(uuid) TO authenticated;
-CREATE OR REPLACE FUNCTION private.approve_nonprice_product_edit(p_request_id uuid)
- RETURNS jsonb
- LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION private.approve_nonprice_product_edit(p_request_id uuid) RETURNS jsonb LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO ''
 AS $function$
@@ -190,8 +180,7 @@ END;
 $function$
 ;
 REVOKE ALL ON FUNCTION private.approve_nonprice_product_edit(uuid) FROM PUBLIC,anon,authenticated;
-CREATE FUNCTION private.dispatch_product_approval(request_id uuid) RETURNS jsonb
-LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+CREATE FUNCTION private.dispatch_product_approval(request_id uuid) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE r public.inventory_requests%ROWTYPE;
 BEGIN
  SELECT * INTO r FROM public.inventory_requests WHERE id=request_id;
@@ -202,21 +191,17 @@ END;
 $$;
 REVOKE ALL ON FUNCTION private.dispatch_product_approval(uuid) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION private.dispatch_product_approval(uuid) TO authenticated;
-CREATE OR REPLACE FUNCTION public.approve_product_edit(p_request_id uuid) RETURNS jsonb
-LANGUAGE sql SECURITY INVOKER SET search_path='' AS $$ SELECT private.dispatch_product_approval(p_request_id); $$;
+CREATE OR REPLACE FUNCTION public.approve_product_edit(p_request_id uuid) RETURNS jsonb LANGUAGE sql SECURITY INVOKER SET search_path='' AS $$ SELECT private.dispatch_product_approval(p_request_id); $$;
 REVOKE ALL ON FUNCTION public.approve_product_edit(uuid) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.approve_product_edit(uuid) TO authenticated;
-CREATE OR REPLACE FUNCTION private.product_edit_decision_matches(p_product_id uuid,p_site_id uuid) RETURNS boolean
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
+CREATE OR REPLACE FUNCTION private.product_edit_decision_matches(p_product_id uuid,p_site_id uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
  SELECT private.price_decision_matches(p_product_id,p_site_id) OR EXISTS(SELECT 1 FROM public.inventory_requests r
  WHERE r.id::text=current_setting('app.product_edit_decision_id',true) AND r.product_id=p_product_id::text AND r.site_id=p_site_id::text
  AND r.change_type='edit' AND r.status='pending' AND NOT private.is_price_change(r.proposed_changes)
  AND private.product_edit_region_scope(r.site_id) AND (SELECT count(*) FROM private.product_edit_votes v WHERE v.request_id=r.id)=3);
 $$;
 REVOKE ALL ON FUNCTION private.product_edit_decision_matches(uuid,uuid) FROM PUBLIC,anon,authenticated;
-CREATE OR REPLACE FUNCTION private.guard_product_edit_request()
- RETURNS trigger
- LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION private.guard_product_edit_request() RETURNS trigger LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO ''
 AS $function$
@@ -255,6 +240,11 @@ BEGIN
  WHERE target.id=p.site_id AND (upper(target.country)=upper(home.country) OR (actor.role='group_ceo' AND public.is_country_in_my_authorized_scope(target.country)))) THEN
   RAISE EXCEPTION 'Product edit is outside your country';
  END IF;
+ IF jsonb_typeof(NEW.proposed_changes)='object' THEN
+  NEW.proposed_changes:=(SELECT coalesce(jsonb_object_agg(field.key,field.value),'{}') FROM jsonb_each(NEW.proposed_changes) field
+   WHERE private.product_edit_patch(jsonb_build_object(field.key,field.value)) IS DISTINCT FROM
+   (SELECT coalesce(jsonb_object_agg(k,to_jsonb(p)->k),'{}') FROM jsonb_object_keys(private.product_edit_patch(jsonb_build_object(field.key,field.value))) k));
+ END IF;
  IF NEW.proposed_changes IS NULL OR jsonb_typeof(NEW.proposed_changes)<>'object'
  OR private.product_edit_patch(NEW.proposed_changes)='{}' THEN RAISE EXCEPTION 'No editable product fields supplied'; END IF;
  IF EXISTS(SELECT 1 FROM jsonb_object_keys(NEW.proposed_changes) k WHERE NOT k=ANY(ARRAY['name','sku','category','brand','description','image','size','unit','barcode','barcodes','barcodeType','price','costPrice','salePrice','isOnSale','minStock','maxStock','packQuantity','customAttributes','shelfPosition'])) THEN RAISE EXCEPTION 'Product proposal includes unauthorized fields'; END IF;
@@ -274,9 +264,7 @@ BEGIN
 END;
 $function$
 ;
-CREATE OR REPLACE FUNCTION private.guard_merchandising_finance_signoff()
- RETURNS trigger
- LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION private.guard_merchandising_finance_signoff() RETURNS trigger LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO ''
 AS $function$
@@ -299,9 +287,7 @@ BEGIN
 END;
 $function$
 ;
-CREATE OR REPLACE FUNCTION private.reject_nonprice_product_edit(p_request_id uuid, p_reason text)
- RETURNS void
- LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION private.reject_nonprice_product_edit(p_request_id uuid, p_reason text) RETURNS void LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO ''
 AS $function$
@@ -326,8 +312,7 @@ END;
 $function$
 ;
 REVOKE ALL ON FUNCTION private.reject_nonprice_product_edit(uuid,text) FROM PUBLIC,anon,authenticated;
-CREATE FUNCTION private.dispatch_product_rejection(request_id uuid,reason text) RETURNS void
-LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+CREATE FUNCTION private.dispatch_product_rejection(request_id uuid,reason text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE r public.inventory_requests%ROWTYPE; route jsonb;
 BEGIN
  SELECT * INTO r FROM public.inventory_requests WHERE id=request_id FOR UPDATE;
@@ -341,13 +326,10 @@ END;
 $$;
 REVOKE ALL ON FUNCTION private.dispatch_product_rejection(uuid,text) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION private.dispatch_product_rejection(uuid,text) TO authenticated;
-CREATE OR REPLACE FUNCTION public.reject_product_edit(p_request_id uuid,p_reason text) RETURNS void
-LANGUAGE sql SECURITY INVOKER SET search_path='' AS $$ SELECT private.dispatch_product_rejection(p_request_id,p_reason); $$;
+CREATE OR REPLACE FUNCTION public.reject_product_edit(p_request_id uuid,p_reason text) RETURNS void LANGUAGE sql SECURITY INVOKER SET search_path='' AS $$ SELECT private.dispatch_product_rejection(p_request_id,p_reason); $$;
 REVOKE ALL ON FUNCTION public.reject_product_edit(uuid,text) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.reject_product_edit(uuid,text) TO authenticated;
-CREATE OR REPLACE FUNCTION public.get_my_product_approval_inbox(p_country_code text, p_limit integer DEFAULT 5)
- RETURNS jsonb
- LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION public.get_my_product_approval_inbox(p_country_code text, p_limit integer DEFAULT 5) RETURNS jsonb LANGUAGE plpgsql
  STABLE
  SET search_path TO ''
 AS $function$
@@ -398,8 +380,7 @@ BEGIN
 END;
 $function$
 ;
-CREATE FUNCTION public.get_my_price_approval_inbox(p_country_code text) RETURNS jsonb
-LANGUAGE plpgsql STABLE SECURITY INVOKER SET search_path='' AS $$
+CREATE FUNCTION public.get_my_price_approval_inbox(p_country_code text) RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY INVOKER SET search_path='' AS $$
 DECLARE result jsonb;
 BEGIN
  IF auth.uid() IS NULL OR upper(p_country_code) IS DISTINCT FROM upper(public.get_my_country_code()) THEN RAISE EXCEPTION 'Price inbox requires your assigned country' USING ERRCODE='42501'; END IF;
@@ -412,9 +393,7 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.get_my_price_approval_inbox(text) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.get_my_price_approval_inbox(text) TO authenticated;
-CREATE OR REPLACE FUNCTION public.get_my_approval_inbox(p_country_code text)
- RETURNS jsonb
- LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION public.get_my_approval_inbox(p_country_code text) RETURNS jsonb LANGUAGE plpgsql
  STABLE
  SET search_path TO ''
 AS $function$

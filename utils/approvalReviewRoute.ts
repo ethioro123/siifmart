@@ -4,9 +4,9 @@ import { APPROVAL_QUEUES } from './unifiedApprovalInbox';
 // existing module permissions. This resolves site/mobile redirects, not RLS.
 const reviewRoles: Record<string, readonly string[]> = {
   product: ['regional_operations_manager','regional_supply_chain_manager','regional_merchandising_manager'],
-  price: ['regional_operations_manager','regional_supply_chain_manager','regional_merchandising_manager'],
+  price: ['regional_merchandising_manager','country_commercial_director','country_managing_director'],
   planogram: ['regional_operations_manager','regional_supply_chain_manager','regional_merchandising_manager'],
-  price_finance: ['group_ceo','country_finance_director','regional_finance_manager'],
+  price_finance: ['country_finance_director'],
   campaigns: ['group_ceo','country_commercial_director','regional_merchandising_manager'],
   purchase_orders: ['group_ceo','country_commercial_director','regional_procurement_manager'],
   po_finance: ['country_finance_director'],

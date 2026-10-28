@@ -3,7 +3,8 @@ import { isApprovalReviewRoute } from '../../utils/approvalReviewRoute';
 describe('approval review destination scope',()=>{
   it('recognizes regional departmental and procurement review destinations',()=>{
     expect(isApprovalReviewRoute('regional_supply_chain_manager','pricing','/pricing','?tab=reviews')).toBe(true);
-    expect(isApprovalReviewRoute('regional_finance_manager','pricing','/pricing','?tab=reviews')).toBe(true);
+    expect(isApprovalReviewRoute('country_finance_director','pricing','/pricing','?tab=reviews')).toBe(true);
+    expect(isApprovalReviewRoute('regional_finance_manager','pricing','/pricing','?tab=reviews')).toBe(false);
     expect(isApprovalReviewRoute('regional_procurement_manager','procurement','/procurement','?tab=orders')).toBe(true);
   });
   it('does not allow unrelated roles, modules, tabs or spoofed query parameters',()=>{

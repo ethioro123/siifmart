@@ -81,6 +81,12 @@ BEGIN
  PERFORM public.reject_product_edit(request_id,'Pricing proposal needs revision');
  SELECT price INTO pprice FROM public.products WHERE id=product.id;
  IF pprice<>140 THEN RAISE EXCEPTION 'Rejection changed live price'; END IF;
+ -- A full product form with unchanged price fields remains a normal catalog edit.
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',requester,'role','authenticated')::text,true);
+ INSERT INTO public.inventory_requests(product_id,product_name,product_sku,site_id,country_code,change_type,status,requested_by,proposed_changes,adjustment_reason)
+ VALUES(product.id::text,product.name,product.sku,target.id::text,target.country,'edit','pending','fixture','{"price":140,"costPrice":50,"isOnSale":false,"name":"Coffee catalog correction"}','MERCHANDISING: catalog form') RETURNING id INTO request_id;
+ SELECT proposed_changes INTO snapshot FROM public.inventory_requests WHERE id=request_id;
+ IF snapshot ?| ARRAY['price','costPrice','isOnSale'] OR NOT snapshot ? 'name' THEN RAISE EXCEPTION 'Unchanged form prices misclassified catalog edit: %',snapshot; END IF;
  -- Separate mixed detail edits from the price approval shortcut.
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',requester,'role','authenticated')::text,true);
  BEGIN

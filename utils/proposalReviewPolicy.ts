@@ -1,8 +1,10 @@
+import { isPriceProposal } from './priceApproval';
 import type { PendingInventoryChange, Product } from '../types';
 import { canVoteProductEdit, PRODUCT_EDIT_APPROVERS } from './productEditApproval';
 import { checkRequiresFinanceSignoff } from './pricingGovernance';
 
 export function proposalApprovalBlock(request: PendingInventoryChange, actor: { id?: string; role?: string; name?: string; email?: string } | null | undefined, product?: Partial<Product>): string | undefined {
+  if (isPriceProposal(request)) return request.priceApprovalRoute?.canApprove ? undefined : request.priceApprovalRoute?.block || 'Price approval is unavailable for your role, country or region.';
   if (request.status !== 'pending') return 'This proposal is no longer pending.';
   if (!actor?.role || !(actor.role in PRODUCT_EDIT_APPROVERS)) return 'Only the assigned regional Operations, Supply Chain or Merchandising role can record a departmental approval.';
   const requester = request.requestedBy?.trim().toLowerCase();

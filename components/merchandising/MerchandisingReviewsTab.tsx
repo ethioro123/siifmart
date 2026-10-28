@@ -1,3 +1,5 @@
+import { isPriceProposal } from '../../utils/priceApproval';
+import { proposalApprovalBlock } from '../../utils/proposalReviewPolicy';
 import { useSearchParams } from 'react-router-dom';
 import { PRODUCT_APPROVAL_INBOX_KEY } from '../../utils/approvalInbox';
 import { ProposalReviewModal } from './components/ProposalReviewModal';
@@ -7,8 +9,7 @@ import { AlertCircle, CheckCircle, ChevronLeft, ChevronRight, XCircle, Clock, La
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { inventoryRequestsService } from '../../services/inventory-requests.service';
-import { checkRequiresFinanceSignoff } from '../../utils/pricingGovernance';
-import { PRODUCT_EDIT_APPROVERS, canVoteProductEdit } from '../../utils/productEditApproval';
+import { PRODUCT_EDIT_APPROVERS } from '../../utils/productEditApproval';
 import { logger } from '../../utils/logger';
 import { useMerchandising } from './MerchandisingContext';
 import { useCreateInventoryRequestMutation } from '../../hooks/useInventoryRequestMutations';
@@ -18,7 +19,6 @@ import { RejectProposalModal } from './components/RejectProposalModal';
 import type { PendingInventoryChange } from '../../types';
 
 const MERCHANDISING_LEADS = new Set(Object.keys(PRODUCT_EDIT_APPROVERS));
-const FINANCE_LEADS = new Set(['group_ceo', 'country_finance_director', 'regional_finance_manager']);
 
 type StatusFilter = 'pending' | 'completed' | 'all';
 
@@ -76,12 +76,12 @@ export const MerchandisingReviewsTab: React.FC = () => {
       }
       if (action === 'finance') {
         await inventoryRequestsService.signoffMerchandisingPrice(id);
-        return { action, applied: false, approvalCount: 0 };
+        return { action, applied: false, approvalCount: 0, workflow: undefined };
       }
       if (action === 'reject') {
         if (!reason?.trim()) throw new Error('A rejection reason is required');
         await inventoryRequestsService.rejectProductEdit(id, reason.trim());
-        return { action, applied: false, approvalCount: 0 };
+        return { action, applied: false, approvalCount: 0, workflow: undefined };
       }
       throw new Error(`Unsupported action: ${action}`);
     },
@@ -97,7 +97,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
       } else if (result.action === 'finance') {
         addNotification('success', 'Finance signoff recorded.');
       } else if (result.applied) {
-        addNotification('success', 'Three approvals received. Product edit applied.');
+        addNotification('success', result.workflow === 'price' ? 'Price change approved and applied.' : 'Three approvals received. Product edit applied.');
       } else {
         addNotification('success', `Regional approval recorded (${result.approvalCount}/3).`);
       }
@@ -204,7 +204,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
         <div>
           <h2 className="text-base font-bold text-[var(--theme-text-primary)]">Product & Price Governance</h2>
           <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
-            Product edits require Operations, Supply Chain and Merchandising approval. Below-floor prices also require independent Finance signoff.
+            Prices at or above 15% margin need one independent commercial approval. Below-floor prices need Country Finance clearance and country commercial approval. Product details and shelf layouts retain three regional approvals.
           </p>
         </div>
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] self-start sm:self-auto">
@@ -267,17 +267,10 @@ export const MerchandisingReviewsTab: React.FC = () => {
           </div>
 
           {requests.map(request => {
-            const isPrice =
-              request.adjustmentReason?.startsWith('PRICE_CHANGE') ||
-              ('price' in (request.proposedChanges || {})) ||
-              ('salePrice' in (request.proposedChanges || {}));
-
+            const isPrice = isPriceProposal(request);
             const baselineProduct = request.currentProduct || products.find(p => p.id === request.productId);
-            const pricingAnalysis = checkRequiresFinanceSignoff(request.proposedChanges, baselineProduct);
-            const needsFinance = isPrice && pricingAnalysis.requiresFinance;
-            const canVote = canVoteProductEdit(request, role, user?.id);
-            const canApprove = Boolean(canVote && (!needsFinance || request.financeApprovedByEmployeeId));
-            const canActAsLead = MERCHANDISING_LEADS.has(role) || role === 'group_ceo';
+            const canApprove = !proposalApprovalBlock(request,user,baselineProduct);
+            const canActAsLead = isPrice ? request.priceApprovalRoute?.canReject : MERCHANDISING_LEADS.has(role) || role === 'group_ceo';
             const isPending = request.status === 'pending';
             const isApproved = request.status === 'approved';
             const isRejected = request.status === 'rejected';
@@ -331,7 +324,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                   {/* Actions for Pending Proposals */}
                   {isPending && (
                     <div className="flex flex-wrap items-center gap-2">
-                      {needsFinance && !request.financeApprovedByEmployeeId && FINANCE_LEADS.has(role) && (
+                      {isPrice && request.priceApprovalRoute?.canFinance && (
                         <button
                           type="button"
                           disabled={decision.isPending}
@@ -351,7 +344,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                           Reject proposal
                         </button>
                       )}
-                      {MERCHANDISING_LEADS.has(role) && (
+                      {(isPrice ? request.priceApprovalRoute?.canApprove : MERCHANDISING_LEADS.has(role)) && (
                         <button
                           type="button"
                           disabled={decision.isPending || !canApprove}
@@ -360,7 +353,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                           }}
                           className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
                         >
-                          Record regional approval
+                          {isPrice ? 'Approve price change' : 'Record regional approval'}
                         </button>
                       )}
                     </div>

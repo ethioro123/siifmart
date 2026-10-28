@@ -1,3 +1,4 @@
+import type { PriceApprovalRoute } from './priceApproval';
 
 export type ShelfPosition = 'Eye Level' | 'Top Shelf' | 'Bottom Shelf' | 'End Cap' | 'Checkout' | 'Back Aisle' | 'Secure';
 
@@ -116,6 +117,7 @@ export interface BarcodeApproval {
 export type InventoryChangeType = 'create' | 'edit' | 'delete' | 'stock_adjustment';
 
 export interface PendingInventoryChange {
+  priceApprovalRoute?: PriceApprovalRoute;
   id: string;
   productId: string;
   product_id?: string; // Supabase compatibility

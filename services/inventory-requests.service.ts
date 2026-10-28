@@ -1,3 +1,5 @@
+import { priceApprovalService } from './price-approval.service';
+import { isPriceProposal } from '../utils/priceApproval';
 import { supabase } from '../lib/supabase';
 import type { PendingInventoryChange, Product } from '../types';
 import { productEditFields } from '../utils/productEditApproval';
@@ -32,7 +34,7 @@ export const inventoryRequestsService = {
         const { error } = await supabase.rpc('reject_product_edit', { p_request_id: requestId, p_reason: trimmed });
         if (error) throw error;
     },
-    async approveProductEdit(requestId: string): Promise<{ applied: boolean; approvalCount: number }> {
+    async approveProductEdit(requestId: string): Promise<{ applied: boolean; approvalCount: number; workflow?: string }> {
         const { data, error } = await supabase.rpc('approve_product_edit', { p_request_id: requestId });
         if (error) throw error;
         return data;
@@ -134,6 +136,7 @@ export const inventoryRequestsService = {
             });
         }
 
+        const priceRoutes = await priceApprovalService.routes(rawItems.filter((row: { proposed_changes: Partial<Product> }) => isPriceProposal({proposedChanges:row.proposed_changes})).map((row: {id:string}) => row.id));
         const items: PendingInventoryChange[] = rawItems.map((r: any) => ({
             id: r.id,
             productId: r.product_id,
@@ -147,6 +150,7 @@ export const inventoryRequestsService = {
             requestedAt: r.requested_at,
             status: r.status,
             proposedChanges: r.proposed_changes,
+            priceApprovalRoute: priceRoutes[r.id],
             proposalBaseline: r.product_edit_baseline,
             adjustmentReason: r.adjustment_reason,
             financeApprovedByEmployeeId: r.finance_approved_by_employee_id,
