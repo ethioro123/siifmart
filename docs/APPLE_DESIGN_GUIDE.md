@@ -1,94 +1,77 @@
-# SIIFMART UI Design Guide
+# SIIFMART Design Standard
 
-This guide describes SIIFMART's internal design direction. It is inspired by clear, restrained platform UI; it does not claim to define official Apple web tokens. Existing product requirements, accessibility, and the design tokens in `styles/theme.css` take precedence over examples here.
+**Edition:** 29 October 2026 · **Status:** authoritative internal design specification · **Audience:** product, design, engineering and QA.
 
-## 1. Design for the task
+SIIFMART should feel composed, precise and immediate. People should recognize the next action, understand the business consequence, and trust the result. Our design quality comes from the relationships between information, controls and feedback, supported by disciplined visual craft. Every module must work convincingly in daily use, including a country director's large desktop, a store supervisor's phone and a warehouse worker's scanner.
 
-- Start from the user's goal, role, device, and operating conditions. Put the primary task and its current status first.
-- Reuse established components and patterns. A narrow bug fix should not trigger an unrelated redesign.
-- Choose the simplest layout that makes relationships clear. Use whitespace and typography for hierarchy; add a card or divider only when it helps grouping or scanning.
-- Keep terminology, control placement, and feedback consistent across modules. Adapt density to the task: operational tables may be compact, while consequential decisions need room to understand and confirm.
-- Show the information needed to decide, with progressive disclosure for secondary detail. Do not hide a critical action or safety condition to make a screen look cleaner.
+This is SIIFMART's Apple-inspired web standard. It interprets current Apple guidance for our React, Tailwind and browser-based product. It is not an Apple specification, a native-framework implementation, or a claim that our existing screens already conform. Numerical design targets below are SIIFMART decisions unless an external standard is explicitly identified. Native Apple points and web CSS pixels are different units; CSS approximations do not reproduce native Liquid Glass.
 
-## 2. Tokens and surfaces
+## What changed in this edition
 
-- Use semantic theme tokens for color, typography, spacing, borders, radii, and elevation. If a needed token is missing, add it centrally and reuse it; do not create local palettes in components.
-- Keep surfaces distinct from the page canvas, with enough contrast in light and dark modes. Status color is supplementary: include a label, icon, or other cue.
-- Use translucent materials only for floating controls when they improve context. Provide a solid fallback for reduced transparency, higher contrast, and unsupported browsers.
-- Avoid decorative gradients, glow, stacked glass, heavy shadows, and unnecessary nested cards. Never place blur over dense scrolling or frequently updating content.
-- Keep the SIIFMART wordmark consistent with the shared logo component.
+The former short guide is replaced by a full handbook with explicit component behavior, interaction states, responsive rules, operational patterns and release evidence. It retains the central token system and device-led appearance preference. It makes compact approval indicators, meaningful site display codes, scoped bulk review, readable tables, progressive disclosure and truthful synchronization first-class requirements.
 
-## 3. Type, spacing, and responsive layout
+The verified 2026 Apple direction includes refinement of Liquid Glass, stronger toolbar structure and adjustable transparency. Our interpretation prioritizes legibility and user control while keeping the operational content layer stable. See [Apple's WWDC26 keynote](https://developer.apple.com/videos/play/wwdc2026/101/) and the [research register](design/13-sources-and-decisions.md). No unverified October-specific Apple release is assumed.
 
-- Use the established type scale and semantic text tokens. Preserve legibility at browser zoom and on small screens; do not shrink important content to fit.
-- Align dense numeric values and codes for quick comparison. Use tabular numerals where the existing type system supports them.
-- Follow the existing spacing scale. Group related controls and separate unrelated tasks; do not enforce arbitrary screen-space percentages where content varies.
-- Design for narrow widths, keyboard appearance, and browser zoom. Keep important content in normal flow and prevent sticky controls from obscuring fields or results.
-- Tables may scroll or change presentation on small screens, but must retain labels and access to every value and action.
+## Read the handbook
 
-## 4. Interaction and accessibility
+| Chapter | Use it to decide |
+|---|---|
+| [01 · Product principles and information architecture](design/01-principles-and-architecture.md) | What belongs on a page, how navigation works, and which task comes first |
+| [02 · Visual foundations and materials](design/02-visual-foundations.md) | Surface hierarchy, tokens, color, corners, shadows and restrained glass |
+| [03 · Typography, content and localization](design/03-typography-and-content.md) | Type hierarchy, identifiers, dates, currency, language and factual copy |
+| [04 · Adaptive layout and navigation](design/04-adaptive-layout.md) | Desktop, tablet, phone, zoom, keyboard and split-view behavior |
+| [05 · Controls, forms and overlays](design/05-controls-and-forms.md) | Buttons, validation, search, selection, sheets and dialogs |
+| [06 · Tables, lists and analytics](design/06-data-and-analytics.md) | Dense workspaces, pagination, selection, metrics, charts and exports |
+| [07 · Approvals, tasks and notifications](design/07-approvals-and-notifications.md) | Compact inboxes, scoped proposals, review evidence and actionable feedback |
+| [08 · Accessibility and inclusion](design/08-accessibility.md) | WCAG 2.2 AA, keyboard, assistive technology and display preferences |
+| [09 · Motion, feedback and assistance](design/09-motion-and-assistance.md) | Transitions, pending states, progress, undo and AI-assisted work |
+| [10 · Operational workflow patterns](design/10-operational-patterns.md) | POS, receiving, putaway, pick, pack, dispatch, finance and people workflows |
+| [11 · Engineering and performance](design/11-engineering-and-performance.md) | Shared components, browser capability, data freshness and measurable speed |
+| [12 · Review, acceptance and rollout](design/12-review-and-rollout.md) | Definition of done, evidence, severity, migration and maintenance |
+| [13 · Sources and design decisions](design/13-sources-and-decisions.md) | Verified references, source boundaries and rationale |
 
-- Support keyboard, touch, and assistive technology. Every control needs an accessible name, visible focus, correct semantics, and a usable disabled/loading state.
-- Aim for touch targets of at least 44 by 44 CSS pixels; enlarge primary controls when the setting, gloves, or movement call for it. Never rely on hover alone.
-- Keep validation close to the relevant field, explain how to recover, and preserve entered values after recoverable errors.
-- Use confirmation for destructive or high-impact actions and show the actor/reason where approval rules require it. Avoid confirmation steps for routine reversible actions.
-- Meet WCAG AA contrast for text and controls. Verify focus, contrast, zoom/reflow, reduced motion, and color-independent status cues in the rendered interface.
-- Respect `prefers-reduced-motion`. Motion should communicate state, remain brief, and never delay a time-sensitive task.
+Chapters form one standard. Read the relevant workflow chapter together with accessibility and verification before implementing. Do not treat a visual chapter as permission to weaken a business or security rule.
 
-## 5. Data and operational states
+## The essential rules
 
-- Design loading, empty, error, offline, permission-denied, and stale-data states alongside the success state.
-- Keep server-side filtering, pagination, and authorization behavior understandable in the UI. Never imply that a hidden or disabled control is the only security boundary.
-- For financial, inventory, and approval actions, show the amount or quantity being changed, the relevant source/target, and the result of success or failure.
-- Preserve country isolation, site scope, blind-counting, dual-control, and chain-of-custody requirements in every view and state.
+1. **Lead with the work.** Give the page one clear identity and a recognizable primary task. Keep secondary diagnostics and historical detail behind deliberate disclosure.
+2. **Use a stable visual hierarchy.** Canvas, content and controls have distinct roles. Use spacing and alignment before adding another border, card, color or material.
+3. **Keep data surfaces clear.** Tables, forms, financial totals, price comparisons and scanning screens use readable solid surfaces. Material treatment is optional and localized to navigation or temporary chrome.
+4. **Honor user appearance choices.** System is the default. Respect explicit Light/Dark choices, contrast needs, reduced motion and a solid-surface fallback. Performance fallbacks apply in every module when needed.
+5. **Design at the actual density.** Administration can support comparison-heavy layouts; POS and Fulfillment need fast, reachable actions. Neither requires tiny text or giant dashboard decorations.
+6. **Make approval entry points compact.** Show the count and route to review without expanding a large preview list on every module. A genuine failure is unavailable, not zero.
+7. **Review one coherent business decision.** A scoped price change is one proposal per SKU and selected scope, with per-site evidence available on demand. Preserve required independence and atomic application.
+8. **Use human identifiers.** Show site name and display code, SKU and business reference. Keep database UUIDs and payloads under technical details.
+9. **Design every state.** Initial loading, background refresh, empty, partial, failed, stale, offline, permission change and completed work each need an intentional representation.
+10. **Protect facts.** Distinguish draft, submitted, approved, applied and synchronized. Only announce outcomes that the server or supported device capability has confirmed.
+11. **Make all essential work accessible.** Keyboard, screen readers, 200% text, 400% zoom/reflow, touch, language variation and interrupted connectivity are normal design cases.
+12. **Prove quality in the rendered product.** A passing token name, screenshot at one width or automated check alone does not establish usability, accessibility or performance.
 
-## 6. POS and Fulfillment on mobile
+## Authority and vocabulary
 
-POS and Fulfillment must remain responsive on phones and tablets. Fulfillment scanning has the strictest performance needs because workers may use low-powered devices while moving and handling stock.
+User instructions, `AGENTS.md`, server-enforced policy and security invariants retain precedence. For visual and interaction decisions this handbook is canonical; root `APPLE_DESIGN_GUIDE.md` is a pointer, not a competing copy. The focused engineering guide must link here rather than restating a contradictory style system.
 
-- Keep the task target, item identity, quantity, and next action glanceable. Use compact layouts only while labels and error recovery remain clear.
-- Place frequent actions within comfortable reach and give scanning controls generous touch targets. Avoid unnecessary modal layers in receive, putaway, pick, and pack flows.
-- Provide immediate, distinct visual scan feedback for accepted, rejected, and unrecognized codes. Audio or vibration may supplement feedback when supported and permitted; never make them the only signal.
-- Support blind receiving without revealing expected quantity or shifting the remaining content unpredictably. Preserve unit and packaging descriptions.
-- For putaway, keep the suggested/current location and correction path visible. For pick/pack, make the item and remaining quantity clear, with short-pick and exception paths available.
-- Keep scrolling surfaces solid and animations lightweight on constrained Fulfillment devices. Test the critical scan-to-confirm path on representative hardware when available.
+**MUST** indicates a release requirement. **SHOULD** indicates the expected approach; a departure needs a concrete workflow reason and verification. **MAY** describes an optional treatment. A documented departure is review evidence, not an automatic request for extra user approval. Do not introduce a new permission step into an already authorized task.
 
-## 7. Visual review checklist
+Existing component behavior is implementation evidence, not design authority. If a shared component fails these requirements, fix it at the appropriate shared boundary before presenting its reuse as compliance. Existing business rules must be read from their authoritative implementation; this handbook does not create new financial limits or grant roles permission.
 
-- Is the user's main task obvious, and is the next action easy to find?
-- Are labels, hierarchy, and density appropriate for the role and device?
-- Are loading, empty, error, offline, and permission states covered?
-- Can keyboard and touch users complete the workflow? Is focus visible?
-- Are contrast, zoom, reduced motion, and non-color status cues verified?
-- Are shared tokens and components used consistently?
-- Does the design preserve site/country boundaries and operational controls?
-- Did a performance decision follow evidence or realistic device constraints?
+## Repository implementation map
 
-## 8. Fulfillment workflow references
+| Existing implementation | Responsibility | Important boundary |
+|---|---|---|
+| `styles/theme.css` | Semantic colors, radii, spacing, control sizes, motion values, material utilities | Values require rendered contrast and state verification; comments are not certification |
+| `index.css` | Tailwind v4 theme mapping, font stacks and global/legacy styles | Audit actual cascade, legacy remapping and font coverage |
+| `hooks/useTheme.ts` | System/Light/Dark preference and OS-change subscription | Do not hardcode a new dark default in a module |
+| `components/ThemeSelector.tsx` | User-facing appearance control | Keep selected preference separate from resolved appearance |
+| `components/shared/Button.tsx` | Shared action treatment and loading | Confirm focus, target size, semantics and disabled behavior |
+| `components/shared/PageHeader.tsx` | Shared page identity, actions and metrics | Its current card layout is not mandatory for every page |
+| `components/Modal.tsx` | Shared overlay shell | Verify focus containment, restoration, background inertness and safe areas |
+| `components/Logo.tsx` | Corporate wordmark | Preserve the brand mark; do not create decorative replacements |
+| `utils/translations/` | Locale dictionaries | POS/WMS changes synchronize English, Amharic and Afaan Oromoo |
+| `components/approvals/` | Compact approval indicators and entry points | Counts must match authorized, reviewable server work |
 
-### Receive
+## Start a design change
 
-- Summarize supplier/manifest, purchase-order reference, item tally, and intake status without hiding the worker's next action.
-- Provide direct access to quality and batch details. Use quantity shortcuts only as optional accelerators; keep precise entry available.
-- Keep blind-receiving behavior stable and preserve packaging context.
+Write one sentence describing the user's task and one sentence describing the expected saved outcome. Identify the data owner, site/country scope, affected roles, device/input modes and interrupted-work behavior. Then choose the smallest existing pattern that supports that task. If the pattern is inadequate, improve it with explicit states and evidence rather than adding a competing visual vocabulary.
 
-### Putaway
-
-- Keep the current or suggested zone/location easy to scan, with a clear way to correct it.
-- Keep confirmation reachable when the keyboard is open and ensure it cannot cover required fields.
-
-### Pick
-
-- Show target location, item identity, and required quantity together. Provide clear short-pick and exception handling without interrupting the normal path.
-- Show scan/checksum status only when backed by actual validation.
-
-### Pack and dispatch
-
-- Make item confirmation and packed-versus-remaining quantities clear. Keep bulk actions safe and reversible until final dispatch where possible.
-- Trigger label printing and hardware feedback through supported device capabilities, with a visible fallback when unavailable.
-
-## 9. Performance and design verification
-
-- Profile the actual route and workflow before adding memoization, virtualization, or animation restrictions. Prefer bounded queries, deferred non-critical modules, and simple rendering.
-- Measure the critical workflow on representative device/network conditions. Compare with a known baseline and investigate meaningful regressions.
-- Validate the actual rendered UI in supported browsers and themes. Do not infer accessibility or contrast solely from token names.
+Use [the acceptance checklist](design/12-review-and-rollout.md) to finish. A documentation update establishes the target standard; it does not silently deploy a full application redesign or certify every existing component.

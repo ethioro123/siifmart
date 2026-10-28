@@ -62,28 +62,17 @@ import { ROLES } from '../constants';
 <div style={{ width: `${percentage}%` }} />
 ```
 
-### Design Tokens (Apple Liquid Glass & Pure Contrast Architecture)
-- Centralized semantic tokens defined in `styles/theme.css`:
-  - Canvas & Wallpaper: `var(--theme-bg-app)`
-  - Window Chrome & Panels: `var(--theme-bg-panel)`
-  - Content Cards & Tables: `var(--theme-bg-card)`, `var(--theme-bg-card-hover)`
-  - High-Contrast CTAs: `var(--theme-primary)`, `var(--theme-primary-hover)`, `var(--theme-primary-text)`
-  - Typography: `var(--theme-text-primary)`, `var(--theme-text-secondary)`, `var(--theme-text-muted)`
-  - Hairlines: `var(--theme-border)`, `var(--theme-border-subtle)`, `var(--theme-border-focus)`
-  - Corner Radii: `--radius-xs` (6px), `--radius-sm` (10px), `--radius-md` (14px), `--radius-lg` (18px), `--radius-xl` (22px), `--radius-2xl` (28px), `--radius-pill` (999px)
-  - Spacing Scale: `--space-1` (4px) through `--space-16` (64px) on a 4px base grid
-  - Control Sizing: `--control-height-sm` (36px), `--control-height-md` (44px), `--control-height-lg` (52px)
-  - Motion & Easing: `--ease-apple` (`cubic-bezier(0.2, 0.8, 0.2, 1)`), `--duration-fast` (120ms), `--duration-normal` (200ms), `--duration-slow` (320ms)
-  - Soft Shadows: `--shadow-sm`, `--shadow-md`, `--shadow-lg`, `--shadow-modal`
-  - Liquid Glass 3 Tiers: Clear (`.glass-clear`), Standard (`.glass-standard`), Strong (`.glass-strong`)
-- Dark Mode Canvas: Level 0 Canvas — Layered charcoal `#121316` dark / Apple `#F5F5F7` light
-- Softened Charcoal Surfaces: Dark mode uses layered charcoal surfaces (`#121316` canvas, `#18191E` panel, `#1F2128` card, `#272A33` hover) with legible borders (`rgba(255,255,255,0.12)`); Light mode uses pure white cards (`#FFFFFF`) with subtle hairline borders (`rgba(0,0,0,0.08)`).
-- Typography & Status Contrast: Dark mode elevates secondary text to clean Apple mid-gray (`#A1A1AA`, >6:1 contrast) and muted text to `#80828D` (>4.5:1 contrast). Status tokens use calm, non-neon Apple HIG tones (`#34C759` success, `#FF9F0A` warning, `#FF453A` danger, `#64D2FF` info).
-- SIIFMART Corporate Brand Logo Invariant: The official corporate logo is the typographic wordmark itself (`components/Logo.tsx`) without icon containers: `SIIF` in Apple high-contrast neutral (`#1D1D1F` light / `#F5F5F7` dark) and `MART` in signature green (`#2C5E3B` light / `#00FF9D` dark). All other application UI (canvas, surfaces, panels, controls, cards, navigation) adheres to Apple minimalist tokens (`#121316`, `#F5F5F7`, `#FFFFFF`, Apple blue `#0071E3`).
-- Judicious Liquid Glass: Used selectively for navigation bars, toolbars, search pills, sidebars, segmented controls, and modal sheets (not everywhere).
-- Scope of Hardware Overrides: Low-end mobile performance constraints (stripping GPU blurs, restricting RAM/animations, solid opaque surfaces) are STRICTLY CONFINED to the Fulfillment domain (`pages/Fulfillment.tsx` and `components/fulfillment/`). In POS, POS Command, Administration, and all other domains, our full Apple Liquid Glass aesthetic applies completely.
-- Supreme Text Visibility & Contrast: Text readability is paramount. All typography tokens enforce high contrast (minimum WCAG AA 4.5:1, AAA 7:1 for data tables). Never use washed-out or dim text on dark or light backgrounds, and ensure text over Liquid Glass materials maintains a high-contrast backing.
-- POS & WMS UI Translation Synchronization: Any UI modification in POS or WMS components that alters, introduces, or re-labels user-facing information must update the translation definitions in `utils/translations/pos.ts`, `utils/translations/posCommand.ts`, or `utils/translations/warehouse/*` across `en`, `am`, and `or`. Never hardcode untranslated strings in POS or WMS templates.
+### Design standard — 29 October 2026
+
+- Follow the canonical [SIIFMART Design Standard](../../docs/APPLE_DESIGN_GUIDE.md) and its focused chapters. The repository-root `APPLE_DESIGN_GUIDE.md` is an entry-point pointer, not a second specification.
+- `styles/theme.css` owns semantic colors, radii, spacing, control sizes, motion values and existing material utilities; `index.css` maps them into Tailwind. These are SIIFMART values, not official Apple web presets.
+- Preserve the corporate wordmark in `components/Logo.tsx`; use the shared neutral primary-action, accent and semantic-status roles throughout the application.
+- Readable content surfaces are the default for tables, forms, financial evidence, modal bodies and scanning work. Restrained material may enhance navigation or temporary chrome only when legibility and measured rendering support it. Existing `.glass-*` classes are optional utilities, not mandatory visual tiers.
+- Solid-surface and performance fallbacks apply in **every** module when accessibility, browser support or measured hardware conditions require them. Fulfillment has especially strict repeated-scanning needs; it is not the only module allowed to use an opaque fallback.
+- The appearance default is **System**, with explicit Light/Dark overrides retained through `hooks/useTheme.ts`. Respect reduced motion, forced colors and a supported reduced-transparency/solid fallback.
+- Verify contrast on actual rendered foreground/background pairs in both themes. Token names and comments do not certify WCAG. Target WCAG 2.2 AA; enhanced internal targets are identified separately in the handbook.
+- Keep approval awareness compact, use business display codes rather than UUIDs as primary labels, and distinguish pending, confirmed, stale and unavailable states.
+- POS/WMS text changes still require synchronized English, Amharic and Afaan Oromoo translations in the established dictionaries, including errors, modal text and accessible labels.
 
 ---
 
