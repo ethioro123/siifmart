@@ -37,9 +37,16 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 4000);
             const t0 = performance.now();
-            const res = await fetch('/favicon.svg?ping=' + Date.now(), {
+            const isFileProtocol = typeof window !== 'undefined' && window.location?.protocol === 'file:';
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+            const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+            const pingUrl = isFileProtocol && supabaseUrl
+                ? `${supabaseUrl}/rest/v1/`
+                : 'favicon.svg?ping=' + Date.now();
+            const res = await fetch(pingUrl, {
                 method: 'HEAD',
                 cache: 'no-store',
+                headers: isFileProtocol && supabaseKey ? { apikey: supabaseKey } : undefined,
                 signal: controller.signal
             });
             clearTimeout(timeout);
