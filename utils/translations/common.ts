@@ -59,4 +59,5 @@ export const common: TranslationBlock = {
     both: { en: 'Both', am: 'ሁለቱም', or: 'Lamaan' },
     processing: { en: 'Processing', am: 'በማስኬድ ላይ', or: 'Adeemsisaa jira' },
     verify: { en: 'Verify', am: 'አረጋግጥ', or: 'Mirkaneessi' },
+    actions: { en: 'Actions', am: 'ድርጊቶች', or: 'Gochaalee' },
 };

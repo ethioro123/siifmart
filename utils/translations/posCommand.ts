@@ -162,6 +162,7 @@ export const posCommand: TranslationBlock = {
     resetFilters: { en: 'Reset', am: 'ዳግም አስጀምር', or: 'Haquuf' },
     allCategoriesCount: { en: 'All Categories ({count})', am: 'ሁሉም ምድቦች ({count})', or: 'Ramaddii Hunda ({count})' },
     productDetails: { en: 'Details', am: 'ዝርዝሮች', or: 'Bal\'ina' },
+    pendingApproval: { en: 'Pending Approval', am: 'ማጽደቅ በመጠባበቅ ላይ', or: 'Mirkaneessa Eegaa' },
     noProductsMatchingFilters: { en: 'No products found matching active filters', am: 'ከተመረጡት ማጣሪያዎች ጋር የሚዛመድ ምንም ምርት አልተገኘም', or: 'Oomishni filannoo kana fakkaatu hin argamne' },
 
     // Core POS Command Keys

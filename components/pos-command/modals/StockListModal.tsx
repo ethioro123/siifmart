@@ -251,6 +251,7 @@ export const StockListModal: React.FC = () => {
                                 const stock = product.stock || 0;
                                 const minimum = product.minStock && product.minStock > 0 ? product.minStock : 10;
                                 const stockLabel = stock <= 0 ? t('posCommand.filterOutOfStock') : stock < minimum ? t('posCommand.filterLowStock') : '';
+                                const isPendingApproval = ((product.approvalStatus || (product as any).approval_status) || 'approved').toLowerCase() === 'pending';
                                 const flags = getUpdateFlags(product, lastSeenUpdates);
                                 return (
                                     <tr key={product.id} onClick={() => setSelectedProduct(product)} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer">
@@ -259,6 +260,11 @@ export const StockListModal: React.FC = () => {
                                                 <span className="flex items-center gap-1.5 font-medium text-[var(--theme-text-primary)]">
                                                     {flags.isUnseen && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />}
                                                     <span className="truncate">{formatProductDisplayName(product) || product.name}</span>
+                                                    {isPendingApproval && (
+                                                        <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-medium shrink-0">
+                                                            {t('posCommand.pendingApproval')}
+                                                        </span>
+                                                    )}
                                                 </span>
                                                 <span className="block mt-0.5 text-xs font-mono text-[var(--theme-text-secondary)]">
                                                     {product.sku}{product.category ? ` · ${product.category}` : ''}
