@@ -1,3 +1,4 @@
+import { PRODUCT_APPROVAL_INBOX_KEY } from '../utils/approvalInbox';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     productsService,
@@ -104,6 +105,7 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
             queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
+            queryClient.invalidateQueries({ queryKey: [PRODUCT_APPROVAL_INBOX_KEY] });
             queryClient.invalidateQueries({ queryKey: ['products'] });
             queryClient.invalidateQueries({ queryKey: ['price_manager_catalog'] });
 
@@ -148,6 +150,7 @@ export function useRejectInventoryRequestMutation() {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
             queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
+            queryClient.invalidateQueries({ queryKey: [PRODUCT_APPROVAL_INBOX_KEY] });
             addNotification('info', `Request rejected: ${data.change.productName}`);
             logSystemEvent(
                 'Inventory Request Rejected',
@@ -183,6 +186,7 @@ export function useBulkCleanupRequestsMutation() {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
             queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
+            queryClient.invalidateQueries({ queryKey: [PRODUCT_APPROVAL_INBOX_KEY] });
             addNotification('success', `Successfully cleared ${data.length} requests.`);
         },
         onError: (error: any) => {
@@ -205,6 +209,7 @@ export function useCreateInventoryRequestMutation() {
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
             queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
+            queryClient.invalidateQueries({ queryKey: [PRODUCT_APPROVAL_INBOX_KEY] });
             logSystemEvent(
                 'Inventory Request Created',
                 `Pending request created for ${data.request.changeType} "${data.request.productName}"`,

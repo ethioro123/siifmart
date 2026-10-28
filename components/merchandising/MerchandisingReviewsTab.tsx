@@ -1,5 +1,7 @@
+import { useSearchParams } from 'react-router-dom';
+import { PRODUCT_APPROVAL_INBOX_KEY } from '../../utils/approvalInbox';
 import { PlanogramRevisionReview } from './planogram/PlanogramRevisionReview';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, CheckCircle, ChevronLeft, ChevronRight, XCircle, Clock, Layers } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
@@ -22,6 +24,10 @@ type StatusFilter = 'pending' | 'completed' | 'all';
 
 export const MerchandisingReviewsTab: React.FC = () => {
   const { user } = useStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const focusedRequest = searchParams.get('requestId') || undefined;
+  const focusedRevision = searchParams.get('revisionId') || undefined;
+  useEffect(() => { setPage(1); }, [focusedRequest, focusedRevision]);
   const { addNotification, effectiveCountry, activeSite } = useData();
   const { products } = useMerchandising();
   const [productId, setProductId] = useState('');
@@ -38,13 +44,15 @@ export const MerchandisingReviewsTab: React.FC = () => {
   const role = (user?.role || '').toLowerCase();
   const queryClient = useQueryClient();
 
-  const queryKey = ['merchandising_reviews', country, user?.regionCode, activeSite?.id, user?.id, statusFilter, page];
+  const queryKey = ['merchandising_reviews', country, user?.regionCode, activeSite?.id, user?.id, statusFilter, page, focusedRequest, focusedRevision];
   const { data: pagedData, isLoading, error } = useQuery({
     queryKey,
     queryFn: () => inventoryRequestsService.getMerchandisingRequests(country, {
       page,
       limit: 25,
-      status: statusFilter
+      status: focusedRequest || focusedRevision ? 'all' : statusFilter,
+      requestId: focusedRevision ? undefined : focusedRequest,
+      layoutRevisionId: focusedRevision
     })
   });
 
@@ -77,6 +85,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
       throw new Error(`Unsupported action: ${action}`);
     },
     onSuccess: result => {
+      queryClient.invalidateQueries({ queryKey: [PRODUCT_APPROVAL_INBOX_KEY] });
       queryClient.invalidateQueries({ queryKey: ['merchandising_reviews'] });
       queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -134,6 +143,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
   };
 
   const handleTabChange = (newTab: StatusFilter) => {
+    if (focusedRequest || focusedRevision) { const next = new URLSearchParams(searchParams); next.delete('requestId'); next.delete('revisionId'); setSearchParams(next); }
     setStatusFilter(newTab);
     setPage(1);
   };
@@ -184,6 +194,10 @@ export const MerchandisingReviewsTab: React.FC = () => {
         </div>
       )}
 
+      {(focusedRequest || focusedRevision) && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--theme-border)] p-3 text-sm">
+        <span>{focusedRevision ? 'Showing the selected shelf revision.' : 'Showing the selected approval request.'}</span>
+        <button type="button" onClick={() => { const next = new URLSearchParams(searchParams); next.delete('requestId'); next.delete('revisionId'); setSearchParams(next); setPage(1); setStatusFilter('pending'); }} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-3">Show all pending requests</button>
+      </div>}
       {/* Governance Banner & Status Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--theme-border)] pb-3">
         <div>

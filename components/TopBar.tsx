@@ -1,3 +1,4 @@
+import { ProductApprovalInboxButton } from './approvals/ProductApprovalInboxButton';
 import '../styles/topbar.css';
 import { useTopBarLayout } from '../hooks/useTopBarLayout';
 import { ThemeSelector } from './ThemeSelector';
@@ -425,6 +426,7 @@ export default function TopBar() {
             {/* Dark/Light Toggle */}
             <ThemeSelector className="topbar-appearance hidden sm:block" />
 
+            <ProductApprovalInboxButton />
             <ActivityCenter 
                notifRef={notifRef}
                isNotifOpen={isNotifOpen}

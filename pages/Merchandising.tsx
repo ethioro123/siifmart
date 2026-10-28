@@ -1,7 +1,9 @@
+import { ProductApprovalInboxCard } from '../components/approvals/ProductApprovalInboxCard';
 import { PriceBatchPreview } from '../components/merchandising/components/PriceBatchPreview';
+import { useSearchParams } from 'react-router-dom';
 import { sellingMargin } from '../utils/priceManager';
 import { effectivePrice } from '../utils/pricingGovernance';
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Tags, Target, TrendingUp, DollarSign, LineChart as LineChartIcon, TrendingDown, BrainCircuit, Layers, Percent, Tag, ClipboardCheck } from 'lucide-react';
 
 // Split Modals
@@ -30,6 +32,8 @@ import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBan
 
 export default function Pricing() {
    const state = useMerchandisingState();
+   const [searchParams] = useSearchParams();
+   useEffect(() => { if (searchParams.get('tab') === 'reviews') state.setActiveTab('reviews'); }, [searchParams, state.setActiveTab]);
    const { user } = useStore();
    const { isRegionalUser } = useData();
 
@@ -125,6 +129,8 @@ export default function Pricing() {
                   </div>
                </div>
             </div>
+
+            <ProductApprovalInboxCard />
 
             {/* Adaptive Regional Territory Lens */}
             <RegionalScopeBanner

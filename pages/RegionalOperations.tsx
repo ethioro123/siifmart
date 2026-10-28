@@ -1,3 +1,4 @@
+import { ProductApprovalInboxCard } from '../components/approvals/ProductApprovalInboxCard';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -153,6 +154,8 @@ export default function RegionalOperations() {
           </div>
         </div>
       </div>
+
+      <ProductApprovalInboxCard />
 
       {/* Autonomous Purchase Order Alert Banner */}
       {metrics.pendingAutonomousPOCount > 0 && (
