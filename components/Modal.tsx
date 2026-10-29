@@ -29,6 +29,11 @@ export default function Modal({
   mobileFullScreen = false,
   closeOnEscape = true
 }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const titleId = useId();
+
   // Keep keyboard and screen-reader focus within the active dialog.
   useEffect(() => {
     if (!isOpen) return;
@@ -81,10 +86,6 @@ export default function Modal({
   };
 
   const isSide = variant === 'side';
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-  const titleId = useId();
 
   const modalContent = (
     <div

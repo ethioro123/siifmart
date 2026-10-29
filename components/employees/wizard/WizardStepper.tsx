@@ -33,7 +33,7 @@ export default function WizardStepper({ currentStep, steps }: WizardStepperProps
                             <span
                                 className={`text-[10px] mt-1.5 uppercase font-bold tracking-wider hidden sm:block ${
                                     isCurrent
-                                        ? 'text-[var(--theme-primary)] dark:text-[#A9CBA2]'
+                                        ? 'text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]'
                                         : isCompleted
                                             ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                             : 'text-stone-400'
@@ -49,7 +49,7 @@ export default function WizardStepper({ currentStep, steps }: WizardStepperProps
             {/* Connecting Progress Track */}
             <div className="absolute top-4 left-6 right-6 sm:left-10 sm:right-10 h-0.5 bg-stone-200 dark:bg-white/10 -z-0">
                 <div
-                    className="h-full bg-gradient-to-r from-emerald-600 to-[#2C5E3B] transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-emerald-600 to-[var(--theme-primary)] transition-all duration-300"
                     style={{ width: `${progressPercent}%` }}
                 />
             </div>

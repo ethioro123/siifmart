@@ -218,7 +218,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
     if (filteredEmployees.length === 0) {
         return (
             <div className={`w-full min-h-[400px] flex flex-col items-center justify-center p-8 rounded-2xl border text-center ${
-                isDark ? 'bg-[#18201B] border-[#2C4D35] text-stone-300' : 'bg-white border-[#E2DCCE] text-stone-600'
+                isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35] text-stone-300' : 'bg-white border-[var(--theme-border)] text-stone-600'
             }`}>
                 <div className="w-14 h-14 rounded-2xl bg-[var(--theme-status-warning-bg)] flex items-center justify-center text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mb-4">
                     <FilterX size={28} />
@@ -233,7 +233,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                     <button
                         type="button"
                         onClick={onResetFilters}
-                        className="px-4 py-2 text-xs font-bold rounded-xl bg-[var(--theme-primary)] hover:bg-[#1E3F27] text-white shadow-sm transition-all cursor-pointer"
+                        className="px-4 py-2 text-xs font-bold rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary)] text-white shadow-sm transition-all cursor-pointer"
                     >
                         Reset All Matrix Filters
                     </button>
@@ -257,7 +257,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                         Matrix Dimension:
                     </span>
                     <div className={`flex items-center p-0.5 rounded-xl border ${
-                        isDark ? 'bg-[#18201B] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'
+                        isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
                     }`}>
                         <button
                             type="button"
@@ -302,7 +302,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                     <button
                         type="button"
                         onClick={collapsedKeys.size > 0 ? handleExpandAll : handleCollapseAll}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-[#FAF8F5] dark:bg-[#1E2822] hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 text-xs font-semibold transition-colors cursor-pointer"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-[var(--theme-bg-app)] dark:bg-[#1E2822] hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 text-xs font-semibold transition-colors cursor-pointer"
                         title={collapsedKeys.size > 0 ? 'Expand all swimlanes' : 'Collapse all swimlanes'}
                     >
                         {collapsedKeys.size > 0 ? <ChevronsUpDown size={13} /> : <ChevronsDownUp size={13} />}
@@ -349,7 +349,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                                         <button
                                             type="button"
                                             onClick={onOpenAddEmployee}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-[var(--theme-primary)]/10 hover:bg-[var(--theme-primary)]/20 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]/20 transition-colors cursor-pointer"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-[var(--theme-primary)]/10 hover:bg-[var(--theme-primary)]/20 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-border)]/20 transition-colors cursor-pointer"
                                             title={`Add new member to ${dept.label}`}
                                         >
                                             <UserPlus size={13} />
@@ -448,7 +448,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                                 subtitle={`${siteEmps.filter(e => e.status === 'Active').length} active personnel`}
                                 count={siteEmps.length}
                                 icon={
-                                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-primary)]/10 dark:bg-[#A9CBA2]/15 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]/20 flex items-center justify-center shrink-0">
+                                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary-muted)]/15 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-border)]/20 flex items-center justify-center shrink-0">
                                         <MapPin size={17} />
                                     </div>
                                 }

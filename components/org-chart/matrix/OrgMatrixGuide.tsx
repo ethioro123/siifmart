@@ -44,7 +44,7 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
     return (
         <div
             className={`rounded-2xl border transition-all duration-200 overflow-hidden mb-5 ${
-                isDark ? 'bg-[#18201B] border-[#2C4D35]' : 'bg-white border-[#E2DCCE]'
+                isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]' : 'bg-white border-[var(--theme-border)]'
             }`}
         >
             {/* Header Toggle */}
@@ -55,15 +55,15 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                 }`}
             >
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/20 flex items-center justify-center text-[var(--theme-primary)] dark:text-[#A9CBA2]">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/20 flex items-center justify-center text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">
                         <Network size={20} />
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">
+                            <h3 className="text-sm font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">
                                 Dual-Control Reporting Lines & Supervisory Matrix Standard
                             </h3>
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/20 text-[var(--theme-primary)] dark:text-[#A9CBA2] font-semibold border border-[var(--theme-border)]/20">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/20 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-semibold border border-[var(--theme-border)]/20">
                                 SOP-ORG-036
                             </span>
                         </div>
@@ -74,7 +74,7 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[var(--theme-primary)] dark:text-[#A9CBA2] hidden sm:inline">
+                    <span className="text-xs font-semibold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] hidden sm:inline">
                         {isExpanded ? 'Hide Governance Standard' : 'View Governance Standard'}
                     </span>
                     <button
@@ -93,16 +93,16 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                     {/* Core Matrix Concepts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
                         <div className={`p-4 rounded-xl border ${
-                            isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'
+                            isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
                         }`}>
-                            <div className="flex items-center gap-2 font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1.5">
+                            <div className="flex items-center gap-2 font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1.5">
                                 <span className="w-2.5 h-2.5 rounded-full bg-[var(--theme-primary)]" />
                                 <span>Solid Line (Operational Command)</span>
                             </div>
                             <p className="text-stone-600 dark:text-stone-300 leading-relaxed">
                                 Direct supervisory hierarchy for shift rostering, task execution, time & attendance, immediate floor discipline, and daily custody sign-offs.
                             </p>
-                            <div className="mt-2.5 flex items-center gap-1.5 font-mono text-[11px] text-[var(--theme-primary)] dark:text-[#A9CBA2]">
+                            <div className="mt-2.5 flex items-center gap-1.5 font-mono text-[11px] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">
                                 <span>↳ Shift Lead</span>
                                 <ArrowRight size={12} />
                                 <span>Cashier / Sales Associate</span>
@@ -110,7 +110,7 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                         </div>
 
                         <div className={`p-4 rounded-xl border ${
-                            isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'
+                            isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
                         }`}>
                             <div className="flex items-center gap-2 font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mb-1.5">
                                 <span className="w-2.5 h-2.5 rounded-full border-2 border-dashed border-[var(--theme-status-warning-border)]" />
@@ -129,8 +129,8 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
 
                     {/* 10-Level Hierarchy Breakdown */}
                     <div className="space-y-2">
-                        <h4 className="font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-1.5">
-                            <Shield size={14} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
+                        <h4 className="font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] flex items-center gap-1.5">
+                            <Shield size={14} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                             <span>Enterprise 10-Level Hierarchy Tiers (L1–L10)</span>
                         </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
@@ -140,7 +140,7 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                                     <div
                                         key={lvl}
                                         className={`p-3 rounded-xl border flex flex-col justify-between ${
-                                            isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'
+                                            isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
                                         }`}
                                     >
                                         <div>
@@ -159,7 +159,7 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                                                     {cfg.badge}
                                                 </span>
                                             </div>
-                                            <h5 className="font-bold text-xs text-[#1E3F27] dark:text-[#EAE5D9]">
+                                            <h5 className="font-bold text-xs text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">
                                                 {cfg.title.split(':')[1]?.trim() || cfg.title}
                                             </h5>
                                             <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 line-clamp-2">

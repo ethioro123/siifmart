@@ -112,10 +112,10 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
     };
 
     return (
-        <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] dark:border-white/10 shadow-xs">
             <div className="flex items-center justify-between mb-3">
-                <label className="text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-bold uppercase tracking-wide flex items-center gap-2">
-                    <Award size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
+                <label className="text-xs text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] font-bold uppercase tracking-wide flex items-center gap-2">
+                    <Award size={15} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                     <span>Certificates & Verification Credentials</span>
                 </label>
                 <span className="text-[10px] text-stone-400 font-mono">
@@ -141,7 +141,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                 <select
                     value={certCategory}
                     onChange={e => setCertCategory(e.target.value)}
-                    className="bg-stone-50 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-800 dark:text-stone-200 outline-none cursor-pointer"
+                    className="bg-stone-50 dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-800 dark:text-stone-200 outline-none cursor-pointer"
                 >
                     {DOCUMENT_CATEGORIES.map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.label}</option>
@@ -152,7 +152,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                     type="button"
                     onClick={(e) => { e.stopPropagation(); certInputRef.current?.click(); }}
                     disabled={isUploadingCert}
-                    className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-700 dark:text-stone-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer border border-[#E2DCCE] dark:border-white/10"
+                    className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-700 dark:text-stone-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer border border-[var(--theme-border)] dark:border-white/10"
                 >
                     {isUploadingCert ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
                     <span>Add Document</span>
@@ -173,7 +173,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                     {(newEmpData.certificates || []).map((cert: any) => (
                         <div
                             key={cert.id}
-                            className="p-2.5 rounded-xl bg-stone-50 dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between gap-3 text-xs"
+                            className="p-2.5 rounded-xl bg-stone-50 dark:bg-white/[0.02] border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center justify-between gap-3 text-xs"
                         >
                             <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                 <div className="p-1.5 rounded-lg bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0">
@@ -185,7 +185,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                                         <select
                                             value={cert.category || 'Professional Certificate'}
                                             onChange={(e) => updateCertCategory(cert.id, e.target.value)}
-                                            className="text-[10px] font-bold bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-md px-2 py-0.5 text-[var(--theme-primary)] dark:text-[#A9CBA2] outline-none cursor-pointer hover:border-[var(--theme-border)]"
+                                            className="text-[10px] font-bold bg-white dark:bg-black/40 border border-[var(--theme-border)] dark:border-white/10 rounded-md px-2 py-0.5 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] outline-none cursor-pointer hover:border-[var(--theme-border)]"
                                             title="Change Document Category"
                                         >
                                             {DOCUMENT_CATEGORIES.map(cat => (

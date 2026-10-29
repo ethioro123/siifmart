@@ -44,7 +44,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                 size="sm"
             >
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
                         <Copy size={24} className="shrink-0" />
                         <p className="text-xs">
                             This will replicate all shifts from the preceding week into <strong>{weekLabel}</strong>. Any existing draft shifts will be updated.
@@ -80,7 +80,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                 size="sm"
             >
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
                         <Send size={24} className="shrink-0" />
                         <p className="text-xs">
                             Publishing will confirm and finalize the schedule for <strong>{weekLabel}</strong>. Shifts will be visible to all staff profiles and POS/WMS terminals.

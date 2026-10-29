@@ -89,21 +89,21 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
         >
             <form onSubmit={handleFormSubmit} className="space-y-4">
                 {/* Employee Header */}
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-100/70 dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-100/70 dark:bg-white/5 border border-[var(--theme-border)] dark:border-white/10">
                     <img
                         src={employee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}`}
                         alt=""
                         className="w-10 h-10 rounded-xl object-cover border border-white/20"
                     />
                     <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9] truncate">
+                        <p className="font-bold text-sm text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] truncate">
                             {employee.name}
                         </p>
                         <p className="text-xs text-stone-500 capitalize">
                             {employee.department || 'Operations'} • {date}
                         </p>
                     </div>
-                    <div className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] text-xs font-bold font-mono">
+                    <div className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] text-xs font-bold font-mono">
                         {status === 'Cancelled' ? '0h' : `${hours}h`}
                     </div>
                 </div>
@@ -152,26 +152,26 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                 {/* Custom Time Fields */}
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <label className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1 flex items-center gap-1">
+                        <label className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1 flex items-center gap-1">
                             <Clock size={12} className="text-[var(--theme-primary)]" /> Start Time
                         </label>
                         <input
                             type="time"
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]/20"
+                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                             required
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1 flex items-center gap-1">
+                        <label className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1 flex items-center gap-1">
                             <Clock size={12} className="text-[var(--theme-primary)]" /> End Time
                         </label>
                         <input
                             type="time"
                             value={endTime}
                             onChange={(e) => setEndTime(e.target.value)}
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]/20"
+                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                             required
                         />
                     </div>
@@ -180,7 +180,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                 {/* Role and Status */}
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <label className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1 block">
+                        <label className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1 block">
                             Assigned Shift Role
                         </label>
                         <input
@@ -188,17 +188,17 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                             value={role}
                             onChange={(e) => setRole(e.target.value)}
                             placeholder="e.g. Cashier, Dispatcher"
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-medium text-[#1E3F27] dark:text-[#EAE5D9] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]/20"
+                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-medium text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1 block">
+                        <label className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1 block">
                             Status
                         </label>
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value as any)}
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]/20"
+                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                         >
                             <option value="Scheduled">Scheduled</option>
                             <option value="Confirmed">Confirmed</option>
@@ -209,7 +209,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
 
                 {/* Shift Notes */}
                 <div>
-                    <label className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1 block">
+                    <label className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1 block">
                         Shift Instructions / Notes
                     </label>
                     <textarea
@@ -217,12 +217,12 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="e.g. Opening register 1, check cold storage temperature..."
                         rows={2}
-                        className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-medium text-[#1E3F27] dark:text-[#EAE5D9] focus:outline-none focus:ring-2 focus:ring-[#2C5E3B]/20 resize-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-medium text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20 resize-none"
                     />
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E2DCCE] dark:border-white/10">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)] dark:border-white/10">
                     <button
                         type="button"
                         onClick={onClose}

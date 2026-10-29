@@ -137,10 +137,10 @@ export default function StepDocuments({
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* Header Description */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#E2DCCE]/60 dark:border-white/5">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]/60 dark:border-white/5">
                 <div>
-                    <h4 className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2">
-                        <ShieldCheck size={16} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
+                    <h4 className="text-sm font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] flex items-center gap-2">
+                        <ShieldCheck size={16} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                         <span>Personnel Credentials & Documents</span>
                     </h4>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
@@ -153,10 +153,10 @@ export default function StepDocuments({
             </div>
 
             {/* SECTION 1: NATIONAL ID PHOTO WITH COMPRESSION & DRAG-AND-DROP */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] dark:border-white/10 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
-                    <label className="text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-bold uppercase tracking-wide flex items-center gap-2">
-                        <IdCard size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
+                    <label className="text-xs text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] font-bold uppercase tracking-wide flex items-center gap-2">
+                        <IdCard size={15} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                         <span>National ID / Passport Document Photo <span className="text-[var(--theme-status-danger-text)]">*</span></span>
                     </label>
                     {newEmpData.nationalIdInfo && (
@@ -171,7 +171,7 @@ export default function StepDocuments({
                     {/* ID Photo Preview or Upload Zone */}
                     <div className="sm:col-span-1">
                         {newEmpData.nationalIdPhoto ? (
-                            <div className="relative group rounded-xl overflow-hidden border border-[#E2DCCE] dark:border-white/10 aspect-[4/3] bg-stone-100 dark:bg-black/30">
+                            <div className="relative group rounded-xl overflow-hidden border border-[var(--theme-border)] dark:border-white/10 aspect-[4/3] bg-stone-100 dark:bg-black/30">
                                 <img
                                     src={newEmpData.nationalIdPhoto}
                                     alt="National ID Preview"
@@ -212,17 +212,17 @@ export default function StepDocuments({
                                 className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all aspect-[4/3] group ${
                                     isDraggingId
                                         ? 'border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] scale-[1.02]'
-                                        : 'border-[#E2DCCE] dark:border-white/10 hover:border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-stone-50/50 dark:bg-white/[0.01]'
+                                        : 'border-[var(--theme-border)] dark:border-white/10 hover:border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-stone-50/50 dark:bg-white/[0.01]'
                                 }`}
                             >
                                 {isCompressingId ? (
                                     <div className="flex flex-col items-center">
-                                        <Loader2 size={24} className="animate-spin text-[var(--theme-primary)] dark:text-[#A9CBA2] mb-2" />
-                                        <span className="text-[11px] font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2]">Compressing...</span>
+                                        <Loader2 size={24} className="animate-spin text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] mb-2" />
+                                        <span className="text-[11px] font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">Compressing...</span>
                                     </div>
                                 ) : (
                                     <>
-                                        <FileUp size={24} className={`mb-1.5 transition-transform ${isDraggingId ? 'scale-125 text-[var(--theme-primary)] dark:text-[#A9CBA2]' : 'text-stone-400 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2] group-hover:scale-110'}`} />
+                                        <FileUp size={24} className={`mb-1.5 transition-transform ${isDraggingId ? 'scale-125 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]' : 'text-stone-400 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[var(--theme-text-secondary)] group-hover:scale-110'}`} />
                                         <span className="text-xs font-bold text-stone-700 dark:text-stone-200">
                                             {isDraggingId ? 'Drop ID Card Photo Here' : 'Upload or Drop ID Card'}
                                         </span>
@@ -248,7 +248,7 @@ export default function StepDocuments({
                                 National ID / Passport Number
                             </label>
                             <input
-                                className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-mono"
+                                className="w-full bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-mono"
                                 placeholder="e.g. ET-10492819 or KE-3891024"
                                 value={newEmpData.nationalIdNumber || ''}
                                 onChange={e => setNewEmpData((prev: any) => ({ ...prev, nationalIdNumber: e.target.value }))}
@@ -276,19 +276,19 @@ export default function StepDocuments({
             </div>
 
             {/* SECTION 2: RESUME / CV WITH DRAG-AND-DROP */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+            <div className="p-4 rounded-2xl bg-white dark:bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] dark:border-white/10 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
-                    <label className="text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-bold uppercase tracking-wide flex items-center gap-2">
-                        <FileText size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
+                    <label className="text-xs text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] font-bold uppercase tracking-wide flex items-center gap-2">
+                        <FileText size={15} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                         <span>Curriculum Vitae / Resume</span>
                     </label>
                     <span className="text-[10px] text-stone-400 font-mono">PDF, DOC, DOCX</span>
                 </div>
 
                 {newEmpData.resume ? (
-                    <div className="p-3 rounded-xl bg-stone-50 dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/10 flex items-center justify-between gap-3">
+                    <div className="p-3 rounded-xl bg-stone-50 dark:bg-white/[0.02] border border-[var(--theme-border)] dark:border-white/10 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-lg bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] flex items-center justify-center shrink-0">
+                            <div className="w-9 h-9 rounded-lg bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0">
                                 <FileText size={18} />
                             </div>
                             <div className="min-w-0">
@@ -332,21 +332,21 @@ export default function StepDocuments({
                         className={`border-2 border-dashed rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all group ${
                             isDraggingResume
                                 ? 'border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] scale-[1.01]'
-                                : 'border-[#E2DCCE] dark:border-white/10 hover:border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-stone-50/50 dark:bg-white/[0.01]'
+                                : 'border-[var(--theme-border)] dark:border-white/10 hover:border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-stone-50/50 dark:bg-white/[0.01]'
                         }`}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${isDraggingResume ? 'bg-[var(--theme-primary)] text-white' : 'bg-stone-200/60 dark:bg-white/5 text-stone-500 dark:text-stone-400 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2]'}`}>
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${isDraggingResume ? 'bg-[var(--theme-primary)] text-white' : 'bg-stone-200/60 dark:bg-white/5 text-stone-500 dark:text-stone-400 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 {isUploadingResume ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
                             </div>
                             <div>
-                                <p className="text-xs font-bold text-stone-700 dark:text-stone-200 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2] transition-colors">
+                                <p className="text-xs font-bold text-stone-700 dark:text-stone-200 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[var(--theme-text-secondary)] transition-colors">
                                     {isDraggingResume ? 'Drop Resume File Here' : 'Upload or Drop Candidate Resume'}
                                 </p>
                                 <p className="text-[10px] text-stone-400">PDF, DOC, DOCX up to 5MB</p>
                             </div>
                         </div>
-                        <span className="text-xs font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2] px-3 py-1.5 rounded-lg bg-[var(--theme-primary)]/10 bg-[var(--theme-status-success-bg)] border border-[var(--theme-border)]/20 border-[var(--theme-status-success-border)]">
+                        <span className="text-xs font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] px-3 py-1.5 rounded-lg bg-[var(--theme-primary)]/10 bg-[var(--theme-status-success-bg)] border border-[var(--theme-border)]/20 border-[var(--theme-status-success-border)]">
                             Browse
                         </span>
                     </div>

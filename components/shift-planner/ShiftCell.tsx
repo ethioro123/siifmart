@@ -123,7 +123,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
                         onEdit();
                     }}
                     title="Edit shift details & notes"
-                    className="absolute top-2 right-2 p-1 rounded-md bg-white dark:bg-stone-900 border border-[#E2DCCE] dark:border-white/10 shadow-xs text-stone-600 dark:text-stone-300 opacity-0 group-hover:opacity-100 hover:text-[var(--theme-primary)] transition-opacity cursor-pointer z-10"
+                    className="absolute top-2 right-2 p-1 rounded-md bg-white dark:bg-stone-900 border border-[var(--theme-border)] dark:border-white/10 shadow-xs text-stone-600 dark:text-stone-300 opacity-0 group-hover:opacity-100 hover:text-[var(--theme-primary)] transition-opacity cursor-pointer z-10"
                 >
                     <Edit3 size={12} />
                 </button>

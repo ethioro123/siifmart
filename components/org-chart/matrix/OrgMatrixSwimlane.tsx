@@ -49,7 +49,7 @@ export const OrgMatrixSwimlane: React.FC<OrgMatrixSwimlaneProps> = ({
     return (
         <div
             className={`rounded-2xl border transition-all ${
-                isDark ? 'bg-[#18201B] border-[#2C4D35]' : 'bg-white border-[#E2DCCE] shadow-xs'
+                isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]' : 'bg-white border-[var(--theme-border)] shadow-xs'
             }`}
         >
             {/* Swimlane Header */}

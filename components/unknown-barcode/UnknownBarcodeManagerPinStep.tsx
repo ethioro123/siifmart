@@ -60,9 +60,9 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
                 </div>
             </div>
 
-            <div className="bg-white/80 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4 text-center">
+            <div className="bg-white/80 dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-2xl p-4 text-center">
                 <span className="text-[10px] font-mono text-stone-500 uppercase tracking-widest block mb-1">Target Product & Barcode</span>
-                <span className="text-sm font-black text-[#1E3F27] dark:text-white block truncate">{selectedProduct.name}</span>
+                <span className="text-sm font-black text-[var(--theme-text-primary)] dark:text-white block truncate">{selectedProduct.name}</span>
                 <span className="text-xs font-mono text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-bold block mt-1">Barcode: {scannedBarcode}</span>
             </div>
 
@@ -83,7 +83,7 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
                 />
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-[#E2DCCE] dark:border-white/5">
+            <div className="flex justify-between items-center pt-4 border-t border-[var(--theme-border)] dark:border-white/5">
                 <button
                     type="button"
                     onClick={onBack}
@@ -95,7 +95,7 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
                     type="button"
                     onClick={handleVerifyPin}
                     disabled={managerPin.length < 4}
-                    className="px-6 py-2.5 bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md cursor-pointer text-xs uppercase tracking-wider"
+                    className="px-6 py-2.5 bg-gradient-to-br from-[var(--theme-primary)] to-[var(--theme-primary)] text-white hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md cursor-pointer text-xs uppercase tracking-wider"
                 >
                     <CheckCircle2 size={16} />
                     Authorize & Link

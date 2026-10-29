@@ -97,8 +97,8 @@ export function RegionBadge() {
                 disabled={!canSwitchRegion}
                 className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border transition-colors text-left min-h-[44px] ${
                     canSwitchRegion
-                        ? 'border-[#E2DCCE] dark:border-white/10 hover:border-[var(--theme-border-focus)]/50 bg-white/70 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 cursor-pointer shadow-xs'
-                        : 'border-[#E2DCCE]/50 dark:border-white/5 bg-white/40 dark:bg-black/10 cursor-default select-none'
+                        ? 'border-[var(--theme-border)] dark:border-white/10 hover:border-[var(--theme-border-focus)]/50 bg-white/70 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 cursor-pointer shadow-xs'
+                        : 'border-[var(--theme-border)]/50 dark:border-white/5 bg-white/40 dark:bg-black/10 cursor-default select-none'
                 }`}
                 aria-label={canSwitchRegion ? 'Regional jurisdiction lens switcher' : 'Assigned regional jurisdiction'}
             >

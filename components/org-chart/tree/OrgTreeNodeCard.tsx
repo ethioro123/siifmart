@@ -40,8 +40,8 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                 onClick={() => onSelect(layoutNode)}
                 className={`group relative h-full w-full rounded-xl border p-2.5 flex flex-col justify-between cursor-pointer select-none transition-all duration-150 ${
                     isDark
-                        ? 'bg-[#1E2822] hover:bg-[#25322A] border-[#2C4D35] text-[#FAF8F5] shadow-md shadow-black/40'
-                        : 'bg-white hover:bg-[#FAF8F5] border-[#E2DCCE] text-[#1E3F27] shadow-sm hover:shadow-md'
+                        ? 'bg-[#1E2822] hover:bg-[#25322A] border-[#2C4D35] text-[var(--theme-text-primary)] shadow-md shadow-black/40'
+                        : 'bg-white hover:bg-[var(--theme-bg-app)] border-[var(--theme-border)] text-[var(--theme-text-primary)] shadow-sm hover:shadow-md'
                 } ${
                     isSearchMatch
                         ? 'ring-2 ring-[var(--theme-status-warning-border)] ring-offset-2 ring-offset-transparent shadow-lg shadow-amber-500/20'
@@ -71,7 +71,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
 
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
-                            <span className="font-bold text-xs truncate leading-tight group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2] transition-colors">
+                            <span className="font-bold text-xs truncate leading-tight group-hover:text-[var(--theme-primary)] dark:group-hover:text-[var(--theme-text-secondary)] transition-colors">
                                 {node.label}
                             </span>
                             <div className="flex items-center gap-1 shrink-0">
@@ -82,7 +82,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                                 )}
                                 {emp?.code && (
                                     <span className={`text-[9px] font-mono px-1 py-0.5 rounded font-semibold ${
-                                        isDark ? 'bg-black/30 text-[var(--theme-status-success-text)]' : 'bg-[#EAE5D9]/70 text-[var(--theme-primary)]'
+                                        isDark ? 'bg-black/30 text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-bg-subtle)]/70 text-[var(--theme-primary)]'
                                     }`}>
                                         {formatDisplayEmployeeId(emp)}
                                     </span>
@@ -109,7 +109,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                 {/* Footer row: Site & Reports Counter */}
                 <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-black/5 dark:border-white/5">
                     <div className="flex items-center gap-1 text-stone-500 dark:text-stone-400 truncate max-w-[120px]" title={node.siteName || 'All Sites'}>
-                        <MapPin size={11} className="shrink-0 text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
+                        <MapPin size={11} className="shrink-0 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                         <span className="truncate">{node.siteName || 'All Sites'}</span>
                     </div>
 
@@ -122,7 +122,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                             }}
                             className={`flex items-center gap-0.5 px-2 py-0.5 rounded-full font-bold text-[10px] transition-colors cursor-pointer ${
                                 isDark
-                                    ? 'bg-[var(--theme-primary)]/40 hover:bg-[var(--theme-primary)]/70 text-[#A9CBA2] border border-[var(--theme-border)]'
+                                    ? 'bg-[var(--theme-primary)]/40 hover:bg-[var(--theme-primary)]/70 text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                     : 'bg-[var(--theme-primary)]/10 hover:bg-[var(--theme-primary)]/20 text-[var(--theme-primary)] border border-[var(--theme-border)]/30'
                             }`}
                             title={isCollapsed ? 'Expand direct reports' : 'Collapse direct reports'}

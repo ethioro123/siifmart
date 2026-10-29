@@ -85,7 +85,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-[#FAF8F5] dark:bg-[#000000] transition-colors duration-300"
+      className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-[var(--theme-bg-app)] dark:bg-[#000000] transition-colors duration-300"
       style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)' }}
     >
 
@@ -298,7 +298,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
+          <div className="mt-8 pt-6 border-t border-[var(--theme-border)]/40 dark:border-white/[0.04] text-center select-none">
             <p className="text-[10px] text-stone-500 dark:text-stone-400 font-bold tracking-[0.16em] uppercase">SIIFMART Operations v3.6.1</p>
           </div>
         </div>

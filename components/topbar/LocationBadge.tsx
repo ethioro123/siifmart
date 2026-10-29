@@ -153,18 +153,18 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
             disabled={!canSwitchSites}
             className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border transition-colors text-left min-h-[44px] ${
                canSwitchSites
-                  ? 'border-[#E2DCCE] dark:border-white/10 hover:border-[var(--theme-border)]/40 dark:hover:border-[#A9CBA2]/30 bg-white/70 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 cursor-pointer shadow-xs'
-                  : 'border-[#E2DCCE]/50 dark:border-white/5 bg-white/40 dark:bg-black/10 cursor-default select-none'
+                  ? 'border-[var(--theme-border)] dark:border-white/10 hover:border-[var(--theme-border)]/40 dark:hover:border-[var(--theme-border)]/30 bg-white/70 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 cursor-pointer shadow-xs'
+                  : 'border-[var(--theme-border)]/50 dark:border-white/5 bg-white/40 dark:bg-black/10 cursor-default select-none'
             }`}
             aria-label={canSwitchSites ? "Current location and site switcher" : "Current location"}
          >
             {/* Accent dot / indicator */}
             <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-               isWarehouse ? 'bg-[var(--theme-status-info-bg)]' : 'bg-[var(--theme-primary)] dark:bg-[#A9CBA2]'
+               isWarehouse ? 'bg-[var(--theme-status-info-bg)]' : 'bg-[var(--theme-primary)] dark:bg-[var(--theme-primary-muted)]'
             }`} />
 
             <div className="flex flex-col min-w-0 max-w-[110px] sm:max-w-[160px]">
-               <span className="text-[11px] sm:text-[13px] font-bold text-[#1E3F27] dark:text-[#EAE5D9] truncate leading-tight">
+               <span className="text-[11px] sm:text-[13px] font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] truncate leading-tight">
                   {displayLocationTitle}
                </span>
                {displaySubtitle && (
@@ -186,8 +186,8 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
 
          {/* Site Switcher Dropdown - CEO or Region-Scoped Regional Officers */}
          {canSwitchSites && isOpen && (
-            <div className="absolute left-0 mt-1.5 w-64 sm:w-72 bg-[#FDFBF7] dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-               <div className="px-3 py-1.5 mb-1 border-b border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between">
+            <div className="absolute left-0 mt-1.5 w-64 sm:w-72 bg-[#FDFBF7] dark:bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] dark:border-white/10 rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+               <div className="px-3 py-1.5 mb-1 border-b border-[var(--theme-border)]/60 dark:border-white/5 flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">
                      {activeRegionShortName && (showOnlyActiveRegion || !isCeo) ? `${activeRegionShortName} Sites` : 'Switch Location'}
                   </span>
@@ -197,7 +197,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                            <button
                               type="button"
                               onClick={() => setShowOnlyActiveRegion(!showOnlyActiveRegion)}
-                              className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] hover:text-[var(--theme-primary)] dark:hover:text-[#A9CBA2] flex items-center gap-0.5 cursor-pointer"
+                              className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] flex items-center gap-0.5 cursor-pointer"
                               title={showOnlyActiveRegion ? "Show all facilities across all regions" : `Filter facilities to ${activeRegionShortName}`}
                            >
                               <Filter size={10} />
@@ -207,7 +207,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                         <button
                            type="button"
                            onClick={() => { setIsOpen(false); navigate('/location-select'); }}
-                           className="text-[10px] font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2] hover:underline flex items-center gap-0.5 cursor-pointer"
+                           className="text-[10px] font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] hover:underline flex items-center gap-0.5 cursor-pointer"
                         >
                            <span>All</span>
                            <ExternalLink size={10} />
@@ -233,8 +233,8 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                            onClick={() => handleSelectSite(site.id)}
                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
                               isSelected
-                                 ? 'bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/25 text-[#1E3F27] dark:text-[#EAE5D9] font-bold'
-                                 : 'hover:bg-black/5 dark:hover:bg-white/5 text-[#2C4D35] dark:text-[#A9CBA2]'
+                                 ? 'bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/25 text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] font-bold'
+                                 : 'hover:bg-black/5 dark:hover:bg-white/5 text-[#2C4D35] dark:text-[var(--theme-text-secondary)]'
                            }`}
                         >
                            <div className="flex items-center gap-2 min-w-0">
@@ -243,7 +243,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                               ) : isWh ? (
                                  <Building size={14} className="text-[var(--theme-status-info-text)] flex-shrink-0" />
                               ) : (
-                                 <MapPin size={14} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] flex-shrink-0" />
+                                 <MapPin size={14} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] flex-shrink-0" />
                               )}
                               <div className="min-w-0">
                                  <p className="text-xs font-semibold truncate leading-tight">{site.name}</p>
@@ -253,7 +253,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                                  </p>
                               </div>
                            </div>
-                           {isSelected && <Check size={14} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] flex-shrink-0" />}
+                           {isSelected && <Check size={14} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] flex-shrink-0" />}
                         </button>
                      );
                   })}

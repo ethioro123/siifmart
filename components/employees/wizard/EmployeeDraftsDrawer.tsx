@@ -52,7 +52,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] flex items-center justify-between gap-3 bg-[var(--theme-bg-card)]">
                     <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]">
+                        <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                             <FileText size={18} />
                         </div>
                         <div>
@@ -60,7 +60,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                 <h3 className="text-base font-bold text-[var(--theme-text-primary)]">
                                     Saved Worker Drafts
                                 </h3>
-                                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]/20">
+                                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-border)]/20">
                                     {drafts.length}
                                 </span>
                             </div>
@@ -134,7 +134,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                                         Active in Wizard
                                                     </span>
                                                 )}
-                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-[var(--theme-bg-subtle)] text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)] shrink-0">
+                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-[var(--theme-bg-subtle)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-border)] shrink-0">
                                                     {getJobTitleForRole(draft.role || 'Staff')}
                                                 </span>
                                             </div>

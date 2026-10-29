@@ -237,10 +237,10 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
                 </div>
             ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                    <div className="w-14 h-14 rounded-2xl bg-[var(--theme-primary)]/10 dark:bg-[#A9CBA2]/10 flex items-center justify-center text-[var(--theme-primary)] dark:text-[#A9CBA2] mb-3">
+                    <div className="w-14 h-14 rounded-2xl bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary-muted)]/10 flex items-center justify-center text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] mb-3">
                         <Users size={28} />
                     </div>
-                    <h4 className="text-base font-bold text-[#1E3F27] dark:text-[#EAE5D9]">
+                    <h4 className="text-base font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">
                         No matching employees in hierarchy
                     </h4>
                     <p className="text-xs text-[#4D6E56] dark:text-stone-400 mt-1 max-w-sm">
@@ -250,7 +250,7 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
                         <button
                             type="button"
                             onClick={onResetFilters}
-                            className="mt-4 px-4 py-2 text-xs font-bold rounded-lg bg-[var(--theme-primary)] text-white hover:bg-[#1E3F27] transition-colors cursor-pointer"
+                            className="mt-4 px-4 py-2 text-xs font-bold rounded-lg bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)] transition-colors cursor-pointer"
                         >
                             Reset Filters
                         </button>

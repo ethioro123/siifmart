@@ -52,8 +52,8 @@ export default function StepReview({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Personal Information */}
-                <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[#E2DCCE] dark:border-white/10">
-                    <h4 className="text-xs text-[var(--theme-primary)] dark:text-[#A9CBA2] uppercase font-bold mb-3 flex items-center gap-2">
+                <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[var(--theme-border)] dark:border-white/10">
+                    <h4 className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] uppercase font-bold mb-3 flex items-center gap-2">
                         <User size={14} /> Personal Information
                     </h4>
                     <div className="space-y-2 text-xs">
@@ -77,14 +77,14 @@ export default function StepReview({
                 </div>
 
                 {/* Role & Location */}
-                <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[#E2DCCE] dark:border-white/10">
-                    <h4 className="text-xs text-[var(--theme-primary)] dark:text-[#A9CBA2] uppercase font-bold mb-3 flex items-center gap-2">
+                <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[var(--theme-border)] dark:border-white/10">
+                    <h4 className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] uppercase font-bold mb-3 flex items-center gap-2">
                         <Briefcase size={14} /> Role & Operating Facility
                     </h4>
                     <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
                             <span className="text-stone-500">Job Title:</span>
-                            <span className="text-[var(--theme-primary)] dark:text-[#A9CBA2] font-bold">{newEmpData.jobTitle || getJobTitleForRole(newEmpData.role)}</span>
+                            <span className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-bold">{newEmpData.jobTitle || getJobTitleForRole(newEmpData.role)}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-stone-500">App Access:</span>
@@ -106,15 +106,15 @@ export default function StepReview({
                 </div>
 
                 {/* Attached Documents Review */}
-                <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[#E2DCCE] dark:border-white/10 sm:col-span-2">
-                    <h4 className="text-xs text-[var(--theme-primary)] dark:text-[#A9CBA2] uppercase font-bold mb-3 flex items-center gap-2">
+                <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[var(--theme-border)] dark:border-white/10 sm:col-span-2">
+                    <h4 className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] uppercase font-bold mb-3 flex items-center gap-2">
                         <IdCard size={14} /> Attached Personnel Documents
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {/* National ID */}
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/5 flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center gap-3">
                             {newEmpData.nationalIdPhoto ? (
-                                <img src={newEmpData.nationalIdPhoto} alt="ID" className="w-10 h-10 rounded-lg object-cover border border-[#E2DCCE] dark:border-white/10 shrink-0" />
+                                <img src={newEmpData.nationalIdPhoto} alt="ID" className="w-10 h-10 rounded-lg object-cover border border-[var(--theme-border)] dark:border-white/10 shrink-0" />
                             ) : (
                                 <div className="w-10 h-10 rounded-lg bg-stone-100 dark:bg-white/5 flex items-center justify-center text-stone-400 shrink-0">
                                     <IdCard size={18} />
@@ -129,7 +129,7 @@ export default function StepReview({
                         </div>
 
                         {/* Resume */}
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/5 flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                                 <FileText size={18} />
                             </div>
@@ -142,7 +142,7 @@ export default function StepReview({
                         </div>
 
                         {/* Certificates */}
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/5 flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                 <Award size={18} />
                             </div>
@@ -157,20 +157,20 @@ export default function StepReview({
 
                     {/* Itemized Certificates with Category for Approver Sign-off */}
                     {(newEmpData.certificates || []).length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-[#E2DCCE]/60 dark:border-white/10 space-y-2">
+                        <div className="mt-3 pt-3 border-t border-[var(--theme-border)]/60 dark:border-white/10 space-y-2">
                             <p className="text-[11px] font-bold text-stone-600 dark:text-stone-300 uppercase tracking-wider flex items-center gap-1.5">
-                                <Award size={13} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
+                                <Award size={13} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                                 <span>Verified Credentials for Sign-off ({(newEmpData.certificates || []).length})</span>
                             </p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 {(newEmpData.certificates || []).map((cert: any) => (
                                     <div
                                         key={cert.id}
-                                        className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between gap-2"
+                                        className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center justify-between gap-2"
                                     >
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-1.5 flex-wrap">
-                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[var(--theme-primary)]/10 dark:bg-[#A9CBA2]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]/20 shrink-0">
+                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary-muted)]/10 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-border)]/20 shrink-0">
                                                     {cert.category || 'Professional Certificate'}
                                                 </span>
                                                 <span className="text-[10px] text-stone-400 font-mono">
@@ -190,13 +190,13 @@ export default function StepReview({
 
                 {/* Compensation if provided */}
                 {newEmpData.salary && (
-                    <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[#E2DCCE] dark:border-white/10 sm:col-span-2">
+                    <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[var(--theme-border)] dark:border-white/10 sm:col-span-2">
                         <div className="flex justify-between items-center text-xs">
                             <span className="text-stone-500 font-semibold flex items-center gap-1.5">
                                 <DollarSign size={14} className="text-[var(--theme-primary)]" />
                                 Base Monthly Compensation:
                             </span>
-                            <span className="font-extrabold text-[var(--theme-primary)] dark:text-[#A9CBA2] text-sm">
+                            <span className="font-extrabold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] text-sm">
                                 {currencySymbol} {parseFloat(newEmpData.salary).toLocaleString()} / month
                             </span>
                         </div>
@@ -210,10 +210,10 @@ export default function StepReview({
                     <img
                         src={newEmpData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(newEmpData.firstName + ' ' + newEmpData.lastName)}&background=2C5E3B&color=ffffff`}
                         alt=""
-                        className="w-12 h-12 rounded-xl object-cover border border-[#E2DCCE] dark:border-white/10 shrink-0"
+                        className="w-12 h-12 rounded-xl object-cover border border-[var(--theme-border)] dark:border-white/10 shrink-0"
                     />
                     <div className="min-w-0">
-                        <h4 className="text-sm font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] truncate">
+                        <h4 className="text-sm font-extrabold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] truncate">
                             {newEmpData.firstName} {newEmpData.lastName}
                         </h4>
                         <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">
@@ -223,7 +223,7 @@ export default function StepReview({
                 </div>
                 <div className="text-right shrink-0">
                     <span className="text-[10px] text-stone-400 uppercase font-bold block">ID Number</span>
-                    <span className="text-xs font-mono font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2]">Auto-Generated</span>
+                    <span className="text-xs font-mono font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">Auto-Generated</span>
                 </div>
             </div>
         </div>

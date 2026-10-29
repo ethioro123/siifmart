@@ -21,7 +21,7 @@ export const DeleteExpenseModal: React.FC = () => {
                         <Trash2 className="w-8 h-8 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-[#1E3F27] dark:text-white">Delete Record?</h3>
+                        <h3 className="text-lg font-bold text-[var(--theme-text-primary)] dark:text-white">Delete Record?</h3>
                         <p className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-sm">This action cannot be undone.</p>
                     </div>
                 </div>
@@ -41,7 +41,7 @@ export const DeleteExpenseModal: React.FC = () => {
                 <div className="flex justify-end gap-3">
                     <button
                         onClick={() => setIsDeleteExpenseModalOpen(false)}
-                        className="px-4 py-2 text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors"
+                        className="px-4 py-2 text-stone-500 dark:text-gray-400 hover:text-[var(--theme-text-primary)] dark:hover:text-white transition-colors"
                     >
                         Cancel
                     </button>

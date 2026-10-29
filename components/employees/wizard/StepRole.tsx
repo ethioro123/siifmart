@@ -18,10 +18,10 @@ export default function StepRole({
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h4 className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Select App Access Profile</h4>
+                    <h4 className="text-sm font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">Select App Access Profile</h4>
                     <p className="text-xs text-stone-500 dark:text-stone-400">This profile controls system permissions. Enter the employee's job title separately in Details.</p>
                 </div>
-                <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-stone-600 dark:text-stone-300">
+                <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-white/5 border border-[var(--theme-border)] dark:border-white/10 text-stone-600 dark:text-stone-300">
                     {availableRoles.length} Roles Authorized
                 </span>
             </div>
@@ -39,7 +39,7 @@ export default function StepRole({
                             className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 relative ${
                                 isSelected
                                     ? 'bg-[var(--theme-primary)]/10 bg-[var(--theme-status-success-bg)] border-[var(--theme-border)] border-[var(--theme-status-success-border)] shadow-sm'
-                                    : 'bg-white dark:bg-black/20 border-[#E2DCCE] dark:border-white/5 hover:border-stone-400 dark:hover:border-white/20'
+                                    : 'bg-white dark:bg-black/20 border-[var(--theme-border)] dark:border-white/5 hover:border-stone-400 dark:hover:border-white/20'
                             }`}
                         >
                             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 flex-shrink-0 ${
@@ -50,7 +50,7 @@ export default function StepRole({
 
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                    <p className={`font-bold text-xs uppercase tracking-wide ${isSelected ? 'text-[#1E3F27] dark:text-[#EAE5D9]' : 'text-stone-800 dark:text-stone-200'}`}>
+                                    <p className={`font-bold text-xs uppercase tracking-wide ${isSelected ? 'text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]' : 'text-stone-800 dark:text-stone-200'}`}>
                                         {roleObj.label}
                                     </p>
                                     {hasViolations && (

@@ -38,9 +38,9 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
         >
             <div className="space-y-6 print:m-0 print:p-0">
                 {/* Header Statement */}
-                <div className="p-5 rounded-2xl bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-5 rounded-2xl bg-[var(--theme-bg-app)] dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h3 className="text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">
+                        <h3 className="text-xl font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] tracking-tight">
                             SIIFMART ENTERPRISE
                         </h3>
                         <p className="text-xs text-stone-500 font-medium">
@@ -48,7 +48,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                         </p>
                     </div>
                     <div className="text-right">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--theme-primary)] dark:text-[#A9CBA2] block">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] block">
                             Payslip ID
                         </span>
                         <span className="font-mono text-xs font-bold text-stone-700 dark:text-stone-300">
@@ -58,30 +58,30 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                 </div>
 
                 {/* Employee Info Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-white dark:bg-white/5 border border-[var(--theme-border)] dark:border-white/10 text-xs">
                     <div>
                         <span className="text-stone-400 text-[10px] uppercase font-bold block">Employee Name</span>
-                        <span className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{employee.name}</span>
+                        <span className="font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{employee.name}</span>
                     </div>
                     <div>
                         <span className="text-stone-400 text-[10px] uppercase font-bold block">Employee Code</span>
-                        <span className="font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{formatDisplayEmployeeId(employee)}</span>
+                        <span className="font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{formatDisplayEmployeeId(employee)}</span>
                     </div>
                     <div>
                         <span className="text-stone-400 text-[10px] uppercase font-bold block">Job Title</span>
-                        <span className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{getEmployeeJobTitle(employee)}</span>
+                        <span className="font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{getEmployeeJobTitle(employee)}</span>
                     </div>
                     <div>
                         <span className="text-stone-400 text-[10px] uppercase font-bold block">Pay Period</span>
-                        <span className="font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2]">{payslip.period}</span>
+                        <span className="font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">{payslip.period}</span>
                     </div>
                 </div>
 
                 {/* Earnings & Deductions Table */}
-                <div className="border border-[#E2DCCE] dark:border-white/10 rounded-2xl overflow-hidden">
+                <div className="border border-[var(--theme-border)] dark:border-white/10 rounded-2xl overflow-hidden">
                     <table className="w-full text-left text-xs">
                         <thead>
-                            <tr className="bg-[#FAF8F5] dark:bg-white/5 border-b border-[#E2DCCE] dark:border-white/10 font-bold text-stone-600 dark:text-stone-300">
+                            <tr className="bg-[var(--theme-bg-app)] dark:bg-white/5 border-b border-[var(--theme-border)] dark:border-white/10 font-bold text-stone-600 dark:text-stone-300">
                                 <th className="p-3">Earnings Description</th>
                                 <th className="p-3 text-right">Amount ({currencySymbol})</th>
                                 <th className="p-3">Deductions Description</th>
@@ -110,12 +110,12 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                         </tbody>
                         <tfoot>
                             <tr className="bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 border-t border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] font-bold text-sm">
-                                <td className="p-3 text-[#1E3F27] dark:text-[#EAE5D9]">Total Gross Earnings</td>
-                                <td className="p-3 text-right font-mono text-[#1E3F27] dark:text-[#EAE5D9]">
+                                <td className="p-3 text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">Total Gross Earnings</td>
+                                <td className="p-3 text-right font-mono text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">
                                     {currencySymbol} {payslip.grossSalary.toLocaleString()}
                                 </td>
                                 <td className="p-3 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-black">Net Take-Home Pay</td>
-                                <td className="p-3 text-right font-mono text-lg font-black text-[var(--theme-primary)] dark:text-[#A9CBA2]">
+                                <td className="p-3 text-right font-mono text-lg font-black text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">
                                     {currencySymbol} {payslip.netSalary.toLocaleString()}
                                 </td>
                             </tr>
@@ -124,7 +124,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                 </div>
 
                 {/* Status & Actions */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-[#E2DCCE] dark:border-white/10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-[var(--theme-border)] dark:border-white/10">
                     <div className="flex items-center gap-2 text-xs text-stone-500">
                         <CheckCircle2 size={16} className="text-[var(--theme-status-success-text)]" />
                         <span>Disbursed via Direct Bank Deposit • Released {payslip.releaseDate}</span>

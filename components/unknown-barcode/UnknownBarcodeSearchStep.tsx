@@ -31,7 +31,7 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
 }) => {
     return (
         <div className="space-y-4">
-            <p className="text-[#1E3F27] dark:text-gray-300 text-sm">
+            <p className="text-[var(--theme-text-primary)] dark:text-gray-300 text-sm">
                 Search for the existing product name or SKU to link this barcode to.
             </p>
 
@@ -42,7 +42,7 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                     type="text"
                     placeholder="Search product name or SKU..."
                     aria-label="Search products"
-                    className="w-full bg-white dark:bg-black/50 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-[#1E3F27] dark:text-white focus:border-[var(--theme-border)] dark:focus:border-[#A9CBA2] focus:outline-none transition-colors"
+                    className="w-full bg-white dark:bg-black/50 border border-[var(--theme-border)] dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-[var(--theme-text-primary)] dark:text-white focus:border-[var(--theme-border)] dark:focus:border-[var(--theme-border)] focus:outline-none transition-colors"
                     value={searchTerm || ''}
                     onChange={e => setSearchTerm(e.target.value)}
                     onKeyDown={onKeyDown}
@@ -59,16 +59,16 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                             type="button"
                             onClick={() => setSelectedProduct(product)}
                             className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${selectedProduct?.id === product.id
-                                ? 'bg-[var(--theme-primary)]/10 border-[var(--theme-border)] dark:border-[#A9CBA2] text-[var(--theme-primary)] dark:text-[#A9CBA2]'
-                                : 'bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-white/5 text-stone-700 dark:text-gray-300 hover:bg-white dark:hover:bg-[#18201B]/40 hover:border-[var(--theme-border)]/30'
+                                ? 'bg-[var(--theme-primary)]/10 border-[var(--theme-border)] dark:border-[var(--theme-border)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]'
+                                : 'bg-white dark:bg-black/25 border border-[var(--theme-border)] dark:border-white/5 text-stone-700 dark:text-gray-300 hover:bg-white dark:hover:bg-[var(--theme-bg-panel)]/40 hover:border-[var(--theme-border)]/30'
                                 }`}
                         >
-                            <div className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{product.name}</div>
+                            <div className="font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{product.name}</div>
                             <div className="text-xs text-[#4D6E56] dark:text-gray-400 flex justify-between items-center mt-1">
                                 <span className="font-mono">{product.sku}</span>
                                 <div className="flex items-center gap-2">
                                     {isLocalStock ? (
-                                        <span className="px-2 py-0.5 bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] rounded text-[10px] font-bold">Store: {product.stock}</span>
+                                        <span className="px-2 py-0.5 bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] rounded text-[10px] font-bold">Store: {product.stock}</span>
                                     ) : (
                                         <span className="px-2 py-0.5 bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] rounded text-[10px] font-bold">Global: {product.stock}</span>
                                     )}
@@ -82,9 +82,9 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                 )}
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-[#E2DCCE] dark:border-white/5">
+            <div className="flex justify-between items-center pt-4 border-t border-[var(--theme-border)] dark:border-white/5">
                 {selectedProduct ? (
-                    <div className="text-xs text-[var(--theme-primary)] dark:text-[#A9CBA2] font-semibold truncate max-w-[200px]">
+                    <div className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-semibold truncate max-w-[200px]">
                         Linking to: <b>{selectedProduct.name}</b>
                     </div>
                 ) : <div />}
@@ -101,7 +101,7 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                         type="button"
                         onClick={onConfirmMap}
                         disabled={!selectedProduct || isUploading}
-                        className="px-6 py-2.5 bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white hover:opacity-90 font-bold rounded-xl disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md disabled:shadow-none cursor-pointer text-xs uppercase tracking-wider"
+                        className="px-6 py-2.5 bg-gradient-to-br from-[var(--theme-primary)] to-[var(--theme-primary)] text-white hover:opacity-90 font-bold rounded-xl disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md disabled:shadow-none cursor-pointer text-xs uppercase tracking-wider"
                     >
                         {isUploading ? <Loader2 className="animate-spin" size={16} /> : <LinkIcon size={16} />}
                         Map Barcode

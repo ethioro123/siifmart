@@ -159,7 +159,7 @@ export function ActivityCenter({
                            {displayedNotifications.length > 0 ? (
                               <div className="divide-y divide-white/5 flex-1">
                                  {displayedNotifications.map(notif => (
-                                    <div key={notif.id} className={`p-4 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors relative group ${!notif.read ? 'bg-[var(--theme-primary)]/5 dark:bg-[#A9CBA2]/5' : ''}`}>
+                                    <div key={notif.id} className={`p-4 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors relative group ${!notif.read ? 'bg-[var(--theme-primary)]/5 dark:bg-[var(--theme-primary-muted)]/5' : ''}`}>
                                        <div className="flex gap-3">
                                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${(notif.type === 'error' || notif.type === 'alert') ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' :
                                              notif.type === 'warning' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]' :
@@ -216,7 +216,7 @@ export function ActivityCenter({
                                        <div className="flex items-start gap-3">
                                           <button
                                              onClick={() => handleTaskStatusChange(task.id, task.status === 'Completed' ? 'Pending' : 'Completed')}
-                                             className={`mt-0.5 w-4 h-4 rounded border transition-all flex items-center justify-center ${task.status === 'Completed' ? 'bg-[var(--theme-primary)] dark:bg-[#A9CBA2] border-[var(--theme-border)] dark:border-[#A9CBA2]' : 'border-stone-300 dark:border-gray-600 hover:border-[var(--theme-border)] dark:hover:border-[#A9CBA2]'}`}
+                                             className={`mt-0.5 w-4 h-4 rounded border transition-all flex items-center justify-center ${task.status === 'Completed' ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-primary-muted)] border-[var(--theme-border)] dark:border-[var(--theme-border)]' : 'border-stone-300 dark:border-gray-600 hover:border-[var(--theme-border)] dark:hover:border-[var(--theme-border)]'}`}
                                           >
                                              {task.status === 'Completed' && <X size={12} className="text-black" />}
                                           </button>

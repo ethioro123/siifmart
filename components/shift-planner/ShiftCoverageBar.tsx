@@ -24,15 +24,15 @@ export const ShiftCoverageBar: React.FC<ShiftCoverageBarProps> = ({
     const totalScheduledShifts = dailyCoverage.reduce((sum, d) => sum + d.headcount, 0);
 
     return (
-        <div className="bg-white/90 dark:bg-black/30 p-4 rounded-2xl border border-[#E2DCCE] border-[var(--theme-status-success-border)] shadow-xs space-y-3">
+        <div className="bg-white/90 dark:bg-black/30 p-4 rounded-2xl border border-[var(--theme-border)] border-[var(--theme-status-success-border)] shadow-xs space-y-3">
             {/* Header / Summary Strip */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E2DCCE] dark:border-white/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--theme-border)] dark:border-white/10">
                 <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/30 text-[var(--theme-primary)] dark:text-[#A9CBA2]">
+                    <div className="p-2 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/30 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">
                         <Users size={18} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
+                        <h4 className="font-bold text-sm text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">
                             Labor & Coverage Summary
                         </h4>
                         <p className="text-[11px] text-stone-500 font-medium">
@@ -42,7 +42,7 @@ export const ShiftCoverageBar: React.FC<ShiftCoverageBarProps> = ({
                 </div>
 
                 <div className="flex items-center gap-4 text-xs font-bold">
-                    <div className="flex items-center gap-1.5 text-[var(--theme-primary)] dark:text-[#A9CBA2]">
+                    <div className="flex items-center gap-1.5 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">
                         <Clock size={15} />
                         <span>{totalWeekHours} Total Weekly Hours</span>
                     </div>
@@ -79,18 +79,18 @@ export const ShiftCoverageBar: React.FC<ShiftCoverageBarProps> = ({
                                     ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
                                     : isZero
                                     ? 'bg-stone-100/50 dark:bg-white/5 border-dashed border-stone-200 dark:border-stone-800'
-                                    : 'bg-white dark:bg-black/20 border-[#E2DCCE] dark:border-white/10'
+                                    : 'bg-white dark:bg-black/20 border-[var(--theme-border)] dark:border-white/10'
                             }`}
                         >
                             <p className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
                                 {day.dayName} {day.dayNumber}
                             </p>
                             <p className={`text-base font-extrabold my-0.5 ${
-                                isZero ? 'text-stone-400' : 'text-[#1E3F27] dark:text-[#EAE5D9]'
+                                isZero ? 'text-stone-400' : 'text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]'
                             }`}>
                                 {cov.headcount} <span className="text-[11px] font-semibold text-stone-400">staff</span>
                             </p>
-                            <p className="text-[10px] font-mono font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2]">
+                            <p className="text-[10px] font-mono font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">
                                 {cov.totalHours} hrs
                             </p>
                         </div>

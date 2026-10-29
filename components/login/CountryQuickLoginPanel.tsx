@@ -175,12 +175,12 @@ export function CountryQuickLoginPanel({
     : 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';
 
   return (
-    <div role="region" aria-label={title} className="w-full lg:w-[360px] xl:w-[390px] bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] border-[var(--theme-status-success-border)] rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[750px] max-h-[90vh] transition-all duration-300">
+    <div role="region" aria-label={title} className="w-full lg:w-[360px] xl:w-[390px] bg-white/85 dark:bg-[var(--theme-bg-panel)]/60 border border-[var(--theme-border)] border-[var(--theme-status-success-border)] rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[750px] max-h-[90vh] transition-all duration-300">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#E2DCCE]/50 dark:border-white/[0.06]">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]/50 dark:border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <ShieldCheck size={16} className={isEthiopia ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-primary)] dark:text-[#A9CBA2]'} />
-          <h3 className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">
+          <ShieldCheck size={16} className={isEthiopia ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]'} />
+          <h3 className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] tracking-tight">
             {title}
           </h3>
         </div>
@@ -199,7 +199,7 @@ export function CountryQuickLoginPanel({
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles, titles, or sites...`}
-          className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-stone-100/70 dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/[0.06] focus:outline-none focus:border-[var(--theme-border)] dark:focus:border-[#A9CBA2] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
+          className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-stone-100/70 dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/[0.06] focus:outline-none focus:border-[var(--theme-border)] dark:focus:border-[var(--theme-border)] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
         />
         {searchQuery && (
           <button
@@ -221,7 +221,7 @@ export function CountryQuickLoginPanel({
             onClick={() => setRoleFilter('ALL')}
             className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-colors cursor-pointer shrink-0 border ${
               roleFilter === 'ALL'
-                ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent font-bold'
+                ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] border-transparent font-bold'
                 : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-stone-400 border-stone-200/60 dark:border-white/[0.06] hover:bg-stone-200 dark:hover:bg-white/[0.08]'
             }`}
           >
@@ -240,7 +240,7 @@ export function CountryQuickLoginPanel({
                 onClick={() => setRoleFilter(active ? 'ALL' : chip.id)}
                 className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-all cursor-pointer shrink-0 flex items-center gap-1 border ${
                   active
-                    ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent font-bold shadow-xs'
+                    ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] border-transparent font-bold shadow-xs'
                     : 'bg-stone-100/70 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/50 dark:border-white/[0.05] hover:bg-stone-200/60 dark:hover:bg-white/[0.06]'
                 }`}
               >
@@ -273,7 +273,7 @@ export function CountryQuickLoginPanel({
               }}
               className={`py-1 px-1 text-[10px] font-semibold rounded-lg transition-colors cursor-pointer text-center truncate ${
                 active
-                  ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]'
+                  ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)]'
                   : 'bg-stone-100 dark:bg-white/[0.05] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.08]'
               }`}
             >
@@ -307,7 +307,7 @@ export function CountryQuickLoginPanel({
                 active
                   ? siteTheme
                     ? `${siteTheme.badge} font-bold shadow-xs`
-                    : 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent'
+                    : 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] border-transparent'
                   : siteTheme
                     ? `${siteTheme.bgLight} ${siteTheme.nameColor} border-stone-200/60 dark:border-white/[0.06] hover:bg-stone-100 dark:hover:bg-white/[0.06]`
                     : 'bg-stone-50/80 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/80 dark:border-white/[0.07] hover:bg-stone-100 dark:hover:bg-white/[0.06]'
@@ -345,7 +345,7 @@ export function CountryQuickLoginPanel({
       {(roleFilter !== 'ALL' || tierFilter !== 'ALL' || levelFilter !== 'ALL' || searchQuery) && (
         <div className="flex items-center justify-between text-[10px] text-stone-500 dark:text-stone-400 px-1 mb-1.5">
           <span>
-            Showing <strong className="text-[#1E3F27] dark:text-[#EAE5D9]">{totalFilteredAccounts}</strong> roles
+            Showing <strong className="text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{totalFilteredAccounts}</strong> roles
           </span>
           <button
             type="button"
@@ -356,7 +356,7 @@ export function CountryQuickLoginPanel({
               setOpsSiteFilter('ALL_OPS');
               setLevelFilter('ALL');
             }}
-            className="text-[9px] font-semibold text-[var(--theme-primary)] dark:text-[#A9CBA2] hover:underline cursor-pointer"
+            className="text-[9px] font-semibold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] hover:underline cursor-pointer"
           >
             Reset filters
           </button>
@@ -373,7 +373,7 @@ export function CountryQuickLoginPanel({
             <button
               type="button"
               onClick={() => refetch()}
-              className="px-3 py-1 text-xs font-semibold rounded-lg bg-stone-100 dark:bg-white/[0.08] hover:bg-stone-200 dark:hover:bg-white/[0.12] text-[#1E3F27] dark:text-[#EAE5D9] transition-colors cursor-pointer border border-[#E2DCCE]/60 dark:border-white/[0.06]"
+              className="px-3 py-1 text-xs font-semibold rounded-lg bg-stone-100 dark:bg-white/[0.08] hover:bg-stone-200 dark:hover:bg-white/[0.12] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] transition-colors cursor-pointer border border-[var(--theme-border)]/60 dark:border-white/[0.06]"
             >
               Retry loading
             </button>
@@ -389,10 +389,10 @@ export function CountryQuickLoginPanel({
             return (
               <div
                 key={site.siteCode}
-                className={`rounded-2xl border border-[#E2DCCE]/60 dark:border-white/[0.06] ${siteTheme.borderLeft} ${siteTheme.bgLight} p-2.5 space-y-2 transition-all`}
+                className={`rounded-2xl border border-[var(--theme-border)]/60 dark:border-white/[0.06] ${siteTheme.borderLeft} ${siteTheme.bgLight} p-2.5 space-y-2 transition-all`}
               >
                 {/* Site Header: Color on site name, site type badge, and prominent worker count */}
-                <div className="flex items-center justify-between pb-1.5 border-b border-[#E2DCCE]/40 dark:border-white/[0.06]">
+                <div className="flex items-center justify-between pb-1.5 border-b border-[var(--theme-border)]/40 dark:border-white/[0.06]">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="p-1 rounded-md bg-white/70 dark:bg-black/30 shadow-xs">
                       {getSiteIcon(site.siteType, siteTheme.iconColor)}
@@ -422,12 +422,12 @@ export function CountryQuickLoginPanel({
                       type="button"
                       disabled={disabled}
                       onClick={() => onSelectAccount(acc.email)}
-                      className={`w-full p-2.5 text-left bg-white/90 dark:bg-black/40 hover:bg-stone-50 dark:hover:bg-white/[0.06] border border-[#E2DCCE]/70 dark:border-white/[0.07] ${siteTheme.borderCard} rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs`}
+                      className={`w-full p-2.5 text-left bg-white/90 dark:bg-black/40 hover:bg-stone-50 dark:hover:bg-white/[0.06] border border-[var(--theme-border)]/70 dark:border-white/[0.07] ${siteTheme.borderCard} rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs`}
                     >
                       <div className="flex flex-col min-w-0 pr-2">
                         <div className="flex items-center gap-1.5">
                           {/* Clean Worker Role Title without rainbow color pills */}
-                          <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[var(--theme-primary)] dark:group-hover:text-white transition-colors truncate">
+                          <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-primary)] dark:group-hover:text-white transition-colors truncate">
                             {acc.role}
                           </span>
                           <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
@@ -445,7 +445,7 @@ export function CountryQuickLoginPanel({
                         <span className="text-[8.5px] font-mono tabular-nums font-semibold text-stone-500 dark:text-stone-400">
                           {acc.code}
                         </span>
-                        <UserCheck size={11} className="text-stone-300 dark:text-stone-600 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2] transition-colors" />
+                        <UserCheck size={11} className="text-stone-300 dark:text-stone-600 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[var(--theme-text-secondary)] transition-colors" />
                       </div>
                     </button>
                   ))}
@@ -457,7 +457,7 @@ export function CountryQuickLoginPanel({
       </div>
 
       {/* Footer hint */}
-      <div className="pt-2 border-t border-[#E2DCCE]/40 dark:border-white/[0.05] text-center">
+      <div className="pt-2 border-t border-[var(--theme-border)]/40 dark:border-white/[0.05] text-center">
         <span className="text-[9px] text-stone-400 dark:text-stone-500 font-mono">
           Select an employee to sign in to staging
         </span>

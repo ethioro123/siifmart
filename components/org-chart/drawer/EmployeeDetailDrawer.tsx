@@ -115,7 +115,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
             <div
                 onClick={(e) => e.stopPropagation()}
                 className={`w-full max-w-md h-full flex flex-col shadow-2xl border-l animate-slideLeft ${
-                    isDark ? 'bg-[#18201B] border-[#2C4D35] text-[#FAF8F5]' : 'bg-white border-[#E2DCCE] text-[#1E3F27]'
+                    isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35] text-[var(--theme-text-primary)]' : 'bg-white border-[var(--theme-border)] text-[var(--theme-text-primary)]'
                 }`}
             >
                 {/* Header with Close */}
@@ -146,7 +146,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                         />
                         <div
                             title={isOnline ? 'Online now' : 'Offline'}
-                            className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#18201B] transition-colors duration-500 ${
+                            className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[var(--theme-border)] transition-colors duration-500 ${
                                 isOnline
                                     ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_6px_rgba(52,211,153,0.7)] animate-pulse'
                                     : 'bg-stone-300 dark:bg-stone-600'
@@ -160,13 +160,13 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                 {employee.name}
                             </h3>
                             {employee.code && (
-                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-bold bg-[#EAE5D9] dark:bg-black/40 text-[var(--theme-primary)] text-[var(--theme-status-success-text)]">
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-bold bg-[var(--theme-bg-subtle)] dark:bg-black/40 text-[var(--theme-primary)] text-[var(--theme-status-success-text)]">
                                     {formatDisplayEmployeeId(employee)}
                                 </span>
                             )}
                         </div>
 
-                        <p className="text-sm font-semibold text-[var(--theme-primary)] dark:text-[#A9CBA2] mt-0.5">
+                        <p className="text-sm font-semibold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] mt-0.5">
                             {roleTitle}
                         </p>
 
@@ -193,7 +193,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                 {employee.status || 'Active'}
                             </span>
                             <span className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center gap-1 truncate">
-                                <MapPin size={11} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] shrink-0" />
+                                <MapPin size={11} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] shrink-0" />
                                 <span className="truncate">{siteName}</span>
                             </span>
                         </div>
@@ -208,15 +208,15 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                             Key Metrics
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
-                            <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'}`}>
+                            <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'}`}>
                                 <div className="text-[11px] text-stone-500 dark:text-stone-400">Performance Score</div>
-                                <div className="text-lg font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2] mt-0.5">
+                                <div className="text-lg font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] mt-0.5">
                                     {employee.performanceScore ? `${employee.performanceScore}%` : 'N/A'}
                                 </div>
                             </div>
-                            <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'}`}>
+                            <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'}`}>
                                 <div className="text-[11px] text-stone-500 dark:text-stone-400">Attendance Rate</div>
-                                <div className="text-lg font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2] mt-0.5">
+                                <div className="text-lg font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] mt-0.5">
                                     {employee.attendanceRate ? `${employee.attendanceRate}%` : '98%'}
                                 </div>
                             </div>
@@ -224,18 +224,18 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                     </div>
 
                     {canEditReportingLines && onSaveReportingLines && (
-                        <section className="rounded-xl border border-[#E2DCCE] dark:border-white/10 p-3.5 space-y-3" aria-label="Reporting relationships">
+                        <section className="rounded-xl border border-[var(--theme-border)] dark:border-white/10 p-3.5 space-y-3" aria-label="Reporting relationships">
                             <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 dark:text-stone-500">Reporting Relationships</h4>
                             <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-300">
                                 Primary manager
-                                <select value={primaryManagerId} onChange={event => setPrimaryManagerId(event.target.value)} className="mt-1 w-full rounded-lg border border-[#E2DCCE] dark:border-white/10 bg-white dark:bg-black/30 px-3 py-2 text-sm text-stone-900 dark:text-white">
+                                <select value={primaryManagerId} onChange={event => setPrimaryManagerId(event.target.value)} className="mt-1 w-full rounded-lg border border-[var(--theme-border)] dark:border-white/10 bg-white dark:bg-black/30 px-3 py-2 text-sm text-stone-900 dark:text-white">
                                     <option value="">Unassigned</option>
                                     {reportableEmployees.map(manager => <option key={manager.id} value={manager.id}>{manager.name} · {getEmployeeJobTitle(manager)}</option>)}
                                 </select>
                             </label>
                             <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-300">
                                 Functional manager
-                                <select value={functionalManagerId} onChange={event => setFunctionalManagerId(event.target.value)} className="mt-1 w-full rounded-lg border border-[#E2DCCE] dark:border-white/10 bg-white dark:bg-black/30 px-3 py-2 text-sm text-stone-900 dark:text-white">
+                                <select value={functionalManagerId} onChange={event => setFunctionalManagerId(event.target.value)} className="mt-1 w-full rounded-lg border border-[var(--theme-border)] dark:border-white/10 bg-white dark:bg-black/30 px-3 py-2 text-sm text-stone-900 dark:text-white">
                                     <option value="">Unassigned</option>
                                     {reportableEmployees.map(manager => <option key={manager.id} value={manager.id}>{manager.name} · {getEmployeeJobTitle(manager)}</option>)}
                                 </select>
@@ -257,9 +257,9 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                 <div className="flex items-center justify-between p-2.5 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
                                     <a
                                         href={`mailto:${employee.email}`}
-                                        className="flex items-center gap-2.5 min-w-0 hover:text-[var(--theme-primary)] dark:hover:text-[#A9CBA2] transition-colors"
+                                        className="flex items-center gap-2.5 min-w-0 hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] transition-colors"
                                     >
-                                        <Mail size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] shrink-0" />
+                                        <Mail size={15} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] shrink-0" />
                                         <span className="text-xs truncate">{employee.email}</span>
                                     </a>
                                     <button
@@ -277,9 +277,9 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                 <div className="flex items-center justify-between p-2.5 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
                                     <a
                                         href={`tel:${employee.phone}`}
-                                        className="flex items-center gap-2.5 min-w-0 hover:text-[var(--theme-primary)] dark:hover:text-[#A9CBA2] transition-colors"
+                                        className="flex items-center gap-2.5 min-w-0 hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] transition-colors"
                                     >
-                                        <Phone size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] shrink-0" />
+                                        <Phone size={15} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] shrink-0" />
                                         <span className="text-xs font-mono">{employee.phone}</span>
                                     </a>
                                     <button
@@ -295,7 +295,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
 
                             {employee.joinDate && (
                                 <div className="flex items-center gap-2.5 p-2.5 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
-                                    <Calendar size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] shrink-0" />
+                                    <Calendar size={15} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] shrink-0" />
                                     <span className="text-xs">Joined {new Date(employee.joinDate).toLocaleDateString()}</span>
                                 </div>
                             )}
@@ -331,7 +331,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                             </h4>
                             <div className="flex flex-wrap gap-1.5">
                                 {employee.badges.map((b, idx) => (
-                                    <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#EAE5D9] dark:bg-black/30 text-[var(--theme-primary)] text-[var(--theme-status-success-text)] border border-[var(--theme-border)]/20">
+                                    <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[var(--theme-bg-subtle)] dark:bg-black/30 text-[var(--theme-primary)] text-[var(--theme-status-success-text)] border border-[var(--theme-border)]/20">
                                         {b}
                                     </span>
                                 ))}
@@ -358,7 +358,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                     onClose();
                                     onOpenIdCard(employee);
                                 }}
-                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-[var(--theme-border)]/30 hover:bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] transition-colors cursor-pointer"
+                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-[var(--theme-border)]/30 hover:bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] transition-colors cursor-pointer"
                                 title="View & Print Employee ID Badge"
                             >
                                 <CreditCard size={14} />
@@ -373,7 +373,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                     onClose();
                                     onOpenProfile(employee);
                                 }}
-                                className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[var(--theme-primary)] hover:bg-[#1E3F27] text-white shadow-sm transition-all cursor-pointer"
+                                className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary)] text-white shadow-sm transition-all cursor-pointer"
                                 title="Open full profile modal to edit credentials, shifts, or permissions"
                             >
                                 <ExternalLink size={14} />

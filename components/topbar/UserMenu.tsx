@@ -295,6 +295,31 @@ export function UserMenu({
                         <ChevronDown size={14} className="-rotate-90 text-[var(--theme-text-muted)]" aria-hidden="true" />
                      </button>
 
+                     {approvalInbox.enabled && (
+                        <button
+                           type="button"
+                           onClick={() => { navigate('/approvals'); setIsUserMenuOpen(false); }}
+                           className="w-full min-h-12 flex items-center justify-between gap-3 px-3.5 py-3 text-sm font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        >
+                           <div className="flex items-center gap-3 min-w-0">
+                              <ClipboardCheck size={16} className="text-[var(--theme-accent)] shrink-0" />
+                              <span className="truncate">{t ? t('pos.approvals.title') : 'Approvals'}</span>
+                           </div>
+                           <div className="flex items-center gap-2 shrink-0">
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-bold tabular-nums ${
+                                 approvalInbox.isError
+                                    ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                                    : pendingApprovalsCount > 0
+                                       ? 'bg-[var(--theme-accent)] text-[var(--theme-btn-primary-text)]'
+                                       : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                              }`}>
+                                 {approvalBadgeText}
+                              </span>
+                              <ChevronDown size={14} className="-rotate-90 text-[var(--theme-text-muted)]" aria-hidden="true" />
+                           </div>
+                        </button>
+                     )}
+
                      {user.role === 'group_ceo' && (
                         <button
                            onClick={() => { navigate('/location-select'); setIsUserMenuOpen(false); }}

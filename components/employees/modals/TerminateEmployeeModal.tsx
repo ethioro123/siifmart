@@ -165,7 +165,7 @@ export default function TerminateEmployeeModal({
 
                 {/* Zero-Trust Asset & Access Revocation Checklist */}
                 <div className="space-y-2 p-4 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl">
-                    <h5 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider flex items-center gap-1.5">
+                    <h5 className="text-xs font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
                         <ShieldAlert size={14} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" />
                         Asset Revocation & Security Handshake Checklist
                     </h5>

@@ -19,12 +19,12 @@ const CoordBadge = ({ label, value, colorClass, compact = false }: { label: stri
     const borderPart = colorClass.split(' ')[2] || 'border-gray-500/30';
 
     return (
-        <div className={`flex items-center rounded-2xl overflow-hidden border ${borderPart} border-[var(--theme-status-success-border)] shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] hover:border-[var(--theme-border)]/40 dark:hover:border-[#A9CBA2]/30`}>
+        <div className={`flex items-center rounded-2xl overflow-hidden border ${borderPart} border-[var(--theme-status-success-border)] shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] hover:border-[var(--theme-border)]/40 dark:hover:border-[var(--theme-border)]/30`}>
             <div className={`px-3 py-2 ${bgPart} bg-opacity-25 border-r ${borderPart} border-[var(--theme-status-success-border)] flex items-center justify-center min-w-[3.8rem]`}>
-                <span className={`font-black uppercase tracking-widest text-[#2C4D35] dark:text-[#A9CBA2] ${compact ? 'text-[8px]' : 'text-[10px]'}`}>{label}</span>
+                <span className={`font-black uppercase tracking-widest text-[#2C4D35] dark:text-[var(--theme-text-secondary)] ${compact ? 'text-[8px]' : 'text-[10px]'}`}>{label}</span>
             </div>
-            <div className={`px-4 py-2 bg-white/80 dark:bg-[#18201B]/40 backdrop-blur-md flex items-center justify-center min-w-[2.8rem]`}>
-                <span className={`font-mono font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-widest ${compact ? 'text-xs' : 'text-sm'}`}>{value}</span>
+            <div className={`px-4 py-2 bg-white/80 dark:bg-[var(--theme-bg-panel)]/40 backdrop-blur-md flex items-center justify-center min-w-[2.8rem]`}>
+                <span className={`font-mono font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] tracking-widest ${compact ? 'text-xs' : 'text-sm'}`}>{value}</span>
             </div>
         </div>
     );
@@ -84,27 +84,27 @@ export default function ProductLocationDisplay({
         return (
             <div className="flex items-center gap-2 group cursor-pointer">
                 {locationInfo.location.isValid ? (
-                    <div className="flex items-center bg-white/80 dark:bg-[#18201B]/55 backdrop-blur-xl border border-[#E2DCCE] dark:border-[#A9CBA2]/10 rounded-xl overflow-hidden shadow-md hover:border-[var(--theme-border)]/30 transition-all">
-                        <div className={`px-2 py-1.5 ${zoneColor.split(' ')[0]} bg-opacity-20 border-r border-[#E2DCCE] border-[var(--theme-status-success-border)] flex items-center gap-1.5`}>
+                    <div className="flex items-center bg-white/80 dark:bg-[var(--theme-bg-panel)]/55 backdrop-blur-xl border border-[var(--theme-border)] dark:border-[var(--theme-border)]/10 rounded-xl overflow-hidden shadow-md hover:border-[var(--theme-border)]/30 transition-all">
+                        <div className={`px-2 py-1.5 ${zoneColor.split(' ')[0]} bg-opacity-20 border-r border-[var(--theme-border)] border-[var(--theme-status-success-border)] flex items-center gap-1.5`}>
                             <span className="text-[8px] font-black text-stone-400 dark:text-white/40 uppercase tracking-tighter">Zone</span>
-                            <span className="text-[10px] font-black text-[#1E3F27] dark:text-white font-mono">{locationInfo.location.zone}</span>
+                            <span className="text-[10px] font-black text-[var(--theme-text-primary)] dark:text-white font-mono">{locationInfo.location.zone}</span>
                         </div>
                         <div className="px-2.5 py-1.5 flex items-center gap-2.5">
                             <div className="flex items-center gap-1">
                                 <span className="text-[8px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-tighter">Aisle</span>
-                                <span className="text-[10px] font-mono font-black text-[#1E3F27] dark:text-[#EAE5D9]">{locationInfo.location.aisle}</span>
+                                <span className="text-[10px] font-mono font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{locationInfo.location.aisle}</span>
                             </div>
-                            <div className="w-px h-3 bg-[#E2DCCE] dark:bg-[#A9CBA2]/10" />
+                            <div className="w-px h-3 bg-[var(--theme-bg-app)] dark:bg-[var(--theme-primary-muted)]/10" />
                             <div className="flex items-center gap-1">
                                 <span className="text-[8px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-tighter">Bay</span>
-                                <span className="text-[10px] font-mono font-black text-[#1E3F27] dark:text-[#EAE5D9]">{locationInfo.location.bay}</span>
+                                <span className="text-[10px] font-mono font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{locationInfo.location.bay}</span>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className="px-3 py-1.5 bg-white/80 dark:bg-[#18201B]/55 border border-[#E2DCCE] dark:border-[#A9CBA2]/10 rounded-xl flex items-center gap-2 shadow-sm">
-                        <div className="p-1 bg-[var(--theme-primary)]/10 rounded shadow-inner text-[var(--theme-primary)] dark:text-[#A9CBA2]">{getSiteIcon()}</div>
-                        <span className="text-[10px] font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">{locationInfo.shortPath}</span>
+                    <div className="px-3 py-1.5 bg-white/80 dark:bg-[var(--theme-bg-panel)]/55 border border-[var(--theme-border)] dark:border-[var(--theme-border)]/10 rounded-xl flex items-center gap-2 shadow-sm">
+                        <div className="p-1 bg-[var(--theme-primary)]/10 rounded shadow-inner text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">{getSiteIcon()}</div>
+                        <span className="text-[10px] font-extrabold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] tracking-tight">{locationInfo.shortPath}</span>
                     </div>
                 )}
             </div>
@@ -117,23 +117,23 @@ export default function ProductLocationDisplay({
                 {/* Visual Ambient Glow */}
                 <div className={`absolute -top-4 -left-4 w-24 h-24 rounded-full blur-3xl opacity-20 ${zoneColor.split(' ')[0]}`} />
 
-                <div className="relative bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] border-[var(--theme-status-success-border)] rounded-[2rem] overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] backdrop-blur-2xl transition-all duration-300">
+                <div className="relative bg-white/85 dark:bg-[var(--theme-bg-panel)]/60 border border-[var(--theme-border)] border-[var(--theme-status-success-border)] rounded-[2rem] overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] backdrop-blur-2xl transition-all duration-300">
                     {/* Header */}
                     <div className="p-6 border-b border-gray-100 dark:border-white/5 bg-gradient-to-b from-gray-50/50 dark:from-white/5 to-transparent flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/90 dark:bg-black/25 rounded-2xl border border-[#E2DCCE] border-[var(--theme-status-success-border)] text-[var(--theme-primary)] dark:text-[#A9CBA2] shadow-sm text-[var(--theme-status-info-text)] transition-colors">
+                            <div className="p-3 bg-white/90 dark:bg-black/25 rounded-2xl border border-[var(--theme-border)] border-[var(--theme-status-success-border)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] shadow-sm text-[var(--theme-status-info-text)] transition-colors">
                                 {getSiteIcon()}
                             </div>
                             <div>
-                                <h4 className="text-base font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight leading-none mb-1.5">{locationInfo.siteName}</h4>
+                                <h4 className="text-base font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] uppercase tracking-tight leading-none mb-1.5">{locationInfo.siteName}</h4>
                                 <div className="flex items-center gap-2 opacity-60">
                                     <span className="text-[10px] font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-[0.2em]">{locationInfo.siteType}</span>
                                     <ArrowRight size={10} className="text-gray-400 dark:text-gray-600" />
-                                    <span className="text-[10px] font-mono text-[var(--theme-primary)] dark:text-[#A9CBA2] font-black">{locationInfo.siteCode}</span>
+                                    <span className="text-[10px] font-mono text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-black">{locationInfo.siteCode}</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="px-4 py-2 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] rounded-full border border-[var(--theme-status-success-border)] text-[var(--theme-primary)] dark:text-[#A9CBA2]">
+                        <div className="px-4 py-2 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] rounded-full border border-[var(--theme-status-success-border)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">
                             <Navigation size={18} />
                         </div>
                     </div>
@@ -153,7 +153,7 @@ export default function ProductLocationDisplay({
                                         <Layers size={14} className="text-[var(--theme-status-success-text)]" />
                                         <span className="text-[10px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-[0.3em]">Full System Orientation</span>
                                     </div>
-                                    <p className="text-xs font-mono font-bold text-[#1E3F27] dark:text-gray-300 uppercase tracking-widest leading-relaxed">
+                                    <p className="text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-gray-300 uppercase tracking-widest leading-relaxed">
                                         {locationInfo.fullPath.split(' > ').map((part, i, arr) => (
                                             <React.Fragment key={part}>
                                                 <span className={i === arr.length - 1 ? 'text-gray-900 dark:text-white font-black' : ''}>{part}</span>
@@ -167,7 +167,7 @@ export default function ProductLocationDisplay({
                             <div className="p-8 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex flex-col items-center text-center">
                                 <Grid3X3 size={48} className="text-[var(--theme-status-warning-text)] mb-4" />
                                 <h5 className="text-[10px] font-black text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] uppercase tracking-[0.4em] mb-4">Manual Location Override</h5>
-                                <div className="px-6 py-3 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] border-[var(--theme-status-success-border)] rounded-2xl">
+                                <div className="px-6 py-3 bg-white/90 dark:bg-black/25 border border-[var(--theme-border)] border-[var(--theme-status-success-border)] rounded-2xl">
                                     <span className="text-2xl font-mono font-black text-gray-900 dark:text-white tracking-widest">{activeLocation || 'MISSING'}</span>
                                 </div>
                             </div>
@@ -181,32 +181,32 @@ export default function ProductLocationDisplay({
     // Medium size (default / popup style)
     return (
         <div className="flex items-center gap-2 group">
-            <div className={`p-4 rounded-[2rem] border border-[#E2DCCE] border-[var(--theme-status-success-border)] bg-white/85 dark:bg-[#18201B]/55 backdrop-blur-2xl shadow-xl hover:shadow-2xl group-hover:scale-[1.02] transition-all cursor-pointer`}>
+            <div className={`p-4 rounded-[2rem] border border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-white/85 dark:bg-[var(--theme-bg-panel)]/55 backdrop-blur-2xl shadow-xl hover:shadow-2xl group-hover:scale-[1.02] transition-all cursor-pointer`}>
                 <div className="flex items-center gap-5">
-                    <div className="flex flex-col items-center border-r border-[#E2DCCE] dark:border-[#A9CBA2]/10 pr-5">
-                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--theme-primary)] dark:text-[#A9CBA2] mb-2.5">Zone</span>
-                        <div className="w-12 h-12 rounded-2xl bg-white/90 dark:bg-black/35 flex items-center justify-center border border-[#E2DCCE] border-[var(--theme-status-success-border)] shadow-sm">
-                            <span className="text-2xl font-mono font-black text-[#1E3F27] dark:text-white">{locationInfo.location.zone || '?'}</span>
+                    <div className="flex flex-col items-center border-r border-[var(--theme-border)] dark:border-[var(--theme-border)]/10 pr-5">
+                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] mb-2.5">Zone</span>
+                        <div className="w-12 h-12 rounded-2xl bg-white/90 dark:bg-black/35 flex items-center justify-center border border-[var(--theme-border)] border-[var(--theme-status-success-border)] shadow-sm">
+                            <span className="text-2xl font-mono font-black text-[var(--theme-text-primary)] dark:text-white">{locationInfo.location.zone || '?'}</span>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2.5">
                         <div className="flex items-center gap-3">
                             <div className="flex flex-col">
                                 <span className="text-[9px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-1">Aisle</span>
-                                <div className="px-3.5 py-2 bg-white/90 dark:bg-black/35 rounded-xl border border-[#E2DCCE] border-[var(--theme-status-success-border)] shadow-sm">
-                                    <span className="font-mono text-sm font-black text-gray-800 dark:text-[#EAE5D9]">{locationInfo.location.aisle || '--'}</span>
+                                <div className="px-3.5 py-2 bg-white/90 dark:bg-black/35 rounded-xl border border-[var(--theme-border)] border-[var(--theme-status-success-border)] shadow-sm">
+                                    <span className="font-mono text-sm font-black text-gray-800 dark:text-[var(--theme-text-secondary)]">{locationInfo.location.aisle || '--'}</span>
                                 </div>
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-[9px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] mb-1">Bay</span>
-                                <div className="px-3.5 py-2 bg-white/90 dark:bg-black/35 rounded-xl border border-[#E2DCCE] border-[var(--theme-status-success-border)] shadow-sm">
-                                    <span className="font-mono text-sm font-black text-gray-800 dark:text-[#EAE5D9]">{locationInfo.location.bay || '--'}</span>
+                                <div className="px-3.5 py-2 bg-white/90 dark:bg-black/35 rounded-xl border border-[var(--theme-border)] border-[var(--theme-status-success-border)] shadow-sm">
+                                    <span className="font-mono text-sm font-black text-gray-800 dark:text-[var(--theme-text-secondary)]">{locationInfo.location.bay || '--'}</span>
                                 </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 opacity-50">
-                            <div className="text-[var(--theme-primary)] dark:text-[#A9CBA2]">{getSiteIcon()}</div>
-                            <p className="text-[9px] font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-[0.15em] truncate w-28">{locationInfo.siteName}</p>
+                            <div className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">{getSiteIcon()}</div>
+                            <p className="text-[9px] font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] uppercase tracking-[0.15em] truncate w-28">{locationInfo.siteName}</p>
                         </div>
                     </div>
                 </div>
@@ -234,29 +234,29 @@ export function CompactLocationDisplay({ product, sites }: { product: Product; s
     return (
         <div className="flex items-center gap-2">
             {locationInfo.location.isValid ? (
-                <div className="flex items-center bg-white/75 dark:bg-[#18201B]/40 backdrop-blur-xl border border-[#E2DCCE] border-[var(--theme-status-success-border)] rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(44,94,59,0.02)] hover:border-[var(--theme-border)]/40 dark:hover:border-[#A9CBA2]/30 transition-all select-none">
+                <div className="flex items-center bg-white/75 dark:bg-[var(--theme-bg-panel)]/40 backdrop-blur-xl border border-[var(--theme-border)] border-[var(--theme-status-success-border)] rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(44,94,59,0.02)] hover:border-[var(--theme-border)]/40 dark:hover:border-[var(--theme-border)]/30 transition-all select-none">
                     {/* Zone Mini-Badge */}
-                    <div className={`px-3 py-2 ${zoneColor.split(' ')[0]} bg-opacity-20 border-r border-[#E2DCCE] border-[var(--theme-status-success-border)] flex items-center gap-1.5`}>
+                    <div className={`px-3 py-2 ${zoneColor.split(' ')[0]} bg-opacity-20 border-r border-[var(--theme-border)] border-[var(--theme-status-success-border)] flex items-center gap-1.5`}>
                         <span className="text-[8px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest">Zone</span>
-                        <span className="text-xs font-black text-[#1E3F27] dark:text-white font-mono leading-none">{locationInfo.location.zone}</span>
+                        <span className="text-xs font-black text-[var(--theme-text-primary)] dark:text-white font-mono leading-none">{locationInfo.location.zone}</span>
                     </div>
                     {/* Aisle & Bay */}
                     <div className="px-3.5 py-2 flex items-center gap-4">
                         <div className="flex items-baseline gap-1">
                             <span className="text-[8px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest">Aisle</span>
-                            <span className="text-xs font-mono font-black text-gray-800 dark:text-[#EAE5D9] leading-none">{locationInfo.location.aisle}</span>
+                            <span className="text-xs font-mono font-black text-gray-800 dark:text-[var(--theme-text-secondary)] leading-none">{locationInfo.location.aisle}</span>
                         </div>
-                        <div className="w-px h-3.5 bg-[#E2DCCE] dark:bg-emerald-950/25" />
+                        <div className="w-px h-3.5 bg-[var(--theme-bg-app)] dark:bg-emerald-950/25" />
                         <div className="flex items-baseline gap-1">
                             <span className="text-[8px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest">Bay</span>
-                            <span className="text-xs font-mono font-black text-gray-800 dark:text-[#EAE5D9] leading-none">{locationInfo.location.bay}</span>
+                            <span className="text-xs font-mono font-black text-gray-800 dark:text-[var(--theme-text-secondary)] leading-none">{locationInfo.location.bay}</span>
                         </div>
                     </div>
                 </div>
             ) : (
                 <div className="flex flex-col gap-1">
-                    <div className="px-3 py-1.5 bg-[#FAF8F5]/80 dark:bg-black/25 border border-[#E2DCCE] dark:border-[#A9CBA2]/10 rounded-xl shadow-sm flex items-center gap-1.5">
-                        <MapPin size={10} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
+                    <div className="px-3 py-1.5 bg-[var(--theme-bg-app)]/80 dark:bg-black/25 border border-[var(--theme-border)] dark:border-[var(--theme-border)]/10 rounded-xl shadow-sm flex items-center gap-1.5">
+                        <MapPin size={10} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                         <span className="text-[10px] font-mono font-black text-gray-900 dark:text-white tracking-widest">
                             {product?.location || 'DIRECT'}
                         </span>

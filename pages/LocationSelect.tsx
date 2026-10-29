@@ -66,7 +66,7 @@ export default function LocationSelect() {
             <div className="max-w-6xl mx-auto space-y-8">
 
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[#E2DCCE] border-[var(--theme-status-success-border)] pb-6">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[var(--theme-border)] border-[var(--theme-status-success-border)] pb-6">
                     <div>
                         <Logo size={22} className="mb-4" />
                         <h1 className="text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight">

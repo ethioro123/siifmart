@@ -53,12 +53,12 @@ export default function ImageEditorModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[999] animate-in fade-in duration-200">
-      <div className="bg-[#FAF8F5] dark:bg-[#18201B] border border-[#E2DCCE] border-[var(--theme-status-success-border)] rounded-3xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] relative shadow-2xl">
+      <div className="bg-[var(--theme-bg-app)] dark:bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] border-[var(--theme-status-success-border)] rounded-3xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] relative shadow-2xl">
 
         {/* Header */}
-        <div className="p-5 border-b border-[#E2DCCE]/60 dark:border-white/[0.06] flex justify-between items-center bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-sm">
+        <div className="p-5 border-b border-[var(--theme-border)]/60 dark:border-white/[0.06] flex justify-between items-center bg-[var(--theme-bg-app)]/30 dark:bg-[var(--theme-bg-card)]/30 backdrop-blur-sm">
           <div>
-            <h3 className="text-lg font-black text-[#1E3F27] dark:text-white uppercase tracking-tight">Adjust Profile Photo</h3>
+            <h3 className="text-lg font-black text-[var(--theme-text-primary)] dark:text-white uppercase tracking-tight">Adjust Profile Photo</h3>
             <p className="text-[10px] text-stone-500 dark:text-zinc-500 font-bold uppercase tracking-widest mt-1">Resize, rotate, and adjust your photo</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-stone-100 dark:hover:bg-white/10 rounded-xl text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors" aria-label="Close">
@@ -67,14 +67,14 @@ export default function ImageEditorModal({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-[#E2DCCE]/60 dark:border-white/[0.06] bg-stone-50 dark:bg-black/10">
+        <div className="flex border-b border-[var(--theme-border)]/60 dark:border-white/[0.06] bg-stone-50 dark:bg-black/10">
           <button
             type="button"
             onClick={() => setActiveTab('crop')}
             className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'crop'
-                ? 'border-[var(--theme-border)] text-[var(--theme-primary)] dark:text-[#A9CBA2] dark:border-[#A9CBA2]'
-                : 'border-transparent text-stone-500 dark:text-zinc-500 hover:text-[#1E3F27] dark:hover:text-zinc-300'
+                ? 'border-[var(--theme-border)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] dark:border-[var(--theme-border)]'
+                : 'border-transparent text-stone-500 dark:text-zinc-500 hover:text-[var(--theme-text-primary)] dark:hover:text-zinc-300'
             }`}
           >
             <ZoomIn size={14} /> Resize & Crop
@@ -84,8 +84,8 @@ export default function ImageEditorModal({
             onClick={() => setActiveTab('adjust')}
             className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'adjust'
-                ? 'border-[var(--theme-border)] text-[var(--theme-primary)] dark:text-[#A9CBA2] dark:border-[#A9CBA2]'
-                : 'border-transparent text-stone-500 dark:text-zinc-500 hover:text-[#1E3F27] dark:hover:text-zinc-300'
+                ? 'border-[var(--theme-border)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] dark:border-[var(--theme-border)]'
+                : 'border-transparent text-stone-500 dark:text-zinc-500 hover:text-[var(--theme-text-primary)] dark:hover:text-zinc-300'
             }`}
           >
             <Sliders size={14} /> Adjustments
@@ -134,7 +134,7 @@ export default function ImageEditorModal({
                     title="Zoom Level"
                     placeholder="1.0"
                     onChange={(e) => setZoom(parseFloat(e.target.value))}
-                    className="w-full accent-[#2C5E3B] dark:accent-[#A9CBA2] h-1.5 bg-stone-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-[var(--theme-accent)] dark:accent-[#A9CBA2] h-1.5 bg-stone-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
 
@@ -153,7 +153,7 @@ export default function ImageEditorModal({
                     title="Rotation Degree"
                     placeholder="0"
                     onChange={(e) => setRotation(parseInt(e.target.value))}
-                    className="w-full accent-[#2C5E3B] dark:accent-[#A9CBA2] h-1.5 bg-stone-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-[var(--theme-accent)] dark:accent-[#A9CBA2] h-1.5 bg-stone-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
               </>
@@ -174,7 +174,7 @@ export default function ImageEditorModal({
                     title="Brightness Percentage"
                     placeholder="100"
                     onChange={(e) => setBrightness(parseInt(e.target.value))}
-                    className="w-full accent-[#2C5E3B] dark:accent-[#A9CBA2] h-1.5 bg-stone-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-[var(--theme-accent)] dark:accent-[#A9CBA2] h-1.5 bg-stone-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
 
@@ -193,7 +193,7 @@ export default function ImageEditorModal({
                     title="Contrast Percentage"
                     placeholder="100"
                     onChange={(e) => setContrast(parseInt(e.target.value))}
-                    className="w-full accent-[#2C5E3B] dark:accent-[#A9CBA2] h-1.5 bg-stone-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-[var(--theme-accent)] dark:accent-[#A9CBA2] h-1.5 bg-stone-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
               </>
@@ -202,7 +202,7 @@ export default function ImageEditorModal({
         </div>
 
         {/* Footer */}
-        <div className="p-5 border-t border-[#E2DCCE]/60 dark:border-white/[0.06] flex items-center justify-end gap-3 bg-stone-50 dark:bg-black/10">
+        <div className="p-5 border-t border-[var(--theme-border)]/60 dark:border-white/[0.06] flex items-center justify-end gap-3 bg-stone-50 dark:bg-black/10">
           <button
             type="button"
             onClick={onClose}
@@ -215,7 +215,7 @@ export default function ImageEditorModal({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="px-5 py-2.5 bg-[var(--theme-primary)] hover:bg-[#224429] dark:bg-[#EAE5D9] dark:hover:bg-white text-white dark:text-[#18201B] text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] dark:hover:bg-white text-white dark:text-[var(--theme-text-primary)] text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             {isSaving ? (
               <>
