@@ -423,3 +423,11 @@ describe('WMS Jobs Zero-Trust Architecture & Country Scoping', () => {
         });
     });
 });
+
+it('uses the exact server version for shipment updates and propagates stale-write rejection', async()=>{
+ const query=supabase.from('wms_jobs').update({});
+ vi.mocked(query.single).mockResolvedValueOnce({data:null,error:{code:'PGRST116',message:'No matching version'}} as never);
+ await expect(wmsJobsService.update('dispatch-1',{location:'Dock D1'},'2026-10-30T00:00:00.123456Z')).rejects.toMatchObject({code:'PGRST116'});
+ expect(query.eq).toHaveBeenCalledWith('id','dispatch-1');
+ expect(query.eq).toHaveBeenCalledWith('updated_at','2026-10-30T00:00:00.123456Z');
+});
