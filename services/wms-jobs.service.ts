@@ -96,17 +96,11 @@ export const wmsJobsService = {
      * Never call on module mount/login. Returns latest 25 completed/cancelled jobs by default.
      */
     async getHistory(siteId?: string, limit: number = 25, employeeId?: string, countryCode?: string, type?: WMSJob['type'], page=0) {
-        let q: any = supabase
+        let q = supabase
             .from('wms_jobs')
             .select(WMS_JOB_COLUMNS)
             .in('status', ['Completed', 'Cancelled'])
-            .order('updated_at', { ascending: false });
-
-        if (typeof q.range === 'function') {
-            q = q.range(page * 25, page * 25 + Math.min(25, Math.max(1, limit)) - 1);
-        } else if (typeof q.limit === 'function') {
-            q = q.limit(Math.min(25, Math.max(1, limit)));
-        }
+            .order('updated_at', { ascending: false }).order('id').range(page*25,page*25+Math.min(25,Math.max(1,limit))-1);
 
         if (type) q = q.eq('type', type);
         if (countryCode) q = q.eq('country_code', countryCode);

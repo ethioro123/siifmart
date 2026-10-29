@@ -1,3 +1,4 @@
+import {useLanguage} from '../../../contexts/LanguageContext';
 import React from 'react';
 import { SaleRecord, ReturnItem, ReturnCondition, ReturnReason, User, Site } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
@@ -34,6 +35,7 @@ export const usePOSReturnActions = ({
     activeSite
 }: UsePOSReturnActionsProps) => {
 
+    const {t}=useLanguage();const returnLock=React.useRef(false);
     const handleSearchForReturn = React.useCallback(() => {
         const query = returnSearchId.trim().toLowerCase();
         if (!query) {
@@ -64,7 +66,7 @@ export const usePOSReturnActions = ({
             setFoundSaleForReturn(null);
             addNotification('alert', 'Transaction not found.');
         }
-    }, [sales, returnSearchId, activeSite, setFoundSaleForReturn, setReturnConfig, addNotification]);
+    }, [sales, returnSearchId, activeSite, setFoundSaleForReturn, setReturnConfig, addNotification,t]);
 
     const updateReturnConfig = React.useCallback((itemId: string, field: string, value: any) => {
         setReturnConfig(prev => ({
@@ -74,9 +76,10 @@ export const usePOSReturnActions = ({
     }, [setReturnConfig]);
 
     const handleProcessReturn = React.useCallback(async (refundMethod: string = 'STORE_CREDIT', customerPhone: string = '', hqOtp?: string) => {
-        if (!foundSaleForReturn) return;
+        if (!foundSaleForReturn||returnLock.current) return;
+        returnLock.current=true;
+        try{
         setIsProcessing(true);
-        await new Promise(resolve => setTimeout(resolve, 1200));
         const returnItems: ReturnItem[] = [];
         let refundTotal = 0;
         foundSaleForReturn.items.forEach(item => {
@@ -97,26 +100,15 @@ export const usePOSReturnActions = ({
         });
         if (returnItems.length > 0) {
             await processReturn(foundSaleForReturn.id, returnItems, refundTotal, user?.name || 'System');
-            try {
-                const { systemLogsService } = await import('../../../services/supabase.service');
-                await systemLogsService.create({
-                    module: 'POS_RETURNS_AUDIT',
-                    action: 'ZERO_TRUST_REFUND_EXECUTED',
-                    user_name: user?.name || 'Cashier',
-                    details: `Zero-Trust Refund of ${CURRENCY_SYMBOL} ${refundTotal.toLocaleString()} processed via ${refundMethod}. Receipt: ${foundSaleForReturn.receiptNumber || foundSaleForReturn.id}. Customer Phone: ${customerPhone || 'N/A'}. HQ Authorization: ${hqOtp ? 'VERIFIED_OTP' : 'NOT_REQUIRED'}. (${returnItems.length} item types returned)`
-                });
-            } catch (logErr) {
-                // Non-blocking audit log
-            }
-            const tenderLabel = refundMethod === 'STORE_CREDIT' ? 'Store Credit' : refundMethod === 'TELEBIRR' ? 'Telebirr' : refundMethod === 'CBE_BIRR' ? 'CBE Birr' : (refundMethod as string) === 'M_PESA' ? 'M-Pesa' : 'Cash (HQ Approved)';
-            addNotification('success', `Refund Issued via ${tenderLabel}: ${CURRENCY_SYMBOL} ${refundTotal.toLocaleString()}`);
+            addNotification('success',t('warehouse.returnPendingSaved'));
         }
         setIsProcessing(false);
         setIsReturnModalOpen(false);
         setFoundSaleForReturn(null);
         setReturnSearchId('');
         setReturnConfig({});
-    }, [foundSaleForReturn, returnConfig, processReturn, user, setIsProcessing, setIsReturnModalOpen, setFoundSaleForReturn, setReturnSearchId, setReturnConfig, addNotification]);
+        }catch{addNotification('alert',t('warehouse.returnSubmitFailed'));}finally{returnLock.current=false;setIsProcessing(false);}
+    }, [foundSaleForReturn, returnConfig, processReturn, user, setIsProcessing, setIsReturnModalOpen, setFoundSaleForReturn, setReturnSearchId, setReturnConfig, addNotification,t]);
 
     return {
         handleSearchForReturn,

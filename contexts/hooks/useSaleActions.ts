@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback,useRef } from 'react';
 import type {
     CartItem, SaleRecord, Site, Product, Customer, SystemConfig,
     PaymentMethod, ReturnItem, SystemLog, StorePoints
@@ -263,10 +263,14 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
         setSales, setAllSales, setCustomers
     ]);
 
+    const returnRetry=useRef<{signature:string;id:string}|null>(null);
     const processReturn = useCallback(async (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => {
         try {
             if (!navigator.onLine) throw new Error('Return intake requires an internet connection.');
-            const result=await salesService.refund(saleId,items.map(ri=>({product_id:ri.productId,quantity:ri.quantity})),totalRefund);
+            const signature=JSON.stringify([saleId,items]);
+            if(returnRetry.current?.signature!==signature)returnRetry.current={signature,id:crypto.randomUUID()};
+            await salesService.refund(saleId,items.map(ri=>({product_id:ri.productId,quantity:ri.quantity,reason:ri.reason,condition:ri.condition==='Damaged'?'Damaged':'Open Box',action:'Repair'})),totalRefund,returnRetry.current.id);
+            returnRetry.current=null;
             return;
 
         } catch (error: any) {

@@ -157,6 +157,7 @@ describe('Step 7: Regional Transfers & Inventory Requests', () => {
             const mockQuery = {
                 select: vi.fn().mockReturnThis(),
                 limit: vi.fn().mockReturnThis(),
+                range:vi.fn().mockReturnThis(),
                 eq: vi.fn().mockReturnThis(),
                 order: vi.fn().mockResolvedValue({
                     data: [

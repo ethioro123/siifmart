@@ -112,7 +112,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     const [barcodeApprovals, setBarcodeApprovals] = useState<BarcodeApproval[]>([]);
     const [refreshCounter, setRefreshCounter] = useState(0);
     const queueWorker=fulfillmentQueueWorker(user,employees);
-    const {initialize,failInitial,loadMoreJobs,queueHasMore,queueLoading,queueError}=useFulfillmentQueuePaging(activeSiteId,effectiveCountry||settings?.country||'',queueWorker,setJobs,setJobAssignments,setTransfers);
+    const {initialize,failInitial,loadMoreJobs,queueHasMore,queueLoading,queueError}=useFulfillmentQueuePaging(activeSiteId,effectiveCountry||settings?.country||'',queueWorker,user?.id,setJobs,setJobAssignments,setTransfers);
     const siteFilteredEmployees = useMemo(() => {
         if (!activeSiteId) return [];
         return employees.filter((e: any) => {

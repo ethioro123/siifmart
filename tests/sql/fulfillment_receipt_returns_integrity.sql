@@ -34,9 +34,9 @@ BEGIN
  blocked:=false;BEGIN PERFORM public.submit_fulfillment_return(second_request,sale,site.id,'KE',lines);EXCEPTION WHEN insufficient_privilege THEN blocked:=true;END;
  IF NOT blocked THEN RAISE EXCEPTION 'Cross-border return accepted';END IF;
  result:=public.return_sale_lookup(sale::text,site.id,'ET');IF (result->'items'->0->>'quantity')::numeric<>8 THEN RAISE EXCEPTION 'Pending quantities not reserved';END IF;
+ blocked:=false;BEGIN PERFORM public.maintain_fulfillment_jobs(site.id,'ET','reconcile');EXCEPTION WHEN insufficient_privilege THEN blocked:=true;END;IF NOT blocked THEN RAISE EXCEPTION 'Floor worker repaired jobs';END IF;
  EXECUTE 'RESET ROLE';
  SELECT received_qty INTO quantity FROM public.po_items WHERE id=item;IF quantity<>3 THEN RAISE EXCEPTION 'Receipt count not committed exactly once';END IF;
- job_id:=(again->>'unused')::uuid;
  SELECT id INTO job_id FROM public.wms_jobs WHERE order_ref=po::text AND type='PUTAWAY';
  IF job_id IS NULL THEN RAISE EXCEPTION 'Missing putaway work';END IF;
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',supervisor,'role','authenticated')::text,true);EXECUTE 'SET LOCAL ROLE authenticated';

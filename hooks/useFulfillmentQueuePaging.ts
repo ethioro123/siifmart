@@ -4,8 +4,8 @@ import type {QueueCursor} from '../services/blind-receiving.service';
 import {wmsJobsService} from '../services/wms-jobs.service';
 import {jobAssignmentsService} from '../services/job-assignments.service';
 import type {User,Employee,TransferRecord,WMSJob,JobAssignment} from '../types';
-export function useFulfillmentQueuePaging(site:string|undefined,country:string,worker:string|undefined,setJobs:React.Dispatch<React.SetStateAction<WMSJob[]>>,setAssignments:React.Dispatch<React.SetStateAction<JobAssignment[]>>,setTransfers:React.Dispatch<React.SetStateAction<TransferRecord[]>>){
- const scope=JSON.stringify([site,country,worker]);const current=useRef(scope);current.current=scope;
+export function useFulfillmentQueuePaging(site:string|undefined,country:string,worker:string|undefined,actor:string|undefined,setJobs:React.Dispatch<React.SetStateAction<WMSJob[]>>,setAssignments:React.Dispatch<React.SetStateAction<JobAssignment[]>>,setTransfers:React.Dispatch<React.SetStateAction<TransferRecord[]>>){
+ const scope=JSON.stringify([site,country,worker,actor]);const current=useRef(scope);current.current=scope;
  const transferPage=useRef<TransferQueueCursor>({});
  const page=useRef<{active?:QueueCursor;blind?:QueueCursor}>({});const lock=useRef(false);const [state,setState]=useState({scope,hasMore:false,loading:false,error:false});
  const initialize=useCallback((hasMore:boolean,cursor:{active?:QueueCursor;blind?:QueueCursor}={},transfers:TransferQueueCursor={})=>{page.current=cursor;transferPage.current=transfers;setState({scope,hasMore,loading:false,error:false});},[scope]);

@@ -168,8 +168,8 @@ export const salesService = {
         };
     },
 
-    async refund(id: string, items: Array<{product_id:string;quantity:number}>, _refundAmount: number) {
-        return fulfillmentReturnsService.requestByProduct(id,items);
+    async refund(id: string, items: Array<{product_id:string;quantity:number;reason?:string;condition?:string;action?:string}>, _refundAmount: number,requestId?:string) {
+        return fulfillmentReturnsService.requestByProduct(id,items,requestId);
     },
 
     async update(id: string, updates: Partial<SaleRecord>) {

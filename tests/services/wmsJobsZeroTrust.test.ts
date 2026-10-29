@@ -3,6 +3,7 @@ import { wmsJobsService } from '../../services/wms-jobs.service';
 import { supabase } from '../../lib/supabase';
 
 // Mock Supabase client
+vi.mock('../../services/blind-receiving.service',()=>({blindReceivingService:{jobs:vi.fn().mockResolvedValue([])}}));
 vi.mock('../../lib/supabase', () => {
     const mockSelect = vi.fn();
     const mockInsert = vi.fn();
@@ -15,6 +16,7 @@ vi.mock('../../lib/supabase', () => {
     const mockContains = vi.fn();
     const mockOrder = vi.fn();
     const mockLimit = vi.fn();
+    const mockRange=vi.fn();
     const mockMaybeSingle = vi.fn();
     const mockSingle = vi.fn();
     const mockRpc = vi.fn();
@@ -31,6 +33,8 @@ vi.mock('../../lib/supabase', () => {
         contains: mockContains,
         order: mockOrder,
         limit: mockLimit,
+        range:mockRange,
+        then: (resolve:(value:unknown)=>unknown)=>Promise.resolve({data:[],error:null}).then(resolve),
         maybeSingle: mockMaybeSingle,
         single: mockSingle
     };
@@ -47,6 +51,7 @@ vi.mock('../../lib/supabase', () => {
     mockContains.mockReturnValue(queryBuilder);
     mockOrder.mockReturnValue(queryBuilder);
     mockLimit.mockReturnValue(queryBuilder);
+    mockRange.mockReturnValue(queryBuilder);
 
     return {
         supabase: {
@@ -159,15 +164,7 @@ describe('WMS Jobs Zero-Trust Architecture & Country Scoping', () => {
             };
 
             // Let active query return data
-            mockQueryBuilder.select.mockReturnValueOnce({
-                not: vi.fn().mockReturnValue({
-                    order: vi.fn().mockReturnValue({
-                        eq: vi.fn().mockReturnValue({
-                            or: vi.fn().mockResolvedValue({ data: [mockDbJob], error: null })
-                        })
-                    })
-                })
-            });
+            mockQueryBuilder.then=(resolve:(value:unknown)=>unknown)=>Promise.resolve({data:[mockDbJob],error:null}).then(resolve);
 
             // Test wmsJobsService.getAll with countryCode parameter
             const result = await wmsJobsService.getAll('site-ke-1', 50, undefined, 'KE');
@@ -369,15 +366,7 @@ describe('WMS Jobs Zero-Trust Architecture & Country Scoping', () => {
             };
 
             const { mockQueryBuilder } = await import('../../lib/supabase') as any;
-            mockQueryBuilder.select.mockReturnValueOnce({
-                not: vi.fn().mockReturnValue({
-                    order: vi.fn().mockReturnValue({
-                        eq: vi.fn().mockReturnValue({
-                            or: vi.fn().mockResolvedValue({ data: [activeJob], error: null })
-                        })
-                    })
-                })
-            });
+            mockQueryBuilder.then=(resolve:(value:unknown)=>unknown)=>Promise.resolve({data:[activeJob],error:null}).then(resolve);
 
             // Calling getAll with default limit=0 (zero history on mount)
             const result = await wmsJobsService.getAll('site-ke-1', 0, undefined, 'KE');
@@ -401,17 +390,7 @@ describe('WMS Jobs Zero-Trust Architecture & Country Scoping', () => {
             };
 
             const { mockQueryBuilder } = await import('../../lib/supabase') as any;
-            mockQueryBuilder.select.mockReturnValueOnce({
-                in: vi.fn().mockReturnValue({
-                    order: vi.fn().mockReturnValue({
-                        limit: vi.fn().mockReturnValue({
-                            eq: vi.fn().mockReturnValue({
-                                or: vi.fn().mockResolvedValue({ data: [historicalJob], error: null })
-                            })
-                        })
-                    })
-                })
-            });
+            mockQueryBuilder.then=(resolve:(value:unknown)=>unknown)=>Promise.resolve({data:[historicalJob],error:null}).then(resolve);
 
             const history = await wmsJobsService.getHistory('site-ke-1', 25, undefined, 'KE');
 
