@@ -99,18 +99,18 @@ export const StockListModal: React.FC = () => {
     const hasActiveFilters = activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' || Boolean(stockSearch);
 
     return (
-        <Modal isOpen={isStockListOpen} onClose={() => setIsStockListOpen(false)} title={`${t('posCommand.stockLookupHeader')} — ${activeSite?.name || t('posCommand.currentLocation')}`} size="xl">
-            <div className="space-y-3">
+        <Modal isOpen={isStockListOpen} onClose={() => setIsStockListOpen(false)} title={`${t('posCommand.stockLookupHeader')} — ${activeSite?.name || t('posCommand.currentLocation')}`} size="3xl">
+            <div className="space-y-4">
                 {/* Primary Search & Control Toolbar */}
-                <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex-1 min-w-[220px] min-h-[44px] flex items-center gap-2 bg-[var(--theme-input-bg)] px-3 rounded-xl border border-[var(--theme-border)] focus-within:border-[var(--theme-border-focus)] transition-colors">
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex-1 min-w-[260px] min-h-11 flex items-center gap-2.5 bg-[var(--theme-input-bg)] px-4 rounded-xl border border-[var(--theme-border)] focus-within:border-[var(--theme-border-focus)] transition-colors">
                         <Search className="w-4 h-4 text-[var(--theme-text-muted)] shrink-0" />
                         <input
                             type="text"
                             value={stockSearch}
                             onChange={(e) => setStockSearch(e.target.value)}
                             placeholder={t('posCommand.searchStockPlaceholder')}
-                            className="flex-1 bg-transparent border-none outline-none text-[var(--theme-text-primary)] text-xs placeholder:text-[var(--theme-text-muted)]"
+                            className="flex-1 bg-transparent border-none outline-none text-[var(--theme-text-primary)] text-sm placeholder:text-[var(--theme-text-muted)]"
                             autoFocus
                         />
                         {stockSearch && (
@@ -119,9 +119,9 @@ export const StockListModal: React.FC = () => {
                                 onClick={() => setStockSearch('')}
                                 title={t('posCommand.resetFilters')}
                                 aria-label={t('posCommand.resetFilters')}
-                                className="w-6 h-6 rounded-full hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                                className="w-7 h-7 rounded-full hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
                             >
-                                <X size={13} />
+                                <X size={14} />
                             </button>
                         )}
                     </div>
@@ -130,7 +130,7 @@ export const StockListModal: React.FC = () => {
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="min-h-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl px-3 text-xs font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer focus:border-[var(--theme-border-focus)] transition-colors"
+                            className="min-h-11 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl px-3.5 text-sm font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer focus:border-[var(--theme-border-focus)] transition-colors"
                             title={t('posCommand.allCategoriesCount', { count: availableCategories.length })}
                             aria-label={t('posCommand.allCategoriesCount', { count: availableCategories.length })}
                         >
@@ -144,16 +144,16 @@ export const StockListModal: React.FC = () => {
                         onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }}
                         title={t('posCommand.printLabels')}
                         aria-label={t('posCommand.printLabels')}
-                        className="min-h-[44px] px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="min-h-11 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-sm font-medium rounded-xl transition-colors flex items-center gap-2 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
-                        <Printer size={14} className="text-[var(--theme-text-secondary)]" />
+                        <Printer size={15} className="text-[var(--theme-text-secondary)]" />
                         <span>{t('posCommand.printLabels')}</span>
                     </button>
                 </div>
 
                 {/* Streamlined Filter Strip & Inline Unseen Actions */}
-                <div className="flex items-center justify-between gap-2 border-b border-[var(--theme-border)] pb-2.5">
-                    <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+                <div className="flex items-center justify-between gap-3 border-b border-[var(--theme-border)] pb-3">
+                    <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar">
                         {filterTabs.map(tab => {
                             const isActive = activeFilter === tab.id;
                             const isZero = tab.count === 0 && !isActive;
@@ -165,15 +165,15 @@ export const StockListModal: React.FC = () => {
                                     title={tab.label}
                                     aria-label={`${tab.label} (${tab.count})`}
                                     aria-pressed={isActive}
-                                    className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                                    className={`min-h-10 px-3.5 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-2 shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                         isActive
                                             ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]'
                                             : `bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] ${isZero ? 'opacity-50' : ''}`
                                     }`}
                                 >
-                                    {tab.dotColor && !isActive && <span className={`w-1.5 h-1.5 rounded-full ${tab.dotColor} shrink-0`} />}
+                                    {tab.dotColor && !isActive && <span className={`w-2 h-2 rounded-full ${tab.dotColor} shrink-0`} />}
                                     <span>{tab.label}</span>
-                                    <span className={`text-[11px] font-mono tabular-nums ${isActive ? 'opacity-85' : 'text-[var(--theme-text-muted)]'}`}>
+                                    <span className={`text-xs font-mono tabular-nums ${isActive ? 'opacity-85' : 'text-[var(--theme-text-muted)]'}`}>
                                         {tab.count}
                                     </span>
                                 </button>
@@ -181,16 +181,16 @@ export const StockListModal: React.FC = () => {
                         })}
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                         {hasActiveFilters && (
                             <button
                                 type="button"
                                 onClick={() => { setActiveFilter('ALL'); setSelectedCategory('ALL_CATEGORIES'); setStockSearch(''); }}
                                 title={t('posCommand.resetFilters')}
                                 aria-label={t('posCommand.resetFilters')}
-                                className="h-8 px-2.5 rounded-lg text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                className="min-h-10 px-3 rounded-xl text-xs sm:text-sm font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
-                                <X size={13} />
+                                <X size={14} />
                                 <span>{t('posCommand.resetFilters')}</span>
                             </button>
                         )}
@@ -198,14 +198,14 @@ export const StockListModal: React.FC = () => {
                 </div>
 
                 {/* Product Table */}
-                <div className="overflow-x-auto rounded-xl border border-[var(--theme-border)] isolate">
+                <div className="overflow-x-auto rounded-2xl border border-[var(--theme-border)] isolate">
                     <table className="w-full text-sm">
                         <thead className="text-[var(--theme-thead-text)] bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                             <tr>
-                                <th className="text-left py-2 px-3 font-medium text-[10px] uppercase tracking-wider">{t('inventory.product')}</th>
-                                <th className="text-right py-2 px-3 font-medium text-[10px] uppercase tracking-wider">{t('inventory.price')}</th>
-                                <th className="text-right py-2 px-3 font-medium text-[10px] uppercase tracking-wider">{t('inventory.stock')}</th>
-                                <th className="text-right py-2 px-3 font-medium text-[10px] uppercase tracking-wider">{t('common.actions')}</th>
+                                <th className="text-left py-3 px-4 font-semibold text-xs uppercase tracking-wider">{t('inventory.product')}</th>
+                                <th className="text-right py-3 px-4 font-semibold text-xs uppercase tracking-wider">{t('inventory.price')}</th>
+                                <th className="text-right py-3 px-4 font-semibold text-xs uppercase tracking-wider">{t('inventory.stock')}</th>
+                                <th className="text-right py-3 px-4 font-semibold text-xs uppercase tracking-wider">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--theme-border)]">
@@ -216,38 +216,38 @@ export const StockListModal: React.FC = () => {
                                 const isPendingApproval = ((product.approvalStatus || (product as any).approval_status) || 'approved').toLowerCase() === 'pending';
                                 return (
                                     <tr key={product.id} onClick={() => setSelectedProduct(product)} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer">
-                                        <td className="py-2 px-3 max-w-[22rem]">
+                                        <td className="py-3.5 px-4 max-w-[32rem]">
                                             <button type="button" onClick={() => setSelectedProduct(product)} className="text-left rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] w-full" aria-label={`${t('posCommand.productDetails')}: ${product.name}`}>
-                                                <span className="flex items-center gap-1.5 font-medium text-[var(--theme-text-primary)]">
-                                                    <span className="break-words text-xs font-semibold leading-snug line-clamp-2">{formatProductDisplayName(product) || product.name}</span>
+                                                <span className="flex items-center gap-2 font-medium text-[var(--theme-text-primary)]">
+                                                    <span className="break-words text-sm font-semibold leading-snug line-clamp-2">{formatProductDisplayName(product) || product.name}</span>
                                                     {isPendingApproval && (
-                                                        <span className="px-1.5 py-0.5 rounded bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-[10px] font-medium shrink-0">
+                                                        <span className="px-2 py-0.5 rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-[11px] font-medium shrink-0">
                                                             {t('posCommand.pendingApproval')}
                                                         </span>
                                                     )}
                                                 </span>
-                                                <span className="block mt-0.5 text-[11px] font-mono text-[var(--theme-text-secondary)]">
+                                                <span className="block mt-1 text-xs font-mono text-[var(--theme-text-secondary)]">
                                                     {product.sku}{product.category ? ` · ${product.category}` : ''}
                                                 </span>
                                             </button>
                                         </td>
-                                        <td className="py-2 px-3 text-right whitespace-nowrap font-mono tabular-nums text-xs font-medium text-[var(--theme-text-primary)]">
+                                        <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono tabular-nums text-sm font-semibold text-[var(--theme-text-primary)]">
                                             {CURRENCY_SYMBOL} {formatPriceValue(product.price)}
                                         </td>
-                                        <td className="py-2 px-3 text-right whitespace-nowrap">
-                                            <span className="font-mono tabular-nums text-xs text-[var(--theme-text-primary)]">{formatStockDisplay(stock, product)}</span>
+                                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                                            <span className="font-mono tabular-nums text-sm font-semibold text-[var(--theme-text-primary)]">{formatStockDisplay(stock, product)}</span>
                                             {stockLabel && (
-                                                <span className={`block mt-0.5 text-[10px] font-medium ${stock <= 0 ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-warning-text)]'}`}>
+                                                <span className={`block mt-0.5 text-xs font-medium ${stock <= 0 ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-warning-text)]'}`}>
                                                     {stockLabel}
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="py-2 px-3" onClick={event => event.stopPropagation()}>
-                                            <div className="flex justify-end items-center gap-1.5">
+                                        <td className="py-3.5 px-4" onClick={event => event.stopPropagation()}>
+                                            <div className="flex justify-end items-center gap-2">
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedProduct(product)}
-                                                    className="h-8 px-2.5 rounded-lg border border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-xs font-medium text-[var(--theme-text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] cursor-pointer"
+                                                    className="min-h-9 px-3.5 rounded-xl border border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-xs font-semibold text-[var(--theme-text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] cursor-pointer"
                                                 >
                                                     {t('posCommand.productDetails')}
                                                 </button>
@@ -256,9 +256,9 @@ export const StockListModal: React.FC = () => {
                                                     onClick={() => { setLabelsToPrint([{ product, quantity: 1 }]); setIsPrintHubOpen(true); }}
                                                     aria-label={`${t('posCommand.printLabels')}: ${product.name}`}
                                                     title={t('posCommand.printLabels')}
-                                                    className="h-8 w-8 flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] cursor-pointer"
+                                                    className="min-h-9 min-w-9 flex items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] cursor-pointer"
                                                 >
-                                                    <Printer size={13} />
+                                                    <Printer size={15} />
                                                 </button>
                                             </div>
                                         </td>
@@ -267,7 +267,7 @@ export const StockListModal: React.FC = () => {
                             })}
                             {filteredProducts.length === 0 && (
                                 <tr>
-                                    <td colSpan={4} className="p-8 text-center text-[var(--theme-text-secondary)] text-xs font-medium">
+                                    <td colSpan={4} className="p-10 text-center text-[var(--theme-text-secondary)] text-sm font-medium">
                                         {hasActiveFilters ? t('posCommand.noProductsMatchingFilters') : t('posCommand.noProductsLocation')}
                                     </td>
                                 </tr>
@@ -277,20 +277,20 @@ export const StockListModal: React.FC = () => {
                 </div>
 
                 {filteredProducts.length > 0 && (
-                    <div className="flex items-center justify-between pt-2">
-                        <div className="text-xs text-[var(--theme-text-secondary)] flex items-center gap-2 tabular-nums">
+                    <div className="flex items-center justify-between pt-3">
+                        <div className="text-sm text-[var(--theme-text-secondary)] flex items-center gap-2 tabular-nums">
                             <span>{t('common.page')} {currentPage} / {totalPages}</span>
                             <span className="opacity-40">·</span>
                             <span>{filteredProducts.length} {t('inventory.products')}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                             <button
                                 type="button"
                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                 disabled={currentPage <= 1}
                                 title={t('common.previous')}
                                 aria-label={t('common.previous')}
-                                className="min-h-[36px] px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-medium rounded-lg border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                className="min-h-10 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs sm:text-sm font-semibold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                             >
                                 {t('common.previous')}
                             </button>
@@ -300,7 +300,7 @@ export const StockListModal: React.FC = () => {
                                 disabled={currentPage >= totalPages}
                                 title={t('common.next')}
                                 aria-label={t('common.next')}
-                                className="min-h-[36px] px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-medium rounded-lg border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                className="min-h-10 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs sm:text-sm font-semibold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                             >
                                 {t('common.next')}
                             </button>
