@@ -71,6 +71,10 @@ The supported-browser/device matrix should be recorded in the release evidence f
 
 Severity depends on actual user impact. A faint decorative line is not equivalent to unreadable payment text. A color preference is not equivalent to a worker losing an entered receipt after a failed save. Record the observed problem and its consequence rather than attaching severity to a style opinion.
 
+## Application-wide coverage
+
+For a system-wide design request, use the inventory and statuses in [chapter 19](19-complete-ui-ux-coverage.md). Include every route, nested component, overlay, system path and applicable interaction state. Record implemented but unverified work separately from verified scope. Compatibility overrides, a successful build and token usage are not proof of complete adoption. An unavailable device or missing rendered check stays an explicit gap.
+
 ## Definition of done
 
 A design change is done when the affected task is understandable, its required states are implemented, its data contract remains correct, relevant checks pass and material limitations are reported. Visual acceptance requires inspecting the rendered result in the relevant themes and widths. Automated screenshots can support that inspection but should not be blindly approved because a baseline was regenerated.

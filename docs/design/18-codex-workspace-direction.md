@@ -8,6 +8,10 @@ The user explicitly requested a Codex app design direction. This chapter defines
 
 For visual composition this chapter supersedes earlier Apple-led material guidance and mandatory floating-panel treatment. Chapters 01–17 continue to govern behavior, accessibility, operational safety and details not revised here. The protected requirement for explicit permission before editing rules remains unchanged.
 
+## Complete product coverage
+
+[Chapter 19](19-complete-ui-ux-coverage.md) is mandatory alongside this direction. Apply the design to every UI surface and UX state, including nested controls, system paths and operational interactions. A shared palette update does not complete the rollout.
+
 ## The visual target
 
 The application should feel like one considered workspace. Give the work generous room, keep navigation quieter than content, and reveal detail on demand. Use neutral tonal layers, readable text, restrained icons and a small number of deliberate actions. Elegance comes from alignment and proportion, rather than decoration.

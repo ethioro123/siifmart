@@ -1,6 +1,6 @@
 # SIIFMART Design Standard
 
-The authoritative handbook is [docs/APPLE_DESIGN_GUIDE.md](docs/APPLE_DESIGN_GUIDE.md), edition **30 October 2026, Revision C**.
+The authoritative handbook is [docs/APPLE_DESIGN_GUIDE.md](docs/APPLE_DESIGN_GUIDE.md), edition **30 October 2026, Revision D**.
 
 Read it before UI work and follow its linked chapters for the affected workflow. This file is a stable repository-root entry point, not a second design specification.
 
@@ -11,3 +11,5 @@ The filename is retained for compatibility. The current design direction is SIIF
 The current visual authority is [Codex-inspired workspace direction](docs/design/18-codex-workspace-direction.md): quiet neutral surfaces, compact navigation, restrained typography and softly rounded panels where useful. Read it before applying older visual defaults.
 
 Exact main background and all theme colors are specified in [Revision C palette](docs/design/15-states-and-theme-pairs.md). The palette covers the entire shell and component states; adoption remains a separate runtime change.
+
+[Complete UI and UX coverage](docs/design/19-complete-ui-ux-coverage.md) is mandatory across every screen, component, workflow and state. Theme compatibility adapters are migration aids, not proof of complete adoption.
