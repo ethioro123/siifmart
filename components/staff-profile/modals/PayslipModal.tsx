@@ -88,7 +88,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                                 <th className="p-3 text-right">Amount ({currencySymbol})</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#E2DCCE]/60 divide-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] font-medium">
+                        <tbody className="divide-y divide-[color-mix(in_srgb,var(--theme-border)_60%,transparent)] font-medium">
                             <tr>
                                 <td className="p-3 font-semibold text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">Base Monthly Salary</td>
                                 <td className="p-3 text-right font-mono font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-primary)]">

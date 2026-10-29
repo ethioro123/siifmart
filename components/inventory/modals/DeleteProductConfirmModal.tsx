@@ -39,7 +39,7 @@ export const DeleteProductConfirmModal: React.FC<DeleteProductConfirmModalProps>
                     type="text"
                     value={deleteInput}
                     onChange={(e) => setDeleteInput(e.target.value)}
-                    className="w-full h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[14px] text-[var(--theme-text-primary)] font-mono tracking-wider placeholder:text-[var(--theme-text-secondary)]/50 focus:border-[var(--theme-status-danger-border)] focus:ring-2 focus:ring-[#FF3B30]/20 outline-none transition-all shadow-xs"
+                    className="w-full h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[14px] text-[var(--theme-text-primary)] font-mono tracking-wider placeholder:text-[var(--theme-text-secondary)]/50 focus:border-[var(--theme-status-danger-border)] focus:ring-2 focus:ring-[var(--theme-status-danger)]/20 outline-none transition-all shadow-xs"
                     placeholder="Type DELETE"
                     autoFocus
                 />

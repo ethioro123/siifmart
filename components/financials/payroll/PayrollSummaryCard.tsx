@@ -134,7 +134,7 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
             <button
                 type="button"
                 onClick={onProcessPayroll}
-                className="w-full py-2.5 bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm"
+                className="w-full py-2.5 bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm"
             >
                 <ShieldCheck size={16} /> Zero-Trust Payroll Run (HR + Finance)
             </button>

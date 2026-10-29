@@ -208,13 +208,13 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                             Key Metrics
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
-                            <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'}`}>
+                            <div className={`p-3 rounded-xl border ${isDark ? 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'}`}>
                                 <div className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">Performance Score</div>
                                 <div className="text-lg font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] mt-0.5">
                                     {employee.performanceScore ? `${employee.performanceScore}%` : 'N/A'}
                                 </div>
                             </div>
-                            <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'}`}>
+                            <div className={`p-3 rounded-xl border ${isDark ? 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'}`}>
                                 <div className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">Attendance Rate</div>
                                 <div className="text-lg font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] mt-0.5">
                                     {employee.attendanceRate ? `${employee.attendanceRate}%` : '98%'}

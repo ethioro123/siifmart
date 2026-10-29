@@ -93,7 +93,7 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                     {/* Core Matrix Concepts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
                         <div className={`p-4 rounded-xl border ${
-                            isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
+                            isDark ? 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
                         }`}>
                             <div className="flex items-center gap-2 font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] mb-1.5">
                                 <span className="w-2.5 h-2.5 rounded-full bg-[var(--theme-primary)]" />
@@ -110,7 +110,7 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                         </div>
 
                         <div className={`p-4 rounded-xl border ${
-                            isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
+                            isDark ? 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
                         }`}>
                             <div className="flex items-center gap-2 font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mb-1.5">
                                 <span className="w-2.5 h-2.5 rounded-full border-2 border-dashed border-[var(--theme-status-warning-border)]" />
@@ -140,7 +140,7 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                                     <div
                                         key={lvl}
                                         className={`p-3 rounded-xl border flex flex-col justify-between ${
-                                            isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
+                                            isDark ? 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
                                         }`}
                                     >
                                         <div>

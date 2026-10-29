@@ -181,7 +181,7 @@ export default function RecruitmentPipelineTab() {
                                 onClick={() => setSelectedReqId(isSelected ? null : req.id)}
                                 className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
                                     isSelected
-                                        ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-focus)] dark:border-[var(--theme-border-focus)] ring-1 ring-[#0071E3]/20 shadow-[0_2px_12px_rgba(0,113,227,0.12)]'
+                                        ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-focus)] dark:border-[var(--theme-border-focus)] ring-1 ring-[var(--theme-accent)]/20 shadow-[0_2px_12px_rgba(0,113,227,0.12)]'
                                         : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-[var(--shadow-sm)] hover:border-[var(--theme-border-strong)]'
                                 }`}
                             >

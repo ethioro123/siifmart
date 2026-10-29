@@ -61,7 +61,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                         />
                         <div
                             title={isOnline ? 'Online now' : 'Offline'}
-                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--theme-border)] dark:border-[#1E2822] transition-colors duration-500 ${
+                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--theme-border)] dark:border-[var(--theme-border)] transition-colors duration-500 ${
                                 isOnline
                                     ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_5px_rgba(52,211,153,0.7)] animate-pulse'
                                     : 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)]'

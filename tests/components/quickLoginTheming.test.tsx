@@ -65,7 +65,7 @@ describe('quick login theming and filtering', () => {
 
       expect(store.badge).toMatch(/emerald|theme-status-success/);
       expect(warehouse.badge).toMatch(/amber|theme-status-warning/);
-      expect(dc.badge).toContain('cyan');
+      expect(dc.badge).toMatch(/cyan|theme-status-info/);
 
       // Site themes have unique border and icon colors
       expect(store.iconColor).not.toEqual(warehouse.iconColor);

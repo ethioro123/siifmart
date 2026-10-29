@@ -134,7 +134,7 @@ export default function ImageEditorModal({
                     title="Zoom Level"
                     placeholder="1.0"
                     onChange={(e) => setZoom(parseFloat(e.target.value))}
-                    className="w-full accent-[var(--theme-accent)] dark:accent-[#A9CBA2] h-1.5 bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-[var(--theme-accent)] h-1.5 bg-[var(--theme-bg-subtle)] rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
 
@@ -153,7 +153,7 @@ export default function ImageEditorModal({
                     title="Rotation Degree"
                     placeholder="0"
                     onChange={(e) => setRotation(parseInt(e.target.value))}
-                    className="w-full accent-[var(--theme-accent)] dark:accent-[#A9CBA2] h-1.5 bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-[var(--theme-accent)] h-1.5 bg-[var(--theme-bg-subtle)] rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
               </>
@@ -174,7 +174,7 @@ export default function ImageEditorModal({
                     title="Brightness Percentage"
                     placeholder="100"
                     onChange={(e) => setBrightness(parseInt(e.target.value))}
-                    className="w-full accent-[var(--theme-accent)] dark:accent-[#A9CBA2] h-1.5 bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-[var(--theme-accent)] h-1.5 bg-[var(--theme-bg-subtle)] rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
 
@@ -193,7 +193,7 @@ export default function ImageEditorModal({
                     title="Contrast Percentage"
                     placeholder="100"
                     onChange={(e) => setContrast(parseInt(e.target.value))}
-                    className="w-full accent-[var(--theme-accent)] dark:accent-[#A9CBA2] h-1.5 bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] rounded-lg appearance-none cursor-pointer"
+                    className="w-full accent-[var(--theme-accent)] h-1.5 bg-[var(--theme-bg-subtle)] rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
               </>

@@ -60,7 +60,7 @@ export const ShiftPlannerTable: React.FC<ShiftPlannerTableProps> = ({
                     <thead>
                         <tr className="bg-[var(--theme-bg-app)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] border-b border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] text-xs font-bold text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">
                             {/* Employee column */}
-                            <th className="p-3.5 w-64 sticky left-0 z-20 bg-[var(--theme-bg-app)] dark:bg-[#121915] border-r border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shadow-xs">
+                            <th className="p-3.5 w-64 sticky left-0 z-20 bg-[var(--theme-bg-app)] border-r border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shadow-xs">
                                 Staff Member
                             </th>
 
@@ -94,7 +94,7 @@ export const ShiftPlannerTable: React.FC<ShiftPlannerTableProps> = ({
                         </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-[#E2DCCE]/60 divide-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] text-xs">
+                    <tbody className="divide-y divide-[color-mix(in_srgb,var(--theme-border)_60%,transparent)] text-xs">
                         {employees.map(emp => {
                             const totalHours = employeeWeeklyHours.get(emp.id) || 0;
                             const isOvertime = totalHours > 40;
@@ -105,7 +105,7 @@ export const ShiftPlannerTable: React.FC<ShiftPlannerTableProps> = ({
                                     className="hover:bg-[color-mix(in_srgb,var(--theme-bg-subtle)_80%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_80%,transparent)] transition-colors group"
                                 >
                                     {/* Sticky Employee Info */}
-                                    <td className="p-3 sticky left-0 z-10 bg-[var(--theme-bg-card)] dark:bg-[#121915] group-hover:bg-[color-mix(in_srgb,var(--theme-bg-subtle)_90%,transparent)] dark:group-hover:bg-[#18221c] transition-colors border-r border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shadow-xs">
+                                    <td className="p-3 sticky left-0 z-10 bg-[var(--theme-bg-card)] group-hover:bg-[color-mix(in_srgb,var(--theme-bg-subtle)_90%,transparent)] transition-colors border-r border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shadow-xs">
                                         <div className="flex items-center gap-3">
                                             <img
                                                 src={emp.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.name)}`}

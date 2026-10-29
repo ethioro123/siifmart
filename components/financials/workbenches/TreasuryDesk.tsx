@@ -149,7 +149,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                     sweepBatchStatus === 'authorized'
                                         ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] opacity-70 cursor-not-allowed'
-                                        : 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] cursor-pointer'
+                                        : 'bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] cursor-pointer'
                                 }`}
                             >
                                 <Check size={13} />
@@ -162,7 +162,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                                 disabled={sweepBatchStatus !== 'draft'}
                                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                     sweepBatchStatus === 'draft'
-                                        ? 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] cursor-pointer'
+                                        ? 'bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] cursor-pointer'
                                         : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] opacity-80 cursor-not-allowed'
                                 }`}
                             >

@@ -302,7 +302,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                     <button
                         type="button"
                         onClick={collapsedKeys.size > 0 ? handleExpandAll : handleCollapseAll}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-[var(--theme-border-subtle)] border-[var(--theme-border)] bg-[var(--theme-bg-app)] dark:bg-[#1E2822] hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] text-xs font-semibold transition-colors cursor-pointer"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-[var(--theme-border-subtle)] bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] text-xs font-semibold transition-colors cursor-pointer"
                         title={collapsedKeys.size > 0 ? 'Expand all swimlanes' : 'Collapse all swimlanes'}
                     >
                         {collapsedKeys.size > 0 ? <ChevronsUpDown size={13} /> : <ChevronsDownUp size={13} />}

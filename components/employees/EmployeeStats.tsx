@@ -19,7 +19,7 @@ const StatCard = ({ title, value, icon: Icon, iconBg, iconColor, onClick, active
          onClick ? 'cursor-pointer active:scale-[0.98]' : ''
       } ${
          active
-            ? 'border-[var(--theme-border-focus)] dark:border-[var(--theme-border-focus)] shadow-[0_2px_12px_rgba(0,113,227,0.15)] ring-1 ring-[#0071E3]/20'
+            ? 'border-[var(--theme-border-focus)] dark:border-[var(--theme-border-focus)] shadow-[0_2px_12px_rgba(0,113,227,0.15)] ring-1 ring-[var(--theme-accent)]/20'
             : 'border-[var(--theme-border)] shadow-[var(--shadow-sm)] hover:border-[var(--theme-border-strong)]'
       }`}
    >

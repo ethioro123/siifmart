@@ -243,7 +243,7 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
                     <h4 className="text-base font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">
                         No matching employees in hierarchy
                     </h4>
-                    <p className="text-xs text-[#4D6E56] text-[var(--theme-text-muted)] mt-1 max-w-sm">
+                    <p className="text-xs text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] mt-1 max-w-sm">
                         Adjust your search query or site/department filters to view the tree.
                     </p>
                     {onResetFilters && (

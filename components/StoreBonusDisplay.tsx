@@ -362,7 +362,7 @@ export default function StoreBonusDisplay({
 
                 <div className="h-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full overflow-hidden relative">
                     <div
-                        className="h-full bg-gradient-to-r from-[#0071E3] to-[#2997FF] rounded-full transition-all duration-700"
+                        className="h-full bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-accent-hover)] rounded-full transition-all duration-700"
                         style={{ width: `${tierProgress}%` }}
                     />
                 </div>

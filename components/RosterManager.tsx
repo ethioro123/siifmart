@@ -315,7 +315,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                 }}
                                 required
                                 title="Select Staff Member"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:outline-none transition-all"
                             >
                                 <option value="">Select Appointed Staff Member...</option>
                                 {siteEmployees.map(emp => (
@@ -334,7 +334,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                     onChange={(e) => setFormState({ ...formState, startTime: e.target.value })}
                                     required
                                     title="Shift Start Time"
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:outline-none transition-all"
                                 />
                             </div>
                             <div>
@@ -345,7 +345,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                     onChange={(e) => setFormState({ ...formState, endTime: e.target.value })}
                                     required
                                     title="Shift End Time"
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:outline-none transition-all"
                                 />
                             </div>
                         </div>
@@ -359,7 +359,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                 value={formState.role}
                                 onChange={(e) => setFormState({ ...formState, role: e.target.value })}
                                 title="Assigned Role"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:outline-none transition-all"
                             />
                         </div>
 
@@ -370,7 +370,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                 rows={3}
                                 value={formState.notes}
                                 onChange={(e) => setFormState({ ...formState, notes: e.target.value })}
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:outline-none transition-all"
                                 placeholder="Station assignment, task details or specific notes..."
                                 title="Shift Notes"
                             />

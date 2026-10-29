@@ -128,7 +128,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
     return (
         <div className="space-y-4">
             {/* Main Points Card */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-[var(--theme-accent)] via-[var(--theme-accent)] to-[var(--theme-primary)]/5 dark:from-[var(--theme-bg-panel)]/40 dark:via-[#18201B]/30 to-[var(--theme-status-success)] rounded-2xl border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shadow-sm">
+            <div className="relative overflow-hidden bg-gradient-to-br from-[var(--theme-bg-card)] via-[color-mix(in_srgb,var(--theme-bg-card)_80%,transparent)] to-[color-mix(in_srgb,var(--theme-primary)_5%,transparent)] dark:from-[var(--theme-bg-panel)] dark:via-[color-mix(in_srgb,var(--theme-bg-panel)_70%,transparent)] dark:to-[color-mix(in_srgb,var(--theme-status-success)_20%,transparent)] rounded-2xl border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shadow-sm">
                 {/* Animated background */}
                 <div className="absolute inset-0 opacity-30">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--theme-primary)]/10 rounded-full blur-3xl animate-pulse" />
@@ -175,7 +175,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                     {/* Total Points Display */}
                     <div className="bg-[var(--theme-primary)]/5 bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] rounded-xl p-4 mb-4 border border-[var(--theme-border)]/10 dark:border-transparent">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-[#4D6E56] text-[var(--theme-text-muted)] text-sm font-bold uppercase flex items-center gap-2">
+                            <span className="text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] text-sm font-bold uppercase flex items-center gap-2">
                                 <Sparkles size={16} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" /> Total Points
                             </span>
                             <span className="text-4xl font-black bg-gradient-to-r from-[var(--theme-status-warning)] to-[var(--theme-status-warning)] from-[var(--theme-status-warning)] to-[var(--theme-status-warning)] text-transparent bg-clip-text">
@@ -255,25 +255,25 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                                                 {bonusInfo.tier.tierName}
                                             </span>
                                         </h4>
-                                        <p className="text-[10px] text-[#4D6E56] text-[var(--theme-text-muted)]">Based on your {points.monthlyPoints} monthly points</p>
+                                        <p className="text-[10px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">Based on your {points.monthlyPoints} monthly points</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-2xl font-black text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                         {currency}{bonusInfo.bonus.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                     </p>
-                                    <p className="text-[10px] text-[#4D6E56]/70 text-[var(--theme-text-secondary)]">this period</p>
+                                    <p className="text-[10px] text-[var(--theme-text-secondary)]/70 text-[var(--theme-text-secondary)]">this period</p>
                                 </div>
                             </div>
 
                             {/* Bonus breakdown */}
                             <div className="grid grid-cols-2 gap-2 text-xs">
                                 <div className="bg-[color-mix(in_srgb,var(--theme-bg-card)_80%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] rounded-lg p-2 border border-[var(--theme-border)]/50 dark:border-transparent">
-                                    <span className="text-[#4D6E56] text-[var(--theme-text-muted)]">Base:</span>
+                                    <span className="text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">Base:</span>
                                     <span className="float-right text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-bold">{currency}{bonusInfo.tier.bonusAmount.toLocaleString()}</span>
                                 </div>
                                 <div className="bg-[color-mix(in_srgb,var(--theme-bg-card)_80%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] rounded-lg p-2 border border-[var(--theme-border)]/50 dark:border-transparent">
-                                    <span className="text-[#4D6E56] text-[var(--theme-text-muted)]">Per Point:</span>
+                                    <span className="text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">Per Point:</span>
                                     <span className="float-right text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-bold">{currency}{(bonusInfo.tier.bonusPerPoint || 0).toFixed(2)}</span>
                                 </div>
                             </div>
@@ -347,7 +347,7 @@ function AchievementBadge({ achievement }: { achievement: WorkerAchievement }) {
         <div className="bg-gradient-to-br from-[var(--theme-status-warning)] to-[var(--theme-status-warning)] rounded-xl p-3 border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] hover:border-[var(--theme-border)]/30 hover:bg-[var(--theme-primary)]/5 transition-all group cursor-pointer">
             <div className="text-2xl mb-1">{getAchievementIcon(achievement.type)}</div>
             <p className="text-sm font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] truncate">{achievement.name}</p>
-            <p className="text-[10px] text-[#4D6E56] text-[var(--theme-text-muted)] truncate">{achievement.description}</p>
+            <p className="text-[10px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] truncate">{achievement.description}</p>
             <p className="text-[10px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 font-bold">+{achievement.pointsAwarded} pts</p>
         </div>
     );

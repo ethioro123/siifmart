@@ -21,7 +21,7 @@ const CoordBadge = ({ label, value, colorClass, compact = false }: { label: stri
     return (
         <div className={`flex items-center rounded-2xl overflow-hidden border ${borderPart} border-[var(--theme-status-success-border)] shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] hover:border-[var(--theme-border)]/40 dark:hover:border-[var(--theme-border)]/30`}>
             <div className={`px-3 py-2 ${bgPart} bg-opacity-25 border-r ${borderPart} border-[var(--theme-status-success-border)] flex items-center justify-center min-w-[3.8rem]`}>
-                <span className={`font-black uppercase tracking-widest text-[#2C4D35] dark:text-[var(--theme-text-secondary)] ${compact ? 'text-[8px]' : 'text-[10px]'}`}>{label}</span>
+                <span className={`font-black uppercase tracking-widest text-[var(--theme-text-primary)] ${compact ? 'text-[8px]' : 'text-[10px]'}`}>{label}</span>
             </div>
             <div className={`px-4 py-2 bg-[color-mix(in_srgb,var(--theme-bg-card)_80%,transparent)] dark:bg-[var(--theme-bg-panel)]/40 backdrop-blur-md flex items-center justify-center min-w-[2.8rem]`}>
                 <span className={`font-mono font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] tracking-widest ${compact ? 'text-xs' : 'text-sm'}`}>{value}</span>
@@ -127,7 +127,7 @@ export default function ProductLocationDisplay({
                             <div>
                                 <h4 className="text-base font-black text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] uppercase tracking-tight leading-none mb-1.5">{locationInfo.siteName}</h4>
                                 <div className="flex items-center gap-2 opacity-60">
-                                    <span className="text-[10px] font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-[0.2em]">{locationInfo.siteType}</span>
+                                    <span className="text-[10px] font-black text-[var(--theme-text-secondary)] uppercase tracking-[0.2em]">{locationInfo.siteType}</span>
                                     <ArrowRight size={10} className="text-[var(--theme-text-muted)] text-[var(--theme-text-secondary)]" />
                                     <span className="text-[10px] font-mono text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-black">{locationInfo.siteCode}</span>
                                 </div>

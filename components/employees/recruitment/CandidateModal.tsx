@@ -122,7 +122,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
                                 setProposedSalary(r.target_salary);
                             }
                         }}
-                        className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal cursor-pointer"
+                        className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal cursor-pointer"
                     >
                         <option value="">Direct Local Candidate (No Pre-linked Requisition)</option>
                         {requisitions.map(r => (
@@ -142,7 +142,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
                         onChange={(e) => setName(e.target.value)}
                         placeholder="e.g. Samuel K. Mwangi"
                         required
-                        className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal"
+                        className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal"
                     />
                 </div>
 
@@ -155,7 +155,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="samuel@example.com"
                             required
-                            className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal"
+                            className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal"
                         />
                     </div>
                     <div className="space-y-1.5">
@@ -166,7 +166,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
                             onChange={(e) => setPhone(e.target.value)}
                             placeholder="+254 712 345 678"
                             required
-                            className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-mono tabular-nums focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal"
+                            className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-mono tabular-nums focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal"
                         />
                     </div>
                 </div>
@@ -180,7 +180,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
                             <select
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
-                                className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal cursor-pointer"
+                                className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal cursor-pointer"
                             >
                                 {allowedRoles.map(r => (
                                     <option key={r.id} value={r.id}>
@@ -199,7 +199,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
                                 step="500"
                                 value={proposedSalary}
                                 onChange={(e) => setProposedSalary(Number(e.target.value))}
-                                className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-mono tabular-nums focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal"
+                                className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-mono tabular-nums focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal"
                             />
                         </div>
                     </div>

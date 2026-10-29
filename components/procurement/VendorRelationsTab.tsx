@@ -269,7 +269,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                         <button
                           type="button"
                           onClick={() => handleAuthorizeContract(c)}
-                          className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm"
+                          className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm"
                         >
                           <Check size={13} /> Sign Off
                         </button>

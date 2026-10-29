@@ -205,7 +205,7 @@ export default function StepReview({
             </div>
 
             {/* Profile Ribbon Summary */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-[var(--theme-status-success)] via-[#2C5E3B]/5 to-transparent border border-[var(--theme-status-success-border)] flex items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-[var(--theme-status-success)] via-[color-mix(in_srgb,var(--theme-status-success)_5%,transparent)] to-transparent border border-[var(--theme-status-success-border)] flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5 min-w-0">
                     <img
                         src={newEmpData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(newEmpData.firstName + ' ' + newEmpData.lastName)}&background=2C5E3B&color=ffffff`}

@@ -183,7 +183,7 @@ export default function AccessReviewTab() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search employee, email, or role..."
-                        className="w-full pl-10 pr-4 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20"
+                        className="w-full pl-10 pr-4 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20"
                     />
                 </div>
 
@@ -191,7 +191,7 @@ export default function AccessReviewTab() {
                     <select
                         value={selectedRole}
                         onChange={(e) => setSelectedRole(e.target.value)}
-                        className="w-full px-3 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 cursor-pointer"
+                        className="w-full px-3 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 cursor-pointer"
                     >
                         <option value="All">All Roles ({accessRecords.length})</option>
                         {availableRoles.map(role => (

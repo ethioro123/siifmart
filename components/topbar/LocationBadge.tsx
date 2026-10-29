@@ -168,7 +168,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                   {displayLocationTitle}
                </span>
                {displaySubtitle && (
-                  <span className="font-mono text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold leading-none truncate mt-0.5">
+                  <span className="font-mono text-[9px] text-[var(--theme-text-secondary)] font-semibold leading-none truncate mt-0.5">
                      {displaySubtitle}
                   </span>
                )}
@@ -177,7 +177,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
             {canSwitchSites && (
                <ChevronDown
                   size={14}
-                  className={`text-[#4D6E56] dark:text-[#7A9E83] transition-transform duration-200 flex-shrink-0 ${
+                  className={`text-[var(--theme-text-secondary)] transition-transform duration-200 flex-shrink-0 ${
                      isOpen ? 'rotate-180' : ''
                   }`}
                />
@@ -186,9 +186,9 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
 
          {/* Site Switcher Dropdown - CEO or Region-Scoped Regional Officers */}
          {canSwitchSites && isOpen && (
-            <div className="absolute left-0 mt-1.5 w-64 sm:w-72 bg-[#FDFBF7] dark:bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute left-0 mt-1.5 w-64 sm:w-72 bg-[var(--theme-bg-card)] dark:bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                <div className="px-3 py-1.5 mb-1 border-b border-[var(--theme-border)]/60 border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                      {activeRegionShortName && (showOnlyActiveRegion || !isCeo) ? `${activeRegionShortName} Sites` : 'Switch Location'}
                   </span>
                   {isCeo ? (
@@ -197,7 +197,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                            <button
                               type="button"
                               onClick={() => setShowOnlyActiveRegion(!showOnlyActiveRegion)}
-                              className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] flex items-center gap-0.5 cursor-pointer"
+                              className="text-[10px] font-bold text-[var(--theme-text-secondary)] hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] flex items-center gap-0.5 cursor-pointer"
                               title={showOnlyActiveRegion ? "Show all facilities across all regions" : `Filter facilities to ${activeRegionShortName}`}
                            >
                               <Filter size={10} />
@@ -214,7 +214,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                         </button>
                      </div>
                   ) : (
-                     <span className="text-[9px] font-mono font-semibold text-[#4D6E56] dark:text-[#7A9E83]">
+                     <span className="text-[9px] font-mono font-semibold text-[var(--theme-text-secondary)]">
                         {userRegionCode}
                      </span>
                   )}
@@ -234,7 +234,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
                               isSelected
                                  ? 'bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/25 text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] font-bold'
-                                 : 'hover:bg-[color-mix(in_srgb,var(--theme-overlay)_5%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] text-[#2C4D35] dark:text-[var(--theme-text-secondary)]'
+                                 : 'hover:bg-[color-mix(in_srgb,var(--theme-overlay)_5%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] text-[var(--theme-text-primary)]'
                            }`}
                         >
                            <div className="flex items-center gap-2 min-w-0">

@@ -307,7 +307,7 @@ export const PayrollModal: React.FC = () => {
               type="button"
               onClick={handleInitiateRun}
               disabled={isActionLoading || activeEmployees.length === 0}
-              className="px-4 py-2 bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs uppercase tracking-wider inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 transition-all"
+              className="px-4 py-2 bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs uppercase tracking-wider inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 transition-all"
             >
               {isActionLoading ? <Loader2 size={13} className="animate-spin" /> : <Briefcase size={14} />}
               Initialize {currentMonthYear} Batch
@@ -409,7 +409,7 @@ export const PayrollModal: React.FC = () => {
                 disabled={!isDualApproved || isActionLoading}
                 className={`px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center gap-2 transition-all ${
                   isDualApproved
-                    ? 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] shadow-sm cursor-pointer'
+                    ? 'bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] shadow-sm cursor-pointer'
                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] cursor-not-allowed opacity-60'
                 }`}
                 title={!isDualApproved ? 'Both HR and Finance must sign before disbursing' : 'Disburse payout'}

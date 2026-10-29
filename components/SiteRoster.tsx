@@ -100,7 +100,7 @@ export default function SiteRoster({
                             className={`
                                 relative overflow-hidden group transition-all rounded-2xl border
                                 ${isHighlighted
-                                    ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-focus)] dark:border-[var(--theme-border-focus)] ring-2 ring-[#0071E3]/20 shadow-sm'
+                                    ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-focus)] dark:border-[var(--theme-border-focus)] ring-2 ring-[var(--theme-accent)]/20 shadow-sm'
                                     : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-xs hover:border-[var(--theme-border-focus)]/30'}
                                 ${layout === 'grid' ? 'p-4 sm:p-5' : 'p-3.5 flex items-center gap-3.5'}
                             `}
@@ -124,13 +124,13 @@ export default function SiteRoster({
                                         <div className="text-right flex flex-col items-end gap-1">
                                             <div className="flex items-center gap-1">
                                                 {emp.isRostered && (
-                                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] dark:text-[#30D158]">
+                                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)]">
                                                         On Duty
                                                     </span>
                                                 )}
                                                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                                                     emp.status === 'Active'
-                                                        ? 'bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] dark:text-[#30D158]'
+                                                        ? 'bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] dark:text-[var(--theme-status-success-text)]'
                                                         : 'bg-[var(--theme-status-warning-bg)]/10 text-[var(--theme-status-warning-text)] dark:text-[var(--theme-status-warning-text)]'
                                                 }`}>
                                                     {emp.status}
@@ -209,7 +209,7 @@ export default function SiteRoster({
 
                                     <div className="flex items-center gap-1.5 ml-1">
                                         {emp.isRostered && (
-                                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] dark:text-[#30D158]">
+                                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)]">
                                                 On Duty
                                             </span>
                                         )}

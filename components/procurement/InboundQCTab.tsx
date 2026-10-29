@@ -221,7 +221,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                     <button
                       type="button"
                       onClick={() => handleSignOffWaiver(qc)}
-                      className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
+                      className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
                     >
                       <Check size={13} /> Sign Off Waiver
                     </button>

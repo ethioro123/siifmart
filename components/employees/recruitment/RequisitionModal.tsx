@@ -146,7 +146,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                                     onChange={(e) => setTitle(e.target.value)}
                                     placeholder="e.g. Day Shift Order Picker"
                                     required
-                                    className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal"
+                                    className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal"
                                 />
                             </div>
                             <div className="space-y-1.5">
@@ -154,7 +154,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                                 <select
                                     value={department}
                                     onChange={(e) => setDepartment(e.target.value)}
-                                    className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal cursor-pointer"
+                                    className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal cursor-pointer"
                                 >
                                     <option value="Operations">Operations / WMS</option>
                                     <option value="Store Operations">Store Operations</option>
@@ -173,7 +173,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                             <select
                                 value={role}
                                 onChange={(e) => setRole(e.target.value)}
-                                className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal cursor-pointer"
+                                className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal cursor-pointer"
                             >
                                 {allowedRoles.map(r => (
                                     <option key={r.id} value={r.id}>
@@ -193,7 +193,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                                     max="20"
                                     value={headcount}
                                     onChange={(e) => setHeadcount(Number(e.target.value))}
-                                    className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-mono tabular-nums focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal"
+                                    className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-mono tabular-nums focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal"
                                 />
                             </div>
                             <div className="space-y-1.5">
@@ -206,7 +206,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                                     step="500"
                                     value={targetSalary}
                                     onChange={(e) => setTargetSalary(Number(e.target.value))}
-                                    className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-mono tabular-nums focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal"
+                                    className="w-full h-10 px-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-mono tabular-nums focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal"
                                 />
                             </div>
                         </div>
@@ -220,7 +220,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                                 placeholder="Explain why your department or floor needs this headcount..."
                                 rows={2}
                                 required
-                                className="w-full p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] resize-none focus:ring-2 focus:ring-[#0071E3]/25 outline-none font-normal"
+                                className="w-full p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] resize-none focus:ring-2 focus:ring-[var(--theme-accent)]/25 outline-none font-normal"
                             />
                         </div>
 

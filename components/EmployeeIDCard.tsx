@@ -108,11 +108,11 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
     const roleColor = ROLE_COLORS[employee.role] || 'var(--theme-accent)';
 
     const modalContent = (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-cyber-dark border border-gray-200 dark:border-white/10 rounded-2xl p-6 max-w-4xl w-full flex flex-col md:flex-row gap-8 items-center md:items-start relative shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-[var(--theme-overlay-strong)] backdrop-blur-sm z-[99999] flex items-center justify-center p-4">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 max-w-4xl w-full flex flex-col md:flex-row gap-8 items-center md:items-start relative shadow-2xl animate-in zoom-in-95 duration-200">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
+                    className="absolute top-4 right-4 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors"
                     title="Close"
                     aria-label="Close"
                 >
@@ -122,35 +122,35 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                 {/* Left Side: Controls & Info */}
                 <div className="flex-1 space-y-6 w-full">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                        <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] mb-2 flex items-center gap-2">
                             <CreditCard className="text-cyber-primary" />
                             Employee ID Generator
                         </h2>
-                        <p className="text-gray-500 dark:text-gray-400">Generate and print official identification cards for staff members.</p>
+                        <p className="text-[var(--theme-text-secondary)]">Generate and print official identification cards for staff members.</p>
                     </div>
 
-                    <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 space-y-3 border border-gray-100 dark:border-white/5">
+                    <div className="bg-[var(--theme-bg-subtle)] rounded-xl p-4 space-y-3 border border-[var(--theme-border-subtle)]">
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-500 dark:text-gray-400">Employee Name:</span>
-                            <span className="text-gray-900 dark:text-white font-medium">{employee.name}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Employee Name:</span>
+                            <span className="text-[var(--theme-text-primary)] font-medium">{employee.name}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-500 dark:text-gray-400">Job Title:</span>
-                            <span className="text-gray-900 dark:text-white font-medium">{getEmployeeJobTitle(employee)}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Job Title:</span>
+                            <span className="text-[var(--theme-text-primary)] font-medium">{getEmployeeJobTitle(employee)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-500 dark:text-gray-400">Employee ID:</span>
-                            <span className="text-cyan-600 dark:text-cyan-400 font-mono text-xs font-bold">{formatDisplayEmployeeId(employee)}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Employee ID:</span>
+                            <span className="text-[var(--theme-accent)] font-mono text-xs font-bold">{formatDisplayEmployeeId(employee)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-500 dark:text-gray-400">Site ID:</span>
-                            <span className="text-gray-900 dark:text-white font-medium">{siteCode || 'Unknown'}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Site ID:</span>
+                            <span className="text-[var(--theme-text-primary)] font-medium">{siteCode || 'Unknown'}</span>
                         </div>
                     </div>
 
                     <button
                         onClick={handlePrint}
-                        className="w-full bg-cyber-primary text-black font-bold py-3 rounded-xl hover:bg-cyber-primary/90 transition-all flex items-center justify-center gap-2"
+                        className="w-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-bold py-3 rounded-xl hover:bg-[var(--theme-primary-hover)] transition-all flex items-center justify-center gap-2"
                     >
                         <Printer size={20} />
                         Print ID Card
@@ -158,7 +158,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                 </div>
 
                 {/* Right Side: The Card Preview */}
-                <div className="flex-1 flex justify-center items-center bg-black/20 p-8 rounded-2xl border border-white/5 w-full">
+                <div className="flex-1 flex justify-center items-center bg-[color-mix(in_srgb,var(--theme-overlay)_20%,transparent)] p-8 rounded-2xl border border-[var(--theme-border-subtle)] w-full">
 
                     {/* THE CARD ITSELF - CR80 Size (85.6mm x 54mm) -> Scaled up for display */}
                     {/* Aspect Ratio: 1.586 */}

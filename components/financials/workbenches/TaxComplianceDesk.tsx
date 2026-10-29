@@ -153,7 +153,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                                 disabled={returnStatus !== 'draft'}
                                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                     returnStatus === 'draft'
-                                        ? 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] cursor-pointer'
+                                        ? 'bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-[var(--theme-text-primary)] cursor-pointer'
                                         : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] opacity-80 cursor-default'
                                 }`}
                             >

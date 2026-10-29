@@ -195,7 +195,7 @@ export function KenyaGatewaysPanel({
             <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-danger-bg)] text-[#ED1C24] flex items-center justify-center font-bold text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center font-bold text-xs">
                             AM
                         </div>
                         <div>

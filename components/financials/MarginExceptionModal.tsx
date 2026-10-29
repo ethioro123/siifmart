@@ -283,7 +283,7 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                                         type="button"
                                         onClick={() => handleAction('Approved')}
                                         disabled={isSubmitting}
-                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-accent)] hover:bg-[#0077ED] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
                                     >
                                         {isSubmitting && actionType === 'Approved' ? (
                                             <Loader2 size={13} className="animate-spin" />
