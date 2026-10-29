@@ -156,21 +156,19 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            className={`w-full h-[680px] min-h-[600px] relative overflow-hidden select-none cursor-grab active:cursor-grabbing rounded-xl border ${
-                isDark ? 'bg-[#121814] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'
-            }`}
+            className="w-full h-[680px] min-h-[600px] relative overflow-hidden select-none cursor-grab active:cursor-grabbing rounded-xl border bg-[var(--theme-bg-app)] border-[var(--theme-border)]"
         >
             {/* Subtle background grid pattern */}
             <div
                 className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-10"
                 style={{
-                    backgroundImage: `radial-gradient(${isDark ? '#A9CBA2' : '#2C5E3B'} 1px, transparent 1px)`,
+                    backgroundImage: 'radial-gradient(var(--theme-border-strong) 1px, transparent 1px)',
                     backgroundSize: '24px 24px'
                 }}
             />
 
             {/* Floating Zoom Controls overlay */}
-            <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 p-1.5 rounded-xl shadow-lg border bg-white/90 dark:bg-[#1E2822]/90 border-[#E2DCCE] dark:border-[#2C4D35] backdrop-blur-sm">
+            <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 p-1.5 rounded-xl shadow-lg border bg-[var(--theme-bg-card)] border-[var(--theme-border)]">
                 <button
                     type="button"
                     onClick={handleZoomOut}
@@ -218,11 +216,7 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
                         style={{ overflow: 'visible' }}
                     >
                         {layoutConnectors.map(conn => (
-                            <OrgTreePath
-                                key={conn.id}
-                                connector={conn}
-                                isDark={isDark}
-                            />
+                            <OrgTreePath key={conn.id} connector={conn} />
                         ))}
                     </svg>
 

@@ -75,7 +75,7 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                         ) : (
                             <Package size={30} className="text-[var(--theme-text-muted)] group-hover:opacity-40 transition-opacity" />
                         )}
-                        <span className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-[var(--theme-bg-panel)] shadow-xs shrink-0" style={{ backgroundColor: stock > 0 ? '#10b981' : '#ef4444' }} />
+                        <span className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-[var(--theme-bg-panel)] shadow-xs shrink-0" style={{ backgroundColor: stock > 0 ? 'var(--theme-status-success)' : 'var(--theme-status-danger)' }} />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity">
                             <Camera size={18} />
                             <span className="text-[11px] font-bold uppercase tracking-tighter mt-0.5">Edit</span>

@@ -1,0 +1,10 @@
+/* Shared chart colors are semantic theme aliases, not per-chart palettes. */
+:root {
+  --theme-chart-1: var(--theme-accent);
+  --theme-chart-2: var(--theme-status-success);
+  --theme-chart-3: var(--theme-status-warning);
+  --theme-chart-4: color-mix(in srgb, var(--theme-accent) 58%, var(--theme-status-danger) 42%);
+  --theme-chart-5: var(--theme-status-info);
+  --theme-chart-6: var(--theme-status-danger);
+  --theme-chart-7: var(--theme-text-muted);
+}

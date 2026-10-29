@@ -78,12 +78,18 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
 
     // Create custom icons
     const createIcon = (type: string, hasAlerts: boolean) => {
-        const color = hasAlerts ? '#ef4444' : type === 'Store' ? '#10b981' : '#3b82f6';
+        const rootStyles = getComputedStyle(document.documentElement);
+        const token = (name: string) => rootStyles.getPropertyValue(name).trim();
+        const color = hasAlerts
+            ? token('--theme-status-danger')
+            : type === 'Store' ? token('--theme-status-success') : token('--theme-accent');
+        const markerText = token('--theme-primary-text');
+        const markerSurface = token('--theme-bg-card');
         const letter = type === 'Store' ? 'S' : type === 'Headquarters' ? 'H' : 'W';
         const svgIcon = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="14" fill="${color}" stroke="white" stroke-width="2"/>
-        <text x="16" y="21" text-anchor="middle" fill="white" font-size="16" font-weight="bold">
+        <circle cx="16" cy="16" r="14" fill="${color}" stroke="${markerSurface}" stroke-width="2"/>
+        <text x="16" y="21" text-anchor="middle" fill="${markerText}" font-size="16" font-weight="bold">
           ${letter}
         </text>
       </svg>

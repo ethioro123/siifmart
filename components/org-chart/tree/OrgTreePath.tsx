@@ -3,12 +3,11 @@ import { OrgConnectorPath } from '../types';
 
 interface OrgTreePathProps {
     connector: OrgConnectorPath;
-    isDark: boolean;
 }
 
-export const OrgTreePath: React.FC<OrgTreePathProps> = ({ connector, isDark }) => {
-    const strokeColor = isDark ? '#4D6E56' : '#A9CBA2';
-    const activeColor = isDark ? '#A9CBA2' : '#2C5E3B';
+export const OrgTreePath: React.FC<OrgTreePathProps> = ({ connector }) => {
+    const strokeColor = 'var(--theme-border-strong)';
+    const activeColor = 'var(--theme-accent)';
 
     return (
         <g className="transition-all duration-300">

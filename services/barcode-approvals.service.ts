@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabase';
-import { productsService } from './products.service';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const isUuid = (val?: string): boolean => !!val && UUID_REGEX.test(val);
@@ -14,12 +13,13 @@ export const barcodeApprovalsService = {
         created_by?: string;
         resolution_time?: number;
     }) {
-        const insertPayload: Record<string, any> = {
+        if (!approval.country_code || !isUuid(approval.site_id) || !isUuid(approval.created_by)) throw new Error('Barcode request requires country, site and creator');
+        const insertPayload: Record<string, unknown> = {
             product_id: approval.product_id,
             barcode: approval.barcode,
             image_url: approval.image_url || null,
-            status: 'approved',
-            country_code: (approval.country_code || 'ET').toUpperCase()
+            status: 'pending',
+            country_code: approval.country_code!.toUpperCase()
         };
 
         // Only pass site_id if it is a valid UUID format
@@ -32,72 +32,24 @@ export const barcodeApprovalsService = {
             insertPayload.created_by = approval.created_by;
         }
 
-        try {
-            const { data, error } = await supabase
-                .from('barcode_approvals')
-                .insert(insertPayload)
-                .select('id, product_id, barcode, image_url, status, site_id, country_code, created_at')
-                .maybeSingle();
-
-            if (error) {
-                return {
-                    id: crypto.randomUUID(),
-                    created_at: new Date().toISOString(),
-                    ...insertPayload
-                };
-            }
-            return data || insertPayload;
-        } catch {
-            return {
-                id: crypto.randomUUID(),
-                created_at: new Date().toISOString(),
-                ...insertPayload
-            };
-        }
+        const { data, error } = await supabase.from('barcode_approvals')
+            .insert(insertPayload)
+            .select('id, product_id, barcode, image_url, status, site_id, country_code, created_at')
+            .single();
+        if (error) throw error;
+        return data;
     },
 
-    async getAuditLog(siteId?: string, countryCode?: string, limit: number = 1000) {
-        try {
-            let query = supabase
-                .from('barcode_approvals')
-                .select(`
-                    *,
-                    product:products(id, name, sku, category)
-                `)
-                .order('created_at', { ascending: false })
-                .limit(limit);
-
-            if (siteId) {
-                query = query.eq('site_id', siteId);
-            }
-            if (countryCode) {
-                query = query.eq('country_code', countryCode.toUpperCase());
-            }
-
-            const { data, error } = await query;
-            if (error) {
-                // Fallback query if joined products table is missing or relationship is unmapped in PostgREST
-                let fallbackQuery = supabase
-                    .from('barcode_approvals')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(limit);
-
-                if (siteId) {
-                    fallbackQuery = fallbackQuery.eq('site_id', siteId);
-                }
-                if (countryCode) {
-                    fallbackQuery = fallbackQuery.eq('country_code', countryCode.toUpperCase());
-                }
-
-                const { data: fallbackData, error: fallbackError } = await fallbackQuery;
-                if (fallbackError) throw fallbackError;
-                return fallbackData || [];
-            }
-            return data || [];
-        } catch {
-            return [];
-        }
+    async getAuditLog(siteId?: string, countryCode?: string, limit = 25) {
+        if (!countryCode) throw new Error('Country scope is required');
+        let query = supabase.from('barcode_approvals')
+            .select('id, product_id, barcode, image_url, status, site_id, country_code, created_by, created_at, reviewed_by, reviewed_at, rejection_reason, product:products(id, name, sku, category)')
+            .eq('country_code', countryCode.toUpperCase())
+            .order('created_at', { ascending: false }).limit(limit);
+        if (siteId) query = query.eq('site_id', siteId);
+        const { data, error } = await query;
+        if (error) throw error;
+        return (data || []).map(row => ({ ...row, product: Array.isArray(row.product) ? row.product[0] : row.product, productId: row.product_id, siteId: row.site_id || '', createdBy: row.created_by || '', createdAt: row.created_at, status: row.status as 'pending' | 'approved' | 'rejected' }));
     },
 
     async approve(id: string, userId: string) {
@@ -139,22 +91,6 @@ export const barcodeApprovalsService = {
 
         if (updateError) throw updateError;
 
-        // 3. Revert the barcode on the product (Remove it)
-        const { data: product } = await supabase
-            .from('products')
-            .select('barcode, barcodes')
-            .eq('id', approval.product_id)
-            .single();
-
-        if (product) {
-            const currentList = Array.isArray(product.barcodes) ? product.barcodes : [];
-            const newBarcodes = currentList.filter((b: string) => b !== approval.barcode);
-            const updates: any = { barcodes: newBarcodes };
-            if (product.barcode === approval.barcode) {
-                updates.barcode = newBarcodes[0] || null;
-            }
-            await productsService.update(approval.product_id, updates);
-        }
     },
 
     async uploadEvidence(file: File): Promise<string> {

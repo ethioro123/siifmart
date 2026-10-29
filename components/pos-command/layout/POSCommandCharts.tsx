@@ -16,7 +16,7 @@ export const POSCommandCharts: React.FC = () => {
 
     const isCentralHQ = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_finance_director'].includes(user?.role?.toLowerCase() || '');
 
-    const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'];
+    const COLORS = ['var(--theme-chart-2)', 'var(--theme-chart-1)', 'var(--theme-chart-4)', 'var(--theme-chart-3)'];
 
     React.useEffect(() => {
         setIsMounted(true);

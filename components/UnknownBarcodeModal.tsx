@@ -109,17 +109,19 @@ export default function UnknownBarcodeModal({
         // Capture frame
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Security Watermark Overlay
+        // Security Watermark Overlay uses the active system theme tokens.
+        const themeTokens = getComputedStyle(document.documentElement);
+        const themeColor = (name: string) => themeTokens.getPropertyValue(name).trim();
         const bannerHeight = Math.max(54, Math.floor(canvas.height * 0.13));
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.fillStyle = themeColor('--theme-overlay-strong');
         ctx.fillRect(0, canvas.height - bannerHeight, canvas.width, bannerHeight);
 
-        // Green audit line
-        ctx.fillStyle = '#2C5E3B';
+        // Accent audit line
+        ctx.fillStyle = themeColor('--theme-accent');
         ctx.fillRect(0, canvas.height - bannerHeight, canvas.width, 4);
 
         const fontSize = Math.max(13, Math.floor(bannerHeight * 0.28));
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = themeColor('--theme-primary');
         ctx.font = `bold ${fontSize}px monospace`;
 
         const timestampStr = new Date().toLocaleString([], { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
@@ -131,7 +133,7 @@ export default function UnknownBarcodeModal({
 
         ctx.fillText(`🔒 SIIFMART AUDIT PROOF • BARCODE: ${barcode} • ${barcodeValidation.format}`, 16, canvas.height - bannerHeight + fontSize + 6);
 
-        ctx.fillStyle = '#A9CBA2';
+        ctx.fillStyle = themeColor('--theme-text-secondary');
         ctx.font = `${Math.max(11, Math.floor(fontSize * 0.82))}px monospace`;
         ctx.fillText(`OPERATOR: ${staffName} • LOCATION: ${siteName} • TIME: ${timestampStr}`, 16, canvas.height - 12);
 
@@ -169,59 +171,20 @@ export default function UnknownBarcodeModal({
         setIsUploading(true);
 
         try {
-            // 1. Upload Evidence
-            let evidenceUrl = null;
-            if (imageFile) {
-                try {
-                    evidenceUrl = await barcodeApprovalsService.uploadEvidence(imageFile);
-                } catch (uploadErr) {
-                    logger.error('UnknownBarcodeModal', 'Failed to upload evidence:', uploadErr);
-                }
-            }
+            if (!user?.id || !activeSite?.id || !activeSite.country) throw new Error('Missing scope');
+            const evidenceUrl = imageFile ? await barcodeApprovalsService.uploadEvidence(imageFile) : undefined;
+            await barcodeApprovalsService.create({
+                product_id: selectedProduct.id, barcode,
+                image_url: evidenceUrl, site_id: activeSite.id,
+                country_code: activeSite.country, created_by: user.id
+            });
+            await queryClient.invalidateQueries({ queryKey: ['barcode_approvals'] });
+            addNotification('success', t('pos.barcodeSubmitted'));
 
-            // 2. Create Audit Record
-            if (user && user.id) {
-                try {
-                    await barcodeApprovalsService.create({
-                        product_id: selectedProduct.id,
-                        barcode: barcode,
-                        image_url: evidenceUrl || undefined,
-                        site_id: selectedProduct.siteId || (selectedProduct as any).site_id,
-                        created_by: user.id
-                    });
-                } catch (auditErr) {
-                    logger.error('UnknownBarcodeModal', 'Failed to create audit record:', auditErr);
-                }
-            }
-
-            // 3. Map Barcode to Product (both primary barcode and barcodes array)
-            const currentBarcodes = selectedProduct.barcodes || [];
-            const updatedBarcodes = Array.from(new Set([...currentBarcodes, barcode]));
-
-            const updatedProductPayload = {
-                id: selectedProduct.id,
-                barcode: selectedProduct.barcode || barcode,
-                barcodes: updatedBarcodes
-            };
-
-            await updateProduct(updatedProductPayload, user?.name || 'Store Cashier');
-
-            // 4. Invalidate relevant queries so all POS registers and WMS scanners refresh immediately
-            queryClient.invalidateQueries({ queryKey: ['products'] });
-            queryClient.invalidateQueries({ queryKey: ['barcodeApprovals'] });
-
-            const updatedProduct: Product = {
-                ...selectedProduct,
-                barcode: selectedProduct.barcode || barcode,
-                barcodes: updatedBarcodes
-            };
-
-            onMapProduct(updatedProduct);
-            addNotification('success', `Barcode "${barcode}" mapped to "${selectedProduct.name}" and synced network-wide.`);
             onClose();
         } catch (error: any) {
             logger.error('UnknownBarcodeModal', 'Mapping failed:', error);
-            addNotification('alert', `Failed to map barcode: ${error.message || 'Unknown error'}`);
+            addNotification('alert', t('pos.barcodeSubmitFailed'));
         } finally {
             setIsUploading(false);
         }

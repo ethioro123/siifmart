@@ -174,7 +174,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                 Barcode Mapping Audit Log
                             </h3>
                             <p className="text-[12px] text-[var(--theme-text-secondary)] mt-0.5">
-                                Verified packaging barcodes synchronized across POS registers & WMS scanners
+                                Barcode requests and review history
                             </p>
                         </div>
                     </div>
@@ -268,7 +268,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                             <p className="font-semibold text-[13px] text-[var(--theme-text-primary)]">
                                 {barcodeSearch || barcodeSiteFilter !== 'All' ? 'No mappings match your search' : 'No barcode mappings recorded yet'}
                             </p>
-                            <p className="text-[12px] mt-0.5 text-[var(--theme-text-secondary)]">When cashiers scan packaging barcodes, verified audit records appear here.</p>
+                            <p className="text-[12px] mt-0.5 text-[var(--theme-text-secondary)]">Submitted barcode requests appear here for review.</p>
                         </div>
                     ) : (
                         <div className="space-y-2.5">
@@ -318,7 +318,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                             {approval.product?.sku || 'NO SKU'}
                                                         </span>
                                                         <span className="text-[11px] font-mono tabular-nums font-semibold text-[#34C759] bg-[#34C759]/10 px-2 py-0.5 rounded border border-[#34C759]/20">
-                                                            Mapped: {approval.barcode}
+                                                            Barcode: {approval.barcode}
                                                         </span>
                                                         {siteName && (
                                                             <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] flex items-center gap-1">
@@ -351,7 +351,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                     <span className="text-[11px] uppercase tracking-wider text-[var(--theme-text-secondary)] font-semibold">Status</span>
                                                     <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20 mt-0.5">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-[#34C759]" />
-                                                        <span className="font-semibold text-[11px]">Synced</span>
+                                                        <span className="font-semibold text-[11px]">{approval.status === 'approved' ? 'Approved' : approval.status === 'rejected' ? 'Rejected' : 'Pending review'}</span>
                                                     </div>
                                                 </div>
                                             </div>

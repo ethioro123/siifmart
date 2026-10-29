@@ -107,7 +107,7 @@ export default function ImageEditorModal({
               onRotationChange={setRotation}
               onCropComplete={onCropComplete}
               style={{
-                containerStyle: { background: '#000' },
+                containerStyle: { background: 'var(--theme-bg-app)' },
                 mediaStyle: {
                   filter: `brightness(${brightness}%) contrast(${contrast}%)`
                 }

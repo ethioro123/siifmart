@@ -98,7 +98,7 @@ const POSCommandContent: React.FC = () => {
   // Lock Screen — Apple Minimalist Style
   if (isLocked) {
     return (
-      <div className="pos-codex-workspace min-h-screen w-full flex items-center justify-center p-4 relative bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-300">
+      <div className="min-h-screen w-full flex items-center justify-center p-4 relative bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-300">
         <div className="max-w-[400px] w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-10 relative z-10 shadow-lg flex flex-col items-center">
           {/* Logo */}
           <div className="relative mb-6 select-none flex flex-col items-center gap-4">
@@ -117,7 +117,7 @@ const POSCommandContent: React.FC = () => {
   }
 
   return (
-    <div className="pos-codex-workspace min-h-full w-full relative bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-300">
+    <div className="min-h-full w-full relative bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-300">
       <div className="relative z-10 max-w-[1600px] mx-auto p-4 lg:p-6 space-y-6">
 
         {/* ===== HEADER CARD (Seamless Apple Minimalist Top Bar) ===== */}

@@ -1,130 +1,121 @@
 /* ==========================================================================
-   SIIFMART DESIGN SYSTEM: SEMANTIC THEME TOKENS
-   Standard: Apple 2026 Web Architecture & HIG Dark Mode Standards
-   Dark Mode:
-     - Layered Soft Charcoal Surfaces (#121316 canvas, #18191E panel, #1F2128 card)
-     - Elevated Charcoal Hover (#272A33)
-     - Apple High-Contrast Off-White Primary Text (#F5F5F7)
-     - Distinct Apple Mid-Gray Secondary Text (#A1A1AA, >6:1 contrast ratio)
-     - Muted Helper Text (#80828D, >4.5:1 contrast ratio)
-     - Crisp 1px Hairline Borders (rgba(255, 255, 255, 0.12))
-     - Calm & Clear Semantic Status Palette (Apple HIG system tints)
-     - Signature High-Contrast Pure White CTA Pill (#FFFFFF) with Deep Charcoal Text
-   Light Mode:
-     - Clean Apple Canvas (#F5F5F7)
-     - Pure White Studio Panels & Cards (#FFFFFF)
-     - Apple Deep Black Primary Text (#1D1D1F)
-     - Apple Mid-Gray Subtitles (#86868B)
-     - Apple System Blue Accent (#0071E3)
-     - High-Contrast Deep Black CTA Pill (#1D1D1F) with Pure White Text
+   SIIFMART semantic design tokens. The application palette is a quiet neutral
+   workspace in both themes, with explicit status, focus and control roles.
    ========================================================================== */
 
 :root {
+  color-scheme: dark;
   /* ------------------------------------------------------------------------
-     Dark Mode: Apple macOS / iPadOS Pro Soft Layered Charcoal (Default)
+     Dark Mode: neutral charcoal workspace (default)
      ------------------------------------------------------------------------ */
-  /* Swatch Expose (Apple Monochromatic Palette) */
-  --color-swatch-obsidian: #121316;
-  --color-swatch-silk: #F5F5F7;
-  --color-swatch-slate: #A1A1AA;
-  --color-swatch-graphite: #272A33;
+  /* Neutral palette swatches */
+  --color-swatch-obsidian: #181818;
+  --color-swatch-silk: #F2F2F2;
+  --color-swatch-slate: #B8B8B8;
+  --color-swatch-graphite: #303030;
 
   /* Backward Compatibility Swatch Aliases */
-  --color-swatch-champagne: #F5F5F7;
-  --color-swatch-cashmere: #A1A1AA;
-  --color-swatch-mocha: #272A33;
-  --color-swatch-walnut: #18191E;
+  --color-swatch-champagne: #F2F2F2;
+  --color-swatch-cashmere: #B8B8B8;
+  --color-swatch-mocha: #303030;
+  --color-swatch-walnut: #202020;
 
   /* Layered Charcoal Surfaces (Soft Dark Mode Architecture) */
-  --theme-bg-app: #121316;
-  --theme-bg-panel: #18191E;
-  --theme-bg-card: #1F2128;
-  --theme-bg-card-hover: #272A33;
-  --theme-bg-subtle: rgba(255, 255, 255, 0.06);
+  --theme-bg-app: #181818;
+  --theme-bg-panel: #202020;
+  --theme-bg-card: #202020;
+  --theme-bg-card-hover: #303030;
+  --theme-bg-subtle: #262626;
 
-  /* Primary Brand: High-Contrast Pure White Pill (#FFFFFF) */
-  --theme-primary: #FFFFFF;
-  --theme-primary-hover: #E5E5E7;
-  --theme-primary-active: #D2D2D7;
-  --theme-primary-text: #121316;
-  --theme-primary-muted: rgba(255, 255, 255, 0.12);
+  /* Neutral high-contrast primary action */
+  --theme-primary: #F2F2F2;
+  --theme-primary-hover: #DCDCDC;
+  --theme-primary-active: #CCCCCC;
+  --theme-primary-text: #181818;
+  --theme-primary-muted: rgba(242, 242, 242, 0.12);
   --theme-btn-primary-bg: var(--theme-primary);
   --theme-btn-primary-text: var(--theme-primary-text);
 
-  /* Secondary Brand / Deep System Charcoal */
-  --theme-brand-walnut: #18191E;
-  --theme-brand-walnut-hover: #272A33;
-  --theme-brand-graphite: #272A33;
+  /* Secondary neutral surfaces */
+  --theme-brand-walnut: #202020;
+  --theme-brand-walnut-hover: #303030;
+  --theme-brand-graphite: #303030;
 
-  /* Accent Highlight: Apple System Blue (#2997FF) */
-  --theme-accent: #2997FF;
-  --theme-accent-hover: #52AAFF;
-  --theme-accent-light: #70B8FF;
-  --theme-accent-muted: rgba(41, 151, 255, 0.15);
+  /* Theme focus and link accent */
+  --theme-accent: #9ABEFF;
+  --theme-accent-contrast: #181818;
+  --theme-accent-hover: #B9D1F9;
+  --theme-accent-light: #B9D1F9;
+  --theme-accent-muted: rgba(154, 190, 255, 0.14);
 
   /* Active Navigation & Status Pills */
-  --theme-pill-bg: rgba(255, 255, 255, 0.08);
-  --theme-pill-border: rgba(255, 255, 255, 0.16);
-  --theme-pill-text: #F5F5F7;
+  --theme-pill-bg: #353535;
+  --theme-pill-border: #484848;
+  --theme-pill-text: #F2F2F2;
 
   /* Crisp, Distinguishable Hairline Borders */
-  --theme-border: rgba(255, 255, 255, 0.12);
-  --theme-border-subtle: rgba(255, 255, 255, 0.07);
-  --theme-border-focus: #0071E3;
-  --theme-border-mocha: rgba(255, 255, 255, 0.16);
-  --theme-border-strong: rgba(255, 255, 255, 0.24);
+  --theme-border: #383838;
+  --theme-border-subtle: #383838;
+  --theme-border-focus: #9ABEFF;
+  --theme-border-mocha: #484848;
+  --theme-border-strong: #858585;
+  --theme-scrollbar-thumb: #858585;
+  --theme-overlay: rgba(0, 0, 0, 0.56);
+  --theme-overlay-strong: rgba(0, 0, 0, 0.64);
+  --theme-print-canvas: #FFFFFF;
+  --theme-print-text: #202020;
 
   /* Form Inputs & Controls (Dark Mode) */
-  --theme-input-bg: #15161B;
-  --theme-input-border: rgba(255, 255, 255, 0.15);
-  --theme-input-text: #F5F5F7;
-  --theme-bg-panel-hover: #21232A;
-  --theme-thead-bg: #16171D;
-  --theme-thead-text: #9EA0A8;
-  --theme-table-row-hover: rgba(255, 255, 255, 0.04);
+  --theme-input-bg: #242424;
+  --theme-input-border: #858585;
+  --theme-input-text: #F2F2F2;
+  --theme-bg-panel-hover: #303030;
+  --theme-thead-bg: #262626;
+  --theme-thead-text: #B8B8B8;
+  --theme-table-row-hover: #303030;
 
-  /* Apple Signature High-Contrast Typography */
-  --theme-text-primary: #F5F5F7;
-  --theme-text-secondary: #A1A1AA;
-  --theme-text-muted: #80828D;
+  /* Neutral high-contrast typography */
+  --theme-text-primary: #F2F2F2;
+  --theme-text-secondary: #B8B8B8;
+  --theme-text-muted: #A3A3A3;
 
   /* Calm but Clear Status Palette (Dark Mode) */
-  --theme-status-success: #34C759;
-  --theme-status-success-bg: rgba(52, 199, 89, 0.12);
-  --theme-status-success-border: rgba(52, 199, 89, 0.24);
-  --theme-status-success-text: #34C759;
+  --theme-status-success: #91D5A6;
+  --theme-status-success-bg: #1D3024;
+  --theme-status-success-border: #426B4E;
+  --theme-status-success-text: #91D5A6;
 
-  --theme-status-warning: #FF9F0A;
-  --theme-status-warning-bg: rgba(255, 159, 10, 0.12);
-  --theme-status-warning-border: rgba(255, 159, 10, 0.24);
-  --theme-status-warning-text: #FFB340;
+  --theme-status-warning: #E8CA82;
+  --theme-status-warning-bg: #352C19;
+  --theme-status-warning-border: #79643A;
+  --theme-status-warning-text: #E8CA82;
 
-  --theme-status-danger: #FF453A;
-  --theme-status-danger-bg: rgba(255, 69, 58, 0.12);
-  --theme-status-danger-border: rgba(255, 69, 58, 0.24);
-  --theme-status-danger-text: #FF6961;
+  --theme-status-danger: #FFB4AC;
+  --theme-status-danger-bg: #39201F;
+  --theme-status-danger-border: #87504B;
+  --theme-status-danger-text: #FFB4AC;
 
-  --theme-status-info: #64D2FF;
-  --theme-status-info-bg: rgba(41, 151, 255, 0.12);
-  --theme-status-info-border: rgba(41, 151, 255, 0.24);
-  --theme-status-info-text: #70B8FF;
+  --theme-status-info: #A8C7FA;
+  --theme-status-info-bg: #202C40;
+  --theme-status-info-border: #4A6488;
+  --theme-status-info-text: #A8C7FA;
 
-  --theme-status-neutral: #8E8E93;
-  --theme-status-neutral-bg: rgba(142, 142, 147, 0.12);
-  --theme-status-neutral-border: rgba(142, 142, 147, 0.22);
-  --theme-status-neutral-text: #A1A1AA;
+  --theme-status-neutral: #B8B8B8;
+  --theme-status-neutral-bg: #262626;
+  --theme-status-neutral-border: #484848;
+  --theme-status-neutral-text: #B8B8B8;
 
   /* Glass Panels & Subtle Elevation */
-  --theme-glass-bg: rgba(24, 25, 30, 0.85);
-  --theme-glass-border: rgba(255, 255, 255, 0.12);
+  --theme-glass-bg: #202020;
+  --theme-glass-border: #383838;
   --theme-glass-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 
   /* Liquid Glass 3 Tiers (Soft Dark Architecture) */
-  --theme-glass-clear-bg: rgba(31, 33, 40, 0.35);
+  --theme-glass-clear-bg: #202020;
   --theme-glass-clear-blur: 16px;
-  --theme-glass-standard-bg: rgba(31, 33, 40, 0.60);
+  --theme-glass-standard-bg: #202020;
   --theme-glass-standard-blur: 24px;
-  --theme-glass-strong-bg: rgba(24, 25, 30, 0.82);
+  --theme-glass-strong-bg: #202020;
   --theme-glass-strong-blur: 32px;
 
   /* Standardized Corner Radii System */
@@ -161,10 +152,10 @@
   --duration-slow: 320ms;
 
   /* Soft Elevation Shadows (Dark Mode) */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.20);
-  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.30);
-  --shadow-lg: 0 16px 50px rgba(0, 0, 0, 0.40);
-  --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.16);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.24);
+  --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.35);
 
   /* Legacy Variable Aliases */
   --bg-app: var(--theme-bg-app);
@@ -175,116 +166,122 @@
   --text-base: var(--theme-text-primary);
   --border-color: var(--theme-border);
 }
-
 [data-theme="light"] {
+  color-scheme: light;
   /* ------------------------------------------------------------------------
-     Light Mode: Apple macOS Light
+     Light Mode: warm neutral workspace
      ------------------------------------------------------------------------ */
-  --color-swatch-obsidian: #1D1D1F;
-  --color-swatch-silk: #F5F5F7;
-  --color-swatch-slate: #86868B;
-  --color-swatch-graphite: #E5E5E7;
+  --color-swatch-obsidian: #202020;
+  --color-swatch-silk: #FAF9F7;
+  --color-swatch-slate: #595959;
+  --color-swatch-graphite: #E9E8E4;
 
-  --color-swatch-champagne: #F5F5F7;
-  --color-swatch-cashmere: #86868B;
-  --color-swatch-mocha: #E5E5E7;
-  --color-swatch-walnut: #1D1D1F;
+  --color-swatch-champagne: #FAF9F7;
+  --color-swatch-cashmere: #595959;
+  --color-swatch-mocha: #E9E8E4;
+  --color-swatch-walnut: #202020;
 
-  /* Seamless App Canvas (Clean Apple Web Page Canvas) */
-  --theme-bg-app: #F5F5F7;
+  /* Warm canvas and neutral working surfaces */
+  --theme-bg-app: #FAF9F7;
   --theme-bg-panel: #FFFFFF;
   --theme-bg-card: #FFFFFF;
-  --theme-bg-card-hover: #F0F0F2;
-  --theme-bg-subtle: rgba(0, 0, 0, 0.04);
+  --theme-bg-card-hover: #E9E8E4;
+  --theme-bg-subtle: #F5F4F1;
 
-  /* Primary Brand: Apple Deep Black (#1D1D1F) with Pure White Text */
-  --theme-primary: #1D1D1F;
-  --theme-primary-hover: #000000;
-  --theme-primary-active: #333336;
+  /* Neutral high-contrast primary action */
+  --theme-primary: #202020;
+  --theme-primary-hover: #363636;
+  --theme-primary-active: #454545;
   --theme-primary-text: #FFFFFF;
-  --theme-primary-muted: rgba(29, 29, 31, 0.06);
+  --theme-primary-muted: rgba(32, 32, 32, 0.06);
   --theme-btn-primary-bg: var(--theme-primary);
   --theme-btn-primary-text: var(--theme-primary-text);
 
-  /* Secondary Brand: System Gray 5 */
-  --theme-brand-walnut: #1D1D1F;
-  --theme-brand-walnut-hover: #000000;
-  --theme-brand-graphite: #E5E5E7;
+  /* Secondary neutral surfaces */
+  --theme-brand-walnut: #202020;
+  --theme-brand-walnut-hover: #363636;
+  --theme-brand-graphite: #E9E8E4;
 
-  /* Accent Highlight: Apple System Blue (#0071E3) */
-  --theme-accent: #0071E3;
-  --theme-accent-hover: #0077ED;
-  --theme-accent-light: #2997FF;
-  --theme-accent-muted: rgba(0, 113, 227, 0.1);
+  /* Theme focus and link accent */
+  --theme-accent: #245DC1;
+  --theme-accent-contrast: #FFFFFF;
+  --theme-accent-hover: #174B9C;
+  --theme-accent-light: #245DC1;
+  --theme-accent-muted: rgba(36, 93, 193, 0.10);
 
   /* Active Navigation & Status Pills */
-  --theme-pill-bg: rgba(0, 0, 0, 0.05);
-  --theme-pill-border: rgba(0, 0, 0, 0.08);
-  --theme-pill-text: #1D1D1F;
+  --theme-pill-bg: #E5E4DF;
+  --theme-pill-border: #B8B7B1;
+  --theme-pill-text: #202020;
 
   /* Refined Hairline Borders */
-  --theme-border: rgba(0, 0, 0, 0.08);
-  --theme-border-subtle: rgba(0, 0, 0, 0.04);
-  --theme-border-focus: #0071E3;
-  --theme-border-mocha: rgba(0, 0, 0, 0.12);
-  --theme-border-strong: rgba(0, 0, 0, 0.22);
+  --theme-border: #DDDCD7;
+  --theme-border-subtle: #DDDCD7;
+  --theme-border-focus: #245DC1;
+  --theme-border-mocha: #B8B7B1;
+  --theme-border-strong: #858580;
+  --theme-scrollbar-thumb: #858580;
+  --theme-overlay: rgba(0, 0, 0, 0.32);
+  --theme-overlay-strong: rgba(0, 0, 0, 0.48);
+  --theme-print-canvas: #FFFFFF;
+  --theme-print-text: #202020;
 
   /* Form Inputs & Controls (Light Mode) */
   --theme-input-bg: #FFFFFF;
-  --theme-input-border: rgba(0, 0, 0, 0.12);
-  --theme-input-text: #1D1D1F;
-  --theme-bg-panel-hover: #F0F0F2;
-  --theme-thead-bg: #F5F5F7;
-  --theme-thead-text: #6E6E73;
-  --theme-table-row-hover: rgba(0, 0, 0, 0.02);
+  --theme-input-border: #858580;
+  --theme-input-text: #202020;
+  --theme-bg-panel-hover: #E9E8E4;
+  --theme-thead-bg: #F5F4F1;
+  --theme-thead-text: #595959;
+  --theme-table-row-hover: #E9E8E4;
 
-  /* Apple Signature Deep Charcoal & Slate Typography */
-  --theme-text-primary: #1D1D1F;
-  --theme-text-secondary: #86868B;
-  --theme-text-muted: #A1A1A6;
+  /* Neutral typography */
+  --theme-text-primary: #202020;
+  --theme-text-secondary: #595959;
+  --theme-text-muted: #666666;
 
   /* Calm but Clear Status Palette (Light Mode) */
-  --theme-status-success: #28CD41;
-  --theme-status-success-bg: rgba(40, 205, 65, 0.10);
-  --theme-status-success-border: rgba(40, 205, 65, 0.20);
-  --theme-status-success-text: #248A3D;
+  --theme-status-success: #17653A;
+  --theme-status-success-bg: #EDF8F0;
+  --theme-status-success-border: #A5CDB0;
+  --theme-status-success-text: #17653A;
 
-  --theme-status-warning: #FF9500;
-  --theme-status-warning-bg: rgba(255, 149, 0, 0.10);
-  --theme-status-warning-border: rgba(255, 149, 0, 0.20);
-  --theme-status-warning-text: #B25000;
+  --theme-status-warning: #795000;
+  --theme-status-warning-bg: #FFF6DD;
+  --theme-status-warning-border: #D7BE7A;
+  --theme-status-warning-text: #795000;
 
-  --theme-status-danger: #FF3B30;
-  --theme-status-danger-bg: rgba(255, 59, 48, 0.10);
-  --theme-status-danger-border: rgba(255, 59, 48, 0.20);
-  --theme-status-danger-text: #D70015;
+  --theme-status-danger: #A12219;
+  --theme-status-danger-bg: #FFF0EE;
+  --theme-status-danger-border: #D6A29D;
+  --theme-status-danger-text: #A12219;
 
-  --theme-status-info: #0071E3;
-  --theme-status-info-bg: rgba(0, 113, 227, 0.10);
-  --theme-status-info-border: rgba(0, 113, 227, 0.20);
-  --theme-status-info-text: #0071E3;
+  --theme-status-info: #2453A0;
+  --theme-status-info-bg: #EEF4FF;
+  --theme-status-info-border: #A8BCE0;
+  --theme-status-info-text: #2453A0;
 
-  --theme-status-neutral: #8E8E93;
-  --theme-status-neutral-bg: rgba(142, 142, 147, 0.10);
-  --theme-status-neutral-border: rgba(142, 142, 147, 0.18);
-  --theme-status-neutral-text: #636366;
+  --theme-status-neutral: #595959;
+  --theme-status-neutral-bg: #F5F4F1;
+  --theme-status-neutral-border: #DDDCD7;
+  --theme-status-neutral-text: #595959;
 
   /* Glass Panels & Subtle Elevation */
-  --theme-glass-bg: rgba(255, 255, 255, 0.9);
-  --theme-glass-border: rgba(0, 0, 0, 0.08);
+  --theme-glass-bg: #FFFFFF;
+  --theme-glass-border: #DDDCD7;
   /* Liquid Glass 3 Tiers (Light Mode) */
-  --theme-glass-clear-bg: rgba(255, 255, 255, 0.30);
+  --theme-glass-clear-bg: #FFFFFF;
   --theme-glass-clear-blur: 16px;
-  --theme-glass-standard-bg: rgba(255, 255, 255, 0.55);
+  --theme-glass-standard-bg: #FFFFFF;
   --theme-glass-standard-blur: 24px;
-  --theme-glass-strong-bg: rgba(255, 255, 255, 0.80);
+  --theme-glass-strong-bg: #FFFFFF;
   --theme-glass-strong-blur: 32px;
 
   /* Soft Elevation Shadows (Light Mode) */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 16px 50px rgba(0, 0, 0, 0.14);
-  --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.20);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.14);
+  --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.14);
 
   /* Legacy Variable Aliases */
   --bg-app: var(--theme-bg-app);
@@ -296,15 +293,16 @@
   --border-color: var(--theme-border);
 }
 
+
 /* --------------------------------------------------------------------------
-   Semantic Tone Normalization (Apple Typography & Form Controls)
+   Semantic Tone Normalization
    -------------------------------------------------------------------------- */
 [data-theme="light"] input,
 [data-theme="light"] select,
 [data-theme="light"] textarea {
   color: var(--theme-text-primary);
   background-color: var(--theme-bg-card);
-  border-color: var(--theme-border);
+  border-color: var(--theme-input-border);
 }
 
 [data-theme="dark"] input,
@@ -320,7 +318,7 @@
   color: var(--theme-text-primary);
 }
 
-/* Normalizing standard Tailwind gray & stone tone classes to Apple theme tokens */
+/* Normalize standard Tailwind gray and stone tone classes to shared tokens. */
 [data-theme="light"] .text-gray-400,
 [data-theme="light"] .text-stone-400,
 [data-theme="light"] .text-gray-500,
@@ -419,7 +417,7 @@
 [data-theme="light"] .bg-white\/10,
 [data-theme="light"] .bg-white\/20,
 [data-theme="light"] .bg-white\/30 {
-  background-color: rgba(0, 0, 0, 0.03);
+  background-color: var(--theme-bg-subtle);
 }
 
 /* Shared Semantic Status Badge Utilities */
@@ -430,27 +428,29 @@
 .badge-status-neutral { background-color: var(--theme-status-neutral-bg); border: 1px solid var(--theme-status-neutral-border); color: var(--theme-status-neutral-text); }
 
 /* Modal Backdrops with Neutral Overlays */
-[data-theme="light"] .bg-black\/20 { background-color: rgba(0, 0, 0, 0.15); }
+[data-theme="light"] .bg-black\/20 { background-color: var(--theme-overlay); }
 [data-theme="light"] .bg-black\/30,
-[data-theme="light"] .bg-black\/40 { background-color: rgba(0, 0, 0, 0.25); }
+[data-theme="light"] .bg-black\/40 { background-color: var(--theme-overlay); }
 [data-theme="light"] .bg-black\/50,
-[data-theme="light"] .bg-black\/60 { background-color: rgba(0, 0, 0, 0.45); }
+[data-theme="light"] .bg-black\/60 { background-color: var(--theme-overlay-strong); }
+
+[data-theme="dark"] .bg-black\/20,
+[data-theme="dark"] .bg-black\/30,
+[data-theme="dark"] .bg-black\/40 { background-color: var(--theme-overlay); }
+[data-theme="dark"] .bg-black\/50,
+[data-theme="dark"] .bg-black\/60 { background-color: var(--theme-overlay-strong); }
 
 /* --------------------------------------------------------------------------
-   Liquid Glass Tiered Utility Classes (October 2026 Apple Standard)
+   Solid, softly elevated workspace surfaces
    -------------------------------------------------------------------------- */
 .glass-clear {
   background: var(--theme-glass-clear-bg);
-  -webkit-backdrop-filter: blur(var(--theme-glass-clear-blur));
-  backdrop-filter: blur(var(--theme-glass-clear-blur));
   border: 1px solid var(--theme-border-subtle);
 }
 
 .glass-standard {
   position: relative;
   background: var(--theme-glass-standard-bg);
-  -webkit-backdrop-filter: blur(var(--theme-glass-standard-blur)) saturate(180%);
-  backdrop-filter: blur(var(--theme-glass-standard-blur)) saturate(180%);
   border: 1px solid var(--theme-border);
   box-shadow: var(--shadow-sm);
 }
@@ -461,14 +461,12 @@
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+  background: none;
 }
 
 .glass-strong {
   position: relative;
   background: var(--theme-glass-strong-bg);
-  -webkit-backdrop-filter: blur(var(--theme-glass-strong-blur)) saturate(180%);
-  backdrop-filter: blur(var(--theme-glass-strong-blur)) saturate(180%);
   border: 1px solid var(--theme-border);
   box-shadow: var(--shadow-modal);
 }

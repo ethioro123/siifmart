@@ -82,7 +82,7 @@ export const DemandChartSection: React.FC<DemandChartSectionProps> = ({
                         <Line
                             type="monotone"
                             dataKey="predicted"
-                            stroke="#F59E0B"
+                            stroke="var(--theme-status-warning)"
                             strokeDasharray="4 4"
                             strokeWidth={2}
                             dot={false}

@@ -2,6 +2,8 @@ import { approvalInbox } from './approvalInbox';
 import { TranslationBlock } from './types';
 
 export const pos: TranslationBlock = {
+    barcodeSubmitted: { en: 'Barcode request saved for review. The barcode is not active yet.', am: 'የባርኮድ ጥያቄው ለግምገማ ተቀምጧል። ባርኮዱ ገና ንቁ አይደለም።', or: 'Gaaffiin baarkoodii akka ilaalamuuf galmaa’eera. Baarkoodiin ammatti hin hojjatu.' },
+    barcodeSubmitFailed: { en: 'Barcode request was not saved. Try again.', am: 'የባርኮድ ጥያቄው አልተቀመጠም። እንደገና ይሞክሩ።', or: 'Gaaffiin baarkoodii hin galmoofne. Irra deebi’ii yaali.' },
     // Store-scoped catalog update notice and review
     updatesPriceHistory: {"en": "Price history", "am": "የዋጋ ታሪክ", "or": "Seenaa Gatii"},
     updatesPriceReviews: {"en": "Price changes to review · {count}", "am": "ለመገምገም {count} የዋጋ ለውጦች", "or": "Jijjiirama gatii {count} ilaalamuu qabu"},

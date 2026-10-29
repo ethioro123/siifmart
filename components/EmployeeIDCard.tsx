@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Employee, UserRole } from '../types';
+import { Employee } from '../types';
 import QRCode from 'qrcode';
 import { X, Printer, Shield, MapPin, Building, CreditCard } from 'lucide-react';
 import Logo from './Logo';
@@ -15,35 +15,32 @@ interface EmployeeIDCardProps {
     onClose: () => void;
 }
 
-const ROLE_COLORS: Partial<Record<UserRole, string>> = {
-    group_ceo: '#FACC15', // yellow-400
-    country_managing_director: '#C084FC', // purple-400
-    hr_generalist: '#F472B6', // pink-400
-    country_finance_director: '#34D399', // emerald-400
-    country_commercial_director: '#818CF8', // indigo-400
-    it_support: '#22D3EE',  // cyan-400
-    cs_manager: '#38BDF8',  // sky-400
-    shift_supervisor: '#93C5FD', // blue-300
-    inventory_specialist: '#FBBF24', // amber-400
-    picker: '#FB923C',      // orange-400
-    packer: '#F97316',      // orange-500
-    driver: '#2DD4BF',      // teal-400
-    warehouse_manager: '#A78BFA', // violet-400
-    dispatcher: '#E879F9',  // fuchsia-400
-    auditor: '#FB7185',     // rose-400
-    // New Warehouse Ops roles
-    receiver: '#22D3EE',    // cyan-400
-    forklift_operator: '#9CA3AF', // gray-400
-    dispatch_supervisor: '#A3E635', // lime-400
-    returns_clerk: '#FCA5A5', // red-300
-    // New Store Ops roles
-    cashier: '#86EFAC',     // green-300
-    merchandiser: '#F9A8D4', // pink-300
-    loss_prevention: '#F87171', // red-400
-    // New Administrative roles
-    accountant: '#6EE7B7',  // emerald-300
-    data_analyst: '#D8B4FE', // purple-300
-    training_coordinator: '#FDE047', // yellow-300
+const ROLE_COLORS: Partial<Record<Employee['role'], string>> = {
+    group_ceo: 'var(--theme-chart-1)',
+    country_managing_director: 'var(--theme-chart-4)',
+    hr_generalist: 'var(--theme-chart-4)',
+    country_finance_director: 'var(--theme-chart-2)',
+    country_commercial_director: 'var(--theme-chart-1)',
+    it_support: 'var(--theme-chart-5)',
+    cs_manager: 'var(--theme-chart-5)',
+    shift_supervisor: 'var(--theme-chart-1)',
+    inventory_specialist: 'var(--theme-chart-3)',
+    picker: 'var(--theme-chart-3)',
+    packer: 'var(--theme-chart-3)',
+    driver: 'var(--theme-chart-5)',
+    warehouse_manager: 'var(--theme-chart-5)',
+    dispatcher: 'var(--theme-chart-4)',
+    auditor: 'var(--theme-chart-6)',
+    receiver: 'var(--theme-chart-5)',
+    forklift_operator: 'var(--theme-chart-7)',
+    dispatch_supervisor: 'var(--theme-chart-3)',
+    returns_clerk: 'var(--theme-chart-6)',
+    cashier: 'var(--theme-chart-2)',
+    merchandiser: 'var(--theme-chart-4)',
+    loss_prevention: 'var(--theme-chart-6)',
+    accountant: 'var(--theme-chart-2)',
+    data_analyst: 'var(--theme-chart-4)',
+    training_coordinator: 'var(--theme-chart-3)',
 };
 
 export default function EmployeeIDCard({ employee, siteCode, onClose }: EmployeeIDCardProps) {
@@ -108,7 +105,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
         printHtmlContent(html);
     };
 
-    const roleColor = ROLE_COLORS[employee.role] || '#00ff9d';
+    const roleColor = ROLE_COLORS[employee.role] || 'var(--theme-accent)';
 
     const modalContent = (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[99999] flex items-center justify-center p-4">
@@ -170,8 +167,8 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                         ref={(el) => {
                             if (el) {
                                 el.style.setProperty('--role-color', roleColor);
-                                el.style.setProperty('--role-shadow', `${roleColor}20`);
-                                el.style.setProperty('--role-border', `${roleColor}40`);
+                                el.style.setProperty('--role-shadow', 'var(--theme-accent-muted)');
+                                el.style.setProperty('--role-border', 'var(--theme-border-focus)');
                                 cardRef.current = el;
                             }
                         }}

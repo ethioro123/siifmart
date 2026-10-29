@@ -30,7 +30,7 @@ const POSTerminalContent: React.FC = () => {
   // STORE SELECTION REQUIRED FOR ADMIN USERS
   if (needsStoreSelection) {
     return (
-      <div className="pos-codex-workspace h-full flex items-center justify-center p-4 bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)]">
+      <div className="h-full flex items-center justify-center p-4 bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)]">
         <div className="text-center p-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-[22px] max-w-md shadow-sm">
           <Logo variant="emblem" size={32} className="mx-auto mb-4 flex justify-center" />
           <h2 className="text-xl font-bold text-[var(--theme-text-primary)] mb-2">{t('pos.selectStore')}</h2>
@@ -56,7 +56,7 @@ const POSTerminalContent: React.FC = () => {
   }
 
   return (
-    <main className="pos-codex-workspace relative w-full h-full min-h-[calc(100dvh-128px)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)]">
+    <main className="relative w-full h-full min-h-[calc(100dvh-128px)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)]">
       <div className="relative z-10 h-[calc(100dvh-128px)] min-h-[560px] flex flex-col lg:flex-row gap-4 lg:gap-5 p-3 sm:p-4 lg:p-5 animate-in fade-in duration-300 motion-reduce:animate-none">
         <POSProductGrid />
         <POSCartPanel />

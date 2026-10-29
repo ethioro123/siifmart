@@ -26,15 +26,10 @@ import { useFinance } from './FinanceContext';
 import { formatCompactNumber } from '../../utils/formatting';
 import { PnLWaterfallCard } from './PnLWaterfallCard';
 
-// Apple System Semantic Palette for Category Donut
-const APPLE_CHART_COLORS = [
-    '#0071E3', // Apple Blue
-    '#34C759', // Apple Mint/Green
-    '#FF9500', // Apple Amber/Orange
-    '#FF3B30', // Apple Coral/Red
-    '#AF52DE', // Apple Purple
-    '#30B0C7', // Apple Cyan
-    '#6E6E73'  // Apple Mid-Gray
+const CHART_COLORS = [
+    'var(--theme-chart-1)', 'var(--theme-chart-2)', 'var(--theme-chart-3)',
+    'var(--theme-chart-6)', 'var(--theme-chart-4)', 'var(--theme-chart-5)',
+    'var(--theme-chart-7)'
 ];
 
 export const OverviewTab: React.FC = () => {
@@ -273,8 +268,8 @@ export const OverviewTab: React.FC = () => {
                                     <Area
                                         type="monotone"
                                         dataKey="revenue"
-                                        stroke="#0071E3"
-                                        fill="#0071E3"
+                                        stroke="var(--theme-chart-1)"
+                                        fill="var(--theme-chart-1)"
                                         fillOpacity={0.08}
                                         name="Gross Revenue"
                                         strokeWidth={2}
@@ -284,8 +279,8 @@ export const OverviewTab: React.FC = () => {
                                     <Area
                                         type="monotone"
                                         dataKey="expenses"
-                                        stroke="#FF3B30"
-                                        fill="#FF3B30"
+                                        stroke="var(--theme-chart-6)"
+                                        fill="var(--theme-chart-6)"
                                         fillOpacity={0.08}
                                         name="Disbursements"
                                         strokeWidth={2}
@@ -336,7 +331,7 @@ export const OverviewTab: React.FC = () => {
                                             {expenseBreakdownData.map((_entry: any, index: number) => (
                                                 <Cell
                                                     key={`donut-cell-${index}`}
-                                                    fill={APPLE_CHART_COLORS[index % APPLE_CHART_COLORS.length]}
+                                                    fill={CHART_COLORS[index % CHART_COLORS.length]}
                                                     stroke="var(--theme-bg-card)"
                                                     strokeWidth={2}
                                                 />
@@ -378,7 +373,7 @@ export const OverviewTab: React.FC = () => {
                                         <div className="flex items-center gap-2 min-w-0 pr-2">
                                             <span
                                                 className="w-2.5 h-2.5 rounded-full shrink-0"
-                                                style={{ backgroundColor: APPLE_CHART_COLORS[i % APPLE_CHART_COLORS.length] }}
+                                                style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
                                             />
                                             <span className="text-[var(--theme-text-primary)] font-medium truncate">
                                                 {item.name}

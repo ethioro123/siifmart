@@ -36,12 +36,10 @@ export default function CentralOperations() {
     const { sites, employees, allSales, allOrders, allProducts, systemLogs: contextLogs, storePoints, effectiveCountry, settings, regions } = useData();
     const { jobs, transfers } = useFulfillmentData();
     const { workerPoints } = useGamification();
-    const { loading, theme } = useStore();
+    const { loading } = useStore();
     const navigate = useNavigate();
 
-    // Apple System Blue Accent (#0071E3 in light, #2997FF in dark)
-    const isDark = theme === 'dark';
-    const accentColor = isDark ? '#2997FF' : '#0071E3';
+    const accentColor = 'var(--theme-accent)';
 
 
     const activeCountry = (effectiveCountry || settings?.country || 'ET') as Country;
@@ -159,9 +157,9 @@ export default function CentralOperations() {
         const outStock = scopedProducts.filter(p => p.stock === 0 || p.status === 'out_of_stock').length;
 
         return [
-            { name: 'Optimal', value: goodStock, color: isDark ? '#30D158' : '#34C759' },
-            { name: 'Low Stock', value: lowStock, color: isDark ? '#FF9F0A' : '#FF9500' },
-            { name: 'Out of Stock', value: outStock, color: isDark ? '#FF453A' : '#FF3B30' },
+            { name: 'Optimal', value: goodStock, color: 'var(--theme-status-success)' },
+            { name: 'Low Stock', value: lowStock, color: 'var(--theme-status-warning)' },
+            { name: 'Out of Stock', value: outStock, color: 'var(--theme-status-danger)' },
         ].filter(d => d.value > 0);
 
     }, [scopedProducts]);
@@ -233,12 +231,12 @@ export default function CentralOperations() {
             .slice(0, 5);
     }, [filteredSales]);
 
-    // --- COLORS & CHART STYLES (Apple Minimalist Aesthetic) ---
-    const chartAxisColor = '#86868B';
-    const chartGridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
-    const tooltipBg = isDark ? '#000000' : '#FFFFFF';
-    const tooltipBorder = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)';
-    const tooltipText = isDark ? '#F5F5F7' : '#1D1D1F';
+    // Chart styling follows the same tokens as the rest of the workspace.
+    const chartAxisColor = 'var(--theme-text-muted)';
+    const chartGridColor = 'var(--theme-border-subtle)';
+    const tooltipBg = 'var(--theme-bg-card)';
+    const tooltipBorder = 'var(--theme-border)';
+    const tooltipText = 'var(--theme-text-primary)';
 
 
     // --- LOADING STATE ---

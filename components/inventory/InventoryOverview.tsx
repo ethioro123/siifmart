@@ -9,7 +9,6 @@ import {
 import { formatCompactNumber } from '../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { Product, ServerMetrics } from '../../types';
-import { useStore } from '../../contexts/CentralStore';
 
 interface InventoryOverviewProps {
     totalInventoryValueCost: number;
@@ -24,11 +23,11 @@ interface InventoryOverviewProps {
     currencySymbol?: string;
 }
 
-const getCOLORS = (theme: string) => [
-    theme === 'dark' ? '#2997FF' : '#0071E3', // Class A (Apple Accent)
-    theme === 'dark' ? '#30D158' : '#34C759', // Class B (Apple Emerald)
-    theme === 'dark' ? '#FF9F0A' : '#FF9500', // Class C (Apple Amber)
-    theme === 'dark' ? '#FF453A' : '#FF3B30'  // Fallback (Apple Coral)
+const CHART_COLORS = [
+    'var(--theme-chart-1)',
+    'var(--theme-chart-2)',
+    'var(--theme-chart-3)',
+    'var(--theme-chart-6)'
 ];
 
 interface MetricCardProps {
@@ -77,8 +76,7 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
     lowStockCount = 0,
     currencySymbol
 }) => {
-    const { theme } = useStore();
-    const colors = getCOLORS(theme);
+    const colors = CHART_COLORS;
 
     // Calculate real dynamic velocity (Zero fake magic numbers)
     const displayTurnRate = stockTurnoverRate > 0 ? `${stockTurnoverRate.toFixed(1)}x` : '0.0x';

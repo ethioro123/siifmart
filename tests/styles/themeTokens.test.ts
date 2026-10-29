@@ -66,35 +66,35 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     expect(allRulesContent).not.toContain('use sand/emerald/amber palette');
   });
 
-  it('verifies Apple Minimalist & Softened Charcoal tokens in styles/theme.css', () => {
+  it('verifies the shared neutral light and dark theme tokens in styles/theme.css', () => {
     const themeContent = fs.readFileSync(themeCssPath, 'utf8');
 
-    // Dark Mode tokens: Softened Layered Charcoal Architecture
-    expect(themeContent).toContain('--theme-bg-app: #121316;');
-    expect(themeContent).toContain('--theme-bg-panel: #18191E;');
-    expect(themeContent).toContain('--theme-bg-card: #1F2128;');
-    expect(themeContent).toContain('--theme-bg-card-hover: #272A33;');
-    expect(themeContent).toContain('--theme-primary: #FFFFFF;');
-    expect(themeContent).toContain('--theme-primary-text: #121316;');
-    expect(themeContent).toContain('--theme-text-primary: #F5F5F7;');
-    expect(themeContent).toContain('--theme-text-secondary: #A1A1AA;');
-    expect(themeContent).toContain('--theme-text-muted: #80828D;');
+    // Dark Mode tokens: charcoal workspace
+    expect(themeContent).toContain('--theme-bg-app: #181818;');
+    expect(themeContent).toContain('--theme-bg-panel: #202020;');
+    expect(themeContent).toContain('--theme-bg-card: #202020;');
+    expect(themeContent).toContain('--theme-bg-card-hover: #303030;');
+    expect(themeContent).toContain('--theme-primary: #F2F2F2;');
+    expect(themeContent).toContain('--theme-primary-text: #181818;');
+    expect(themeContent).toContain('--theme-text-primary: #F2F2F2;');
+    expect(themeContent).toContain('--theme-text-secondary: #B8B8B8;');
+    expect(themeContent).toContain('--theme-text-muted: #A3A3A3;');
 
-    // Status color tokens (calm Apple HIG tones)
-    expect(themeContent).toContain('--theme-status-success: #34C759;');
-    expect(themeContent).toContain('--theme-status-warning: #FF9F0A;');
-    expect(themeContent).toContain('--theme-status-danger: #FF453A;');
-    expect(themeContent).toContain('--theme-status-info: #64D2FF;');
-    expect(themeContent).toContain('--theme-status-neutral: #8E8E93;');
+    // Status color tokens use explicit foreground and backing roles.
+    expect(themeContent).toContain('--theme-status-success: #91D5A6;');
+    expect(themeContent).toContain('--theme-status-warning: #E8CA82;');
+    expect(themeContent).toContain('--theme-status-danger: #FFB4AC;');
+    expect(themeContent).toContain('--theme-status-info: #A8C7FA;');
+    expect(themeContent).toContain('--theme-status-neutral: #B8B8B8;');
 
-    // Light Mode tokens: Apple Web Canvas & Pure White Cards
+    // Light Mode tokens: warm canvas and white working surfaces
     expect(themeContent).toContain('[data-theme="light"]');
-    expect(themeContent).toContain('--theme-bg-app: #F5F5F7;');
+    expect(themeContent).toContain('--theme-bg-app: #FAF9F7;');
     expect(themeContent).toContain('--theme-bg-panel: #FFFFFF;');
     expect(themeContent).toContain('--theme-bg-card: #FFFFFF;');
-    expect(themeContent).toContain('--theme-primary: #1D1D1F;');
+    expect(themeContent).toContain('--theme-primary: #202020;');
     expect(themeContent).toContain('--theme-primary-text: #FFFFFF;');
-    expect(themeContent).toContain('--theme-text-primary: #1D1D1F;');
+    expect(themeContent).toContain('--theme-text-primary: #202020;');
 
     // Backward-compatibility variable aliases
     expect(themeContent).toContain('--bg-app: var(--theme-bg-app);');
@@ -139,8 +139,8 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     const execDeckContent = fs.readFileSync(execDeckPath, 'utf8');
     const headerContent = fs.readFileSync(headerPath, 'utf8');
 
-    // Accent color uses official Apple accent token (#2997FF in dark, #0071E3 in light)
-    expect(centralOpsContent).toContain("accentColor = isDark ? '#2997FF' : '#0071E3'");
+    // Accent color reads from the shared theme token.
+    expect(centralOpsContent).toContain("accentColor = 'var(--theme-accent)'");
 
     // Executive deck uses semantic card and text tokens
     expect(execDeckContent).toContain('bg-[var(--theme-bg-card)]');

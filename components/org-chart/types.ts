@@ -10,13 +10,13 @@ export interface HierarchyNode {
 }
 
 export const DEPT_COLORS: Record<string, { bg: string; bgDark: string; border: string; borderDark: string; text: string; textDark: string; dot: string }> = {
-    executive:   { bg: '#f0f4f0', bgDark: '#1a2e1e', border: '#2C5E3B', borderDark: '#A9CBA2', text: '#1a3a22', textDark: '#A9CBA2', dot: '#2C5E3B' },
-    store:       { bg: '#faf8f5', bgDark: '#232E27', border: '#4D6E56', borderDark: '#6a8f72', text: '#2C4D35', textDark: '#b8d4bc', dot: '#4D6E56' },
-    warehouse:   { bg: '#f2f7f2', bgDark: '#1d2c20', border: '#3a6644', borderDark: '#7aab82', text: '#1e4028', textDark: '#9dc4a4', dot: '#3a6644' },
-    finance:     { bg: '#fdf9f0', bgDark: '#2a2618', border: '#8a7340', borderDark: '#c8aa60', text: '#5a4a20', textDark: '#d4bc7a', dot: '#8a7340' },
-    hr_generalist: { bg: '#faf5f0', bgDark: '#2a2018', border: '#8a5a30', borderDark: '#c47840', text: '#5a3018', textDark: '#d4945a', dot: '#8a5a30' },
-    procurement: { bg: '#f5f8f5', bgDark: '#1e2c22', border: '#567a5e', borderDark: '#8ab492', text: '#2a4e32', textDark: '#a8c8b0', dot: '#567a5e' },
-    support:     { bg: '#f5f5f3', bgDark: '#21271e', border: '#6b7a6e', borderDark: '#8ea090', text: '#3a4a3c', textDark: '#9eb0a0', dot: '#6b7a6e' },
+    executive: { bg: 'var(--theme-bg-subtle)', bgDark: 'var(--theme-bg-subtle)', border: 'var(--theme-border)', borderDark: 'var(--theme-border)', text: 'var(--theme-text-primary)', textDark: 'var(--theme-text-primary)', dot: 'var(--theme-chart-1)' },
+    store: { bg: 'var(--theme-bg-subtle)', bgDark: 'var(--theme-bg-subtle)', border: 'var(--theme-border)', borderDark: 'var(--theme-border)', text: 'var(--theme-text-primary)', textDark: 'var(--theme-text-primary)', dot: 'var(--theme-chart-2)' },
+    warehouse: { bg: 'var(--theme-bg-subtle)', bgDark: 'var(--theme-bg-subtle)', border: 'var(--theme-border)', borderDark: 'var(--theme-border)', text: 'var(--theme-text-primary)', textDark: 'var(--theme-text-primary)', dot: 'var(--theme-chart-5)' },
+    finance: { bg: 'var(--theme-bg-subtle)', bgDark: 'var(--theme-bg-subtle)', border: 'var(--theme-border)', borderDark: 'var(--theme-border)', text: 'var(--theme-text-primary)', textDark: 'var(--theme-text-primary)', dot: 'var(--theme-chart-3)' },
+    hr_generalist: { bg: 'var(--theme-bg-subtle)', bgDark: 'var(--theme-bg-subtle)', border: 'var(--theme-border)', borderDark: 'var(--theme-border)', text: 'var(--theme-text-primary)', textDark: 'var(--theme-text-primary)', dot: 'var(--theme-chart-4)' },
+    procurement: { bg: 'var(--theme-bg-subtle)', bgDark: 'var(--theme-bg-subtle)', border: 'var(--theme-border)', borderDark: 'var(--theme-border)', text: 'var(--theme-text-primary)', textDark: 'var(--theme-text-primary)', dot: 'var(--theme-chart-2)' },
+    support: { bg: 'var(--theme-bg-subtle)', bgDark: 'var(--theme-bg-subtle)', border: 'var(--theme-border)', borderDark: 'var(--theme-border)', text: 'var(--theme-text-primary)', textDark: 'var(--theme-text-primary)', dot: 'var(--theme-chart-7)' },
 };
 
 export const ROLE_LABELS: Record<string, string> = {
@@ -71,19 +71,19 @@ export const CARD_SIZES: Record<string, { width: number; height: number; level: 
 };
 
 export const ROLE_COLORS: Record<string, string> = {
-    regional_operations_manager: '#3b82f6',
-    store_manager: '#14b8a6',
-    warehouse_manager: '#14b8a6',
-    inventory_manager: '#0d9488',
-    buyer: '#d97706',
-    demand_planner: '#7c3aed',
-    replenishment_planner: '#7c3aed',
-    fleet_maintenance_supervisor: '#4f46e5',
-    treasury_officer: '#10b981',
-    tax_compliance_officer: '#0d9488',
-    credit_control_officer: '#059669',
-    store_operations_auditor: '#8b5cf6',
-    default: '#64748b',
+    regional_operations_manager: 'var(--theme-chart-1)',
+    store_manager: 'var(--theme-chart-2)',
+    warehouse_manager: 'var(--theme-chart-5)',
+    inventory_manager: 'var(--theme-chart-2)',
+    buyer: 'var(--theme-chart-3)',
+    demand_planner: 'var(--theme-chart-4)',
+    replenishment_planner: 'var(--theme-chart-4)',
+    fleet_maintenance_supervisor: 'var(--theme-chart-1)',
+    treasury_officer: 'var(--theme-chart-2)',
+    tax_compliance_officer: 'var(--theme-chart-5)',
+    credit_control_officer: 'var(--theme-chart-2)',
+    store_operations_auditor: 'var(--theme-chart-4)',
+    default: 'var(--theme-chart-7)',
 };
 
 export const HIERARCHY_TREE: HierarchyNode[] = [

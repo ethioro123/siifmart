@@ -12,7 +12,7 @@ export function useApproveBarcodeMutation() {
             return await barcodeApprovalsService.approve(id, userId);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['barcodeApprovals'] });
+            queryClient.invalidateQueries({ queryKey: ['barcode_approvals'] });
             queryClient.invalidateQueries({ queryKey: ['products'] });
             addNotification('success', 'Barcode mapping approved');
         },
@@ -32,7 +32,7 @@ export function useRejectBarcodeMutation() {
             return await barcodeApprovalsService.reject(id, userId, reason);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['barcodeApprovals'] });
+            queryClient.invalidateQueries({ queryKey: ['barcode_approvals'] });
             queryClient.invalidateQueries({ queryKey: ['products'] });
             addNotification('success', 'Barcode mapping rejected and reverted');
         },

@@ -116,7 +116,7 @@ export const FinancialSection = ({
                                     <XAxis type="number" hide />
                                     <YAxis dataKey="name" type="category" width={80} tick={{ fill: chartAxisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
                                     <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '12px' }} itemStyle={{ color: tooltipText }} />
-                                    <Bar dataKey="value" fill="#5E5CE6" barSize={12} radius={[0, 4, 4, 0]} />
+                                    <Bar dataKey="value" fill="var(--theme-chart-1)" barSize={12} radius={[0, 4, 4, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>

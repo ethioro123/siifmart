@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { barcodeApprovalsService } from '../services/supabase.service';
 import { BarcodeApprovalSchema } from '../schemas/inventory.schema';
 import { BarcodeApproval } from '../types';
+import { useData } from '../contexts/DataContext';
 import { logger } from '../utils/logger';
 
 interface UseBarcodeApprovalsOptions {
@@ -11,18 +12,20 @@ interface UseBarcodeApprovalsOptions {
 }
 
 export function useBarcodeApprovalsQuery(options: UseBarcodeApprovalsOptions = {}) {
-    const { siteId, status = 'logged', enabled = true } = options;
+    const { siteId, status, enabled = true } = options;
+    const { activeSite, settings } = useData();
+    const countryCode = activeSite?.country || settings.country;
 
     return useQuery({
-        queryKey: ['barcode_approvals', siteId, status],
+        queryKey: ['barcode_approvals', countryCode, siteId, status],
         queryFn: async () => {
             // Fetch from audit log service (siteId optional)
-            const data = await barcodeApprovalsService.getAuditLog(siteId);
+            const data = await barcodeApprovalsService.getAuditLog(siteId, countryCode);
 
             if (!data) return [];
 
             // Accuracy: Validate each record with Zod
-            return data.map(raw => {
+            return data.filter(raw => !status || raw.status === status).map(raw => {
                 const result = BarcodeApprovalSchema.safeParse(raw);
                 if (!result.success) {
                     logger.warn('useBarcodeApprovalsQuery', '⚠️ Barcode Approval Schema Validation Failed:', {
@@ -45,7 +48,7 @@ export function useBarcodeApprovalsQuery(options: UseBarcodeApprovalsOptions = {
                 } as BarcodeApproval;
             });
         },
-        enabled: enabled,
+        enabled: enabled && !!countryCode,
         staleTime: 1000 * 60 * 2, // 2 minutes stale time for audit data
     });
 }

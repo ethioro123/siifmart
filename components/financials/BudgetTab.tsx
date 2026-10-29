@@ -75,8 +75,10 @@ export const BudgetTab: React.FC = () => {
             }
         });
 
-        // Apple System Palette for department distribution
-        const palette = ['#0071E3', '#34C759', '#FF9500', '#AF52DE', '#30B0C7', '#FF3B30'];
+        const palette = [
+            'var(--theme-chart-1)', 'var(--theme-chart-2)', 'var(--theme-chart-3)',
+            'var(--theme-chart-4)', 'var(--theme-chart-5)', 'var(--theme-chart-6)'
+        ];
 
         return Array.from(deptMap.entries())
             .map(([dept, data], idx) => ({
@@ -123,8 +125,8 @@ export const BudgetTab: React.FC = () => {
                                 <Legend
                                     wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }}
                                 />
-                                <Bar dataKey="income" fill="#0071E3" radius={[4, 4, 0, 0]} barSize={20} name="Revenue" />
-                                <Line type="monotone" dataKey="expense" stroke="#FF9500" strokeWidth={2} dot={{ r: 3 }} name="Actual Spend" />
+                                <Bar dataKey="income" fill="var(--theme-chart-1)" radius={[4, 4, 0, 0]} barSize={20} name="Revenue" />
+                                <Line type="monotone" dataKey="expense" stroke="var(--theme-chart-3)" strokeWidth={2} dot={{ r: 3 }} name="Actual Spend" />
                             </ComposedChart>
                         </ResponsiveContainer>
                     </div>
@@ -289,7 +291,7 @@ export const BudgetTab: React.FC = () => {
                                         color: 'var(--theme-text-primary)'
                                     }}
                                 />
-                                <Area type="monotone" dataKey="projectedRevenue" stroke="#AF52DE" fillOpacity={0.12} fill="#AF52DE" name="Projected Cash" />
+                                <Area type="monotone" dataKey="projectedRevenue" stroke="var(--theme-chart-4)" fillOpacity={0.12} fill="var(--theme-chart-4)" name="Projected Cash" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>

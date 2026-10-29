@@ -129,14 +129,14 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                     <div className="w-full h-[250px]">
                         <ResponsiveContainer width="100%" height={280}>
                             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                                <PolarGrid stroke="#333" />
-                                <PolarAngleAxis dataKey="subject" tick={{ fill: '#999', fontSize: 10 }} />
+                                <PolarGrid stroke="var(--theme-border)" />
+                                <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--theme-text-muted)', fontSize: 10 }} />
                                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                                 <Radar
                                     name="Performance"
                                     dataKey="A"
-                                    stroke="#10b981"
-                                    fill="#10b981"
+                                    stroke="var(--theme-chart-2)"
+                                    fill="var(--theme-chart-2)"
                                     fillOpacity={0.5}
                                 />
                             </RadarChart>
