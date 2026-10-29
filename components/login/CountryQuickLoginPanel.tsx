@@ -144,7 +144,7 @@ export function CountryQuickLoginPanel({
       case 'Distribution Center':
         return <Truck size={13} className={`shrink-0 ${iconColor}`} />;
       default:
-        return <Building2 size={13} className="shrink-0 text-stone-500" />;
+        return <Building2 size={13} className="shrink-0 text-[var(--theme-text-secondary)]" />;
     }
   };
 
@@ -160,27 +160,27 @@ export function CountryQuickLoginPanel({
       case 6:
       case 7:
       case 8:
-        return 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]';
+        return 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]';
       case 9:
-        return 'bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]';
+        return 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]';
       case 10:
       default:
-        return 'bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/30';
+        return 'bg-[var(--theme-status-neutral-bg)] text-[var(--theme-status-neutral-text)] border border-[var(--theme-status-neutral-border)]';
     }
   };
 
   const isEthiopia = country === 'ET';
   const badgeColor = isEthiopia
-    ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
-    : 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';
+    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
+    : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';
 
   return (
-    <div role="region" aria-label={title} className="w-full lg:w-[360px] xl:w-[390px] bg-white/85 dark:bg-[var(--theme-bg-panel)]/60 border border-[var(--theme-border)] border-[var(--theme-status-success-border)] rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[750px] max-h-[90vh] transition-all duration-300">
+    <div role="region" aria-label={title} className="w-full lg:w-[360px] xl:w-[390px] bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-[28px] p-4 sm:p-5 shadow-sm flex flex-col h-[750px] max-h-[90vh] transition-all duration-300">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]/50 dark:border-white/[0.06]">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border-subtle)]">
         <div className="flex items-center gap-2">
-          <ShieldCheck size={16} className={isEthiopia ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]'} />
-          <h3 className="text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] tracking-tight">
+          <ShieldCheck size={16} className={isEthiopia ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-primary)]'} />
+          <h3 className="text-xs font-bold text-[var(--theme-text-primary)] tracking-tight">
             {title}
           </h3>
         </div>
@@ -193,19 +193,19 @@ export function CountryQuickLoginPanel({
 
       {/* Search Input with Clear Button */}
       <div className="relative mt-3 mb-2">
-        <Search size={12} className="absolute left-3 top-2.5 text-stone-400" />
+        <Search size={12} className="absolute left-3 top-2.5 text-[var(--theme-text-muted)]" />
         <input
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles, titles, or sites...`}
-          className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-stone-100/70 dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/[0.06] focus:outline-none focus:border-[var(--theme-border)] dark:focus:border-[var(--theme-border)] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
+          className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:outline-none focus:border-[var(--theme-border-focus)] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)]"
         />
         {searchQuery && (
           <button
             type="button"
             onClick={() => setSearchQuery('')}
-            className="absolute right-2.5 top-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer"
+            className="absolute right-2.5 top-2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] cursor-pointer"
             aria-label="Clear search"
           >
             <X size={12} />
@@ -221,8 +221,8 @@ export function CountryQuickLoginPanel({
             onClick={() => setRoleFilter('ALL')}
             className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-colors cursor-pointer shrink-0 border ${
               roleFilter === 'ALL'
-                ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] border-transparent font-bold'
-                : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-stone-400 border-stone-200/60 dark:border-white/[0.06] hover:bg-stone-200 dark:hover:bg-white/[0.08]'
+                ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-transparent font-bold'
+                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
             }`}
           >
             All Roles
@@ -240,8 +240,8 @@ export function CountryQuickLoginPanel({
                 onClick={() => setRoleFilter(active ? 'ALL' : chip.id)}
                 className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-all cursor-pointer shrink-0 flex items-center gap-1 border ${
                   active
-                    ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] border-transparent font-bold shadow-xs'
-                    : 'bg-stone-100/70 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/50 dark:border-white/[0.05] hover:bg-stone-200/60 dark:hover:bg-white/[0.06]'
+                    ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-transparent font-bold shadow-xs'
+                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] border-[var(--theme-border-subtle)] hover:bg-[var(--theme-bg-card-hover)]'
                 }`}
               >
                 <span>{chip.label}</span>
@@ -273,8 +273,8 @@ export function CountryQuickLoginPanel({
               }}
               className={`py-1 px-1 text-[10px] font-semibold rounded-lg transition-colors cursor-pointer text-center truncate ${
                 active
-                  ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)]'
-                  : 'bg-stone-100 dark:bg-white/[0.05] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.08]'
+                  ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)]'
+                  : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card-hover)]'
               }`}
             >
               {tab.label}
@@ -307,10 +307,10 @@ export function CountryQuickLoginPanel({
                 active
                   ? siteTheme
                     ? `${siteTheme.badge} font-bold shadow-xs`
-                    : 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] border-transparent'
+                    : 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-transparent'
                   : siteTheme
-                    ? `${siteTheme.bgLight} ${siteTheme.nameColor} border-stone-200/60 dark:border-white/[0.06] hover:bg-stone-100 dark:hover:bg-white/[0.06]`
-                    : 'bg-stone-50/80 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/80 dark:border-white/[0.07] hover:bg-stone-100 dark:hover:bg-white/[0.06]'
+                    ? `${siteTheme.bgLight} ${siteTheme.nameColor} border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]`
+                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
               }`}
             >
               {sub.label}
@@ -331,8 +331,8 @@ export function CountryQuickLoginPanel({
               onClick={() => setLevelFilter(lvl)}
               className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-colors cursor-pointer text-center shrink-0 border ${
                 active
-                  ? 'bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-900 border-transparent'
-                  : 'bg-transparent text-stone-500 dark:text-stone-400 border-stone-200 dark:border-white/[0.08] hover:bg-stone-100 dark:hover:bg-white/[0.04]'
+                  ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent'
+                  : 'bg-transparent text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
               }`}
             >
               {label}
@@ -343,9 +343,9 @@ export function CountryQuickLoginPanel({
 
       {/* Active Filter Counter */}
       {(roleFilter !== 'ALL' || tierFilter !== 'ALL' || levelFilter !== 'ALL' || searchQuery) && (
-        <div className="flex items-center justify-between text-[10px] text-stone-500 dark:text-stone-400 px-1 mb-1.5">
+        <div className="flex items-center justify-between text-[10px] text-[var(--theme-text-secondary)] px-1 mb-1.5">
           <span>
-            Showing <strong className="text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">{totalFilteredAccounts}</strong> roles
+            Showing <strong className="text-[var(--theme-text-primary)]">{totalFilteredAccounts}</strong> roles
           </span>
           <button
             type="button"
@@ -356,7 +356,7 @@ export function CountryQuickLoginPanel({
               setOpsSiteFilter('ALL_OPS');
               setLevelFilter('ALL');
             }}
-            className="text-[9px] font-semibold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] hover:underline cursor-pointer"
+            className="text-[9px] font-semibold text-[var(--theme-primary)] hover:underline cursor-pointer"
           >
             Reset filters
           </button>
@@ -369,19 +369,19 @@ export function CountryQuickLoginPanel({
           <p className="text-xs text-[var(--theme-text-secondary)] py-4">Loading test employees…</p>
         ) : error ? (
           <div role="alert" className="text-center py-6 px-3 space-y-2">
-            <p className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-medium">{error.message}</p>
+            <p className="text-xs text-[var(--theme-status-danger-text)] font-medium">{error.message}</p>
             <button
               type="button"
               onClick={() => refetch()}
-              className="px-3 py-1 text-xs font-semibold rounded-lg bg-stone-100 dark:bg-white/[0.08] hover:bg-stone-200 dark:hover:bg-white/[0.12] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] transition-colors cursor-pointer border border-[var(--theme-border)]/60 dark:border-white/[0.06]"
+              className="px-3 py-1 text-xs font-semibold rounded-lg bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] transition-colors cursor-pointer border border-[var(--theme-border)]"
             >
               Retry loading
             </button>
           </div>
         ) : filteredGroups.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-xs text-stone-400">No matching roles found.</p>
-            <p className="text-[10px] text-stone-500 mt-1">Try adjusting the role chip or search text.</p>
+            <p className="text-xs text-[var(--theme-text-muted)]">No matching roles found.</p>
+            <p className="text-[10px] text-[var(--theme-text-secondary)] mt-1">Try adjusting the role chip or search text.</p>
           </div>
         ) : (
           filteredGroups.map(site => {
@@ -389,12 +389,12 @@ export function CountryQuickLoginPanel({
             return (
               <div
                 key={site.siteCode}
-                className={`rounded-2xl border border-[var(--theme-border)]/60 dark:border-white/[0.06] ${siteTheme.borderLeft} ${siteTheme.bgLight} p-2.5 space-y-2 transition-all`}
+                className={`rounded-2xl border border-[var(--theme-border)] ${siteTheme.borderLeft} ${siteTheme.bgLight} p-2.5 space-y-2 transition-all`}
               >
                 {/* Site Header: Color on site name, site type badge, and prominent worker count */}
-                <div className="flex items-center justify-between pb-1.5 border-b border-[var(--theme-border)]/40 dark:border-white/[0.06]">
+                <div className="flex items-center justify-between pb-1.5 border-b border-[var(--theme-border-subtle)]">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="p-1 rounded-md bg-white/70 dark:bg-black/30 shadow-xs">
+                    <span className="p-1 rounded-md bg-[var(--theme-bg-subtle)] shadow-xs">
                       {getSiteIcon(site.siteType, siteTheme.iconColor)}
                     </span>
                     <span className={`text-[11.5px] font-bold ${siteTheme.nameColor} truncate`}>
@@ -408,7 +408,7 @@ export function CountryQuickLoginPanel({
                     <span className={`text-[9px] font-bold px-2 py-0.2 rounded-full border ${siteTheme.countBadge}`}>
                       {site.accounts.length} {site.accounts.length === 1 ? 'Worker' : 'Workers'}
                     </span>
-                    <span className="text-[9px] font-mono tabular-nums font-semibold text-stone-400 dark:text-stone-500">
+                    <span className="text-[9px] font-mono tabular-nums font-semibold text-[var(--theme-text-muted)]">
                       {site.siteCode}
                     </span>
                   </div>
@@ -422,12 +422,12 @@ export function CountryQuickLoginPanel({
                       type="button"
                       disabled={disabled}
                       onClick={() => onSelectAccount(acc.email)}
-                      className={`w-full p-2.5 text-left bg-white/90 dark:bg-black/40 hover:bg-stone-50 dark:hover:bg-white/[0.06] border border-[var(--theme-border)]/70 dark:border-white/[0.07] ${siteTheme.borderCard} rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs`}
+                      className={`w-full p-2.5 text-left bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] ${siteTheme.borderCard} rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs`}
                     >
                       <div className="flex flex-col min-w-0 pr-2">
                         <div className="flex items-center gap-1.5">
                           {/* Clean Worker Role Title without rainbow color pills */}
-                          <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-primary)] dark:group-hover:text-white transition-colors truncate">
+                          <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] group-hover:text-[var(--theme-accent)] transition-colors truncate">
                             {acc.role}
                           </span>
                           <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
@@ -435,17 +435,17 @@ export function CountryQuickLoginPanel({
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[11px] font-bold text-stone-800 dark:text-stone-100 truncate">
+                          <span className="text-[11px] font-bold text-[var(--theme-text-primary)] truncate">
                             {acc.name}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[8.5px] font-mono tabular-nums font-semibold text-stone-500 dark:text-stone-400">
+                        <span className="text-[8.5px] font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)]">
                           {acc.code}
                         </span>
-                        <UserCheck size={11} className="text-stone-300 dark:text-stone-600 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[var(--theme-text-secondary)] transition-colors" />
+                        <UserCheck size={11} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-primary)] transition-colors" />
                       </div>
                     </button>
                   ))}
@@ -457,8 +457,8 @@ export function CountryQuickLoginPanel({
       </div>
 
       {/* Footer hint */}
-      <div className="pt-2 border-t border-[var(--theme-border)]/40 dark:border-white/[0.05] text-center">
-        <span className="text-[9px] text-stone-400 dark:text-stone-500 font-mono">
+      <div className="pt-2 border-t border-[var(--theme-border-subtle)] text-center">
+        <span className="text-[9px] text-[var(--theme-text-muted)] font-mono">
           Select an employee to sign in to staging
         </span>
       </div>

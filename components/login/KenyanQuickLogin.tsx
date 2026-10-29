@@ -54,12 +54,12 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
       case 6:
       case 7:
       case 8:
-        return 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]';
+        return 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]';
       case 9:
-        return 'bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]';
+        return 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]';
       case 10:
       default:
-        return 'bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/30';
+        return 'bg-[var(--theme-status-neutral-bg)] text-[var(--theme-status-neutral-text)] border border-[var(--theme-status-neutral-border)]';
     }
   };
 
@@ -141,26 +141,26 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
   if (!isLocalhost) return null;
 
   return (
-    <div className="mt-6 pt-5 border-t border-[var(--theme-border)]/50 dark:border-white/[0.06]">
+    <div className="mt-6 pt-5 border-t border-[var(--theme-border-subtle)]">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-stone-100/70 dark:bg-white/[0.03] hover:bg-stone-200/60 dark:hover:bg-white/[0.06] border border-[var(--theme-border)]/60 dark:border-white/[0.06] transition-all duration-200 cursor-pointer select-none group"
+        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] transition-all duration-200 cursor-pointer select-none group"
       >
         <div className="flex items-center gap-2">
-          <ShieldCheck size={14} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
-          <span className="text-xs font-semibold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">
+          <ShieldCheck size={14} className="text-[var(--theme-primary)]" />
+          <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
             Staging Quick Login
           </span>
-          <span className="text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-md bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary-muted)]/15 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">
+          <span className="text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-md bg-[var(--theme-primary-muted)] text-[var(--theme-primary)]">
             {accounts.length} Roles
           </span>
         </div>
         {isOpen ? (
-          <ChevronUp size={14} className="text-stone-500 dark:text-stone-400 transition-transform" />
+          <ChevronUp size={14} className="text-[var(--theme-text-secondary)] transition-transform" />
         ) : (
-          <ChevronDown size={14} className="text-stone-500 dark:text-stone-400 transition-transform" />
+          <ChevronDown size={14} className="text-[var(--theme-text-secondary)] transition-transform" />
         )}
       </button>
 
@@ -176,8 +176,8 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                   onClick={() => setCountryFilter(f)}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer ${
                     countryFilter === f
-                      ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] font-bold'
-                      : 'bg-stone-100 dark:bg-white/[0.05] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.1]'
+                      ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] font-bold'
+                      : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card-hover)]'
                   }`}
                 >
                   {f === 'ALL' ? `All (${accounts.length})` : `${f === 'KE' ? 'Kenya' : 'Ethiopia'} (${accounts.filter(a => a.country === f).length})`}
@@ -186,19 +186,19 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
             </div>
 
             <div className="relative">
-              <Search size={12} className="absolute left-2.5 top-2.5 text-stone-400" />
+              <Search size={12} className="absolute left-2.5 top-2.5 text-[var(--theme-text-muted)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search role, name, facility (e.g. cashier, picker)..."
-                className="w-full pl-7 pr-7 py-1.5 text-xs rounded-lg bg-white/80 dark:bg-black/40 border border-[var(--theme-border)]/60 dark:border-white/[0.08] focus:outline-none focus:border-[var(--theme-border)] dark:focus:border-[var(--theme-border)] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
+                className="w-full pl-7 pr-7 py-1.5 text-xs rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:outline-none focus:border-[var(--theme-border-focus)] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)]"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer"
+                  className="absolute right-2.5 top-2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] cursor-pointer"
                   aria-label="Clear search"
                 >
                   <X size={12} />
@@ -213,8 +213,8 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                 onClick={() => setRoleFilter('ALL')}
                 className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-colors cursor-pointer shrink-0 border ${
                   roleFilter === 'ALL'
-                    ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] border-transparent font-bold'
-                    : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-stone-400 border-stone-200/60 dark:border-white/[0.06]'
+                    ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-transparent font-bold'
+                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                 }`}
               >
                 All Roles
@@ -232,8 +232,8 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                     onClick={() => setRoleFilter(active ? 'ALL' : chip.id)}
                     className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-all cursor-pointer shrink-0 flex items-center gap-1 border ${
                       active
-                        ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] border-transparent font-bold shadow-xs'
-                        : 'bg-stone-100/70 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/50 dark:border-white/[0.05]'
+                        ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-transparent font-bold shadow-xs'
+                        : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] border-[var(--theme-border-subtle)]'
                     }`}
                   >
                     <span>{chip.label}</span>
@@ -245,7 +245,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
 
             {/* Filter Count summary */}
             {(roleFilter !== 'ALL' || searchQuery || countryFilter !== 'ALL') && (
-              <div className="flex items-center justify-between text-[10px] text-stone-500 px-0.5">
+              <div className="flex items-center justify-between text-[10px] text-[var(--theme-text-secondary)] px-0.5">
                 <span>Showing <strong>{totalFilteredAccounts}</strong> roles</span>
                 <button
                   type="button"
@@ -254,7 +254,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                     setRoleFilter('ALL');
                     setCountryFilter('ALL');
                   }}
-                  className="text-[9px] font-semibold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] hover:underline cursor-pointer"
+                    className="text-[9px] font-semibold text-[var(--theme-primary)] hover:underline cursor-pointer"
                 >
                   Reset
                 </button>
@@ -267,27 +267,27 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
               <p className="text-xs text-[var(--theme-text-secondary)] py-4">Loading test employees…</p>
             ) : error ? (
               <div role="alert" className="text-center py-4 space-y-1.5">
-                <p className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-medium">{error.message}</p>
+                <p className="text-xs text-[var(--theme-status-danger-text)] font-medium">{error.message}</p>
                 <button
                   type="button"
                   onClick={() => refetch()}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-stone-100 dark:bg-white/[0.08] hover:bg-stone-200 dark:hover:bg-white/[0.12] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] transition-colors cursor-pointer border border-[var(--theme-border)]/60 dark:border-white/[0.06]"
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] transition-colors cursor-pointer border border-[var(--theme-border)]"
                 >
                   Retry loading
                 </button>
               </div>
             ) : groupedSites.length === 0 ? (
-              <p className="text-xs text-stone-400 text-center py-4">No matching roles found.</p>
+              <p className="text-xs text-[var(--theme-text-muted)] text-center py-4">No matching roles found.</p>
             ) : (
               groupedSites.map(site => {
                 const siteTheme = getSiteTheme(site.siteType as StagingSiteType);
                 return (
                   <div
                     key={site.siteCode}
-                    className={`rounded-xl border border-[var(--theme-border)]/60 dark:border-white/[0.06] ${siteTheme.borderLeft} ${siteTheme.bgLight} p-2 space-y-1.5`}
+                    className={`rounded-xl border border-[var(--theme-border)] ${siteTheme.borderLeft} ${siteTheme.bgLight} p-2 space-y-1.5`}
                   >
                     {/* Site Header: Color on site name, site type badge, and prominent worker count */}
-                    <div className="flex items-center justify-between pb-1 border-b border-[var(--theme-border)]/40 dark:border-white/[0.05]">
+                    <div className="flex items-center justify-between pb-1 border-b border-[var(--theme-border-subtle)]">
                       <div className="flex items-center gap-1.5 min-w-0">
                         {getSiteIcon(site.siteType, siteTheme.iconColor)}
                         <span className={`text-[11px] font-bold ${siteTheme.nameColor} truncate`}>
@@ -301,7 +301,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                         <span className={`text-[8.5px] font-bold px-1.5 py-0.2 rounded-full border ${siteTheme.countBadge}`}>
                           {site.accounts.length} {site.accounts.length === 1 ? 'Worker' : 'Workers'}
                         </span>
-                        <span className="text-[9px] font-mono tabular-nums font-semibold text-stone-500 dark:text-stone-400">
+                        <span className="text-[9px] font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)]">
                           {site.siteCode}
                         </span>
                       </div>
@@ -314,24 +314,24 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                           type="button"
                           disabled={disabled}
                           onClick={() => onSelectAccount(acc.email)}
-                          className={`p-2 text-left bg-white/85 dark:bg-black/35 hover:bg-stone-50 dark:hover:bg-white/[0.05] border border-[var(--theme-border)]/60 dark:border-white/[0.06] ${siteTheme.borderCard} rounded-xl transition-all duration-200 flex flex-col justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
+                          className={`p-2 text-left bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] ${siteTheme.borderCard} rounded-xl transition-all duration-200 flex flex-col justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                           <div className="flex items-start justify-between gap-1 w-full">
-                            <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-primary)] dark:group-hover:text-white transition-colors truncate">
+                            <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] group-hover:text-[var(--theme-accent)] transition-colors truncate">
                               {acc.role}
                             </span>
                             <div className="flex items-center gap-1 shrink-0">
                               <span className={`text-[8px] font-bold px-1 py-0.2 rounded shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
                                 Rank L{acc.level}
                               </span>
-                              <UserCheck size={10} className="text-stone-400 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[var(--theme-text-secondary)] transition-colors" />
+                              <UserCheck size={10} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-primary)] transition-colors" />
                             </div>
                           </div>
                           <div className="flex items-center justify-between w-full mt-1">
-                            <span className="text-[10px] font-bold text-stone-800 dark:text-stone-100 truncate max-w-[130px]">
+                            <span className="text-[10px] font-bold text-[var(--theme-text-primary)] truncate max-w-[130px]">
                               {acc.name}
                             </span>
-                            <span className="text-[8px] font-mono tabular-nums text-stone-400 dark:text-stone-500 shrink-0">
+                            <span className="text-[8px] font-mono tabular-nums text-[var(--theme-text-muted)] shrink-0">
                               {acc.code}
                             </span>
                           </div>

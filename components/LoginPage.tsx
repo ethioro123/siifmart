@@ -85,7 +85,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-[var(--theme-bg-app)] dark:bg-[#000000] transition-colors duration-300"
+      className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-[var(--theme-bg-app)] transition-colors duration-300"
       style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)' }}
     >
 
@@ -110,14 +110,14 @@ export default function LoginPage() {
         )}
 
         {/* Center: Main Login Card */}
-        <div className="max-w-[440px] w-full shrink-0 bg-white dark:bg-[#111111] border border-stone-200 dark:border-white/10 rounded-[32px] p-8 sm:p-10 relative z-10 shadow-2xl transition-all duration-300">
+        <div className="max-w-[440px] w-full shrink-0 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-3xl p-8 sm:p-10 relative z-10 shadow-2xl transition-all duration-300">
 
           {/* Header Branding section */}
           <div className="flex flex-col items-center justify-center mb-6">
             <div className="mb-2 select-none flex flex-col items-center">
               <Logo variant="stacked" size={32} className="justify-center" />
             </div>
-            <p className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-[0.25em] font-bold mt-1 select-none text-center px-4">
+            <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-[0.25em] font-bold mt-1 select-none text-center px-4">
               {mode === 'login' ? (settings?.slogan || 'Operations Access Portal') : 'Security Recovery'}
             </p>
           </div>
@@ -130,13 +130,13 @@ export default function LoginPage() {
                   type="button"
                   disabled={loading}
                   onClick={() => handleQuickLogin(stagingExecutive.email)}
-                  className="w-full py-2 px-3 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                  className="w-full py-2 px-3 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <Crown size={14} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0" />
+                    <Crown size={14} className="text-[var(--theme-status-warning-text)] shrink-0" />
                     <div className="text-left">
-                      <span className="font-bold text-stone-900 dark:text-white block leading-tight">{stagingExecutive.name || 'Dr. Shukri Idriss'}</span>
-                      <span className="text-[10px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold block">Group Chief Executive Officer • Rank L1</span>
+                      <span className="font-bold text-[var(--theme-text-primary)] block leading-tight">{stagingExecutive.name || 'Dr. Shukri Idriss'}</span>
+                      <span className="text-[10px] text-[var(--theme-status-warning-text)] font-semibold block">Group Chief Executive Officer • Rank L1</span>
                     </div>
                   </div>
                   <span className="text-[10px] font-mono opacity-70 shrink-0">Global HQ</span>
@@ -150,15 +150,15 @@ export default function LoginPage() {
                       type="button"
                       disabled={loading}
                       onClick={() => handleQuickLogin(stagingKeRegionalMgr.email)}
-                      className="py-1.5 px-2.5 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      className="py-1.5 px-2.5 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                       title={`Quick Login: ${stagingKeRegionalMgr.name} (${stagingKeRegionalMgr.role})`}
                     >
                       <div className="flex flex-col items-start min-w-0 pr-1 text-left">
                         <div className="flex items-center gap-1">
                           <span className="text-xs">🇰🇪</span>
-                          <span className="font-bold truncate text-stone-900 dark:text-white">{stagingKeRegionalMgr.name || 'Kamau Ndenga'}</span>
+                          <span className="font-bold truncate text-[var(--theme-text-primary)]">{stagingKeRegionalMgr.name || 'Kamau Ndenga'}</span>
                         </div>
-                        <span className="text-[9.5px] text-stone-500 dark:text-stone-400 truncate">Regional Ops Manager • L4</span>
+                        <span className="text-[9.5px] text-[var(--theme-text-secondary)] truncate">Regional Ops Manager • L4</span>
                       </div>
                       <span className="text-[9px] font-mono opacity-70 shrink-0">Nairobi</span>
                     </button>
@@ -168,15 +168,15 @@ export default function LoginPage() {
                       type="button"
                       disabled={loading}
                       onClick={() => handleQuickLogin(stagingEtRegionalMgr.email)}
-                      className="py-1.5 px-2.5 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      className="py-1.5 px-2.5 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                       title={`Quick Login: ${stagingEtRegionalMgr.name} (${stagingEtRegionalMgr.role})`}
                     >
                       <div className="flex flex-col items-start min-w-0 pr-1 text-left">
                         <div className="flex items-center gap-1">
                           <span className="text-xs">🇪🇹</span>
-                          <span className="font-bold truncate text-stone-900 dark:text-white">{stagingEtRegionalMgr.name || 'Henok Tadesse'}</span>
+                          <span className="font-bold truncate text-[var(--theme-text-primary)]">{stagingEtRegionalMgr.name || 'Henok Tadesse'}</span>
                         </div>
-                        <span className="text-[9.5px] text-stone-500 dark:text-stone-400 truncate">Regional Ops Manager • L4</span>
+                        <span className="text-[9.5px] text-[var(--theme-text-secondary)] truncate">Regional Ops Manager • L4</span>
                       </div>
                       <span className="text-[9px] font-mono opacity-70 shrink-0">Addis</span>
                     </button>
@@ -187,14 +187,14 @@ export default function LoginPage() {
           )}
 
           {error && (
-            <div className="mb-6 p-4 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl flex items-start gap-3 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-xs leading-relaxed animate-fade-in">
+            <div className="mb-6 p-4 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl flex items-start gap-3 text-[var(--theme-status-danger-text)] text-xs leading-relaxed animate-fade-in">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-2xl flex items-start gap-3 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-xs leading-relaxed animate-fade-in">
+            <div className="mb-6 p-4 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-2xl flex items-start gap-3 text-[var(--theme-status-success-text)] text-xs leading-relaxed animate-fade-in">
               <CheckCircle size={16} className="shrink-0 mt-0.5" />
               <span>{success}</span>
             </div>
@@ -202,7 +202,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-2 select-none">
+              <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 select-none">
                 Email Address
               </label>
               <div className="relative">
@@ -210,24 +210,24 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-stone-50 dark:bg-white/5 border border-stone-200 dark:border-white/10 hover:border-stone-400 dark:hover:border-white/20 rounded-2xl px-4 py-3.5 pl-11 text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 focus:border-black dark:focus:border-white focus:ring-4 focus:ring-black/5 dark:focus:ring-white/10 focus:outline-none transition-all duration-300 text-sm"
+                  className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-focus)] rounded-2xl px-4 py-3.5 pl-11 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[var(--theme-border-focus)]/20 focus:outline-none transition-all duration-300 text-sm"
                   placeholder="name@company.com"
                   required
                 />
-                <Mail className="absolute left-4 top-4 text-stone-400 dark:text-stone-500" size={16} />
+                <Mail className="absolute left-4 top-4 text-[var(--theme-text-muted)]" size={16} />
               </div>
             </div>
 
             {mode !== 'forgot' && (
               <div>
                 <div className="flex justify-between items-center mb-2 select-none">
-                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                  <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                     Password
                   </label>
                   <button
                     type="button"
                     onClick={() => { setMode('forgot'); resetForm(); }}
-                    className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
+                    className="text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
                   >
                     Forgot?
                   </button>
@@ -237,15 +237,15 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-stone-50 dark:bg-white/5 border border-stone-200 dark:border-white/10 hover:border-stone-400 dark:hover:border-white/20 rounded-2xl px-4 py-3.5 pl-11 pr-11 text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 focus:border-black dark:focus:border-white focus:ring-4 focus:ring-black/5 dark:focus:ring-white/10 focus:outline-none transition-all duration-300 text-sm"
+                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-focus)] rounded-2xl px-4 py-3.5 pl-11 pr-11 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[var(--theme-border-focus)]/20 focus:outline-none transition-all duration-300 text-sm"
                     placeholder="••••••••"
                     required
                   />
-                  <Lock className="absolute left-4 top-4 text-stone-400 dark:text-stone-500" size={16} />
+                  <Lock className="absolute left-4 top-4 text-[var(--theme-text-muted)]" size={16} />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-4 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors cursor-pointer"
+                    className="absolute right-4 top-4 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -256,7 +256,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black dark:bg-white hover:bg-stone-800 dark:hover:bg-stone-200 active:scale-[0.98] text-white dark:text-black font-semibold py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 mt-8 shadow-sm hover:shadow-md dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer"
+              className="w-full bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] active:scale-[0.98] text-[var(--theme-primary-text)] font-semibold py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 mt-8 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer"
             >
               {loading ? (
                 <>
@@ -271,7 +271,7 @@ export default function LoginPage() {
             {/* Mode switching links */}
             <div className="flex flex-col gap-3 mt-6 text-center select-none">
               {mode === 'login' && (
-                <div className="text-xs text-stone-500 dark:text-stone-400 leading-normal">
+                <div className="text-xs text-[var(--theme-text-secondary)] leading-normal">
                   Need access? Contact your systems manager.
                 </div>
               )}
@@ -279,7 +279,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => { setMode('login'); resetForm(); }}
-                  className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <ArrowLeft size={14} />
                   Back to Sign In
@@ -298,8 +298,8 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div className="mt-8 pt-6 border-t border-[var(--theme-border)]/40 dark:border-white/[0.04] text-center select-none">
-            <p className="text-[10px] text-stone-500 dark:text-stone-400 font-bold tracking-[0.16em] uppercase">SIIFMART Operations v3.6.1</p>
+          <div className="mt-8 pt-6 border-t border-[var(--theme-border-subtle)] text-center select-none">
+            <p className="text-[10px] text-[var(--theme-text-secondary)] font-bold tracking-[0.16em] uppercase">SIIFMART Operations v3.6.1</p>
           </div>
         </div>
 
