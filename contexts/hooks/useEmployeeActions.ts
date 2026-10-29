@@ -68,6 +68,10 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             const cashierCode = cashier?.code || undefined;
             const shiftId = crypto.randomUUID();
             const resolvedCounter = counterNumber || 'Counter 1';
+            const counterIndex = Number(resolvedCounter.match(/[0-9]+$/)?.[0] || 1);
+            const terminalId = activeSite?.code
+                ? `${activeSite.code.toUpperCase()}-POS-${String(counterIndex).padStart(2, '0')}`
+                : undefined;
 
             // Calculate sequential human-readable shift number (e.g. SHF-0001, SHF-0002)
             const existingNums = (shifts || [])
@@ -91,6 +95,8 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
                 cashier_code: cashierCode,
                 counterNumber: resolvedCounter,
                 counter_number: resolvedCounter,
+                terminalId,
+                terminal_id: terminalId,
                 startTime: new Date().toISOString(),
                 status: 'Open',
                 openingFloat,
@@ -106,14 +112,13 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             await shiftsService.create(shift);
 
             // 2. State update only after successful persistence
-            setShifts(prev => [shift, ...prev.filter(s => !(s.status === 'Open' && (s.cashierId === cashierId || s.counterNumber === resolvedCounter || s.counter_number === resolvedCounter)))]);
+            setShifts(prev => [shift, ...prev]);
 
             const staffBadge = cashierCode ? `${cashierCode} (${staffName})` : staffName;
             addNotification('success', `Shift started on ${resolvedCounter} for ${staffBadge} with ${openingFloat.toLocaleString()} float`);
             logSystemEvent('Start Shift', `Started shift ${formattedShiftNumber} on ${resolvedCounter} for ${staffBadge} with float ${openingFloat}`, staffName, 'HR');
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to start shift:', error as Error);
-            addNotification('alert', 'Failed to start shift in database');
             throw error;
         }
     }, [activeSiteId, activeSite?.id, employees, shifts, addNotification, logSystemEvent, setShifts]);

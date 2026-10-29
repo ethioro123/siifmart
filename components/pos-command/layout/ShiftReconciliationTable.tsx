@@ -179,6 +179,7 @@ export const ShiftReconciliationTable: React.FC = () => {
                                             <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono mt-0.5 font-medium">
                                                 {shift.counterNumber || shift.counter_number || 'Counter 1'}
                                             </div>
+                                            {shift.terminalId && <div className="text-[9px] text-[var(--theme-text-muted)] font-mono mt-0.5">{t('posCommand.counterIdentifier')}: {shift.terminalId}</div>}
                                         </td>
 
                                         {/* Start Time */}

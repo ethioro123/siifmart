@@ -87,6 +87,8 @@ export interface ShiftRecord {
   cashierName: string;
   counterNumber?: string;
   counter_number?: string;
+  terminalId?: string;
+  terminal_id?: string;
   cashierCode?: string;
   cashier_code?: string;
   startTime: string;

@@ -2,6 +2,7 @@ import React from 'react';
 import { Monitor, UserCheck, ShoppingBag, ShieldAlert, Lock, Save, DollarSign, Target, AlertTriangle, Percent } from 'lucide-react';
 import Button from '../shared/Button';
 import { GlassCard, SectionHeader, InputGroup, RadioCard, ToggleRow } from './POSSettingsUI';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface POSStationTabProps {
   workflow: {
@@ -40,6 +41,7 @@ export function POSStationTab({
   currencySymbol = 'ETB',
   isHQAdmin = false,
 }: POSStationTabProps) {
+  const { t } = useLanguage();
   return (
     <div className="space-y-6 transition-opacity duration-200">
       <GlassCard className="p-8">
@@ -51,12 +53,12 @@ export function POSStationTab({
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           <InputGroup
-            label="Terminal Identifier"
+            label={t('pos.countryPosIdentifier')}
             value={workflow.posTerminalId}
             onChange={(e: any) => setWorkflow(prev => ({ ...prev, posTerminalId: e.target.value }))}
             icon={Monitor}
             placeholder="TERM-001"
-            sub="Unique hardware ID for audit trails"
+            sub={t('pos.countryPosIdentifierHelp')}
           />
 
           {/* ── MULTI-COUNTRY: Dynamic currency symbol (RULES.md §3 Settings Separation) ──

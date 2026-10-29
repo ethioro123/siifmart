@@ -253,35 +253,30 @@
 - **Files**: `migrations/20261019_create_pack_after_completed_pick.sql`, `services/wms-jobs.service.ts`, `components/fulfillment/useJobCompletion.ts`, `components/fulfillment/PickTab.tsx`, `tests/services/wmsJobsZeroTrust.test.ts`
 - **Database**: Applied to Staging (`utykzifrblpyxlvlknsm`)
 - **Root Cause**: The client attempted a direct insert into `wms_jobs` after persisting the completed PICK; RLS rejected the follow-up job and the scanner handler left an unhandled rejection.
-
+- 2026-10-30: Purchase requisitions can be reviewed in Approvals with site/country-scoped pagination, on-demand item evidence, independent review checks and server-confirmed decisions.
 ### SKU-Identity Product Labels and Country-Scoped Worker IDs (2026-10-19)
 - Product label barcodes and human-readable codes now use the product SKU consistently across label preview, batch printing, shelf tags, and inbound putaway labels. Catalog barcodes remain available as scan aliases, not as the printed product identity.
 - Employee code allocation uses an atomic country-specific database sequence so RLS-filtered site lists and concurrent hires cannot issue IDs from a stale local maximum.
 - **Files**: `components/LabelPrintModal.tsx`, `components/fulfillment/ReceiveTab.tsx`, `components/fulfillment/assign/AssignLabelHub.tsx`, `services/employees.service.ts`, `hooks/useEmployeeWizard.ts`, `utils/labels/ProductLabelGenerator.ts`, `utils/labels/InboundPutawayLabelGenerator.ts`, `utils/labels/ShelfTagGenerator.ts`, `migrations/20261019_employee_id_sequence_allocator.sql`
 - **Database**: Added private `public.employee_id_sequences` and authorized `reserve_next_employee_code(text)` RPC. Applied to production; staging remains unchanged.
-
 ### WMS Worker Sovereign Landing Page (2026-10-19)
 - All WMS workers and operators now land directly on their primary working tab upon opening Fulfillment (Pickers -> Pick, Packers -> Pack, Drivers -> Driver, Forklift Operators -> Putaway, Receivers & QC -> Receive, Stock Clerks & Inventory Specialists -> Count, Replenishment Planners -> Replenish, Returns Clerks -> Returns, Dispatchers -> Assign, Warehouse Managers -> Docks) instead of defaulting to Receive.
 - Synced the active operational tab with URL search parameters (`/wms-ops?tab=...`), preserving active state across reloads.
 - Mobile segmented controls dynamically elevate the worker's main working tab into the primary 1-tap quick buttons, eliminating unnecessary menu navigation on mobile scanners.
 - **Files**: `utils/fulfillmentTabPermissions.ts`, `pages/Fulfillment.tsx`, `components/fulfillment/FulfillmentContent.tsx`, `components/fulfillment/TabSelectors.tsx`, `tests/utils/fulfillmentTabPermissions.test.ts`
 - **Database**: None
-
 ### Floor-Friendly Picking Scan Flow (2026-10-19)
 - Scanner content now fits the handheld viewport without an internal vertical scroll; duplicate picked history and redundant quantity confirmation are removed. Product scans require an exact current-line SKU or barcode, and location scans require a valid app label code for the assigned bay. The app's location QR payload and official location URL remain accepted.
 - **Files**: `components/fulfillment/pick/PickScanner.tsx`, `components/fulfillment/pick/steps/Step2PickCollect.tsx`, `components/fulfillment/pick/components/PickScannerHeader.tsx`, `components/fulfillment/pick/components/PickScannerInstructionPanel.tsx`, `components/fulfillment/pick/components/PickScannerForm.tsx`, `components/fulfillment/pick/components/PickScannerSubmitButton.tsx`, `components/fulfillment/pick/components/PickScannerSummary.tsx`, `utils/locationEncoder.ts`, `utils/pickScanValidation.ts`, `tests/utils/pickScanValidation.test.ts`
 - **Database**: None
-
 ### Guided Pick Scanning (2026-10-19)
 - The primary pick action now opens the scanner directly. The scanner keeps the current step and item progress visible, anchors scan controls for mobile use, and carries validated barcode scans through to the matching pick line. The alternate entry point is labeled as a guided scanner.
 - **Files**: `components/fulfillment/pick/PickJobModal.tsx`, `components/fulfillment/pick/PickScanner.tsx`, `components/fulfillment/pick/steps/Step2PickCollect.tsx`, `components/fulfillment/pick/components/PickScannerHeader.tsx`, `components/fulfillment/pick/components/PickScannerForm.tsx`, `components/fulfillment/pick/components/PickScannerSubmitButton.tsx`
 - **Root Cause**: The primary action stopped at a pick list, the scanner showed an incorrect step label, mobile controls scrolled out of view, and validated barcodes were passed to the parent in a format its lookup did not consistently accept.
-
 ### Fulfillment Role-Specific Tab Permissions (2026-10-19)
 - Floor workers can access the shared Receive, Putaway, Pick, and Pack operations; only drivers receive the Driver tab. Inventory Specialists can prepare transfer drafts, while warehouse managers and explicitly authorized higher leadership roles approve them. Other specialist tabs remain limited to their authorized roles. WMS roles missing the Fulfillment sidebar or explicit route permission were added, and all route roles have a non-empty role-appropriate tab set. Fleet maintenance also gets read-only inventory access needed for its WMS duties. Fulfillment content checks the selected tab and returns to an allowed tab if the role changes.
 - **Files**: `utils/fulfillmentTabPermissions.ts`, `components/fulfillment/FulfillmentContent.tsx`, `components/Sidebar.tsx`, `utils/permissions.ts`, `services/permissions.matrix.ts`
 - **Root Cause**: Floor worker roles were spread across tabs without distinction by responsibility; some WMS titles lacked navigation or explicit route access; tab bodies rendered from selected state without an access check.
-
 ### Server-Verified POS Sales (2026-10-19)
 - POS sales now use one trusted database transaction that recalculates line prices, tax, discounts, and cash change from database records. Authenticated browser inserts into `sales` and `sale_items` are denied, and financial sale fields cannot be edited after creation.
 - **Files**: `services/sales.service.ts`, `contexts/hooks/useSaleActions.ts`, `hooks/usePosSync.ts`, `components/pos/hooks/usePOSCheckoutActions.ts`, `migrations/20261019_secure_pos_sale_authority.sql`
@@ -501,3 +496,4 @@
 ### Application-wide semantic theme cleanup (2026-10-30)
 - Replaced fixed light/dark palette classes in application UI, loading/error surfaces, org charts and chart series with shared semantic tokens. Native status-bar appearance follows the active theme; fallback UI uses system canvas colors.
 - Fixed colors remain only where they represent physical print/scan output or actual brand and payment-provider artwork.
+- POS shift assignment integrity (2026-10-30): Counter availability is rechecked against the active site in both POS start-shift flows; stale selections and missing sites are blocked, database assignment conflicts are surfaced in English, Amharic and Oromo, and local state no longer hides older open shifts after a new record is created. Every shift now records a stable register identifier derived from the unique site code and configured counter number (for example, `ADD-STR-03-POS-01`); the identifier appears in the assignment picker and reconciliation history. The former “unique hardware ID” setting is clarified as a country-level reference because it does not identify a device. A transaction-locked database trigger prevents concurrent open shifts from reusing a site counter or cashier. Existing duplicate staging shifts are preserved for audit review. Migration: `migrations/20261030_prevent_duplicate_open_pos_shift_assignments.sql`.

@@ -264,6 +264,8 @@ export const pos: TranslationBlock = {
     startCashierShift: { en: 'Start Cashier Shift', am: 'የካሺየር ፈረቃ ጀምር', or: 'Shiftii Kaashiyaraa Jalqabi' },
     assignCounter: { en: 'Assign Physical Counter / Register', am: 'የካውንተር / መመዝገቢያ ይመድቡ', or: 'Kaawuntarii / Kaaza Qarshii Fili' },
     counterIdentifier: { en: 'Counter ID', am: 'የካውንተር መለያ', or: 'Eenyummaa Kaawuntarii' },
+    countryPosIdentifier: { en: 'Country POS Reference', am: 'የአገር POS ማጣቀሻ', or: 'Wabii POS Biyya' },
+    countryPosIdentifierHelp: { en: 'Country-level configuration value. It does not identify a register device; register IDs use the site code and counter number.', am: 'የአገር ደረጃ የማዋቀሪያ እሴት ነው። መሣሪያን አይለይም፤ የመመዝገቢያ መለያዎች የቦታ ኮድንና የካውንተር ቁጥርን ይጠቀማሉ።', or: 'Gatii qindeessa sadarkaa biyyaati. Meeshaa kaawuntarii hin adda baasu; eenyummaan kaawuntarii koodii bakka hojii fi lakkoofsa kaawuntarii fayyadama.' },
     strictMutualExclusion: { en: 'Strict mutual exclusion', am: 'ጥብቅ የተናጠል አጠቃቀም', or: 'Tokko qofaan fayyadama' },
     shiftCounterConflict: { en: 'This counter already has an open shift. Refresh the counter list and choose another.', am: 'ይህ ካውንተር ክፍት ፈረቃ አለው። ዝርዝሩን አድስና ሌላ ይምረጡ።', or: 'Kaawuntariin kun shiftii banaa qaba. Tarree haaromsiitii kan biraa filadhu.' },
     shiftCashierConflict: { en: 'You already have an open shift at this site. Close it before starting another.', am: 'በዚህ ቦታ ክፍት ፈረቃ አለዎት። ሌላ ከመጀመርዎ በፊት ዝጉት።', or: 'Bakka kana shiftii banaa qabda. Kan biraa jalqabuu dura cufi.' },

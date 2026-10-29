@@ -1,3 +1,4 @@
+import { PURCHASE_REQUEST_REVIEWERS } from '../utils/procurementScope';
 import { useApprovalDestination } from '../hooks/useApprovalDestination';
 import React, { useMemo, useState } from 'react';
 import { Check, ClipboardList, Lightbulb, Plus, X, Search, Package, MapPin } from 'lucide-react';
@@ -14,7 +15,7 @@ import { hasPermission } from '../utils/permissions';
 
 type DraftItem = { product_id: string; product_name: string; sku: string; quantity: string };
 const blankItem = (): DraftItem => ({ product_id: '', product_name: '', sku: '', quantity: '1' });
-const requestReviewers = ['buyer', 'regional_procurement_manager', 'country_supply_chain_director'];
+const requestReviewers = PURCHASE_REQUEST_REVIEWERS;
 const suggestionReviewers = [
   'group_ceo', 'country_commercial_director', 'country_supply_chain_director',
   'regional_procurement_manager', 'regional_merchandising_manager', 'buyer',

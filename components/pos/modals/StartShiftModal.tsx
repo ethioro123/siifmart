@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePOS } from '../POSContext';
 import { useStore } from '../../../contexts/CentralStore';
@@ -21,6 +21,7 @@ export const StartShiftModal: React.FC = () => {
     const { isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift, dismissStartShiftModal } = usePOS();
     const [openingFloat, setOpeningFloat] = useState<string>('2000');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     // Dynamic Counter / Station Options based on site configuration
     const counterCount = Math.max(1, activeSite?.terminalCount || (activeSite as any)?.terminal_count || 4);
@@ -31,7 +32,7 @@ export const StartShiftModal: React.FC = () => {
     // Active shifts at this site to determine counter occupancy
     const occupiedCounters = useMemo(() => {
         const siteShifts = (shifts || []).filter(
-            s => s.status === 'Open' && (!activeSite?.id || s.siteId === activeSite.id || s.site_id === activeSite.id)
+            s => Boolean(activeSite?.id) && s.status === 'Open' && (s.siteId === activeSite?.id || s.site_id === activeSite?.id)
         );
         const map = new Map<string, { cashierCode?: string; cashierName?: string }>();
         siteShifts.forEach(s => {
@@ -43,9 +44,20 @@ export const StartShiftModal: React.FC = () => {
         });
         return map;
     }, [shifts, activeSite?.id]);
+    const hasOpenShiftForCashier = useMemo(() => (shifts || []).some(s =>
+        Boolean(activeSite?.id) && s.status === 'Open' &&
+        (s.siteId === activeSite?.id || s.site_id === activeSite?.id) &&
+        (s.cashierId === user?.id || (Boolean(user?.code) && s.cashierId === user?.code))
+    ), [shifts, activeSite?.id, user?.id, user?.code]);
 
     const firstFreeCounter = counterList.find(c => !occupiedCounters.has(c)) || counterList[0];
     const [selectedCounter, setSelectedCounter] = useState<string>(firstFreeCounter);
+
+    useEffect(() => {
+        if (!counterList.includes(selectedCounter) || occupiedCounters.has(selectedCounter)) {
+            setSelectedCounter(firstFreeCounter);
+        }
+    }, [counterList, firstFreeCounter, occupiedCounters, selectedCounter]);
 
     const floatNum = parseFloat(openingFloat) || 0;
 
@@ -61,8 +73,17 @@ export const StartShiftModal: React.FC = () => {
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         if (floatNum < 0 || isSubmitting) return;
+        if (hasOpenShiftForCashier) {
+            setSubmitError(t('pos.shiftCashierConflict'));
+            return;
+        }
+        if (!activeSite?.id) {
+            setSubmitError(t('pos.shiftSiteRequired'));
+            return;
+        }
 
         setIsSubmitting(true);
+        setSubmitError(null);
         try {
             audioFeedback.playSaleComplete();
             native.haptic();
@@ -70,6 +91,15 @@ export const StartShiftModal: React.FC = () => {
             setIsStartShiftModalOpen(false);
         } catch (err) {
             logger.error('StartShiftModal', 'Failed to start shift:', err);
+            const message = err instanceof Error ? err.message : '';
+            const key = message.includes('SHIFT_COUNTER_OCCUPIED')
+                ? 'pos.shiftCounterConflict'
+                : message.includes('SHIFT_CASHIER_ALREADY_OPEN')
+                    ? 'pos.shiftCashierConflict'
+                    : message.includes('SHIFT_SITE_REQUIRED')
+                        ? 'pos.shiftSiteRequired'
+                        : 'pos.shiftStartFailed';
+            setSubmitError(t(key));
         } finally {
             setIsSubmitting(false);
         }
@@ -129,10 +159,11 @@ export const StartShiftModal: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {counterList.map((counter) => {
+                        {counterList.map((counter, index) => {
                             const occ = occupiedCounters.get(counter);
                             const isOccupied = Boolean(occ);
                             const isSelected = selectedCounter === counter && !isOccupied;
+                            const terminalId = `${activeSite?.code?.toUpperCase() || 'SITE'}-POS-${String(index + 1).padStart(2, '0')}`;
 
                             return (
                                 <button
@@ -160,6 +191,7 @@ export const StartShiftModal: React.FC = () => {
                                             <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
                                         )}
                                     </div>
+                                    <span className="text-[9px] font-mono text-[var(--theme-text-secondary)] mt-1">{t('pos.counterIdentifier')}: {terminalId}</span>
                                     <span className="text-[10px] font-mono mt-1">
                                         {isOccupied ? (
                                             <span className="text-[var(--theme-status-danger-text)] font-semibold truncate block">
@@ -173,6 +205,8 @@ export const StartShiftModal: React.FC = () => {
                             );
                         })}
                     </div>
+                    {hasOpenShiftForCashier && <p role="status" className="text-xs font-medium text-[var(--theme-status-warning-text)]">{t('pos.shiftCashierConflict')}</p>}
+                    {submitError && <p role="alert" className="text-xs font-medium text-[var(--theme-status-danger-text)]">{submitError}</p>}
                 </div>
 
                 {/* Opening Cash Float Input */}
@@ -240,7 +274,7 @@ export const StartShiftModal: React.FC = () => {
 
                     <button
                         type="submit"
-                        disabled={floatNum < 0 || isSubmitting}
+                        disabled={floatNum < 0 || isSubmitting || !activeSite?.id || occupiedCounters.has(selectedCounter) || hasOpenShiftForCashier}
                         className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer border border-transparent tracking-tight"
                     >
                         <DollarSign size={15} />

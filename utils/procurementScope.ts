@@ -44,3 +44,5 @@ export function filterProcurementSites<T extends ProcurementSite>(
         ))
     ));
 }
+
+export const PURCHASE_REQUEST_REVIEWERS: readonly string[] = ['buyer', 'regional_procurement_manager', 'country_supply_chain_director'];
