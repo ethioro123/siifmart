@@ -2,6 +2,9 @@ import React, { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
+let openDialogCount = 0;
+let bodyOverflowBeforeDialogs = '';
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -38,13 +41,21 @@ export default function Modal({
   useEffect(() => {
     if (!isOpen) return;
     const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const previousOverflow = document.body.style.overflow;
+    if (openDialogCount === 0) {
+      bodyOverflowBeforeDialogs = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+    openDialogCount += 1;
+    const modalRoot = dialogRef.current?.parentElement;
+    const inertedSiblings = Array.from(document.body.children)
+      .filter((element): element is HTMLElement => element instanceof HTMLElement && element !== modalRoot)
+      .map(element => ({ element, wasInert: element.inert }));
+    inertedSiblings.forEach(({ element }) => { element.inert = true; });
     const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
     const focusFirst = window.requestAnimationFrame(() => {
       const first = dialogRef.current?.querySelector<HTMLElement>(focusableSelector);
       (first || dialogRef.current)?.focus();
     });
-    document.body.style.overflow = 'hidden';
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && closeOnEscape) {
@@ -68,7 +79,9 @@ export default function Modal({
     return () => {
       window.cancelAnimationFrame(focusFirst);
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
+      inertedSiblings.forEach(({ element, wasInert }) => { element.inert = wasInert; });
+      openDialogCount = Math.max(0, openDialogCount - 1);
+      if (openDialogCount === 0) document.body.style.overflow = bodyOverflowBeforeDialogs;
       previouslyFocused?.focus();
     };
   }, [isOpen, closeOnEscape]);
@@ -99,7 +112,7 @@ export default function Modal({
     >
       {/* Backdrop with blur and darken */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity print:hidden"
+        className="absolute inset-0 bg-[var(--theme-overlay)] transition-opacity print:hidden"
         onClick={closeOnClickOutside ? onClose : undefined}
       />
 
