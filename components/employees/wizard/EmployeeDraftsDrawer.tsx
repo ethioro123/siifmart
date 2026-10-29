@@ -74,7 +74,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                         <button
                             type="button"
                             onClick={onStartNewCandidate}
-                            className="px-3 py-1.5 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                            className="px-3 py-1.5 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                             title="Start New Candidate"
                         >
                             <Plus size={14} />
@@ -173,7 +173,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                             <button
                                                 type="button"
                                                 onClick={() => onResumeDraft(draft.id)}
-                                                className="px-3.5 py-2 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                                className="px-3.5 py-2 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                                                 title="Resume Draft"
                                             >
                                                 <span>{isActive ? 'Continue Editing' : 'Resume Draft'}</span>

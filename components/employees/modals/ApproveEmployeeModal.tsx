@@ -95,7 +95,7 @@ export default function ApproveEmployeeModal({
                         disabled={!isAuthorized}
                         className={`flex-1 h-11 px-4 rounded-xl font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
                             isAuthorized
-                                ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white shadow-[0_2px_8px_rgba(0,113,227,0.25)]'
+                                ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 shadow-[0_2px_8px_rgba(0,113,227,0.25)]'
                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)] cursor-not-allowed opacity-50'
                         }`}
                     >

@@ -144,7 +144,7 @@ export const StockRebalanceRecommendations: React.FC<StockRebalanceRecommendatio
               <button
                 type="button"
                 onClick={() => handleExecuteRebalance(rec)}
-                className="px-2.5 py-1 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-[11px] font-semibold flex items-center gap-1 shadow-sm transition-all"
+                className="px-2.5 py-1 rounded-lg bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-[11px] font-semibold flex items-center gap-1 shadow-sm transition-all"
               >
                 <ArrowRightLeft className="w-3 h-3" />
                 <span>Dispatch Rebalance</span>

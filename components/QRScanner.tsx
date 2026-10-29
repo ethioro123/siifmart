@@ -140,19 +140,19 @@ export const QRScanner: React.FC<QRScannerProps> = ({
         <div className="fixed inset-0 z-50 flex flex-col sm:items-center sm:justify-center bg-black sm:bg-black/90 sm:backdrop-blur-sm">
             <div className="relative w-full h-full sm:h-auto sm:max-w-lg flex flex-col sm:block bg-black sm:bg-transparent">
                 {/* Header */}
-                <div className="bg-cyber-gray border-b sm:border border-white/10 sm:rounded-t-2xl p-4 flex items-center justify-between shrink-0 z-10">
+                <div className="bg-[var(--theme-bg-panel)] border-b sm:border border-[var(--theme-border)] sm:rounded-t-2xl p-4 flex items-center justify-between shrink-0 z-10">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-cyber-primary/10 flex items-center justify-center">
                             <Camera className="text-cyber-primary" size={20} />
                         </div>
                         <div>
-                            <h3 className="text-white font-bold">{title}</h3>
-                            <p className="text-xs text-gray-400">{description}</p>
+                            <h3 className="text-[var(--theme-text-primary)] font-bold">{title}</h3>
+                            <p className="text-xs text-[var(--theme-text-secondary)]">{description}</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                        className="w-10 h-10 rounded-lg bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors"
                         aria-label="Close Scanner"
                         title="Close Scanner"
                     >
@@ -161,12 +161,12 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                 </div>
 
                 {/* Camera View */}
-                <div className="bg-black border-x border-white/10 relative flex-1 sm:flex-none sm:aspect-video overflow-hidden">
+                <div className="bg-black border-x border-[var(--theme-border)] relative flex-1 sm:flex-none sm:aspect-video overflow-hidden">
                     {error ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                             <AlertCircle className="text-[var(--theme-status-danger-text)] mb-4" size={48} />
-                            <p className="text-white font-bold mb-2">Camera Error</p>
-                            <p className="text-gray-400 text-sm">{error}</p>
+                            <p className="text-[var(--theme-text-primary)] font-bold mb-2">Camera Error</p>
+                            <p className="text-[var(--theme-text-secondary)] text-sm">{error}</p>
                         </div>
                     ) : (
                         <>
@@ -183,7 +183,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
 
                             {/* Scanning Frame Overlay */}
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="relative w-64 h-64 sm:w-64 sm:h-64 border border-white/10 rounded-xl bg-black/10 backdrop-blur-[2px]">
+                                <div className="relative w-64 h-64 sm:w-64 sm:h-64 border border-[var(--theme-border)] rounded-xl bg-black/10 backdrop-blur-[2px]">
                                     {/* Corner brackets */}
                                     <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-cyber-primary rounded-tl-xl shadow-[0_0_15px_rgba(0,255,157,0.5)]"></div>
                                     <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-cyber-primary rounded-tr-xl shadow-[0_0_15px_rgba(0,255,157,0.5)]"></div>
@@ -215,8 +215,8 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="bg-cyber-gray border-t sm:border border-white/10 sm:rounded-b-2xl p-4 shrink-0 pb-safe z-10">
-                    <p className="text-xs text-gray-400 text-center">
+                <div className="bg-[var(--theme-bg-panel)] border-t sm:border border-[var(--theme-border)] sm:rounded-b-2xl p-4 shrink-0 pb-safe z-10">
+                    <p className="text-xs text-[var(--theme-text-secondary)] text-center">
                         Align the QR code or Barcode within the frame to scan
                     </p>
                 </div>

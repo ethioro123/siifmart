@@ -1,6 +1,6 @@
 import { ThemeSelector } from '../ThemeSelector';
 import React, { useState } from 'react';
-import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut, RefreshCw, ShieldCheck, Lock, AlertTriangle, X } from 'lucide-react';
+import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut, RefreshCw, ShieldCheck, Lock, AlertTriangle, X, ClipboardCheck } from 'lucide-react';
 import { formatRole } from '../../utils/formatting';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useData } from '../../contexts/DataContext';
@@ -8,6 +8,7 @@ import { canSwitchCountry } from '../../utils/permissions';
 import { getCountryProfile, getRegisteredCountries, Country } from '../../utils/localization';
 import { logger } from '../../utils/logger';
 import { evaluateGeofence } from '../../utils/geofence';
+import { useApprovalInbox } from '../../hooks/useApprovalInbox';
 
 interface UserMenuProps {
    user: any;
@@ -24,6 +25,7 @@ interface UserMenuProps {
    theme?: string;
    toggleTheme?: () => void;
    onRefresh?: () => void;
+   approvalInbox?: ReturnType<typeof useApprovalInbox>;
 }
 
 export function UserMenu({
@@ -40,11 +42,25 @@ export function UserMenu({
    dropdownRef,
    theme,
    toggleTheme,
-   onRefresh
+   onRefresh,
+   approvalInbox: propApprovalInbox
 }: UserMenuProps) {
-   const { availableLanguages, countryProfile, isKenya } = useLanguage();
+   const { availableLanguages, countryProfile, isKenya, t } = useLanguage();
    const { settings, updateSettings, effectiveCountry: ctxEffectiveCountry, isCeo: ctxIsCeo } = useData();
    const [isSwitchingMarket, setIsSwitchingMarket] = useState(false);
+
+   let defaultInbox: any = { enabled: false, data: undefined, isError: false, isLoading: false };
+   try {
+      defaultInbox = useApprovalInbox(true);
+   } catch {
+      // Safe fallback when rendered outside Router / QueryClient in standalone tests
+   }
+   const approvalInbox = propApprovalInbox || defaultInbox;
+   const pendingApprovalsCount = approvalInbox.data?.total ?? 0;
+   const hasApprovalsAlert = Boolean(approvalInbox.enabled && (approvalInbox.isError || pendingApprovalsCount > 0));
+   const approvalBadgeText = approvalInbox.isError
+      ? '!'
+      : `${pendingApprovalsCount}${approvalInbox.data?.unavailable ? '+' : ''}`;
 
    const isCeoUser = ctxIsCeo ?? canSwitchCountry(user);
    const currentMarket: Country = (ctxEffectiveCountry || settings?.country || 'ET') as Country;
@@ -86,7 +102,7 @@ export function UserMenu({
          <button
             type="button"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            aria-label="User Profile and Menu"
+            aria-label={`User Profile and Menu${hasApprovalsAlert ? `, ${pendingApprovalsCount} pending approvals` : ''}`}
             aria-expanded={isUserMenuOpen}
             aria-haspopup="true"
             className={`flex items-center gap-1.5 sm:gap-2 md:gap-3 px-2 sm:px-2 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full border transition-all duration-300 cursor-pointer flex-shrink-0 touch-manipulation min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${isUserMenuOpen
@@ -111,12 +127,29 @@ export function UserMenu({
                   )}
                </div>
                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 md:w-3 md:h-3 bg-[var(--theme-status-success-bg)] border-2 border-[var(--theme-bg-panel)] rounded-full animate-pulse"></div>
+               {hasApprovalsAlert && (
+                  <span
+                     className="absolute -top-1 -right-1 md:-top-1.5 md:-right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--theme-accent)] text-[var(--theme-btn-primary-text)] text-[10px] font-extrabold flex items-center justify-center shadow-xs border-2 border-[var(--theme-bg-panel)] tabular-nums pointer-events-none"
+                     aria-hidden="true"
+                  >
+                     {approvalBadgeText}
+                  </span>
+               )}
             </div>
 
             <div className="topbar-profile-name hidden md:flex flex-col text-left">
                <span className="text-sm font-bold text-[var(--theme-text-primary)] leading-none">{user.name}</span>
                <span className="text-[10px] font-mono text-[var(--theme-text-secondary)] uppercase tracking-wider mt-0.5 leading-none">{formatRole(user.role)}</span>
             </div>
+
+            {hasApprovalsAlert && (
+               <span
+                  className="hidden xl:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-[var(--theme-accent)] text-[var(--theme-btn-primary-text)] tabular-nums shadow-xs"
+                  aria-hidden="true"
+               >
+                  {approvalBadgeText}
+               </span>
+            )}
 
             <ChevronDown size={13} className={`text-[var(--theme-text-secondary)] transition-transform duration-300 md:h-[14px] md:w-[14px] ${isUserMenuOpen ? 'rotate-180' : ''}`} />
          </button>

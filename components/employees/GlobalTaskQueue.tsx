@@ -14,19 +14,19 @@ export default function GlobalTaskQueue({ tasks, employees, setIsTaskQueueOpen }
 
    return (
       <div className="animate-in slide-in-from-top duration-300">
-         <div className="bg-black/40 border border-white/10 rounded-2xl p-6 space-y-4">
+         <div className="bg-[var(--theme-bg-card)] border border-white/10 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between">
-               <h3 className="font-bold text-white flex items-center gap-2">
+               <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
                   <ClipboardList size={18} className="text-cyber-primary" />
                   Global Task Board
                </h3>
                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500 uppercase font-bold px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+                  <span className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold px-2 py-1 bg-[var(--theme-bg-subtle)] rounded-lg border border-[var(--theme-border-subtle)]">
                      {activeTasks.length} Active
                   </span>
                   <button
                      onClick={() => setIsTaskQueueOpen(false)}
-                     className="p-1 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                     className="p-1 hover:bg-[var(--theme-bg-card-hover)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors"
                      title="Close Task Board"
                      aria-label="Close Task Board"
                   >
@@ -44,23 +44,23 @@ export default function GlobalTaskQueue({ tasks, employees, setIsTaskQueueOpen }
 
                   return (
                      <div key={priority} className={`rounded-xl border ${color.split(' ')[1]} ${color.split(' ')[2]} p-4 min-w-[250px]`}>
-                        <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                        <div className="flex items-center justify-between mb-3 border-b border-[var(--theme-border-subtle)] pb-2">
                            <span className={`text-xs font-bold uppercase ${priority === 'High' ? 'text-[var(--theme-status-danger-text)]' : priority === 'Medium' ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-status-info-text)]'}`}>
                               {priority} Priority
                            </span>
-                           <span className="text-xs bg-black/30 px-2 py-0.5 rounded-full text-white/50">{priorityTasks.length}</span>
+                           <span className="text-xs bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-full text-[var(--theme-text-muted)]">{priorityTasks.length}</span>
                         </div>
 
                         <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
                            {priorityTasks.length === 0 ? (
-                              <div className="text-center py-4 text-xs text-gray-500 italic">No tasks</div>
+                              <div className="text-center py-4 text-xs text-[var(--theme-text-secondary)] italic">No tasks</div>
                            ) : (
                               priorityTasks.map(task => (
-                                 <div key={task.id} className="bg-black/40 p-3 rounded-lg border border-white/5 hover:border-white/20 transition-colors group cursor-pointer">
+                                 <div key={task.id} className="bg-[var(--theme-bg-card)] p-3 rounded-lg border border-[var(--theme-border-subtle)] hover:border-[var(--theme-border)] transition-colors group cursor-pointer">
                                     <div className="flex justify-between items-start mb-1">
                                        <span className="text-sm font-medium text-gray-200 line-clamp-1">{task.title}</span>
                                     </div>
-                                    <div className="flex items-center justify-between text-[10px] text-gray-500">
+                                    <div className="flex items-center justify-between text-[10px] text-[var(--theme-text-secondary)]">
                                        <span>{employees.find(e => e.id === task.assignedTo)?.name || 'Unassigned'}</span>
                                        <span className="text-gray-600">{formatDateTime(task.dueDate).split(',')[0]}</span>
                                     </div>

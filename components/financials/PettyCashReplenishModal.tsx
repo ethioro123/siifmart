@@ -105,7 +105,7 @@ export const PettyCashReplenishModal: React.FC<PettyCashReplenishModalProps> = (
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting || !amount || Number(amount) <= 0}
-                        className="px-4 py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {isSubmitting && <Loader2 className="animate-spin" size={14} />}
                         <span>Submit Top-Up to Treasury</span>

@@ -478,7 +478,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                     type="button"
                                     onClick={handleFinalizeActivation}
                                     disabled={isProcessing}
-                                    className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                                    className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
                                 >
                                     <Sparkles size={14} />
                                     <span>Finalize & Activate Employee</span>

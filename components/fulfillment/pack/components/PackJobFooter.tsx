@@ -82,7 +82,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                     <button
                         type="button"
                         onClick={() => void onAdvanceToScanning()}
-                        className="min-h-[48px] w-full sm:w-auto min-w-0 px-3 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-bold text-[11px] sm:text-xs md:text-sm uppercase tracking-wide sm:tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation whitespace-nowrap"
+                        className="min-h-[48px] w-full sm:w-auto min-w-0 px-3 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-bold text-[11px] sm:text-xs md:text-sm uppercase tracking-wide sm:tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation whitespace-nowrap"
                     >
                         <span>{t('warehouse.packing.startScanningAndPack') || 'Start Scanning & Pack'}</span>
                         <ArrowRight size={16} />
@@ -93,7 +93,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                     <button
                         type="button"
                         onClick={() => isFullyPacked ? setStep('BOX') : void onAdvanceToScanning()}
-                        className="min-h-[44px] px-4 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 touch-manipulation cursor-pointer"
+                        className="min-h-[44px] px-4 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 touch-manipulation cursor-pointer"
                     >
                         {isFullyPacked ? <ArrowRight size={16} /> : <ScanLine size={16} />}
                         <span>{isFullyPacked ? (t('warehouse.packing.cartonAndPrep') || 'Carton & Prep') : (t('warehouse.packing.resumeItemScanning') || 'Resume Item Scanning')}</span>
@@ -104,7 +104,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                     <button
                         type="button"
                         onClick={() => setStep('WEIGH')}
-                        className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
+                        className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                     >
                         <span>{t('warehouse.packing.weighAndSeal') || 'Weigh & Seal'}</span>
                         <ArrowRight size={16} />
@@ -115,7 +115,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                     <button
                         type="button"
                         onClick={() => setStep('FINISH')}
-                        className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
+                        className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                     >
                         <span>{t('warehouse.packing.labelAndFinish') || 'Label & Finish'}</span>
                         <ArrowRight size={16} />

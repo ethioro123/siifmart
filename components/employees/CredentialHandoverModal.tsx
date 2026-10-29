@@ -301,7 +301,7 @@ Authorized by Site Management
                         <button
                             type="button"
                             onClick={handleMarkComplete}
-                            className="px-4 py-2 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-95"
+                            className="px-4 py-2 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 text-xs font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-95"
                         >
                             <CheckCircle2 size={14} />
                             <span>Mark as Handed Over</span>

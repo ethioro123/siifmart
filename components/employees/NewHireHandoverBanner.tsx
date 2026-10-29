@@ -133,7 +133,7 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
                         <button
                             type="button"
                             onClick={() => setSelectedEmployee(currentEmployee)}
-                            className="px-3.5 py-2 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-95 transition-all cursor-pointer"
+                            className="px-3.5 py-2 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 text-xs font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-95 transition-all cursor-pointer"
                         >
                             <span>Handover Credentials</span>
                             <ChevronRight size={14} />

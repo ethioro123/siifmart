@@ -148,7 +148,7 @@ export default function RecruitmentPipelineTab() {
                             <button
                                 type="button"
                                 onClick={() => setIsReqModalOpen(true)}
-                                className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
+                                className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
                             >
                                 <Plus size={15} />
                                 <span>New Requisition</span>
@@ -215,7 +215,7 @@ export default function RecruitmentPipelineTab() {
                                         <button
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleApproveRequisition(req.id); }}
-                                            className="h-7 px-2.5 rounded-lg bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-[11px] font-semibold cursor-pointer active:scale-[0.98] transition-all"
+                                            className="h-7 px-2.5 rounded-lg bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 text-[11px] font-semibold cursor-pointer active:scale-[0.98] transition-all"
                                         >
                                             Approve HQ
                                         </button>
@@ -306,7 +306,7 @@ export default function RecruitmentPipelineTab() {
                                                             <button
                                                                 type="button"
                                                                 onClick={(e) => { e.stopPropagation(); setApprovalCandidate(cand); }}
-                                                                className="w-full h-7 rounded-lg bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                                                className="w-full h-7 rounded-lg bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
                                                             >
                                                                 <Sparkles size={11} />
                                                                 <span>Review 4-Eyes</span>

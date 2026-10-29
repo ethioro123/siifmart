@@ -91,7 +91,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting || !receiveSearch.trim()}
-                        className="h-9 sm:h-12 px-3 sm:px-6 bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs tracking-wide rounded-lg sm:rounded-xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 shrink-0 touch-manipulation cursor-pointer shadow-xs min-w-[70px] sm:min-w-[90px]"
+                        className="h-9 sm:h-12 px-3 sm:px-6 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs tracking-wide rounded-lg sm:rounded-xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 shrink-0 touch-manipulation cursor-pointer shadow-xs min-w-[70px] sm:min-w-[90px]"
                     >
                         {isSubmitting ? (
                             <Loader2 size={14} className="animate-spin" />

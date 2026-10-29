@@ -333,7 +333,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 setIsSplitReceiving(true);
                                                             }}
                                                             disabled={isSubmitting}
-                                                            className="w-full min-h-[44px] sm:min-h-[48px] bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="w-full min-h-[44px] sm:min-h-[48px] bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             {isSubmitting ? (
                                                                 <Loader2 size={16} className="animate-spin" />

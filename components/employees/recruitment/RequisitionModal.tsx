@@ -237,7 +237,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                             <button
                                 type="submit"
                                 disabled={isSubmitting || !title.trim()}
-                                className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                                className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 text-xs font-semibold active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Submitting...' : 'Submit to HR & Finance'}
                             </button>

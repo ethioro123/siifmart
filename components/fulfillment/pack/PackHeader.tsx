@@ -201,7 +201,7 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                                         if (val) onGlobalScan(val);
                                     }}
                                     disabled={isScanning}
-                                    className="h-7 sm:h-8 px-2.5 sm:px-3 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1 cursor-pointer"
+                                    className="h-7 sm:h-8 px-2.5 sm:px-3 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1 cursor-pointer"
                                 >
                                     {isScanning ? <Loader2 size={12} className="animate-spin" /> : <span>{t('warehouse.auxiliary.go') || 'Go'}</span>}
                                 </button>

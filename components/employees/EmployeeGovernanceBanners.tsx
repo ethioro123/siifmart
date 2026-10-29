@@ -124,7 +124,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                      <button
                         type="button"
                         onClick={onAttestRegionalPayroll}
-                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
+                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
                      >
                         <ShieldCheck size={14} />
                         <span>Attest Regional Audit</span>
@@ -141,7 +141,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                      <button
                         type="button"
                         onClick={onCertifyPayroll}
-                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
+                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
                      >
                         <ShieldCheck size={14} />
                         <span>Certify Roster</span>
@@ -208,7 +208,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                <button
                   type="button"
                   onClick={onOpenQuotaModal}
-                  className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
+                  className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
                >
                   Review Quota Requests
                </button>

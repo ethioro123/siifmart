@@ -188,7 +188,7 @@ export default function Finance() {
                      <button
                         type="button"
                         onClick={state.handleGenerateReport}
-                        className="min-h-11 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white px-3.5 rounded-xl text-xs font-semibold flex items-center transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="min-h-11 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 px-3.5 rounded-xl text-xs font-semibold flex items-center transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                      >
                         <Download className="w-3.5 h-3.5 mr-1.5" /> PDF Report
                      </button>

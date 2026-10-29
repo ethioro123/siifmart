@@ -111,7 +111,7 @@ export const AddExpenseModal: React.FC = () => {
                 <button
                     onClick={handleAddExpense}
                     disabled={isSubmitting || !newExpData.description || !newExpData.amount}
-                    className="w-full py-2.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white font-semibold text-xs rounded-xl mt-2 flex items-center justify-center gap-2 transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-2.5 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 font-semibold text-xs rounded-xl mt-2 flex items-center justify-center gap-2 transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : null}
                     {isSubmitting ? 'Submitting to HQ...' : 'Submit Expense for Approval'}

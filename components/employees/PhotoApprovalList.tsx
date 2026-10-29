@@ -14,7 +14,7 @@ export default function PhotoApprovalList({ photoRequests, onApprove, onReject }
    return (
       <div className="bg-cyber-gray border border-[var(--theme-status-warning-border)] rounded-2xl p-6 mb-6 relative overflow-hidden">
          <div className="absolute top-0 left-0 w-1 h-full bg-[var(--theme-status-warning-bg)]"></div>
-         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+         <h3 className="text-lg font-bold text-[var(--theme-text-primary)] mb-4 flex items-center gap-2">
             <Camera className="text-[var(--theme-status-warning-text)]" size={20} />
             Pending Photo Approvals
             <span className="bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-xs px-2 py-0.5 rounded-full border border-[var(--theme-status-warning-border)]">
@@ -24,18 +24,18 @@ export default function PhotoApprovalList({ photoRequests, onApprove, onReject }
 
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {photoRequests.map((req) => (
-               <div key={req.id} className="bg-black/40 border border-white/10 rounded-xl p-4 flex items-center gap-4">
+               <div key={req.id} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-4 flex items-center gap-4">
                   <div className="relative group">
                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[var(--theme-status-warning-border)]">
                         <img src={req.newUrl} alt="New" className="w-full h-full object-cover" />
                      </div>
-                     <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-full pointer-events-none">
-                        <span className="text-xs text-white font-bold">New</span>
+                     <div className="absolute inset-0 flex items-center justify-center bg-[var(--theme-overlay)] opacity-0 group-hover:opacity-100 transition-opacity rounded-full pointer-events-none">
+                        <span className="text-xs text-[var(--theme-text-primary)] font-bold">New</span>
                      </div>
                   </div>
 
                   <div className="flex-1 min-w-0">
-                     <p className="text-white font-bold truncate">{req.userName}</p>
+                     <p className="text-[var(--theme-text-primary)] font-bold truncate">{req.userName}</p>
                      <p className="text-xs text-gray-400">Requested {formatDateTime(req.timestamp)}</p>
                   </div>
 

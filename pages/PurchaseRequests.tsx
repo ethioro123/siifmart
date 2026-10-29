@@ -348,7 +348,7 @@ export default function PurchaseRequests() {
             <button onClick={() => decideRequest(request, 'Approved')} disabled={review.isPending} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-4 py-2 text-sm font-medium text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] cursor-pointer disabled:opacity-50"><Check size={16} className="mr-1 inline" />Buyer review</button>
             <button onClick={() => decideRequest(request, 'Rejected')} disabled={review.isPending} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-4 py-2 text-sm font-medium text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] cursor-pointer disabled:opacity-50">Reject</button>
           </div>}
-          {request.status === 'Approved' && canCreatePO && request.requester_employee_id !== user?.id && <button onClick={() => openPO(request)} className="rounded-lg bg-[var(--theme-accent)] px-3 py-2 text-white">Create draft PO</button>}
+          {request.status === 'Approved' && canCreatePO && request.requester_employee_id !== user?.id && <button onClick={() => openPO(request)} className="rounded-lg bg-[var(--theme-accent)] px-3 py-2 text-[var(--theme-accent-contrast)]">Create draft PO</button>}
         </article>
       )}
     </section>}

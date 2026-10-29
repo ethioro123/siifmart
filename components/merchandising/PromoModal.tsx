@@ -199,7 +199,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                <button
                   type="submit"
                   disabled={!isValid || isSubmitting}
-                  className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-opacity disabled:opacity-40"
+                  className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-opacity disabled:opacity-40"
                >
                   {isSubmitting ? (
                      <>

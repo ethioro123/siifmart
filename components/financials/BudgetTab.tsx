@@ -198,7 +198,7 @@ export const BudgetTab: React.FC = () => {
 
                     <button
                         onClick={() => setIsReconciliationModalOpen(true)}
-                        className="bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                        className="bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
                     >
                         <Plus size={14} />
                         <span>Reconcile Gateway Tender</span>

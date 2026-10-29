@@ -314,7 +314,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                             <button
                                 type="button"
                                 onClick={() => onStartPick(job)}
-                                className="min-h-[48px] px-4 sm:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
+                                className="min-h-[48px] px-4 sm:px-7 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 <Package size={16} />
                                 <span>{t('warehouse.picking.startScanning') || 'Start Scanning'}</span>

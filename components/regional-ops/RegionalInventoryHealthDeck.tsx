@@ -59,7 +59,7 @@ export const RegionalInventoryHealthDeck: React.FC<RegionalInventoryHealthDeckPr
           <button
             type="button"
             onClick={onOpenProcurement}
-            className="flex-1 px-3 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+            className="flex-1 px-3 py-2 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
           >
             <Truck size={13} />
             <span>Autonomous PO</span>

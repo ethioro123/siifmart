@@ -258,7 +258,7 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                                                     setCreatingReplenishTask(null);
                                                 }
                                             }}
-                                            className="w-full bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl text-xs font-semibold py-2.5 px-3 min-h-[44px] flex items-center justify-center gap-2 shadow-sm transition-opacity"
+                                            className="w-full bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 rounded-xl text-xs font-semibold py-2.5 px-3 min-h-[44px] flex items-center justify-center gap-2 shadow-sm transition-opacity"
                                         >
                                             {creatingReplenishTask === p.id ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
                                             <span>{t('warehouse.initializeOptimization')}</span>

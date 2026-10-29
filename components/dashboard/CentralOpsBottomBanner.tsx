@@ -30,7 +30,7 @@ export const CentralOpsBottomBanner: React.FC<CentralOpsBottomBannerProps> = ({
 
                 <button
                     onClick={onGenerateReport}
-                    className="flex items-center gap-2 px-4 py-2.5 h-[42px] rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2.5 h-[42px] rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold transition-all shadow-sm active:scale-[0.98] cursor-pointer"
                     title="Generate Operational Performance Report"
                 >
                     <Download size={16} />

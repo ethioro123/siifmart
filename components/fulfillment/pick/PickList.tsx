@@ -279,7 +279,7 @@ export const PickList: React.FC<PickListProps> = ({
                                         </div>
 
                                         <div className="mt-4 pt-3 border-t border-[var(--theme-border)]">
-                                            <button className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all min-h-[44px]">
+                                            <button className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all min-h-[44px]">
                                                 <span>{job.status === 'In-Progress' ? t('warehouse.continueArrow') : t('warehouse.startArrow')}</span>
                                                 <ArrowRight size={14} />
                                             </button>

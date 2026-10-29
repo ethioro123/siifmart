@@ -152,7 +152,7 @@ export const DrawerSignOffModal: React.FC<DrawerSignOffModalProps> = ({
                     <button
                         onClick={() => handleConfirm('Reconciled')}
                         disabled={isActionLoading}
-                        className="px-4 py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                        className="px-4 py-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
                     >
                         {isActionLoading && <Loader2 className="animate-spin" size={14} />}
                         <span>Sign-off &amp; Reconcile</span>

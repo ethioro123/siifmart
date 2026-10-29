@@ -242,7 +242,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                         setIsSubmitting(false);
                                     }
                                 }}
-                                className="px-4 py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-opacity flex items-center gap-2 min-h-[44px] shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="px-4 py-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 rounded-xl text-xs font-semibold uppercase tracking-wider transition-opacity flex items-center gap-2 min-h-[44px] shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
                                 {isSubmitting ? t('warehouse.processingProgress') : t('warehouse.executeCount', { count: selectedReplenishItems.size })}

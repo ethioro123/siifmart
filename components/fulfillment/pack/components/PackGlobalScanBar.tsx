@@ -68,7 +68,7 @@ export const PackGlobalScanBar: React.FC<PackGlobalScanBarProps> = ({
                         <button
                             type="submit"
                             disabled={isScanning}
-                            className="px-3 sm:px-5 py-1.5 sm:py-2.5 min-h-[32px] sm:min-h-[44px] bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-lg sm:rounded-xl font-semibold text-xs uppercase tracking-wider transition-opacity active:scale-95 disabled:opacity-50 cursor-pointer"
+                            className="px-3 sm:px-5 py-1.5 sm:py-2.5 min-h-[32px] sm:min-h-[44px] bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 rounded-lg sm:rounded-xl font-semibold text-xs uppercase tracking-wider transition-opacity active:scale-95 disabled:opacity-50 cursor-pointer"
                         >
                             {t('warehouse.auxiliary.go')}
                         </button>

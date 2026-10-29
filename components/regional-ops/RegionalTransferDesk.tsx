@@ -357,7 +357,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                       return <span className="px-2.5 py-1 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] text-[11px] font-medium">Awaiting Logistics Sign-Off</span>;
                     }
                     return (
-                      <button type="button" onClick={() => handleApprove(transfer.id)} className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
+                      <button type="button" onClick={() => handleApprove(transfer.id)} className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>{isInter ? 'HQ Sign-Off' : 'Approve Rebalance'}</span>
                       </button>
@@ -365,7 +365,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                   })()}
 
                   {transfer.status === 'Approved' && canManageTransfers && (
-                    <button type="button" onClick={() => setDispatchModalTransfer(transfer)} className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
+                    <button type="button" onClick={() => setDispatchModalTransfer(transfer)} className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
                       <Truck className="w-3.5 h-3.5" />
                       <span>Dispatch Driver</span>
                     </button>

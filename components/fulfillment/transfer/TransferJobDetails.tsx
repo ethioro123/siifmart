@@ -383,7 +383,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                     setTransferReceiveMode(true);
                                     setSelectedJob(null);
                                 }}
-                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-accent)] hover:opacity-90 text-white shadow-sm transition-opacity flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 shadow-sm transition-opacity flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 <Package size={14} />
                                 <span>{t('warehouse.received')}</span>

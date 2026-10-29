@@ -119,7 +119,7 @@ export default function AddEmployeeWizard({
                             <button
                                 type="button"
                                 onClick={handleWizardNext}
-                                className="px-6 py-2.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-white font-semibold rounded-xl text-xs transition-all flex items-center gap-2 shadow-sm cursor-pointer active:scale-[0.98]"
+                                className="px-6 py-2.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] font-semibold rounded-xl text-xs transition-all flex items-center gap-2 shadow-sm cursor-pointer active:scale-[0.98]"
                             >
                                 Continue <ArrowRight size={15} />
                             </button>
@@ -128,7 +128,7 @@ export default function AddEmployeeWizard({
                                 type="button"
                                 onClick={handleFinalSubmit}
                                 disabled={isSubmitting}
-                                className={`px-7 py-2.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-white font-bold rounded-xl text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer active:scale-[0.98] ${
+                                className={`px-7 py-2.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] font-bold rounded-xl text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer active:scale-[0.98] ${
                                     isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                                 }`}
                             >

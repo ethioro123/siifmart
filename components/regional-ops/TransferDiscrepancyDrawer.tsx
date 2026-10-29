@@ -69,7 +69,7 @@ export const TransferDiscrepancyDrawer: React.FC<TransferDiscrepancyDrawerProps>
         <button
           type="button"
           onClick={() => onResolveLocally(transfer)}
-          className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+          className="px-3 py-1.5 rounded-lg bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center gap-1.5 shadow-sm"
           title="Resolve minor variance locally with manager audit sign-off"
         >
           <CheckCircle2 className="w-3.5 h-3.5" />

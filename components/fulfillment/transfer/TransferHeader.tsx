@@ -83,7 +83,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                             setTransferCenterTab(isHQ ? 'smart' : isWarehouse ? 'bulk' : 'request');
                             setShowTransferCenter(true);
                         }}
-                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold rounded-xl transition-opacity flex items-center justify-center gap-1.5 shadow-sm min-h-[34px] sm:min-h-[44px] text-xs whitespace-nowrap shrink-0"
+                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold rounded-xl transition-opacity flex items-center justify-center gap-1.5 shadow-sm min-h-[34px] sm:min-h-[44px] text-xs whitespace-nowrap shrink-0"
                     >
                         <Truck size={14} />
                         <span>{t('warehouse.transferCenter')}</span>

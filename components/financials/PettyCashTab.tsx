@@ -210,7 +210,7 @@ export const PettyCashTab: React.FC = () => {
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs flex flex-col justify-center gap-2">
                     <button
                         onClick={() => setIsVoucherModalOpen(true)}
-                        className="w-full py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                        className="w-full py-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs"
                     >
                         <Plus size={14} />
                         <span>Issue Cash Voucher</span>

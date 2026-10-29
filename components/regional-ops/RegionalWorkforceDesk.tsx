@@ -158,7 +158,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
         <button
           type="button"
           onClick={() => setIsQuotaModalOpen(true)}
-          className="px-3.5 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-sm shrink-0 cursor-pointer self-start sm:self-auto"
+          className="px-3.5 py-2 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center gap-2 transition-all shadow-sm shrink-0 cursor-pointer self-start sm:self-auto"
         >
           <TrendingUp className="w-4 h-4" />
           <span>Request Quota Surge</span>
@@ -214,7 +214,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
                   <button
                     type="button"
                     onClick={() => handleCertifyCandidate(candidate)}
-                    className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center gap-1.5 transition-all self-end sm:self-center shadow-sm"
+                    className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center gap-1.5 transition-all self-end sm:self-center shadow-sm"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Regional 1st-Tier Endorsement</span>

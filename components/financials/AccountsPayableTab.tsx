@@ -256,7 +256,7 @@ export const AccountsPayableTab: React.FC = () => {
                             <button
                                 onClick={handleCreatePaymentRun}
                                 disabled={isActionLoading}
-                                className="bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0"
+                                className="bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0"
                             >
                                 {isActionLoading ? <Loader2 className="animate-spin" size={14} /> : <DollarSign size={14} />}
                                 <span>Create Payment Run ({selectedInvoiceIds.length})</span>

@@ -60,7 +60,7 @@ export const RulesTab: React.FC = () => {
                <button
                   type="button"
                   onClick={() => setIsRuleModalOpen(true)}
-                  className="px-3.5 py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm transition-all"
+                  className="px-3.5 py-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm transition-all"
                >
                   <Plus size={15} />
                   <span>Create Rule</span>
@@ -339,7 +339,7 @@ export const RulesTab: React.FC = () => {
                   type="button"
                   onClick={handleRunSimulation}
                   disabled={isSimulating || isSubmitting || pricingRulesMutating}
-                  className="w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-[var(--theme-accent)] hover:opacity-90 text-white disabled:opacity-50 cursor-pointer shadow-sm transition-colors"
+                  className="w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-sm transition-colors"
                >
                   {isSimulating ? <RefreshCw className="animate-spin" size={15} /> : <Zap size={15} />}
                   <span>{isSimulating ? 'Calculating scenario…' : 'Run Simulation'}</span>

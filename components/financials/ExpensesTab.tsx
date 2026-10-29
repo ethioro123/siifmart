@@ -144,7 +144,7 @@ export const ExpensesTab: React.FC = () => {
                     <button
                         onClick={() => setIsAddExpenseOpen(true)}
                         type="button"
-                        className="bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white px-3.5 min-h-11 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-stretch sm:self-start md:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 px-3.5 min-h-11 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-stretch sm:self-start md:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         <Plus size={15} />
                         <span>Log Expense Request</span>

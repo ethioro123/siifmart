@@ -382,7 +382,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             <button
                                 type="button"
                                 onClick={() => setStep('QUALITY')}
-                                className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
+                                className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 <span>{t('warehouse.startQualityAndCount') || 'Start Quality & Count'}</span>
                                 <ArrowRight size={16} />
@@ -396,7 +396,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 onClick={() => setStep('HANDOVER')}
                                 className={`min-h-[44px] px-5 md:px-7 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
                                     countsValid
-                                        ? 'bg-[var(--theme-accent)] hover:opacity-90 text-white cursor-pointer active:scale-95'
+                                        ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 cursor-pointer active:scale-95'
                                         : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
                                 }`}
                             >
