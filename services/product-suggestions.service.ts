@@ -4,6 +4,11 @@ import type { ProductSuggestion, ProductSuggestionStatus } from '../types/produc
 const columns = 'id,submitter_employee_id,site_id,country_code,region_code,product_name,category,brand_or_example,product_details,demand_signal,customer_request_count,status,review_note,reviewed_by_employee_id,reviewed_at,created_at,updated_at';
 
 export const productSuggestionsService = {
+  async pendingPage(country: string, site: string, page: number): Promise<ProductSuggestion[]> {
+    const { data, error } = await supabase.from('product_suggestions').select(columns).eq('country_code', country).eq('site_id', site).in('status', ['Submitted', 'Under Review']).order('created_at').order('id').range((page - 1) * 25, page * 25 - 1);
+    if (error) throw error;
+    return (data || []) as ProductSuggestion[];
+  },
   async list(countryCode: string): Promise<ProductSuggestion[]> {
     const { data, error } = await supabase.from('product_suggestions')
       .select(columns).eq('country_code', countryCode.toUpperCase())

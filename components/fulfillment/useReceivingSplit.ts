@@ -1,3 +1,4 @@
+import { receivingTransactionService } from '../../services/receiving-transaction.service';
 import { loadReceivingPOItem } from '../../utils/receivingPOItem';
 import { hasValidReceivingCounts } from '../../utils/receivingCountValidation';
 import { useCallback, useRef } from 'react';
@@ -39,6 +40,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
     } = deps;
 
     const receiptLock = useRef(false);
+    const retry=useRef<{signature:string;id:string}|null>(null);
     const receivePOSplit = useCallback(async (
         poId: string,
         itemId: string,
@@ -52,6 +54,8 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
             if (!hasValidReceivingCounts(variants)) throw new Error('Enter a positive physical count for every split.');
             const { po, itemIndex, item } = await loadReceivingPOItem(poId, itemId, activeSite?.id, activeSite?.country);
             const poAttrs = extractProductAttributesFromPOItem(item);
+            const signature=JSON.stringify([poId,itemId,variants,locationId]);
+            if(retry.current?.signature!==signature)retry.current={signature,id:crypto.randomUUID()};
 
             // VALIDATION: Prevent over-receiving (helps avoid accidental duplicates)
             const clean = (s?: string) => s ? s.replace(/[-\s]/g, '').toUpperCase() : '';
@@ -354,124 +358,24 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                     }]
                 };
 
-                const createdJob = await wmsJobsService.create(newJob as any);
-                return createdJob;
+                return newJob;
             });
 
-            const results = await Promise.allSettled(jobPromises);
-            const newJobs = results.flatMap(result => result.status === 'fulfilled' ? [result.value] : []);
-            if (results.some(result => result.status === 'rejected')) {
-                await Promise.allSettled(newJobs.map(job => wmsJobsService.delete(job.id)));
-                throw new Error('Receipt save was not confirmed for every split. Refresh the manifest before retrying; some work may have been saved.');
-            }
-
-            // 1. Calculate updated lineItems with receivedQty
-            const updatedLineItems = (po.lineItems || []).map((li: any, idx: number) => {
-                if (idx === itemIndex) {
-                    const prevQty = li.receivedQty || 0;
-                    return {
-                        ...li,
-                        receivedQty: prevQty + newSplitTotal
-                    };
-                }
-                return li;
-            });
-
-            // 2. Check if all items across this PO are now fully received
-            const isAllReceived = updatedLineItems.every((li: any) => {
-                const targetSellable = convertToSellableUnits(li.quantity, li);
-                return (li.receivedQty || 0) >= targetSellable;
-            });
-            // Keep PO in 'Approved' status so manager can authenticate and finalize manifest in ReceiveReviewModal
-            const newPOStatus = po.status === 'Approved' ? 'Approved' : (isAllReceived ? 'Received' : po.status);
-
-            // 3. Persist updated lineItems and status to DB
-            try {
-                await purchaseOrdersService.update(poId, {
-                    lineItems: updatedLineItems,
-                    status: newPOStatus as any,
-                    receivedBy: actionUser?.name || (po as any).receivedBy
-                });
-            } catch (err) {
-                // Roll back created jobs so the PO and jobs never diverge (prevents double receive)
-                await Promise.all(newJobs.map(j => j?.id ? wmsJobsService.delete(j.id).catch(() => null) : null));
-                logger.error('useReceivingSplit', 'PO sync failed; attempted cleanup of putaway jobs', err as Error);
-                throw new Error('Receipt save was not confirmed. Refresh the manifest before retrying; some work may have been saved.');
-            }
-
-            // 4. If matching WMS RECEIVE job exists, update its status
-            const matchingReceiveJobs = jobs.filter(j => 
-                j.type === 'RECEIVE' && 
-                (j.orderRef === poId || (po.poNumber && j.jobNumber === po.poNumber) || (po.po_number && j.jobNumber === po.po_number))
-            );
-            if (matchingReceiveJobs.length > 0) {
-                for (const rj of matchingReceiveJobs) {
-                    const rjUpdatedLineItems = (rj.lineItems || []).map((rli: any) => {
-                        const matchedPOItem = updatedLineItems.find((uli: any) => 
-                            uli.productId === rli.productId || (uli.sku && clean(uli.sku) === clean(rli.sku)) ||
-                            ((uli.productName || uli.name) && String(uli.productName || uli.name).toLowerCase() === String(rli.name).toLowerCase())
-                        );
-                        const targetQty = convertToSellableUnits(rli.expectedQty || 0, rli);
-                        return {
-                            ...rli,
-                            receivedQty: matchedPOItem?.receivedQty || rli.receivedQty || 0,
-                            status: ((matchedPOItem?.receivedQty || 0) >= targetQty) ? 'Completed' : rli.status
-                        };
-                    });
-                    const receiveJobStatus = isAllReceived ? 'Completed' : 'In-Progress';
-                    try {
-                        await wmsJobsService.update(rj.id, {
-                            status: receiveJobStatus,
-                            lineItems: rjUpdatedLineItems,
-                            completedBy: isAllReceived ? (actionUser?.name || 'System') : undefined,
-                            completedAt: isAllReceived ? new Date().toISOString() : undefined
-                        });
-                    } catch (e) {
-                        logger.error('useReceivingSplit', 'updateReceiveJobs', e);
-                    }
-                }
-            }
-
+            const drafts = await Promise.all(jobPromises);
+            const newJobs=await receivingTransactionService.save(retry.current!.id,poId,item.id!,item.receivedQty||0,drafts);
+            const updatedLineItems=(po.lineItems||[]).map((li,index)=>index===itemIndex ? {...li,receivedQty:(li.receivedQty||0)+newSplitTotal}:li);
+            const newPOStatus=po.status;
+            // Manifest completion remains the explicit supervised receiving action.
+            const isAllReceived=false;
             // 5. Update local state for jobs and orders
             setJobs(prev => {
-                const updated = prev.map(j => {
-                    if (j.type === 'RECEIVE' && (j.orderRef === poId || (po.poNumber && j.jobNumber === po.poNumber) || (po.po_number && j.jobNumber === po.po_number))) {
-                        return {
-                            ...j,
-                            status: isAllReceived ? ('Completed' as const) : ('In-Progress' as const),
-                            completedBy: isAllReceived ? (actionUser?.name || 'System') : j.completedBy,
-                            completedAt: isAllReceived ? new Date().toISOString() : j.completedAt
-                        };
-                    }
-                    return j;
-                });
+                const updated = prev;
                 // Realtime/refetch may already have delivered these jobs; never list a job twice
                 const createdIds = new Set(newJobs.map(j => j?.id).filter(Boolean));
                 return [...updated.filter(j => !createdIds.has(j.id)), ...newJobs];
             });
 
-            addNotification('success', `Created ${newJobs.length} split putaway jobs`);
-
-            try {
-                await systemLogsService.create({
-                    action: 'PO_SPLIT_RECEIVE_CONFIRMED',
-                    module: 'Fulfillment',
-                    user_name: actionUser?.name || 'Receiver',
-                    site_id: po.siteId || activeSite?.id,
-                    country_code: activeSite?.country || 'ET',
-                    entity_type: 'purchase_order',
-                    entity_id: poId,
-                    details: {
-                        poNumber: po.poNumber,
-                        itemId,
-                        splitVariantsCount: variants.length,
-                        totalQuantityReceived: newSplitTotal,
-                        receivedBy: actionUser?.name,
-                    },
-                });
-            } catch (logErr) {
-                logger.warn('useReceivingSplit', 'Non-blocking audit log failure:', { error: logErr instanceof Error ? logErr.message : String(logErr) });
-            }
+            retry.current=null;
 
             // Refresh PO details in state
             const updatedPO = await purchaseOrdersService.getById(poId).catch(() => null);

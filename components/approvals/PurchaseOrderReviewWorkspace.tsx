@@ -8,17 +8,17 @@ import { formatPONumber } from '../../utils/jobIdFormatter';
 import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
 import { Link } from 'react-router-dom';
 
-export function PurchaseOrderReviewWorkspace() {
+export function PurchaseOrderReviewWorkspace({ initialMode }: { initialMode?: 'orders' | 'finance' } = {}) {
   const { user } = useStore();
   const { effectiveCountry, activeSite } = useData();
   if (!user?.id || !effectiveCountry || !activeSite?.id) return null;
-  return <OrderPanel key={`${user.id}:${user.role}:${effectiveCountry}:${activeSite.id}`} scope={{ actor: user.id, country: effectiveCountry, site: activeSite.id }} />;
+  return <OrderPanel key={`${user.id}:${user.role}:${effectiveCountry}:${activeSite.id}`} initialMode={initialMode} scope={{ actor: user.id, country: effectiveCountry, site: activeSite.id }} />;
 }
-function OrderPanel({ scope }: { scope: { actor: string; country: string; site: string } }) {
+function OrderPanel({ scope, initialMode }: { scope: { actor: string; country: string; site: string }; initialMode?: 'orders' | 'finance' }) {
   const { user } = useStore();
   const { regions = [], sites, activeSite } = useData();
-  const [open, setOpen] = useState(false);
-  const [financeOpen, setFinanceOpen] = useState(false);
+  const [open, setOpen] = useState(initialMode === 'orders');
+  const [financeOpen, setFinanceOpen] = useState(initialMode === 'finance');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string | null>(null);
   const { list, detail, refresh } = usePurchaseOrderReviewWorkspace(scope, page, selected, open);

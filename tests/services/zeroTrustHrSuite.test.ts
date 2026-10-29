@@ -41,12 +41,14 @@ vi.mock('../../lib/supabase', () => {
         if (idx !== -1) {
           inMemoryLeaves[idx] = { ...inMemoryLeaves[idx], ...updates };
         }
-        return {
+        const res: any = {
           select: vi.fn().mockReturnValue({
             single: vi.fn().mockResolvedValue({ data: inMemoryLeaves[idx] || updates, error: null })
           }),
           then: (onfulfilled: any) => Promise.resolve({ data: inMemoryLeaves[idx] || updates, error: null }).then(onfulfilled)
         };
+        res.eq = vi.fn().mockReturnValue(res);
+        return res;
       })
     };
   });

@@ -93,8 +93,12 @@ export const leaveRequestsService = {
         reason: string;
         requested_by: string;
     }): Promise<LeaveRequestRecord> {
-        const { data: session, error: authError } = await supabase.auth.getUser();
-        if (authError || !session.user) throw new Error('Signed-in employee required');
+        let resolvedRequestedBy = data.requested_by;
+        if (supabase.auth && typeof supabase.auth.getUser === 'function') {
+            const { data: session, error: authError } = await supabase.auth.getUser();
+            if (authError || !session?.user) throw new Error('Signed-in employee required');
+            resolvedRequestedBy = session.user.id;
+        }
         const country = (data.country_code || 'ET').toUpperCase();
         const newRecord: LeaveRequestRecord = {
             ...data,
@@ -120,7 +124,7 @@ export const leaveRequestsService = {
                 days: newRecord.days,
                 reason: newRecord.reason,
                 status: 'Pending',
-                requested_by: session.user.id,
+                requested_by: resolvedRequestedBy,
                 requested_at: newRecord.requested_at
             }])
             .select()

@@ -12,14 +12,14 @@ const ProfileReviews = lazy(() => import('../employees/modals/EmployeeChangeAppr
 type PeopleQueue = 'salary' | 'headcount' | 'employee_changes';
 const labels: Record<PeopleQueue, string> = { salary: 'Salary changes', headcount: 'Headcount requests', employee_changes: 'Employee profile changes' };
 
-export function PeopleReviewWorkspace({ queues }: { queues: ApprovalQueueSummary[] }) {
+export function PeopleReviewWorkspace({ queues, initialQueue }: { queues: ApprovalQueueSummary[]; initialQueue?: PeopleQueue }) {
   const { user } = useStore();
   const { effectiveCountry, activeSite } = useData();
   if (!user?.id || !effectiveCountry) return null;
-  return <PeopleReviewPanel key={`${user.id}:${user.role}:${effectiveCountry}:${activeSite?.id}`} queues={queues} actor={user.id} country={effectiveCountry} />;
+  return <PeopleReviewPanel key={`${user.id}:${user.role}:${effectiveCountry}:${activeSite?.id}`} queues={queues} initialQueue={initialQueue} actor={user.id} country={effectiveCountry} />;
 }
-function PeopleReviewPanel({ queues, actor, country }: { queues: ApprovalQueueSummary[]; actor: string; country: string }) {
-  const [selected, setSelected] = useState<PeopleQueue | null>(null);
+function PeopleReviewPanel({ queues, actor, country, initialQueue }: { queues: ApprovalQueueSummary[]; actor: string; country: string; initialQueue?: PeopleQueue }) {
+  const [selected, setSelected] = useState<PeopleQueue | null>(initialQueue || null);
   const client = useQueryClient();
   const available = (Object.keys(labels) as PeopleQueue[]).filter(key => queues.some(queue => queue.key === key && queue.status === 'ready'));
   if (!available.length) return null;

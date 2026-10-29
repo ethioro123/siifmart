@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { useExpenseReviewWorkspace } from '../../hooks/useExpenseReviewWorkspace';
-export function ExpenseReviewWorkspace() {
+export function ExpenseReviewWorkspace({ initialOpen = false }: { initialOpen?: boolean } = {}) {
   const { user } = useStore();
   const { effectiveCountry, activeSite } = useData();
   if (!user?.id || !user.name || !effectiveCountry || !activeSite?.id) return null;
-  return <ExpensePanel key={`${user.id}:${user.role}:${effectiveCountry}:${activeSite.id}`} scope={{ actor: user.id, name: user.name, role: user.role, country: effectiveCountry, site: activeSite.id }} siteName={activeSite.name} />;
+  return <ExpensePanel key={`${user.id}:${user.role}:${effectiveCountry}:${activeSite.id}`} initialOpen={initialOpen} scope={{ actor: user.id, name: user.name, role: user.role, country: effectiveCountry, site: activeSite.id }} siteName={activeSite.name} />;
 }
-function ExpensePanel({ scope, siteName }: { scope: { actor: string; name: string; role: string; country: string; site: string }; siteName: string }) {
-  const [open, setOpen] = useState(false);
+function ExpensePanel({ scope, siteName, initialOpen }: { scope: { actor: string; name: string; role: string; country: string; site: string }; siteName: string; initialOpen: boolean }) {
+  const [open, setOpen] = useState(initialOpen);
   const [page, setPage] = useState(1);
   const [id, setId] = useState('');
   const [reason, setReason] = useState('');

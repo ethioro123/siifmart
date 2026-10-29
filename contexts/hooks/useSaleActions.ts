@@ -77,9 +77,14 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
             })) as CartItem[];
 
             const isOfflineSale = !navigator.onLine;
+            const regionCode = (activeSite?.regionCode || activeSite?.region_code || '').trim().toUpperCase();
+            if (!/^[A-Z]{3}$/.test(regionCode)) {
+                throw new Error('This site needs a valid three-letter region code before it can record sales.');
+            }
             const offlineReceiptReference = isOfflineSale
-                ? `OFF-${(activeSite?.country || settings.country || 'ET').toUpperCase()}-${saleId.toUpperCase()}`
+                ? `OFF-${regionCode}-${saleId.toUpperCase()}`
                 : undefined;
+            const finalReceiptNumber = receiptNumber || offlineReceiptReference || `PENDING-${regionCode}-${saleId.toUpperCase()}`;
 
             let saleRecord: SaleRecord & { discountCodeId?: string | null } = {
                 id: saleId,
@@ -100,21 +105,21 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 discountCodeId: discountCodeId || null,
                 mobilePaymentChannel: mobileDetails?.channel, mobileTransactionRef: mobileDetails?.ref, customerPhone: mobileDetails?.phone,
                 fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking',
-                receiptNumber: offlineReceiptReference,
+                receiptNumber: finalReceiptNumber,
                 offlineReceiptNumber: offlineReceiptReference
             };
 
-            let queued = false;
-            if (isOfflineSale) {
-                await posDB.saveSale(saleRecord);
-                queued = await posDB.enqueueOperation('CREATE_SALE', {
-                    ...saleRecord,
-                    pointsRedeemed: pointsRedeemed || 0,
-                    loyaltyRate: settings.loyaltyPointsRate || 0,
-                    enableLoyalty: settings.enableLoyalty !== false
-                });
-                if (!queued) throw new Error('Sale could not be queued for synchronization while offline.');
-            } else {
+            await posDB.saveSale(saleRecord);
+            const queued = await posDB.enqueueOperation('CREATE_SALE', {
+                ...saleRecord,
+                pointsRedeemed: pointsRedeemed || 0,
+                loyaltyRate: settings.loyaltyPointsRate || 0,
+                enableLoyalty: settings.enableLoyalty !== false
+            });
+            if (!queued && !navigator.onLine) {
+                throw new Error('Sale could not be queued for synchronization while offline.');
+            }
+            if (!queued) {
                 const persistedSale = await salesService.create(saleRecord, sanitizedItems, discountCodeId);
                 saleRecord = { ...saleRecord, ...persistedSale, items: sanitizedItems };
                 await posDB.saveSale(saleRecord);
@@ -247,7 +252,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
             } else {
                 addNotification('success', 'Sale saved to the server.');
             }
-            return { saleId, receiptNumber: saleRecord.receiptNumber || offlineReceiptReference || '', offlineReceiptNumber: offlineReceiptReference, pointsResult };
+            return { saleId, receiptNumber: saleRecord.receiptNumber || finalReceiptNumber, offlineReceiptNumber: offlineReceiptReference, pointsResult };
 
         } catch (error) {
             logger.error('useSaleActions', "Process Sale Failed:", error);
@@ -262,39 +267,13 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
 
     const processReturn = useCallback(async (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => {
         try {
-            // 1. Map ReturnItem[] to the shape salesService.refund expects
-            const refundItems = items.map(ri => ({
-                product_id: ri.productId,
-                quantity: ri.quantity
-            }));
+            if (!navigator.onLine) throw new Error('Return intake requires an internet connection.');
+            const result=await salesService.refund(saleId,items.map(ri=>({product_id:ri.productId,quantity:ri.quantity})),totalRefund);
+            return;
 
-            // 2. Update sale status to 'Refunded' in Supabase + restore stock
-            if (navigator.onLine) {
-                await salesService.refund(saleId, refundItems, totalRefund);
-
-                // 3. Optimistically restore local product stock
-                for (const ri of items) {
-                    const product = deps.products.find(p => p.id === ri.productId);
-                    if (product) {
-                        const newStock = product.stock + ri.quantity;
-                        setProducts(prev => prev.map(p =>
-                            p.id === ri.productId ? { ...p, stock: newStock } : p
-                        ));
-                    }
-                }
-            } else {
-                addNotification('alert', 'Returns require an internet connection. Please reconnect and try again.');
-                return;
-            }
-
-            // 4. Update the sale in local state
-            setSales(prev => prev.map(s => s.id === saleId ? { ...s, status: 'Refunded' as any } : s));
-            setAllSales(prev => prev.map(s => s.id === saleId ? { ...s, status: 'Refunded' as any } : s));
-
-            addNotification('success', `Return of ${CURRENCY_SYMBOL}${totalRefund.toFixed(2)} processed for sale ${saleId.substring(0, 8)}...`);
         } catch (error: any) {
             logger.error('useSaleActions', 'processReturn failed:', error);
-            addNotification('alert', `Return failed: ${error?.message || 'Unknown error'}`);
+            throw error;
         }
     }, [addNotification, setProducts, setSales, setAllSales, deps.products, deps.settings]);
 

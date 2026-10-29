@@ -13,13 +13,13 @@ const entries: { key: Review; label: string; queues: string[] }[] = [
   { key: 'payroll', label: 'Payroll certification and finance sign-off', queues: ['payroll_hr', 'payroll_finance'] },
   { key: 'margin', label: 'Margin exceptions', queues: ['margin'] }
 ];
-export function RemainingReviewWorkspace({ queues }: { queues: ApprovalQueueSummary[] }) {
+export function RemainingReviewWorkspace({ queues, initialReview }: { queues: ApprovalQueueSummary[]; initialReview?: Review }) {
   const { user } = useStore(); const { effectiveCountry, activeSite } = useData();
   if (!user?.id || !effectiveCountry || !activeSite?.id) return null;
-  return <ReviewPanel key={`${user.id}:${user.role}:${effectiveCountry}:${activeSite.id}`} actor={user.id} queues={queues} />;
+  return <ReviewPanel key={`${user.id}:${user.role}:${effectiveCountry}:${activeSite.id}`} actor={user.id} queues={queues} initialReview={initialReview} />;
 }
-function ReviewPanel({ actor, queues }: { actor: string; queues: ApprovalQueueSummary[] }) {
-  const [selected, setSelected] = useState<Review | null>(null);
+function ReviewPanel({ actor, queues, initialReview }: { actor: string; queues: ApprovalQueueSummary[]; initialReview?: Review }) {
+  const [selected, setSelected] = useState<Review | null>(initialReview || null);
   const client = useQueryClient();
   const available = entries.filter(entry => entry.queues.some(key => queues.some(queue => queue.key === key && queue.status === 'ready')));
   const active = available.find(entry => entry.key === selected);

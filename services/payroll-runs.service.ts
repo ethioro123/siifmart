@@ -83,7 +83,7 @@ export const payrollRunsService = {
   async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<PayrollRun[]> {
     try {
       // RULE 10: 25-record shelf limit
-      let query = supabase.from('payroll_runs').select('*');
+      let query = supabase.from('payroll_runs').select('id,period,country_code,site_id,employee_count,currency,total_gross_salaries,total_bonuses,total_deductions,total_net_payout,status,initiated_by,initiated_by_role,initiated_at,regional_attested_by,regional_attested_by_id,regional_attested_by_role,regional_attested_at,regional_notes,hr_approved_by,hr_approved_by_role,hr_approved_at,hr_notes,finance_approved_by,finance_approved_by_role,finance_approved_at,finance_notes,disbursed_by,disbursed_at,expense_id,rejection_reason,rejected_by,rejected_by_role,rejected_at,created_at,updated_at');
       if (siteId && siteId !== 'ALL') query = query.eq('site_id', siteId);
       if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 
@@ -95,10 +95,7 @@ export const payrollRunsService = {
       return mapped;
     } catch (error) {
       logger.error('payrollRunsService', 'Remote fetch failed for payroll runs:', error as Error);
-      let results = inMemoryBackup;
-      if (siteId && siteId !== 'ALL') results = results.filter(r => !r.siteId || r.siteId === siteId);
-      if (countryCode) results = results.filter(r => r.countryCode.toUpperCase() === countryCode.toUpperCase());
-      return results.sort((a, b) => new Date(b.initiatedAt || 0).getTime() - new Date(a.initiatedAt || 0).getTime());
+      throw error;
     }
   },
 

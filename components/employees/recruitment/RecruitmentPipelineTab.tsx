@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Briefcase, Plus, CheckCircle2, Clock,
     ArrowRight, ShieldCheck, Banknote, UserPlus, Building2, Sparkles
@@ -20,6 +20,7 @@ export default function RecruitmentPipelineTab({ reviewOnly = false }: { reviewO
     const [candidates, setCandidates] = useState<JobCandidate[]>([]);
     const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const loadVersion = useRef(0);
     const [loadError, setLoadError] = useState('');
     const [reqPage, setReqPage] = useState(1);
     const [candPage, setCandPage] = useState(1);
@@ -39,6 +40,7 @@ export default function RecruitmentPipelineTab({ reviewOnly = false }: { reviewO
     const canApproveRequisition = ['group_ceo', 'country_managing_director', 'country_hr_director', 'hr_generalist', 'regional_hr_manager'].includes(user?.role || '');
 
     const loadData = async () => {
+        const version = ++loadVersion.current;
         setIsLoading(true);
         setLoadError('');
         try {
@@ -46,19 +48,22 @@ export default function RecruitmentPipelineTab({ reviewOnly = false }: { reviewO
                 recruitmentService.fetchRequisitions(country, reqPage, activeSite?.id),
                 recruitmentService.fetchCandidates(country, undefined, candPage, activeSite?.id)
             ]);
+            if (version !== loadVersion.current) return;
             setRequisitions(reqs);
             setCandidates(cands);
         } catch {
+            if (version !== loadVersion.current) return;
             setLoadError('Recruitment requests could not be loaded. Retry before reviewing.');
             setRequisitions([]); setCandidates([]);
             // Handled
         } finally {
-            setIsLoading(false);
+            if (version === loadVersion.current) setIsLoading(false);
         }
     };
 
     useEffect(() => {
         loadData();
+        return () => { loadVersion.current++; };
     }, [country, activeSite?.id, reqPage, candPage]);
     useEffect(() => { setReqPage(1); setCandPage(1); setApprovalCandidate(null); setSelectedReqId(null); }, [country, activeSite?.id]);
     useEffect(() => {

@@ -3,17 +3,17 @@ import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { useLeaveAndAttestationReview, type PersonnelReview } from '../../hooks/useLeaveAndAttestationReview';
 import type { ApprovalQueueSummary } from '../../types/unifiedApprovalInbox';
-export function LeaveAndAttestationWorkspace({ queues }: { queues: ApprovalQueueSummary[] }) {
+export function LeaveAndAttestationWorkspace({ queues, initialOpen = false }: { queues: ApprovalQueueSummary[]; initialOpen?: boolean }) {
   const { user } = useStore(); const { effectiveCountry, activeSite } = useData();
   if (!user?.id || !effectiveCountry || !activeSite?.id) return null;
   const scope = { id: user.id, name: user.name || '', role: user.role, country: effectiveCountry, site: activeSite.id };
   return <section className="space-y-4 border-t border-[var(--theme-border)] pt-4"><h2 className="text-lg font-semibold">Leave and regional payroll reviews</h2>
-    {queues.some(q => q.key === 'leave' && q.status === 'ready') && <Panel key={`leave:${JSON.stringify(scope)}`} kind="leave" scope={scope} />}
-    {queues.some(q => q.key === 'payroll_attestation' && q.status === 'ready') && <Panel key={`payroll:${JSON.stringify(scope)}`} kind="attestation" scope={scope} />}
+    {queues.some(q => q.key === 'leave' && q.status === 'ready') && <Panel key={`leave:${JSON.stringify(scope)}`} kind="leave" initialOpen={initialOpen} scope={scope} />}
+    {queues.some(q => q.key === 'payroll_attestation' && q.status === 'ready') && <Panel key={`payroll:${JSON.stringify(scope)}`} kind="attestation" initialOpen={initialOpen} scope={scope} />}
   </section>;
 }
-function Panel({ kind, scope }: { kind: PersonnelReview; scope: { id: string; name: string; role: string; country: string; site: string } }) {
-  const [open, setOpen] = useState(false); const [page, setPage] = useState(1); const [id, setId] = useState(''); const [reason, setReason] = useState(''); const [notice, setNotice] = useState('');
+function Panel({ kind, scope, initialOpen }: { kind: PersonnelReview; initialOpen: boolean; scope: { id: string; name: string; role: string; country: string; site: string } }) {
+  const [open, setOpen] = useState(initialOpen); const [page, setPage] = useState(1); const [id, setId] = useState(''); const [reason, setReason] = useState(''); const [notice, setNotice] = useState('');
   const { list, decision } = useLeaveAndAttestationReview(scope, kind, page, open);
   const leave = list.data?.kind === 'leave' ? list.data.rows.find(row => row.id === id) : undefined;
   const run = list.data?.kind === 'attestation' ? list.data.rows.find(row => row.id === id) : undefined;

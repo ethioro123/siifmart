@@ -74,7 +74,7 @@ export default function Approvals() {
       {selectedQueue && <div id="approval-review" ref={reviewRef} tabIndex={-1} className="space-y-4 scroll-mt-4 focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]"><div className="flex justify-between gap-3 items-center"><h2 className="text-lg font-semibold">{APPROVAL_QUEUES[selectedQueue]?.label || 'Barcode reviews'}</h2><button type="button" className="min-h-11 px-4 border border-[var(--theme-border)] rounded-[10px]" onClick={() => setSelectedQueue('')}>Close review</button></div><ApprovalReviewHost queueKey={selectedQueue} queues={queues} /></div>}
       <section aria-label="Additional review workflows" className="border-t border-[var(--theme-border)] pt-4 space-y-2">
         <h2 className="text-base font-semibold">Additional review workflows</h2>
-        <p className="text-sm text-[var(--theme-text-secondary)]">These workflows are not included in the inbox total. Access is checked by the destination. Legacy browser-local photo requests are not a verified shared approval queue.</p>
+        <p className="text-sm text-[var(--theme-text-secondary)]">These workflows are not included in the inbox total. Access is checked by the destination. Photo review history in employee workflows is excluded from the shared pending total.</p>
         <div className="flex flex-wrap gap-3"><button type="button" className="min-h-11 inline-flex items-center underline text-sm" onClick={() => setSelectedQueue('barcode')}>Barcode requests and evidence</button>
           <Link className="min-h-11 inline-flex items-center underline text-sm" to="/employees">Employee onboarding and profile workflows</Link></div>
       </section>

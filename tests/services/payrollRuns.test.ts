@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { payrollRunsService } from '../../services/payroll-runs.service';
 
 let inMemoryPayrollDb: any[] = [];
+vi.mock('../../services/system-logs.service', () => ({ systemLogsService: { create: vi.fn().mockResolvedValue({ id: 'audit' }) } }));
 
 vi.mock('../../lib/supabase', () => ({
   supabase: {
@@ -22,6 +23,7 @@ vi.mock('../../lib/supabase', () => ({
       let filtered = [...inMemoryPayrollDb];
       const chainable: any = {
         select: vi.fn().mockImplementation(() => chainable),
+        single: vi.fn().mockImplementation(() => Promise.resolve({ data: filtered[0] || null, error: null })),
         eq: vi.fn().mockImplementation((col: string, val: any) => {
           filtered = filtered.filter(r => r[col] === val || r.id === val);
           return chainable;

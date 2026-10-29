@@ -53,8 +53,10 @@ export const PayrollTab: React.FC = () => {
     const [isSalaryQueueOpen, setIsSalaryQueueOpen] = useState(false);
     const [pendingSalaryCount, setPendingSalaryCount] = useState(0);
     const [latestRun, setLatestRun] = useState<PayrollRun | null>(null);
+    const [summaryError, setSummaryError] = useState(false);
 
     const refreshPayrollState = useCallback(async () => {
+        setSummaryError(false);
         try {
             const [pendingSalaries, run] = await Promise.all([
                 salaryRequestsService.getPending(activeSite?.id, effectiveCountry),
@@ -63,6 +65,7 @@ export const PayrollTab: React.FC = () => {
             setPendingSalaryCount(pendingSalaries.length);
             setLatestRun(run);
         } catch {
+            setSummaryError(true); setLatestRun(null);
             // Handled gracefully
         }
     }, [activeSite?.id, effectiveCountry]);
@@ -345,7 +348,7 @@ export const PayrollTab: React.FC = () => {
             </div>
 
             {/* Right 1 Col: Summary & Actions Component */}
-            <PayrollSummaryCard
+            {summaryError ? <p role="alert">Payroll summary unavailable. <button type="button" className="min-h-11 px-4 underline" onClick={refreshPayrollState}>Retry payroll summary</button></p> : <PayrollSummaryCard
                 totalSalaries={totalSalaries}
                 totalBonuses={totalBonuses}
                 employeeCount={employees.length}
@@ -356,7 +359,7 @@ export const PayrollTab: React.FC = () => {
                 onProcessPayroll={handleProcessPayroll}
                 onOpenSalaryQueue={() => setIsSalaryQueueOpen(true)}
                 onDownloadBankFile={handleDownloadBankFile}
-            />
+            />}
 
             {/* Salary Approval Queue Modal */}
             {isSalaryQueueOpen && (

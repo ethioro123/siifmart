@@ -1,4 +1,5 @@
 - User-authorized design direction (2026-10-30): Revision C adopts a Codex-inspired neutral workspace, compact navigation, restrained controls and soft panels where useful. Chapter 18 explicitly supersedes conflicting visual defaults; existing references remain historical until reviewed. Documentation only; no runtime restyling.
+- 2026-10-30: Approval consolidation covers all 24 queues: 22 central workspaces plus onboarding/transfer handoffs. Added recruitment, payroll, campaigns, sourcing, leave and regional attestation; scoped leave storage restored and pending reviews no longer use cached read fallbacks.
 - 2026-10-30: Expense decisions use signed-in server identity, independent review and atomic audit guards; Approvals includes paginated site-scoped expense decisions with required reasons.
 - 2026-10-30: Approvals offers on-demand salary, headcount and employee-profile review dialogs for available authorized queues; context changes close dialogs and decisions refresh the inbox.
 - 2026-10-30: Approvals opens site-scoped purchase-order reviews and on-demand Finance clearance using the existing PO inspector; review-only mode hides editing/deletion.
@@ -302,7 +303,6 @@
 - MFA requirements now show a verification warning only when an enrolled factor requires step-up verification (`nextLevel === 'aal2'`), and `store_manager` no longer defaults to requiring MFA. Short-lived access tokens no longer trigger a misleading countdown because Supabase refreshes them automatically; only the app's inactivity sign-out warns users to save work.
 - **Files**: `hooks/useSessionManager.ts`, `services/zeroTrustPolicies.service.ts`, `components/settings/RoleSettings.tsx`, `contexts/CentralStore.tsx`
 - **Database**: None
-
 ### Store Bonus & Leaderboard Modernization (2026-10-19)
 - Modernized StoreBonusDisplay and LeaderboardWidget using Apple Design System tokens (`var(--theme-bg-card)`, `var(--theme-border)`, `var(--theme-text-primary)`). Added active site fallback initialization so new branches display live tier progression (Starting/Bronze) rather than an unhelpful "Unavailable" error state. Added dedicated empty state to LeaderboardWidget and removed decorative UI emojis.
 - **Files**: `components/StoreBonusDisplay.tsx`, `components/WorkerPointsDisplay.tsx`, `components/gamification/LeaderboardWidget.tsx`, `pages/POSCommand.tsx`, `tests/utils/storeGamification.test.ts`

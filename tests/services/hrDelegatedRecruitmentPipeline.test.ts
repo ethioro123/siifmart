@@ -1,3 +1,4 @@
+vi.mock('../../services/system-logs.service', () => ({ systemLogsService: { create: vi.fn().mockResolvedValue({ id: 'audit' }) } }));
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { recruitmentService } from '../../services/recruitment.service';
 import { evaluateCandidateHiringRoute } from '../../services/recruitment-delegation';
@@ -50,6 +51,7 @@ vi.mock('../../lib/supabase', () => ({
             return b;
           }),
           order: vi.fn(() => b),
+          range: vi.fn(() => b),
           single: vi.fn(() => {
             const item = currentFiltered[0] || null;
             return Promise.resolve({ data: item, error: item ? null : { message: 'Not found' } });

@@ -31,6 +31,7 @@ export const PayrollModal: React.FC = () => {
 
   const [activeRun, setActiveRun] = useState<PayrollRun | null>(null);
   const [isLoadingRun, setIsLoadingRun] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [hrNotesInput, setHrNotesInput] = useState('');
   const [financeNotesInput, setFinanceNotesInput] = useState('');
@@ -52,6 +53,7 @@ export const PayrollModal: React.FC = () => {
   // Load latest payroll run for the active country/site
   const loadActiveRun = useCallback(async () => {
     setIsLoadingRun(true);
+    setLoadError('');
     try {
       const run = await payrollRunsService.getLatestRun(
         activeSite?.id,
@@ -60,6 +62,8 @@ export const PayrollModal: React.FC = () => {
       );
       setActiveRun(run);
     } catch {
+      setActiveRun(null);
+      setLoadError('Payroll evidence could not be loaded. Retry before recording a decision.');
       // Handled gracefully
     } finally {
       setIsLoadingRun(false);
@@ -220,9 +224,7 @@ export const PayrollModal: React.FC = () => {
                 <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                   4-Eyes Dual Control Sign-Off
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20">
-                  {effectiveCountry} TENANT
-                </span>
+
               </div>
               <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                 Both HR and Finance sign-offs are strictly mandatory before funds disburse.
@@ -289,8 +291,9 @@ export const PayrollModal: React.FC = () => {
           </div>
         </div>
 
+        {loadError && <p role="alert">{loadError}<button type="button" className="min-h-11 px-4 underline" onClick={loadActiveRun}>Retry payroll evidence</button></p>}
         {/* If no run initiated yet */}
-        {!activeRun && !isLoadingRun && (
+        {!activeRun && !isLoadingRun && !loadError && (
           <div className="p-6 border border-dashed border-[var(--theme-border)] rounded-2xl bg-[var(--theme-bg-card)] text-center space-y-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] flex items-center justify-center mx-auto">
               <Briefcase size={20} />
@@ -316,7 +319,7 @@ export const PayrollModal: React.FC = () => {
         )}
 
         {/* Active Run Dual Sign-off Cards */}
-        {activeRun && (
+        {activeRun && !loadError && !isLoadingRun && (
           <div className="space-y-4">
             {/* Department 1: HR Certification */}
             <PayrollHrCard

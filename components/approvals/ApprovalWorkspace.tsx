@@ -7,15 +7,15 @@ import { Link } from 'react-router-dom';
 import { useApprovalWorkspace, type WorkspaceQueue } from '../../hooks/useApprovalWorkspace';
 import { proposalApprovalBlock } from '../../utils/proposalReviewPolicy';
 
-export function ApprovalWorkspace({ initialQueue = 'product' }: { initialQueue?: WorkspaceQueue } = {}) {
-  const [open, setOpen] = useState(false);
+export function ApprovalWorkspace({ initialQueue = 'product', initialOpen = false }: { initialQueue?: WorkspaceQueue; initialOpen?: boolean } = {}) {
+  const [open, setOpen] = useState(initialOpen);
   const [queue, setQueue] = useState<WorkspaceQueue>(initialQueue);
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState('');
   const [reason, setReason] = useState('');
   const [result, setResult] = useState('');
   const [scopeReview, setScopeReview] = useState(false);
-  const { records, decision, user, site, country } = useApprovalWorkspace(queue, page, open);
+  const { records, decision, user, site, country, employees } = useApprovalWorkspace(queue, page, open);
   const selected = records.data?.data.find(row => row.id === selectedId);
   const product = records.data?.kind === 'product' ? records.data.data.find(row => row.id === selectedId) : undefined;
   const barcode = records.data?.kind === 'barcode' ? records.data.data.find(row => row.id === selectedId) : undefined;
@@ -49,9 +49,10 @@ export function ApprovalWorkspace({ initialQueue = 'product' }: { initialQueue?:
         <div><ul aria-label="Requests" className="divide-y divide-[var(--theme-border)]">{records.data.data.map(row => {
           const label = 'barcode' in row ? row.barcode : row.productName;
           const requester = 'createdBy' in row ? row.createdBy : row.requestedBy;
+          const actorLabel = requester && /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(requester) ? employees?.find(employee => employee.id === requester)?.name || 'Employee name unavailable' : requester;
           const date = 'createdAt' in row ? row.createdAt : row.requestedAt;
           return <li key={row.id}><button type="button" disabled={decision.isPending} aria-pressed={selectedId === row.id} onClick={() => { setSelectedId(row.id); setReason(''); setResult(''); decision.reset(); }} className={`w-full min-h-14 p-3 text-left rounded-[10px] focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${selectedId === row.id ? 'bg-[var(--theme-bg-subtle)] font-semibold' : ''}`}>
-            <span className="block break-words">{label || 'Product request'}</span><span className="block text-sm text-[var(--theme-text-secondary)] break-words">{requester || 'Requester not recorded'} · {date ? new Date(date).toLocaleDateString() : 'Date not recorded'}</span>
+            <span className="block break-words">{label || 'Product request'}</span><span className="block text-sm text-[var(--theme-text-secondary)] break-words">{actorLabel || 'Requester not recorded'} · {date ? new Date(date).toLocaleDateString() : 'Date not recorded'}</span>
           </button></li>;
         })}</ul>{records.data.data.length === 0 && <p role="status">No pending requests in this result page.</p>}
         <div className="flex items-center gap-3 py-3"><button type="button" disabled={page === 1 || decision.isPending} onClick={() => { setPage(page - 1); setSelectedId(''); }} className="min-h-11 px-3 border rounded-[10px]">Previous</button><span>Page {page}</span><button type="button" disabled={(records.data.kind === 'product' ? !records.data.hasMore : records.data.data.length < 25) || decision.isPending} onClick={() => { setPage(page + 1); setSelectedId(''); }} className="min-h-11 px-3 border rounded-[10px]">Next</button></div>

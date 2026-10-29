@@ -106,21 +106,19 @@ export function CampaignReviewPanel({ activeCountry, currencySymbol, onCreate }:
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-[var(--theme-text-primary)]">Campaign Plans & Governance</h3>
-            <span className="rounded-md bg-[var(--theme-accent-muted)] px-2 py-0.5 text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-wide">
-              {activeCountry} {activeRegionCode ? `· ${activeRegionCode}` : '· National'}
-            </span>
+
           </div>
           <p className="mt-1 text-xs text-[var(--theme-text-secondary)]">
             Approval records the campaign plan in merchandising governance. POS promotional discount activation remains a separate release.
           </p>
         </div>
-        <button
+        {onCreate && <button
           type="button"
-          disabled={!onCreate} onClick={onCreate}
+          onClick={onCreate}
           className="inline-flex items-center gap-2 rounded-xl bg-[var(--theme-accent)] px-4 py-2 text-xs font-semibold text-[var(--theme-text-primary)] shadow-sm hover:opacity-95 transition-opacity"
         >
           <Plus size={15} /> Propose Campaign
-        </button>
+        </button>}
       </div>
 
       {/* Filter Tabs & Pagination Summary */}

@@ -101,7 +101,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             let itemsToValidate = optimisticLineItems || job.lineItems;
 
             // Validate that all items are actually completed (Picked or Short)
-            if (!skipValidation && itemsToValidate && itemsToValidate.length > 0) {
+            if (itemsToValidate && itemsToValidate.length > 0) {
                 const allItemsProcessed = itemsToValidate.every((item: any) =>
                     item.status === 'Picked' || item.status === 'Short' || item.status === 'Discontinued' || item.status === 'Completed'
                 );
@@ -122,23 +122,6 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             const completedByValue = user?.id || employeeName;
             logger.debug('useJobCompletion', `📝 [completeJob] completedBy will be saved as: "${completedByValue}" (user.id: ${user?.id}, user.name: ${user?.name}, fallback: ${employeeName})`);
 
-            // CRITICAL FIX: When skipValidation=true (Force Complete), update lineItems to 'Picked' in DB
-            if (skipValidation && itemsToValidate && itemsToValidate.length > 0) {
-                const forcedLineItems = itemsToValidate.map((item: any) => ({
-                    ...item,
-                    status: (item.status === 'Short' ? 'Short' : 'Picked') as JobItem['status'],
-                    pickedQty: item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : (item.expectedQty || 0)
-                }));
-                logger.debug('useJobCompletion', `🔧 Force Complete: Updating ${forcedLineItems.length} lineItems to 'Picked' status in DB`);
-                await wmsJobsService.update(jobId, {
-                    status: 'Completed',
-                    lineItems: forcedLineItems,
-                    completedBy: completedByValue,
-                    completedAt: timestamp || new Date().toISOString()
-                });
-
-                itemsToValidate = forcedLineItems;
-            } else {
                 await wmsJobsService.update(jobId, {
                     status: 'Completed',
                     lineItems: itemsToValidate.map((i: any) => ({
@@ -149,38 +132,10 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                     completedBy: completedByValue,
                     completedAt: timestamp || new Date().toISOString()
                 });
-            }
             logger.debug('useJobCompletion', `💾 Database updated for job ${jobId}`);
 
-            // CLEANUP: Update assignment record to 'Completed' so it drops from active workload matrix
-            try {
-                const completedByEmployee = employees.find(e => 
-                    e.name === completedByValue || e.email === completedByValue
-                );
-                const employeeIdToMatch = completedByEmployee?.id || user?.id; // Try to resolve current worker
-                const assignment = jobAssignments.find(a => 
-                    a.jobId === jobId && ['Assigned', 'Accepted', 'In-Progress'].includes(a.status) &&
-                    (a.employeeId === employeeIdToMatch || !employeeIdToMatch) // best effort match if possible, otherwise any active
-                );
-
-                if (assignment) {
-                    await jobAssignmentsService.update(assignment.id, { 
-                        status: 'Completed',
-                        completedAt: timestamp || new Date().toISOString()
-                    });
-                    
-                    setJobAssignments(prev => prev.map(a => 
-                        a.id === assignment.id ? { 
-                            ...a, 
-                            status: 'Completed',
-                            completedAt: timestamp || new Date().toISOString()
-                        } : a
-                    ));
-                    logger.debug('useJobCompletion', `✅ Job assignment ${assignment.id} marked Completed`);
-                }
-            } catch (assignError) {
-                logger.error('useJobCompletion', `⚠️ Failed to complete job assignment for job ${jobId}:`, assignError);
-            }
+            // The database closes active assignments in the same transaction as the job.
+            setJobAssignments(prev => prev.map(a => a.jobId === jobId && ['Assigned','Accepted','In-Progress'].includes(a.status) ? {...a,status:'Completed',completedAt:timestamp || new Date().toISOString()} : a));
 
             stage('Local State Update');
             const completionTime = timestamp || new Date().toISOString();

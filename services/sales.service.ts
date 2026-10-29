@@ -1,3 +1,4 @@
+import { fulfillmentReturnsService } from './fulfillment-returns.service';
 import { supabase } from '../lib/supabase';
 import type { SaleRecord, FulfillmentPlan, CartItem } from '../types';
 import { productsService } from './products.service';
@@ -167,19 +168,8 @@ export const salesService = {
         };
     },
 
-    async refund(id: string, items: any[], refundAmount: number) {
-        // Update sale status
-        await supabase
-            .from('sales')
-            .update({ status: 'Refunded' })
-            .eq('id', id);
-
-        // Restore stock for refunded items
-        for (const item of items) {
-            await productsService.adjustStock(item.product_id, item.quantity, 'IN');
-        }
-
-        return true;
+    async refund(id: string, items: Array<{product_id:string;quantity:number}>, _refundAmount: number) {
+        return fulfillmentReturnsService.requestByProduct(id,items);
     },
 
     async update(id: string, updates: Partial<SaleRecord>) {

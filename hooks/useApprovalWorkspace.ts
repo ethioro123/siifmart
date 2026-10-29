@@ -7,7 +7,7 @@ import { APPROVAL_INBOX_KEY } from '../utils/unifiedApprovalInbox';
 export type WorkspaceQueue = 'product' | 'barcode' | 'inventory';
 export function useApprovalWorkspace(queue: WorkspaceQueue, page: number, enabled: boolean) {
   const { user } = useStore();
-  const { effectiveCountry, activeSite } = useData();
+  const { effectiveCountry, activeSite, employees } = useData();
   const cache = useQueryClient();
   const country = effectiveCountry || user?.country_code || user?.country || '';
   const site = activeSite?.id;
@@ -36,5 +36,5 @@ export function useApprovalWorkspace(queue: WorkspaceQueue, page: number, enable
   }, onSuccess: async () => {
     await Promise.all(['approval-workspace', APPROVAL_INBOX_KEY, 'barcode_approvals', 'inventory_requests', 'merchandising_reviews', 'products'].map(key => cache.invalidateQueries({ queryKey: [key] })));
   } });
-  return { records, decision, user, country, site };
+  return { records, decision, user, country, site, employees };
 }

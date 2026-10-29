@@ -4,15 +4,15 @@ import { useStore } from '../../contexts/CentralStore';
 import { useRequisitionReviewWorkspace } from '../../hooks/useRequisitionReviewWorkspace';
 import { PURCHASE_REQUEST_REVIEWERS } from '../../utils/procurementScope';
 
-export function RequisitionReviewWorkspace() {
+export function RequisitionReviewWorkspace({ initialOpen = false }: { initialOpen?: boolean } = {}) {
   const { user } = useStore();
   const { effectiveCountry, activeSite } = useData();
   if (!user?.id || !effectiveCountry || !activeSite?.id || !PURCHASE_REQUEST_REVIEWERS.includes(user.role)) return null;
   const scope = { actor: user.id, country: effectiveCountry, site: activeSite.id };
-  return <RequisitionPanel key={`${scope.actor}:${user.role}:${scope.country}:${scope.site}`} scope={scope} siteName={activeSite.name} />;
+  return <RequisitionPanel key={`${scope.actor}:${user.role}:${scope.country}:${scope.site}`} scope={scope} initialOpen={initialOpen} siteName={activeSite.name} />;
 }
-function RequisitionPanel({ scope, siteName }: { scope: { actor: string; country: string; site: string }; siteName: string }) {
-  const [open, setOpen] = useState(false);
+function RequisitionPanel({ scope, siteName, initialOpen }: { scope: { actor: string; country: string; site: string }; siteName: string; initialOpen: boolean }) {
+  const [open, setOpen] = useState(initialOpen);
   const [page, setPage] = useState(1);
   const [id, setId] = useState('');
   const [reason, setReason] = useState('');
