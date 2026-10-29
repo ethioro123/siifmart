@@ -43,7 +43,7 @@ Chapters 14–17 add exact component defaults and a [runnable visual reference](
 ## The essential rules
 
 1. **Lead with the work.** Give the page one clear identity and a recognizable primary task. Keep secondary diagnostics and historical detail behind deliberate disclosure.
-2. **Use a stable visual hierarchy.** Canvas, content and controls have distinct roles. Use spacing and alignment before adding another border, card, color or material. Open sections are the default; component panel specifications apply only when a bounded surface has a real purpose.
+2. **Use a stable visual hierarchy.** Canvas, content and controls have distinct roles. Use spacing and alignment before adding another border, card, color or material. Softly sculpted cards and panels are preferred for main workspaces and independent objects. Avoid heavy rectangular framing; use open groups within panels for related content.
 3. **Keep data surfaces clear.** Tables, forms, financial totals, price comparisons and scanning screens use readable solid surfaces. Material treatment is optional and localized to navigation or temporary chrome.
 4. **Honor user appearance choices.** System is the default. Respect explicit Light/Dark choices, contrast needs, reduced motion and a solid-surface fallback. Performance fallbacks apply in every module when needed.
 5. **Design at the actual density.** Administration can support comparison-heavy layouts; POS and Fulfillment need fast, reachable actions. Neither requires tiny text or giant dashboard decorations.
@@ -87,3 +87,7 @@ Existing component behavior is implementation evidence, not design authority. If
 Write one sentence describing the user's task and one sentence describing the expected saved outcome. Identify the data owner, site/country scope, affected roles, device/input modes and interrupted-work behavior. Then choose the smallest existing pattern that supports that task. If the pattern is inadequate, improve it with explicit states and evidence rather than adding a competing visual vocabulary.
 
 Use [the acceptance checklist](design/12-review-and-rollout.md) to finish. A documentation update establishes the target standard; it does not silently deploy a full application redesign or certify every existing component.
+
+## Authorized composition clarification — 29 October 2026
+
+The user explicitly clarified that cards and panels are desired: futuristic, clean, elegant and softly shaped. The earlier blanket open-section direction was an incorrect interpretation. Chapters 02 and 14 now define the corrected surface hierarchy, geometry, padding and edge treatment. Removing cards or making the POS entirely transparent is not the target design.

@@ -21,7 +21,7 @@ Default density is Comfortable. Compact is for deliberate fine-pointer, comparis
 | Focus outline | 2 solid; offset 2 | Maintain visibility in forced colors; never clip with overflow |
 | Field radius | 10 | Same across input, select and searchable combobox |
 | Button radius | 10 | Icon-only square also 10; pills reserved for filters/badges |
-| Content panel radius | 14 | 18 for dialogs; no radius required on full-width workspace tables |
+| Content surface radius | Major panels 28; standard cards 22; compact cards 18 | Major panels may reduce to 22 on narrow screens; preserve readable table content within the surface |
 | Border | 1 | Essential boundaries use the verified strong-border role |
 | Section spacing | 24 | 16 on narrow layouts; 32 between major work groups on wide layouts |
 | Label/value gap | 8 | Supporting description starts 4 below its label |
@@ -66,7 +66,7 @@ Count badges use tabular figures and min width 24. Use “99+” only when the f
 
 ## Panels, lists and menus
 
-Panels use 20-pixel padding on wide layouts and 16 on narrow layouts; internal groups have 16-pixel gaps. Use a border or surface difference before adding a shadow. Do not nest a card simply to gain padding. Lists with mixed content use min row height 56 and 12-pixel vertical padding; allow multiline growth. A simple menu item uses min height 44 and padding 8 × 12. Menu section gaps are 8; separators have 4-pixel vertical margins.
+Major panels use 24-pixel padding on wide layouts and 16 on narrow layouts; object cards use 16–20; internal groups have 16-pixel gaps. Use a tonal surface difference with either a soft shadow or a quiet boundary when needed; do not combine strong framing effects. Do not nest a card simply to gain padding. Lists with mixed content use min row height 56 and 12-pixel vertical padding; allow multiline growth. A simple menu item uses min height 44 and padding 8 × 12. Menu section gaps are 8; separators have 4-pixel vertical margins.
 
 Menus use radius 10, a strong boundary and one restrained elevation. They must reposition to remain within an 8-pixel viewport margin. Long menus scroll inside a labeled region; they must not create a second inaccessible page. Destructive actions are separated from routine actions by a divider and a clear label.
 
@@ -93,12 +93,18 @@ Toast width is min(360, viewport minus 32), padding 16, gap 12, with a 44-pixel 
 
 Empty states use a plain heading 18 / 24, body 14 / 20, max readable width 440 and one relevant action. Skeletons reserve actual content geometry and never imitate real money. Progress indicators show a percentage only when measured. Avatars are 32 for rows and 40 for identity summaries; initials and names remain available when an image fails.
 
-## Composition correction: open sections before containers
+## Sculpted cards and panels: the intended composition
 
-A component's radius and padding apply only when its boundary is justified. They are not instructions to wrap every section in a panel. The normal page composition is open sections with shared alignment and 24–32 pixels of separation. Use typography to establish groups before adding a surface change. Avoid a rounded page shell containing rounded cards containing further boxed groups.
+Cards and panels are a preferred part of SIIFMART's visual identity. The objective is a futuristic, clean and elegant workspace with soft, deliberately shaped surfaces. “Not boxy” means avoiding rigid geometry, heavy outlines, flat slab-like backgrounds and cramped internal framing; it does not mean removing cards, making every surface transparent or flattening the workspace into plain text.
 
-Use a bounded panel for a genuinely independent object, an inspector or an overlapping temporary surface. If ordinary content already sits on a readable canvas, keep it on that canvas. A table's row structure does not require another surrounding card. Preserve essential input boundaries and focus cues; removing decorative boxes must not make interaction ambiguous.
+Use major panels to organize independent work areas such as the catalog and basket. Use smaller cards for distinct objects, such as products, where grouping helps recognition and action. Keep related content visibly coherent through shared alignment, balanced proportions and comfortable padding. A main panel may contain object cards: that relationship is intentional. Avoid additional decorative containers around the same content merely to add another border or background.
 
-Read-only metadata should read as data, not resemble an editable input. A compact approval entry need not have a permanent strong outline when its label and count are clear. Keep exceptional states available without placing disabled and busy demonstration controls alongside the principal live action. A reference gallery should distinguish component samples from the composition intended for a real task.
+Use the existing 28-pixel radius for major desktop panels, 22 pixels for standard cards and 18 pixels for compact cards. On narrow screens major panels may use 22 pixels with 16-pixel padding; full-screen sheets respect the actual viewport edge rather than faking floating corners. Inner controls retain their own 10-pixel radius and accessible target sizes. Corners should feel soft and consistent; CSS rounded corners do not claim to reproduce a native continuous-corner algorithm.
 
-Overlays inherit the active theme and keep a readable solid surface. Do not open a hardcoded light dialog from a dark workspace. Review composition at 320, 390 and 1440 pixels as well as under enlarged text. More rounding is not a remedy for too many containers; remove the unnecessary grouping boundary first.
+Primary separation comes from quiet tonal differences, generous corners, space and one subtle depth cue. Prefer borderless cards with a soft shadow on light canvas, or gentle tonal elevation on dark canvas. If a boundary is needed, use a quiet hairline instead of combining strong border, ring and shadow. High-contrast borders remain appropriate for essential inputs, focus and warnings; accessibility is never sacrificed to make an edge disappear.
+
+Default panel padding is 24 pixels on wide layouts and 16 on narrow layouts. Standard object cards use 16–20 pixels; gaps between sibling panels/cards are 16–24 pixels. These values describe breathing room, not a reason to make operational screens oversized. Keep the next action, item identity and financial evidence readable and reachable.
+
+Depth must remain restrained and functional. No neon outlines, repeated glowing boxes, mandatory gradients, thick frames or heavy shadows on every item. Glass may be used selectively where supported and readable, but is optional. A soft solid surface can be equally futuristic. Open sections remain useful within a panel for related fields and facts; they are not a replacement for the panel/card identity the product calls for.
+
+Review the composition in both themes and at narrow widths. Ask whether a surface feels intentionally shaped, whether its depth is calm, and whether the content has room to breathe. If a panel feels boxy, improve its radius, proportion, padding, tonal relationship and edge treatment before deciding to remove it. This direction supersedes the earlier blanket “open sections by default” correction.

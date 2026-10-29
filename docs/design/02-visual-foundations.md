@@ -28,7 +28,7 @@ A token name does not prove accessibility. The current light secondary/muted col
 
 ## Surface hierarchy
 
-Use a quiet canvas, one primary working surface and only the grouping surfaces needed for the task. A table already supplies structure through its heading, columns and rows; it rarely needs a separate card around every row. A form section can use a heading and space without another translucent panel. A selected record may justify an inspector; a basic status label does not.
+Use a quiet canvas, softly sculpted main panels and purposeful object cards. A table already supplies structure through its heading, columns and rows; it rarely needs a separate card around every row. A form section can use a heading and space without another translucent panel. A selected record may justify an inspector; a basic status label does not.
 
 Elevation should indicate temporary overlap or spatial relationship. Menus and dialogs can sit above content. Content cards need less elevation than overlays. Do not use the same strong shadow on the sidebar, header, every card, every button and every input. If a design remains understandable with shadows disabled, its basic hierarchy is probably sound.
 
@@ -57,7 +57,7 @@ Fallback behavior applies across the entire product. Fulfillment has especially 
 
 Use the existing 4-pixel spacing foundation: 4, 8, 12, 16, 20, 24, 28, 32, 40, 48 and 64 CSS pixels. Smaller gaps separate tightly related facts; larger gaps separate decisions or sections. Alignment is more important than adding exactly the same padding to every object.
 
-The existing radii are 6, 10, 14, 18, 22 and 28 pixels, with a pill token for capsule shapes. Prefer smaller radii for inner controls and larger radii for outer surfaces. A large outer radius should not force a large empty gutter around dense content. Use capsules for short filter/status affordances when their shape improves recognition; do not make every input, panel and table a pill.
+The existing radii are 6, 10, 14, 18, 22 and 28 pixels, with a pill token for capsule shapes. Use 28-pixel major panels, 22-pixel standard cards, 18-pixel compact cards and smaller radii for inner controls. A large outer radius should not force a large empty gutter around dense content. Use capsules for short filter/status affordances when their shape improves recognition; do not make every input, panel and table a pill.
 
 Keep icon sizes consistent within a context, normally 16–20 pixels in compact controls and 20–24 pixels in touch-oriented actions. The hit target can be substantially larger than the glyph. Use Lucide consistently; do not mix unrelated icon families, emoji or decorative pseudo-system symbols.
 
@@ -71,12 +71,18 @@ Represent selection through more than hue: use label weight, shape, a marker or 
 
 Review the complete theme pair with real long text, error text, disabled controls and selected rows. Check material surfaces over the lightest, darkest and most visually busy underlying content they can actually encounter. Inspect focus and contrast without relying on shadows. If the effect adds distraction, obscures evidence or slows repeated work, use the solid treatment and retain the same layout quality.
 
-## Composition correction: open sections before containers
+## Sculpted cards and panels: the intended composition
 
-A component's radius and padding apply only when its boundary is justified. They are not instructions to wrap every section in a panel. The normal page composition is open sections with shared alignment and 24–32 pixels of separation. Use typography to establish groups before adding a surface change. Avoid a rounded page shell containing rounded cards containing further boxed groups.
+Cards and panels are a preferred part of SIIFMART's visual identity. The objective is a futuristic, clean and elegant workspace with soft, deliberately shaped surfaces. “Not boxy” means avoiding rigid geometry, heavy outlines, flat slab-like backgrounds and cramped internal framing; it does not mean removing cards, making every surface transparent or flattening the workspace into plain text.
 
-Use a bounded panel for a genuinely independent object, an inspector or an overlapping temporary surface. If ordinary content already sits on a readable canvas, keep it on that canvas. A table's row structure does not require another surrounding card. Preserve essential input boundaries and focus cues; removing decorative boxes must not make interaction ambiguous.
+Use major panels to organize independent work areas such as the catalog and basket. Use smaller cards for distinct objects, such as products, where grouping helps recognition and action. Keep related content visibly coherent through shared alignment, balanced proportions and comfortable padding. A main panel may contain object cards: that relationship is intentional. Avoid additional decorative containers around the same content merely to add another border or background.
 
-Read-only metadata should read as data, not resemble an editable input. A compact approval entry need not have a permanent strong outline when its label and count are clear. Keep exceptional states available without placing disabled and busy demonstration controls alongside the principal live action. A reference gallery should distinguish component samples from the composition intended for a real task.
+Use the existing 28-pixel radius for major desktop panels, 22 pixels for standard cards and 18 pixels for compact cards. On narrow screens major panels may use 22 pixels with 16-pixel padding; full-screen sheets respect the actual viewport edge rather than faking floating corners. Inner controls retain their own 10-pixel radius and accessible target sizes. Corners should feel soft and consistent; CSS rounded corners do not claim to reproduce a native continuous-corner algorithm.
 
-Overlays inherit the active theme and keep a readable solid surface. Do not open a hardcoded light dialog from a dark workspace. Review composition at 320, 390 and 1440 pixels as well as under enlarged text. More rounding is not a remedy for too many containers; remove the unnecessary grouping boundary first.
+Primary separation comes from quiet tonal differences, generous corners, space and one subtle depth cue. Prefer borderless cards with a soft shadow on light canvas, or gentle tonal elevation on dark canvas. If a boundary is needed, use a quiet hairline instead of combining strong border, ring and shadow. High-contrast borders remain appropriate for essential inputs, focus and warnings; accessibility is never sacrificed to make an edge disappear.
+
+Default panel padding is 24 pixels on wide layouts and 16 on narrow layouts. Standard object cards use 16–20 pixels; gaps between sibling panels/cards are 16–24 pixels. These values describe breathing room, not a reason to make operational screens oversized. Keep the next action, item identity and financial evidence readable and reachable.
+
+Depth must remain restrained and functional. No neon outlines, repeated glowing boxes, mandatory gradients, thick frames or heavy shadows on every item. Glass may be used selectively where supported and readable, but is optional. A soft solid surface can be equally futuristic. Open sections remain useful within a panel for related fields and facts; they are not a replacement for the panel/card identity the product calls for.
+
+Review the composition in both themes and at narrow widths. Ask whether a surface feels intentionally shaped, whether its depth is calm, and whether the content has room to breathe. If a panel feels boxy, improve its radius, proportion, padding, tonal relationship and edge treatment before deciding to remove it. This direction supersedes the earlier blanket “open sections by default” correction.

@@ -248,3 +248,9 @@ POS and Fulfillment run on phones and tablets. Keep common actions responsive on
 - Keep scanning feedback immediate; move non-critical work off the input/paint path and avoid arbitrary timers as a substitute for profiling.
 - Validate critical workflows on representative mobile devices and network conditions. Record regressions against a measured baseline instead of relying on a single simulated network preset.
 
+
+### User-authorized card and panel direction — 29 October 2026
+
+- Follow the corrected composition in design chapters 02, 14 and 16: cards and panels are preferred for primary workspaces and distinct objects, with soft geometry, tonal separation, restrained depth and generous internal spacing.
+- Avoid boxiness through edge treatment and proportion rather than removing all cards or making all surfaces transparent. Main-panel radius starts at 28 pixels, standard cards at 22 and compact cards at 18; controls retain accessible geometry.
+- This user clarification supersedes the earlier blanket open-section default. Open groups remain useful inside panels; heavy outlines and needless decorative nesting remain discouraged.

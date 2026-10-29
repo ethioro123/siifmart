@@ -68,3 +68,7 @@ Charts have a labeled title and unit, a readable plot region and an accessible d
 The order is object identity, current workflow stage, explicit scope, before/after evidence, material exceptions, action. Use 16 between these groups and 24 before the final action area. A grouped SKU proposal displays location count and a paginated evidence list. Its anchor site must not masquerade as the full scope. Action copy identifies whether it approves, clears, submits or applies.
 
 A record conflict is an inline persistent condition near the decision, not a transient toast. Preserve safe user input and the selected business object while refreshing authority or evidence. The page must explain the actual next available action without inventing policy limits.
+
+## Main workspace surface contract
+
+Use distinct softly sculpted panels for independent work areas, such as the POS catalog and basket, with 28-pixel wide-layout corners and 16–24 pixels between sibling surfaces. Product cards inside a catalog are legitimate object grouping and use 22-pixel corners. A shared canvas unifies the composition without erasing panel identity. Prefer tonal elevation over full-strength outlines; preserve compact operational density and reachable checkout controls. See the corrected composition rules in chapter 14.

@@ -12,7 +12,8 @@ for (const width of [320, 390, 1440]) {
       const board = page.locator(`[data-theme="${theme}"]`);
       await expect(board.getByRole('textbox', { name: 'Display site code' })).toHaveValue('ADD-DC-01');
       await expect(board.locator('.panel').first()).toHaveCSS('border-top-width', '0px');
-      await expect(board.locator('.panel').first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      await expect(board.locator('.panel').first()).toHaveCSS('background-color', theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(27, 31, 39)');
+      await expect(board.locator('.panel').first()).toHaveCSS('border-radius', '22px');
       await board.locator('summary').click();
       await expect(board.getByRole('button', { name: 'Submitting example…' })).toBeDisabled();
       await board.locator('summary').click();
