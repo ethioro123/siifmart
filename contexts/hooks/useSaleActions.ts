@@ -9,6 +9,7 @@ import { posDB } from '../../services/db/pos.db';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { logger } from '../../utils/logger';
 import { audioFeedback } from '../../utils/audioFeedback';
+import { generateCountryScopedReceiptNumber } from '../../utils/receiptNumberGenerator';
 
 interface UseSaleActionsDeps {
     activeSite: Site | undefined;
@@ -77,14 +78,11 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
             })) as CartItem[];
 
             const isOfflineSale = !navigator.onLine;
-            const regionCode = (activeSite?.regionCode || activeSite?.region_code || '').trim().toUpperCase();
-            if (!/^[A-Z]{3}$/.test(regionCode)) {
-                throw new Error('This site needs a valid three-letter region code before it can record sales.');
-            }
+            const offlinePrefix = (activeSite?.regionCode || activeSite?.region_code || activeSite?.country || settings?.country || 'ET').trim().toUpperCase();
             const offlineReceiptReference = isOfflineSale
-                ? `OFF-${regionCode}-${saleId.toUpperCase()}`
+                ? `OFF-${offlinePrefix}-${saleId.toUpperCase()}`
                 : undefined;
-            const finalReceiptNumber = receiptNumber || offlineReceiptReference || `PENDING-${regionCode}-${saleId.toUpperCase()}`;
+            const finalReceiptNumber = receiptNumber || generateCountryScopedReceiptNumber({ activeSite });
 
             let saleRecord: SaleRecord & { discountCodeId?: string | null } = {
                 id: saleId,

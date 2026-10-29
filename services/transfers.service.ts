@@ -4,7 +4,7 @@ import type { TransferRecord } from '../types';
 import { generateTransferId } from './wms-jobs.service';
 import { logger } from '../utils/logger';
 
-function mapTransferRow(t: any): TransferRecord {
+export function mapTransferRow(t: any): TransferRecord {
     return {
         ...t,
         sourceSiteId: t.source_site_id,

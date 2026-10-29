@@ -22,7 +22,7 @@ export function generateReprintReceiptHtml(
       <body>
         <div class="text-center">
           <h2 style="margin: 0; font-size: 16px;">${siteName}</h2>
-          <p style="margin: 2px 0; font-size: 10px; color: #555;">REPRINT RECEIPT</p>
+          <p style="margin: 2px 0; font-size: 10px; font-weight: bold; letter-spacing: 0.1em; color: #000;">*** REPRINT / DUPLICATE RECEIPT ***</p>
           <p style="margin: 2px 0; font-size: 10px;">${lastSale.receiptNumber || `REC-${lastSale.id.slice(0, 8).toUpperCase()}`}</p>
           <p style="margin: 2px 0; font-size: 9px; color: #666;">${new Date(lastSale.date).toLocaleString()}</p>
         </div>
@@ -31,7 +31,7 @@ export function generateReprintReceiptHtml(
           ${(lastSale.items || []).map((item: any) => `
             <div class="flex justify-between py-1">
               <span>${item.quantity}x ${item.name}</span>
-              <span class="font-bold">${CURRENCY_SYMBOL} ${(item.price * item.quantity).toLocaleString()}</span>
+              <span class="font-bold">${CURRENCY_SYMBOL} ${Math.round(item.price * item.quantity).toLocaleString()}</span>
             </div>
           `).join('')}
         </div>
@@ -163,8 +163,8 @@ export function generateZReportReceiptHtml(
             .filter(([, count]) => Number(count) > 0)
             .map(([denom, count]) => `
               <div class="flex justify-between py-1 font-mono" style="font-size: 10px;">
-                <span>${denom} ETB note x ${count}</span>
-                <span>${CURRENCY_SYMBOL} ${(Number(denom) * Number(count)).toLocaleString()}</span>
+                <span>${denom} ${shift.currency || (CURRENCY_SYMBOL === 'KES' || CURRENCY_SYMBOL === 'KSh' ? 'KES' : 'ETB')} note x ${count}</span>
+                <span>${CURRENCY_SYMBOL} ${Math.round(Number(denom) * Number(count)).toLocaleString()}</span>
               </div>
             `).join('')}
         ` : ''}
@@ -197,7 +197,7 @@ export function generateZReportReceiptHtml(
         <div class="border-b my-2"></div>
         <div class="text-center" style="font-size: 8px; color: #777; margin-top: 8px;">
           <p>Zero-Trust Central Oversight • Real-Time Database Sync</p>
-          <p>SIIFMART Retail Systems • Ethiopia</p>
+          <p>SIIFMART Retail Systems • ${shift.country === 'KE' || CURRENCY_SYMBOL === 'KES' || CURRENCY_SYMBOL === 'KSh' ? 'Kenya' : 'Ethiopia'}</p>
         </div>
       </body>
       </html>

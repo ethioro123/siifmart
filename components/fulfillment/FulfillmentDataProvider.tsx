@@ -1,3 +1,5 @@
+import {getFulfillmentTransferPage} from '../../services/fulfillment-transfer-queue.service';
+import {useFulfillmentQueuePaging,fulfillmentQueueWorker} from '../../hooks/useFulfillmentQueuePaging';
 import { useScopedJobHistory } from '../../hooks/useScopedJobHistory';
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -31,18 +33,22 @@ import { mapJobAssignmentRow } from '../../services/job-assignments.service';
 import { playBeep } from '../../utils/audioUtils';
 import { logger } from '../../utils/logger';
 import { isAdminSite } from '../../utils/countryAdmin';
-
 interface FulfillmentDataContextType {
-    // State
     jobs: WMSJob[];
     /** RULE 10: Starts empty on mount. Populated only when user explicitly clicks History. */
     historicalJobs: WMSJob[];
+    historyError:boolean;
+    historyLoading:boolean;
+    historyHasMore:boolean;
+    loadMoreHistory:()=>Promise<void>;
+    queueHasMore:boolean;
+    queueLoading:boolean;
+    queueError:boolean;
+    loadMoreJobs:()=>Promise<void>;
     transfers: TransferRecord[];
     jobAssignments: JobAssignment[];
     zones: WarehouseZone[];
     barcodeApprovals: BarcodeApproval[];
-
-    // Actions
     assignJob: (jobId: string, employeeIdOrName: string) => Promise<void>;
     unassignJob: (jobId: string) => Promise<void>;
     updateJobItem: (jobId: string, itemId: number, status: JobItem['status'], qty: number, location?: string) => Promise<void>;
@@ -55,33 +61,22 @@ interface FulfillmentDataContextType {
     fixBrokenJobs: () => Promise<void>;
     createPutawayJob: (product: Product, quantity: number, user: string, source?: string) => Promise<WMSJob | undefined>;
     deleteJob: (id: string) => Promise<void>;
-
     /**
      * RULE 10 — Zero Eager History: call this ONLY when the user explicitly clicks the History tab.
      * Fetches the 25 most recent completed/cancelled jobs on demand.
      */
     loadHistoricalJobs: (limit?: number) => Promise<void>;
-
-    // Receiving Actions (Moved from DataContext)
     receivePO: (poId: string, receivedItems?: POReceivingInput[], skuDecisions?: Record<string, 'keep' | 'generate'>, scannedSkus?: Record<string, string>, locationId?: string, user?: { name: string; email: string }) => Promise<any>;
     receivePOSplit: (poId: string, itemId: string, variants: Array<{ sku: string; skuType: 'existing' | 'new'; productId?: string; productName?: string; quantity: number; barcode?: string; barcodes?: string[]; expiryDate?: string; batchNumber?: string; condition?: string; }>, locationId?: string, user?: { name: string; email: string }) => Promise<void>;
     finalizePO: (poId: string) => Promise<void>;
-
-    // Transfer Actions
     requestTransfer: (transfer: TransferRecord) => void;
     shipTransfer: (id: string, user: string) => void;
     receiveTransfer: (id: string, user: string, receivedQuantities?: Record<string, number>) => void;
-
-    // Data Audit
     approveBarcode: (id: string, userId: string) => Promise<void>;
     rejectBarcode: (id: string, userId: string, reason: string) => Promise<void>;
-
-    // Refresh
     refreshJobs: () => void;
 }
-
 const FulfillmentDataContext = createContext<FulfillmentDataContextType | undefined>(undefined);
-
 export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) => {
     const {
         activeSite,
@@ -104,24 +99,20 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
         setAllProducts,
         effectiveCountry
     } = useData(); // Dependency on DataContext
-
     const { user } = useStore();
     const queryClient = useQueryClient();
     const activeSiteId = activeSite?.id;
-
-    // --- LOCAL STATE ---
     const [jobs, setJobs] = useState<WMSJob[]>([]);
     /** RULE 10: Never pre-populated. Filled only on user-triggered loadHistoricalJobs(). */
-    const { historicalJobs, loadHistoricalJobs } = useScopedJobHistory(activeSiteId, effectiveCountry || settings?.country || 'ET', user, employees);
+    const history = useScopedJobHistory(activeSiteId, effectiveCountry || settings?.country || 'ET', user, employees);
+    const {historicalJobs,loadHistoricalJobs,historyError,historyLoading,historyHasMore,loadMoreHistory}=history;
     const [transfers, setTransfers] = useState<TransferRecord[]>([]);
     const [jobAssignments, setJobAssignments] = useState<JobAssignment[]>([]);
     const [zones, setZones] = useState<WarehouseZone[]>([]);
     const [barcodeApprovals, setBarcodeApprovals] = useState<BarcodeApproval[]>([]);
     const [refreshCounter, setRefreshCounter] = useState(0);
-
-    // --- STRICT SITE-FILTERED EMPLOYEES ---
-    // The raw `employees` from useData() contains ALL employees across ALL sites.
-    // For auto-assign and assignment operations, we MUST restrict to the active site.
+    const queueWorker=fulfillmentQueueWorker(user,employees);
+    const {initialize,failInitial,loadMoreJobs,queueHasMore,queueLoading,queueError}=useFulfillmentQueuePaging(activeSiteId,effectiveCountry||settings?.country||'',queueWorker,setJobs,setJobAssignments,setTransfers);
     const siteFilteredEmployees = useMemo(() => {
         if (!activeSiteId) return [];
         return employees.filter((e: any) => {
@@ -129,102 +120,67 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             return empSiteId === activeSiteId;
         });
     }, [employees, activeSiteId]);
-
-    // Call this from any child component to force a fresh fetch of WMS jobs
     const refreshJobs = useCallback(() => setRefreshCounter(c => c + 1), []);
-
     /**
      * RULE 10 — Zero Eager History: on-demand history loader.
      * Called ONLY when the user explicitly switches to the History view in any tab.
      * Clears stale cache and fetches completed/cancelled jobs on demand.
      */
-
-    // --- FETCHING LOGIC (Migrated from DataContext hooks/useDataQueries) ---
-    // In a real refactor, we should probably pull this out into a hook too, 
-    // but for now we'll fetch inside useEffect to mirror DataContext behavior 
-    // or use the existing react-query structure if possible.
-    // Since useDataQueries was fetching EVERYTHING, we should ideally modify it or create a new one.
-    // For the sake of this task, I will replicate the fetching logic using simple useEffects/service calls 
-    // OR rely on the existing useDataQueries if it's modular.
-    // Looking at useDataQueries usage in DataContext, it fetches everything. 
-    // We want to STOP DataContext from fetching these. 
-    // So we should implementation fetching here.
-
     useEffect(() => {
         if (!activeSiteId) return;
-
-        // The provider mounts before CentralStore finishes restoring Supabase Auth.
-        // Don't send protected table requests with the publishable key as `anon`.
         if (!user?.id) {
             setJobs([]);
             setTransfers([]);
             setJobAssignments([]);
             setZones([]);
             setBarcodeApprovals([]);
-
             return;
         }
-
+        let cancelled=false;
+        setJobs([]);setTransfers([]);setJobAssignments([]);
         const loadFulfillmentData = async () => {
             try {
-                // Global-queue roles (group_ceo, managers, dispatchers) see ALL site jobs.
-                // Do NOT pass their personal employeeId — it would pollute the DB query with
-                // an auth UUID that may match stale assigned_to records, showing false assignments.
-                const GLOBAL_QUEUE_ROLES = ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'warehouse_manager', 'dispatcher', 'store_manager', 'regional_supply_chain_manager', 'inventory_manager', 'assistant_store_manager', 'shift_supervisor', 'inventory_specialist', 'dispatch_supervisor', 'country_supply_chain_director', 'fleet_maintenance_supervisor', 'replenishment_planner'];
-                const isGlobalRole = GLOBAL_QUEUE_ROLES.includes((user?.role || '').toLowerCase());
-
-                // For operational roles (picker, packer, driver etc.) pass their employee ID
-                // so the query also catches jobs cross-site that are explicitly assigned to them.
-                const currentEmployee = !isGlobalRole ? employees.find((e: any) =>
-                    (user?.email && e.email === user.email) ||
-                    (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) ||
-                    (user?.employeeId && e.id === user.employeeId) ||
-                    e.id === user?.id
-                ) : undefined;
-                const employeeId = !isGlobalRole ? (currentEmployee?.id || user?.employeeId || user?.id) : undefined;
-
+                const employeeId=queueWorker;
                 const isCountryAdmin = isAdminSite(activeSite);
                 const targetSiteId = isCountryAdmin ? undefined : activeSiteId;
                 const activeCountryCode = effectiveCountry || settings?.country || 'ET';
-
                 const [
                     loadedJobs,
                     loadedTransfers,
                     loadedZones,
                     loadedApprovals
                 ] = await Promise.all([
-                    // RULE 10: limit=0 → active jobs only, zero history on mount
-                    wmsJobsService.getAll(activeSiteId, 0, employeeId, activeCountryCode),
-                    transfersService.getAll(activeSiteId),
+                    wmsJobsService.getActivePage(activeSiteId, employeeId, activeCountryCode),
+                    getFulfillmentTransferPage(activeSiteId,activeCountryCode),
                     warehouseZonesService.getAll(activeSiteId),
                     barcodeApprovalsService.getAuditLog(targetSiteId, activeCountryCode)
                 ]);
-
-                setJobs(loadedJobs);
-                setTransfers(loadedTransfers);
+                if(cancelled)return;
+                initialize(loadedJobs.hasMore||loadedTransfers.hasMore,loadedJobs.cursor,loadedTransfers.cursor);
+                setJobs(loadedJobs.jobs);
+                setTransfers(loadedTransfers.transfers);
                 try {
-                    setJobAssignments(await jobAssignmentsService.getForJobs(loadedJobs, activeSiteId));
+                    const assignments=await jobAssignmentsService.getForJobs(loadedJobs.jobs, activeSiteId);
+                    if(cancelled)return;setJobAssignments(assignments);
                 } catch (assignmentError) {
+                    if(cancelled)return;
                     setJobAssignments([]);
                     logger.error('FulfillmentDataProvider', 'Failed to load active job assignments', assignmentError);
                     addNotification('alert', 'Job assignments could not be loaded.');
                 }
                 setZones(loadedZones);
                 setBarcodeApprovals(loadedApprovals);
-
             } catch (error) {
+                if(cancelled)return;failInitial();
                 logger.error('FulfillmentDataProvider', "Failed to load fulfillment data", error);
                 addNotification('alert', 'Failed to load fulfillment data');
             }
         };
-
         loadFulfillmentData();
-    }, [activeSiteId, refreshCounter, user?.email, user?.id, user?.name, user?.employeeId, user?.role]);
-
-    // --- REALTIME SUBSCRIPTIONS ---
+        return ()=>{cancelled=true;};
+    }, [activeSiteId, effectiveCountry, refreshCounter, user?.email, user?.id, user?.name, user?.employeeId, user?.role]);
     useEffect(() => {
         if (!activeSiteId || !user?.id) return;
-
         const currentWorker = employees.find((e: any) =>
             (user?.email && e.email === user.email) ||
             (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) ||
@@ -232,9 +188,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             e.id === user?.id
         );
         const currentWorkerId = currentWorker?.id || user?.employeeId || user?.id;
-
         logger.debug('FulfillmentDataProvider', `📡 [Fulfillment] Subscribing to real-time updates for site: ${activeSiteId}`);
-
         const subscriptions = realtimeService.subscribeToSite(activeSiteId, {
             onWMSJobChange: (event, payload) => {
                 if (event === 'INSERT') {
@@ -243,7 +197,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                         if (prev.some(j => j.id === mapped.id)) return prev;
                         return [mapped, ...prev];
                     });
-                    // If line items not present in payload, fetch full job
                     if ((mapped.items || 0) > 0 && (!mapped.lineItems || mapped.lineItems.length === 0)) {
                         wmsJobsService.getById(mapped.id).then((freshJob: WMSJob | null) => {
                             if (freshJob) {
@@ -251,7 +204,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                             }
                         }).catch(() => {});
                     }
-                    // Alert worker if newly assigned to them
                     if (currentWorkerId && mapped.assignedTo === currentWorkerId) {
                         try { playBeep('success'); } catch {}
                         addNotification('info', `New job assigned: ${mapped.jobNumber || mapped.type}`);
@@ -269,7 +221,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                         wasAssignedToMeBefore = existing.assignedTo === currentWorkerId;
                         const hasLineItemsInPayload = Array.isArray(payload.line_items) && payload.line_items.length > 0;
                         const mergedLineItems = hasLineItemsInPayload ? mapped.lineItems : (existing.lineItems || []);
-
                         if (!hasLineItemsInPayload && (!existing.lineItems || existing.lineItems.length === 0)) {
                             wmsJobsService.getById(mapped.id).then((freshJob: WMSJob | null) => {
                                 if (freshJob) {
@@ -279,8 +230,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                         }
                         return prev.map(j => j.id === mapped.id ? { ...existing, ...mapped, lineItems: mergedLineItems } : j);
                     });
-
-                    // Alert if newly assigned to current worker
                     if (currentWorkerId && mapped.assignedTo === currentWorkerId && !wasAssignedToMeBefore) {
                         try { playBeep('success'); } catch {}
                         addNotification('info', `Job assigned to you: ${mapped.jobNumber || mapped.type}`);
@@ -332,7 +281,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                     updatedAt: data.updated_at,
                     deliveryMethod: data.delivery_method
                 });
-
                 if (event === 'INSERT') setTransfers(prev => [mapRealtimeTransfer(payload), ...prev]);
                 else if (event === 'UPDATE') setTransfers(prev => prev.map(t => t.id === payload.id ? mapRealtimeTransfer(payload) : t));
                 else if (event === 'DELETE') setTransfers(prev => prev.filter(t => t.id !== payload.id));
@@ -366,53 +314,33 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 queryClient.invalidateQueries({ queryKey: ['barcode-approvals'] });
             }
         });
-
         return () => {
             logger.debug('FulfillmentDataProvider', 'Unsubscribing from fulfillment real-time updates...');
             realtimeService.unsubscribeAll(subscriptions);
         };
     }, [activeSiteId, employees, user?.id, user?.email, user?.name, user?.employeeId, queryClient, addNotification]);
-
-    // --- AUTO CLEANUP OF GHOST JOBS ---
-
-
-    // ═══════════════════════════════════════════════════════════════════
-    // EXTRACTED HOOKS — all business logic lives in focused hook files
-    // ═══════════════════════════════════════════════════════════════════
-
     const { assignJob, unassignJob, updateJobItem, updateJobStatus, updateJob, autoAssignJobs, autoUnassignJobs } = useJobActions({
         jobs, jobAssignments, employees: siteFilteredEmployees, user,
         setJobs, setJobAssignments, addNotification, queryClient, activeSiteId
     });
-
-    // Job Completion: completeJob (with job chaining, putaway, gamification)
     const { completeJob } = useJobCompletion({
         jobs, sales, employees, user, allOrders, allProducts, jobAssignments,
         setJobs, setTransfers, setOrders, setAllOrders, setSales, setJobAssignments,
         addNotification, adjustStock, queryClient
     });
-
-    // Job Maintenance: resetJob, fixBrokenJobs, createPutawayJob, deleteJob
     const { resetJob, fixBrokenJobs, createPutawayJob, deleteJob } = useJobMaintenance({
-        jobs, orders, products, activeSite: activeSite || null, user,
+        jobs, orders, products, activeSite: activeSite || null, user, countryCode:effectiveCountry || settings?.country || '',
         setJobs, addNotification, refreshJobs, queryClient
     });
-
-    // Receiving: receivePO, receivePOSplit, finalizePO
     const { receivePO, receivePOSplit, finalizePO } = useReceiving({
         orders, allOrders, jobs, products, allProducts,
         activeSite, setJobs, setOrders, setAllOrders, addNotification,
         setProducts, setAllProducts, settings
     });
-
-    // Transfers: requestTransfer, shipTransfer, receiveTransfer, updateTransfer
     const { requestTransfer, shipTransfer, receiveTransfer, updateTransfer } = useTransfers({
         transfers, sites,
         setJobs, setTransfers, addNotification, logSystemEvent
     });
-
-    // ─── Barcode Approvals (small, kept inline) ─────────────────────────
-
     const approveBarcode = async (id: string, userId: string) => {
         try {
             await barcodeApprovalsService.approve(id, userId);
@@ -424,7 +352,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             addNotification('alert', 'Failed to approve barcode');
         }
     };
-
     const rejectBarcode = async (id: string, userId: string, reason: string) => {
         try {
             await barcodeApprovalsService.reject(id, userId, reason);
@@ -435,15 +362,11 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             addNotification('alert', 'Failed to reject barcode');
         }
     };
-
-
-
-
-
     return (
         <FulfillmentDataContext.Provider value={{
             jobs,
-            historicalJobs,
+            historicalJobs,historyError,historyLoading,historyHasMore,loadMoreHistory,
+            loadMoreJobs,queueHasMore,queueLoading,queueError,
             transfers,
             jobAssignments,
             zones,
@@ -475,7 +398,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
         </FulfillmentDataContext.Provider>
     );
 };
-
 export const useFulfillmentData = () => {
     const context = useContext(FulfillmentDataContext);
     if (context === undefined) {

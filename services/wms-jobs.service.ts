@@ -1,4 +1,4 @@
-import { blindReceivingService } from './blind-receiving.service';
+import { QueueCursor,blindReceivingService } from './blind-receiving.service';
 import { supabase } from '../lib/supabase';
 import type { WMSJob } from '../types';
 import { mapWmsJobRow } from './wms-jobs.mapper';
@@ -62,69 +62,51 @@ export const wmsJobsService = {
         return mapWmsJobRow(data);
     },
 
-    async getAll(siteId?: string, limit: number = 0, employeeId?: string, countryCode?: string) {
-        // 1. Fetch ALL Active Jobs (Pending/In-Progress) for the site (operational backlog)
-        let activeQuery = supabase
+    async getAll(siteId?:string,limit=0,employeeId?:string,countryCode?:string){
+        const active=await this.getActivePage(siteId,employeeId,countryCode);
+        const history=limit>0?await this.getHistory(siteId,Math.min(25,limit),employeeId,countryCode):[];
+        return [...active.jobs,...history];
+    },
+    async getActivePage(siteId?:string,employeeId?:string,countryCode?:string,cursor?:{active?:QueueCursor;blind?:QueueCursor}):Promise<{jobs:WMSJob[];hasMore:boolean;cursor:{active?:QueueCursor;blind?:QueueCursor}}>{
+        if(!siteId||!countryCode)throw new Error('Facility and country required');
+        let activeQuery: any = supabase
             .from('wms_jobs')
             .select(WMS_JOB_COLUMNS)
             .not('status', 'in', '("Completed","Cancelled")')
-            .order('created_at', { ascending: true }); // Oldest first for FIFO
+            .order('created_at', { ascending: true });
+        if (typeof activeQuery.limit === 'function') activeQuery = activeQuery.limit(25);
 
         if (countryCode) {
             activeQuery = activeQuery.eq('country_code', countryCode);
         }
 
-        if (siteId && employeeId) {
-            activeQuery = activeQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
-        } else if (siteId) {
-            activeQuery = activeQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
-        } else if (employeeId) {
-            activeQuery = activeQuery.eq('assigned_to', employeeId);
-        }
-
-        // 2. RULE 10 — Zero Eager History: only fetch history when caller explicitly requests it
-        //    limit <= 0 means "active jobs only" — zero historical data downloaded on mount.
-        const historyPromise = limit > 0
-            ? (() => {
-                let historyQuery = supabase
-                    .from('wms_jobs')
-                    .select(WMS_JOB_COLUMNS)
-                    .in('status', ['Completed', 'Cancelled'])
-                    .order('updated_at', { ascending: false })
-                    .limit(limit);
-
-                if (countryCode) historyQuery = historyQuery.eq('country_code', countryCode);
-
-                if (siteId) historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
-                if (employeeId) historyQuery = historyQuery.eq('status','Completed').eq('completed_by',employeeId);
-                return historyQuery;
-            })()
-            : Promise.resolve({ data: [] as any[], error: null });
-
-        // Execute queries
-        const [activeRes, historyRes] = await Promise.all([activeQuery, historyPromise]);
-
-        if (activeRes.error) throw activeRes.error;
-        if (historyRes.error) throw historyRes.error;
-
-        // Combine datasets
-        const blind = siteId ? await blindReceivingService.jobs(siteId,countryCode) : [];
-        const combinedData = [...(activeRes.data || []), ...(historyRes.data || []), ...blind];
-
-        return combinedData.map(mapWmsJobRow);
+        const scopes=[`site_id.eq.${siteId}`,`dest_site_id.eq.${siteId}`,...(employeeId?[`assigned_to.eq.${employeeId}`]:[])];
+        const after=cursor?.active?`or(created_at.gt.${cursor.active.createdAt},and(created_at.eq.${cursor.active.createdAt},id.gt.${cursor.active.id}))`:undefined;
+        activeQuery=activeQuery.or(scopes.map(scope=>after?`and(${scope},${after})`:scope).join(','));
+        const [active,blind]=await Promise.all([activeQuery,blindReceivingService.jobs(siteId,countryCode,cursor?.blind)]);
+        if(active.error)throw active.error;
+        // Prefer the masked receiving projection when both sources include a job.
+        const rows=new Map([...(active.data||[]),...blind].map(row=>[row.id,row]));
+        const lastActive=active.data?.at(-1);const lastBlind=blind.at(-1);
+        return {jobs:[...rows.values()].map(mapWmsJobRow),hasMore:(active.data?.length||0)===25||blind.length===25,cursor:{active:lastActive?{createdAt:lastActive.created_at,id:lastActive.id}:cursor?.active,blind:lastBlind?{createdAt:lastBlind.created_at,id:lastBlind.id}:cursor?.blind}};
     },
 
     /**
      * RULE 10 — On-demand history fetch. Call ONLY when user explicitly clicks the History tab.
      * Never call on module mount/login. Returns latest 25 completed/cancelled jobs by default.
      */
-    async getHistory(siteId?: string, limit: number = 200, employeeId?: string, countryCode?: string, type?: WMSJob['type']) {
-        let q = supabase
+    async getHistory(siteId?: string, limit: number = 25, employeeId?: string, countryCode?: string, type?: WMSJob['type'], page=0) {
+        let q: any = supabase
             .from('wms_jobs')
             .select(WMS_JOB_COLUMNS)
             .in('status', ['Completed', 'Cancelled'])
-            .order('updated_at', { ascending: false })
-            .limit(limit);
+            .order('updated_at', { ascending: false });
+
+        if (typeof q.range === 'function') {
+            q = q.range(page * 25, page * 25 + Math.min(25, Math.max(1, limit)) - 1);
+        } else if (typeof q.limit === 'function') {
+            q = q.limit(Math.min(25, Math.max(1, limit)));
+        }
 
         if (type) q = q.eq('type', type);
         if (countryCode) q = q.eq('country_code', countryCode);

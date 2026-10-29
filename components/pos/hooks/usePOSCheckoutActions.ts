@@ -123,6 +123,8 @@ export const usePOSCheckoutActions = ({
     useDiscountCode
 }: UsePOSCheckoutActionsProps) => {
 
+    const [isReprint, setIsReprint] = React.useState(false);
+
     const applyDiscountFromCode = React.useCallback((discountCode: any) => {
         let discountAmount = discountCode.type === 'FIXED' ? discountCode.value : subtotal * (discountCode.value / 100);
         if (discountCode.maxDiscountAmount !== undefined && discountAmount > discountCode.maxDiscountAmount) discountAmount = discountCode.maxDiscountAmount;
@@ -221,6 +223,7 @@ export const usePOSCheckoutActions = ({
                 customerPhone: mobileDetails?.phone
             };
             setLastSale(saleObj);
+            setIsReprint(false);
             if (pointsResult) {
                 setEarnedPointsData(pointsResult);
                 setShowPointsPopup(true);
@@ -248,7 +251,8 @@ export const usePOSCheckoutActions = ({
         hasStaleCartPriceChanges
     ]);
 
-    const handlePrintReceipt = React.useCallback(() => {
+    const handlePrintReceipt = React.useCallback((options?: { isReprint?: boolean }) => {
+        const reprintActive = options?.isReprint !== undefined ? options.isReprint : isReprint;
         const {
             storeName = 'SIIFMART', logoUrl, posReceiptLogo, posReceiptShowLogo = true,
             posReceiptHeader = 'SIIFMART RETAIL', posReceiptFooter = 'Thank you for shopping with us!',
@@ -261,6 +265,9 @@ export const usePOSCheckoutActions = ({
         const displayHeader = posReceiptHeader || 'SIIFMART RETAIL';
         const displaySlogan = slogan && slogan !== displayHeader ? slogan : '';
         const paperWidth = posReceiptWidth === '80mm' ? '80mm' : '58mm';
+        const isKenya = activeSite?.country === 'KE' || settings?.country === 'KE' || settings?.currency === 'KES' || settings?.currency === 'KSh';
+        const receiptCurrency = (activeSite as any)?.currency || (isKenya ? 'KES' : 'ETB');
+
         const receiptHTML = `
       <!DOCTYPE html>
       <html>
@@ -269,7 +276,7 @@ export const usePOSCheckoutActions = ({
         <style>
           @page { size: ${paperWidth} auto; margin: 0; }
           body { font-family: ${posReceiptFont === 'monospace' ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' : 'system-ui, -apple-system, sans-serif'}; width: ${paperWidth}; margin: 0; padding: 24px; color: #000; background: #fff; -webkit-print-color-adjust: exact; font-size: 10px; }
-          .text-center { text-align: center; } .text-right { text-align: right; } .flex { display: flex; } .justify-between { justify-content: space-between; } .justify-center { justify-content: center; } .gap-2 { gap: 8px; } .mb-1 { margin-bottom: 4px; } .mb-4 { margin-bottom: 16px; } .pb-4 { padding-bottom: 16px; } .py-3 { padding-top: 12px; padding-bottom: 12px; } .pt-2 { padding-top: 8px; } .mt-2 { margin-top: 8px; } .space-y-05 > * + * { margin-top: 2px; } .space-y-1 > * + * { margin-top: 4px; } .space-y-2 > * + * { margin-top: 8px; }
+          .text-center { text-align: center; } .text-right { text-align: right; } .flex { display: flex; } .justify-between { justify-content: space-between; } .justify-center { justify-center; } .gap-2 { gap: 8px; } .mb-1 { margin-bottom: 4px; } .mb-4 { margin-bottom: 16px; } .pb-4 { padding-bottom: 16px; } .py-3 { padding-top: 12px; padding-bottom: 12px; } .pt-2 { padding-top: 8px; } .mt-2 { margin-top: 8px; } .space-y-05 > * + * { margin-top: 2px; } .space-y-1 > * + * { margin-top: 4px; } .space-y-2 > * + * { margin-top: 8px; }
           .font-bold { font-weight: 700; } .font-black { font-weight: 900; } .uppercase { text-transform: uppercase; } .tracking-tighter { letter-spacing: -0.05em; } .tracking-widest { letter-spacing: 0.1em; } .text-xs { font-size: 12px; } .text-base { font-size: 16px; } .text-xl { font-size: 20px; } .border-b-2-dashed { border-bottom: 2px dashed rgba(0,0,0,0.1); } .border-y { border-top: 1px solid rgba(0,0,0,0.1); border-bottom: 1px solid rgba(0,0,0,0.1); } .border-t-black { border-top: 1px solid #000; } .border-t-dashed { border-top: 1px dashed rgba(0,0,0,0.1); } .logo { max-height: 48px; object-fit: contain; margin: 0 auto; filter: grayscale(1); display: block; } .opacity-60 { opacity: 0.6; }
         </style>
       </head>
@@ -279,6 +286,7 @@ export const usePOSCheckoutActions = ({
             <h2 class="text-xl font-black uppercase tracking-tighter leading-none mb-1">${displayStoreName}</h2>
             <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">${displayHeader}</p>
             ${displaySlogan ? `<p class="text-[9px] italic opacity-70 mt-0.5">${displaySlogan}</p>` : ''}
+            ${reprintActive ? `<div class="text-center font-black text-[10px] tracking-widest my-2 border-y border-dashed py-1">*** REPRINT / DUPLICATE ***</div>` : ''}
           </div>
           <div class="text-[10px] text-center space-y-05 mb-4 border-b-2-dashed pb-4">
             ${posReceiptAddress ? `<p>${posReceiptAddress}</p>` : ''}
@@ -286,8 +294,8 @@ export const usePOSCheckoutActions = ({
               ${posReceiptPhone ? `<p>Tel: ${posReceiptPhone}</p>` : ''}
               ${posReceiptEmail ? `<p>Email: ${posReceiptEmail}</p>` : ''}
             </div>
-            ${posReceiptTaxId ? `<p class="font-bold">${settings?.country === 'KE' || settings?.currency === 'KES' || settings?.currency === 'KSh' ? 'KRA PIN' : 'TIN'}: ${posReceiptTaxId}</p>` : ''}
-            ${settings?.country === 'KE' || settings?.currency === 'KES' || settings?.currency === 'KSh' ? '<p class="text-[8px] opacity-70">eTIMS Compliant - Valid Tax Invoice</p>' : ''}
+            ${posReceiptTaxId ? `<p class="font-bold">${isKenya ? 'KRA PIN' : 'TIN'}: ${posReceiptTaxId}</p>` : ''}
+            ${isKenya ? '<p class="text-[8px] opacity-70">eTIMS Compliant - Valid Tax Invoice</p>' : ''}
           </div>
           <div class="text-[10px] space-y-1 mb-4">
             <div class="flex justify-between"><span class="opacity-60">DATE:</span> <span>${formatDateTime(new Date(), { showTime: true })}</span></div>
@@ -296,17 +304,17 @@ export const usePOSCheckoutActions = ({
             ${selectedCustomer ? `<div class="flex justify-between"><span class="opacity-60">CUSTOMER:</span> <span>${selectedCustomer.name}</span></div>` : ''}
           </div>
           <div class="border-y py-3 mb-4 space-y-2">
-            ${(lastSale?.items || []).map(item => `<div class="flex justify-between text-[10px]"><div><div class="font-bold">${item.name}</div><div class="text-[9px] opacity-60">${item.quantity} x ${CURRENCY_SYMBOL}${item.price.toFixed(2)}</div></div><div class="font-bold">${(item.price * item.quantity).toLocaleString()}</div></div>`).join('')}
+            ${(lastSale?.items || []).map(item => `<div class="flex justify-between text-[10px]"><div><div class="font-bold">${item.name}</div><div class="text-[9px] opacity-60">${item.quantity} x ${receiptCurrency} ${Math.round(item.price).toLocaleString()}</div></div><div class="font-bold">${receiptCurrency} ${Math.round(item.price * item.quantity).toLocaleString()}</div></div>`).join('')}
           </div>
           <div class="space-y-1 text-right mb-4">
-            <div class="flex justify-between text-[10px] opacity-60"><span>Subtotal</span><span>${CURRENCY_SYMBOL}${(lastSale?.subtotal || 0).toLocaleString()}</span></div>
-            ${(lastSale?.taxBreakdown || []).length > 0 ? (lastSale?.taxBreakdown || []).map(rule => `<div class="flex justify-between text-[10px] opacity-60"><span>${rule.name} (${rule.rate}%)</span><span>${CURRENCY_SYMBOL}${rule.amount.toLocaleString()}</span></div>`).join('') : (lastSale?.tax && lastSale.tax > 0) ? `<div class="flex justify-between text-[10px] opacity-60"><span>Tax</span><span>${CURRENCY_SYMBOL}${lastSale.tax.toLocaleString()}</span></div>` : ''}
-            <div class="flex justify-between font-black text-base border-t-black pt-2 mt-2"><span>TOTAL</span> <span>${CURRENCY_SYMBOL}${(lastSale?.total || 0).toLocaleString()}</span></div>
+            <div class="flex justify-between text-[10px] opacity-60"><span>Subtotal</span><span>${receiptCurrency} ${Math.round(lastSale?.subtotal || 0).toLocaleString()}</span></div>
+            ${(lastSale?.taxBreakdown || []).length > 0 ? (lastSale?.taxBreakdown || []).map(rule => `<div class="flex justify-between text-[10px] opacity-60"><span>${rule.name} (${rule.rate}%)</span><span>${receiptCurrency} ${Math.round(rule.amount).toLocaleString()}</span></div>`).join('') : (lastSale?.tax && lastSale.tax > 0) ? `<div class="flex justify-between text-[10px] opacity-60"><span>Tax</span><span>${receiptCurrency} ${Math.round(lastSale.tax).toLocaleString()}</span></div>` : ''}
+            <div class="flex justify-between font-black text-base border-t-black pt-2 mt-2"><span>TOTAL</span> <span>${receiptCurrency} ${Math.round(lastSale?.total || 0).toLocaleString()}</span></div>
           </div>
           <div class="text-[10px] font-bold border-t-dashed pt-4 mb-4">
             <div class="flex justify-between">
               <span>PAID (${lastSale?.mobilePaymentChannel ? lastSale.mobilePaymentChannel.replace(/_/g, ' ') : (lastSale?.method || 'CASH').toUpperCase()})</span>
-              <span>${CURRENCY_SYMBOL}${(lastSale?.amountTendered || lastSale?.total || 0).toLocaleString()}</span>
+              <span>${receiptCurrency} ${Math.round(lastSale?.amountTendered || lastSale?.total || 0).toLocaleString()}</span>
             </div>
             ${lastSale?.mobileTransactionRef ? `
               <div class="flex justify-between text-[9px] opacity-75 font-mono mt-0.5">
@@ -332,12 +340,12 @@ export const usePOSCheckoutActions = ({
     `;
         setReceiptPreviewHTML(receiptHTML);
         setIsReceiptPreviewOpen(true);
-    }, [settings, activeSite, lastSale, user, selectedCustomer, setReceiptPreviewHTML, setIsReceiptPreviewOpen]);
+    }, [settings, activeSite, lastSale, user, selectedCustomer, isReprint, setReceiptPreviewHTML, setIsReceiptPreviewOpen]);
 
     const handleConfirmPrint = React.useCallback(() => {
         printHtmlContent(receiptPreviewHTML);
         setIsReceiptPreviewOpen(false);
-        addNotification('success', 'Receipt sent to printer');
+        addNotification('info', 'Receipt print dialog opened. Confirm output on thermal printer.');
     }, [receiptPreviewHTML, setIsReceiptPreviewOpen, addNotification]);
 
     const handleEmailReceipt = React.useCallback(() => {
@@ -371,6 +379,7 @@ export const usePOSCheckoutActions = ({
     }, [addNotification]);
 
     const handleReprintLast = React.useCallback(() => {
+        setIsReprint(true);
         if (lastSale) {
             setIsReceiptModalOpen(true);
         } else if (sales.length > 0) {

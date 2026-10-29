@@ -6,7 +6,13 @@ import {
     wmsJobsService
 } from '../../services/supabase.service';
 import {fulfillmentMaintenanceService} from '../../services/fulfillment-maintenance.service';
-import {useLanguage} from '../../contexts/LanguageContext';
+import {fulfillmentRecovery} from '../../utils/translations/warehouse/fulfillmentRecovery';
+const t=(key:string,params:Record<string,string|number>={})=>{
+ const lang=typeof localStorage==='undefined'?'en':localStorage.getItem('language')||'en';
+ const messages=fulfillmentRecovery as Record<string,Record<string,string>>;
+ let result=messages[key.replace('warehouse.','')]?.[lang]||messages[key.replace('warehouse.','')]?.en||key;
+ for(const [name,value] of Object.entries(params))result=result.replaceAll(`{${name}}`,String(value));return result;
+};
 import { QueryClient } from '@tanstack/react-query';
 import { logger } from '../../utils/logger';
 
@@ -15,6 +21,7 @@ interface UseJobMaintenanceDeps {
     orders: PurchaseOrder[];
     products: Product[];
     activeSite: Site | null;
+    countryCode:string;
     user: User | null;
     setJobs: React.Dispatch<React.SetStateAction<WMSJob[]>>;
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
@@ -23,7 +30,7 @@ interface UseJobMaintenanceDeps {
 }
 
 export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
- const {activeSite,setJobs,addNotification,refreshJobs}=deps;const {t,country}=useLanguage();
+ const {activeSite,setJobs,addNotification,refreshJobs,countryCode:country}=deps;
  const maintain=useCallback(async(action:'reset'|'cancel'|'reconcile',id?:string)=>{
   try{
    const count=await fulfillmentMaintenanceService.run(activeSite?.id||'',country,action,id);

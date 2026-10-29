@@ -1,3 +1,4 @@
+import {FulfillmentRecoveryControls} from './FulfillmentRecoveryControls';
 import React, { useMemo, useState, useEffect } from 'react';
 import { useFulfillment, OpTab } from './FulfillmentContext';
 
@@ -126,6 +127,7 @@ export const FulfillmentContent: React.FC = () => {
                 </div>
             )}
 
+            <FulfillmentRecoveryControls />
             {/* --- TAB SELECTORS --- */}
             {isMobile ? (
                 <MobileTabSelector
