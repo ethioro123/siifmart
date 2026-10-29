@@ -46,7 +46,7 @@ Do not combine a visible outline, ring, shadow and contrasting backing on every 
 
 ## Color and theme
 
-Use the existing semantic token system. This documentation does not change production CSS colors. Default appearance follows the device; preserve explicit Light and Dark choices.
+Use the existing semantic token system and the exact [Revision C palette in chapter 15](15-states-and-theme-pairs.md), including the main canvas, sidebar, panels, overlays, controls and states. This documentation does not change production CSS colors. Default appearance follows the device; preserve explicit Light and Dark choices.
 
 - Light: near-white canvas, gently differentiated neutral sidebar and working surfaces; dark neutral text.
 - Dark: charcoal canvas with subtle tonal elevation; avoid pure-black slabs surrounded by bright borders.

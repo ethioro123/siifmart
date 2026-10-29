@@ -9,3 +9,5 @@ The standard covers visual foundations, adaptive layout, accessible controls, op
 The filename is retained for compatibility. The current design direction is SIIFMART’s own platform-neutral modern standard, with precise component contracts and a runnable reference, rather than an Apple-only visual theme.
 
 The current visual authority is [Codex-inspired workspace direction](docs/design/18-codex-workspace-direction.md): quiet neutral surfaces, compact navigation, restrained typography and softly rounded panels where useful. Read it before applying older visual defaults.
+
+Exact main background and all theme colors are specified in [Revision C palette](docs/design/15-states-and-theme-pairs.md). The palette covers the entire shell and component states; adoption remains a separate runtime change.

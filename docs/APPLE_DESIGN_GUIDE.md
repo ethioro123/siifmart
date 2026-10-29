@@ -8,7 +8,7 @@ This is SIIFMART's own platform-neutral web standard: modern elegance through si
 
 ## What changed in this edition
 
-The user selected a **Codex-inspired workspace direction**: quiet neutral surfaces, compact navigation, restrained controls, readable typography and progressive disclosure. [Chapter 18](design/18-codex-workspace-direction.md) is the authoritative visual update. It preserves softly rounded cards and panels where useful, while removing mandatory floating-card treatment from full-height workspaces. This is SIIFMART's interpretation, not an official OpenAI specification or a claim of pixel-identical Codex styling.
+The user selected a **Codex-inspired workspace direction**: quiet neutral surfaces, compact navigation, restrained controls, readable typography and progressive disclosure. [Chapter 18](design/18-codex-workspace-direction.md) is the authoritative visual update. [Chapter 15](design/15-states-and-theme-pairs.md) specifies the complete Light/Dark palette, including main backgrounds. It preserves softly rounded cards and panels where useful, while removing mandatory floating-card treatment from full-height workspaces. This is SIIFMART's interpretation, not an official OpenAI specification or a claim of pixel-identical Codex styling.
 
 Apple, Material and Fluent remain supporting references for behavior and accessibility. Glass and Apple-like decoration are optional, not the design identity. Existing business controls, accessibility requirements and rule-edit permission stay in force. Documentation does not deploy a runtime redesign.
 
