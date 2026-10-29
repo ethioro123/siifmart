@@ -2,6 +2,7 @@ import React from 'react';
 import { SystemConfig } from '../../types';
 import { getCountryProfile, Country } from '../../utils/localization';
 import { formatDateTime } from '../../utils/formatting';
+import { generateQRCodeSyncSvg } from '../../utils/qrCodeGenerator';
 
 interface ReceiptPreviewProps {
   settings: Partial<SystemConfig> & { country?: Country };
@@ -60,21 +61,32 @@ export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
   const cleanSocial = escapeHtml(posReceiptSocialHandle || '');
   const cleanPolicy = escapeHtml(posReceiptPolicy || '');
 
+  const qrSvg = posReceiptEnableQR && posReceiptQRLink ? generateQRCodeSyncSvg(posReceiptQRLink, 64) : '';
+
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
       <style>
+        * { box-sizing: border-box; }
         @page { size: ${paperWidth} auto; margin: 0; }
+        html, body {
+          margin: 0;
+          padding: 0;
+          background: #fff;
+          color: #000;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
         body { 
           font-family: ${posReceiptFont === 'monospace' ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' : 'system-ui, -apple-system, sans-serif'}; 
-          width: ${paperWidth}; 
-          margin: 0; 
-          padding: 24px;
+          width: 100%;
+          max-width: ${paperWidth}; 
+          margin: 0 auto; 
+          padding: 16px;
           color: #000;
           background: #fff;
-          -webkit-print-color-adjust: exact;
           font-size: 10px;
         }
         
@@ -191,9 +203,9 @@ export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
           ${cleanSocial ? `<p class="text-[10px] opacity-70 font-medium">${cleanSocial}</p>` : ''}
           ${cleanPolicy ? `<p class="text-[9px] italic opacity-60 leading-tight">${cleanPolicy}</p>` : ''}
 
-          ${posReceiptEnableQR ? `
+          ${qrSvg ? `
             <div class="flex justify-center mt-4">
-               <img src="https://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=${encodeURIComponent(posReceiptQRLink)}" style="width: 64px; height: 64px;" alt="Survey QR" />
+               ${qrSvg}
             </div>
           ` : ''}
         </div>

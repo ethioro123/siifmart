@@ -4,6 +4,7 @@ import { formatDateTime } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { printHtmlContent } from '../../../utils/printHelper';
 import { getEffectiveCountry } from '../../../utils/localization';
+import { generateQRCodeSyncSvg } from '../../../utils/qrCodeGenerator';
 
 interface UsePOSCheckoutActionsProps {
     cart: CartItem[];
@@ -267,17 +268,21 @@ export const usePOSCheckoutActions = ({
         const paperWidth = posReceiptWidth === '80mm' ? '80mm' : '58mm';
         const isKenya = activeSite?.country === 'KE' || settings?.country === 'KE' || settings?.currency === 'KES' || settings?.currency === 'KSh';
         const receiptCurrency = (activeSite as any)?.currency || (isKenya ? 'KES' : 'ETB');
+        const qrSvg = posReceiptEnableQR && posReceiptQRLink ? generateQRCodeSyncSvg(posReceiptQRLink, 64) : '';
 
         const receiptHTML = `
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="utf-8">
         <title>Receipt - ${lastSale?.receiptNumber || 'TX'}</title>
         <style>
+          * { box-sizing: border-box; }
           @page { size: ${paperWidth} auto; margin: 0; }
-          body { font-family: ${posReceiptFont === 'monospace' ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' : 'system-ui, -apple-system, sans-serif'}; width: ${paperWidth}; margin: 0; padding: 24px; color: #000; background: #fff; -webkit-print-color-adjust: exact; font-size: 10px; }
-          .text-center { text-align: center; } .text-right { text-align: right; } .flex { display: flex; } .justify-between { justify-content: space-between; } .justify-center { justify-center; } .gap-2 { gap: 8px; } .mb-1 { margin-bottom: 4px; } .mb-4 { margin-bottom: 16px; } .pb-4 { padding-bottom: 16px; } .py-3 { padding-top: 12px; padding-bottom: 12px; } .pt-2 { padding-top: 8px; } .mt-2 { margin-top: 8px; } .space-y-05 > * + * { margin-top: 2px; } .space-y-1 > * + * { margin-top: 4px; } .space-y-2 > * + * { margin-top: 8px; }
-          .font-bold { font-weight: 700; } .font-black { font-weight: 900; } .uppercase { text-transform: uppercase; } .tracking-tighter { letter-spacing: -0.05em; } .tracking-widest { letter-spacing: 0.1em; } .text-xs { font-size: 12px; } .text-base { font-size: 16px; } .text-xl { font-size: 20px; } .border-b-2-dashed { border-bottom: 2px dashed rgba(0,0,0,0.1); } .border-y { border-top: 1px solid rgba(0,0,0,0.1); border-bottom: 1px solid rgba(0,0,0,0.1); } .border-t-black { border-top: 1px solid #000; } .border-t-dashed { border-top: 1px dashed rgba(0,0,0,0.1); } .logo { max-height: 48px; object-fit: contain; margin: 0 auto; filter: grayscale(1); display: block; } .opacity-60 { opacity: 0.6; }
+          html, body { margin: 0; padding: 0; background: #fff; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          body { font-family: ${posReceiptFont === 'monospace' ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' : 'system-ui, -apple-system, sans-serif'}; width: 100%; max-width: ${paperWidth}; margin: 0 auto; padding: 16px; color: #000; background: #fff; font-size: 10px; }
+          .text-center { text-align: center; } .text-right { text-align: right; } .flex { display: flex; } .justify-between { justify-content: space-between; } .justify-center { justify-content: center; } .gap-2 { gap: 8px; } .mb-1 { margin-bottom: 4px; } .mb-4 { margin-bottom: 16px; } .pb-4 { padding-bottom: 16px; } .py-3 { padding-top: 12px; padding-bottom: 12px; } .pt-2 { padding-top: 8px; } .mt-2 { margin-top: 8px; } .space-y-05 > * + * { margin-top: 2px; } .space-y-1 > * + * { margin-top: 4px; } .space-y-2 > * + * { margin-top: 8px; }
+          .font-bold { font-weight: 700; } .font-black { font-weight: 900; } .uppercase { text-transform: uppercase; } .tracking-tighter { letter-spacing: -0.05em; } .tracking-widest { letter-spacing: 0.1em; } .text-xs { font-size: 12px; } .text-base { font-size: 16px; } .text-xl { font-size: 20px; } .border-b-2-dashed { border-bottom: 2px dashed rgba(0,0,0,0.15); } .border-y { border-top: 1px solid rgba(0,0,0,0.15); border-bottom: 1px solid rgba(0,0,0,0.15); } .border-t-black { border-top: 1px solid #000; } .border-t-dashed { border-top: 1px dashed rgba(0,0,0,0.15); } .logo { max-height: 48px; object-fit: contain; margin: 0 auto; filter: grayscale(1); display: block; } .opacity-60 { opacity: 0.6; }
         </style>
       </head>
       <body>
@@ -333,7 +338,7 @@ export const usePOSCheckoutActions = ({
             <p class="text-xs font-bold leading-tight mb-2">${posReceiptFooter}</p>
             ${posReceiptSocialHandle ? `<p class="text-[10px] opacity-70 font-medium">${posReceiptSocialHandle}</p>` : ''}
             ${posReceiptPolicy ? `<p class="text-[9px] italic opacity-60 leading-tight">${posReceiptPolicy}</p>` : ''}
-            ${posReceiptEnableQR ? `<div class="flex justify-center mt-4"><img src="https://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=${encodeURIComponent(posReceiptQRLink)}" style="width: 64px; height: 64px;" /></div>` : ''}
+            ${qrSvg ? `<div class="flex justify-center mt-4">${qrSvg}</div>` : ''}
           </div>
       </body>
       </html>

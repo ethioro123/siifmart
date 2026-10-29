@@ -43,16 +43,24 @@ const printViaIframe = (htmlContent: string): void => {
         oldIframe.parentNode.removeChild(oldIframe);
     }
 
+    // Ensure parent document allows the print iframe full rendering in print preview
+    if (!document.getElementById('siifmart-print-iframe-style')) {
+        const style = document.createElement('style');
+        style.id = 'siifmart-print-iframe-style';
+        style.textContent = `@media print { #siifmart-print-iframe { position: static !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; opacity: 1 !important; visibility: visible !important; } }`;
+        document.head.appendChild(style);
+    }
+
     const iframe = document.createElement('iframe');
     iframe.id = 'siifmart-print-iframe';
     iframe.style.cssText = [
         'position:fixed',
-        'left:0',
-        'top:0',
-        'width:100vw',
+        'left:-9999px',
+        'top:-9999px',
+        'width:80mm',
         'height:100vh',
         'border:0',
-        'opacity:0',
+        'opacity:1',
         'pointer-events:none',
         'z-index:-99999'
     ].join(';');

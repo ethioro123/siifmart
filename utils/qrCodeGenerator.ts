@@ -31,6 +31,30 @@ export const generateQRCode = async (options: QRCodeGeneratorOptions): Promise<s
 };
 
 /**
+ * Generate a synchronous SVG string for a QR code (offline, zero-network, pure vector)
+ * Optimized for thermal receipt previews and label printing.
+ */
+export const generateQRCodeSyncSvg = (data: string, size: number = 80): string => {
+    try {
+        const qr = QRCode.create(data, { errorCorrectionLevel: 'M' });
+        const count = qr.modules.size;
+        const margin = 1;
+        const total = count + margin * 2;
+        let path = '';
+        for (let r = 0; r < count; r++) {
+            for (let c = 0; c < count; c++) {
+                if (qr.modules.get(r, c)) {
+                    path += `M${c + margin} ${r + margin}h1v1h-1z `;
+                }
+            }
+        }
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${total} ${total}" width="${size}" height="${size}" shape-rendering="crispEdges" style="display:block;margin:0 auto;"><rect width="${total}" height="${total}" fill="#ffffff"/><path d="${path}" fill="#000000"/></svg>`;
+    } catch {
+        return '';
+    }
+};
+
+/**
  * Generate a QR code as Data URL (PNG image) - Better for printing
  */
 export const generateQRCodeImage = async (options: QRCodeGeneratorOptions): Promise<string> => {

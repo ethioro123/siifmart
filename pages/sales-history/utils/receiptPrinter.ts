@@ -2,6 +2,7 @@ import { formatDateTime } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { SaleRecord, Site } from '../../../types';
 import { printHtmlContent } from '../../../utils/printHelper';
+import { generateQRCodeSyncSvg } from '../../../utils/qrCodeGenerator';
 
 export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sites: Site[], currencySymbol: string = CURRENCY_SYMBOL) => {
       const {
@@ -31,22 +32,26 @@ export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sit
       const displaySlogan = slogan && slogan !== displayHeader ? slogan : '';
       const is80mm = posReceiptWidth === '80mm';
       const paperWidth = is80mm ? '80mm' : '58mm';
+      const qrSvg = posReceiptEnableQR && posReceiptQRLink ? generateQRCodeSyncSvg(posReceiptQRLink, 64) : '';
 
       const htmlContent = `
              <!DOCTYPE html>
              <html>
              <head>
+               <meta charset="utf-8">
                <title>Receipt - ${selectedSale.receiptNumber || 'TX'}</title>
                <style>
+                 * { box-sizing: border-box; }
                  @page { size: ${paperWidth} auto; margin: 0; }
+                 html, body { margin: 0; padding: 0; background: #fff; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                  body { 
                    font-family: ${posReceiptFont === 'monospace' ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' : 'system-ui, -apple-system, sans-serif'}; 
-                   width: ${paperWidth}; 
-                   margin: 0; 
-                   padding: 24px;
+                   width: 100%;
+                   max-width: ${paperWidth}; 
+                   margin: 0 auto; 
+                   padding: 16px;
                    color: #000;
                    background: #fff;
-                   -webkit-print-color-adjust: exact;
                    font-size: 10px;
                  }
                  .text-center { text-align: center; }
@@ -182,9 +187,9 @@ export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sit
                     <p class="text-xs font-bold leading-tight mb-2">${posReceiptFooter}</p>
                     ${posReceiptSocialHandle ? `<p class="text-[10px] opacity-70 font-medium">${posReceiptSocialHandle}</p>` : ''}
                     ${posReceiptPolicy ? `<p class="text-[9px] italic opacity-60 leading-tight">${posReceiptPolicy}</p>` : ''}
-                    ${posReceiptEnableQR ? `
+                    ${qrSvg ? `
                       <div class="flex justify-center mt-4">
-                         <img src="https://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=${encodeURIComponent(posReceiptQRLink)}" style="width: 64px; height: 64px;" />
+                         ${qrSvg}
                       </div>
                     ` : ''}
                  </div>
