@@ -72,11 +72,11 @@ export const POSCartPanel: React.FC = () => {
             {/* Cart Panel: Desktop Side Panel / Mobile Full-Screen Sheet */}
             <div className={`
                 fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col transition-transform duration-300 ease-out motion-reduce:transition-none
-                lg:static lg:w-[420px] xl:w-[440px] lg:bg-[var(--theme-bg-card)] lg:border lg:border-[var(--theme-border)] lg:rounded-[14px] lg:h-full lg:z-auto lg:transform-none overflow-hidden isolate
+                lg:static lg:w-[420px] xl:w-[440px] lg:bg-[var(--theme-bg-card)] lg:border-l lg:border-[var(--theme-border)] lg:h-full lg:z-auto lg:transform-none overflow-hidden isolate
                 ${showCart ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
             `}>
                 {/* Header */}
-                <div className="py-1.5 px-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] lg:rounded-t-[14px] flex items-center justify-between shrink-0">
+                <div className="py-1.5 px-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] flex items-center justify-between shrink-0">
                     <button
                         type="button"
                         onClick={() => {
@@ -115,7 +115,7 @@ export const POSCartPanel: React.FC = () => {
                 <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-1 custom-scrollbar">
                     {cart.length === 0 ? (
                         <div className="h-full min-h-[220px] flex flex-col items-center justify-center text-center p-8 select-none animate-in fade-in duration-300">
-                            <div className="w-14 h-14 rounded-2xl bg-[var(--theme-bg-subtle)] flex items-center justify-center mb-3 border border-[var(--theme-border)]">
+                            <div className="w-14 h-14 flex items-center justify-center mb-3">
                                 <CreditCard size={24} className="text-teal-500" />
                             </div>
                             <h4 className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">{t('pos.cartEmpty')}</h4>
