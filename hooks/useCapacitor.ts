@@ -28,19 +28,27 @@ export function useCapacitor() {
     useEffect(() => {
         if (!Capacitor.isNativePlatform()) return;
 
-        // 1. Configure Android / iOS Status Bar
+        // 1. Match native status-bar text and background to the active app theme.
         const setupStatusBar = async () => {
             try {
                 await StatusBar.setOverlaysWebView({ overlay: false });
-                await StatusBar.setStyle({ style: Style.Dark });
+                const root = document.documentElement;
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const theme = root.getAttribute('data-theme') || (prefersDark ? 'dark' : 'light');
+                const backgroundColor = getComputedStyle(root).getPropertyValue('--theme-bg-app').trim();
+                await StatusBar.setStyle({ style: theme === 'dark' ? Style.Dark : Style.Light });
                 if (Capacitor.getPlatform() === 'android') {
-                    await StatusBar.setBackgroundColor({ color: '#151D18' });
+                    if (/^#[\da-f]{6}$/i.test(backgroundColor)) {
+                        await StatusBar.setBackgroundColor({ color: backgroundColor });
+                    }
                 }
             } catch (err) {
                 logger.warn('useCapacitor', 'Failed to configure status bar', { error: String(err) });
             }
         };
         setupStatusBar();
+        const themeObserver = new MutationObserver(() => void setupStatusBar());
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
         // 2. Monitor Network Connectivity
         const initNetwork = async () => {
@@ -89,6 +97,7 @@ export function useCapacitor() {
         setupBackButton();
 
         return () => {
+            themeObserver.disconnect();
             cleanupNetwork.then(cleanup => cleanup && cleanup());
             if (backListener) backListener.remove();
         };

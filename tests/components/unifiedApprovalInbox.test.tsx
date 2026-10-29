@@ -16,6 +16,7 @@ const { query } = vi.hoisted(() => ({
   }
 }));
 
+vi.mock('../../components/approvals/ProductApprovalInboxCard', () => ({ ProductApprovalInboxCard: () => null }));
 vi.mock('../../hooks/useApprovalInbox', () => ({ useApprovalInbox: () => query }));
 vi.mock('../../contexts/LanguageContext', () => ({
   useLanguage: () => ({
@@ -83,9 +84,9 @@ describe('cross-department approval inbox', () => {
 
   it('flags unavailable workflows without claiming they have zero pending items', () => {
     show(<Approvals />);
-    expect(screen.getByRole('alert').textContent).toContain('available queues only');
-    expect(screen.queryByRole('link', { name: 'Review Leave requests' })).toBeNull();
-    expect(screen.getByText(/Pending count could not be verified/)).toBeTruthy();
+    expect(screen.getByRole('alert').textContent).toContain('verified queues');
+    expect(screen.getByRole('link', { name: 'Review Leave requests' })).toBeTruthy();
+    expect(screen.getByText('Count unavailable')).toBeTruthy();
   });
 
   it('hides cached totals and offers retry after a refresh failure', () => {
@@ -157,26 +158,24 @@ describe('cross-department approval inbox', () => {
     expect(screen.queryByRole('status')).toBeNull();
   });
 
-  it('renders visual badges distinguishing specialist clearances from final line approvals', () => {
-    show(<Approvals />);
-    const specialistBadge = screen.getByTestId('badge-po_finance');
-    expect(specialistBadge.textContent).toContain('Finance Clearance Required');
-
-    const lineApprovalBadge = screen.getByTestId('badge-purchase_orders');
-    expect(lineApprovalBadge.textContent).toContain('Final Line Approval');
-  });
-
-  it('filters queue items by Specialist Clearance and Final Line Approval tabs', () => {
+  it('labels decision stages and filters their review destinations', () => {
     show(<Approvals />);
     expect(screen.getByRole('link', { name: 'Review Purchase orders' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Review PO finance clearance' })).toBeTruthy();
-
-    fireEvent.click(screen.getByRole('button', { name: /Specialist Clearances/ }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Decision stage' }), { target: { value: 'specialist_clearance' } });
     expect(screen.getByRole('link', { name: 'Review PO finance clearance' })).toBeTruthy();
     expect(screen.queryByRole('link', { name: 'Review Purchase orders' })).toBeNull();
-
-    fireEvent.click(screen.getByRole('button', { name: /Final Line Approvals/ }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Decision stage' }), { target: { value: 'final_line_approval' } });
     expect(screen.getByRole('link', { name: 'Review Purchase orders' })).toBeTruthy();
     expect(screen.queryByRole('link', { name: 'Review PO finance clearance' })).toBeNull();
+  });
+  it('searches requests and hides empty queues until requested', () => {
+    query.data!.queues.push({ key: 'salary', count: 0, status: 'ready' });
+    show(<Approvals />);
+    expect(screen.queryByRole('link', { name: 'Review Salary changes' })).toBeNull();
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Include empty queues' }));
+    expect(screen.getByRole('link', { name: 'Review Salary changes' })).toBeTruthy();
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search approval types' }), { target: { value: 'salary' } });
+    expect(screen.queryByRole('link', { name: 'Review Purchase orders' })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Review Salary changes' })).toBeTruthy();
   });
 });

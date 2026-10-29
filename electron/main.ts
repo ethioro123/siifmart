@@ -73,7 +73,6 @@ function createWindow(): void {
         height: 900,
         minWidth: 1024,
         minHeight: 700,
-        backgroundColor: '#09090B',
         title: 'SIIFMART',
         icon: !appIcon.isEmpty() ? appIcon : iconPath,
         show: false, // Wait until ready-to-show to prevent white flash

@@ -12,13 +12,11 @@ export const getABCClass = (product: Product, totalValue: number) => {
 };
 
 export function useInventoryOverviewData({
-    theme,
     serverMetrics,
     filteredProducts,
     totalInventoryValueCost,
     totalInventoryValueRetail
 }: {
-    theme: 'light' | 'dark';
     serverMetrics: any;
     filteredProducts: Product[];
     totalInventoryValueCost: number;
@@ -86,9 +84,9 @@ export function useInventoryOverviewData({
 
     // ABC chart: Pareto classification across active inventory
     const abcData = useMemo(() => {
-        const classAColor = theme === 'dark' ? '#2997FF' : '#0071E3';
-        const classBColor = theme === 'dark' ? '#30D158' : '#34C759';
-        const classCColor = theme === 'dark' ? '#FF9F0A' : '#FF9500';
+        const classAColor = 'var(--theme-status-info)';
+        const classBColor = 'var(--theme-status-success)';
+        const classCColor = 'var(--theme-status-warning)';
 
         if (serverMetrics?.abc_stats?.length) {
             return serverMetrics.abc_stats.map((item: { name: string; value: number }, i: number) => ({
@@ -109,7 +107,7 @@ export function useInventoryOverviewData({
             { name: 'Class B (Important)', value: data.B, color: classBColor },
             { name: 'Class C (Standard)', value: data.C, color: classCColor },
         ];
-    }, [serverMetrics, filteredProducts, totalInventoryValueRetail, theme]);
+    }, [serverMetrics, filteredProducts, totalInventoryValueRetail]);
 
     return {
         stockTurnoverRate,

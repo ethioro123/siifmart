@@ -166,8 +166,6 @@ export default defineConfig(({ mode }) => {
             name: 'SIIFMART Retail & Warehouse',
             short_name: 'SIIFMART',
             description: 'SIIFMART Retail & Warehouse Management System',
-            theme_color: '#000000',
-            background_color: '#000000',
             display: 'standalone',
             orientation: 'portrait',
             icons: [

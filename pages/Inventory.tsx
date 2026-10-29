@@ -231,7 +231,6 @@ export default function Inventory() {
     const totalInventoryValueRetail = serverMetrics?.total_value_retail || activeSiteProducts.reduce((sum, p) => sum + ((p.stock || 0) * (p.price || 0)), 0);
 
     const { stockTurnoverRate, deadStockValue, lowStockCount, categoryData, abcData } = useInventoryOverviewData({
-        theme,
         serverMetrics,
         filteredProducts: activeSiteProducts,
         totalInventoryValueCost,

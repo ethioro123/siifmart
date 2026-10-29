@@ -176,7 +176,7 @@ export default function App() {
       : 0;
 
     return (
-      <div className="min-h-screen bg-white dark:bg-black text-[#09090B] dark:text-white flex flex-col items-center justify-center p-6 select-none transition-colors duration-200">
+      <div className="min-h-screen bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] flex flex-col items-center justify-center p-6 select-none transition-colors duration-200">
         {/* Brand Display — Pure, Simple, Elegant Apple Presentation */}
         <div className="flex flex-col items-center text-center">
           <Logo variant="stacked" size={36} />
@@ -187,7 +187,7 @@ export default function App() {
 
         {/* Error Display with Retry */}
         {loadError && (
-          <div className="mt-8 p-4 border border-red-500/30 rounded-2xl max-w-sm w-full text-center">
+          <div className="mt-8 p-4 border border-[var(--theme-status-danger-border)] rounded-2xl max-w-sm w-full text-center">
             <p className="text-xs text-red-500 mb-2">{loadError}</p>
             <button
               onClick={() => window.location.reload()}

@@ -10,19 +10,15 @@ const config: CapacitorConfig = {
   },
   plugins: {
     StatusBar: {
-      style: 'DARK',
-      backgroundColor: '#151D18',
       overlaysWebView: false
     }
   },
   android: {
-    backgroundColor: '#151D18',
     allowMixedContent: true,
     captureInput: true,
     webContentsDebuggingEnabled: process.env.NODE_ENV !== 'production'
   },
   ios: {
-    backgroundColor: '#151D18',
     contentInset: 'always'
   }
 };

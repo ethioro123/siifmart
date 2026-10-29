@@ -29,7 +29,7 @@ const EXPENSES_PER_PAGE = 20;
 
 export function useFinancialsState() {
    const { user, theme } = useStore();
-   const accentColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
+   const accentColor = 'var(--theme-accent)';
    const {
       employees,
       sales,
@@ -249,7 +249,14 @@ export function useFinancialsState() {
       ];
    }, [cashflowData]);
 
-   const COLORS = [accentColor, '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
+   const COLORS = [
+      accentColor,
+      'var(--theme-status-info)',
+      'var(--theme-status-warning)',
+      'var(--theme-status-danger)',
+      'var(--theme-status-success)',
+      'var(--theme-text-muted)'
+   ];
 
    // Zero-Trust Expense Creation (Strictly Pending, Captures Creator)
    const handleAddExpense = async () => {
