@@ -218,7 +218,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
     if (filteredEmployees.length === 0) {
         return (
             <div className={`w-full min-h-[400px] flex flex-col items-center justify-center p-8 rounded-2xl border text-center ${
-                isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35] text-[var(--theme-text-muted)]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
+                'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
             }`}>
                 <div className="w-14 h-14 rounded-2xl bg-[var(--theme-status-warning-bg)] flex items-center justify-center text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mb-4">
                     <FilterX size={28} />
@@ -257,7 +257,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                         Matrix Dimension:
                     </span>
                     <div className={`flex items-center p-0.5 rounded-xl border ${
-                        isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]' : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
+                        'bg-[var(--theme-bg-app)] border-[var(--theme-border)]'
                     }`}>
                         <button
                             type="button"

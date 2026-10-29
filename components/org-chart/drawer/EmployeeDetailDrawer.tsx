@@ -115,7 +115,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
             <div
                 onClick={(e) => e.stopPropagation()}
                 className={`w-full max-w-md h-full flex flex-col shadow-2xl border-l animate-slideLeft ${
-                    isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'
+                    'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'
                 }`}
             >
                 {/* Header with Close */}
@@ -148,7 +148,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                             title={isOnline ? 'Online now' : 'Offline'}
                             className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-[var(--theme-border)] dark:border-[var(--theme-border)] transition-colors duration-500 ${
                                 isOnline
-                                    ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_6px_rgba(52,211,153,0.7)] animate-pulse'
+                                    ? 'bg-[var(--theme-status-success)] animate-pulse'
                                     : 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)]'
                             }`}
                         />

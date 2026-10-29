@@ -15,9 +15,7 @@ interface OrgMatrixKPIsProps {
 }
 
 export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark }) => {
-    const cardBg = isDark
-        ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]'
-        : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-xs';
+    const cardBg = 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-xs';
 
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">

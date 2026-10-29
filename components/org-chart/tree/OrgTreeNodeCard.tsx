@@ -39,9 +39,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
             <div
                 onClick={() => onSelect(layoutNode)}
                 className={`group relative h-full w-full rounded-xl border p-2.5 flex flex-col justify-between cursor-pointer select-none transition-all duration-150 ${
-                    isDark
-                        ? 'bg-[#1E2822] hover:bg-[#25322A] border-[#2C4D35] text-[var(--theme-text-primary)] shadow-md '
-                        : 'bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-app)] border-[var(--theme-border)] text-[var(--theme-text-primary)] shadow-sm hover:shadow-md'
+                    'bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] border-[var(--theme-border)] text-[var(--theme-text-primary)] shadow-sm hover:shadow-md'
                 } ${
                     isSearchMatch
                         ? 'ring-2 ring-[var(--theme-status-warning-border)] ring-offset-2 ring-offset-transparent shadow-lg '
@@ -63,7 +61,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                             title={isOnline ? 'Online now' : 'Offline'}
                             className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--theme-border)] dark:border-[var(--theme-border)] transition-colors duration-500 ${
                                 isOnline
-                                    ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_5px_rgba(52,211,153,0.7)] animate-pulse'
+                                    ? 'bg-[var(--theme-status-success)] animate-pulse'
                                     : 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)]'
                             }`}
                         />

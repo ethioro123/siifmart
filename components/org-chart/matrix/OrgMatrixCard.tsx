@@ -39,9 +39,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
         <div
             onClick={() => onSelectEmployee(employee)}
             className={`group relative p-3.5 rounded-2xl border flex flex-col justify-between cursor-pointer transition-all duration-200 hover:-translate-y-0.5 ${
-                isDark
-                    ? 'bg-[#1E2822] hover:bg-[#25322A] border-[#2C4D35] text-[var(--theme-text-primary)] hover:border-[#3d6b49]'
-                    : 'bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:border-[var(--theme-border)]/30 hover:shadow-md'
+                'bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:shadow-md'
             }`}
         >
             {/* Top row: Avatar, Info & Quick Actions */}
@@ -60,7 +58,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                             title={isOnline ? 'Online now' : 'Offline'}
                             className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--theme-border)] dark:border-[var(--theme-border)] transition-colors duration-500 ${
                                 isOnline
-                                    ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse'
+                                    ? 'bg-[var(--theme-status-success)] animate-pulse'
                                     : 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)]'
                             }`}
                         />

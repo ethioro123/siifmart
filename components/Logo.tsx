@@ -28,7 +28,7 @@ function SiifGroceryEmblem({ size }: { size: number }) {
       viewBox="0 0 400 320"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0 text-[#09090B] dark:text-[#FFFFFF] transition-colors duration-200"
+      className="shrink-0 text-[var(--theme-text-primary)] transition-colors duration-200"
       aria-hidden="true"
     >
       <path d={SPEED_CART_PATH} fill="currentColor" />
@@ -57,7 +57,7 @@ function SiifWordmark({
   return (
     <span
       aria-label={storeName}
-      className={`inline-flex ${centered ? 'flex-col items-center text-center' : 'items-center'} text-[#09090B] dark:text-[#FFFFFF] leading-none select-none`}
+      className={`inline-flex ${centered ? 'flex-col items-center text-center' : 'items-center'} text-[var(--theme-text-primary)] leading-none select-none`}
     >
       <span
         style={{

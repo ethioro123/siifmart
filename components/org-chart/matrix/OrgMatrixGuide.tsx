@@ -44,14 +44,14 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
     return (
         <div
             className={`rounded-2xl border transition-all duration-200 overflow-hidden mb-5 ${
-                isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
             }`}
         >
             {/* Header Toggle */}
             <div
                 onClick={() => setIsExpanded(!isExpanded)}
                 className={`p-4 flex items-center justify-between cursor-pointer select-none transition-colors ${
-                    isDark ? 'hover:bg-[#1E2822]' : 'hover:bg-[var(--theme-bg-subtle)]'
+                    'hover:bg-[var(--theme-bg-subtle)]'
                 }`}
             >
                 <div className="flex items-center gap-3">
