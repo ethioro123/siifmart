@@ -298,6 +298,8 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             return;
         }
         setClosingStep(1);
+        setCashDenominations({});
+        setDiscrepancyReason('');
         setIsClosingShift(true);
     };
 
@@ -348,7 +350,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     const value: POSCommandContextType = {
         dateRange, setDateRange, isWithinRange, filteredSales,
-        activeShift, cashInDrawer, personalSales, txCount, shiftTxCount, returnCount, totalRevenue,
+        activeShift, cashInDrawer, cashSummaryAvailable: Boolean(serverSummary.data && !serverSummary.data.blind && !serverSummary.isError), personalSales, txCount, shiftTxCount, returnCount, totalRevenue,
         getShiftSummary, myPoints, siteWorkerPoints, hourlyData, paymentChartData,
         isLocked, setIsLocked, pin, setPin,
         

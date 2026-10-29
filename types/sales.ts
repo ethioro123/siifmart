@@ -78,6 +78,8 @@ export interface ReturnRequest {
 export interface ShiftRecord {
   countSubmittedAt?: string;
   ledgerVersion?: number;
+  countSubmittedAt?: string;
+  count_submitted_at?: string;
   id: string;
   shiftNumber?: string | number;
   shift_number?: string | number;
