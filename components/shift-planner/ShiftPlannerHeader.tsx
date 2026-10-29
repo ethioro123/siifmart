@@ -144,7 +144,7 @@ export const ShiftPlannerHeader: React.FC<ShiftPlannerHeaderProps> = ({
                                 disabled={isSaving || !isDirty}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-xs ${
                                     isDirty
-                                        ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] dark:text-[var(--theme-text-primary)] hover:bg-[#1A3420] ring-2 ring-[var(--theme-status-success-border)]'
+                                        ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:bg-[var(--theme-primary-hover)] ring-2 ring-[var(--theme-status-success-border)]'
                                         : 'bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] text-[var(--theme-text-muted)] text-[var(--theme-text-secondary)] cursor-not-allowed opacity-75'
                                 }`}
                             >
