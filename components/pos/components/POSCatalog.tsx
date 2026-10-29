@@ -149,16 +149,16 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                             </span>
                                         ) : null;
                                     })()}
-                                    <div className="mt-auto pt-2.5 flex items-center justify-between border-t border-[var(--theme-border-subtle)]">
-                                        <div className="flex flex-col min-w-0 pr-1">
+                                    <div className="mt-auto pt-2.5 flex flex-col gap-2 items-start">
+                                        <div className="flex flex-col min-w-0 min-h-6 pr-1">
                                             <div className="flex items-baseline gap-1 flex-wrap">
                                                 {product.isOnSale && product.salePrice ? (
                                                     <>
-                                                        <p className="text-[var(--theme-status-danger-text)] font-bold text-sm sm:text-base font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-status-danger-text)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                        <p className="text-[var(--theme-status-danger-text)] font-bold text-sm sm:text-base font-mono tabular-nums tracking-tight whitespace-nowrap">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-status-danger-text)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                                         <p className="text-[var(--theme-text-secondary)] text-xs line-through font-mono tabular-nums font-semibold">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
                                                     </>
                                                 ) : (
-                                                    <p className="text-[var(--theme-text-primary)] font-bold text-sm sm:text-base font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-text-secondary)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                    <p className="text-[var(--theme-text-primary)] font-bold text-sm sm:text-base font-mono tabular-nums tracking-tight whitespace-nowrap">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-text-secondary)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                                 )}
                                             </div>
                                         </div>

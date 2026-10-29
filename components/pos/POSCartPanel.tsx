@@ -296,7 +296,7 @@ export const POSCartPanel: React.FC = () => {
                         )}
 
                         {/* Grand Total Row */}
-                        <div className="flex justify-between items-baseline px-3 py-1.5 rounded-[10px] bg-[var(--theme-bg-subtle)]">
+                        <div className="flex justify-between items-baseline px-1 py-1.5">
                             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 {t('pos.totalAmount')}
                             </span>

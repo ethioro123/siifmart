@@ -53,15 +53,15 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 onClick={() => navigate('/')}
                 title={t('pos.exitDashboard')}
                 aria-label="Exit to Dashboard"
-                className="hidden lg:flex min-h-11 min-w-11 items-center justify-center p-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors shadow-xs group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                className="hidden lg:flex min-h-11 min-w-11 items-center justify-center p-2.5 bg-transparent rounded-lg text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
             >
-                <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center transition-transform group-hover:-translate-x-0.5">
+                <div className="w-5 h-5 text-[var(--theme-text-secondary)] flex items-center justify-center">
                     <ArrowLeft size={14} />
                 </div>
             </button>
             <div className="flex-1 relative">
                 <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-[14px] px-3 py-1.5 focus-within:border-[var(--theme-border-focus)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 focus-within:bg-[var(--theme-bg-card)] transition-colors group">
-                    <div className="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 group-focus-within:bg-blue-500 group-focus-within:text-white transition-all">
+                    <div className="w-5 h-5 text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0 group-focus-within:text-[var(--theme-accent)] transition-colors">
                         <Search size={14} />
                     </div>
                     <input
@@ -165,9 +165,9 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 type="button"
                 onClick={() => setIsFilterPanelOpen(true)}
                 aria-label={`Filter and sort${activeFiltersCount ? `, ${activeFiltersCount} active` : ''}`}
-                className="relative min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors flex items-center gap-2 shadow-xs shrink-0 tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                className="relative min-h-11 bg-transparent rounded-lg px-3.5 py-2.5 text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors flex items-center gap-2 shrink-0 tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
             >
-                <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0">
                     <SlidersHorizontal size={13} />
                 </div>
                 <span className="hidden sm:inline">{t('pos.filterAndSort')}</span>
