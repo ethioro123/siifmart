@@ -27,7 +27,7 @@ All eight files below were applied to **staging `utykzifrblpyxlvlknsm`**. Produc
 | [20261030_receipt_sequence_variable_scope.sql](../migrations/20261030_receipt_sequence_variable_scope.sql) | 20261029170319 |
 | [20261030_fulfillment_intake_stage_separation.sql](../migrations/20261030_fulfillment_intake_stage_separation.sql) | 20261029170630 |
 | [20261030_fulfillment_paused_assignment_closure.sql](../migrations/20261030_fulfillment_paused_assignment_closure.sql) | 20261029170926 |
-| [20261030_fulfillment_return_read_performance.sql](../migrations/20261030_fulfillment_return_read_performance.sql) | Verified applied; see staging migration history |
+| [20261030_fulfillment_return_read_performance.sql](../migrations/20261030_fulfillment_return_read_performance.sql) | 20261029171038 |
 
 ## Verification
 
