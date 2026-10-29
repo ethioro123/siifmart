@@ -5,7 +5,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { ThemeSelector } from '../../components/ThemeSelector';
 import type { ThemePreference } from '../../hooks/useTheme';
 
-const store = vi.hoisted(() => ({ themePreference: 'system' as ThemePreference, setThemePreference: vi.fn() }));
+const store = vi.hoisted(() => ({ themePreference: 'system' as ThemePreference, setThemePreference: vi.fn(), theme: 'dark' as 'dark' | 'light', toggleTheme: vi.fn() }));
 vi.mock('../../contexts/CentralStore', () => ({ useStore: () => store }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
@@ -26,5 +26,19 @@ describe('profile appearance control', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Use device setting' }));
         expect(store.setThemePreference.mock.calls.map(([value]) => value)).toEqual(['dark', 'light', 'system']);
         expect(closeMenu).not.toHaveBeenCalled();
+    });
+    it('renders accessible theme icon button when variant is icon and toggles theme on click', () => {
+        store.theme = 'dark';
+        const { rerender } = render(<ThemeSelector variant="icon" />);
+        const button = screen.getByRole('button', { name: 'Switch to light mode' });
+        expect(button).toBeTruthy();
+        expect(button.getAttribute('title')).toBe('Switch to light mode');
+
+        fireEvent.click(button);
+        expect(store.toggleTheme).toHaveBeenCalledOnce();
+
+        store.theme = 'light';
+        rerender(<ThemeSelector variant="icon" />);
+        expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeTruthy();
     });
 });

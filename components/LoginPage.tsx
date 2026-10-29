@@ -89,9 +89,9 @@ export default function LoginPage() {
       style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)' }}
     >
 
-      {/* Premium Theme Switcher */}
-      <div className="absolute right-6 z-20" style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}>
-        <ThemeSelector />
+      {/* Theme Switcher Icon */}
+      <div className="absolute right-4 sm:right-6 z-20" style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}>
+        <ThemeSelector variant="icon" />
       </div>
 
       {/* Main 3-Column Layout: Left (Ethiopia) | Center (Login) | Right (Kenya) */}
