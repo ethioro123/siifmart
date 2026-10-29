@@ -44,4 +44,22 @@ describe('profile dropdown navigation', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
         expect(logout).toHaveBeenCalledOnce();
     });
+    it('exposes approvals in dropdown and badges the profile trigger when reviews are pending', () => {
+        const close = vi.fn();
+        const navigate = vi.fn();
+        render(<UserMenu user={{ name: 'Regional Buyer', email: 'buyer@example.test', role: 'buyer' }}
+            isUserMenuOpen setIsUserMenuOpen={close} currentUserPoints={null}
+            todayJobs={[]} todayJobsTotal={0} logout={vi.fn()} navigate={navigate}
+            language="en" setLanguage={vi.fn()} dropdownRef={createRef<HTMLDivElement>()}
+            approvalInbox={{ enabled: true, data: { total: 5, unavailable: 0, queues: [] } as any, isError: false, isLoading: false } as any} />);
+
+        expect(screen.getByRole('button', { name: /User Profile and Menu/i })).toBeTruthy();
+        expect(screen.getAllByText('5').length).toBeGreaterThanOrEqual(1);
+
+        const approvalsBtn = screen.getByRole('button', { name: /^Approvals/i });
+        expect(approvalsBtn).toBeTruthy();
+        fireEvent.click(approvalsBtn);
+        expect(navigate).toHaveBeenCalledWith('/approvals');
+        expect(close).toHaveBeenCalledWith(false);
+    });
 });
