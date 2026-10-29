@@ -72,18 +72,18 @@ export const POSCartPanel: React.FC = () => {
             {/* Cart Panel: Desktop Side Panel / Mobile Full-Screen Sheet */}
             <div className={`
                 fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col transition-transform duration-300 ease-out motion-reduce:transition-none
-                lg:static lg:w-[420px] xl:w-[440px] lg:bg-[var(--theme-bg-card)] lg:border-l lg:border-[var(--theme-border)] lg:h-full lg:z-auto lg:transform-none overflow-hidden isolate
+                lg:static lg:w-[420px] xl:w-[440px] lg:bg-[var(--theme-bg-card)] lg:border lg:border-[var(--theme-border-subtle)] lg:rounded-[28px] lg:shadow-xs lg:h-full lg:z-auto lg:transform-none overflow-hidden isolate
                 ${showCart ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
             `}>
                 {/* Header */}
-                <div className="py-1.5 px-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] flex items-center justify-between shrink-0">
+                <div className="py-3 px-5 sm:px-6 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-card)] flex items-center justify-between shrink-0">
                     <button
                         type="button"
                         onClick={() => {
                             setShowCart(false);
                             native.haptic();
                         }}
-                        className="min-h-11 min-w-11 px-2 -ml-2 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors lg:hidden flex items-center gap-1.5 font-bold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="min-h-11 min-w-11 px-2.5 -ml-2 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors lg:hidden flex items-center gap-1.5 font-bold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         aria-label={t('pos.backToProducts')}
                     >
                         <ArrowLeft size={18} />
@@ -91,18 +91,18 @@ export const POSCartPanel: React.FC = () => {
                     </button>
 
                     <div className="flex items-center gap-2">
-                        <span className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">
-                            {t('pos.cart')} ({totalItemCount})
+                        <span className="text-base font-bold text-[var(--theme-text-primary)] tracking-tight">
+                            {t('pos.cart')} <span className="font-mono text-sm font-semibold text-[var(--theme-text-secondary)]">({totalItemCount})</span>
                         </span>
                     </div>
 
                     <button
                         type="button"
                         onClick={() => setIsCustomerModalOpen(true)}
-                        className="min-h-11 flex items-center gap-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] px-3 rounded-[10px] transition-colors group shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="min-h-11 flex items-center gap-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border-subtle)] px-3 py-2 rounded-xl transition-all group shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         aria-label={`Customer: ${selectedCustomer ? selectedCustomer.name : t('pos.walkIn')}. Change customer`}
                     >
-                            <div className="w-5 h-5 rounded-md bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
+                        <div className="w-5 h-5 rounded-md bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <User size={13} aria-hidden="true" />
                         </div>
                         <span className="text-xs font-semibold text-[var(--theme-text-primary)] max-w-[110px] truncate tracking-tight">
@@ -112,11 +112,11 @@ export const POSCartPanel: React.FC = () => {
                 </div>
 
                 {/* Cart Items List */}
-                <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-1 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 custom-scrollbar">
                     {cart.length === 0 ? (
                         <div className="h-full min-h-[220px] flex flex-col items-center justify-center text-center p-8 select-none animate-in fade-in duration-300">
-                            <div className="w-14 h-14 flex items-center justify-center mb-3">
-                                <CreditCard size={24} className="text-teal-500" />
+                            <div className="w-14 h-14 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] flex items-center justify-center mb-3 shadow-2xs">
+                                <CreditCard size={24} className="text-[var(--theme-accent)]" />
                             </div>
                             <h4 className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">{t('pos.cartEmpty')}</h4>
                             <p className="text-xs text-[var(--theme-text-secondary)]">{t('pos.tapItemsToStart')}</p>
@@ -128,7 +128,7 @@ export const POSCartPanel: React.FC = () => {
                             return (
                                 <div
                                     key={item.id}
-                                    className={`px-2 py-1 border-b ${stalePrice ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]' : 'border-[var(--theme-border-subtle)]'} flex items-center gap-2 min-h-14 animate-in fade-in duration-200 motion-reduce:animate-none transition-colors`}
+                                    className={`p-3 rounded-[16px] border ${stalePrice ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]' : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border-subtle)] hover:border-[var(--theme-border)]'} flex items-center gap-2.5 min-h-14 animate-in fade-in duration-200 motion-reduce:animate-none transition-all shadow-2xs`}
                                 >
                                     <div className="flex-1 min-w-0">
                                         <h4 className="text-[var(--theme-text-primary)] text-sm font-semibold leading-5 whitespace-normal break-words">
@@ -152,9 +152,9 @@ export const POSCartPanel: React.FC = () => {
                                     </div>
 
                                     {/* Stepper / Quantity Controls */}
-                                    <div className="flex items-center gap-1 shrink-0">
+                                    <div className="flex items-center gap-1.5 shrink-0">
                                         {unit.allowDecimal ? (
-                                            <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-[10px] px-2 border border-[var(--theme-border-subtle)] gap-1 min-h-[52px] pointer-fine:min-h-11">
+                                            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-[12px] px-2 border border-[var(--theme-border-subtle)] gap-1 min-h-[44px] shadow-2xs">
                                                 <input
                                                     type="number"
                                                     aria-label={`Quantity of ${item.name} in ${unit.shortLabel}`}
@@ -165,24 +165,24 @@ export const POSCartPanel: React.FC = () => {
                                                         const val = parseFloat(e.target.value);
                                                         if (!isNaN(val) && val > 0) setCartItemQuantity(item.id, val);
                                                     }}
-                                                    className="w-12 bg-transparent text-[var(--theme-text-primary)] font-bold text-sm text-center outline-none tabular-nums"
+                                                    className="w-12 bg-transparent text-[var(--theme-text-primary)] font-bold text-sm text-center outline-none tabular-nums font-mono"
                                                 />
                                                 <span className="text-xs text-[var(--theme-text-secondary)] font-bold uppercase">{unit.shortLabel}</span>
                                             </div>
                                         ) : (
-                                            <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-[10px] p-0.5 border border-[var(--theme-border-subtle)] min-h-[52px] pointer-fine:min-h-11">
+                                            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-[12px] p-0.5 border border-[var(--theme-border-subtle)] min-h-[44px] shadow-2xs">
                                                 <button
                                                     type="button"
                                                     onClick={() => {
                                                         updateQuantity(item.id, -1);
                                                         native.haptic();
                                                     }}
-                                                    className="min-h-[52px] min-w-[52px] pointer-fine:min-h-11 pointer-fine:min-w-11 rounded-[10px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                    className="min-h-9 min-w-9 rounded-[10px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                                     aria-label={`Decrease ${item.name} quantity`}
                                                 >
-                                                    <Minus size={18} />
+                                                    <Minus size={16} />
                                                 </button>
-                                                <span className="text-[var(--theme-text-primary)] font-bold text-sm w-6 text-center tabular-nums">
+                                                <span className="text-[var(--theme-text-primary)] font-bold text-sm w-7 text-center tabular-nums font-mono">
                                                     {item.quantity}
                                                 </span>
                                                 <button
@@ -191,15 +191,15 @@ export const POSCartPanel: React.FC = () => {
                                                         updateQuantity(item.id, 1);
                                                         native.haptic();
                                                     }}
-                                                    className="min-h-[52px] min-w-[52px] pointer-fine:min-h-11 pointer-fine:min-w-11 rounded-[10px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                    className="min-h-9 min-w-9 rounded-[10px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                                     aria-label={`Increase ${item.name} quantity`}
                                                 >
-                                                    <Plus size={18} />
+                                                    <Plus size={16} />
                                                 </button>
                                             </div>
                                         )}
 
-                                        <div className="min-w-[5rem] text-right font-semibold text-sm leading-5 text-[var(--theme-text-primary)] font-mono tabular-nums whitespace-nowrap">
+                                        <div className="min-w-[4.5rem] text-right font-bold text-sm leading-5 text-[var(--theme-text-primary)] font-mono tabular-nums whitespace-nowrap">
                                             {CURRENCY_SYMBOL} {formatPriceValue(item.price * item.quantity)}
                                         </div>
 
@@ -209,10 +209,10 @@ export const POSCartPanel: React.FC = () => {
                                                 removeFromCart(item.id);
                                                 native.haptic();
                                             }}
-                                            className="min-h-[52px] min-w-[52px] pointer-fine:min-h-11 pointer-fine:min-w-11 flex items-center justify-center text-[var(--theme-text-muted)] hover:text-[var(--theme-status-danger)] rounded-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
+                                            className="min-h-9 min-w-9 flex items-center justify-center text-[var(--theme-text-muted)] hover:text-[var(--theme-status-danger)] hover:bg-rose-500/10 rounded-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                                             aria-label={`Remove ${item.name} from cart`}
                                         >
-                                            <Trash2 size={18} />
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </div>
@@ -222,9 +222,9 @@ export const POSCartPanel: React.FC = () => {
                 </div>
 
                 {/* Bottom Summary & Payment Section */}
-                <div className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-t border-[var(--theme-border-subtle)] lg:rounded-b-[14px] shrink-0">
+                <div className="p-4 sm:p-5 bg-[var(--theme-bg-card)] border-t border-[var(--theme-border-subtle)] lg:rounded-b-[28px] shrink-0 space-y-3">
                     {/* Collapsible Tax / Discount Details Toggle */}
-                    <div className="mb-1 space-y-1">
+                    <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-semibold text-[var(--theme-text-secondary)] tracking-tight">
@@ -239,7 +239,7 @@ export const POSCartPanel: React.FC = () => {
                                 type="button"
                                 onClick={() => setShowDetails(!showDetails)}
                                 aria-expanded={showDetails}
-                                className="min-h-11 px-2 text-[11px] font-semibold text-[var(--theme-text-primary)] flex items-center gap-1 hover:bg-[var(--theme-bg-subtle)] rounded-lg tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                className="min-h-8 px-2 text-[11px] font-semibold text-[var(--theme-text-primary)] flex items-center gap-1 hover:bg-[var(--theme-bg-subtle)] rounded-lg tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] transition-colors"
                             >
                                 <span>{showDetails ? t('pos.hideBreakdown') : t('pos.viewBreakdown')}</span>
                                 {showDetails ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
@@ -248,7 +248,7 @@ export const POSCartPanel: React.FC = () => {
 
                         {/* Breakdown Panel */}
                         {showDetails && (
-                            <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-2 text-xs animate-in fade-in duration-200">
+                            <div className="p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] space-y-2 text-xs animate-in fade-in duration-200">
                                 <div className="flex justify-between items-center text-[var(--theme-text-secondary)]">
                                     <div className="flex items-center gap-1.5">
                                         <span>{t('pos.discount')}</span>
@@ -256,7 +256,7 @@ export const POSCartPanel: React.FC = () => {
                                             <button
                                                 type="button"
                                                 onClick={() => setIsDiscountModalOpen(true)}
-                                                className="min-h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-2.5 rounded-xl font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                className="min-h-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border-subtle)] px-2.5 rounded-lg font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                             >
                                                 <Tag size={11} className="inline mr-1 text-pink-500" />
                                                 {appliedDiscountCodeDetails ? appliedDiscountCodeDetails.code : t('pos.applyCode')}
@@ -285,9 +285,9 @@ export const POSCartPanel: React.FC = () => {
                                             aria-label={t('pos.cashRounding')}
                                             title={t('pos.cashRounding')}
                                             onClick={() => setIsRoundingEnabled(!isRoundingEnabled)}
-                                            className={`min-h-11 min-w-11 rounded-xl transition-colors relative shrink-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${isRoundingEnabled ? 'bg-[var(--theme-accent-muted)]' : 'bg-[var(--theme-bg-subtle)]'}`}
+                                            className={`min-h-8 min-w-8 rounded-xl transition-colors relative shrink-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${isRoundingEnabled ? 'bg-[var(--theme-accent-muted)]' : 'bg-[var(--theme-bg-card)]'}`}
                                         >
-                                            <div className={`w-5 h-5 rounded-full absolute top-1/2 -translate-y-1/2 transition-all shadow-xs ${isRoundingEnabled ? 'left-5 bg-[var(--theme-accent)]' : 'left-1 bg-[var(--theme-text-muted)]'}`} />
+                                            <div className={`w-4 h-4 rounded-full absolute top-1/2 -translate-y-1/2 transition-all shadow-xs ${isRoundingEnabled ? 'left-4 bg-[var(--theme-accent)]' : 'left-0.5 bg-[var(--theme-text-muted)]'}`} />
                                         </button>
                                     </div>
                                     <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">+{CURRENCY_SYMBOL} {roundingAdjustment.toFixed(2)}</span>
@@ -296,18 +296,18 @@ export const POSCartPanel: React.FC = () => {
                         )}
 
                         {/* Grand Total Row */}
-                        <div className="flex justify-between items-baseline px-1 py-1.5">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                        <div className="flex justify-between items-baseline pt-1">
+                            <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 {t('pos.totalAmount')}
                             </span>
-                            <span className="text-2xl sm:text-[28px] leading-8 font-bold font-mono text-[var(--theme-text-primary)] tracking-tight tabular-nums">
+                            <span className="text-2xl sm:text-3xl font-extrabold font-mono text-[var(--theme-text-primary)] tracking-tight tabular-nums">
                                 {CURRENCY_SYMBOL} {total.toLocaleString()}
                             </span>
                         </div>
                     </div>
 
                     {/* Quick Functions Bar: Hold, Clear, More */}
-                    <div className="grid grid-cols-3 gap-1.5 mb-1">
+                    <div className="grid grid-cols-3 gap-2">
                         <button
                             type="button"
                             onClick={() => {
@@ -315,10 +315,10 @@ export const POSCartPanel: React.FC = () => {
                                 native.haptic();
                             }}
                             disabled={cart.length === 0}
-                            className="min-h-11 py-2 px-2 bg-[var(--theme-bg-subtle)] enabled:hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-[10px] text-sm leading-5 font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 disabled:text-[var(--theme-text-secondary)] disabled:border-[var(--theme-border-strong)] disabled:cursor-not-allowed transition-colors tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                            className="min-h-11 py-2 px-2 bg-[var(--theme-bg-subtle)] enabled:hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border-subtle)] rounded-xl text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 disabled:text-[var(--theme-text-secondary)] disabled:opacity-40 disabled:cursor-not-allowed transition-all tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] shadow-2xs"
                         >
                             <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                                <PauseCircle size={16} />
+                                <PauseCircle size={15} />
                             </div>
                             <span>{t('pos.hold')}</span>
                         </button>
@@ -332,11 +332,11 @@ export const POSCartPanel: React.FC = () => {
                                 native.haptic();
                             }}
                             disabled={cart.length === 0}
-                            className="min-h-11 py-2 px-2 bg-[var(--theme-status-danger-bg)] enabled:hover:opacity-90 border border-[var(--theme-status-danger-border)] rounded-[10px] text-sm leading-5 font-semibold text-[var(--theme-status-danger-text)] flex items-center justify-center gap-1.5 disabled:cursor-not-allowed transition-colors tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
+                            className="min-h-11 py-2 px-2 bg-[var(--theme-status-danger-bg)] enabled:hover:opacity-90 border border-[var(--theme-status-danger-border)] rounded-xl text-xs sm:text-sm font-semibold text-[var(--theme-status-danger-text)] flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)] shadow-2xs"
                             title={t('pos.void')}
                         >
                             <div className="w-5 h-5 rounded-md bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
-                                <Trash2 size={16} />
+                                <Trash2 size={15} />
                             </div>
                             <span>{t('pos.void')}</span>
                         </button>
@@ -346,10 +346,10 @@ export const POSCartPanel: React.FC = () => {
                                 type="button"
                                 onClick={() => setShowActions(!showActions)}
                                 aria-expanded={showActions}
-                                className="w-full min-h-11 py-2 px-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-[10px] text-sm leading-5 font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 transition-colors tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                className="w-full min-h-11 py-2 px-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border-subtle)] rounded-xl text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 transition-all tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] shadow-2xs"
                             >
                                 <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
-                                    <Settings size={16} />
+                                    <Settings size={15} />
                                 </div>
                                 <span>{t('pos.more')}</span>
                                 {unreviewedPriceUpdateCount > 0 && (
@@ -382,9 +382,9 @@ export const POSCartPanel: React.FC = () => {
                             native.haptic();
                         }}
                         disabled={cart.length === 0}
-                        className="w-full min-h-14 py-2.5 bg-[var(--theme-primary)] enabled:hover:bg-[var(--theme-primary-hover)] disabled:bg-[var(--theme-bg-subtle)] disabled:text-[var(--theme-text-secondary)] disabled:border-[var(--theme-border)] disabled:cursor-not-allowed text-[var(--theme-primary-text)] rounded-[10px] flex items-center justify-center gap-2 transition-colors font-semibold text-sm sm:text-base leading-6 select-none border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        className="w-full min-h-[52px] sm:min-h-[56px] py-3 bg-[var(--theme-primary)] enabled:hover:bg-[var(--theme-primary-hover)] active:scale-[0.99] disabled:bg-[var(--theme-bg-subtle)] disabled:text-[var(--theme-text-muted)] disabled:border-[var(--theme-border)] disabled:cursor-not-allowed text-[var(--theme-primary-text)] rounded-[16px] flex items-center justify-center gap-2.5 transition-all font-bold text-base select-none border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] shadow-sm"
                     >
-                        <CreditCard size={18} />
+                        <CreditCard size={20} />
                         <span>{t('pos.charge')} {CURRENCY_SYMBOL} {total.toLocaleString()}</span>
                     </button>
                 </div>

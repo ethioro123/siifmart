@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import { CatalogUpdatesNotice } from '../components/pos/shared/CatalogUpdatesNotice';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Lock, ArrowLeft, Printer, Box, Power, Play, PackageCheck, Vault, UserPlus,
@@ -40,7 +41,7 @@ const POSCommandContent: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { user } = useStore();
-  const { storePoints, activeSite, shifts, products, effectiveCountry, settings } = useData();
+  const { storePoints, activeSite, shifts, effectiveCountry, settings } = useData();
   const activeCountry = (activeSite?.country || effectiveCountry || settings?.country || 'ET') as Country;
 
   const {
@@ -93,23 +94,6 @@ const POSCommandContent: React.FC = () => {
       navigate(isExecutive ? '/admin' : '/pos');
     }
   };
-
-  const { lastSeenUpdates } = usePOSCommand();
-
-  // ── Notification badge: count UNSEEN products updated in the last 24 h ──
-  const updatedProductCount = useMemo(() => {
-    const siteId = activeSite?.id || user?.siteId;
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    return products.filter((p: any) => {
-      const matchesSite = !siteId || p.siteId === siteId || p.site_id === siteId;
-      const updatedAt = p.updatedAt || p.updated_at;
-      if (!updatedAt) return false;
-      const ts = new Date(updatedAt).getTime();
-      const isRecent = ts > cutoff;
-      const isUnseen = ts > lastSeenUpdates;
-      return matchesSite && isRecent && isUnseen;
-    }).length;
-  }, [products, activeSite, user?.siteId, lastSeenUpdates]);
 
   // Lock Screen — Apple Minimalist Style
   if (isLocked) {
@@ -217,6 +201,8 @@ const POSCommandContent: React.FC = () => {
               </button>
             )}
 
+            <CatalogUpdatesNotice namespace="posCommand" />
+
             {/* Store Inventory Operations */}
             <div className="flex items-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5">
               <div className="relative">
@@ -231,11 +217,7 @@ const POSCommandContent: React.FC = () => {
                   </div>
                   <span>{t('posCommand.stockList')}</span>
                 </button>
-                {updatedProductCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-amber-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
-                    {updatedProductCount > 99 ? '99+' : updatedProductCount}
-                  </span>
-                )}
+
               </div>
 
               <button

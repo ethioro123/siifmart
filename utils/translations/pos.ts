@@ -2,6 +2,21 @@ import { approvalInbox } from './approvalInbox';
 import { TranslationBlock } from './types';
 
 export const pos: TranslationBlock = {
+    // Store-scoped catalog update notice and review
+    catalogCurrentPrice: { en: 'Current selling price', am: 'የአሁኑ መሸጫ ዋጋ', or: 'Gatii Gurgurtaa Ammaa' },
+    catalogUpdates: {"en": "Product updates", "am": "የምርት ለውጦች", "or": "Jijjiirama Oomishaa"},
+    catalogUpdatesCount: {"en": "Review product updates · {count}", "am": "የ{count} ምርቶችን የቅርብ ጊዜ ለውጦች ይመልከቱ", "or": "Jijjiirama yeroo dhihoo oomisha {count} ilaali"},
+    catalogWindow: {"en": "Last 7 days", "am": "ያለፉት 7 ቀናት", "or": "Guyyoota 7 darban"},
+    catalogScopeNote: {"en": "From the catalog currently available for this store. Viewing updates does not approve changes or mark price history as reviewed.", "am": "በአሁኑ ጊዜ ለዚህ ሱቅ ካለው የምርት ዝርዝር። ለውጦችን ማየት ለውጦችን አያጸድቅም ወይም የዋጋ ታሪክን እንደተገመገመ አያስመዘግብም።", "or": "Tarree oomishaa amma suuqii kanaaf jiru keessaa. Jijjiirama ilaaluun jijjiirama hin raggaasisu; seenaa gatiis akka ilaalametti hin galmeessu."},
+    catalogUpdateFilters: {"en": "Filter product updates", "am": "የምርት ለውጦችን አጣራ", "or": "Jijjiirama oomishaa calali"},
+    catalogAll: {"en": "All products", "am": "ሁሉም ምርቶች", "or": "Oomisha Hunda"},
+    catalogNew: {"en": "Recently added", "am": "በቅርቡ የተጨመሩ", "or": "Dhiheenya Ida’ame"},
+    catalogPrice: {"en": "Price updated", "am": "ዋጋ ተቀይሯል", "or": "Gatiin Jijjiirame"},
+    catalogOther: { en: 'Other catalog updates', am: 'ሌሎች የምርት ዝርዝር ለውጦች', or: 'Jijjiirama Tarree Oomishaa Biraa' },
+    catalogEmpty: {"en": "No recent updates match this view.", "am": "ከዚህ እይታ ጋር የሚዛመዱ የቅርብ ጊዜ ለውጦች የሉም።", "or": "Jijjiiramni yeroo dhihoo filannoo kanaan wal simu hin jiru."},
+    catalogPrevious: {"en": "Previous", "am": "ቀዳሚ", "or": "Duraa"},
+    catalogNext: {"en": "Next", "am": "ቀጣይ", "or": "Itti Aanu"},
+    catalogPage: {"en": "Page {page} of {total}", "am": "ገጽ {page} ከ{total}", "or": "Fuula {page} keessaa {total}"},
     approvals: {
         en: 'Approvals',
         am: 'ማጽደቆች',
@@ -190,7 +205,8 @@ export const pos: TranslationBlock = {
     tapItemsToStart: { en: 'Tap items from the catalog or scan barcodes to start sale.', am: 'ሽያጭ ለመጀመር እቃዎችን ይንኩ ወይም ባርኮድ ይቃኙ።', or: 'Gurgurtaa jalqabuuf oomisha tuqi ykn baarkoodii iskaani godhi.' },
     catalogPriceChangedTo: { en: 'Catalog price changed to {price}.', am: 'የካታሎግ ዋጋ ወደ {price} ተለውጧል።', or: 'Gatiin oomishaa gara {price}tti jijjiirameera.' },
     useCurrentPrice: { en: 'Use current price', am: 'የአሁኑን ዋጋ ተጠቀም', or: 'Gatii ammaa fayyadami' },
-    unreviewedPriceChangesCount: { en: '{count} unreviewed price change{s} · Review history', am: '{count} ያልተገመገሙ የዋጋ ለውጦች · ታሪክ ይገምግሙ', or: 'Jijjiirama gatii hin mirkanoofne {count} · Seenaa ilaali' },
+    unreviewedPriceChangesCount: { en: 'Price changes to review · {count}', am: 'ለመገምገም የሚጠብቁ የዋጋ ለውጦች · {count}', or: 'Jijjiirama gatii ilaalamuu qabu · {count}' },
+    priceHistoryUnavailable: { en: 'Price history unavailable · Open to retry', am: 'የዋጋ ታሪክ አይገኝም · እንደገና ለመሞከር ይክፈቱ', or: 'Seenaa gatii argachuun hin danda’amne · Irra deebi’uuf bani' },
 
     // Cart Actions Menu
     priceUpdates: { en: 'Price Updates', am: 'የዋጋ ለውጦች', or: 'Jijjiirama Gatii' },

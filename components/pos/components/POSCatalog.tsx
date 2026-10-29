@@ -65,9 +65,15 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                 }}
                                 disabled={product.stock <= 0}
                                 aria-label={`${product.name}, ${product.stock <= 0 ? t('common.outOfStock') : `${CURRENCY_SYMBOL} ${formatPriceValue(product.isOnSale && product.salePrice ? product.salePrice : product.price)}`}. Add to cart`}
-                                className={`text-left bg-transparent rounded-[10px] p-2 sm:p-2.5 transition-colors group relative overflow-hidden flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${product.stock <= 0 ? 'cursor-not-allowed' : inCartItem ? 'bg-[var(--theme-bg-subtle)]' : 'hover:bg-[var(--theme-bg-subtle)]'} disabled:hover:bg-transparent`}
+                                className={`text-left rounded-[20px] p-3 sm:p-3.5 transition-all duration-200 group relative overflow-hidden flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] select-none ${
+                                    product.stock <= 0
+                                        ? 'bg-[var(--theme-bg-subtle)]/70 border border-[var(--theme-border-subtle)] opacity-70 cursor-not-allowed'
+                                        : inCartItem
+                                            ? 'bg-[var(--theme-bg-card)] border border-[var(--theme-accent)] ring-1 ring-[var(--theme-accent)]/25 shadow-xs'
+                                            : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border-subtle)] hover:border-[var(--theme-border)] shadow-2xs hover:shadow-xs'
+                                }`}
                             >
-                                <div className="aspect-[4/3] rounded-[10px] bg-[var(--theme-bg-panel)] mb-3 overflow-hidden relative flex items-center justify-center">
+                                <div className="aspect-[4/3] rounded-[14px] bg-[var(--theme-bg-panel)] mb-3 overflow-hidden relative flex items-center justify-center">
                                     {product.image && !product.image.includes('placeholder.com') ? (
                                         <>
                                             <img
@@ -144,13 +150,13 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     {(() => {
                                         const badge = formatPackBadge(product);
                                         return badge ? (
-                                            <span className="inline-block mb-2 px-2 py-1 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] text-xs leading-4 font-semibold tracking-wide max-w-fit">
+                                            <span className="inline-block mb-2 px-2.5 py-0.5 rounded-full bg-[var(--theme-bg-panel)] text-[var(--theme-text-secondary)] text-[11px] leading-4 font-semibold tracking-wide border border-[var(--theme-border-subtle)] max-w-fit shadow-2xs">
                                                 {badge}
                                             </span>
                                         ) : null;
                                     })()}
-                                    <div className="mt-auto pt-2.5 flex flex-col gap-2 items-start">
-                                        <div className="flex flex-col min-w-0 min-h-6 pr-1">
+                                    <div className="mt-auto pt-2.5 flex items-center justify-between w-full">
+                                        <div className="flex flex-col min-w-0 pr-1">
                                             <div className="flex items-baseline gap-1 flex-wrap">
                                                 {product.isOnSale && product.salePrice ? (
                                                     <>
@@ -162,11 +168,11 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                 )}
                                             </div>
                                         </div>
-                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors shrink-0 ${inCartItem ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] group-hover:bg-[var(--theme-primary)] group-hover:text-[var(--theme-primary-text)]'}`}>
+                                        <div className={`w-8.5 h-8.5 rounded-full flex items-center justify-center transition-all duration-200 shrink-0 shadow-2xs ${inCartItem ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] ring-2 ring-[var(--theme-primary)]/20' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border-subtle)] group-hover:bg-[var(--theme-primary)] group-hover:text-[var(--theme-primary-text)] group-hover:border-transparent'}`}>
                                             {inCartItem ? (
-                                                <span className="text-xs font-bold">{inCartItem.quantity}</span>
+                                                <span className="text-xs font-bold font-mono">{inCartItem.quantity}</span>
                                             ) : (
-                                                <Plus size={16} />
+                                                <Plus size={15} />
                                             )}
                                         </div>
                                     </div>
