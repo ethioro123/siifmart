@@ -1,3 +1,4 @@
+vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries: vi.fn(), setQueryData: vi.fn() }) }));
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useSaleActions } from '../../contexts/hooks/useSaleActions';
 import { useRealtimeUpdates } from '../../contexts/hooks/useRealtimeUpdates';
@@ -39,6 +40,7 @@ vi.mock('../../services/supabase.service', () => ({
 
 vi.mock('../../services/db/pos.db', () => ({
     posDB: {
+        cacheProducts: vi.fn(),
         saveSale: (...args: any[]) => mockSaveSale(...args),
         enqueueOperation: (...args: any[]) => mockEnqueueOperation(...args)
     }

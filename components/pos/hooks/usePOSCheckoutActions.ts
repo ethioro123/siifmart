@@ -193,26 +193,8 @@ export const usePOSCheckoutActions = ({
             const tendered = selectedPaymentMethod === 'Cash' ? parseFloat(amountTendered) : total;
             const change = selectedPaymentMethod === 'Cash' ? changeDue : 0;
             
-            let siteIdNum = activeSite?.siteNumber;
-            if (siteIdNum === undefined && activeSite?.code) {
-                const match = activeSite.code.match(/\d+/);
-                if (match) siteIdNum = parseInt(match[0], 10);
-            }
-            
-            let terminalId = localStorage.getItem('pos_terminal_id');
-            if (!terminalId) {
-                terminalId = String(Math.floor(Math.random() * 90) + 10); // 10 to 99
-                localStorage.setItem('pos_terminal_id', terminalId);
-            }
-            
-            const siteCode = siteIdNum || '0';
-            const counterKey = `pos_receipt_counter_${activeSite?.id || 'default'}`;
-            const prevCount = parseInt(localStorage.getItem(counterKey) || '0', 10);
-            const nextCount = prevCount + 1;
-            localStorage.setItem(counterKey, String(nextCount));
-            
-            const receiptNumber = `${siteCode}${terminalId}${nextCount.toString().padStart(5, '0')}`;
-            const { saleId, pointsResult } = await processSale(cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change, selectedCustomer?.id, undefined, 'In-Store', taxBreakdown, receiptNumber, total, appliedDiscountCode);
+            const receiptNumber = `POS-${crypto.randomUUID()}`;
+            const { saleId, pointsResult } = await processSale(cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change, selectedCustomer?.id, undefined, 'In-Store', taxBreakdown, receiptNumber, total, appliedDiscountCode, mobileDetails);
 
             const saleObj: SaleRecord = {
                 id: saleId,

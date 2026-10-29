@@ -278,18 +278,17 @@ class POSDBService {
     }
 
     async getPendingOperations(): Promise<SyncOperation[]> {
-        if (DISABLE_IDB || this.disabled) return [];
+        if (DISABLE_IDB || this.disabled) throw new Error('POS queue storage unavailable');
         try {
             const db = await this.getDB();
             return await db.getAll('sync_queue');
         } catch (err) {
-            console.warn('POSDB: Gracefully returning empty array for getPendingOperations');
-            return [];
+            throw err;
         }
     }
 
     async removeOperation(id: number) {
-        if (DISABLE_IDB || this.disabled) return;
+        if (DISABLE_IDB || this.disabled) throw new Error('POS queue storage unavailable');
         try {
             const db = await this.getDB();
             await db.delete('sync_queue', id);

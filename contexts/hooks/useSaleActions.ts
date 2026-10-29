@@ -49,7 +49,8 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
         taxBreakdown: { name: string; rate: number; amount: number; compound: boolean }[] = [],
         receiptNumber?: string,
         roundedTotal?: number,
-        discountCodeId?: string | null
+        discountCodeId?: string | null,
+        mobileDetails?: {channel?: string; ref?: string; phone?: string}
     ): Promise<{ saleId: string; pointsResult?: any }> => {
         try {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -92,6 +93,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 cashierName: user,
                 type,
                 discountCodeId: discountCodeId || null,
+                mobilePaymentChannel: mobileDetails?.channel, mobileTransactionRef: mobileDetails?.ref, customerPhone: mobileDetails?.phone,
                 fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking',
                 receiptNumber: receiptNumber || `TX-${Date.now()}`
             };
@@ -104,8 +106,10 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 loyaltyRate: settings.loyaltyPointsRate || 0,
                 enableLoyalty: settings.enableLoyalty !== false
             });
-            if (!queued && !navigator.onLine) {
-                throw new Error('Sale could not be queued for synchronization while offline.');
+            if (!queued && !navigator.onLine) throw new Error('Sale could not be queued for synchronization while offline.');
+            if (!queued) {
+                const { items } = saleRecord;
+                await salesService.create(saleRecord, items, discountCodeId);
             }
             posCheckQueue();
 
@@ -149,16 +153,6 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                     const newStatus = newStock === 0 ? 'out_of_stock' : newStock < settings.lowStockThreshold ? 'low_stock' : 'active';
                     logger.debug('useSaleActions', 'Stock update:', { productId, name: product.name, oldStock: product.stock, newStock, newStatus });
 
-                    // Only perform direct DB stock write if posDB queue is unavailable;
-                    // otherwise `usePosSync` executes `pos_decrement_stock` atomically once.
-                    if (!queued && navigator.onLine) {
-                        try {
-                            await productsService.update(productId, { stock: newStock, status: newStatus });
-                        } catch (e) {
-                            logger.error('useSaleActions', 'Fallback stock update failed', e);
-                        }
-                    }
-
                     // Cached optimistic balances are not evidence for stock alerts.
                 }
             }
@@ -192,13 +186,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 }
             }
 
-            // 5. Fallback direct sale creation if IDB queue was unavailable, otherwise triggerSync
-            if (!queued) {
-                const { items, ...saleData } = saleRecord;
-                await salesService.create(saleData as any, items, discountCodeId);
-            } else if (navigator.onLine) {
-                triggerSync();
-            }
+            if (queued && navigator.onLine) void triggerSync();
 
             // 6. Gamification Logic
             let pointsResult = null;

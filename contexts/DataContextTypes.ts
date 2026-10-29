@@ -73,7 +73,7 @@ export interface DataContextType {
   updatePO: (po: PurchaseOrder) => Promise<void>;
   deletePO: (poId: string) => void;
 
-  processSale: (cart: CartItem[], method: PaymentMethod, user: string, tendered: number, change: number, customerId?: string, pointsRedeemed?: number, type?: 'In-Store' | 'Delivery' | 'Pickup', taxBreakdown?: any[], receiptNumber?: string, roundedTotal?: number, discountCodeId?: string | null) => Promise<{ saleId: string; pointsResult?: any }>;
+  processSale: (cart: CartItem[], method: PaymentMethod, user: string, tendered: number, change: number, customerId?: string, pointsRedeemed?: number, type?: 'In-Store' | 'Delivery' | 'Pickup', taxBreakdown?: any[], receiptNumber?: string, roundedTotal?: number, discountCodeId?: string | null, mobileDetails?: {channel?: string; ref?: string; phone?: string}) => Promise<{ saleId: string; pointsResult?: any }>;
   processReturn: (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => void;
   closeShift: (shift: ShiftRecord) => void;
   startShift: (cashierId: string, openingFloat: number, counterNumber?: string) => void;

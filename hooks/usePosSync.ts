@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { posDB } from '../services/db/pos.db';
 import { salesService, customersService } from '../services/supabase.service';
-import { supabase } from '../lib/supabase';
 import { logger } from '../utils/logger';
 
 export type SyncStatus = 'synced' | 'syncing' | 'offline' | 'error' | 'pending';
@@ -23,7 +22,6 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
     const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
     const [latencyMs, setLatencyMs] = useState<number | null>(null);
     const isSyncingRef = useRef<boolean>(false);
-    const processedSaleIdsRef = useRef<Set<string>>(new Set());
     const onSyncCompleteRef = useRef(onSyncComplete);
     onSyncCompleteRef.current = onSyncComplete;
 
@@ -75,7 +73,7 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
                 return prev;
             });
         } catch (err: any) {
-            if (err?.message?.includes('disabled')) return;
+            setSyncStatus('error');
             logger.warn('usePosSync', 'POS sync queue check failed');
         }
     }, []);
@@ -118,42 +116,10 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
                 try {
                     if (op.type === 'CREATE_SALE') {
                         const salePayload = op.payload;
-                        const saleId = salePayload?.id;
-
-                        if (saleId && processedSaleIdsRef.current.has(saleId)) {
-                            if (op.id) await posDB.removeOperation(op.id);
-                            continue;
-                        }
-                        if (saleId) {
-                            processedSaleIdsRef.current.add(saleId);
-                        }
-
                         const { items, pointsRedeemed, loyaltyRate, enableLoyalty, discountCodeId, ...saleData } = salePayload;
 
                         // 1. Send sale to Supabase
                         await salesService.create(saleData, items, discountCodeId);
-
-                        // 2. Atomic stock decrement per item
-                        if (items && Array.isArray(items)) {
-                            for (const item of items) {
-                                try {
-                                    const { error: rpcErr } = await supabase.rpc('pos_decrement_stock', {
-                                        p_product_id: item.id,
-                                        p_quantity: item.quantity,
-                                        p_site_id: salePayload.siteId || salePayload.site_id || null,
-                                        p_product_name: item.name || '',
-                                        p_reason: `POS Sale — Receipt ${salePayload.receiptNumber || salePayload.id}`,
-                                        p_performed_by: salePayload.cashierName || 'System',
-                                        p_sale_date: salePayload.date || new Date().toISOString()
-                                    });
-                                    if (rpcErr) {
-                                        logger.warn('usePosSync', `Stock decrement failed for ${item.name || item.id}`);
-                                    }
-                                } catch (stockErr) {
-                                    logger.warn('usePosSync', `Stock decrement failed for ${item.name || item.id}`);
-                                }
-                            }
-                        }
 
                         // 3. Customer loyalty points reconciliation
                         if (salePayload.customerId && salePayload.total && enableLoyalty !== false) {
@@ -182,19 +148,7 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
                     successfulSyncs++;
 
                 } catch (err: any) {
-                    if (op.type === 'CREATE_SALE' && op.payload?.id && !(err?.code === '23505' || err?.message?.includes('duplicate key'))) {
-                        processedSaleIdsRef.current.delete(op.payload.id);
-                    }
-                    logger.error('usePosSync', `Failed to sync POS op ${op.id}`, err);
-
-                    // If it's a duplicate key or constraint error, gracefully remove
-                    if (err?.code === '23505' || err?.message?.includes('duplicate key')) {
-                        if (op.id) await posDB.removeOperation(op.id);
-                        successfulSyncs++;
-                    } else if (err?.code === '23502' || err?.code === '42501') {
-                        if (op.id) await posDB.removeOperation(op.id);
-                        successfulSyncs++;
-                    }
+                    logger.error('usePosSync', `POS operation ${op.id} remains queued after a failed save`, err);
                 }
             }
 
@@ -202,17 +156,13 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
             const remaining = await posDB.getPendingOperations();
             setPendingCount(remaining.length);
             setSyncStatus(remaining.length === 0 ? 'synced' : 'error');
-            setLastSyncedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+            if (successfulSyncs > 0) setLastSyncedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
             if (successfulSyncs > 0 && remaining.length === 0 && onSyncCompleteRef.current) {
                 onSyncCompleteRef.current(successfulSyncs);
             }
 
         } catch (err: any) {
-            if (err?.message?.includes('disabled')) {
-                setSyncStatus('synced');
-                return;
-            }
             logger.error('usePosSync', 'Core POS sync process failed', err as Error);
             setSyncStatus('error');
         } finally {
