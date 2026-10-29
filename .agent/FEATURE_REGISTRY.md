@@ -1,4 +1,5 @@
 - User-authorized design direction (2026-10-30): Revision C adopts a Codex-inspired neutral workspace, compact navigation, restrained controls and soft panels where useful. Chapter 18 explicitly supersedes conflicting visual defaults; existing references remain historical until reviewed. Documentation only; no runtime restyling.
+- 2026-10-30: Approvals offers on-demand salary, headcount and employee-profile review dialogs for available authorized queues; context changes close dialogs and decisions refresh the inbox.
 - 2026-10-30: Approvals opens site-scoped purchase-order reviews and on-demand Finance clearance using the existing PO inspector; review-only mode hides editing/deletion.
 - User-authorized panel/card direction (2026-10-29): Corrected the design specification to prefer softly sculpted major panels and object cards, explicit geometry and padding, tonal separation and subtle depth; updated the reference gallery and regression expectations. Earlier blanket open-section guidance is superseded; runtime POS changes are separate.
 - POS open composition (2026-10-29): Removed the catalog outer card and product-tile outlines/shadows; desktop basket uses a single separating edge and the empty basket loses its decorative icon box. Existing selection, stock, pricing, quantity and payment controls remain intact.
@@ -287,7 +288,6 @@
 - Fulfillment table reads and realtime subscriptions wait for a signed-in employee profile. Logout clears cached fulfillment items so the client does not issue anonymous requests or retain the prior user's view.
 - **Files**: `components/fulfillment/FulfillmentDataProvider.tsx`
 - **Root Cause**: The provider mounted globally and began loading after site selection, before Supabase Auth session restoration had populated the user profile.
-
 ### Notification Cards - Clearer Issue Guidance and Responsive Presentation (2026-10-18)
 - Error notifications now recognize common account, permission, barcode, duplicate SKU, inventory, pricing, validation, missing-record, connection, and data-service signals. Guidance avoids claiming that unsaved work will sync or assuming a specific approval path.
 - Notifications expose optional technical details on demand, use clearer status hierarchy, fit mobile safe areas, and honor reduced-motion preferences. Auto-dismiss pauses while the page is hidden.
