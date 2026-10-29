@@ -63,10 +63,10 @@ function AppleBootProgress({ realProgress }: { realProgress: number }) {
 
   return (
     <div className="w-48 sm:w-56 mt-10">
-      <div className="w-full h-[3px] bg-black/10 dark:bg-white/20 rounded-full overflow-hidden">
+      <div className="w-full h-[3px] bg-[color-mix(in_srgb,var(--theme-overlay)_10%,transparent)] rounded-full overflow-hidden">
         <div
           style={{ width: `${activePercent}%` }}
-          className="h-full bg-black dark:bg-white rounded-full transition-all duration-200 ease-out"
+          className="h-full bg-[var(--theme-primary)] rounded-full transition-all duration-200 ease-out"
         />
       </div>
     </div>
@@ -78,7 +78,7 @@ function ModuleLoader() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center select-none">
       <div className="relative mb-3">
-        <div className="w-7 h-7 rounded-full border-2 border-stone-200 dark:border-white/10 border-t-black dark:border-t-white animate-spin" />
+        <div className="w-7 h-7 rounded-full border-2 border-[var(--theme-border-subtle)] border-t-[var(--theme-primary)] animate-spin" />
       </div>
       <p className="text-[11px] text-[var(--theme-text-muted)] font-mono uppercase tracking-[0.2em]">
         Loading Module...
@@ -188,10 +188,10 @@ export default function App() {
         {/* Error Display with Retry */}
         {loadError && (
           <div className="mt-8 p-4 border border-[var(--theme-status-danger-border)] rounded-2xl max-w-sm w-full text-center">
-            <p className="text-xs text-red-500 mb-2">{loadError}</p>
+            <p className="text-xs text-[var(--theme-status-danger-text)] mb-2">{loadError}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-1.5 bg-black dark:bg-white text-white dark:text-black text-xs font-semibold rounded-lg transition-opacity hover:opacity-80 active:scale-95 cursor-pointer"
+              className="px-4 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-lg transition-opacity hover:bg-[var(--theme-primary-hover)] active:scale-95 cursor-pointer"
             >
               Retry
             </button>
@@ -412,7 +412,7 @@ export default function App() {
             {/* Redirect /login to dashboard if already authenticated */}
             <Route path="/login" element={<Navigate to="/" replace />} />
 
-            <Route path="*" element={<div className="text-center pt-20 text-gray-500">Module Access Restricted or Not Found</div>} />
+            <Route path="*" element={<div className="text-center pt-20 text-[var(--theme-text-muted)]">Module Access Restricted or Not Found</div>} />
           </Routes>
         </Suspense>
       </Layout>
