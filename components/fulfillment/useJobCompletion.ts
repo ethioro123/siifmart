@@ -8,7 +8,6 @@ import {
     wmsJobsService,
     purchaseOrdersService,
     salesService,
-    jobAssignmentsService,
     systemLogsService
 } from '../../services/supabase.service';
 import { QueryClient } from '@tanstack/react-query';
@@ -135,7 +134,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             logger.debug('useJobCompletion', `💾 Database updated for job ${jobId}`);
 
             // The database closes active assignments in the same transaction as the job.
-            setJobAssignments(prev => prev.map(a => a.jobId === jobId && ['Assigned','Accepted','In-Progress'].includes(a.status) ? {...a,status:'Completed',completedAt:timestamp || new Date().toISOString()} : a));
+            setJobAssignments(prev => prev.map(a => a.jobId === jobId && ['Assigned','Accepted','In-Progress','Paused'].includes(a.status) ? {...a,status:'Completed',completedAt:timestamp || new Date().toISOString()} : a));
 
             stage('Local State Update');
             const completionTime = timestamp || new Date().toISOString();

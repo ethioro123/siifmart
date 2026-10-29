@@ -6,8 +6,8 @@ import {fulfillmentMaintenanceService} from '../../services/fulfillment-maintena
 import type {WMSJob} from '../../types';
 vi.mock('../../lib/supabase',()=>({supabase:{rpc:vi.fn(),from:vi.fn()}}));
 beforeEach(()=>vi.clearAllMocks());
-const draft={siteId:'site',type:'PUTAWAY',status:'Pending',priority:'Normal',items:1,lineItems:[]} as Omit<WMSJob,'id'>;
-const sale={id:'sale',siteId:'site',countryCode:'ET',currency:'ETB',items:[],total:100} as ReturnSale;
+const draft={siteId:'site',type:'PUTAWAY',status:'Pending',priority:'Normal',items:1,lineItems:[],location:'Receiving Dock',orderRef:'po'} as Omit<WMSJob,'id'>;
+const sale={id:'sale',siteId:'site',countryCode:'ET',currency:'ETB',receiptNumber:'AAA-1000001',items:[],total:100} as ReturnSale;
 describe('confirmed fulfillment persistence',()=>{
  it('returns only server-confirmed receipt jobs',async()=>{vi.mocked(supabase.rpc).mockResolvedValue({data:{saved:true,jobIds:['server-job']},error:null} as never);const jobs=await receivingTransactionService.save('retry','po','line',0,[draft]);expect(jobs[0].id).toBe('server-job');expect(supabase.rpc).toHaveBeenCalledWith('save_receiving_split',{p_request:'retry',p_po:'po',p_item:'line',p_previous:0,p_jobs:[draft]});});
  it('rejects a partial receipt response instead of synthesizing jobs',async()=>{vi.mocked(supabase.rpc).mockResolvedValue({data:{saved:true,jobIds:[]},error:null} as never);await expect(receivingTransactionService.save('retry','po','line',0,[draft])).rejects.toThrow('not confirmed');});

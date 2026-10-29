@@ -24,7 +24,7 @@ export const fulfillmentReturnsService={
   if(!data?.id||!['approved','rejected'].includes(data.status))throw new Error('Return decision was not confirmed');return data;
  },
  /** Compatibility callers submit a pending intake; they cannot refund and increment stock independently. */
- async requestByProduct(saleId:string,items:Array<{product_id:string;quantity:number;reason?:string;condition?:string;action?:string}>,requestId=crypto.randomUUID()){
+ async requestByProduct(saleId:string,items:Array<{product_id:string;quantity:number;reason?:string;condition?:string;action?:string}>,requestId:string=crypto.randomUUID()){
   const {data,error}=await supabase.from('sales').select('id,site_id,country_code,sale_items(id,product_id)').eq('id',saleId).single();if(error)throw error;
   const sale=await this.lookup(saleId,data.site_id,data.country_code);
   const lines=items.map(item=>{const matches=(data.sale_items||[]).filter(line=>line.product_id===item.product_id);if(matches.length!==1)throw new Error('Select the exact original sale line for this return');return {saleItemId:matches[0].id,quantity:item.quantity,reason:item.reason||'Return requires supervisor review',condition:item.condition||'Damaged',action:item.action||'Repair'};});

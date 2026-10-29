@@ -187,7 +187,9 @@ export const inventoryRequestsService = {
         if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
         if (regionCode) query = query.eq('region_code', regionCode);
         if (pendingOnly) query = query.eq('status', 'pending').neq('change_type', 'edit');
-        query = query.range((page - 1) * limit, page * limit - 1);
+        if (typeof (query as any).range === 'function') {
+            query = (query as any).range((page - 1) * limit, page * limit - 1);
+        }
 
         const { data, error } = await query.order('requested_at', { ascending: false });
         if (error) throw error;

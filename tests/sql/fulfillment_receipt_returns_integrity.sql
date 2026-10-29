@@ -3,7 +3,7 @@ BEGIN;
 DO $test$
 DECLARE site public.sites%ROWTYPE; product public.products%ROWTYPE; receiver uuid; supervisor uuid;
  po uuid:=gen_random_uuid(); item uuid:=gen_random_uuid(); receipt uuid:=gen_random_uuid(); sale uuid:=gen_random_uuid(); sale_line uuid:=gen_random_uuid(); request uuid:=gen_random_uuid(); second_request uuid:=gen_random_uuid();
- jobs jsonb; lines jsonb; result jsonb; again jsonb; quantity numeric; blocked boolean; n integer; job_id uuid;
+ jobs jsonb; lines jsonb; result jsonb; again jsonb; quantity numeric; blocked boolean; n integer; job_id uuid; independent_worker uuid; completed_job uuid:=gen_random_uuid(); assignment uuid:=gen_random_uuid();
 BEGIN
  SELECT s.* INTO site FROM public.sites s WHERE country='ET' AND type IN('Warehouse','Distribution Center')
  AND EXISTS(SELECT 1 FROM public.employees e WHERE e.site_id=s.id AND e.role='receiver' AND lower(e.status)='active')
@@ -11,6 +11,7 @@ BEGIN
  SELECT id INTO receiver FROM public.employees WHERE site_id=site.id AND role='receiver' AND lower(status)='active' LIMIT 1;
  SELECT id INTO supervisor FROM public.employees WHERE role='group_ceo' AND lower(status)='active' LIMIT 1;
  SELECT * INTO product FROM public.products WHERE site_id=site.id AND sku IS NOT NULL LIMIT 1;
+ SELECT id INTO independent_worker FROM public.employees WHERE site_id=site.id AND role='packer' AND lower(status)='active' LIMIT 1;
  IF site.id IS NULL OR receiver IS NULL OR supervisor IS NULL OR product.id IS NULL THEN RAISE EXCEPTION 'Missing staging fixtures'; END IF;
  PERFORM set_config('request.jwt.claims','{"role":"service_role"}',true);
  INSERT INTO public.purchase_orders(id,site_id,country_code,supplier_name,total_amount,items_count,status,currency) VALUES(po,site.id,'ET','Rollback receipt supplier',100,1,'Approved','ETB');
@@ -24,11 +25,18 @@ BEGIN
  IF result<>again THEN RAISE EXCEPTION 'Receipt retry created different work'; END IF;
  blocked:=false;BEGIN PERFORM public.save_receiving_split(gen_random_uuid(),po,item,jobs,0);EXCEPTION WHEN serialization_failure THEN blocked:=true;END;
  IF NOT blocked THEN RAISE EXCEPTION 'Stale intake accepted'; END IF;
+ blocked:=false;BEGIN PERFORM public.save_receiving_split(gen_random_uuid(),po,item,jobs||jsonb_build_array(jsonb_build_object('lineItems',jsonb_build_array(jsonb_build_object('productId',gen_random_uuid(),'sku','invalid','expectedQty',1)))),3);EXCEPTION WHEN raise_exception THEN blocked:=true;END;
+ IF NOT blocked THEN RAISE EXCEPTION 'Invalid split accepted';END IF;
  blocked:=false;BEGIN PERFORM public.return_sale_lookup('',site.id,'ET');EXCEPTION WHEN insufficient_privilege THEN blocked:=true;END;
  IF NOT blocked THEN RAISE EXCEPTION 'Blank receipt matched'; END IF;
  result:=public.return_sale_lookup(sale::text,site.id,'ET');IF (result->'items'->0->>'quantity')::numeric<>10 THEN RAISE EXCEPTION 'Wrong return eligibility';END IF;
  result:=public.submit_fulfillment_return(request,sale,site.id,'ET',lines);again:=public.submit_fulfillment_return(request,sale,site.id,'ET',lines);
  IF result<>again OR (result->>'refundAmount')::numeric<>18 THEN RAISE EXCEPTION 'Return amount or retry wrong'; END IF;
+ blocked:=false;BEGIN PERFORM public.submit_fulfillment_return(request,sale,site.id,'ET',jsonb_set(lines,'{0,quantity}','1'));EXCEPTION WHEN raise_exception THEN blocked:=true;END;
+ IF NOT blocked THEN RAISE EXCEPTION 'Changed retry input accepted';END IF;
+ blocked:=false;BEGIN PERFORM public.submit_fulfillment_return(second_request,sale,site.id,'ET',jsonb_set(lines,'{0,quantity}','9'));EXCEPTION WHEN raise_exception THEN blocked:=true;END;
+ IF NOT blocked THEN RAISE EXCEPTION 'Overreturn accepted';END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.fulfillment_return_requests WHERE id=request AND status='pending') THEN RAISE EXCEPTION 'Requester cannot read own intake';END IF;
  blocked:=false;BEGIN PERFORM public.decide_fulfillment_return(request,true,'Self review');EXCEPTION WHEN insufficient_privilege THEN blocked:=true;END;
  IF NOT blocked THEN RAISE EXCEPTION 'Self review accepted'; END IF;
  blocked:=false;BEGIN PERFORM public.submit_fulfillment_return(second_request,sale,site.id,'KE',lines);EXCEPTION WHEN insufficient_privilege THEN blocked:=true;END;
@@ -39,6 +47,7 @@ BEGIN
  SELECT received_qty INTO quantity FROM public.po_items WHERE id=item;IF quantity<>3 THEN RAISE EXCEPTION 'Receipt count not committed exactly once';END IF;
  SELECT id INTO job_id FROM public.wms_jobs WHERE order_ref=po::text AND type='PUTAWAY';
  IF job_id IS NULL THEN RAISE EXCEPTION 'Missing putaway work';END IF;
+ IF (SELECT count(*) FROM public.wms_jobs WHERE order_ref=po::text AND type='PUTAWAY')<>1 THEN RAISE EXCEPTION 'Partial receipt failure left downstream jobs';END IF;
  PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',supervisor,'role','authenticated')::text,true);EXECUTE 'SET LOCAL ROLE authenticated';
  result:=public.decide_fulfillment_return(request,true,'Independent inspection complete');again:=public.decide_fulfillment_return(request,true,'Independent inspection complete');
  IF result<>again OR result->>'status'<>'approved' THEN RAISE EXCEPTION 'Decision not idempotent';END IF;
@@ -50,5 +59,13 @@ BEGIN
  IF (SELECT status FROM public.sales WHERE id=sale)<>'Completed' THEN RAISE EXCEPTION 'Credit approval claimed financial settlement';END IF;
  blocked:=false;BEGIN UPDATE public.wms_jobs SET status='Completed',completed_by=supervisor::text,line_items=jsonb_build_array(jsonb_build_object('status','Completed','pickedQty',3,'location','A-01-01')) WHERE id=job_id;EXCEPTION WHEN raise_exception THEN blocked:=true;END;
  IF NOT blocked THEN RAISE EXCEPTION 'Putaway completed without placement evidence';END IF;
+ blocked:=false;BEGIN UPDATE public.wms_jobs SET assigned_to=receiver::text WHERE id=job_id;EXCEPTION WHEN insufficient_privilege THEN blocked:=SQLERRM LIKE '%Independent worker%';END;
+ IF NOT blocked THEN RAISE EXCEPTION 'Receipt worker could be assigned the same PO putaway';END IF;
+ IF independent_worker IS NULL THEN RAISE EXCEPTION 'Missing independent staging worker';END IF;
+ INSERT INTO public.wms_jobs(id,site_id,country_code,type,status,priority,items_count,order_ref,assigned_to,line_items) VALUES(completed_job,site.id,'ET','COUNT','In-Progress','Normal',1,gen_random_uuid()::text,independent_worker::text,'[{"status":"Completed","pickedQty":1}]');
+ INSERT INTO public.job_assignments(id,job_id,employee_id,employee_name,status) VALUES(assignment,completed_job,independent_worker,'Rollback independent worker','Paused');
+ UPDATE public.wms_jobs SET status='Completed',completed_by=independent_worker::text,completed_at=now() WHERE id=completed_job;
+ IF NOT EXISTS(SELECT 1 FROM public.job_assignments WHERE id=assignment AND status='Completed' AND completed_at IS NOT NULL) THEN RAISE EXCEPTION 'Completed job left paused workload';END IF;
+ IF has_function_privilege('anon','public.submit_fulfillment_return(uuid,uuid,uuid,text,jsonb)','EXECUTE') OR has_table_privilege('authenticated','public.fulfillment_return_requests','INSERT') THEN RAISE EXCEPTION 'Return boundary grants bypass approval';END IF;
 END $test$;
 ROLLBACK;
