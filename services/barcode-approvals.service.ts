@@ -40,12 +40,13 @@ export const barcodeApprovalsService = {
         return data;
     },
 
-    async getAuditLog(siteId?: string, countryCode?: string, limit = 25) {
+    async getAuditLog(siteId?: string, countryCode?: string, limit = 25, page = 1, pendingOnly = false) {
         if (!countryCode) throw new Error('Country scope is required');
         let query = supabase.from('barcode_approvals')
             .select('id, product_id, barcode, image_url, status, site_id, country_code, created_by, created_at, reviewed_by, reviewed_at, rejection_reason, product:products(id, name, sku, category)')
             .eq('country_code', countryCode.toUpperCase())
-            .order('created_at', { ascending: false }).limit(limit);
+            .order('created_at', { ascending: false }).range((page - 1) * limit, page * limit - 1);
+        if (pendingOnly) query = query.eq('status', 'pending');
         if (siteId) query = query.eq('site_id', siteId);
         const { data, error } = await query;
         if (error) throw error;

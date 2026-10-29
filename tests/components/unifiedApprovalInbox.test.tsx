@@ -16,7 +16,7 @@ const { query } = vi.hoisted(() => ({
   }
 }));
 
-vi.mock('../../components/approvals/ProductApprovalInboxCard', () => ({ ProductApprovalInboxCard: () => null }));
+vi.mock('../../components/approvals/ApprovalWorkspace', () => ({ ApprovalWorkspace: () => null }));
 vi.mock('../../hooks/useApprovalInbox', () => ({ useApprovalInbox: () => query }));
 vi.mock('../../contexts/LanguageContext', () => ({
   useLanguage: () => ({
