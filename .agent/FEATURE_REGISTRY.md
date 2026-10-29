@@ -497,3 +497,7 @@
 - Aligned POS Terminal (`POSTerminal.tsx`, `POSProductGrid.tsx`, `POSCatalog.tsx`, `POSCartPanel.tsx`, `POSHeader.tsx`) with the 29 October 2026 Design Standard: softly sculpted 28px/22px major panels, 20px product cards with subtle borders and shadows, 16px cart item cards, 54px operational tender button, and store-scoped catalog update notices across English, Amharic, and Afaan Oromoo.
 - Streamlined POS catalog filter sidebar into a 4-section cashier drawer (Departments, Stock, Sort, On Sale) with 44px touch targets.
 - Full Application Test Suite Zero-Failure Resolution (2026-10-30): Resolved all 11 test suite failures across vitest runner: excluded Playwright browser tests from Node runner (`vitest.config.ts`), aligned Driver arrival draft label resolution, synchronized Label hub button casing, resolved Pick scanner quantity unit handling, wrapped PurchaseRequests in MemoryRouter, aligned Putaway process translations and 4-Eyes procurement error assertions, and synchronized design/token test assertions. 362 of 362 test files (2,435 tests) now pass with 0 TypeScript compilation errors and clean production build.
+
+### Application-wide semantic theme cleanup (2026-10-30)
+- Replaced fixed light/dark palette classes in application UI, loading/error surfaces, org charts and chart series with shared semantic tokens. Native status-bar appearance follows the active theme; fallback UI uses system canvas colors.
+- Fixed colors remain only where they represent physical print/scan output or actual brand and payment-provider artwork.
