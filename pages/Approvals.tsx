@@ -1,3 +1,4 @@
+import { PurchaseOrderReviewWorkspace } from '../components/approvals/PurchaseOrderReviewWorkspace';
 import { RequisitionReviewWorkspace } from '../components/approvals/RequisitionReviewWorkspace';
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -70,6 +71,7 @@ export default function Approvals() {
       <p className="text-xs text-[var(--theme-text-secondary)]">{query.isFetching ? 'Updating…' : 'Checked ' + new Date(query.data.checkedAt).toLocaleTimeString()} · Counts represent decision stages. A request can require more than one independent sign-off.</p>
       <ApprovalWorkspace />
       <RequisitionReviewWorkspace />
+      <PurchaseOrderReviewWorkspace />
       <section aria-label="Additional review workflows" className="border-t border-[var(--theme-border)] pt-4 space-y-2">
         <h2 className="text-base font-semibold">Additional review workflows</h2>
         <p className="text-sm text-[var(--theme-text-secondary)]">These workflows are not included in the inbox total. Access is checked by the destination.</p>

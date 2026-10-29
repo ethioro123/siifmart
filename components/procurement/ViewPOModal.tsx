@@ -21,13 +21,14 @@ import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
 
 interface ViewPOModalProps {
     isOpen: boolean;
+    reviewOnly?: boolean;
     onClose: () => void;
     po: PurchaseOrder | null;
     onEdit: (po: PurchaseOrder) => void;
     onSuccess: () => void; // Trigger refresh
 }
 
-export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, onEdit, onSuccess }) => {
+export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, onEdit, onSuccess, reviewOnly = false }) => {
     const clearFinance = useClearPOFinance();
     const { allProducts, sites, settings, regions = [] } = useData();
     const { user, showToast } = useStore();
@@ -422,7 +423,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             1. CEO/Country Commercial Director can Edit/Delete anything NOT fully Received.
                             2. Other staff can ONLY Edit/Delete their own Draft POs.
                         */}
-                        {((canFullDelete && po.status !== 'Received') ||
+                        {!reviewOnly && ((canFullDelete && po.status !== 'Received') ||
                           (!isFinanceRole && po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                             <>
                                 <button

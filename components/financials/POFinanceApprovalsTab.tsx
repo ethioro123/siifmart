@@ -37,6 +37,6 @@ export default function POFinanceApprovalsTab() {
         </>}
         {selectedId && detail.isPending && <p role="status">Loading order details…</p>}
         {selectedId && detail.isError && <p role="alert">Could not load this order. {detail.error.message}</p>}
-        {selectedId && detail.data && detail.data.country_code === effectiveCountry && <ViewPOModal isOpen onClose={() => setSelectedId(null)} po={detail.data} onEdit={() => undefined} onSuccess={() => queue.refetch()} />}
+        {selectedId && detail.data && detail.data.country_code === effectiveCountry && <ViewPOModal reviewOnly isOpen onClose={() => setSelectedId(null)} po={detail.data} onEdit={() => undefined} onSuccess={() => queue.refetch()} />}
     </section>;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePOSCatalogReads, unreadCatalogProducts } from '../../../hooks/usePOSCatalogReads';
-import { Bell, ArrowRight, PackagePlus, Tag, Package } from 'lucide-react';
+import { Bell, PackagePlus, Tag, Package } from 'lucide-react';
 import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -58,69 +58,12 @@ export function CatalogUpdatesNotice({ namespace, history, isOpen, onOpenChange 
           })}
         </div>
         {filter === 'price' ? <ProductPriceHistoryPanel key={identity} history={history} /> : selected.length === 0 ? <p role="status" className="py-6 text-sm text-[var(--theme-text-secondary)]">{tr('catalogEmpty')}</p> :
-          <ul className="divide-y divide-[var(--theme-border-subtle)]">{selected.slice(currentPage * 25, (currentPage + 1) * 25).map(update => {
-            const p = update.product as typeof update.product & { old_price?: number; sale_price?: number; is_on_sale?: boolean; shelf_position?: string };
-            const effectivePrice = getEffectiveRetailPrice(p);
-            const matchedHistory = history.entries.find(e => e.product_id === p.id || (Boolean(p.sku) && e.sku === p.sku));
-            const rawOldPrice = matchedHistory?.old_effective_price ?? p.oldPrice ?? p.old_price;
-            const hasPriceDiff = typeof rawOldPrice === 'number' && Number.isFinite(rawOldPrice) && rawOldPrice > 0 && rawOldPrice !== effectivePrice;
-            const salePriceVal = p.salePrice ?? p.sale_price;
-            const isOnSaleVal = Boolean(p.isOnSale ?? p.is_on_sale) && typeof salePriceVal === 'number' && salePriceVal > 0 && salePriceVal !== p.price;
-            const unitSpec = [p.size, p.unit].filter(Boolean).join(' ');
-            const shelfLoc = p.shelfPosition || p.shelf_position || p.location;
-            return <li key={p.id} className="py-4 space-y-2.5">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                  <h3 className="font-semibold text-[var(--theme-text-primary)] break-words">{p.name}</h3>
-                  <p className="text-xs font-mono text-[var(--theme-text-secondary)]">{p.sku}</p>
-                </div>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {!readState.isLoading && !readState.error && (update.observations.new !== undefined || update.observations.updated !== undefined) && (
-                    <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] text-xs font-medium text-[var(--theme-text-secondary)]">
-                      {tr(unreadCatalogProducts([update], readState.reads) > 0 ? 'catalogUnread' : 'catalogRead')}
-                    </span>
-                  )}
-                  {update.kinds.map(kind => {
-                    const Icon = icons[kind];
-                    const badgeStyle = kind === 'price'
-                      ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]'
-                      : kind === 'new'
-                        ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]'
-                        : 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)]';
-                    return <span key={kind} className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md border text-xs font-semibold ${badgeStyle}`}><Icon size={13} aria-hidden="true" />{tr(keys[kind])}</span>;
-                  })}
-                  <time dateTime={new Date(update.timestamp).toISOString()} className="text-xs text-[var(--theme-text-secondary)] ml-1">{new Date(update.timestamp).toLocaleString()}</time>
-                </div>
-              </div>
-
-              {hasPriceDiff ? (
-                <div className="flex flex-wrap items-center gap-2.5 px-3 py-2 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] text-sm tabular-nums">
-                  <span className="text-[var(--theme-text-secondary)]">{tr('previousPosPrice')}: <span className="line-through">{CURRENCY_SYMBOL} {formatPriceValue(rawOldPrice)}</span></span>
-                  <ArrowRight size={15} aria-hidden="true" className="text-[var(--theme-text-muted)]" />
-                  <span className="text-[var(--theme-text-primary)]">{tr('newPosPrice')}: <span className="font-semibold">{CURRENCY_SYMBOL} {formatPriceValue(effectivePrice)}</span></span>
-                </div>
-              ) : typeof p.price === 'number' && Number.isFinite(p.price) ? (
-                <div className="flex flex-wrap items-center gap-3 px-3 py-2 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] text-sm tabular-nums">
-                  <p className="text-sm text-[var(--theme-text-primary)]">{tr('catalogCurrentPrice')}: <span className="font-semibold tabular-nums">{CURRENCY_SYMBOL} {formatPriceValue(effectivePrice)}</span></p>
-                  {isOnSaleVal && (
-                    <span className="text-xs text-[var(--theme-text-secondary)]">
-                      ({tr('catalogRegularPrice')}: <span className="line-through">{CURRENCY_SYMBOL} {formatPriceValue(p.price)}</span> · <span className="font-semibold text-[var(--theme-status-success-text)]">{tr('catalogSalePrice')}</span>)
-                    </span>
-                  )}
-                </div>
-              ) : null}
-
-              {(p.category || p.brand || unitSpec || p.barcode || shelfLoc) && (
-                <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--theme-text-secondary)]">
-                  {p.category && <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)]">{tr('catalogCategoryLabel')}: <strong className="font-medium text-[var(--theme-text-primary)]">{p.category}</strong></span>}
-                  {p.brand && <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)]">{tr('catalogBrandLabel')}: <strong className="font-medium text-[var(--theme-text-primary)]">{p.brand}</strong></span>}
-                  {unitSpec && <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)]">{tr('catalogUnitLabel')}: <strong className="font-medium text-[var(--theme-text-primary)]">{unitSpec}</strong></span>}
-                  {p.barcode && <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] font-mono">{tr('catalogBarcodeLabel')}: <strong className="font-medium text-[var(--theme-text-primary)]">{p.barcode}</strong></span>}
-                  {shelfLoc && <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] font-mono">{tr('catalogLocationLabel')}: <strong className="font-medium text-[var(--theme-text-primary)]">{shelfLoc}</strong></span>}
-                </div>
-              )}
-            </li>;
-          })}</ul>}
+          <ul className="divide-y divide-[var(--theme-border-subtle)]">{selected.slice(currentPage * 25, (currentPage + 1) * 25).map(update => <li key={update.product.id} className="py-4 space-y-2">
+            <div className="flex flex-wrap justify-between gap-2"><div><h3 className="font-semibold text-[var(--theme-text-primary)] break-words">{update.product.name}</h3><p className="text-sm text-[var(--theme-text-secondary)]">{update.product.sku}</p></div>
+              <time dateTime={new Date(update.timestamp).toISOString()} className="text-sm text-[var(--theme-text-secondary)]">{new Date(update.timestamp).toLocaleString()}</time></div>
+            {typeof update.product.price === 'number' && Number.isFinite(update.product.price) && <p className="text-sm text-[var(--theme-text-primary)]">{tr('catalogCurrentPrice')}: <span className="font-semibold tabular-nums">{CURRENCY_SYMBOL} {formatPriceValue(getEffectiveRetailPrice(update.product))}</span></p>}
+            <div className="flex flex-wrap gap-2">{!readState.isLoading && !readState.error && (update.observations.new !== undefined || update.observations.updated !== undefined) && <span className="text-xs text-[var(--theme-text-secondary)]">{tr(unreadCatalogProducts([update], readState.reads) > 0 ? 'catalogUnread' : 'catalogRead')}</span>}{update.kinds.map(kind => { const Icon = icons[kind]; return <span key={kind} className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--theme-status-info-text)]"><Icon size={14} aria-hidden="true" />{tr(keys[kind])}</span>; })}</div>
+          </li>)}</ul>}
         {filter !== 'price' && !readState.isLoading && !readState.error && unreadCatalogProducts(selected.slice(currentPage * 25, (currentPage + 1) * 25), readState.reads) > 0 && <button type="button" disabled={readState.saving} onClick={() => readState.markPageRead(selected.slice(currentPage * 25, (currentPage + 1) * 25))} className="min-h-11 px-3 rounded-xl text-sm bg-[var(--theme-bg-subtle)] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{tr(readState.saving ? 'catalogReadSaving' : 'catalogMarkPageRead')}</button>}
         {filter !== 'price' && selected.length > 25 && <div className="flex flex-wrap items-center justify-between gap-2">
           <button type="button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)} className="min-h-11 px-3 rounded-xl disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{tr('catalogPrevious')}</button>
