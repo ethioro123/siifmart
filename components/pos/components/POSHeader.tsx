@@ -99,10 +99,6 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                     )}
                 </div>
 
-                <div className="mt-2 flex flex-wrap items-center justify-end gap-2 [&:empty]:hidden">
-                <PriceUpdatesModal />
-                </div>
-
                 {/* Unknown Barcode Alert */}
                 {unknownBarcode && (
                     <div role="alert" className="absolute left-0 right-0 top-full mt-2 z-50">
@@ -163,6 +159,9 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                     </span>
                 )}
             </button>
+
+            {/* Product & Price Updates Notice */}
+            <PriceUpdatesModal />
 
             {/* Sync Status Badge */}
             <div className="hidden md:block shrink-0">

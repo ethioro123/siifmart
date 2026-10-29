@@ -92,10 +92,33 @@ export function useRealtimeUpdates({
         }
         else if (event === 'UPDATE') {
           const mapped = mapRealtimeProduct(payload);
-          setProducts(prev => prev.map(p => p.id === payload.id ? { ...p, ...mapped } : p));
-          setAllProducts(prev => prev.map(p => p.id === payload.id ? { ...p, ...mapped } : p));
+          const mergeProductUpdate = (existing: Product): Product => {
+            const onlyStockOrVelocityChanged =
+              existing.name === mapped.name &&
+              existing.sku === mapped.sku &&
+              existing.price === mapped.price &&
+              existing.salePrice === mapped.salePrice &&
+              existing.isOnSale === mapped.isOnSale &&
+              existing.category === mapped.category &&
+              existing.brand === mapped.brand &&
+              existing.barcode === mapped.barcode &&
+              existing.unit === mapped.unit &&
+              existing.size === mapped.size &&
+              (existing.priceUpdatedAt || (existing as any).price_updated_at) === (mapped.priceUpdatedAt || (mapped as any).price_updated_at);
+            if (!onlyStockOrVelocityChanged) {
+              return { ...existing, ...mapped };
+            }
+            return {
+              ...existing,
+              ...mapped,
+              updatedAt: (existing as any).updatedAt,
+              updated_at: (existing as any).updated_at
+            } as Product;
+          };
+          setProducts(prev => prev.map(p => p.id === payload.id ? mergeProductUpdate(p) : p));
+          setAllProducts(prev => prev.map(p => p.id === payload.id ? mergeProductUpdate(p) : p));
           queryClient.setQueryData<Product[]>(DATA_KEYS.products(activeSiteId), prev =>
-            prev ? prev.map(p => p.id === payload.id ? { ...p, ...mapped } : p) : prev
+            prev ? prev.map(p => p.id === payload.id ? mergeProductUpdate(p) : p) : prev
           );
         }
         else if (event === 'DELETE') {

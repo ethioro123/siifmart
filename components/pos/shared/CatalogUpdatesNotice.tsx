@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePOSCatalogReads, unreadCatalogProducts } from '../../../hooks/usePOSCatalogReads';
-import { Bell, ArrowRight, PackagePlus, Tag, Package } from 'lucide-react';
+import { Bell, PackagePlus, Tag, Package } from 'lucide-react';
 import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -32,11 +32,16 @@ export function CatalogUpdatesNotice({ namespace, history, isOpen, onOpenChange 
   const tr = (key: string, params?: Record<string, string | number>) => t(`${namespace}.${key}`, params);
   if (!user?.id || !activeSite) return null;
   const summary = history.error ? tr('updatesPriceUnavailable') : history.isLoading ? tr('updatesCheckingPrices') : history.unreviewedCount > 0 ? tr('updatesPriceReviews', { count: history.unreviewedCount }) : readState.error ? tr('catalogReadUnavailable') : readState.isLoading ? tr('catalogReadLoading') : tr('updatesRecentProducts', { count: readState.unreadCount });
+  const badgeCount = history.error || history.isLoading ? 0 : history.unreviewedCount > 0 ? history.unreviewedCount : (!readState.isLoading && !readState.error ? readState.unreadCount : 0);
+  const hasAttention = badgeCount > 0;
   return <>
     <button type="button" onClick={() => { setOpen(true); setFilter(history.unreviewedCount > 0 || history.error ? 'price' : 'all'); setPage(0); setNow(Date.now()); }}
       aria-label={`${tr('catalogUpdates')} · ${summary}`}
-      className={`min-h-11 max-w-full inline-flex items-center gap-2 px-3 py-2 rounded-2xl text-sm font-medium hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${history.unreviewedCount > 0 || (!readState.isLoading && !readState.error && readState.unreadCount > 0) ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)]' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]'}`}>
-      <Bell size={17} aria-hidden="true" /><span>{tr('catalogUpdates')}</span><span className="text-xs tabular-nums">{summary}</span><ArrowRight size={15} aria-hidden="true" />
+      title={`${tr('catalogUpdates')} · ${summary}`}
+      className={`min-h-11 shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all tracking-tight shadow-2xs hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${hasAttention ? 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)]' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border-subtle)] text-[var(--theme-text-primary)]'}`}>
+      <Bell size={14} aria-hidden="true" className={hasAttention ? 'text-[var(--theme-status-info-text)]' : 'text-[var(--theme-text-secondary)]'} />
+      <span className="hidden sm:inline">{tr('catalogUpdates')}</span>
+      {badgeCount > 0 && <span className="min-w-5 h-5 px-1.5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] inline-flex items-center justify-center text-[10px] font-bold tabular-nums">{badgeCount}</span>}
     </button>
     <Modal isOpen={isOpen ?? (opened === identity)} onClose={() => setOpen(false)} title={tr('catalogUpdates')} size="lg">
       <div className="space-y-4">

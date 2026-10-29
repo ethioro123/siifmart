@@ -290,13 +290,11 @@ export const POSCommandHeader: React.FC<POSCommandHeaderProps> = ({
               <span>{t('posCommand.onboardTalent')}</span>
             </button>
           )}
-
-          {/* Operational Product Updates Notice */}
-          <CommandProductUpdatesNotice />
         </div>
 
-        {/* Right: Analytical Time Window Selector */}
-        <div className="flex items-center gap-2 self-start xl:self-auto">
+        {/* Right: Product Updates Notice & Analytical Time Window Selector */}
+        <div className="flex flex-wrap items-center gap-2 self-start xl:self-auto">
+          <CommandProductUpdatesNotice />
           <DateRangeSelector value={dateRange} onChange={setDateRange} align="right" />
         </div>
       </div>
