@@ -1,12 +1,14 @@
 # SIIFMART Design Standard
 
-**Edition:** 30 October 2026, Revision D · **Status:** authoritative internal design specification · **Audience:** product, design, engineering and QA.
+**Edition:** 30 October 2026, Revision E · **Status:** authoritative internal design specification · **Audience:** product, design, engineering and QA.
 
 SIIFMART should feel composed, precise and immediate. People should recognize the next action, understand the business consequence, and trust the result. Our design quality comes from the relationships between information, controls and feedback, supported by disciplined visual craft. Every module must work convincingly in daily use, including a country director's large desktop, a store supervisor's phone and a warehouse worker's scanner.
 
 This is SIIFMART's own platform-neutral web standard: modern elegance through simplicity, precision and readable operational information. It draws selectively on Apple, Material and Fluent guidance for our React, Tailwind and browser-based product. It is not an Apple specification, a native-framework implementation, or a claim that our existing screens already conform. Numerical design targets below are SIIFMART decisions unless an external standard is explicitly identified. Native Apple points and web CSS pixels are different units; CSS approximations do not reproduce native Liquid Glass.
 
 ## What changed in this edition
+
+Revision E adds the required design inventory for physical and digital outputs, barcode/label contracts and receipt/document/printing requirements in chapters 20–22. It extends the existing screen standard; it does not certify or deploy existing output templates.
 
 Revision D makes complete UI and UX coverage mandatory. [Chapter 19](design/19-complete-ui-ux-coverage.md) defines the route/component inventory, semantic-theme requirements, interaction and state coverage, and evidence required before claiming a complete rollout. Compatibility color overrides alone do not establish compliance.
 
@@ -37,6 +39,9 @@ Apple, Material and Fluent remain supporting references for behavior and accessi
 | [17 · Reference and visual acceptance](design/17-reference-and-visual-acceptance.md) | Runnable component board, reference tests and baseline-review discipline |
 | [18 · Codex-inspired workspace direction](design/18-codex-workspace-direction.md) | Current visual authority: shell, surfaces, typography, controls and operational adaptation |
 | [19 · Complete UI and UX coverage](design/19-complete-ui-ux-coverage.md) | Mandatory application-wide coverage, semantic tokens, interaction/state contracts and truthful rollout status |
+| [20 · Output and pattern inventory](design/20-output-and-pattern-inventory.md) | Required families and template contracts for screens, labels, receipts, operational documents, exports and communications |
+| [21 · Barcodes and operational labels](design/21-barcodes-and-operational-labels.md) | Payloads, symbology/device profiles, readable identity, protected content, price tags and scan verification |
+| [22 · Receipts, documents and printing](design/22-receipts-documents-and-printing.md) | Document anatomy, media layouts, previews, financial/operational states, retries and truthful output status |
 
 Chapters form one standard. Read the relevant workflow chapter together with accessibility and verification before implementing. Do not treat a visual chapter as permission to weaken a business or security rule.
 
