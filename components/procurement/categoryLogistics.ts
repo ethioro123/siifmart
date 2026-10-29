@@ -335,19 +335,19 @@ export const getCategoryProcurementMetrics = (
             metrics.push({
                 label: 'Total Intake Weight',
                 value: `${(totalUnits * netKg).toLocaleString()} kg`,
-                badgeColor: 'text-emerald-500'
+                badgeColor: 'text-[var(--theme-status-success-text)]'
             });
         }
         metrics.push({
             label: 'Freshness Intake',
             value: 'Cold Chain Gate Probe Active',
-            badgeColor: 'text-emerald-500'
+            badgeColor: 'text-[var(--theme-status-success-text)]'
         });
     } else if (domainId === 'electronics') {
         metrics.push({
             label: 'Serialized Units',
             value: `${totalUnits.toLocaleString()} units tracking required`,
-            badgeColor: 'text-sky-500'
+            badgeColor: 'text-[var(--theme-status-info-text)]'
         });
     } else if (domainId === 'apparel') {
         const size = customAttributes?.categorySpecific?.apparelSize || customAttributes?.identity?.variant || 'Each';

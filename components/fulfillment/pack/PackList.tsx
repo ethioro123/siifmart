@@ -60,20 +60,20 @@ export const PackList: React.FC<PackListProps> = ({
                                     key={job.id}
                                     onClick={() => setSelectedPackJob(job)}
                                     className={`relative bg-[var(--theme-bg-card)] border rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition-all duration-150 shadow-xs min-h-[48px] sm:min-h-[56px] touch-manipulation ${
-                                        isCritical ? 'border-red-500/40' :
+                                        isCritical ? 'border-[var(--theme-status-danger-border)]' :
                                         isActive ? 'border-[var(--theme-accent)] shadow-[var(--theme-accent)]/10 shadow-xs' :
                                         'border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40'
                                     }`}
                                 >
                                     {/* Priority accent stripe */}
-                                    {isCritical && <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />}
+                                    {isCritical && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--theme-status-danger-bg)]" />}
                                     {isActive && !isCritical && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--theme-accent)]" />}
 
                                     <div className={`flex items-center gap-2.5 sm:gap-3.5 p-2.5 sm:px-4 sm:py-3.5 ${isCritical || isActive ? 'pl-3.5 sm:pl-5' : ''}`}>
                                         {/* Icon with progress on mobile */}
                                         <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border ${
                                             progress >= 100
-                                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
+                                                ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]'
                                                 : isActive
                                                     ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
                                                     : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
@@ -89,7 +89,7 @@ export const PackList: React.FC<PackListProps> = ({
                                                     {formatJobId(job)}
                                                 </span>
                                                 {isCritical && (
-                                                    <span className="flex items-center gap-1 bg-red-500/10 text-red-500 text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-full uppercase border border-red-500/20 shrink-0">
+                                                    <span className="flex items-center gap-1 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-full uppercase border border-[var(--theme-status-danger-border)] shrink-0">
                                                         <Zap size={10} /> {t('warehouse.urgent') || 'Urgent'}
                                                     </span>
                                                 )}
@@ -117,10 +117,10 @@ export const PackList: React.FC<PackListProps> = ({
                                                 <div className="flex-1 h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden">
                                                     <div
                                                         ref={el => { if (el) el.style.width = `${progress}%`; }}
-                                                        className={`h-full rounded-full transition-colors duration-300 ${progress === 100 ? 'bg-green-500' : 'bg-[var(--theme-accent)]'}`}
+                                                        className={`h-full rounded-full transition-colors duration-300 ${progress === 100 ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-accent)]'}`}
                                                     />
                                                 </div>
-                                                <span className={`text-[11px] font-mono tabular-nums font-semibold shrink-0 ${progress === 100 ? 'text-green-500' : 'text-[var(--theme-accent)]'}`}>
+                                                <span className={`text-[11px] font-mono tabular-nums font-semibold shrink-0 ${progress === 100 ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-accent)]'}`}>
                                                     {packedItems}/{totalItems}
                                                 </span>
                                             </div>

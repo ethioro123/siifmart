@@ -157,11 +157,11 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                                         {t('warehouse.opticalVerificationLabel')}
                                     </span>
                                     {isCodeValid ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                             <CheckCircle2 size={12} /> {t('warehouse.scannableBadge')}
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                             <AlertTriangle size={12} /> {t('warehouse.reviewBadge')}
                                         </span>
                                     )}
@@ -181,7 +181,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                                             title="Copy scanner payload"
                                             aria-label="Copy scanner payload"
                                         >
-                                            {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                            {copied ? <Check size={14} className="text-[var(--theme-status-success-text)]" /> : <Copy size={14} />}
                                         </button>
                                     </div>
                                 </div>

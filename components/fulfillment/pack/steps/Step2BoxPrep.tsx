@@ -152,7 +152,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 md:p-5 shadow-sm space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
                     <span className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider flex items-center gap-2">
-                        <ShieldAlert size={16} className="text-amber-500" />
+                        <ShieldAlert size={16} className="text-[var(--theme-status-warning-text)]" />
                         {t('warehouse.packingOptions') || 'Protection & Directives'}
                     </span>
                     <span className="text-xs font-mono text-[var(--theme-text-secondary)]">{t('warehouse.packing.printedOnShippingLabel') || 'Printed on Shipping Label'}</span>
@@ -165,13 +165,13 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                         onClick={() => setPackingMaterials({ ...packingMaterials, fragileStickers: !packingMaterials.fragileStickers })}
                         className={`min-h-[52px] p-3 rounded-xl border flex items-center justify-between transition-colors cursor-pointer touch-manipulation ${
                             packingMaterials.fragileStickers
-                                ? 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400'
+                                ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-accent)]/30'
                         }`}
                     >
                         <div className="flex items-center gap-3 min-w-0">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.fragileStickers ? 'bg-red-500 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Tag size={15} />
                             </div>
@@ -181,7 +181,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.fragileStickers ? 'bg-red-600 border-red-600 text-white' : 'border-[var(--theme-border)]'
+                            packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-white' : 'border-[var(--theme-border)]'
                         }`}>
                             {packingMaterials.fragileStickers && <Check size={11} />}
                         </div>
@@ -193,13 +193,13 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                         onClick={() => setPackingMaterials({ ...packingMaterials, bubbleWrap: !packingMaterials.bubbleWrap })}
                         className={`min-h-[52px] p-3 rounded-xl border flex items-center justify-between transition-colors cursor-pointer touch-manipulation ${
                             packingMaterials.bubbleWrap
-                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                                ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-accent)]/30'
                         }`}
                     >
                         <div className="flex items-center gap-3 min-w-0">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.bubbleWrap ? 'bg-amber-500 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Layers size={15} />
                             </div>
@@ -209,7 +209,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.bubbleWrap ? 'bg-amber-600 border-amber-600 text-white' : 'border-[var(--theme-border)]'
+                            packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-white' : 'border-[var(--theme-border)]'
                         }`}>
                             {packingMaterials.bubbleWrap && <Check size={11} />}
                         </div>

@@ -98,7 +98,7 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                                 const displayRemaining = rawStock - totalAllocated;
                                 const isWarning = displayRemaining < 0;
                                 return (
-                                    <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg flex items-center gap-1 tabular-nums ${isWarning ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'}`}>
+                                    <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg flex items-center gap-1 tabular-nums ${isWarning ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'}`}>
                                         Stock: {formatTransferStock(rawStock, unitProduct)} <ArrowRight size={10} /> Rem: {formatTransferStock(displayRemaining, unitProduct)}
                                     </span>
                                 );

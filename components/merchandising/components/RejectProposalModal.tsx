@@ -58,7 +58,7 @@ export const RejectProposalModal: React.FC<RejectProposalModalProps> = ({
       size="md"
     >
       <form onSubmit={handleSubmit} className="p-5 space-y-4 text-left">
-        <div className="flex items-start gap-3 rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-rose-700 dark:text-rose-300">
+        <div className="flex items-start gap-3 rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-3 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
           <AlertCircle className="mt-0.5 shrink-0" size={18} />
           <div className="text-xs">
             <p className="font-semibold">Audit Requirement</p>
@@ -81,7 +81,7 @@ export const RejectProposalModal: React.FC<RejectProposalModalProps> = ({
 
         <div className="space-y-1.5">
           <label htmlFor="rejection-reason" className="block text-xs font-semibold text-[var(--theme-text-primary)]">
-            Rejection Reason <span className="text-rose-500">*</span>
+            Rejection Reason <span className="text-[var(--theme-status-danger-text)]">*</span>
           </label>
           <textarea
             id="rejection-reason"
@@ -92,13 +92,13 @@ export const RejectProposalModal: React.FC<RejectProposalModalProps> = ({
               if (validationError) setValidationError(null);
             }}
             placeholder="e.g., Margin below threshold without seasonal promo approval; supplier price changes pending confirmation..."
-            className="w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-rose-500/40"
+            className="w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 ring-[var(--theme-status-danger-border)]"
             required
             disabled={isSubmitting}
             autoFocus
           />
           {validationError && (
-            <p className="text-[11px] font-medium text-rose-600 dark:text-rose-400">
+            <p className="text-[11px] font-medium text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
               {validationError}
             </p>
           )}
@@ -116,7 +116,7 @@ export const RejectProposalModal: React.FC<RejectProposalModalProps> = ({
           <button
             type="submit"
             disabled={isSubmitting || !reason.trim()}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 px-4 py-2 text-xs font-semibold text-white transition-colors disabled:opacity-50 shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] px-4 py-2 text-xs font-semibold text-white transition-colors disabled:opacity-50 shadow-sm"
           >
             <XCircle size={14} />
             <span>{isSubmitting ? 'Rejecting...' : 'Confirm Rejection'}</span>

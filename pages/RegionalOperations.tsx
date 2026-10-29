@@ -168,7 +168,7 @@ export default function RegionalOperations() {
                 <span className="text-xs font-bold text-[var(--theme-status-warning-text)] uppercase tracking-wide">
                   Autonomous Purchase Order Authorization
                 </span>
-                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                   SOP-MGT-020
                 </span>
               </div>
@@ -200,7 +200,7 @@ export default function RegionalOperations() {
                 <span className="text-xs font-bold text-[var(--theme-status-danger-text)] uppercase tracking-wide">
                   Managerial Override Velocity Breach (24h Window)
                 </span>
-                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300">
+                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                   SOP-MGT-020
                 </span>
               </div>
@@ -318,7 +318,7 @@ export default function RegionalOperations() {
               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
           }`}
         >
-          <Trophy className="w-4 h-4 text-amber-500" />
+          <Trophy className="w-4 h-4 text-[var(--theme-status-warning-text)]" />
           <span>Leaderboard</span>
         </button>
 

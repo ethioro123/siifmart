@@ -91,8 +91,8 @@ export const BarcodeGraphic: React.FC<BarcodeGraphicProps> = ({
                             lineColor="#000000"
                         />
                     ) : (
-                        <div className="flex items-center gap-1.5 p-2 bg-amber-50 text-amber-800 rounded border border-amber-200 text-[11px]">
-                            <AlertCircle size={14} className="shrink-0 text-amber-600" />
+                        <div className="flex items-center gap-1.5 p-2 bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] rounded border border-[var(--theme-status-warning-border)] text-[11px]">
+                            <AlertCircle size={14} className="shrink-0 text-[var(--theme-status-warning-text)]" />
                             <span>Code contains non-ASCII characters</span>
                         </div>
                     )}
@@ -110,7 +110,7 @@ export const BarcodeGraphic: React.FC<BarcodeGraphicProps> = ({
                             className="rounded border border-slate-200 bg-white p-1"
                         />
                     ) : qrError ? (
-                        <div className="text-[10px] text-red-500 font-mono">{qrError}</div>
+                        <div className="text-[10px] text-[var(--theme-status-danger-text)] font-mono">{qrError}</div>
                     ) : (
                         <div
                             style={{ width: qrSize, height: qrSize }}

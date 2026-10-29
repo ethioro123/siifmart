@@ -74,12 +74,12 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
                 <div className="flex items-center gap-2">
                     <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 font-mono text-xs font-semibold ${
                         isBlindReceiving
-                            ? 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400'
+                            ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                             : remaining === 0
-                                ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400'
+                                ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                 : remaining > 0
-                                    ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
-                                    : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'
+                                    ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
+                                    : 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                     }`}>
                         {remaining === 0 && !isBlindReceiving ? (
                             <Check size={14} className="stroke-[2.5]" />

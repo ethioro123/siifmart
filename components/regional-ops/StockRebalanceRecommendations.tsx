@@ -102,7 +102,7 @@ export const StockRebalanceRecommendations: React.FC<StockRebalanceRecommendatio
   if (rebalanceRecommendations.length === 0) return null;
 
   return (
-    <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 space-y-3">
+    <div className="p-4 rounded-2xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[var(--theme-accent)]" />
@@ -110,7 +110,7 @@ export const StockRebalanceRecommendations: React.FC<StockRebalanceRecommendatio
             Autonomous Stock Balancing Opportunities
           </span>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold">
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] font-semibold">
           Territorial Equilibrium
         </span>
       </div>
@@ -131,9 +131,9 @@ export const StockRebalanceRecommendations: React.FC<StockRebalanceRecommendatio
                 </span>
               </div>
               <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] mt-1">
-                <span>From: <strong className="text-emerald-600 dark:text-emerald-400">{rec.sourceSite.name}</strong> ({rec.sourceStock})</span>
+                <span>From: <strong className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">{rec.sourceSite.name}</strong> ({rec.sourceStock})</span>
                 <span>&rarr;</span>
-                <span>To: <strong className="text-amber-600 dark:text-amber-400">{rec.destSite.name}</strong> ({rec.destStock})</span>
+                <span>To: <strong className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">{rec.destSite.name}</strong> ({rec.destStock})</span>
               </div>
             </div>
 

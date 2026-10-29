@@ -68,7 +68,7 @@ export const ToggleRow = ({ label, sub, checked, onChange, warning, icon: Icon, 
         </div>
         {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] truncate">{sub}</p>}
         {warning && checked && (
-          <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5 font-medium">
+          <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1 mt-0.5 font-medium">
             <AlertTriangle size={11} className="shrink-0" /> {warning}
           </p>
         )}

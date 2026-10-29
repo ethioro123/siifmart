@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { 
-    X, AlertTriangle, Clock, Truck, ShieldAlert, 
+import {
+    X, AlertTriangle, Clock, Truck, ShieldAlert,
     MessageSquare, Send, CheckCircle, Navigation
 } from 'lucide-react';
 import { User, WMSJob } from '../../../types';
@@ -12,9 +12,9 @@ interface IncidentReportModalProps {
     onClose: () => void;
     user: User | null;
     activeJob?: WMSJob | null;
-    onReport: (data: { 
-        type: string; 
-        description: string; 
+    onReport: (data: {
+        type: string;
+        description: string;
         priority: 'High' | 'Critical';
         jobId?: string;
     }) => Promise<void>;
@@ -38,11 +38,11 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
     if (!isOpen) return null;
 
     const issueTypes = [
-        { id: 'Traffic / Delay', label: t('warehouse.driverHub.trafficDelay'), icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+        { id: 'Traffic / Delay', label: t('warehouse.driverHub.trafficDelay'), icon: Clock, color: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]' },
         { id: 'Vehicle Issue', label: t('warehouse.driverHub.vehicleIssue'), icon: Truck, color: 'text-orange-500', bg: 'bg-orange-500/10' },
         { id: 'Customer Not Found', label: t('warehouse.driverHub.customerNotFound'), icon: Navigation, color: 'text-[var(--theme-primary)]', bg: 'bg-[var(--theme-primary)]/10' },
-        { id: 'Security / Access', label: t('warehouse.driverHub.securityAccess'), icon: ShieldAlert, color: 'text-red-500', bg: 'bg-red-500/10' },
-        { id: 'Package Damage', label: t('warehouse.driverHub.packageDamage'), icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' },
+        { id: 'Security / Access', label: t('warehouse.driverHub.securityAccess'), icon: ShieldAlert, color: 'text-[var(--theme-status-danger-text)]', bg: 'bg-[var(--theme-status-danger-bg)]' },
+        { id: 'Package Damage', label: t('warehouse.driverHub.packageDamage'), icon: AlertTriangle, color: 'text-[var(--theme-status-danger-text)]', bg: 'bg-[var(--theme-status-danger-bg)]' },
         { id: 'Other', label: t('warehouse.driverHub.other'), icon: MessageSquare, color: 'text-[var(--theme-text-muted)]', bg: 'bg-[var(--theme-bg-subtle)]' }
     ];
 
@@ -76,11 +76,11 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-4 bg-black/60 overflow-x-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-md rounded-3xl border border-[var(--theme-border)] shadow-xl flex flex-col isolate overflow-hidden max-h-[90vh] relative">
-                
+
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)] shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-2xl bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                             <AlertTriangle size={18} />
                         </div>
                         <div>
@@ -104,8 +104,8 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                 <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
                     {isSuccess ? (
                         <div className="py-10 flex flex-col items-center text-center animate-in zoom-in-95">
-                            <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 mb-3">
-                                <CheckCircle className="text-emerald-500" size={28} />
+                            <div className="w-14 h-14 bg-[var(--theme-status-success-bg)] rounded-2xl flex items-center justify-center border border-[var(--theme-status-success-border)] mb-3">
+                                <CheckCircle className="text-[var(--theme-status-success-text)]" size={28} />
                             </div>
                             <h3 className="text-[var(--theme-text-primary)] font-semibold text-sm mb-1">
                                 {t('warehouse.driverHub.reportLogged')}
@@ -123,8 +123,8 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                                         key={type.id}
                                         onClick={() => setIssueType(type.id)}
                                         className={`flex items-center gap-2.5 p-2.5 min-h-[44px] rounded-xl border transition-all active:scale-[0.98] touch-manipulation ${
-                                            issueType === type.id 
-                                                ? 'bg-[var(--theme-bg-card)] border-[var(--theme-primary)] text-[var(--theme-text-primary)] ring-1 ring-[var(--theme-primary)]/30' 
+                                            issueType === type.id
+                                                ? 'bg-[var(--theme-bg-card)] border-[var(--theme-primary)] text-[var(--theme-text-primary)] ring-1 ring-[var(--theme-primary)]/30'
                                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                     >
@@ -148,7 +148,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                                     aria-label={t('warehouse.driverHub.incidentIntel')}
                                     title={t('warehouse.driverHub.incidentIntel')}
                                     rows={3}
-                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] min-h-[96px] focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/30 transition-colors"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] min-h-[96px] focus:outline-none border-[var(--theme-status-danger-border)] focus:ring-1 ring-[var(--theme-status-danger-border)] transition-colors"
                                 />
                             </div>
 
@@ -157,7 +157,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                         <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting || !description.trim()}
-                                className="w-full min-h-[44px] py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] touch-manipulation shrink-0"
+                                className="w-full min-h-[44px] py-3 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] disabled:opacity-50 text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] touch-manipulation shrink-0"
                             >
                                 <Send size={14} />
                                 {isSubmitting ? t('warehouse.driverHub.sending') : t('warehouse.driverHub.transmitReport')}

@@ -54,8 +54,8 @@ export const Step1ReceiveIntake: React.FC<Step1ReceiveIntakeProps> = ({
 
             {/* Zero-Trust Blind Policy Alert */}
             {isBlindReceiving && (
-                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+                <div className="p-3.5 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-warning-bg)] text-white flex items-center justify-center shrink-0">
                         <EyeOff size={16} />
                     </div>
                     <div>
@@ -105,7 +105,7 @@ export const Step1ReceiveIntake: React.FC<Step1ReceiveIntakeProps> = ({
                         </span>
                         <div className="mt-1 font-mono text-sm md:text-base font-bold text-[var(--theme-text-primary)]">
                             {isBlindReceiving ? (
-                                <span className="text-amber-600 dark:text-amber-400">*** {t('warehouse.blindAudit') || 'Blind Mode'}</span>
+                                <span className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">*** {t('warehouse.blindAudit') || 'Blind Mode'}</span>
                             ) : (
                                 <span>{expectedSellable} {t('warehouse.unitsLabel') || 'Units'}</span>
                             )}

@@ -38,17 +38,17 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
         <div className="text-center w-full max-w-sm mx-auto">
             {/* Header label */}
             <p className="text-[var(--theme-text-secondary)] text-[11px] font-semibold uppercase tracking-wider mb-2">
-                {recommendation?.type === 'ASSIGNED' 
-                    ? t('warehouse.putaway.assignedLocation') 
-                    : recommendation?.type === 'SUGGESTED' 
-                        ? t('warehouse.putaway.suggestedLocation') 
+                {recommendation?.type === 'ASSIGNED'
+                    ? t('warehouse.putaway.assignedLocation')
+                    : recommendation?.type === 'SUGGESTED'
+                        ? t('warehouse.putaway.suggestedLocation')
                         : t('warehouse.putaway.awaitingScan')}
             </p>
 
             {/* Main Location Box */}
             <div className={`w-full px-4 sm:px-6 py-3.5 sm:py-5 rounded-2xl border transition-colors ${
                 recommendation?.type === 'ASSIGNED'
-                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                    ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                     : recommendation?.type === 'SUGGESTED'
                         ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/30 text-[var(--theme-accent)]'
                         : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'

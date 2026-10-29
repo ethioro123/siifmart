@@ -1,15 +1,15 @@
 import React from 'react';
-import { 
-    Truck, 
-    ArrowRight, 
-    Package, 
-    X, 
-    Box, 
-    ArrowDownToLine, 
-    ArrowUpFromLine, 
-    RefreshCw, 
-    User, 
-    ShieldCheck, 
+import {
+    Truck,
+    ArrowRight,
+    Package,
+    X,
+    Box,
+    ArrowDownToLine,
+    ArrowUpFromLine,
+    RefreshCw,
+    User,
+    ShieldCheck,
     Calendar,
     ClipboardList,
     AlertTriangle,
@@ -78,13 +78,13 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
     };
 
     return (
-        <div 
+        <div
             className="fixed inset-0 z-[150] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200"
             onClick={(e) => {
                 if (e.target === e.currentTarget) setIsDetailsOpen(false);
             }}
         >
-            <div 
+            <div
                 className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-t-3xl md:rounded-2xl w-full md:max-w-2xl max-h-[85vh] overflow-hidden shadow-xl flex flex-col relative"
                 role="dialog"
                 aria-modal="true"
@@ -140,7 +140,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                                     <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">{t('warehouse.logisticsRoute')}</p>
                                     <Truck size={18} className="text-primary opacity-60" />
                                 </div>
-                                
+
                                 {destSiteId ? (
                                     <div className="flex items-center gap-3">
                                         <div className="flex-1 min-w-0">
@@ -178,7 +178,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                                     <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase flex items-center gap-1.5">
                                         <ShieldCheck size={12} className="text-primary" /> {t('warehouse.authAuthorityLabel')}
                                     </span>
-                                    <span className={`font-semibold text-xs ${selectedJob.approvedBy ? 'text-[var(--theme-text-primary)]' : 'text-amber-600 dark:text-amber-400'}`}>
+                                    <span className={`font-semibold text-xs ${selectedJob.approvedBy ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'}`}>
                                         {selectedJob.approvedBy || t('warehouse.pendingAuthLabel')}
                                     </span>
                                 </div>
@@ -195,7 +195,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                                         <AlertTriangle size={12} className="text-primary" /> {t('warehouse.priorityLabel')}
                                     </span>
                                     <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider border ${
-                                        selectedJob.priority === 'Critical' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                        selectedJob.priority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' :
                                         selectedJob.priority === 'High' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
                                         'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border-[var(--theme-border)]'
                                     }`}>
@@ -244,7 +244,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                                             <td className="px-4 py-3 text-center">
                                                 {item.orderedQty && item.orderedQty > (item.expectedQty || item.quantity || item.pickedQty || 0) ? (
                                                     <div className="flex flex-col items-center">
-                                                        <span className="text-[11px] font-mono font-medium text-red-500 line-through tabular-nums" title="Short Picked">{item.orderedQty}</span>
+                                                        <span className="text-[11px] font-mono font-medium text-[var(--theme-status-danger-text)] line-through tabular-nums" title="Short Picked">{item.orderedQty}</span>
                                                         <span className="font-bold font-mono tabular-nums text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-lg border border-[var(--theme-border)]">
                                                             {item.expectedQty || item.quantity || item.pickedQty || 0}
                                                         </span>
@@ -257,8 +257,8 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <span className={`inline-flex text-[11px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider border ${
-                                                    item.status === 'Completed' ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20' :
-                                                    item.status === 'Discrepancy' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                                                    item.status === 'Completed' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' :
+                                                    item.status === 'Discrepancy' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' :
                                                     'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]'
                                                 }`}>
                                                     {item.status || 'Verified'}
@@ -280,7 +280,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                         {canDelete && (
                             <button
                                 onClick={handleDelete}
-                                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
+                                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
                                 title="Delete Job"
                             >
                                 <Trash2 size={14} />

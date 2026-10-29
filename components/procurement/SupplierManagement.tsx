@@ -121,7 +121,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                     </button>
                 </Protected>
             </div>
-            {verificationError && <p role="alert" className="text-xs text-rose-600 dark:text-rose-400">{verificationError}</p>}
+            {verificationError && <p role="alert" className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">{verificationError}</p>}
 
             {/* Filter and Search Bar */}
             <div className="p-4 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
@@ -207,17 +207,17 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                     <td className="py-4 px-4">
                                         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
                                             sup.status === 'Active' && sup.verificationStatus === 'verified'
-                                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                                : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                         }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${sup.status === 'Active' && sup.verificationStatus === 'verified' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                            <span className={`w-1.5 h-1.5 rounded-full ${sup.status === 'Active' && sup.verificationStatus === 'verified' ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-status-danger-bg)]'}`} />
                                             {sup.verificationStatus === 'verified' ? sup.status : 'Pending verification'}
                                         </div>
                                     </td>
                                     <td className="py-4 px-4">
                                         <div className="flex flex-col gap-1.5">
                                             <div className="flex items-center gap-1.5">
-                                                <Star size={12} className="text-amber-500 fill-amber-500" />
+                                                <Star size={12} className="text-[var(--theme-status-warning-text)] fill-amber-500" />
                                                 <span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{sup.rating ?? 'Unrated'}</span>
                                                 {sup.rating != null && <span className="text-[11px] text-[var(--theme-text-secondary)]">/ 5.0</span>}
                                             </div>
@@ -286,8 +286,8 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                     </div>
                                     <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                                         sup.status === 'Active' && sup.verificationStatus === 'verified'
-                                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                            ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                            : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                     }`}>
                                         {sup.verificationStatus === 'verified' ? sup.status : 'Pending verification'}
                                     </div>
@@ -302,7 +302,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                     <div>
                                         <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Rating</span>
                                         <div className="flex items-center gap-1 mt-0.5">
-                                            <Star size={11} className="text-amber-500 fill-amber-500" />
+                                            <Star size={11} className="text-[var(--theme-status-warning-text)] fill-amber-500" />
                                             <span className="text-xs text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{sup.rating ?? 'Unrated'}</span>
                                             {sup.rating != null && <span className="text-[10px] text-[var(--theme-text-secondary)]">/ 5.0</span>}
                                         </div>

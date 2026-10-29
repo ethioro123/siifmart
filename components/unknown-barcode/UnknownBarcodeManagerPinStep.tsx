@@ -48,13 +48,13 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
 
     return (
         <div className="space-y-6 animate-in fade-in">
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-                <ShieldAlert className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" size={22} />
+            <div className="p-4 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-start gap-3">
+                <ShieldAlert className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" size={22} />
                 <div className="space-y-1">
-                    <h4 className="text-sm font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">
+                    <h4 className="text-sm font-black text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] uppercase tracking-wider">
                         Manager Authorization Required
                     </h4>
-                    <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                    <p className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] leading-relaxed">
                         <b>{selectedProduct.name}</b> is classified as a high-value asset (ETB {Number(selectedProduct.price || 0).toLocaleString()}). To prevent inventory shrinkage, a Shift Supervisor or Store Manager PIN is required.
                     </p>
                 </div>
@@ -63,11 +63,11 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
             <div className="bg-white/80 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4 text-center">
                 <span className="text-[10px] font-mono text-stone-500 uppercase tracking-widest block mb-1">Target Product & Barcode</span>
                 <span className="text-sm font-black text-[#1E3F27] dark:text-white block truncate">{selectedProduct.name}</span>
-                <span className="text-xs font-mono text-amber-700 dark:text-amber-300 font-bold block mt-1">Barcode: {scannedBarcode}</span>
+                <span className="text-xs font-mono text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-bold block mt-1">Barcode: {scannedBarcode}</span>
             </div>
 
             {errorMsg && (
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold text-center animate-shake">
+                <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-xs font-bold text-center animate-shake">
                     {errorMsg}
                 </div>
             )}
@@ -87,7 +87,7 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
                 <button
                     type="button"
                     onClick={onBack}
-                    className="px-4 py-2 text-stone-700 hover:text-[#2C5E3B] dark:text-gray-300 dark:hover:text-white font-bold text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2 text-stone-700 hover:text-[var(--theme-primary)] dark:text-gray-300 dark:hover:text-white font-bold text-sm transition-colors cursor-pointer"
                 >
                     Back to Product
                 </button>

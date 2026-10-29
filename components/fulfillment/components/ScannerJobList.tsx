@@ -60,7 +60,7 @@ export const ScannerJobList: React.FC<ScannerJobListProps> = ({
                                     <p className="text-xs text-[var(--theme-text-muted)] mt-1">To: {job.assignedTo || 'Unassigned'}</p>
                                 </div>
                                 <div className="text-right">
-                                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${job.priority === 'High' || job.priority === 'Critical' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-primary/10 text-primary border-primary/20'} `}>
+                                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${job.priority === 'High' || job.priority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' : 'bg-primary/10 text-primary border-primary/20'} `}>
                                         {job.priority}
                                     </span>
                                     <div className="mt-2 text-[var(--theme-text-muted)] text-xs font-mono tabular-nums">

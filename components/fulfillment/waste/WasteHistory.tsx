@@ -31,7 +31,7 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
             if (!search) return true;
             const q = search.toLowerCase();
             const product = products.find(p => p.id === m.productId);
-            
+
             return (
                 (m.productName || '').toLowerCase().includes(q) ||
                 (product?.name || '').toLowerCase().includes(q) ||
@@ -101,7 +101,7 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                                 >
                                     <div className="flex justify-between items-start mb-2.5">
                                         <span className="text-[11px] font-mono text-primary font-bold">{m.id.slice(0, 8)}</span>
-                                        <span className="text-[11px] px-2 py-0.5 rounded-lg uppercase font-semibold bg-red-500/10 text-red-500 border border-red-500/20">
+                                        <span className="text-[11px] px-2 py-0.5 rounded-lg uppercase font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                                             {m.reason.replace('Waste: ', '')}
                                         </span>
                                     </div>

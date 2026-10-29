@@ -110,7 +110,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
         <div className={cardBase}>
             <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-4 mb-5">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Globe size={16} />
                     </div>
                     <div>
@@ -140,7 +140,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                                 <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono truncate max-w-[260px]">{activeProfile.complianceStandard}</p>
                             </div>
                         </div>
-                        <CheckCircle2 size={16} className="text-emerald-500" />
+                        <CheckCircle2 size={16} className="text-[var(--theme-status-success-text)]" />
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono border-t border-[var(--theme-border)] pt-2.5">
@@ -165,10 +165,10 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
 
                 {/* Regional Adaptive Notice */}
                 {isKenya && (
-                    <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5">
-                        <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="p-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-start gap-2.5">
+                        <AlertCircle className="w-4 h-4 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" />
                         <div className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">
-                            <strong className="font-semibold text-amber-700 dark:text-amber-300 block mb-0.5">
+                            <strong className="font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] block mb-0.5">
                                 Kenya Localization Active:
                             </strong>
                             Ethiopian regional languages are disabled. Primary tender locked to M-Pesa. Standard KRA tax rate is 16%.
@@ -231,7 +231,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                                 System Language
                             </label>
                             {isKenya && (
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2 py-0.5 rounded-full border border-[var(--theme-status-warning-border)]">
                                     English Standard
                                 </span>
                             )}

@@ -307,7 +307,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             <td className="py-4 px-4 text-center">
                                 <div className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold border transition-all ${
                                     abc === 'A' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[#34C759]/30' :
-                                    abc === 'B' ? 'bg-[#2997FF]/10 text-[#2997FF] border-[#2997FF]/30' :
+                                    abc === 'B' ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-border-focus)]/30' :
                                     'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                 }`}>
                                     {abc}

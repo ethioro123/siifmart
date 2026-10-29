@@ -37,9 +37,9 @@ export const DashboardLeaderboard: React.FC<DashboardLeaderboardProps> = ({
                 {siteLeaderboard.slice(0, 5).map((worker: any, idx: number) => {
                     const rank = idx + 1;
                     const getRankBadge = () => {
-                        if (rank === 1) return { icon: <Crown size={14} className="text-amber-500" />, label: 'Rank 1', border: 'border-amber-500/30' };
+                        if (rank === 1) return { icon: <Crown size={14} className="text-[var(--theme-status-warning-text)]" />, label: 'Rank 1', border: 'border-[var(--theme-status-warning-border)]' };
                         if (rank === 2) return { icon: <Medal size={14} className="text-slate-400" />, label: 'Rank 2', border: 'border-slate-400/30' };
-                        if (rank === 3) return { icon: <Medal size={14} className="text-amber-700 dark:text-amber-600" />, label: 'Rank 3', border: 'border-amber-700/30' };
+                        if (rank === 3) return { icon: <Medal size={14} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" />, label: 'Rank 3', border: 'border-[var(--theme-status-warning-border)]' };
                         return { icon: <Award size={14} className="text-[var(--theme-text-secondary)]" />, label: `Rank ${rank}`, border: 'border-[var(--theme-border)]' };
                     };
                     const badge = getRankBadge();

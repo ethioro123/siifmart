@@ -204,11 +204,11 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                     <div>
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-sm">
-                                <ShieldAlert className="text-amber-500" size={16} />
+                                <ShieldAlert className="text-[var(--theme-status-warning-text)]" size={16} />
                                 Corporate Governance & Escalations
                             </h3>
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
                                 HQ Level
                             </span>
                         </div>
@@ -217,11 +217,11 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                             {/* High-Value Regional Procurement Escalation */}
                             <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)] transition-colors">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                    <div className="p-2 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                         <Building2 size={16} />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                        <p className="text-xs font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                                             {pendingEscalatedPOCount} Regional PO Escalations
                                         </p>
                                         <p className="text-[11px] text-[var(--theme-text-muted)]">
@@ -241,11 +241,11 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                             {/* Inter-Regional Dispatches & Logistics */}
                             <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)] transition-colors">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                                    <div className="p-2 rounded-lg bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                                         <ArrowRightLeft size={16} />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                                        <p className="text-xs font-bold text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]">
                                             {interRegionTransfersCount} Inter-Regional Dispatches
                                         </p>
                                         <p className="text-[11px] text-[var(--theme-text-muted)]">
@@ -358,7 +358,7 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                 <div className="lg:col-span-6 p-6 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-sm">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-sm">
-                            <Package className="text-emerald-600 dark:text-emerald-400" size={16} />
+                            <Package className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" size={16} />
                             Fast-Moving SKUs & Packaging
                         </h3>
                         <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-muted)]">
@@ -383,7 +383,7 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                                     <div key={i} className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between">
                                         <div className="flex items-center gap-3 min-w-0">
                                             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                                                i === 0 ? 'bg-emerald-600 text-white shadow-xs' :
+                                                i === 0 ? 'bg-[var(--theme-status-success-bg)] text-white shadow-xs' :
                                                 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                             }`}>
                                                 {i + 1}

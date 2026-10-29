@@ -34,11 +34,11 @@ export const ExpenseMetricRibbon: React.FC<ExpenseMetricRibbonProps> = ({
                     <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                         Pending 4-Eyes
                     </span>
-                    <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center">
                         <Clock size={13} />
                     </div>
                 </div>
-                <h4 className="text-xl font-semibold tracking-tight text-amber-600 dark:text-amber-400 font-mono tabular-nums mt-1">
+                <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono tabular-nums mt-1">
                     {stats.pendingCount}
                 </h4>
                 <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -51,11 +51,11 @@ export const ExpenseMetricRibbon: React.FC<ExpenseMetricRibbonProps> = ({
                     <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                         Settled / Approved
                     </span>
-                    <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center">
                         <CheckCircle2 size={13} />
                     </div>
                 </div>
-                <h4 className="text-xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
+                <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono tabular-nums mt-1">
                     {stats.approvedOrPaidCount}
                 </h4>
                 <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">

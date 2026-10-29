@@ -61,21 +61,21 @@ export const ShiftPlannerHeader: React.FC<ShiftPlannerHeaderProps> = ({
     return (
         <div className="space-y-4">
             {/* Top Toolbar: Week Navigator + Actions */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white/90 dark:bg-black/30 p-4 rounded-2xl border border-[#E2DCCE] dark:border-emerald-950/30 shadow-xs">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white/90 dark:bg-black/30 p-4 rounded-2xl border border-[#E2DCCE] border-[var(--theme-status-success-border)] shadow-xs">
                 {/* Week Navigation */}
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => onNavigateWeek(-1)}
-                        className="p-2 rounded-xl text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-stone-100 dark:hover:bg-white/10 transition-colors border border-[#E2DCCE] dark:border-white/10 cursor-pointer"
+                        className="p-2 rounded-xl text-[var(--theme-primary)] dark:text-[#A9CBA2] hover:bg-stone-100 dark:hover:bg-white/10 transition-colors border border-[#E2DCCE] dark:border-white/10 cursor-pointer"
                         title="Previous Week"
                         aria-label="Previous Week"
                     >
                         <ChevronLeft size={18} />
                     </button>
-                    
+
                     <button
                         onClick={onGoToCurrentWeek}
-                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#FAF8F5] dark:bg-white/5 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 transition-colors cursor-pointer flex items-center gap-1.5"
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#FAF8F5] dark:bg-white/5 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[#E2DCCE] dark:border-white/10 hover:bg-[var(--theme-primary)]/10 transition-colors cursor-pointer flex items-center gap-1.5"
                         title="Jump to Today"
                     >
                         <RotateCcw size={13} />
@@ -83,7 +83,7 @@ export const ShiftPlannerHeader: React.FC<ShiftPlannerHeaderProps> = ({
                     </button>
 
                     <div className="px-4 py-2 rounded-xl bg-[#FAF8F5] dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 flex items-center gap-2">
-                        <Calendar size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <Calendar size={16} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
                         <span className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9] tracking-wide select-none min-w-[190px] text-center">
                             {weekLabel}
                         </span>
@@ -91,7 +91,7 @@ export const ShiftPlannerHeader: React.FC<ShiftPlannerHeaderProps> = ({
 
                     <button
                         onClick={() => onNavigateWeek(1)}
-                        className="p-2 rounded-xl text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-stone-100 dark:hover:bg-white/10 transition-colors border border-[#E2DCCE] dark:border-white/10 cursor-pointer"
+                        className="p-2 rounded-xl text-[var(--theme-primary)] dark:text-[#A9CBA2] hover:bg-stone-100 dark:hover:bg-white/10 transition-colors border border-[#E2DCCE] dark:border-white/10 cursor-pointer"
                         title="Next Week"
                         aria-label="Next Week"
                     >
@@ -114,7 +114,7 @@ export const ShiftPlannerHeader: React.FC<ShiftPlannerHeaderProps> = ({
                         <>
                             <button
                                 onClick={onOpenCopyModal}
-                                className="px-3 py-2 rounded-xl text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#FAF8F5] dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                                className="px-3 py-2 rounded-xl text-xs font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2] bg-[#FAF8F5] dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 hover:bg-[var(--theme-primary)]/10 transition-colors flex items-center gap-1.5 cursor-pointer"
                                 title="Copy Last Week's Schedule"
                             >
                                 <Copy size={15} />
@@ -123,7 +123,7 @@ export const ShiftPlannerHeader: React.FC<ShiftPlannerHeaderProps> = ({
 
                             <button
                                 onClick={onOpenPublishModal}
-                                className="px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors flex items-center gap-1.5 cursor-pointer"
+                                className="px-3 py-2 rounded-xl text-xs font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] transition-colors flex items-center gap-1.5 cursor-pointer"
                                 title="Publish and Confirm Roster"
                             >
                                 <Send size={15} />
@@ -132,7 +132,7 @@ export const ShiftPlannerHeader: React.FC<ShiftPlannerHeaderProps> = ({
 
                             <button
                                 onClick={onOpenClearModal}
-                                className="px-3 py-2 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/40 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors flex items-center gap-1.5 cursor-pointer"
+                                className="px-3 py-2 rounded-xl text-xs font-bold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] dark:bg-red-950/20 border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] transition-colors flex items-center gap-1.5 cursor-pointer"
                                 title="Clear All Shifts for This Week"
                             >
                                 <Trash2 size={15} />
@@ -144,7 +144,7 @@ export const ShiftPlannerHeader: React.FC<ShiftPlannerHeaderProps> = ({
                                 disabled={isSaving || !isDirty}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-xs ${
                                     isDirty
-                                        ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] hover:bg-[#1A3420] ring-2 ring-emerald-500/30'
+                                        ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] hover:bg-[#1A3420] ring-2 ring-[var(--theme-status-success-border)]'
                                         : 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed opacity-75'
                                 }`}
                             >
@@ -202,8 +202,8 @@ export const ShiftPlannerHeader: React.FC<ShiftPlannerHeaderProps> = ({
 
                 {/* Shift Type Legend */}
                 <div className="flex items-center justify-between sm:justify-end gap-2 bg-white/60 dark:bg-black/20 px-3 py-2 rounded-xl border border-[#E2DCCE] dark:border-white/10 text-[11px] font-bold">
-                    <span className="flex items-center gap-1 text-amber-700 dark:text-amber-300">
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span> M (Morning)
+                    <span className="flex items-center gap-1 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[var(--theme-status-warning-bg)]"></span> M (Morning)
                     </span>
                     <span className="flex items-center gap-1 text-orange-700 dark:text-orange-300">
                         <span className="w-2.5 h-2.5 rounded-full bg-orange-400"></span> E (Evening)

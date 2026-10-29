@@ -17,25 +17,25 @@ export function getSiteTheme(type: StagingSiteType): SiteTheme {
   switch (type) {
     case 'Store':
       return {
-        iconColor: 'text-emerald-700 dark:text-emerald-400',
-        nameColor: 'text-emerald-800 dark:text-emerald-300',
-        badge: 'bg-emerald-500/15 dark:bg-emerald-500/25 text-emerald-800 dark:text-emerald-300 border-emerald-500/30',
-        countBadge: 'bg-emerald-500/20 dark:bg-emerald-500/30 text-emerald-900 dark:text-emerald-200 border-emerald-500/40',
+        iconColor: 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]',
+        nameColor: 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]',
+        badge: 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
+        countBadge: 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
         borderLeft: 'border-l-4 border-l-emerald-500',
-        borderCard: 'hover:border-emerald-500/50 dark:hover:border-emerald-400/50',
-        bgLight: 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.05]',
+        borderCard: 'border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]',
+        bgLight: 'bg-[var(--theme-status-success-bg)]/[0.04] bg-[var(--theme-status-success-bg)]/[0.05]',
         label: 'Retail Store',
         shortLabel: 'Store',
       };
     case 'Warehouse':
       return {
-        iconColor: 'text-amber-700 dark:text-amber-400',
-        nameColor: 'text-amber-800 dark:text-amber-300',
-        badge: 'bg-amber-500/15 dark:bg-amber-500/25 text-amber-800 dark:text-amber-300 border-amber-500/30',
-        countBadge: 'bg-amber-500/20 dark:bg-amber-500/30 text-amber-900 dark:text-amber-200 border-amber-500/40',
+        iconColor: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
+        nameColor: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
+        badge: 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
+        countBadge: 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
         borderLeft: 'border-l-4 border-l-amber-500',
-        borderCard: 'hover:border-amber-500/50 dark:hover:border-amber-400/50',
-        bgLight: 'bg-amber-500/[0.04] dark:bg-amber-500/[0.05]',
+        borderCard: 'border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)]',
+        bgLight: 'bg-[var(--theme-status-warning-bg)]/[0.04] bg-[var(--theme-status-warning-bg)]/[0.05]',
         label: 'Warehouse',
         shortLabel: 'WH',
       };

@@ -137,7 +137,7 @@ export default function Pricing() {
             <RegionalScopeBanner
                moduleName="Merchandising"
                guardrailBadge={
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-xs font-semibold">
                      <span>Corporate Margin Floor: 15.0% Min</span>
                   </div>
                }

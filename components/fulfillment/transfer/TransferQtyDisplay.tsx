@@ -12,9 +12,9 @@ interface TransferQtyDisplayProps {
 
 export const TransferQtyDisplay: React.FC<TransferQtyDisplayProps> = ({ qty, size, unit, color, t, measureQty = false }) => {
     const textColor = color === 'red'
-        ? 'text-red-600 dark:text-red-400'
+        ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
         : color === 'green'
-            ? 'text-green-600 dark:text-green-400'
+            ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
             : 'text-[var(--theme-text-primary)]';
     const isWeightVol = unit && (unit.category === 'weight' || unit.category === 'volume');
 

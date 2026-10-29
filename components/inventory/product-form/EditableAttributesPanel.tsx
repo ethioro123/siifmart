@@ -16,11 +16,11 @@ const AttrBadge = ({ label, value, color }: { label: string; value?: string | nu
     const displayLabel = typeof value === 'boolean' ? '' : label;
 
     const colorMap: Record<string, string> = {
-        red: 'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400',
-        blue: 'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-400',
+        red: 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]',
+        blue: 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]',
         cyan: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-400',
-        green: 'bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400',
-        yellow: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-700 dark:text-yellow-400',
+        green: 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]',
+        yellow: 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
         orange: 'bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-400',
         purple: 'bg-purple-500/10 border-purple-500/30 text-purple-700 dark:text-purple-400',
         pink: 'bg-pink-500/10 border-pink-500/30 text-pink-700 dark:text-pink-400',

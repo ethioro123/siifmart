@@ -89,7 +89,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                                             {product.sku}
                                         </span>
                                         {formatProductSize(product) && (
-                                            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                                            <span className="text-[11px] font-mono text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-1.5 py-0.5 rounded border border-[var(--theme-status-success-border)]">
                                                 {formatProductSize(product)}
                                             </span>
                                         )}
@@ -102,7 +102,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                                     const displayStock = product.stock || 0;
                                     const packDesc = formatPackagingDescription(product, displayStock);
                                     return (
-                                        <div className={`text-xs font-mono font-bold tabular-nums ${displayStock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+                                        <div className={`text-xs font-mono font-bold tabular-nums ${displayStock > 0 ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}`}>
                                             <div>{formatStockDisplay(displayStock, product)}</div>
                                             {packDesc && (
                                                 <div className="text-[11px] text-[var(--theme-text-secondary)] font-sans font-normal">

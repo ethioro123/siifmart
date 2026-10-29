@@ -162,7 +162,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                         {wasteBasket.length > 0 && (
                             <button
                                 onClick={() => setWasteBasket([])}
-                                className="min-h-[36px] px-2.5 text-xs text-red-500 hover:text-red-400 font-semibold touch-manipulation transition-colors"
+                                className="min-h-[36px] px-2.5 text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-semibold touch-manipulation transition-colors"
                             >
                                 {t('warehouse.clearAll')}
                             </button>
@@ -205,7 +205,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                             <p className="font-mono font-bold text-[var(--theme-text-primary)] text-sm tabular-nums">{formatCompactNumber(cost, { currency: CURRENCY_SYMBOL })}</p>
                                             <button
                                                 onClick={() => setWasteBasket(prev => prev.filter((_, i) => i !== idx))}
-                                                className="min-h-[36px] min-w-[36px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-red-500 rounded-lg transition-colors touch-manipulation"
+                                                className="min-h-[36px] min-w-[36px] flex items-center justify-center text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] rounded-lg transition-colors touch-manipulation"
                                                 aria-label={t('warehouse.removeItemAria')}
                                             >
                                                 <X size={16} />
@@ -277,7 +277,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                             }}
                             className={`w-full min-h-[44px] py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs touch-manipulation ${isDisposingWaste || wasteBasket.length === 0
                                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
-                                : 'bg-red-500 hover:bg-red-600 text-white active:scale-[0.99] cursor-pointer'
+                                : 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white active:scale-[0.99] cursor-pointer'
                                 }`}
                         >
                             {isDisposingWaste ? (

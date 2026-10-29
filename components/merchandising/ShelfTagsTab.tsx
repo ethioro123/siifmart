@@ -198,7 +198,7 @@ export const ShelfTagsTab: React.FC = () => {
             </div>
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs">
                <p className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">Promotional Shelf Items</p>
-               <p className="text-2xl font-bold text-amber-500 mt-1 font-mono">
+               <p className="text-2xl font-bold text-[var(--theme-status-warning-text)] mt-1 font-mono">
                   {scopedProducts.filter(p => p.isOnSale).length}
                </p>
                <p className="text-xs text-[var(--theme-text-secondary)] mt-1">Requires sale flag tags</p>
@@ -210,7 +210,7 @@ export const ShelfTagsTab: React.FC = () => {
             </div>
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs">
                <p className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">Discrepancy Alerts</p>
-               <p className="text-2xl font-bold text-rose-500 mt-1 font-mono">
+               <p className="text-2xl font-bold text-[var(--theme-status-danger-text)] mt-1 font-mono">
                   {auditRecords.filter(r => r.status !== 'verified').length}
                </p>
                <p className="text-xs text-[var(--theme-text-secondary)] mt-1">Pending floor resolution</p>

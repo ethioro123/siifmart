@@ -173,11 +173,11 @@ export default function GeneralSettings() {
 
                     <div className="flex items-center gap-2">
                         <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-1.5 font-mono">
-                            <ShieldCheck size={12} className="text-emerald-500" />
+                            <ShieldCheck size={12} className="text-[var(--theme-status-success-text)]" />
                             <span>SIIFMART Permanent Brand</span>
                         </span>
                         {!isAuthorized && (
-                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1.5">
+                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2.5 py-0.5 rounded-full border border-[var(--theme-status-warning-border)] flex items-center gap-1.5">
                                 <Lock size={12} /> View-Only (L1 Required)
                             </span>
                         )}
@@ -232,7 +232,7 @@ export default function GeneralSettings() {
                             </div>
                         </div>
                         {!isAuthorized && (
-                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1.5">
+                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2.5 py-0.5 rounded-full border border-[var(--theme-status-warning-border)] flex items-center gap-1.5">
                                 <Lock size={12} /> Locked
                             </span>
                         )}

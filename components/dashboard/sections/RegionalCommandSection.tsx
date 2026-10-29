@@ -61,15 +61,15 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
             const regionSiteIds = new Set(regionSites.map(s => s.id));
 
             // Workforce assigned to this region
-            const regionEmployees = employees.filter(e => 
-                e.regionCode === region.code || 
+            const regionEmployees = employees.filter(e =>
+                e.regionCode === region.code ||
                 (e as any).region_code === region.code ||
                 (e.siteId && regionSiteIds.has(e.siteId))
             );
 
             // Regional Operations and Department Managers
-            const regionalManager = employees.find(e => 
-                (e.id === region.regional_manager_id) || 
+            const regionalManager = employees.find(e =>
+                (e.id === region.regional_manager_id) ||
                 (e.role === 'regional_operations_manager' && (e.regionCode === region.code || (e as any).region_code === region.code))
             );
 
@@ -86,12 +86,12 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
             const totalRevenue = regionSales.reduce((acc, curr) => acc + (curr.total || 0), 0);
 
             // Purchase Orders in this region for current month
-            const regionOrders = allOrders.filter(o => 
-                o.regionCode === region.code || 
+            const regionOrders = allOrders.filter(o =>
+                o.regionCode === region.code ||
                 (o as any).region_code === region.code ||
                 (o.siteId && regionSiteIds.has(o.siteId))
             );
-            const currentMonthOrders = regionOrders.filter(o => 
+            const currentMonthOrders = regionOrders.filter(o =>
                 (o.createdAt || o.date || '').startsWith(currentMonthPrefix) &&
                 o.status !== 'Cancelled' && o.status !== 'Rejected'
             );
@@ -108,7 +108,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
             const isOverBudget = budgetCap > 0 && monthlySpent > budgetCap;
 
             // Open Transfers
-            const openTransfers = transfers.filter(t => 
+            const openTransfers = transfers.filter(t =>
                 (t.sourceRegionCode === region.code || t.destRegionCode === region.code) &&
                 t.status !== 'Completed' && t.status !== 'Received' && t.status !== 'Cancelled'
             );
@@ -168,7 +168,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
                         <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                             Regional PO Spend
                         </span>
-                        <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <div className="p-2 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                             <DollarSign size={16} />
                         </div>
                     </div>
@@ -185,7 +185,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
                         <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                             Autonomy Index
                         </span>
-                        <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        <div className="p-2 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]">
                             <ShieldCheck size={16} />
                         </div>
                     </div>
@@ -264,7 +264,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
                                             {openTransfersCount > 0 && (
                                                 <>
                                                     <span className="text-[var(--theme-border)]">•</span>
-                                                    <span className="flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
+                                                    <span className="flex items-center gap-1 font-medium text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                                                         <ArrowRightLeft size={13} />
                                                         {openTransfersCount} Active Transfers
                                                     </span>
@@ -325,9 +325,9 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
                                             <div
                                                 className={`h-full rounded-full transition-all duration-300 ${
                                                     isOverBudget
-                                                        ? 'bg-rose-500'
+                                                        ? 'bg-[var(--theme-status-danger-bg)]'
                                                         : isNearCap
-                                                            ? 'bg-amber-500'
+                                                            ? 'bg-[var(--theme-status-warning-bg)]'
                                                             : 'bg-[var(--theme-accent)]'
                                                 }`}
                                                 style={{ width: `${budgetPercent}%` }}
@@ -341,7 +341,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
 
                                     <div className="flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)] mt-2 pt-2 border-t border-[var(--theme-border)]/60">
                                         <span>Autonomous Cap: <strong className="text-[var(--theme-text-primary)] font-mono">{formatCompactNumber(autonomousLimit, { currency: currencySymbol })}</strong> / PO</span>
-                                        <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                                        <span className="font-medium text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                             Revenue: {formatCompactNumber(totalRevenue, { currency: currencySymbol })}
                                         </span>
                                     </div>

@@ -418,7 +418,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                         </p>
                         <div className="grid grid-cols-2 gap-2 text-xs">
                             <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-start gap-2">
-                                <WifiOff size={15} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                                <WifiOff size={15} className="text-[var(--theme-status-warning-text)] mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="font-bold text-[var(--theme-text-primary)]">100% Offline POS</p>
                                     <p className="text-[11px] text-[var(--theme-text-secondary)]">Local barcode scan, sale queue & auto-sync.</p>
@@ -432,7 +432,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                                 </div>
                             </div>
                             <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-start gap-2">
-                                <Sparkles size={15} className="text-blue-500 mt-0.5 flex-shrink-0" />
+                                <Sparkles size={15} className="text-[var(--theme-status-info-text)] mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="font-bold text-[var(--theme-text-primary)]">Cash Drawer Kick</p>
                                     <p className="text-[11px] text-[var(--theme-text-secondary)]">Automated ESC/POS pulse on cash sales.</p>

@@ -127,7 +127,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                         <div className={`w-11 h-11 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center shrink-0 border ${
                             isFullySlotted
-                                ? 'bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400'
+                                ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                 : 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
                         }`}>
                             <Package size={22} />
@@ -254,7 +254,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                         onClose();
                                     }
                                 }}
-                                className="min-h-[44px] px-3.5 md:px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
+                                className="min-h-[44px] px-3.5 md:px-4 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
                                 title={t('common.delete') || 'Delete Job'}
                             >
                                 <Trash2 size={14} />
@@ -298,7 +298,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 type="button"
                                 onClick={() => onCompleteJob(job)}
                                 disabled={isSubmitting || !isFullySlotted || isCompleted}
-                                className="min-h-[44px] w-full sm:w-auto justify-center px-3 sm:px-6 md:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                                className="min-h-[44px] w-full sm:w-auto justify-center px-3 sm:px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <Loader2 size={16} className="animate-spin" />

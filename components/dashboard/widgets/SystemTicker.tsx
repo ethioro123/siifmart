@@ -21,7 +21,7 @@ export const SystemTicker = () => {
             <div className="animate-marquee whitespace-nowrap flex gap-12 items-center pl-40">
                 {messages.concat(messages).map((msg, i) => (
                     <span key={i} className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] flex items-center">
-                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
+                        <span className="w-1.5 h-1.5 bg-[var(--theme-status-success-bg)] rounded-full mr-2 animate-pulse"></span>
                         {msg}
                     </span>
                 ))}

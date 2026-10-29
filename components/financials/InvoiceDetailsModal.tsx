@@ -77,8 +77,8 @@ export const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
 
                 {/* Match Discrepancy Diagnostics */}
                 {invoice.matchDiscrepancyNotes && (
-                    <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2.5">
-                        <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                    <div className="p-3.5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-start gap-2.5">
+                        <AlertTriangle size={16} className="text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" />
                         <div>
                             <span className="font-semibold block mb-0.5">Discrepancy Diagnostics:</span>
                             <p className="leading-relaxed text-[var(--theme-text-secondary)]">
@@ -110,7 +110,7 @@ export const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
                                     <td className="p-3 text-right text-[var(--theme-text-secondary)] tabular-nums">
                                         {item.poQuantity}
                                     </td>
-                                    <td className="p-3 text-right text-emerald-600 dark:text-emerald-400 font-medium tabular-nums">
+                                    <td className="p-3 text-right text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium tabular-nums">
                                         {item.receivedQuantity}
                                     </td>
                                     <td className="p-3 text-right text-[var(--theme-text-primary)] font-semibold tabular-nums">
@@ -120,7 +120,7 @@ export const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
                                         {currencySymbol} {item.invoicedUnitPrice.toLocaleString()}
                                     </td>
                                     <td className={`p-3 text-right font-semibold tabular-nums ${
-                                        item.matchVariancePct > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                                        item.matchVariancePct > 0 ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                     }`}>
                                         {item.matchVariancePct > 0 ? `+${item.matchVariancePct}%` : '0%'}
                                     </td>
@@ -136,13 +136,13 @@ export const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
                         canOverride ? (
                             <button
                                 onClick={onOpenOverride}
-                                className="px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                                className="px-3.5 py-2 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
                             >
                                 <ShieldAlert size={14} />
                                 <span>Supervisory Override (Rule 18)</span>
                             </button>
                         ) : (
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 font-medium">
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium">
                                 <Clock size={13} className="shrink-0" />
                                 <span>Discrepancy Flagged — Awaiting Country Finance Director Supervisory Override</span>
                             </div>

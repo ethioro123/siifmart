@@ -77,12 +77,12 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
     return (
         <div className="fixed inset-0 z-50 overflow-hidden flex justify-end" role="dialog" aria-modal="true" aria-label={t('pos.filtersAndSort')}>
             {/* Backdrop */}
-            <div 
+            <div
                 className="absolute inset-0 bg-black/60 transition-opacity duration-200 animate-in fade-in"
                 onClick={onClose}
                 aria-hidden="true"
             />
-            
+
             {/* Sidebar Container */}
             <div className="relative w-full max-w-md bg-[var(--theme-bg-panel)] h-full shadow-xl flex flex-col z-10 border-l border-[var(--theme-border)] transform transition-transform duration-200 animate-in slide-in-from-right">
                 {/* Header */}
@@ -104,7 +104,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                             </div>
                         </div>
                     </div>
-                    <button 
+                    <button
                         ref={closeButtonRef}
                         type="button"
                         onClick={onClose}
@@ -115,7 +115,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                         <X size={16} />
                     </button>
                 </div>
-                
+
                 {/* Body / Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-hide">
                     {/* 1. Department Selection */}
@@ -162,7 +162,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                                    <Folder size={13} className="text-blue-500" />
+                                    <Folder size={13} className="text-[var(--theme-status-info-text)]" />
                                     {t('pos.categories')}
                                 </span>
                                 {selectedCategory !== 'All' && (
@@ -227,7 +227,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                     {/* 3. Sort Options */}
                     <div className="space-y-2.5">
                         <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                            <SlidersHorizontal size={13} className="text-sky-500" />
+                            <SlidersHorizontal size={13} className="text-[var(--theme-status-info-text)]" />
                             {t('pos.sortProductsBy')}
                         </span>
                         <div className="grid grid-cols-2 gap-2">
@@ -261,18 +261,18 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                             className="w-full min-h-11 flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-colors"
                         >
                             <span className="inline-flex items-center gap-2.5 text-xs font-medium text-[var(--theme-text-primary)] tracking-tight">
-                                <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                                <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                                     <Tag className="w-4 h-4" />
                                 </div>
                                 <span className="font-semibold">{t('pos.onlyPromotionalItems')}</span>
                             </span>
-                            <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${onSaleOnly ? 'bg-rose-500' : 'bg-[var(--theme-border)]'}`}>
+                            <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${onSaleOnly ? 'bg-[var(--theme-status-danger-bg)]' : 'bg-[var(--theme-border)]'}`}>
                                 <div className={`w-4 h-4 rounded-full bg-white transition-transform ${onSaleOnly ? 'translate-x-4' : 'translate-x-0'}`} />
                             </div>
                         </button>
                     </div>
                 </div>
-                
+
                 {/* Footer Controls */}
                 <div className="p-4 border-t border-[var(--theme-border-subtle)] flex items-center gap-3 bg-[var(--theme-bg-card)]">
                     <button

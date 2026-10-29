@@ -106,7 +106,7 @@ export function POSStationTab({
             help="Enable this to process sales without requiring a customer profile. Ideal for quick retail transactions."
           />
           {workflow.posGuestCheckout && (
-            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-[11px] font-medium col-span-full p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20">
+            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-medium col-span-full p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
               <AlertTriangle size={14} className="shrink-0" />
               <span>Guest checkout is ON — anonymous cash sales are untraceable. HQ audit visibility required.</span>
             </div>

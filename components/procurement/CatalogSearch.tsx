@@ -59,7 +59,7 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                 <input
                     type="text"
-                    className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.search ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-full pl-10 pr-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none placeholder:text-[var(--theme-text-muted)] font-semibold transition-all`}
+                    className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.search ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-full pl-10 pr-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none placeholder:text-[var(--theme-text-muted)] font-semibold transition-all`}
                     placeholder="Type product name, brand, size, pack, or SKU..."
                     value={searchTerm}
                     onChange={(e) => {
@@ -71,7 +71,7 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                     onFocus={() => setIsSearchOpen(true)}
                     onBlur={() => setIsSearchOpen(false)}
                 />
-                {errors.search && <span className="absolute right-3.5 top-3 text-[11px] text-rose-500 font-bold">{errors.search}</span>}
+                {errors.search && <span className="absolute right-3.5 top-3 text-[11px] text-[var(--theme-status-danger-text)] font-bold">{errors.search}</span>}
                 {isSearchOpen && (
                     <div className="absolute z-50 w-full mt-1.5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-2xl max-h-72 overflow-y-auto p-1.5">
                         {filteredProducts.length > 0 ? (

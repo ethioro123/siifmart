@@ -36,17 +36,17 @@ export const PackGlobalScanBar: React.FC<PackGlobalScanBarProps> = ({
             <form onSubmit={onSubmit} className="relative group">
                 <div className={`relative flex items-center gap-2 sm:gap-3 bg-[var(--theme-bg-card)] border sm:border-2 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-1.5 sm:py-3 transition-colors ${
                     scanSuccess
-                        ? 'border-green-500/50 bg-green-500/5'
+                        ? 'border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)]'
                         : scanError
-                            ? 'border-red-500/50 bg-red-500/5'
+                            ? 'border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)]'
                             : 'border-[var(--theme-border)] focus-within:border-[var(--theme-accent)] shadow-xs'
                 }`}>
                     {isScanning ? (
                         <Loader2 size={16} className="text-[var(--theme-accent)] animate-spin shrink-0 sm:w-[22px] sm:h-[22px]" />
                     ) : scanSuccess ? (
-                        <CheckCircle size={16} className="text-green-500 shrink-0 sm:w-[22px] sm:h-[22px]" />
+                        <CheckCircle size={16} className="text-[var(--theme-status-success-text)] shrink-0 sm:w-[22px] sm:h-[22px]" />
                     ) : scanError ? (
-                        <X size={16} className="text-red-500 shrink-0 sm:w-[22px] sm:h-[22px]" />
+                        <X size={16} className="text-[var(--theme-status-danger-text)] shrink-0 sm:w-[22px] sm:h-[22px]" />
                     ) : (
                         <ScanLine size={16} className="text-[var(--theme-accent)] shrink-0 sm:w-[22px] sm:h-[22px]" />
                     )}
@@ -76,7 +76,7 @@ export const PackGlobalScanBar: React.FC<PackGlobalScanBarProps> = ({
                 </div>
                 {/* Status Messages */}
                 {(scanSuccess || scanError) && (
-                    <div className={`absolute -bottom-5 sm:-bottom-6 left-3 sm:left-4 text-[10px] sm:text-xs font-semibold tracking-wide ${scanSuccess ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className={`absolute -bottom-5 sm:-bottom-6 left-3 sm:left-4 text-[10px] sm:text-xs font-semibold tracking-wide ${scanSuccess ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}`}>
                         {scanSuccess || scanError}
                     </div>
                 )}

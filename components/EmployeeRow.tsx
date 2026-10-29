@@ -73,14 +73,14 @@ export default function EmployeeRow({
                     })();
                     const isOnlineAndActive = employee.status === 'Active' && loggedInToday;
                     return (
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--theme-bg-card)] ${isOnlineAndActive ? 'bg-emerald-500' : 'bg-neutral-400'}`} />
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--theme-bg-card)] ${isOnlineAndActive ? 'bg-[var(--theme-status-success-bg)]' : 'bg-neutral-400'}`} />
                     );
                 })()}
             </div>
 
             {/* Name & Role */}
             <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] truncate group-hover:text-[#0071E3] dark:group-hover:text-[#2997FF] transition-colors">
+                <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] truncate group-hover:text-[var(--theme-accent)] dark:group-hover:text-[var(--theme-accent)] transition-colors">
                     {employee.name}
                 </h4>
                 <p className="text-xs font-medium text-[var(--theme-text-secondary)] mt-0.5 truncate">
@@ -94,7 +94,7 @@ export default function EmployeeRow({
                 <div className="flex items-center gap-1.5">
                     <MapPin size={12} className="flex-shrink-0 text-[var(--theme-text-muted)]" />
                     {siteInfo.isWarning ? (
-                        <span className="truncate text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1" title="Workplace facility assignment is mandatory">
+                        <span className="truncate text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium flex items-center gap-1" title="Workplace facility assignment is mandatory">
                             <AlertTriangle size={11} className="flex-shrink-0" />
                             {siteInfo.label}
                         </span>
@@ -107,8 +107,8 @@ export default function EmployeeRow({
                                 </span>
                             ) : siteInfo.facilityId ? (
                                 <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded shrink-0 font-semibold ${
-                                    siteInfo.isHQ 
-                                        ? 'bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20' 
+                                    siteInfo.isHQ
+                                        ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                 }`} title={`Assigned Facility ID: ${siteInfo.facilityId}`}>
                                     {siteInfo.facilityId}
@@ -119,8 +119,8 @@ export default function EmployeeRow({
                 </div>
                 {canSeeLocation && geofence ? (
                     geofence.isForeignAnomaly ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 mt-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold border border-rose-500/20 truncate" title={`Security Alert: ${geofence.anomalyReason}`}>
-                            <AlertTriangle size={10} className="text-rose-500 flex-shrink-0" />
+                        <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 mt-0.5 rounded-full bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-semibold border border-[var(--theme-status-danger-border)] truncate" title={`Security Alert: ${geofence.anomalyReason}`}>
+                            <AlertTriangle size={10} className="text-[var(--theme-status-danger-text)] flex-shrink-0" />
                             Foreign / Off-Premise
                         </span>
                     ) : (
@@ -138,7 +138,7 @@ export default function EmployeeRow({
             {/* Status Badges */}
             <div className="hidden sm:flex items-center gap-1.5 shrink-0">
                 {isPending && (
-                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/20">
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold border border-[var(--theme-status-warning-border)]">
                         Pending
                     </span>
                 )}
@@ -150,10 +150,10 @@ export default function EmployeeRow({
                         const loggedInToday = date.getDate() === today.getDate() &&
                             date.getMonth() === today.getMonth() &&
                             date.getFullYear() === today.getFullYear();
-                        
+
                         return loggedInToday ? (
-                            <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold border border-[var(--theme-status-success-border)]">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
                                 Active Today
                             </span>
                         ) : null;

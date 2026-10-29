@@ -46,11 +46,11 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
                     <Truck size={18} className="text-primary" /> {t('warehouse.transferRequest')}
                 </h3>
                 {isCrossZone && settings?.enforceRegionalZoning && (
-                    <div className="bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-4 rounded-xl flex items-start gap-3 mb-5">
-                        <AlertTriangle className="shrink-0 mt-0.5 text-amber-500" size={18} />
+                    <div className="bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] p-4 rounded-xl flex items-start gap-3 mb-5">
+                        <AlertTriangle className="shrink-0 mt-0.5 text-[var(--theme-status-warning-text)]" size={18} />
                         <div>
-                            <h4 className="font-bold text-sm text-amber-700 dark:text-amber-400">Cross-Zone Replenishment Override</h4>
-                            <p className="text-xs mt-1 text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+                            <h4 className="font-bold text-sm text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">Cross-Zone Replenishment Override</h4>
+                            <p className="text-xs mt-1 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] leading-relaxed">
                                 Transferring stock from <span className="font-bold text-[var(--theme-text-primary)]">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to <span className="font-bold text-[var(--theme-text-primary)]">{getZoneName(destSiteObj?.logisticsZoneId)}</span>. Authorized leadership override active.
                             </p>
                         </div>
@@ -107,7 +107,7 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5 pt-4 border-t border-[var(--theme-border)]">
                     <div>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1">{t('warehouse.priority')}</p>
-                        <span className={`text-xs px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider ${transferPriority === 'Critical' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
+                        <span className={`text-xs px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider ${transferPriority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' :
                             transferPriority === 'High' ? 'bg-orange-500/20 text-orange-500 border border-orange-500/30' :
                                 'bg-primary/20 text-primary border border-primary/30'
                             }`}>{transferPriority}</span>

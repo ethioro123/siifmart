@@ -28,8 +28,8 @@ export const BulkDiscountModal: React.FC<BulkDiscountModalProps> = ({
          title="Apply Bulk Discount"
       >
          <div className="space-y-4">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-[11px] font-medium">
-               <ShieldAlert size={14} className="shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-medium">
+               <ShieldAlert size={14} className="shrink-0 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" />
                <span>Proposals need regional Operations, Supply Chain and Merchandising approval. Prices below the 15% margin floor also need independent Finance signoff. Selling prices round to whole numbers.</span>
             </div>
 

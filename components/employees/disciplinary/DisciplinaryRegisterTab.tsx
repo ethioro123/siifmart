@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-    Scale, AlertTriangle, Plus, Search, Filter, Clock, 
+import {
+    Scale, AlertTriangle, Plus, Search, Filter, Clock,
     CheckCircle2, XCircle, Eye, ShieldAlert, FileText, ArrowRight
 } from 'lucide-react';
 import { disciplinaryService } from '../../../services/disciplinary.service';
@@ -57,8 +57,8 @@ export default function DisciplinaryRegisterTab() {
     const handleResolveAppeal = async (recordId: string, resolution: 'Upheld' | 'Overturned') => {
         try {
             await disciplinaryService.resolveAppeal(
-                recordId, 
-                resolution, 
+                recordId,
+                resolution,
                 {
                     id: user?.id || 'hr_dir',
                     name: user?.name || 'HR Officer',
@@ -84,7 +84,7 @@ export default function DisciplinaryRegisterTab() {
 
     const filteredRecords = useMemo(() => {
         return records.filter(rec => {
-            const matchesSearch = 
+            const matchesSearch =
                 rec.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 rec.employee_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 rec.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,7 +110,7 @@ export default function DisciplinaryRegisterTab() {
             {/* Header Banner */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-2xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Scale size={20} />
                     </div>
                     <div>
@@ -119,11 +119,11 @@ export default function DisciplinaryRegisterTab() {
                                 Disciplinary & Grievance Register
                             </h3>
                             {canAdjudicate ? (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                     Checker • Appeal Adjudication
                                 </span>
                             ) : (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-status-info-border)]">
                                     Maker • Incident Filing
                                 </span>
                             )}
@@ -138,7 +138,7 @@ export default function DisciplinaryRegisterTab() {
                     <button
                         type="button"
                         onClick={() => setIsNoticeModalOpen(true)}
-                        className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
+                        className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
                     >
                         <Plus size={15} />
                         <span>Issue Disciplinary Notice</span>
@@ -160,7 +160,7 @@ export default function DisciplinaryRegisterTab() {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Search employee, ID, title..."
-                            className="w-full pl-9 pr-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-hidden focus:border-[#0071E3]"
+                            className="w-full pl-9 pr-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-hidden focus:border-[var(--theme-border-focus)]"
                         />
                     </div>
 
@@ -168,7 +168,7 @@ export default function DisciplinaryRegisterTab() {
                     <select
                         value={filterSeverity}
                         onChange={(e) => setFilterSeverity(e.target.value)}
-                        className="px-3 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3]"
+                        className="px-3 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[var(--theme-border-focus)]"
                     >
                         <option value="All">All Severities</option>
                         <option value="Critical">Critical Severity</option>
@@ -181,7 +181,7 @@ export default function DisciplinaryRegisterTab() {
                     <select
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value)}
-                        className="px-3 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3]"
+                        className="px-3 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[var(--theme-border-focus)]"
                     >
                         <option value="All">All Notice Types</option>
                         <option value="Verbal Warning">Verbal Warning</option>
@@ -196,7 +196,7 @@ export default function DisciplinaryRegisterTab() {
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
-                        className="px-3 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3]"
+                        className="px-3 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[var(--theme-border-focus)]"
                     >
                         <option value="All">All Appeal Statuses</option>
                         <option value="Pending Appeal">Pending Appeal</option>
@@ -222,7 +222,7 @@ export default function DisciplinaryRegisterTab() {
                 <div className="text-center py-12 bg-[var(--theme-bg-card)] rounded-2xl border border-dashed border-[var(--theme-border)] space-y-2">
                     {records.length === 0 ? (
                         <>
-                            <CheckCircle2 size={36} className="mx-auto text-emerald-500" />
+                            <CheckCircle2 size={36} className="mx-auto text-[var(--theme-status-success-text)]" />
                             <p className="font-bold text-sm text-[var(--theme-text-primary)]">
                                 Zero Active Disciplinary Notices
                             </p>
@@ -232,7 +232,7 @@ export default function DisciplinaryRegisterTab() {
                         </>
                     ) : (
                         <>
-                            <AlertTriangle size={36} className="mx-auto text-amber-500" />
+                            <AlertTriangle size={36} className="mx-auto text-[var(--theme-status-warning-text)]" />
                             <p className="font-bold text-sm text-[var(--theme-text-primary)]">
                                 No Matching Records Found
                             </p>
@@ -247,7 +247,7 @@ export default function DisciplinaryRegisterTab() {
                                     setFilterType('All');
                                     setFilterStatus('All');
                                 }}
-                                className="mt-2 text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] hover:underline cursor-pointer"
+                                className="mt-2 text-xs font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] hover:underline cursor-pointer"
                             >
                                 Clear all filters
                             </button>
@@ -277,10 +277,10 @@ export default function DisciplinaryRegisterTab() {
                                             </h4>
                                             <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${
                                                 rec.severity === 'Critical'
-                                                    ? 'bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30'
+                                                    ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                                                     : rec.severity === 'High'
                                                     ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30'
-                                                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                                                    : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                             }`}>
                                                 {rec.severity} Severity
                                             </span>
@@ -309,12 +309,12 @@ export default function DisciplinaryRegisterTab() {
                                             </span>
                                         )}
                                         {rec.appeal_status === 'Upheld' && (
-                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30">
+                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                                                 Sanction Upheld
                                             </span>
                                         )}
                                         {rec.appeal_status === 'Overturned' && (
-                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                                 Overturned
                                             </span>
                                         )}
@@ -333,7 +333,7 @@ export default function DisciplinaryRegisterTab() {
                                     </span>
                                     <div className="flex items-center gap-3 text-[11px] text-[var(--theme-text-secondary)]">
                                         {rec.expires_at && (
-                                            <span className={isExpired ? 'text-stone-400 line-through' : 'text-emerald-600 dark:text-emerald-400'}>
+                                            <span className={isExpired ? 'text-stone-400 line-through' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'}>
                                                 {isExpired ? `Expired (${rec.expires_at})` : `Expires: ${rec.expires_at}`}
                                             </span>
                                         )}
@@ -368,7 +368,7 @@ export default function DisciplinaryRegisterTab() {
                                         {rec.appeal_status === 'Pending Appeal' && canAdjudicate && (
                                             <>
                                                 {isIssuer ? (
-                                                    <span className="text-[11px] text-amber-500 font-semibold px-2">
+                                                    <span className="text-[11px] text-[var(--theme-status-warning-text)] font-semibold px-2">
                                                         4-Eyes rule: Issuer cannot resolve
                                                     </span>
                                                 ) : (
@@ -376,14 +376,14 @@ export default function DisciplinaryRegisterTab() {
                                                         <button
                                                             type="button"
                                                             onClick={() => handleResolveAppeal(rec.id, 'Overturned')}
-                                                            className="h-8 px-3 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/30 transition-all cursor-pointer"
+                                                            className="h-8 px-3 rounded-xl text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] transition-all cursor-pointer"
                                                         >
                                                             Overturn Warning
                                                         </button>
                                                         <button
                                                             type="button"
                                                             onClick={() => handleResolveAppeal(rec.id, 'Upheld')}
-                                                            className="h-8 px-3 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-xs transition-all cursor-pointer"
+                                                            className="h-8 px-3 rounded-xl text-xs font-semibold text-white bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] shadow-xs transition-all cursor-pointer"
                                                         >
                                                             Uphold Sanction
                                                         </button>

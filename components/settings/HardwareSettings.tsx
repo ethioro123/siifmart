@@ -13,7 +13,7 @@ const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
 
 const ConnectionBadge = ({ type }: { type: 'network' | 'usb' | 'bluetooth' }) => {
     switch (type) {
-        case 'network': return <span className="flex items-center gap-1 text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20"><Wifi size={10} /> Network</span>;
+        case 'network': return <span className="flex items-center gap-1 text-[10px] bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] px-2 py-0.5 rounded border border-[var(--theme-status-info-border)]"><Wifi size={10} /> Network</span>;
         case 'usb': return <span className="flex items-center gap-1 text-[10px] bg-gray-500/10 text-gray-400 px-2 py-0.5 rounded border border-gray-500/20"><Usb size={10} /> USB</span>;
         case 'bluetooth': return <span className="flex items-center gap-1 text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20"><Bluetooth size={10} /> Bluetooth</span>;
     }
@@ -23,7 +23,7 @@ const DeviceCard = ({ device, onTest, onConfig }: any) => (
     <div className="bg-black/40 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-all flex flex-col gap-4 group relative overflow-hidden">
 
         {/* Status Dot */}
-        <div className={`absolute top-4 right-4 w-2 h-2 rounded-full ${device.status === 'online' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-red-500'}`} />
+        <div className={`absolute top-4 right-4 w-2 h-2 rounded-full ${device.status === 'online' ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-[var(--theme-status-danger-bg)]'}`} />
 
         <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-gray-300 group-hover:bg-cyber-primary/10 group-hover:text-cyber-primary transition-colors">
@@ -118,14 +118,14 @@ export default function HardwareSettings() {
                                     <Printer size={16} className="text-gray-400" />
                                     <div className="text-sm text-gray-300">Print Spooler</div>
                                 </div>
-                                <span className="text-[10px] text-green-400 flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">Running</span>
+                                <span className="text-[10px] text-[var(--theme-status-success-text)] flex items-center gap-1 bg-[var(--theme-status-success-bg)] px-2 py-0.5 rounded border border-[var(--theme-status-success-border)]">Running</span>
                             </div>
                             <div className="flex items-center justify-between p-3 bg-black/20 rounded-xl border border-white/5">
                                 <div className="flex items-center gap-3">
                                     <Scale size={16} className="text-gray-400" />
                                     <div className="text-sm text-gray-300">OPOS Bridge</div>
                                 </div>
-                                <span className="text-[10px] text-yellow-400 flex items-center gap-1 bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-500/20">Restarting</span>
+                                <span className="text-[10px] text-[var(--theme-status-warning-text)] flex items-center gap-1 bg-[var(--theme-status-warning-bg)] px-2 py-0.5 rounded border border-[var(--theme-status-warning-border)]">Restarting</span>
                             </div>
                         </div>
                     </div>

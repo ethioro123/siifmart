@@ -8,7 +8,7 @@ export function GhostModeBanner() {
     if (!originalUser) return null;
 
     return (
-        <div className="bg-yellow-500/90 backdrop-blur-md text-black px-4 py-2 flex items-center justify-between shadow-lg relative z-[100] animate-slide-down">
+        <div className="bg-[var(--theme-status-warning-bg)] backdrop-blur-md text-black px-4 py-2 flex items-center justify-between shadow-lg relative z-[100] animate-slide-down">
             <div className="flex items-center gap-3">
                 <div className="bg-black/20 p-1.5 rounded-full animate-pulse">
                     <Eye size={18} className="text-black" />

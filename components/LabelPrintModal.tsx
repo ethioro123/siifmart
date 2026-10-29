@@ -279,7 +279,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                                     width={1.2}
                                                     margin={0}
                                                 />
-                                            ) : <span className="text-red-500 font-bold text-[11px]">NO DATA</span>}
+                                            ) : <span className="text-[var(--theme-status-danger-text)] font-bold text-[11px]">NO DATA</span>}
                                             <div className="font-mono font-bold text-[11px] mt-1 text-slate-800 tracking-wider">
                                                 {labelData.product.sku}
                                             </div>
@@ -320,7 +320,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveLabel(index)}
-                                            className="p-2 text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
+                                            className="p-2 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] rounded-xl transition-colors cursor-pointer"
                                             title="Remove label"
                                         >
                                             <Trash2 size={16} />

@@ -31,15 +31,15 @@ export const RegionalOperationalDigest: React.FC<RegionalOperationalDigestProps>
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
-            <AlertTriangle className="text-amber-500 w-4 h-4" />
+            <AlertTriangle className="text-[var(--theme-status-warning-text)] w-4 h-4" />
             <span>Territory Operational Alert Digest</span>
           </h3>
           <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
             Real-time branch alerts, freight arrivals, and active warehouse workloads in this region
           </p>
         </div>
-        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
           <span>Regional Pulse</span>
         </span>
       </div>
@@ -50,14 +50,14 @@ export const RegionalOperationalDigest: React.FC<RegionalOperationalDigestProps>
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg border ${
               totalStockAlerts > 0
-                ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
             }`}>
               <Box size={16} />
             </div>
             <div>
               <p className={`text-xs font-bold ${
-                totalStockAlerts > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--theme-text-primary)]'
+                totalStockAlerts > 0 ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-text-primary)]'
               }`}>
                 {totalStockAlerts} Stock Alerts
               </p>
@@ -79,11 +79,11 @@ export const RegionalOperationalDigest: React.FC<RegionalOperationalDigestProps>
         {/* 2. Inbound Freight Arriving */}
         <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)] transition-colors">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+            <div className="p-2 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
               <Truck size={16} />
             </div>
             <div>
-              <p className="text-xs font-bold text-amber-600 dark:text-amber-400">
+              <p className="text-xs font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                 {pendingInboundShipments} Inbound Shipments
               </p>
               <p className="text-[11px] text-[var(--theme-text-secondary)]">
@@ -104,11 +104,11 @@ export const RegionalOperationalDigest: React.FC<RegionalOperationalDigestProps>
         {/* 3. Regional Warehouse Fulfillment Pipeline */}
         <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)] transition-colors">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+            <div className="p-2 rounded-lg bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
               <ShoppingCart size={16} />
             </div>
             <div>
-              <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+              <p className="text-xs font-bold text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]">
                 {pendingPicks} Picks · {inProgressPacks} Packs
               </p>
               <p className="text-[11px] text-[var(--theme-text-secondary)]">

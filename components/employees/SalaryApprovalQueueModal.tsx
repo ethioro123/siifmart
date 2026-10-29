@@ -165,7 +165,7 @@ export default function SalaryApprovalQueueModal({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-stone-200 dark:border-white/10">
                     <div>
                         <div className="flex items-center gap-2">
-                            <ShieldCheck className="text-emerald-600 dark:text-emerald-400" size={20} />
+                            <ShieldCheck className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" size={20} />
                             <h3 className="font-bold text-base text-stone-900 dark:text-white">
                                 Dual-Control Compensation Governance
                             </h3>
@@ -189,7 +189,7 @@ export default function SalaryApprovalQueueModal({
                             <Clock size={14} />
                             <span>Pending</span>
                             {pendingCount > 0 && (
-                                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-mono">
+                                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[var(--theme-status-warning-bg)] text-white font-mono">
                                     {pendingCount}
                                 </span>
                             )}
@@ -217,7 +217,7 @@ export default function SalaryApprovalQueueModal({
                     </div>
                 ) : displayedRequests.length === 0 ? (
                     <div className="py-12 text-center text-stone-500">
-                        <UserCheck size={36} className="mx-auto mb-3 opacity-40 text-emerald-600" />
+                        <UserCheck size={36} className="mx-auto mb-3 opacity-40 text-[var(--theme-status-success-text)]" />
                         <p className="font-bold text-sm text-stone-700 dark:text-stone-300">
                             {activeTab === 'pending' ? 'Zero Pending Salary Requests' : 'No Past Requests Recorded'}
                         </p>
@@ -242,7 +242,7 @@ export default function SalaryApprovalQueueModal({
                             return (
                                 <div
                                     key={req.id}
-                                    className="p-4 rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-black/30 hover:border-emerald-500/40 transition-all shadow-xs space-y-3"
+                                    className="p-4 rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-black/30 border-[var(--theme-status-success-border)] transition-all shadow-xs space-y-3"
                                 >
                                     {/* Top Row: Employee & Status */}
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -253,10 +253,10 @@ export default function SalaryApprovalQueueModal({
                                                 </h4>
                                                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                                                     req.status === 'approved'
-                                                        ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400'
+                                                        ? 'bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/40 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                                         : req.status === 'rejected'
-                                                        ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400'
-                                                        : 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'
+                                                        ? 'bg-[var(--theme-status-danger-bg)] dark:bg-rose-950/40 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
+                                                        : 'bg-[var(--theme-status-warning-bg)] dark:bg-amber-950/40 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                                                 }`}>
                                                     {req.status}
                                                 </span>
@@ -272,7 +272,7 @@ export default function SalaryApprovalQueueModal({
                                             <ArrowRight size={13} className="text-stone-400" />
                                             <span className="font-bold text-stone-900 dark:text-white">{req.currency} {req.proposedSalary.toLocaleString()}</span>
                                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                                diff >= 0 ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400'
+                                                diff >= 0 ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                                             }`}>
                                                 {diff >= 0 ? '+' : ''}{pctChange}%
                                             </span>
@@ -289,14 +289,14 @@ export default function SalaryApprovalQueueModal({
 
                                     {/* Approver or Rejector Note */}
                                     {req.status === 'approved' && req.approvedBy && (
-                                        <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                        <p className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1">
                                             <CheckCircle size={13} />
                                             Approved by {req.approvedBy} ({req.approvedByRole}) on {new Date(req.approvedAt || '').toLocaleString()}
                                         </p>
                                     )}
 
                                     {req.status === 'rejected' && (
-                                        <div className="p-2.5 bg-rose-50 dark:bg-rose-950/20 rounded-xl border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-400">
+                                        <div className="p-2.5 bg-[var(--theme-status-danger-bg)] dark:bg-rose-950/20 rounded-xl border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                                             <p className="font-bold">Rejected by {req.rejectedBy || 'Reviewer'}:</p>
                                             <p className="italic mt-0.5">"{req.rejectionReason}"</p>
                                         </div>
@@ -307,17 +307,17 @@ export default function SalaryApprovalQueueModal({
                                         <div>
                                             {rejectingId === req.id ? (
                                                 <div className="space-y-2 pt-2 border-t border-stone-200 dark:border-white/10">
-                                                    <label className="block text-xs font-bold text-rose-600 dark:text-rose-400">
+                                                    <label className="block text-xs font-bold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                                                         State Reason for Rejection:
                                                     </label>
                                                     <textarea
                                                         value={rejectionReason}
                                                         onChange={(e) => setRejectionReason(e.target.value)}
                                                         rows={2}
-                                                        className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl p-2.5 text-xs text-stone-900 dark:text-white outline-none focus:border-rose-500 resize-none"
+                                                        className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl p-2.5 text-xs text-stone-900 dark:text-white outline-none border-[var(--theme-status-danger-border)] resize-none"
                                                         placeholder="e.g. Budget ceiling reached, review scheduled next quarter..."
                                                     />
-                                                    {rejectError && <p className="text-[11px] text-rose-500">{rejectError}</p>}
+                                                    {rejectError && <p className="text-[11px] text-[var(--theme-status-danger-text)]">{rejectError}</p>}
                                                     <div className="flex justify-end gap-2">
                                                         <button
                                                             type="button"
@@ -330,7 +330,7 @@ export default function SalaryApprovalQueueModal({
                                                             type="button"
                                                             disabled={processingId === req.id}
                                                             onClick={() => handleConfirmReject(req.id)}
-                                                            className="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold cursor-pointer flex items-center gap-1.5"
+                                                            className="px-4 py-1.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white rounded-lg text-xs font-bold cursor-pointer flex items-center gap-1.5"
                                                         >
                                                             {processingId === req.id ? <Loader2 size={12} className="animate-spin" /> : <XCircle size={12} />}
                                                             Confirm Rejection
@@ -340,7 +340,7 @@ export default function SalaryApprovalQueueModal({
                                             ) : (
                                                 <div className="flex items-center justify-between pt-2 border-t border-stone-200 dark:border-white/10">
                                                     {isActionDisabled && processingId !== req.id && (
-                                                        <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                                        <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1">
                                                             <AlertTriangle size={13} />
                                                             {isOwnRecord
                                                                 ? 'Zero-Trust: You cannot approve your own compensation adjustment'
@@ -353,7 +353,7 @@ export default function SalaryApprovalQueueModal({
                                                             type="button"
                                                             disabled={isActionDisabled || !canApprove}
                                                             onClick={() => { setRejectingId(req.id); setRejectionReason(''); }}
-                                                            className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 text-rose-600 dark:text-rose-400 rounded-lg text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
+                                                            className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-lg text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
                                                         >
                                                             <XCircle size={13} />
                                                             Reject
@@ -362,7 +362,7 @@ export default function SalaryApprovalQueueModal({
                                                             type="button"
                                                             disabled={isActionDisabled || !canApprove}
                                                             onClick={() => handleApprove(req)}
-                                                            className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors shadow-xs"
+                                                            className="px-4 py-1.5 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white rounded-lg text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors shadow-xs"
                                                         >
                                                             {processingId === req.id ? (
                                                                 <Loader2 size={13} className="animate-spin" />

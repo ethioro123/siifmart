@@ -80,7 +80,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                 <tr key={i} className="hover:bg-[var(--theme-bg-subtle)] transition-colors group/row">
                                     <td className="p-4 pl-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
+                                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-success-bg)] flex items-center justify-center border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0">
                                                 <Package size={18} />
                                             </div>
                                             <div>
@@ -90,7 +90,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                                 <div className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5 flex items-center gap-2 flex-wrap">
                                                     <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[11px] border border-[var(--theme-border)] font-bold">{item.sku}</span>
                                                     {item.identityType === 'new' && (
-                                                        <span className="text-[11px] px-2 py-0.5 border border-amber-500/30 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold tracking-widest">
+                                                        <span className="text-[11px] px-2 py-0.5 border border-[var(--theme-status-warning-border)] rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold tracking-widest">
                                                             CUSTOM
                                                         </span>
                                                     )}
@@ -204,14 +204,14 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                         <div className="flex justify-end gap-2">
                                             <button
                                                 onClick={saveInlineEdit}
-                                                className="p-1.5 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:text-emerald-400 rounded-xl border border-emerald-500/20 transition-all cursor-pointer"
+                                                className="p-1.5 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] rounded-xl border border-[var(--theme-status-success-border)] transition-all cursor-pointer"
                                                 title="Save Changes"
                                             >
                                                 <Check size={14} />
                                             </button>
                                             <button
                                                 onClick={cancelInlineEdit}
-                                                className="p-1.5 bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-400 rounded-xl border border-red-500/20 transition-all cursor-pointer"
+                                                className="p-1.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] rounded-xl border border-[var(--theme-status-danger-border)] transition-all cursor-pointer"
                                                 title="Discard Changes"
                                             >
                                                 <X size={14} />
@@ -221,7 +221,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                         <div className="flex justify-end gap-1.5">
                                             <button onClick={() => onFullEdit(i)} className="p-1.5 hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer" title="Full Edit"><Edit3 size={14} /></button>
                                             <button onClick={() => startInlineEdit(i)} className="p-1.5 hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] transition-colors cursor-pointer" title="Quick Adjust"><FileText size={14} /></button>
-                                            <button onClick={() => onRemoveItem(i)} className="p-1.5 hover:bg-red-500/10 rounded-xl text-[var(--theme-text-secondary)] hover:text-red-500 transition-colors cursor-pointer" title="Remove Item"><Trash2 size={14} /></button>
+                                            <button onClick={() => onRemoveItem(i)} className="p-1.5 bg-[var(--theme-status-danger-bg)] rounded-xl text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] transition-colors cursor-pointer" title="Remove Item"><Trash2 size={14} /></button>
                                         </div>
                                     )}
                                 </td>
@@ -232,7 +232,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                             <tr>
                                 <td colSpan={6} className="p-12 text-center">
                                     <div className="flex flex-col items-center justify-center">
-                                        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-3 text-emerald-600 dark:text-emerald-400">
+                                        <div className="w-14 h-14 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] flex items-center justify-center mb-3 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                             <Package size={26} />
                                         </div>
                                         <h3 className="text-sm font-bold text-[var(--theme-text-primary)]">No Products Added Yet</h3>

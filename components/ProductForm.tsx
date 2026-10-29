@@ -156,7 +156,7 @@ export function ProductForm({
     return (
         <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-6 text-[var(--theme-text-primary)]" noValidate>
             {isReadOnly && (
-                <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-2xl text-center text-xs text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                <div className="bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] p-3 rounded-2xl text-center text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-bold uppercase tracking-wider flex items-center justify-center gap-2">
                     <Lock size={14} /> Read Only Mode — Adjustments Disabled
                 </div>
             )}
@@ -245,7 +245,7 @@ export function ProductForm({
                         <button
                             type="button"
                             onClick={onDelete}
-                            className="px-4 py-2.5 text-xs font-black uppercase rounded-xl border bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
+                            className="px-4 py-2.5 text-xs font-black uppercase rounded-xl border bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] flex items-center gap-1.5 transition-all cursor-pointer"
                         >
                             <Trash2 size={13} />
                             <span>Delete Product</span>

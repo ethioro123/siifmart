@@ -78,14 +78,14 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
         }
     };
 
-    const inputBase = "w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors placeholder:text-[var(--theme-text-secondary)]/50";
+    const inputBase = "w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[var(--theme-border-focus)] dark:focus:border-[var(--theme-border-focus)] transition-colors placeholder:text-[var(--theme-text-secondary)]/50";
     const labelBase = "text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5 block";
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Mobile Money & Bank Settlement Reconciliation" size="md">
             <div className="space-y-4 p-1">
-                <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs flex items-center gap-2.5">
-                    <ShieldCheck size={18} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                <div className="p-3.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-xl text-xs flex items-center gap-2.5">
+                    <ShieldCheck size={18} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                     <span className="text-[var(--theme-text-secondary)] leading-relaxed">
                         Reconcile POS-cleared mobile wallet balances against official bank / telco statements.
                     </span>
@@ -181,8 +181,8 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
                 {posReportedAmount !== '' && statementAmount !== '' && (
                     <div className={`p-3 rounded-xl border flex justify-between items-center text-xs ${
                         Math.abs(calculatedVariance) < 0.01
-                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'
+                            ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
+                            : 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                     }`}>
                         <div className="flex items-center gap-1.5 font-semibold">
                             {Math.abs(calculatedVariance) < 0.01 ? (
@@ -223,7 +223,7 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting || posReportedAmount === '' || statementAmount === ''}
-                        className="px-4 py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {isSubmitting && <Loader2 className="animate-spin" size={14} />}
                         <span>Save Reconciliation</span>

@@ -93,7 +93,7 @@ export const RegionalVelocityDeck: React.FC<RegionalVelocityDeckProps> = ({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
-                <TrendingUp size={16} className="text-emerald-500" />
+                <TrendingUp size={16} className="text-[var(--theme-status-success-text)]" />
                 <span>Fast-Moving SKUs in Territory</span>
               </h3>
               <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">

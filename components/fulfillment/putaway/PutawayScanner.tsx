@@ -349,17 +349,17 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         step={step}
                     />
 
-                    <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight break-words mb-3 sm:mb-4 transition-colors ${isStrictlyValid ? 'text-[var(--theme-accent)]' : showError ? 'text-rose-500' : ''}`}>
+                    <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight break-words mb-3 sm:mb-4 transition-colors ${isStrictlyValid ? 'text-[var(--theme-accent)]' : showError ? 'text-[var(--theme-status-danger-text)]' : ''}`}>
                         {showSuccess ? (t('warehouse.putaway.success') || 'Success!') : showError ? (t('warehouse.putaway.scanError') || 'Scan Error') : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : (t('warehouse.putaway.enterShelvedQuantity') || 'Enter Shelved Quantity')}
                     </h1>
 
                     {showSuccess ? (
                         <div className="text-center mb-6 animate-in fade-in duration-200">
-                            <p className="text-emerald-500 text-sm sm:text-lg break-words font-bold uppercase tracking-wider">{successMsg}</p>
+                            <p className="text-[var(--theme-status-success-text)] text-sm sm:text-lg break-words font-bold uppercase tracking-wider">{successMsg}</p>
                         </div>
                     ) : showError ? (
                         <div className="text-center mb-6 animate-in fade-in duration-200">
-                            <p className="text-rose-500 text-sm sm:text-lg break-words font-bold uppercase tracking-wider">{errorMsg}</p>
+                            <p className="text-[var(--theme-status-danger-text)] text-sm sm:text-lg break-words font-bold uppercase tracking-wider">{errorMsg}</p>
                         </div>
                     ) : step === 'LOCATION' ? (
                         <div className="w-full mb-6">
@@ -404,8 +404,8 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 onKeyDown={step !== 'QUANTITY' ? scanOnlyHandlers.onKeyDown : undefined}
                                 onPaste={step !== 'QUANTITY' ? scanOnlyHandlers.onPaste : undefined}
                                 className={`w-full bg-[var(--theme-bg-card)] border-2 rounded-2xl py-3.5 sm:py-4 px-4 text-center text-2xl sm:text-3xl font-bold font-mono text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none transition-colors ${
-                                    awaitingOccupancyConfirmation || awaitingMismatchConfirmation 
-                                        ? 'border-amber-400' 
+                                    awaitingOccupancyConfirmation || awaitingMismatchConfirmation
+                                        ? 'border-[var(--theme-status-warning-border)]'
                                         : 'border-[var(--theme-border)] focus:border-[var(--theme-accent)]'
                                 }`}
                                 placeholder={
@@ -444,9 +444,9 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 !inputVal.trim() || isProcessing
                                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] cursor-not-allowed opacity-60'
                                     : isPlacementBlocked
-                                        ? 'bg-rose-600 border-rose-500 text-white cursor-not-allowed'
+                                        ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-white cursor-not-allowed'
                                         : awaitingOccupancyConfirmation || awaitingMismatchConfirmation
-                                            ? 'bg-amber-600 hover:bg-amber-500 border-amber-500 text-white font-semibold uppercase tracking-wider'
+                                            ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-white font-semibold uppercase tracking-wider'
                                             : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white font-semibold uppercase tracking-wider'
                             }`}
                         >

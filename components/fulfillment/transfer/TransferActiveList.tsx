@@ -98,15 +98,15 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
 
         const statusBadges: Record<string, string> = {
             'Draft': 'bg-stone-500/10 text-[var(--theme-text-secondary)] border-stone-500/20',
-            'Requested': 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
-            'Approved': 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+            'Requested': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
+            'Approved': 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
             'Picking': 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
-            'Picked': 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+            'Picked': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
             'Packed': 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
             'Shipped': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
             'In-Transit': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
             'Delivered': 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-            'Received': 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
+            'Received': 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
         };
 
         const getLocalizedStatus = (status: string) => {
@@ -134,13 +134,13 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                 }}
                 className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-colors shadow-sm ${
                     hasDisc
-                        ? 'bg-red-500/5 border-red-500/40 hover:border-red-500'
+                        ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]'
                         : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-accent)]/50'
                 }`}
             >
                 {/* Left: ID + Discrepancy indicator */}
                 <div className="flex items-center gap-2.5 min-w-0">
-                    {hasDisc && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />}
+                    {hasDisc && <div className="w-2 h-2 rounded-full bg-[var(--theme-status-danger-bg)] animate-pulse shrink-0" />}
                     <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)] text-sm truncate">
                         {formatJobId(transfer)}
                     </span>
@@ -210,7 +210,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                 {/* ONGOING Section */}
                 <div>
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="w-2 h-2 rounded-full bg-amber-400" />
+                        <div className="w-2 h-2 rounded-full bg-[var(--theme-status-warning-bg)]" />
                         <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wide">
                             {t('warehouse.ongoing')}
                         </h4>

@@ -83,7 +83,7 @@ export const RequestQuotaAdjustmentModal: React.FC<RequestQuotaAdjustmentModalPr
       <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-status-info-border)] flex items-center justify-center">
               <TrendingUp size={16} />
             </div>
             <div>
@@ -161,7 +161,7 @@ export const RequestQuotaAdjustmentModal: React.FC<RequestQuotaAdjustmentModalPr
                 onClick={() => setRequestType('TEMPORARY_SURGE')}
                 className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                   requestType === 'TEMPORARY_SURGE'
-                    ? 'bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border-blue-500/30'
+                    ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-status-info-border)]'
                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                 }`}
               >

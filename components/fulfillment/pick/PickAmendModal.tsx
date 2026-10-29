@@ -160,7 +160,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                 {/* Header */}
                 <div className="p-4 sm:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-amber-500">
+                        <div className="p-2.5 bg-[var(--theme-status-warning-bg)] rounded-2xl border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]">
                             <FileEdit size={20} />
                         </div>
                         <div>
@@ -168,7 +168,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                 <h3 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                                     {t('warehouse.picking.amendPickQuantities')}
                                 </h3>
-                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                     Zero-Trust
                                 </span>
                             </div>
@@ -193,7 +193,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                 {/* Auth guard */}
                 {!isManager ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-10 text-center">
-                        <div className="p-4 bg-red-500/10 rounded-2xl border border-red-500/20 mb-4 text-red-500">
+                        <div className="p-4 bg-[var(--theme-status-danger-bg)] rounded-2xl border border-[var(--theme-status-danger-border)] mb-4 text-[var(--theme-status-danger-text)]">
                             <ShieldAlert size={32} />
                         </div>
                         <p className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
@@ -206,8 +206,8 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                 ) : step === 'EDIT' ? (
                     <>
                         {/* Info Banner */}
-                        <div className="mx-4 sm:mx-6 mt-4 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-2.5 shrink-0">
-                            <AlertTriangle size={15} className="text-amber-500 mt-0.5 shrink-0" />
+                        <div className="mx-4 sm:mx-6 mt-4 p-3.5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex items-start gap-2.5 shrink-0">
+                            <AlertTriangle size={15} className="text-[var(--theme-status-warning-text)] mt-0.5 shrink-0" />
                             <div className="text-[11px] text-[var(--theme-text-primary)] leading-relaxed">
                                 <span className="font-semibold">Zero-Trust Notice:</span> Amending quantities creates a pending inventory request for Central HQ review and preserves original customer requirement on linked pack jobs.
                             </div>
@@ -227,7 +227,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                     <div
                                         key={i}
                                         className={`p-4 rounded-2xl border transition-colors ${
-                                            isDiff ? 'bg-[var(--theme-bg-card)] border-amber-500/40' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                                            isDiff ? 'bg-[var(--theme-bg-card)] border-[var(--theme-status-warning-border)]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
                                         }`}
                                     >
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -244,9 +244,9 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                                     <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('warehouse.picking')}</p>
                                                     <p className={`text-sm font-bold font-mono ${isDiff ? 'line-through text-[var(--theme-text-secondary)]' : 'text-[var(--theme-text-primary)]'}`}>{line.picked}</p>
                                                 </div>
-                                                {isDiff && <ArrowRight size={14} className="text-amber-500" />}
+                                                {isDiff && <ArrowRight size={14} className="text-[var(--theme-status-warning-text)]" />}
                                                 <div className="text-center">
-                                                    <p className="text-[11px] font-semibold text-amber-500 uppercase tracking-wider">{t('warehouse.picking.correctTo')}</p>
+                                                    <p className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] uppercase tracking-wider">{t('warehouse.picking.correctTo')}</p>
                                                     <input
                                                         type="number"
                                                         inputMode="decimal"
@@ -260,15 +260,15 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                                         placeholder="0"
                                                         className={`w-16 text-center text-sm font-bold font-mono border rounded-xl px-2 py-1.5 focus:outline-none transition-colors min-h-[36px] ${
                                                             isOver
-                                                                ? 'border-red-400 bg-red-500/10 text-red-500'
-                                                                : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] focus:border-amber-400'
+                                                                ? 'border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)]'
+                                                                : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-status-warning-border)]'
                                                         }`}
                                                     />
                                                 </div>
                                             </div>
                                         </div>
                                         {isOver && (
-                                            <p className="text-[11px] text-red-500 font-semibold mt-1 text-right">{t('warehouse.picking.exceedsExpectedWarning')}</p>
+                                            <p className="text-[11px] text-[var(--theme-status-danger-text)] font-semibold mt-1 text-right">{t('warehouse.picking.exceedsExpectedWarning')}</p>
                                         )}
                                     </div>
                                 );
@@ -284,7 +284,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                 <select
                                     value={reasonCode}
                                     onChange={e => setReasonCode(e.target.value as PickAmendReasonCode)}
-                                    className="w-full text-xs font-medium border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-3 py-2.5 text-[var(--theme-text-primary)] focus:outline-none focus:border-amber-400 min-h-[44px]"
+                                    className="w-full text-xs font-medium border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-3 py-2.5 text-[var(--theme-text-primary)] focus:outline-none border-[var(--theme-status-warning-border)] min-h-[44px]"
                                 >
                                     {PICK_AMEND_REASON_CODES.map(rc => (
                                         <option key={rc.code} value={rc.code}>
@@ -303,7 +303,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                     onChange={e => setReasonNotes(e.target.value)}
                                     placeholder={t('warehouse.picking.reasonPlaceholder') || 'Detail the specific bin condition, item condition, or supervisor finding...'}
                                     rows={2}
-                                    className="w-full text-xs border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-3 py-2.5 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-amber-400 transition-colors resize-none"
+                                    className="w-full text-xs border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-3 py-2.5 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none border-[var(--theme-status-warning-border)] transition-colors resize-none"
                                 />
                             </div>
                         </div>
@@ -319,7 +319,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                             <button
                                 disabled={!hasChanges || !reasonNotes.trim()}
                                 onClick={() => setStep('CONFIRM')}
-                                className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
+                                className="px-6 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] disabled:opacity-40 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
                             >
                                 <Edit3 size={14} /> {t('warehouse.picking.reviewChanges')}
                             </button>
@@ -338,27 +338,27 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                             }).map((line, i) => {
                                 const delta = parseInt(line.amended, 10) - line.picked;
                                 return (
-                                    <div key={i} className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-amber-500/30 flex items-center justify-between gap-3">
+                                    <div key={i} className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] flex items-center justify-between gap-3">
                                         <div>
                                             <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase">{line.name}</p>
                                             <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">{line.sku}</p>
-                                            <span className="inline-block mt-1 text-[11px] font-semibold font-mono text-amber-600 dark:text-amber-400">
+                                            <span className="inline-block mt-1 text-[11px] font-semibold font-mono text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                                                 Stock Request: {delta < 0 ? `+${Math.abs(delta)} Return to Stock (IN)` : `-${delta} Deduct from Stock (OUT)`}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <span className="text-sm font-semibold font-mono text-[var(--theme-text-secondary)] line-through">{line.picked}</span>
-                                            <ArrowRight size={14} className="text-amber-500" />
-                                            <span className="text-sm font-bold font-mono text-amber-600 dark:text-amber-400">{line.amended}</span>
+                                            <ArrowRight size={14} className="text-[var(--theme-status-warning-text)]" />
+                                            <span className="text-sm font-bold font-mono text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">{line.amended}</span>
                                         </div>
                                     </div>
                                 );
                             })}
 
                             {linkedPackJob && (
-                                <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-2">
-                                    <CheckCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />
-                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+                                <div className="p-3.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-2xl flex items-start gap-2">
+                                    <CheckCircle size={14} className="text-[var(--theme-status-info-text)] mt-0.5 shrink-0" />
+                                    <p className="text-[11px] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] font-medium">
                                         Linked PACK job ({formatJobId(linkedPackJob)}) will record shortage variance while strictly preserving original customer demand.
                                     </p>
                                 </div>
@@ -386,7 +386,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                             <button
                                 disabled={isSubmitting}
                                 onClick={handleConfirm}
-                                className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
+                                className="px-6 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
                             >
                                 {isSubmitting
                                     ? <><Loader2 size={14} className="animate-spin" /> {t('warehouse.saving')}</>

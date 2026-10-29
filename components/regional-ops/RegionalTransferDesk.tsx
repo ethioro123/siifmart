@@ -308,15 +308,15 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                       </span>
                       <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md border ${
                         transfer.status === 'Requested'
-                          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                          ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                           : transfer.status === 'Approved'
-                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                            ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                             : transfer.status === 'In-Transit' || transfer.status === 'Dispatched'
                               ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
                               : transfer.status === 'Delivered'
                                 ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20'
                                 : transfer.status === 'Received' || transfer.status === 'Completed'
-                                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                  ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                   : 'bg-stone-500/10 text-stone-600 dark:text-stone-400 border-stone-500/20'
                       }`}>
                         {transfer.status}
@@ -351,7 +351,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                     const isInter = Boolean(transfer.isInterRegion || transfer.is_inter_region ||
                       (transfer.sourceRegionCode && transfer.destRegionCode && transfer.sourceRegionCode !== transfer.destRegionCode));
                     if (isInter && !isHQUser) {
-                      return <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-[11px] font-semibold">Awaiting HQ Co-Sign</span>;
+                      return <span className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-[11px] font-semibold">Awaiting HQ Co-Sign</span>;
                     }
                     if (!canManageTransfers) {
                       return <span className="px-2.5 py-1 rounded-lg bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] text-[11px] font-medium">Awaiting Logistics Sign-Off</span>;
@@ -382,14 +382,14 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                         {/* Internal driver transit: button to confirm delivery */}
                         {!isExternal && transfer.status === 'In-Transit' && (
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20 flex items-center gap-1">
+                            <span className="text-[10px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono bg-[var(--theme-status-warning-bg)] px-2 py-1 rounded-md border border-[var(--theme-status-warning-border)] flex items-center gap-1">
                               <Lock className="w-3 h-3" />
                               <span>Awaiting Fleet Delivery</span>
                             </span>
                             <button
                               type="button"
                               onClick={() => handleDriverDeliver(transfer.id)}
-                              className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1 transition-all shadow-sm"
+                              className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white text-xs font-semibold flex items-center gap-1 transition-all shadow-sm"
                               title="Internal driver clicks to confirm arrival at store"
                             >
                               <Check className="w-3.5 h-3.5" />
@@ -404,7 +404,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                             <button
                               type="button"
                               onClick={() => handleReceiveHandshake(transfer.id)}
-                              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                              className="px-3 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                             >
                               <PackageCheck className="w-3.5 h-3.5" />
                               <span>Dual Sign-Off</span>
@@ -416,7 +416,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                                 setDiscrepancyTransferId(discrepancyTransferId === transfer.id ? null : transfer.id);
                                 setDiscrepancyNotes('');
                               }}
-                              className="px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold flex items-center gap-1 transition-all"
+                              className="px-2.5 py-1.5 rounded-lg bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-xs font-semibold flex items-center gap-1 transition-all"
                               title="Report Missing Units & Escalate to Security Supervisor"
                             >
                               <AlertTriangle className="w-3.5 h-3.5" />
@@ -430,19 +430,19 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
 
                   {(transfer.status === 'Received' || transfer.status === 'Completed') && (
                     <div className="text-right">
-                      <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 justify-end">
+                      <div className="text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold flex items-center gap-1 justify-end">
                         <ShieldCheck className="w-4 h-4" />
                         <span>Verified by {transfer.receivedBy || 'Staff'}</span>
                       </div>
                       {transfer.hasDiscrepancy && (
                         <div className="mt-1 flex flex-col items-end gap-0.5">
                           {transfer.discrepancyResolutionType === 'LOCAL_STORE_MANAGER' ? (
-                            <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
+                            <div className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold flex items-center gap-1">
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               <span>Store Manager Resolved: {transfer.discrepancyReasonCode?.replace(/_/g, ' ') || 'Local Sign-Off'}</span>
                             </div>
                           ) : (
-                            <div className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-1">
+                            <div className="text-[11px] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-semibold flex items-center gap-1">
                               <ShieldAlert className="w-3.5 h-3.5" />
                               <span>LP Escalated: {transfer.discrepancyDetails}</span>
                             </div>

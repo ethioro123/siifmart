@@ -142,7 +142,7 @@ export default function SettingsTab({
         editPhone, editAddress, editEmergencyContact
     ]);
 
-    const hasChanges = 
+    const hasChanges =
         editName.trim() !== employee.name.trim() ||
         editAge !== (employee.age?.toString() || '') ||
         editDateOfBirth !== (employee.dateOfBirth || '') ||
@@ -179,7 +179,7 @@ export default function SettingsTab({
             } as Employee;
 
             const result = updateEmployee(
-                fullUpdatedEmployee, 
+                fullUpdatedEmployee,
                 currentUser?.name || (isCEO ? 'CEO Sovereign Executive' : 'HR Officer')
             );
             if (result instanceof Promise) await result;
@@ -215,8 +215,8 @@ export default function SettingsTab({
                 requestedByRole: currentUser?.role || 'hr',
                 requestedAt: new Date().toISOString(),
                 status: 'pending',
-                governanceCategory: governanceResult.governanceCategories.length === 1 
-                    ? governanceResult.governanceCategories[0] 
+                governanceCategory: governanceResult.governanceCategories.length === 1
+                    ? governanceResult.governanceCategories[0]
                     : (governanceResult.governanceCategories.length ? 'composite' : 'contact_general'),
                 requiredApprovers: [...requiredApprovers],
                 diffs: governanceResult.diffs,
@@ -239,10 +239,10 @@ export default function SettingsTab({
     return (
         <div className="space-y-6 animate-in fade-in duration-200">
             {/* Real-time Governance Status Callout */}
-            <GovernanceApprovalBadge 
-                isCEO={isCEO} 
-                ruleResult={governanceResult} 
-                hasChanges={hasChanges} 
+            <GovernanceApprovalBadge
+                isCEO={isCEO}
+                ruleResult={governanceResult}
+                hasChanges={hasChanges}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -317,7 +317,7 @@ export default function SettingsTab({
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-sm">
                     <div className="text-xs text-[var(--theme-text-muted)]">
                         {governanceResult.blockedReason ? (
-                            <span className="text-rose-500 font-semibold">{governanceResult.blockedReason}</span>
+                            <span className="text-[var(--theme-status-danger-text)] font-semibold">{governanceResult.blockedReason}</span>
                         ) : isCEO ? (
                             <span>CEO Sovereign Authority: Changes apply directly to personnel ledger.</span>
                         ) : requiresReview && hasChanges ? (
@@ -332,9 +332,9 @@ export default function SettingsTab({
                         disabled={isSaving || !hasChanges || Boolean(governanceResult.blockedReason)}
                         className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs disabled:opacity-40 ${
                             saveSuccess
-                                ? 'bg-emerald-600 text-white'
+                                ? 'bg-[var(--theme-status-success-bg)] text-white'
                                 : requiresReview && !isCEO
-                                    ? 'bg-amber-500 hover:bg-amber-600 text-black'
+                                    ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-black'
                                     : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'
                         }`}
                     >

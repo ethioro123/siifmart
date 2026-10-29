@@ -79,7 +79,7 @@ export const TransferDiscrepancyDrawer: React.FC<TransferDiscrepancyDrawerProps>
         <button
           type="button"
           onClick={() => onEscalateLP(transfer)}
-          className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+          className="px-3 py-1.5 rounded-lg bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm"
           title="Escalate high-value item discrepancy to Regional Security Manager"
         >
           <ShieldAlert className="w-3.5 h-3.5" />

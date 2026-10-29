@@ -38,10 +38,10 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
         const daysDiff = Math.ceil((new Date(expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
         if (daysDiff < 0) {
             expiryAlert = `Expired ${Math.abs(daysDiff)}d ago`;
-            expiryColor = 'text-red-500';
+            expiryColor = 'text-[var(--theme-status-danger-text)]';
         } else if (daysDiff < 30) {
             expiryAlert = `${daysDiff}d left`;
-            expiryColor = 'text-amber-500';
+            expiryColor = 'text-[var(--theme-status-warning-text)]';
         }
     }
 
@@ -72,7 +72,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                     onClick={onOpenSmartUnitModal}
                     className="px-2.5 py-1 text-xs font-medium uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)] flex items-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                 >
-                    <Sparkles size={12} className="text-amber-500" />
+                    <Sparkles size={12} className="text-[var(--theme-status-warning-text)]" />
                     <span>Smart Unit Spec</span>
                 </button>
             </div>
@@ -343,7 +343,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                                 <button
                                     type="button"
                                     onClick={() => onUpdateBarcodes(barcodes.filter((_, i) => i !== idx))}
-                                    className="text-[var(--theme-text-secondary)] hover:text-red-500 cursor-pointer ml-0.5"
+                                    className="text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] cursor-pointer ml-0.5"
                                 >
                                     <X size={10} />
                                 </button>

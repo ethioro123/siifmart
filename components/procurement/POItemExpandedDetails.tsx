@@ -1,16 +1,16 @@
 import React from 'react';
-import { 
-    Cpu, 
-    Shirt, 
-    Apple, 
-    ShieldCheck, 
-    Milk, 
-    Coffee, 
-    Layers, 
-    Sparkles, 
-    Baby, 
-    Car, 
-    Tag, 
+import {
+    Cpu,
+    Shirt,
+    Apple,
+    ShieldCheck,
+    Milk,
+    Coffee,
+    Layers,
+    Sparkles,
+    Baby,
+    Car,
+    Tag,
     Cookie,
     UtensilsCrossed,
     Snowflake,
@@ -108,7 +108,7 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
             return {
                 title: 'Hardware & Dimensions',
                 icon: Cpu,
-                colorClass: 'text-sky-500',
+                colorClass: 'text-[var(--theme-status-info-text)]',
                 rows: [
                     { label: 'Dimensions:', value: physical.dims || smart.dimensions },
                     { label: 'Device Wt:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'g'}` : smart.netContent },
@@ -121,7 +121,7 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
             return {
                 title: 'Dimensions & Material',
                 icon: UtensilsCrossed,
-                colorClass: 'text-amber-500',
+                colorClass: 'text-[var(--theme-status-warning-text)]',
                 rows: [
                     { label: 'Dimensions:', value: physical.dims || smart.dimensions },
                     { label: 'Capacity:', value: physSummary.sizeOrVolume || physical.capacity || smart.netContent },
@@ -133,7 +133,7 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
         return {
             title: 'Physical Specifications',
             icon: Scale,
-            colorClass: 'text-emerald-500',
+            colorClass: 'text-[var(--theme-status-success-text)]',
             rows: [
                 { label: 'Net Content:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || physical.unit || ''}` : smart.netContent },
                 { label: 'Gross Weight:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : smart.grossWeight },
@@ -223,7 +223,7 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
                         {(storage.inboundQcDirective || smart.inboundQcDirective) && (
                             <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
                                 <span className="text-[var(--theme-text-secondary)]">Inbound QC:</span>
-                                <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate max-w-[160px]" title={storage.inboundQcDirective || smart.inboundQcDirective || ''}>
+                                <span className="font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] truncate max-w-[160px]" title={storage.inboundQcDirective || smart.inboundQcDirective || ''}>
                                     {storage.inboundQcDirective || smart.inboundQcDirective}
                                 </span>
                             </div>
@@ -231,19 +231,19 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
                         {(storage.isPerishable ?? smart.isPerishable) && (
                             <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
                                 <span className="text-[var(--theme-text-secondary)]">Perishable:</span>
-                                <span className="font-bold text-amber-500">Yes ({storage.shelfLifeDays ? `${storage.shelfLifeDays} days` : 'FEFO Tracked'})</span>
+                                <span className="font-bold text-[var(--theme-status-warning-text)]">Yes ({storage.shelfLifeDays ? `${storage.shelfLifeDays} days` : 'FEFO Tracked'})</span>
                             </div>
                         )}
                         {(storage.isHazardous ?? smart.isHazardous) && (
                             <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
                                 <span className="text-[var(--theme-text-secondary)]">Hazard Class:</span>
-                                <span className="font-bold text-rose-500 flex items-center gap-1"><AlertTriangle size={11} /> Hazardous</span>
+                                <span className="font-bold text-[var(--theme-status-danger-text)] flex items-center gap-1"><AlertTriangle size={11} /> Hazardous</span>
                             </div>
                         )}
                         {(storage.isFragile ?? smart.isFragile) && (
                             <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
                                 <span className="text-[var(--theme-text-secondary)]">Fragile:</span>
-                                <span className="font-bold text-amber-500">Handle With Care</span>
+                                <span className="font-bold text-[var(--theme-status-warning-text)]">Handle With Care</span>
                             </div>
                         )}
                         {storage.stackLimit && (
@@ -258,7 +258,7 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
                 {/* Packaging & Hierarchy */}
                 <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1.5">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                        <Package size={11} className="text-amber-500" />
+                        <Package size={11} className="text-[var(--theme-status-warning-text)]" />
                         <span>Packaging Architecture</span>
                     </div>
                     <div className="space-y-1 text-xs">

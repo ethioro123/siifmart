@@ -53,8 +53,8 @@ export default function ImageEditorModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[999] animate-in fade-in duration-200">
-      <div className="bg-[#FAF8F5] dark:bg-[#18201B] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] relative shadow-2xl">
-        
+      <div className="bg-[#FAF8F5] dark:bg-[#18201B] border border-[#E2DCCE] border-[var(--theme-status-success-border)] rounded-3xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] relative shadow-2xl">
+
         {/* Header */}
         <div className="p-5 border-b border-[#E2DCCE]/60 dark:border-white/[0.06] flex justify-between items-center bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 backdrop-blur-sm">
           <div>
@@ -73,7 +73,7 @@ export default function ImageEditorModal({
             onClick={() => setActiveTab('crop')}
             className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'crop'
-                ? 'border-[#2C5E3B] text-[#2C5E3B] dark:text-[#A9CBA2] dark:border-[#A9CBA2]'
+                ? 'border-[var(--theme-border)] text-[var(--theme-primary)] dark:text-[#A9CBA2] dark:border-[#A9CBA2]'
                 : 'border-transparent text-stone-500 dark:text-zinc-500 hover:text-[#1E3F27] dark:hover:text-zinc-300'
             }`}
           >
@@ -84,7 +84,7 @@ export default function ImageEditorModal({
             onClick={() => setActiveTab('adjust')}
             className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border-b-2 cursor-pointer ${
               activeTab === 'adjust'
-                ? 'border-[#2C5E3B] text-[#2C5E3B] dark:text-[#A9CBA2] dark:border-[#A9CBA2]'
+                ? 'border-[var(--theme-border)] text-[var(--theme-primary)] dark:text-[#A9CBA2] dark:border-[#A9CBA2]'
                 : 'border-transparent text-stone-500 dark:text-zinc-500 hover:text-[#1E3F27] dark:hover:text-zinc-300'
             }`}
           >
@@ -215,7 +215,7 @@ export default function ImageEditorModal({
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="px-5 py-2.5 bg-[#2C5E3B] hover:bg-[#224429] dark:bg-[#EAE5D9] dark:hover:bg-white text-white dark:text-[#18201B] text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 bg-[var(--theme-primary)] hover:bg-[#224429] dark:bg-[#EAE5D9] dark:hover:bg-white text-white dark:text-[#18201B] text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             {isSaving ? (
               <>

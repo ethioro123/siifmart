@@ -39,12 +39,12 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
     const [shelfHygieneScore, setShelfHygieneScore] = useState<number>(92);
     const [halalCompliant, setHalalCompliant] = useState<boolean>(true);
     const [planogramNotes, setPlanogramNotes] = useState<string>('Shelf tags aligned with HQ pricing; endcaps verified.');
-    
+
     // Cash Spot Audit
     const [registerId, setRegisterId] = useState<string>('POS-REG-01');
     const [cashCounted, setCashCounted] = useState<string>('2450');
     const [cashExpected, setCashExpected] = useState<string>('2450');
-    
+
     // Findings & Actions
     const [findings, setFindings] = useState<string>('');
     const [correctiveActions, setCorrectiveActions] = useState<string>('');
@@ -54,7 +54,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
 
     // Filter staff for selected site
     const siteManagers = useMemo(() => {
-        return employees.filter(e => 
+        return employees.filter(e =>
             (!e.site_id || e.site_id === selectedSiteId || e.siteId === selectedSiteId) &&
             ['store_manager', 'assistant_store_manager', 'shift_supervisor'].includes(e.role || '')
         );
@@ -279,10 +279,10 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                             </span>
                             <span className={`text-xs font-mono tabular-nums font-semibold px-2 py-0.5 rounded-full ${
                                 cashVariance === 0
-                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                                     : cashVariance > 0
-                                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
-                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                                    ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]'
+                                    : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                             }`}>
                                 Variance: {cashVariance >= 0 ? `+${cashVariance.toFixed(2)}` : cashVariance.toFixed(2)} {activeCountry === 'KE' ? 'KSh' : 'ETB'}
                             </span>
@@ -374,7 +374,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                         onClick={() => setStatus(s.id as StoreAuditStatus)}
                                         className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all active:scale-[0.98] ${
                                             status === s.id
-                                                ? s.id === 'passed' ? 'bg-emerald-600 text-white' : s.id === 'action_required' ? 'bg-amber-600 text-white' : 'bg-rose-600 text-white'
+                                                ? s.id === 'passed' ? 'bg-[var(--theme-status-success-bg)] text-white' : s.id === 'action_required' ? 'bg-[var(--theme-status-warning-bg)] text-white' : 'bg-[var(--theme-status-danger-bg)] text-white'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                         }`}
                                     >

@@ -74,7 +74,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
         <div className="bg-[var(--theme-bg-card)] p-6 rounded-2xl border border-[var(--theme-border)] space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                 <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
+                    <div className="p-2 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)]">
                         <Briefcase size={18} />
                     </div>
                     <div>
@@ -131,7 +131,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
                 ) : (
                     <div className={readOnlyClasses}>
                         <p className="text-xs font-bold text-[var(--theme-text-primary)]">{SYSTEM_ROLES.find(item => item.id === role)?.label || formatRole(role)}</p>
-                        <Shield size={15} className="text-blue-500" />
+                        <Shield size={15} className="text-[var(--theme-status-info-text)]" />
                     </div>
                 )}
             </div>

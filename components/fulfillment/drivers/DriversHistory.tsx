@@ -32,7 +32,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
     const filteredHistory = useMemo(() => {
         const canSeeGlobalQueue = canManageDispatch(user?.role);
         const employeeId = currentEmployee?.id || user?.id;
-        
+
         const filteredByTypeAndRole = historicalJobs.filter((j: WMSJob) => {
             if (!isShipment(j) || j.deliveryMethod === 'External' || !['awaiting-receipt','closed'].includes(getShipmentPhase(j))) return false;
             if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
@@ -77,7 +77,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
 
             // Search product names and SKUs
             const items = j.lineItems || (j as any).line_items || [];
-            const matchesItems = items.some((item: any) => 
+            const matchesItems = items.some((item: any) =>
                 (item.name || '').toLowerCase().includes(q) ||
                 (item.productName || '').toLowerCase().includes(q) ||
                 (item.sku || '').toLowerCase().includes(q)
@@ -175,15 +175,15 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{t('warehouse.driverHub.delivered')}</span>
+                                        <div className="flex items-center gap-1.5 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] px-2.5 py-1 rounded-full">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
+                                            <span className="text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">{t('warehouse.driverHub.delivered')}</span>
                                         </div>
 
                                         {job.status === 'Completed' && (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setReturnJob(job); }}
-                                                className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 px-3.5 py-2 rounded-xl border border-amber-500/20 transition-all text-amber-600 dark:text-amber-400 shadow-xs active:scale-[0.98] min-h-[44px] touch-manipulation font-semibold text-xs"
+                                                className="flex items-center gap-1.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] px-3.5 py-2 rounded-xl border border-[var(--theme-status-warning-border)] transition-all text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shadow-xs active:scale-[0.98] min-h-[44px] touch-manipulation font-semibold text-xs"
                                             >
                                                 <Undo2 size={14} />
                                                 <span>{t('warehouse.driverHub.return')}</span>

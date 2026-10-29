@@ -56,7 +56,7 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
         <div className="space-y-3 pt-3 border-t border-[var(--theme-border-subtle)]">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                    <Layers size={12} className="text-amber-500" />
+                    <Layers size={12} className="text-[var(--theme-status-warning-text)]" />
                     <span>4. Supply Chain Packaging Hierarchy (GS1 Logistics Standard)</span>
                 </div>
                 <div className="px-2.5 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[9px] font-mono font-bold text-[var(--theme-accent)]">
@@ -92,10 +92,10 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                 <div className="col-span-full sm:col-span-2 space-y-1">
                     <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Package Container Type</label>
                     <div className="relative">
-                        <select 
-                            title="Package Container Type" 
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer" 
-                            value={customAttributes.packaging?.packageType || ''} 
+                        <select
+                            title="Package Container Type"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer"
+                            value={customAttributes.packaging?.packageType || ''}
                             onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packageType: e.target.value } }))}
                         >
                             <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Select Container...</option>
@@ -112,12 +112,12 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                             <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">
                                 ({packagingLevel === 'two_tier' ? 'units per inner pack' : packagingLevel === 'bale' ? 'units per bale' : 'units per case'})
                             </span>{' '}
-                            <span className="text-rose-500">*</span>
+                            <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <input
                             type="number"
                             min="2"
-                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.packQty ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
+                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.packQty ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                             placeholder="e.g. 12 or 24"
                             data-po-field="packQty" value={customAttributes.packaging?.packQty || ''}
                             onChange={e => {
@@ -125,19 +125,19 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                                 setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: e.target.value } }));
                             }}
                         />
-                        {errors.packQty && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.packQty}</span>}
+                        {errors.packQty && <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors.packQty}</span>}
                     </div>
                 )}
 
                 {packagingLevel === 'two_tier' && (
                     <div className="col-span-full sm:col-span-2 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                            Case Size <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(inner packs per case)</span> <span className="text-rose-500">*</span>
+                            Case Size <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(inner packs per case)</span> <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <input
                             type="number"
                             min="1"
-                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.caseSize ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
+                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.caseSize ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                             placeholder="e.g. 4"
                             data-po-field="caseSize" value={customAttributes.packaging?.caseSize || ''}
                             onChange={e => {
@@ -145,7 +145,7 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                                 setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: e.target.value } }));
                             }}
                         />
-                        {errors.caseSize && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.caseSize}</span>}
+                        {errors.caseSize && <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors.caseSize}</span>}
                     </div>
                 )}
 

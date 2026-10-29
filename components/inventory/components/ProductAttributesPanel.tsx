@@ -12,11 +12,11 @@ const AttrBadge = ({ label, value, color }: { label: string; value?: string | nu
     const displayLabel = typeof value === 'boolean' ? '' : label;
 
     const colorMap: Record<string, string> = {
-        red: 'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400',
-        blue: 'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-400',
+        red: 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]',
+        blue: 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]',
         cyan: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-400',
-        green: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400',
-        yellow: 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400',
+        green: 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]',
+        yellow: 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
         orange: 'bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-400',
         purple: 'bg-purple-500/10 border-purple-500/30 text-purple-700 dark:text-purple-400',
         pink: 'bg-pink-500/10 border-pink-500/30 text-pink-700 dark:text-pink-400',
@@ -77,10 +77,10 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
             <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                        <Package size={12} className="text-blue-500 shrink-0" />
+                        <Package size={12} className="text-[var(--theme-status-info-text)] shrink-0" />
                         <span>Packaging & Case Hierarchy (GS1 Logistics)</span>
                     </div>
-                    <span className="text-[11px] font-mono font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">
+                    <span className="text-[11px] font-mono font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] px-2.5 py-0.5 rounded-full">
                         {smart.packBadge}
                     </span>
                 </div>
@@ -99,7 +99,7 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
             <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                        <Layers size={12} className="text-amber-500 shrink-0" />
+                        <Layers size={12} className="text-[var(--theme-status-warning-text)] shrink-0" />
                         <span>Physical & Net Content Specifications</span>
                     </div>
                     {(physSummary.specBadge || smart.netContent) && (
@@ -121,11 +121,11 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
             {/* 4. Storage, Cold Chain & Inbound QC Directives */}
             <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                    <ShieldCheck size={12} className="text-emerald-500 shrink-0" />
+                    <ShieldCheck size={12} className="text-[var(--theme-status-success-text)] shrink-0" />
                     <span>Storage, Cold Chain & Inbound QC Directives</span>
                 </div>
                 {smart.inboundQcDirective && (
-                    <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2">
+                    <div className="p-2 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-xs font-semibold flex items-center gap-2">
                         <ShieldCheck size={13} className="shrink-0" />
                         <span>Inbound QC: {smart.inboundQcDirective}</span>
                     </div>

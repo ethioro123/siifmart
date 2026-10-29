@@ -45,7 +45,7 @@ export const Step4PrintFinish: React.FC<Step4PrintFinishProps> = ({
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-4 md:p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center">
                             <ShieldCheck size={22} />
                         </div>
                         <div>
@@ -58,7 +58,7 @@ export const Step4PrintFinish: React.FC<Step4PrintFinishProps> = ({
                         </div>
                     </div>
 
-                    <span className="px-3 py-1 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 font-mono font-bold text-xs uppercase">
+                    <span className="px-3 py-1 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono font-bold text-xs uppercase">
                         {totalItems} {t('warehouse.packing.itemsPacked') || 'Items Packed'}
                     </span>
                 </div>
@@ -93,7 +93,7 @@ export const Step4PrintFinish: React.FC<Step4PrintFinishProps> = ({
                             {t('warehouse.grossWeight') || 'Gross Weight'}
                         </span>
                         <div className="flex items-center gap-1.5 mt-1 text-xs font-bold text-[var(--theme-text-primary)] truncate font-mono">
-                            <Scale size={13} className="text-green-600 dark:text-green-400 shrink-0" />
+                            <Scale size={13} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0" />
                             <span>{finalWeight.toFixed(2)} kg</span>
                         </div>
                     </div>
@@ -116,12 +116,12 @@ export const Step4PrintFinish: React.FC<Step4PrintFinishProps> = ({
                         {t('warehouse.packing.appliedDirectives') || 'Applied Directives:'}
                     </span>
                     {packingMaterials.fragileStickers && (
-                        <span className="px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[11px] font-bold uppercase flex items-center gap-1">
+                        <span className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-[11px] font-bold uppercase flex items-center gap-1">
                             <Tag size={12} /> {t('warehouse.packing.fragile') || 'Fragile'}
                         </span>
                     )}
                     {packingMaterials.bubbleWrap && (
-                        <span className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-bold uppercase">
+                        <span className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-bold uppercase">
                             {t('warehouse.packing.bubbleWrapped') || 'Bubble Wrapped'}
                         </span>
                     )}

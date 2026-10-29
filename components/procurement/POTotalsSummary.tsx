@@ -104,11 +104,11 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                 {/* Discount */}
                 <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-[var(--theme-text-secondary)] flex items-center gap-1.5">
-                        <Percent size={13} className="text-emerald-600 dark:text-emerald-400" /> Applied Discount
+                        <Percent size={13} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" /> Applied Discount
                     </span>
                     <div className="flex items-center gap-2">
                         {discountRate > 0 && (
-                            <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold font-mono tabular-nums">
+                            <span className="text-[10px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-bold font-mono tabular-nums">
                                 - {formatCompactNumber(poDiscount, { currency: currencySymbol })}
                             </span>
                         )}
@@ -134,12 +134,12 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                 {taxRate > 0 && (
                     <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-[var(--theme-text-secondary)] flex items-center gap-1.5">
-                            <Percent size={13} className="text-amber-600 dark:text-amber-400" /> Regulatory Tax
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold">
+                            <Percent size={13} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" /> Regulatory Tax
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold">
                                 {currencySymbol === 'KSh' ? 'KRA' : 'ERCA'} {taxRate}%
                             </span>
                         </span>
-                        <span className="text-xs font-bold text-amber-700 dark:text-amber-300 font-mono tabular-nums">
+                        <span className="text-xs font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono tabular-nums">
                             + {formatCompactNumber(poTax, { currency: currencySymbol })}
                         </span>
                     </div>
@@ -184,7 +184,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         </div>
                     </div>
                     {exceedsRegionalCap && (
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                             <AlertTriangle size={14} className="shrink-0" />
                             <span>
                                 Order exceeds regional autonomous cap ({formatCompactNumber(regionalCapAmount, { currency: currencySymbol })}) — HQ co-approval will be required.

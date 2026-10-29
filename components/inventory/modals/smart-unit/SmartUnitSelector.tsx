@@ -53,13 +53,13 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
                         onClick={() => onCategoryChange('weight')}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                             category === 'weight'
-                                ? 'bg-amber-500/10 text-[var(--theme-text-primary)] border-amber-500 shadow-xs ring-1 ring-amber-500/30'
+                                ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-warning-border)] shadow-xs ring-1 ring-[var(--theme-status-warning-border)]'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
                         <div className="flex items-center justify-between w-full mb-1.5">
-                            <Scale size={16} className={category === 'weight' ? 'text-amber-500' : 'text-[var(--theme-text-secondary)]'} />
-                            {category === 'weight' && <Check size={14} className="text-amber-500" />}
+                            <Scale size={16} className={category === 'weight' ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-text-secondary)]'} />
+                            {category === 'weight' && <Check size={14} className="text-[var(--theme-status-warning-text)]" />}
                         </div>
                         <div>
                             <p className="text-xs font-bold text-[var(--theme-text-primary)]">By Weight</p>
@@ -72,13 +72,13 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
                         onClick={() => onCategoryChange('volume')}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                             category === 'volume'
-                                ? 'bg-blue-500/10 text-[var(--theme-text-primary)] border-blue-500 shadow-xs ring-1 ring-blue-500/30'
+                                ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-info-border)] shadow-xs ring-1 ring-[var(--theme-status-info-border)]'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
                         <div className="flex items-center justify-between w-full mb-1.5">
-                            <Sparkles size={16} className={category === 'volume' ? 'text-blue-500' : 'text-[var(--theme-text-secondary)]'} />
-                            {category === 'volume' && <Check size={14} className="text-blue-500" />}
+                            <Sparkles size={16} className={category === 'volume' ? 'text-[var(--theme-status-info-text)]' : 'text-[var(--theme-text-secondary)]'} />
+                            {category === 'volume' && <Check size={14} className="text-[var(--theme-status-info-text)]" />}
                         </div>
                         <div>
                             <p className="text-xs font-bold text-[var(--theme-text-primary)]">By Volume</p>

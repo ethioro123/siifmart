@@ -23,10 +23,10 @@ export const PickScannerPickedList: React.FC<PickScannerPickedListProps> = ({
         <div className="w-full max-w-2xl mt-6 z-10 transition-colors">
             <div className="flex items-center justify-between mb-2 px-1">
                 <h4 className="text-sm sm:text-base font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-2">
-                    <CheckCircle size={18} className="text-emerald-500" />
+                    <CheckCircle size={18} className="text-[var(--theme-status-success-text)]" />
                     {t('warehouse.picking')}
                 </h4>
-                <span className="text-sm font-mono font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                <span className="text-sm font-mono font-bold text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-3 py-1 rounded-full border border-[var(--theme-status-success-border)]">
                     {pickedItems.length}/{job.lineItems?.length || 0}
                 </span>
             </div>
@@ -40,13 +40,13 @@ export const PickScannerPickedList: React.FC<PickScannerPickedListProps> = ({
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <span className="text-[var(--theme-text-secondary)] text-sm font-mono font-semibold break-all">{item.sku}</span>
                                     {formatProductSize(prod || item) && (
-                                        <span className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded-md border border-emerald-500/20">
+                                        <span className="text-[11px] font-mono font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-1.5 py-0.2 rounded-md border border-[var(--theme-status-success-border)]">
                                             {formatProductSize(prod || item)}
                                         </span>
                                     )}
                                 </div>
                             </div>
-                                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-base font-mono font-bold px-3 py-2 rounded-xl border border-emerald-500/20 whitespace-nowrap">
+                                <span className="bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-base font-mono font-bold px-3 py-2 rounded-xl border border-[var(--theme-status-success-border)] whitespace-nowrap">
                                 {(() => {
                                     let expected = item.expectedQty || 1;
                                     let picked = item.pickedQty || 0;

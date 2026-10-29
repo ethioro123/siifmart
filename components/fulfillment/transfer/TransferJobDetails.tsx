@@ -237,15 +237,15 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-[var(--theme-text-secondary)] font-medium">
                                     <span className="flex items-center gap-1.5 text-[var(--theme-text-primary)] font-semibold">
-                                        <span className={`w-2 h-2 rounded-full ${transferStatus === 'Received' ? 'bg-green-500' : 'bg-amber-400'}`} />
+                                        <span className={`w-2 h-2 rounded-full ${transferStatus === 'Received' ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-status-warning-bg)]'}`} />
                                         {getLocalizedStatus(transferStatus)}
                                     </span>
                                     <span>•</span>
                                     <span className={`px-2 py-0.5 rounded-full border text-[11px] font-semibold ${
                                         selectedJob.priority === 'Critical'
-                                            ? 'border-red-500/20 text-red-500 bg-red-500/10'
+                                            ? 'border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)]'
                                             : selectedJob.priority === 'High'
-                                                ? 'border-amber-500/20 text-amber-600 dark:text-amber-400 bg-amber-500/10'
+                                                ? 'border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]'
                                                 : 'border-[var(--theme-border)] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]'
                                     }`}>
                                         {selectedJob.priority || 'Normal'}
@@ -332,7 +332,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             <button
                                 onClick={handleApprove}
                                 disabled={loading !== null}
-                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-green-600 hover:bg-green-700 text-white shadow-sm transition-opacity flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white shadow-sm transition-opacity flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 {loading === 'approve' ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                                 <span>{t('warehouse.approveTransfer')}</span>
@@ -342,7 +342,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             <button
                                 onClick={handleReject}
                                 disabled={loading !== null}
-                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:text-white border border-[var(--theme-status-danger-border)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 {loading === 'reject' ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
                                 <span>{t('warehouse.rejectTransfer')}</span>
@@ -352,7 +352,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             <button
                                 onClick={handleDelete}
                                 disabled={loading !== null}
-                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-bg-subtle)] hover:bg-red-500 hover:text-white border border-[var(--theme-border)] text-[var(--theme-text-secondary)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-bg-subtle)] bg-[var(--theme-status-danger-bg)] hover:text-white border border-[var(--theme-border)] text-[var(--theme-text-secondary)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 {loading === 'delete' ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                                 <span>{t('warehouse.deleteManifest')}</span>

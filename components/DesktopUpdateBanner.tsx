@@ -73,7 +73,7 @@ export const DesktopUpdateBanner: React.FC = () => {
             aria-live="polite"
             className="fixed bottom-4 right-4 z-50 flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-lg text-xs text-[var(--theme-text-primary)]"
         >
-            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success-bg)] shrink-0" />
             <span className="font-medium">
                 Update ready{updateState.availableVersion ? ` (${updateState.availableVersion})` : ''}
             </span>

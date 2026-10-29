@@ -126,7 +126,7 @@ export const POSCartPanel: React.FC = () => {
                             return (
                                 <div
                                     key={item.id}
-                                    className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-[14px] border ${stalePrice ? 'bg-[var(--theme-status-warning-bg)]/80 border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]' : 'bg-[var(--theme-bg-subtle)]/70 hover:bg-[var(--theme-bg-card)] border-[var(--theme-border-subtle)]/80 hover:border-[var(--theme-border)]'} flex items-center gap-2 sm:gap-2.5 min-h-[40px] sm:min-h-[44px] animate-in fade-in duration-200 motion-reduce:animate-none transition-all shadow-2xs`}
+                                    className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-[14px] border ${stalePrice ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]' : 'bg-[var(--theme-bg-subtle)]/70 hover:bg-[var(--theme-bg-card)] border-[var(--theme-border-subtle)]/80 hover:border-[var(--theme-border)]'} flex items-center gap-2 sm:gap-2.5 min-h-[40px] sm:min-h-[44px] animate-in fade-in duration-200 motion-reduce:animate-none transition-all shadow-2xs`}
                                 >
                                     <div className="flex-1 min-w-0 pr-1">
                                         <h4 className="text-[var(--theme-text-primary)] text-[11px] sm:text-xs font-semibold leading-snug whitespace-normal break-words" title={item.name}>
@@ -209,7 +209,7 @@ export const POSCartPanel: React.FC = () => {
                                                 removeFromCart(item.id);
                                                 native.haptic();
                                             }}
-                                            className="w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center text-[var(--theme-text-muted)] hover:text-[var(--theme-status-danger)] hover:bg-[var(--theme-status-danger-bg)]/20 rounded-[6px] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-status-danger)]"
+                                            className="w-6 h-6 sm:w-6.5 sm:h-6.5 flex items-center justify-center text-[var(--theme-text-muted)] hover:text-[var(--theme-status-danger)] hover:bg-[var(--theme-status-danger-bg)] rounded-[6px] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-status-danger)]"
                                             aria-label={`Remove ${item.name} from cart`}
                                         >
                                             <Trash2 size={13} />
@@ -326,7 +326,7 @@ export const POSCartPanel: React.FC = () => {
                             disabled={cart.length === 0}
                             className="min-h-11 py-2 px-2 bg-[var(--theme-bg-subtle)] enabled:hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border-subtle)] rounded-xl text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 disabled:text-[var(--theme-text-secondary)] disabled:opacity-40 disabled:cursor-not-allowed transition-all tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] shadow-2xs"
                         >
-                            <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                            <div className="w-5 h-5 rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                 <PauseCircle size={15} />
                             </div>
                             <span>{t('pos.hold')}</span>
@@ -344,7 +344,7 @@ export const POSCartPanel: React.FC = () => {
                             className="min-h-11 py-2 px-2 bg-[var(--theme-status-danger-bg)] enabled:hover:opacity-90 border border-[var(--theme-status-danger-border)] rounded-xl text-xs sm:text-sm font-semibold text-[var(--theme-status-danger-text)] flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)] shadow-2xs"
                             title={t('pos.void')}
                         >
-                            <div className="w-5 h-5 rounded-md bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
+                            <div className="w-5 h-5 rounded-md bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                                 <Trash2 size={15} />
                             </div>
                             <span>{t('pos.void')}</span>

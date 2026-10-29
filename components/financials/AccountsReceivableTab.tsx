@@ -64,7 +64,7 @@ export const AccountsReceivableTab: React.FC = () => {
                     <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                         Current (0-30 Days)
                     </span>
-                    <h4 className="text-xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono tabular-nums mt-1">
                         {currencySymbol} {aging.current.toLocaleString()}
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -76,7 +76,7 @@ export const AccountsReceivableTab: React.FC = () => {
                     <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                         31-60 Days
                     </span>
-                    <h4 className="text-xl font-semibold tracking-tight text-blue-600 dark:text-blue-400 font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] font-mono tabular-nums mt-1">
                         {currencySymbol} {aging.days31to60.toLocaleString()}
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -88,7 +88,7 @@ export const AccountsReceivableTab: React.FC = () => {
                     <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                         61-90 Days
                     </span>
-                    <h4 className="text-xl font-semibold tracking-tight text-amber-600 dark:text-amber-400 font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono tabular-nums mt-1">
                         {currencySymbol} {aging.days61to90.toLocaleString()}
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -100,7 +100,7 @@ export const AccountsReceivableTab: React.FC = () => {
                     <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                         90+ Days Overdue
                     </span>
-                    <h4 className="text-xl font-semibold tracking-tight text-rose-600 dark:text-rose-400 font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-mono tabular-nums mt-1">
                         {currencySymbol} {aging.days90Plus.toLocaleString()}
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -130,7 +130,7 @@ export const AccountsReceivableTab: React.FC = () => {
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                                 Accounts Receivable (AR) &amp; Credit Ledger
                             </h3>
-                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-medium">
                                 <ShieldCheck size={12} />
                                 <span>Commercial Credit Governance</span>
                             </div>
@@ -190,7 +190,7 @@ export const AccountsReceivableTab: React.FC = () => {
                             {loading ? (
                                 <tr>
                                     <td colSpan={8} className="py-16 text-center text-[var(--theme-text-secondary)]">
-                                        <Loader2 className="animate-spin inline mr-2 text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                        <Loader2 className="animate-spin inline mr-2 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                                         <span className="text-xs">Loading Accounts Receivable invoices...</span>
                                     </td>
                                 </tr>
@@ -237,10 +237,10 @@ export const AccountsReceivableTab: React.FC = () => {
                                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
                                             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
                                                 inv.status === 'Paid'
-                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                                     : inv.status === 'Overdue'
-                                                        ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                                                        : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                                                        ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                                                        : 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                                             }`}>
                                                 {inv.status === 'Paid' && <CheckCircle2 size={11} />}
                                                 {inv.status === 'Overdue' && <AlertCircle size={11} />}

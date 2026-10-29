@@ -93,11 +93,11 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             <div
                 className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-xs font-medium transition-all ${
                     isAlert
-                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400'
+                        ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                         : 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'
                 }`}
             >
-                {Icon && <Icon size={11} className={isAlert ? 'text-rose-600 dark:text-rose-400 shrink-0' : 'text-[var(--theme-text-secondary)] shrink-0'} />}
+                {Icon && <Icon size={11} className={isAlert ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] shrink-0' : 'text-[var(--theme-text-secondary)] shrink-0'} />}
                 {displayLabel && (
                     <span className="text-[9px] uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)]">
                         {displayLabel}
@@ -164,7 +164,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             return {
                 title: 'Hardware & Form Factor',
                 icon: Cpu,
-                colorClass: 'text-sky-500',
+                colorClass: 'text-[var(--theme-status-info-text)]',
                 attrs: [
                     { label: 'Dimensions', value: phys.dims || smart.dimensions },
                     { label: 'Device Wt', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'g'}`.trim() : smart.netContent },
@@ -177,7 +177,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             return {
                 title: 'Dimensions & Material Specs',
                 icon: UtensilsCrossed,
-                colorClass: 'text-amber-500',
+                colorClass: 'text-[var(--theme-status-warning-text)]',
                 attrs: [
                     { label: 'Dimensions', value: phys.dims || smart.dimensions },
                     { label: 'Capacity', value: catSpec.capacity || phys.capacity || smart.netContent },
@@ -189,7 +189,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
         return {
             title: 'Physical Specs',
             icon: Scale,
-            colorClass: 'text-emerald-500',
+            colorClass: 'text-[var(--theme-status-success-text)]',
             attrs: [
                 { label: 'Net Content', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || unit || ''}`.trim() : smart.netContent },
                 { label: 'Gross Wt', value: phys.grossWeight ? (/[a-zA-Z]/.test(phys.grossWeight) ? phys.grossWeight : `${phys.grossWeight} kg`) : null },
@@ -310,10 +310,10 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                             <div
                                 className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono mt-0.5 border ${
                                     marginPct >= 30
-                                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                        ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                         : marginPct >= 15
-                                        ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
-                                        : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
+                                        ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
+                                        : 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                                 }`}
                             >
                                 <span>+{Math.round(marginPct)}% margin</span>
@@ -347,7 +347,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 {packagingAttrs.length > 0 && (
                     <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                            <Package size={12} className="text-amber-500 shrink-0" />
+                            <Package size={12} className="text-[var(--theme-status-warning-text)] shrink-0" />
                             <span>Packaging</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
@@ -377,7 +377,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 {storageAttrs.length > 0 && (
                     <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                            <Thermometer size={12} className="text-emerald-500 shrink-0" />
+                            <Thermometer size={12} className="text-[var(--theme-status-success-text)] shrink-0" />
                             <span>Storage & Care</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">

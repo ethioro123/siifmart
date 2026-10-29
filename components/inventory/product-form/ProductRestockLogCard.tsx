@@ -37,12 +37,12 @@ export const ProductRestockLogCard: React.FC<ProductRestockLogCardProps> = ({
                 <div className="space-y-3 pl-2 border-l border-[var(--theme-border)] ml-2 max-h-[140px] overflow-y-auto custom-scrollbar">
                     {recentReceives.map(m => (
                         <div key={m.id} className="relative flex flex-col gap-0.5">
-                            <div className="absolute -left-[14px] top-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 border border-[var(--theme-bg-card)]" />
+                            <div className="absolute -left-[14px] top-1.5 w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] border border-[var(--theme-bg-card)]" />
                             <div className="flex items-center justify-between text-[11px]">
                                 <span className="font-semibold text-[var(--theme-text-primary)] uppercase">
                                     {employees?.find(e => e.id === m.performedBy)?.name || m.performedBy || 'System'}
                                 </span>
-                                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                                <span className="font-mono text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-bold">
                                     +{m.quantity}
                                 </span>
                             </div>

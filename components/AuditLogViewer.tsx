@@ -111,7 +111,7 @@ export const AuditLogViewer: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
-                        <Shield className="text-[#0071E3] dark:text-[#2997FF]" />
+                        <Shield className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                         Security Audit Logs
                     </h2>
                     <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm mt-1">
@@ -134,7 +134,7 @@ export const AuditLogViewer: React.FC = () => {
                     <input
                         type="text"
                         placeholder="Search logs..."
-                        className="w-full pl-9 pr-3.5 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-muted)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors"
+                        className="w-full pl-9 pr-3.5 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] dark:focus:border-[var(--theme-border-focus)] outline-none transition-colors"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -144,7 +144,7 @@ export const AuditLogViewer: React.FC = () => {
                     <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                     <select
                         aria-label="Filter by Category"
-                        className="w-full pl-9 pr-4 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors appearance-none cursor-pointer"
+                        className="w-full pl-9 pr-4 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] dark:focus:border-[var(--theme-border-focus)] outline-none transition-colors appearance-none cursor-pointer"
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value as any)}
                     >
@@ -161,7 +161,7 @@ export const AuditLogViewer: React.FC = () => {
                     <AlertTriangle className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                     <select
                         aria-label="Filter by Severity"
-                        className="w-full pl-9 pr-4 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors appearance-none cursor-pointer"
+                        className="w-full pl-9 pr-4 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] dark:focus:border-[var(--theme-border-focus)] outline-none transition-colors appearance-none cursor-pointer"
                         value={severityFilter}
                         onChange={(e) => setSeverityFilter(e.target.value as any)}
                     >
@@ -247,7 +247,7 @@ export const AuditLogViewer: React.FC = () => {
                     <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-3xl shadow-[var(--shadow-modal)] max-w-2xl w-full p-6 animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-start mb-6">
                             <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
-                                <Info className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                <Info className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                                 Log Details
                             </h3>
                             <button

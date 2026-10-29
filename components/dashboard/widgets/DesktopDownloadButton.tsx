@@ -23,7 +23,7 @@ export const DesktopDownloadButton: React.FC = () => {
     if (isElectron) {
         return (
             <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] text-xs font-semibold shadow-xs">
-                <CheckCircle2 size={15} className="text-emerald-500" />
+                <CheckCircle2 size={15} className="text-[var(--theme-status-success-text)]" />
                 <span className="font-mono">Desktop Active</span>
                 <span className="px-1.5 py-0.5 rounded text-[11px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                     {appVersion || 'v3.5.3'}

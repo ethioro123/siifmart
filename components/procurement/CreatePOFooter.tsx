@@ -36,7 +36,7 @@ export const CreatePOFooter: React.FC<CreatePOFooterProps> = ({
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 {itemsCount === 0 && (
-                    <span className="hidden lg:inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-full">
+                    <span className="hidden lg:inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] px-3 py-1.5 rounded-full">
                         <AlertCircle size={13} />
                         {hasUnsavedItemDraft ? 'Click "Add Item to Order" above first' : 'Add at least 1 item to submit'}
                     </span>

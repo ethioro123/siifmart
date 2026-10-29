@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Users, ShieldCheck, Clock, Calendar, AlertCircle, Save, 
+import {
+    Users, ShieldCheck, Clock, Calendar, AlertCircle, Save,
     Compass, Award, UserMinus, ShieldAlert
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
@@ -53,7 +53,7 @@ export default function HRSettings() {
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
     const countryProfile = getCountryProfile(activeCountry);
 
-    const [policy, setPolicy] = useState<HRCountryPolicy>(() => 
+    const [policy, setPolicy] = useState<HRCountryPolicy>(() =>
         DEFAULT_POLICIES[activeCountry] || DEFAULT_POLICIES.ET
     );
     const [isSaving, setIsSaving] = useState(false);
@@ -257,7 +257,7 @@ export default function HRSettings() {
             {/* Zero-Trust Security & Dormant Account Threshold */}
             <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
                 <div className="flex items-center gap-2.5 border-b border-[var(--theme-border)] pb-3">
-                    <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20 shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center border border-[var(--theme-status-warning-border)] shrink-0">
                         <ShieldAlert size={14} />
                     </div>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
@@ -281,10 +281,10 @@ export default function HRSettings() {
                         </span>
                     </div>
 
-                    <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-3">
-                        <ShieldCheck className="text-amber-600 shrink-0" size={20} />
-                        <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed font-medium">
-                            <strong className="font-semibold text-amber-900 dark:text-amber-200">Rule 18 Enforced:</strong> Under Zero-Trust policy, HR personnel can audit dormant credentials and propose account deactivations for secondary executive sign-off.
+                    <div className="p-4 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl flex items-center gap-3">
+                        <ShieldCheck className="text-[var(--theme-status-warning-text)] shrink-0" size={20} />
+                        <p className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] leading-relaxed font-medium">
+                            <strong className="font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">Rule 18 Enforced:</strong> Under Zero-Trust policy, HR personnel can audit dormant credentials and propose account deactivations for secondary executive sign-off.
                         </p>
                     </div>
                 </div>

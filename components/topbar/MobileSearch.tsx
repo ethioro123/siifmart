@@ -74,7 +74,7 @@ export function MobileSearch({
                                  onClick={() => { handleResultClick('job', link.id, link.path); setIsMobileSearchVisible(false); }}
                                  className="w-full px-4 py-3.5 hover:bg-[var(--theme-bg-subtle)] active:bg-[var(--theme-bg-card-hover)] flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 transition-colors"
                               >
-                                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                                 <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                     <Activity size={18} />
                                  </div>
                                  <div className="flex-1 min-w-0">
@@ -109,7 +109,7 @@ export function MobileSearch({
                      {searchResults.products?.length > 0 && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-4 py-2.5 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-status-success-text)] uppercase tracking-widest flex items-center gap-1.5">
                                  <Package size={12} /> Products ({searchResults.products.length})
                               </p>
                            </div>
@@ -119,7 +119,7 @@ export function MobileSearch({
                                  onClick={() => { handleResultClick('product', p.id); setIsMobileSearchVisible(false); }}
                                  className="w-full px-4 py-3.5 hover:bg-[var(--theme-bg-subtle)] active:bg-[var(--theme-bg-card-hover)] flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 transition-colors"
                               >
-                                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                                 <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                                     <Package size={18} />
                                  </div>
                                  <div className="flex-1 min-w-0">
@@ -135,7 +135,7 @@ export function MobileSearch({
                      {searchResults.orders?.length > 0 && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-4 py-2.5 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-status-info-text)] uppercase tracking-widest flex items-center gap-1.5">
                                  <FileText size={12} /> Purchase Orders ({searchResults.orders.length})
                               </p>
                            </div>
@@ -145,7 +145,7 @@ export function MobileSearch({
                                  onClick={() => { handleResultClick('order', o.id); setIsMobileSearchVisible(false); }}
                                  className="w-full px-4 py-3.5 hover:bg-[var(--theme-bg-subtle)] active:bg-[var(--theme-bg-card-hover)] flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 transition-colors"
                               >
-                                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                                 <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                                     <FileText size={18} />
                                  </div>
                                  <div className="flex-1 min-w-0">
@@ -213,7 +213,7 @@ export function MobileSearch({
                      {searchResults.employees?.length > 0 && (
                         <div>
                            <div className="px-4 py-2.5 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-status-warning-text)] uppercase tracking-widest flex items-center gap-1.5">
                                  <Users size={12} /> Team Members ({searchResults.employees.length})
                               </p>
                            </div>
@@ -223,7 +223,7 @@ export function MobileSearch({
                                  onClick={() => { handleResultClick('employee', e.id); setIsMobileSearchVisible(false); }}
                                  className="w-full px-4 py-3.5 hover:bg-[var(--theme-bg-subtle)] active:bg-[var(--theme-bg-card-hover)] flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 transition-colors"
                               >
-                                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                                 <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                     <Users size={18} />
                                  </div>
                                  <div className="flex-1 min-w-0">
@@ -248,7 +248,7 @@ export function MobileSearch({
                )
             ) : (
                <div className="flex flex-col items-center justify-center h-full text-center p-8 select-none">
-                  <div className="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center mb-4">
                      <Zap size={28} />
                   </div>
                   <h3 className="text-base font-semibold text-[var(--theme-text-primary)] mb-1">Global Search</h3>

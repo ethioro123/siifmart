@@ -156,7 +156,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
               <span className="font-bold text-[var(--theme-text-primary)]">
                 Delegated Headcount Buffer Authority ({effectiveCountry || 'ET'})
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-status-info-border)]">
                 Tier 3 & 4 Governance
               </span>
             </div>
@@ -191,7 +191,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
           </div>
         ) : filteredRequests.length === 0 ? (
           <div className="py-12 text-center text-xs text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
-            <ShieldCheck className="w-8 h-8 mx-auto text-emerald-500 opacity-60 mb-2" />
+            <ShieldCheck className="w-8 h-8 mx-auto text-[var(--theme-status-success-text)] opacity-60 mb-2" />
             No {filterStatus.toLowerCase()} headcount quota requests recorded for this country.
           </div>
         ) : (
@@ -224,18 +224,18 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                         Region: {req.regionCode}
                       </span>
                       {exceedsBuffer ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                           Group Escalation (&gt;10 Buffer)
                         </span>
                       ) : (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                           Country MD Buffer (≤10)
                         </span>
                       )}
                     </div>
 
                     <div className="text-right">
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                      <span className="text-xs font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                         {req.currentQuota} &rarr; {req.requestedQuota} (+{req.increaseAmount} Slots)
                       </span>
                     </div>
@@ -244,16 +244,16 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                   {/* Clearances Status Row */}
                   <div className="flex items-center gap-2 flex-wrap text-[11px]">
                     <span className={`px-2 py-0.5 rounded-md font-medium border ${
-                      hasHRCapture 
-                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
-                        : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                      hasHRCapture
+                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                        : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                     }`}>
                       {hasHRCapture ? `HR Cleared (${req.hrClearedBy})` : 'Awaiting HR Clearance'}
                     </span>
                     <span className={`px-2 py-0.5 rounded-md font-medium border ${
-                      hasFinanceCapture 
-                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
-                        : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                      hasFinanceCapture
+                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                        : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                     }`}>
                       {hasFinanceCapture ? `Finance Cleared (${req.financeClearedBy})` : 'Awaiting Finance Clearance'}
                     </span>
@@ -274,7 +274,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                     {req.status === 'PENDING' && (
                       <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
                         {isRequester ? (
-                          <span className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                          <span className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1">
                             <AlertCircle size={13} /> Maker-Checker: Requester cannot approve or clear
                           </span>
                         ) : isRejecting ? (
@@ -290,7 +290,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                               type="button"
                               onClick={() => handleReject(req)}
                               disabled={isActioning}
-                              className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-colors cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white font-semibold text-xs transition-colors cursor-pointer"
                             >
                               Confirm
                             </button>
@@ -309,7 +309,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                                 type="button"
                                 onClick={() => handleClearHR(req)}
                                 disabled={isActioning}
-                                className="px-2.5 py-1 rounded-lg border border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 text-xs font-semibold cursor-pointer"
+                                className="px-2.5 py-1 rounded-lg border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] text-xs font-semibold cursor-pointer"
                               >
                                 Clear HR
                               </button>
@@ -320,7 +320,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                                 type="button"
                                 onClick={() => handleClearFinance(req)}
                                 disabled={isActioning}
-                                className="px-2.5 py-1 rounded-lg border border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 text-xs font-semibold cursor-pointer"
+                                className="px-2.5 py-1 rounded-lg border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] text-xs font-semibold cursor-pointer"
                               >
                                 Clear Finance
                               </button>
@@ -330,7 +330,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                               type="button"
                               onClick={() => setRejectionModalId(req.id)}
                               disabled={isActioning}
-                              className="px-3 py-1.5 rounded-lg border border-[var(--theme-border)] hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 font-semibold text-xs transition-colors cursor-pointer"
+                              className="px-3 py-1.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-semibold text-xs transition-colors cursor-pointer"
                             >
                               Decline
                             </button>
@@ -356,11 +356,11 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                     {req.status !== 'PENDING' && (
                       <span className="font-semibold text-xs">
                         {req.status === 'APPROVED' ? (
-                          <span className="text-emerald-600 dark:text-emerald-400">
+                          <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                             Approved by {req.reviewedBy || 'Corporate HQ'}
                           </span>
                         ) : (
-                          <span className="text-rose-600 dark:text-rose-400">
+                          <span className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                             Declined: {req.reviewNotes || 'Corporate policy restriction'}
                           </span>
                         )}

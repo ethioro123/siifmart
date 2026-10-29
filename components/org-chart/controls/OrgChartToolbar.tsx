@@ -89,19 +89,19 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
         }`}>
             {/* Left: Matrix Branding & Headcount Badges */}
             <div className="flex items-center gap-2.5 flex-wrap">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--theme-primary)]/10 dark:bg-[#A9CBA2]/15 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]/20">
                     <LayoutGrid size={15} />
                     <span className="text-xs font-black uppercase tracking-wider">Enterprise Matrix</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-[#FAF8F5] dark:bg-[#1E2822] text-xs font-semibold text-stone-700 dark:text-stone-300">
-                    <Users size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <Users size={13} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
                     <span>{totalCount} Personnel</span>
                 </div>
 
                 {typeof activeCount === 'number' && (
-                    <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
                         <span>{activeCount} Active</span>
                     </div>
                 )}
@@ -120,7 +120,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                         className={`w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border outline-none transition-colors ${
                             isDark
                                 ? 'bg-[#1E2822] border-[#2C4D35] text-white placeholder-stone-500 focus:border-[#A9CBA2]'
-                                : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-900 placeholder-stone-400 focus:border-[#2C5E3B]'
+                                : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-900 placeholder-stone-400 focus:border-[var(--theme-border)]'
                         }`}
                     />
                     {filters.searchTerm && (
@@ -143,7 +143,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
                         isDark
                             ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[#A9CBA2]'
-                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[#2C5E3B]'
+                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[var(--theme-border)]'
                     }`}
                 >
                     <option value="">All Facilities / Sites</option>
@@ -160,7 +160,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
                         isDark
                             ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[#A9CBA2]'
-                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[#2C5E3B]'
+                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[var(--theme-border)]'
                     }`}
                 >
                     {departments.map(d => (
@@ -179,7 +179,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
                         isDark
                             ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[#A9CBA2]'
-                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[#2C5E3B]'
+                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[var(--theme-border)]'
                     }`}
                 >
                     <option value="">All Hierarchy Tiers</option>
@@ -203,7 +203,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
                         isDark
                             ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[#A9CBA2]'
-                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[#2C5E3B]'
+                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[var(--theme-border)]'
                     }`}
                 >
                     <option value="">All Statuses</option>
@@ -218,7 +218,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     <button
                         type="button"
                         onClick={handleReset}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-semibold transition-colors cursor-pointer"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs font-semibold transition-colors cursor-pointer"
                         title="Reset all active filters"
                     >
                         <RotateCcw size={12} />

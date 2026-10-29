@@ -184,7 +184,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                         onChange={e => setNewSupLocation(e.target.value)}
                     />
                 </div>
-                {error && <p role="alert" className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
+                {error && <p role="alert" className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">{error}</p>}
                 <p className="text-xs text-[var(--theme-text-secondary)]">New suppliers are pending verification by a procurement lead.</p>
                 <div className="pt-3 flex gap-3">
                     <button

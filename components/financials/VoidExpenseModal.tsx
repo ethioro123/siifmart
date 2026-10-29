@@ -53,8 +53,8 @@ export const VoidExpenseModal: React.FC = () => {
             size="md"
         >
             <div className="p-5 space-y-4">
-                <div className="flex items-center gap-3.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                    <div className="p-2.5 bg-amber-500/20 rounded-xl shrink-0 text-amber-600 dark:text-amber-400">
+                <div className="flex items-center gap-3.5 p-3.5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl">
+                    <div className="p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl shrink-0 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                         <ShieldAlert size={22} />
                     </div>
                     <div>
@@ -86,7 +86,7 @@ export const VoidExpenseModal: React.FC = () => {
 
                 <div>
                     <label className="text-xs text-[var(--theme-text-secondary)] font-medium mb-2 flex items-center gap-1.5">
-                        <AlertTriangle size={13} className="text-amber-500" />
+                        <AlertTriangle size={13} className="text-[var(--theme-status-warning-text)]" />
                         <span>Select or Enter Mandatory Void Reason</span>
                     </label>
 
@@ -98,7 +98,7 @@ export const VoidExpenseModal: React.FC = () => {
                                 onClick={() => handleSelectQuickReason(qr)}
                                 className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
                                     selectedQuickReason === qr
-                                        ? 'bg-amber-500/20 border-amber-500/50 text-amber-700 dark:text-amber-300 font-medium'
+                                        ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >
@@ -110,7 +110,7 @@ export const VoidExpenseModal: React.FC = () => {
                     <textarea
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl p-3 text-xs focus:outline-none focus:border-amber-500 transition-colors resize-none h-20 placeholder:text-[var(--theme-text-secondary)]/50"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl p-3 text-xs focus:outline-none border-[var(--theme-status-warning-border)] transition-colors resize-none h-20 placeholder:text-[var(--theme-text-secondary)]/50"
                         placeholder="Provide detailed justification for supervisory audit..."
                         aria-label="Void Reason"
                     />
@@ -130,7 +130,7 @@ export const VoidExpenseModal: React.FC = () => {
                     <button
                         onClick={handleConfirm}
                         disabled={reason.trim().length < 5 || isSubmitting}
-                        className="px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white dark:text-black disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
+                        className="px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white dark:text-black disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
                     >
                         {isSubmitting && <Loader2 className="animate-spin" size={14} />}
                         <span>{isSubmitting ? 'Recording Void...' : 'Confirm Void'}</span>

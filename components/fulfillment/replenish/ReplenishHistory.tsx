@@ -129,7 +129,7 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                                             {job.jobNumber && <span className="text-[var(--theme-text-primary)] ml-1 font-mono">• {job.jobNumber}</span>}
                                         </p>
                                     </div>
-                                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 uppercase shrink-0">
+                                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)] uppercase shrink-0">
                                         {job.status}
                                     </span>
                                 </div>

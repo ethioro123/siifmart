@@ -8,7 +8,7 @@ interface DisciplinaryKPIsProps {
 
 export function DisciplinaryKPIs({ records }: DisciplinaryKPIsProps) {
     const totalCount = records.length;
-    const activeWarnings = records.filter(r => 
+    const activeWarnings = records.filter(r =>
         ['Verbal Warning', 'Written Warning', 'Final Warning', 'Suspension'].includes(r.record_type) &&
         r.appeal_status !== 'Overturned'
     ).length;
@@ -21,16 +21,16 @@ export function DisciplinaryKPIs({ records }: DisciplinaryKPIsProps) {
             value: totalCount,
             sub: 'All formal disciplinary files',
             icon: Scale,
-            color: 'text-[#0071E3] dark:text-[#2997FF]',
-            bg: 'bg-blue-500/10'
+            color: 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)]',
+            bg: 'bg-[var(--theme-status-info-bg)]'
         },
         {
             label: 'Active Warnings',
             value: activeWarnings,
             sub: 'Policy violations & sanctions',
             icon: AlertTriangle,
-            color: 'text-amber-600 dark:text-amber-400',
-            bg: 'bg-amber-500/10'
+            color: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
+            bg: 'bg-[var(--theme-status-warning-bg)]'
         },
         {
             label: 'Appeals Pending',
@@ -46,8 +46,8 @@ export function DisciplinaryKPIs({ records }: DisciplinaryKPIsProps) {
             value: highCritical,
             sub: 'Severe misconduct investigations',
             icon: ShieldAlert,
-            color: 'text-red-600 dark:text-red-400',
-            bg: 'bg-red-500/10'
+            color: 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]',
+            bg: 'bg-[var(--theme-status-danger-bg)]'
         }
     ];
 

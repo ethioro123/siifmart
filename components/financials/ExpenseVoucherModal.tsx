@@ -57,14 +57,14 @@ export const ExpenseVoucherModal: React.FC<ExpenseVoucherModalProps> = ({
                     </div>
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
                         expense.status === 'Paid'
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                            ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                             : expense.status === 'Approved'
-                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                                ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                                 : expense.status === 'Pending'
-                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                     : expense.status === 'Voided'
                                         ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
-                                        : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                        : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                     }`}>
                         {expense.status === 'Paid' && <CheckCircle2 size={12} />}
                         {expense.status === 'Approved' && <CheckCircle2 size={12} />}
@@ -77,8 +77,8 @@ export const ExpenseVoucherModal: React.FC<ExpenseVoucherModalProps> = ({
 
                 {/* Tier & Governance Banners */}
                 {isCeoEscalated && (
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5 text-xs text-amber-700 dark:text-amber-300">
-                        <Crown size={16} className="text-amber-500 shrink-0" />
+                    <div className="p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl flex items-center gap-2.5 text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
+                        <Crown size={16} className="text-[var(--theme-status-warning-text)] shrink-0" />
                         <div>
                             <span className="font-semibold">Group Executive Authorization Required:</span>
                             <span className="ml-1">
@@ -89,8 +89,8 @@ export const ExpenseVoucherModal: React.FC<ExpenseVoucherModalProps> = ({
                 )}
 
                 {isCountrySignoff && (
-                    <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-2.5 text-xs text-blue-700 dark:text-blue-300">
-                        <ShieldCheck size={16} className="text-blue-500 shrink-0" />
+                    <div className="p-3 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-xl flex items-center gap-2.5 text-xs text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]">
+                        <ShieldCheck size={16} className="text-[var(--theme-status-info-text)] shrink-0" />
                         <div>
                             <span className="font-semibold">Country Sign-Off Required:</span>
                             <span className="ml-1">
@@ -102,8 +102,8 @@ export const ExpenseVoucherModal: React.FC<ExpenseVoucherModalProps> = ({
 
                 {/* Void Audit Details */}
                 {expense.status === 'Voided' && (
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl space-y-1 text-xs">
-                        <div className="flex items-center gap-1.5 font-semibold text-rose-600 dark:text-rose-400">
+                    <div className="p-3 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl space-y-1 text-xs">
+                        <div className="flex items-center gap-1.5 font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                             <Ban size={14} />
                             <span>Zero-Trust Soft Void Record</span>
                         </div>
@@ -187,8 +187,8 @@ export const ExpenseVoucherModal: React.FC<ExpenseVoucherModalProps> = ({
                         <div className="flex items-center gap-2">
                             <div className={`w-6 h-6 rounded-md flex items-center justify-center ${
                                 expense.approvedBy
-                                    ? 'bg-emerald-500/10 text-emerald-600'
-                                    : 'bg-amber-500/10 text-amber-600'
+                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]'
+                                    : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]'
                             }`}>
                                 <UserCheck size={12} />
                             </div>

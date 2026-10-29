@@ -294,7 +294,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         {filters.category && filters.category !== 'All' && (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20">
                                 <Package size={12} /> {filters.category}
-                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, category: 'All' }))} className="hover:text-red-500 ml-1 cursor-pointer">
+                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, category: 'All' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />
                                 </button>
                             </span>
@@ -303,7 +303,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         {filters.brand && filters.brand.trim() !== '' && (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/20">
                                 <Tag size={12} /> Brand: {filters.brand}
-                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, brand: '' }))} className="hover:text-red-500 ml-1 cursor-pointer">
+                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, brand: '' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />
                                 </button>
                             </span>
@@ -312,7 +312,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         {(filters.minPrice || filters.maxPrice) && (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20">
                                 <DollarSign size={12} /> {filters.minPrice || 0} - {filters.maxPrice || '∞'} {currencySymbol}
-                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, minPrice: '', maxPrice: '' }))} className="hover:text-red-500 ml-1 cursor-pointer">
+                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, minPrice: '', maxPrice: '' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />
                                 </button>
                             </span>
@@ -321,7 +321,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         {(filters.minStock || filters.maxStock) && (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                                 <Box size={12} /> Stock: {filters.minStock || 0} - {filters.maxStock || '∞'}
-                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, minStock: '', maxStock: '' }))} className="hover:text-red-500 ml-1 cursor-pointer">
+                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, minStock: '', maxStock: '' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />
                                 </button>
                             </span>
@@ -330,7 +330,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         {filters.locationStatus && filters.locationStatus !== 'All' && (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/20">
                                 <MapPin size={12} /> {filters.locationStatus === 'assigned' ? 'Located' : 'No Bay'}
-                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, locationStatus: 'All' }))} className="hover:text-red-500 ml-1 cursor-pointer">
+                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, locationStatus: 'All' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />
                                 </button>
                             </span>
@@ -339,7 +339,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         {filters.hasBarcode && filters.hasBarcode !== 'All' && (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                 {filters.hasBarcode === 'with_barcode' ? 'Has Barcode' : 'No Barcode'}
-                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, hasBarcode: 'All' }))} className="hover:text-red-500 ml-1 cursor-pointer">
+                                <button type="button" onClick={() => setFilters((p: any) => ({ ...p, hasBarcode: 'All' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />
                                 </button>
                             </span>
@@ -348,7 +348,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         <button
                             type="button"
                             onClick={handleResetAll}
-                            className="text-[11px] font-semibold uppercase text-rose-500 hover:text-rose-600 transition-colors ml-auto cursor-pointer"
+                            className="text-[11px] font-semibold uppercase text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] transition-colors ml-auto cursor-pointer"
                         >
                             Reset All
                         </button>

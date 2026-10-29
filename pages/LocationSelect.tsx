@@ -66,7 +66,7 @@ export default function LocationSelect() {
             <div className="max-w-6xl mx-auto space-y-8">
 
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[#E2DCCE] dark:border-emerald-950/20 pb-6">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[#E2DCCE] border-[var(--theme-status-success-border)] pb-6">
                     <div>
                         <Logo size={22} className="mb-4" />
                         <h1 className="text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight">
@@ -105,7 +105,7 @@ export default function LocationSelect() {
 
                     {/* STORES COLUMN */}
                     <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-green-400 mb-2">
+                        <div className="flex items-center gap-2 text-[var(--theme-status-success-text)] mb-2">
                             <Store size={18} />
                             <h2 className="text-sm font-bold tracking-widest uppercase">Retail Locations ({stores.length})</h2>
                         </div>
@@ -118,8 +118,8 @@ export default function LocationSelect() {
                                         key={site.id}
                                         className={`group relative rounded-xl border transition-all duration-300 ${
                                             activeSite?.id === site.id
-                                                ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] shadow-sm'
-                                                : 'glass-panel border-white/5 hover:border-[#2C5E3B]/30 hover:shadow-md'
+                                                ? 'bg-[var(--theme-primary)]/10 border-[var(--theme-border)] shadow-sm'
+                                                : 'glass-panel border-white/5 hover:border-[var(--theme-border)]/30 hover:shadow-md'
                                         }`}
                                     >
                                         <div
@@ -128,10 +128,10 @@ export default function LocationSelect() {
                                         >
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <span className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                    <span className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                                         {formatDisplaySiteId(site)}
                                                     </span>
-                                                    <h3 className="text-sm font-semibold text-stone-100 group-hover:text-green-400 transition-colors truncate">
+                                                    <h3 className="text-sm font-semibold text-stone-100 text-[var(--theme-status-success-text)] transition-colors truncate">
                                                         {site.name}
                                                     </h3>
                                                 </div>
@@ -155,7 +155,7 @@ export default function LocationSelect() {
                                                         className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
                                                     />
                                                 </button>
-                                                <div className="p-1.5 text-stone-600 group-hover:text-green-400 group-hover:translate-x-0.5 transition-all">
+                                                <div className="p-1.5 text-stone-600 text-[var(--theme-status-success-text)] group-hover:translate-x-0.5 transition-all">
                                                     <ArrowRight size={16} />
                                                 </div>
                                             </div>
@@ -182,11 +182,11 @@ export default function LocationSelect() {
                                                     </div>
 
                                                     <div className="flex flex-wrap gap-2 pt-1">
-                                                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-green-400/90 bg-green-500/10 border border-green-500/20 px-2.5 py-0.5 rounded-full">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> POS ONLINE
+                                                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] px-2.5 py-0.5 rounded-full">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" /> POS ONLINE
                                                         </div>
-                                                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-blue-400/90 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400" /> SYNC ACTIVE
+                                                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] px-2.5 py-0.5 rounded-full">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info-bg)]" /> SYNC ACTIVE
                                                         </div>
                                                     </div>
                                                 </motion.div>
@@ -205,7 +205,7 @@ export default function LocationSelect() {
 
                     {/* WAREHOUSES COLUMN */}
                     <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-blue-400 mb-2">
+                        <div className="flex items-center gap-2 text-[var(--theme-status-info-text)] mb-2">
                             <Building size={18} />
                             <h2 className="text-sm font-bold tracking-widest uppercase">Logistics Centers ({warehouses.length})</h2>
                         </div>
@@ -218,8 +218,8 @@ export default function LocationSelect() {
                                         key={site.id}
                                         className={`group relative rounded-xl border transition-all duration-300 ${
                                             activeSite?.id === site.id
-                                                ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] shadow-sm'
-                                                : 'glass-panel border-white/5 hover:border-[#2C5E3B]/30 hover:shadow-md'
+                                                ? 'bg-[var(--theme-primary)]/10 border-[var(--theme-border)] shadow-sm'
+                                                : 'glass-panel border-white/5 hover:border-[var(--theme-border)]/30 hover:shadow-md'
                                         }`}
                                     >
                                         <div
@@ -228,10 +228,10 @@ export default function LocationSelect() {
                                         >
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <span className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                                    <span className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                                                         {formatDisplaySiteId(site)}
                                                     </span>
-                                                    <h3 className="text-sm font-semibold text-stone-100 group-hover:text-blue-400 transition-colors truncate">
+                                                    <h3 className="text-sm font-semibold text-stone-100 text-[var(--theme-status-info-text)] transition-colors truncate">
                                                         {site.name}
                                                     </h3>
                                                 </div>
@@ -255,7 +255,7 @@ export default function LocationSelect() {
                                                         className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
                                                     />
                                                 </button>
-                                                <div className="p-1.5 text-stone-600 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all">
+                                                <div className="p-1.5 text-stone-600 text-[var(--theme-status-info-text)] group-hover:translate-x-0.5 transition-all">
                                                     <ArrowRight size={16} />
                                                 </div>
                                             </div>
@@ -285,8 +285,8 @@ export default function LocationSelect() {
                                                         <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-purple-400/90 bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 rounded-full">
                                                             <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" /> WMS NETWORK
                                                         </div>
-                                                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-blue-400/90 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400" /> SYNC ACTIVE
+                                                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] px-2.5 py-0.5 rounded-full">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info-bg)]" /> SYNC ACTIVE
                                                         </div>
                                                     </div>
                                                 </motion.div>

@@ -141,7 +141,7 @@ export const PettyCashTab: React.FC = () => {
                         <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                             Physical Vault Balance
                         </span>
-                        <h4 className="text-2xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
+                        <h4 className="text-2xl font-semibold tracking-tight text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono tabular-nums mt-1">
                             {currencySymbol} {currentBalance.toLocaleString()}
                         </h4>
                     </div>
@@ -168,10 +168,10 @@ export const PettyCashTab: React.FC = () => {
                             <div
                                 className={`h-full rounded-full transition-all duration-500 ${
                                     floatReservePct < 25
-                                        ? 'bg-rose-500'
+                                        ? 'bg-[var(--theme-status-danger-bg)]'
                                         : floatReservePct < 50
-                                            ? 'bg-amber-500'
-                                            : 'bg-emerald-500'
+                                            ? 'bg-[var(--theme-status-warning-bg)]'
+                                            : 'bg-[var(--theme-status-success-bg)]'
                                 }`}
                                 style={{ width: `${floatReservePct}%` }}
                             />
@@ -179,7 +179,7 @@ export const PettyCashTab: React.FC = () => {
                     </div>
                     <div className="mt-3 pt-2 border-t border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] flex justify-between">
                         <span>Deficit to replenish:</span>
-                        <span className="font-mono font-medium text-rose-600 dark:text-rose-400">
+                        <span className="font-mono font-medium text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                             {currencySymbol} {Math.max(0, authorizedFloat - currentBalance).toLocaleString()}
                         </span>
                     </div>
@@ -196,7 +196,7 @@ export const PettyCashTab: React.FC = () => {
                                 {account?.custodianName || 'Branch Manager'}
                             </h4>
                         </div>
-                        <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <UserCheck size={16} />
                         </div>
                     </div>
@@ -210,7 +210,7 @@ export const PettyCashTab: React.FC = () => {
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs flex flex-col justify-center gap-2">
                     <button
                         onClick={() => setIsVoucherModalOpen(true)}
-                        className="w-full py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                        className="w-full py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs"
                     >
                         <Plus size={14} />
                         <span>Issue Cash Voucher</span>
@@ -234,7 +234,7 @@ export const PettyCashTab: React.FC = () => {
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                                 Branch Petty Cash Vouchers
                             </h3>
-                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-medium">
                                 <ShieldCheck size={12} />
                                 <span>Zero-Trust Vault Audit</span>
                             </div>
@@ -295,7 +295,7 @@ export const PettyCashTab: React.FC = () => {
                             {loading ? (
                                 <tr>
                                     <td colSpan={7} className="py-16 text-center text-[var(--theme-text-secondary)]">
-                                        <Loader2 className="animate-spin inline mr-2 text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                        <Loader2 className="animate-spin inline mr-2 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                                         <span className="text-xs">Loading petty cash vouchers...</span>
                                     </td>
                                 </tr>
@@ -318,7 +318,7 @@ export const PettyCashTab: React.FC = () => {
                             ) : (
                                 filteredVouchers.map((v) => (
                                     <tr key={v.id} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
-                                        <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[#0071E3] dark:text-[#2997FF] whitespace-nowrap">
+                                        <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)] whitespace-nowrap">
                                             {v.voucherNumber}
                                         </td>
                                         <td className="py-3.5 px-4 text-xs font-mono text-[var(--theme-text-secondary)] whitespace-nowrap tabular-nums">
@@ -339,7 +339,7 @@ export const PettyCashTab: React.FC = () => {
                                             {currencySymbol} {v.amount.toLocaleString()}
                                         </td>
                                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                                 <CheckCircle2 size={11} />
                                                 <span>Attached</span>
                                             </span>

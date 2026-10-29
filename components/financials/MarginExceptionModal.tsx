@@ -66,7 +66,7 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                 {/* Product Header Card */}
                 <div className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                             <ShieldAlert size={18} />
                         </div>
                         <div>
@@ -94,10 +94,10 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
 
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border shrink-0 ${
                         isApproved
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                            ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                             : isRejected
-                                ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                                : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                     }`}>
                         {isApproved && <CheckCircle2 size={12} />}
                         {isRejected && <XCircle size={12} />}
@@ -135,15 +135,15 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                         </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-rose-500/5 border border-rose-500/20">
-                        <span className="text-[11px] font-medium text-rose-600 dark:text-rose-400 block">
+                    <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)]">
+                        <span className="text-[11px] font-medium text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] block">
                             Proposed Margin
                         </span>
                         <div className="flex items-center gap-1.5 mt-1">
-                            <span className="text-sm font-bold text-rose-600 dark:text-rose-400 font-mono tabular-nums">
+                            <span className="text-sm font-bold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-mono tabular-nums">
                                 {request.proposedMarginPct.toFixed(1)}%
                             </span>
-                            <span className="inline-flex items-center text-[10px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-1 py-0.5 rounded font-mono">
+                            <span className="inline-flex items-center text-[10px] font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] px-1 py-0.5 rounded font-mono">
                                 <ArrowDownRight size={10} />
                                 {request.marginVariancePct.toFixed(1)}%
                             </span>
@@ -155,16 +155,16 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                 <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-2">
                     <div className="flex justify-between items-center text-xs">
                         <span className="text-[var(--theme-text-secondary)] flex items-center gap-1">
-                            <TrendingDown size={13} className="text-rose-500" />
+                            <TrendingDown size={13} className="text-[var(--theme-status-danger-text)]" />
                             Margin Variance from Floor Target
                         </span>
-                        <span className="font-mono tabular-nums font-semibold text-rose-600 dark:text-rose-400">
+                        <span className="font-mono tabular-nums font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                             -{Math.abs(request.marginVariancePct).toFixed(1)}% Under Hurdle
                         </span>
                     </div>
                     <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden flex">
                         <div
-                            className="h-full bg-rose-500 rounded-full transition-all"
+                            className="h-full bg-[var(--theme-status-danger-bg)] rounded-full transition-all"
                             style={{ width: `${Math.min(100, Math.max(10, (request.proposedMarginPct / (request.targetMarginPct || 1)) * 100))}%` }}
                         />
                     </div>
@@ -213,19 +213,19 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                 {!isPending && (
                     <div className={`p-3.5 rounded-xl border text-xs space-y-1.5 ${
                         isApproved
-                            ? 'bg-emerald-500/5 border-emerald-500/20'
-                            : 'bg-rose-500/5 border-rose-500/20'
+                            ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
+                            : 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)]'
                     }`}>
                         <div className="flex items-center justify-between">
                             <span className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5">
                                 {isApproved ? (
                                     <>
-                                        <CheckCircle2 size={14} className="text-emerald-500" />
+                                        <CheckCircle2 size={14} className="text-[var(--theme-status-success-text)]" />
                                         Approved Exception Audit
                                     </>
                                 ) : (
                                     <>
-                                        <XCircle size={14} className="text-rose-500" />
+                                        <XCircle size={14} className="text-[var(--theme-status-danger-text)]" />
                                         Rejection Audit
                                     </>
                                 )}
@@ -270,7 +270,7 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                                         type="button"
                                         onClick={() => handleAction('Rejected')}
                                         disabled={isSubmitting}
-                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] transition-all flex items-center gap-1.5 disabled:opacity-50"
                                     >
                                         {isSubmitting && actionType === 'Rejected' ? (
                                             <Loader2 size={13} className="animate-spin" />
@@ -283,7 +283,7 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                                         type="button"
                                         onClick={() => handleAction('Approved')}
                                         disabled={isSubmitting}
-                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[#0071E3] hover:bg-[#0077ED] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[var(--theme-accent)] hover:bg-[#0077ED] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
                                     >
                                         {isSubmitting && actionType === 'Approved' ? (
                                             <Loader2 size={13} className="animate-spin" />
@@ -295,7 +295,7 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                                 </div>
                             </>
                         ) : (
-                            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 flex items-center gap-2">
+                            <div className="p-3 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-2">
                                 <AlertTriangle size={15} className="shrink-0" />
                                 <span>Pending Finance sign-off. Your role does not possess authority to approve sub-floor margins.</span>
                             </div>

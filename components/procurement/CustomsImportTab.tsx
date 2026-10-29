@@ -105,7 +105,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                   <span>Checker • Release Sign-Off</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 text-[11px] font-semibold">
                   <Clock size={12} />
                   <span>Maker • Customs Specialist</span>
                 </span>
@@ -144,8 +144,8 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                       <span className="font-mono font-bold text-sm text-[var(--theme-text-primary)]">{d.declarationNumber}</span>
                       <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                         isCleared
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                          ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                          : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                       }`}>
                         {isCleared ? 'Cleared & Released' : d.customsStatus}
                       </span>
@@ -185,7 +185,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                       Filed by {d.specialistName || 'Customs Specialist'} on {formatDateTime(d.createdAt)}
                     </p>
                     {d.clearedAt && d.clearedBy && (
-                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
+                      <p className="text-[10px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono font-semibold">
                         Released by {d.clearedBy} on {formatDateTime(d.clearedAt)}
                       </p>
                     )}
@@ -194,7 +194,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                     <button
                       type="button"
                       onClick={() => handleAuthorizeRelease(d)}
-                      className="h-8 px-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
+                      className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
                     >
                       <Check size={13} /> Authorize Release
                     </button>

@@ -20,7 +20,7 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
 }) => {
     const canSeeGlobalQueue = canManageDispatch(user?.role);
 
-    const currentEmployee = employees.find(e => 
+    const currentEmployee = employees.find(e =>
         (user?.email && e.email === user.email) ||
         ((user as any)?.employeeId && e.id === (user as any).employeeId) ||
         e.id === user?.id
@@ -46,15 +46,15 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
                     <p className="text-base sm:text-xl font-bold font-mono text-[var(--theme-text-primary)] tabular-nums leading-none">{totalJobs}</p>
                 </div>
                 <div className="text-center px-2 border-x border-[var(--theme-border)]">
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mb-1">{t('warehouse.driverHub.done')}</p>
-                    <p className="text-base sm:text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums leading-none">{stats.completed}</p>
+                    <p className="text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium mb-1">{t('warehouse.driverHub.done')}</p>
+                    <p className="text-base sm:text-xl font-bold font-mono text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] tabular-nums leading-none">{stats.completed}</p>
                 </div>
                 <div className="text-center px-2">
                     <p className="text-xs text-[var(--theme-primary)] font-medium mb-1">{t('warehouse.driverHub.units')}</p>
                     <p className="text-base sm:text-xl font-bold font-mono text-[var(--theme-primary)] tabular-nums leading-none">{stats.items}</p>
                 </div>
             </div>
-            
+
             <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 pt-3 sm:pt-0 border-t sm:border-none border-[var(--theme-border)]">
                 <div className="text-left sm:text-right">
                     <div className="flex items-center gap-2 mb-1.5 justify-start sm:justify-end">

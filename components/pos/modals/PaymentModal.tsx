@@ -78,9 +78,9 @@ export const PaymentModal: React.FC = () => {
                 {/* Payment Method Selector */}
                 <div className="grid grid-cols-3 gap-3">
                     {[
-                        { id: 'Cash', icon: Banknote, color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: t('pos.cash') },
-                        { id: 'Card', icon: CreditCard, color: 'text-blue-500', bg: 'bg-blue-500/10', label: t('pos.card') },
-                        { id: 'Mobile Money', icon: Smartphone, color: 'text-amber-500', bg: 'bg-amber-500/10', label: isKenya ? 'M-Pesa' : t('pos.mobile') }
+                        { id: 'Cash', icon: Banknote, color: 'text-[var(--theme-status-success-text)]', bg: 'bg-[var(--theme-status-success-bg)]', label: t('pos.cash') },
+                        { id: 'Card', icon: CreditCard, color: 'text-[var(--theme-status-info-text)]', bg: 'bg-[var(--theme-status-info-bg)]', label: t('pos.card') },
+                        { id: 'Mobile Money', icon: Smartphone, color: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]', label: isKenya ? 'M-Pesa' : t('pos.mobile') }
                     ].map(method => {
                         const Icon = method.icon;
                         const isSelected = selectedPaymentMethod === method.id;

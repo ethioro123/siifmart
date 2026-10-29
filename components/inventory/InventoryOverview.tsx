@@ -48,12 +48,12 @@ const MetricCard = ({ title, value, sub, icon: Icon, color = 'emerald' }: Metric
             <div className="flex justify-between items-start mb-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
                     isRed
-                        ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                        ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                         : isAmber
-                            ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                            ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                             : isSky
-                                ? 'bg-sky-500/10 text-sky-500 border-sky-500/20'
-                                : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
+                                : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                 }`}>
                     <Icon size={18} />
                 </div>

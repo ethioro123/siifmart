@@ -13,7 +13,7 @@ interface ProgressBarProps {
 export const ProgressBar: React.FC<ProgressBarProps> = ({
     progress,
     containerClassName = "h-2 bg-white/10 rounded-full overflow-hidden",
-    fillClassName = "h-full bg-blue-500 transition-all duration-300"
+    fillClassName = "h-full bg-[var(--theme-status-info-bg)] transition-all duration-300"
 }) => {
     const fillRef = useRef<HTMLDivElement>(null);
 

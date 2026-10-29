@@ -101,11 +101,11 @@ export function DesktopSearch({
                                  onClick={() => handleResultClick('job', link.id, link.path)}
                                  className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
                               >
-                                 <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                                 <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                     <Activity size={16} className="group-hover:animate-pulse" />
                                  </div>
                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-amber-500 transition-colors truncate">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] text-[var(--theme-status-warning-text)] transition-colors truncate">
                                        {link.title}
                                     </p>
                                     <p className="text-[10px] text-[var(--theme-text-muted)] font-mono tracking-wider">
@@ -144,7 +144,7 @@ export function DesktopSearch({
                      {searchResults.products?.length > 0 && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-status-success-text)] uppercase tracking-widest flex items-center gap-1.5">
                                  <Package size={12} /> Products ({searchResults.products.length})
                               </p>
                            </div>
@@ -154,11 +154,11 @@ export function DesktopSearch({
                                  onClick={() => handleResultClick('product', p.id)}
                                  className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
                               >
-                                 <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                                 <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                                     <Package size={16} />
                                  </div>
                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-emerald-500 transition-colors truncate">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] text-[var(--theme-status-success-text)] transition-colors truncate">
                                        {p.name}
                                     </p>
                                     <p className="text-[10px] text-[var(--theme-text-muted)] font-mono truncate">
@@ -175,7 +175,7 @@ export function DesktopSearch({
                      {searchResults.orders?.length > 0 && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-status-info-text)] uppercase tracking-widest flex items-center gap-1.5">
                                  <FileText size={12} /> Purchase Orders ({searchResults.orders.length})
                               </p>
                            </div>
@@ -185,11 +185,11 @@ export function DesktopSearch({
                                  onClick={() => handleResultClick('order', o.id)}
                                  className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
                               >
-                                 <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                                 <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                                     <FileText size={16} />
                                  </div>
                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-blue-500 transition-colors truncate">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] text-[var(--theme-status-info-text)] transition-colors truncate">
                                        {o.poNumber || o.po_number}
                                     </p>
                                     <p className="text-[10px] text-[var(--theme-text-muted)] truncate">
@@ -268,7 +268,7 @@ export function DesktopSearch({
                      {searchResults.employees?.length > 0 && (
                         <div>
                            <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-status-warning-text)] uppercase tracking-widest flex items-center gap-1.5">
                                  <Users size={12} /> Team Members ({searchResults.employees.length})
                               </p>
                            </div>
@@ -278,11 +278,11 @@ export function DesktopSearch({
                                  onClick={() => handleResultClick('employee', e.id)}
                                  className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
                               >
-                                 <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                                 <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                     <Users size={16} />
                                  </div>
                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-amber-500 transition-colors truncate">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] text-[var(--theme-status-warning-text)] transition-colors truncate">
                                        {e.name}
                                     </p>
                                     <p className="text-[10px] text-[var(--theme-text-muted)] truncate">

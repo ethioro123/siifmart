@@ -16,7 +16,7 @@ interface NewHireHandoverBannerProps {
  * Prominently alerts site managers (Store & Warehouse managers) when a recruit
  * is approved by HR & Finance, providing an immediate, elegant action to issue
  * their web login credentials and terminal PIN.
- * 
+ *
  * Strictly hidden for Level 4 floor staff.
  */
 export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerProps) {
@@ -84,20 +84,20 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
 
     return (
         <>
-            <div className={`p-4 sm:p-4.5 rounded-2xl bg-gradient-to-r from-blue-500/10 via-emerald-500/10 to-transparent border border-blue-500/25 shadow-xs relative overflow-hidden transition-all ${className}`}>
+            <div className={`p-4 sm:p-4.5 rounded-2xl bg-gradient-to-r from-blue-500/10 via-emerald-500/10 to-transparent border border-[var(--theme-status-info-border)] shadow-xs relative overflow-hidden transition-all ${className}`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                     <div className="flex items-start sm:items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-2xl bg-[#0071E3] text-white flex items-center justify-center shrink-0 shadow-[0_2px_8px_rgba(0,113,227,0.3)]">
+                        <div className="w-10 h-10 rounded-2xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0 shadow-[0_2px_8px_rgba(0,113,227,0.3)]">
                             <Key size={18} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-bold uppercase tracking-wider text-[#0071E3] dark:text-[#2997FF] flex items-center gap-1">
+                                <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center gap-1">
                                     <Sparkles size={13} />
                                     New Staff Approved & Ready for Duty
                                 </span>
                                 {pendingHandovers.length > 1 && (
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/25">
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-status-info-border)]">
                                         {currentIndex + 1} of {pendingHandovers.length}
                                     </span>
                                 )}
@@ -133,7 +133,7 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
                         <button
                             type="button"
                             onClick={() => setSelectedEmployee(currentEmployee)}
-                            className="px-3.5 py-2 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-95 transition-all cursor-pointer"
+                            className="px-3.5 py-2 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-95 transition-all cursor-pointer"
                         >
                             <span>Handover Credentials</span>
                             <ChevronRight size={14} />

@@ -102,8 +102,8 @@ export const DocksOutboundStaging: React.FC<DocksOutboundStagingProps> = ({
                                             </p>
                                             {job.deliveryMethod === 'External' ? (
                                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <Truck size={12} className="text-amber-500" />
-                                                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-tight truncate">
+                                                    <Truck size={12} className="text-[var(--theme-status-warning-text)]" />
+                                                    <span className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold uppercase tracking-tight truncate">
                                                         {job.externalCarrierName || 'EXT Carrier'}
                                                     </span>
                                                 </div>

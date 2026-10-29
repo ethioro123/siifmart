@@ -28,19 +28,19 @@ export const DiscountModal: React.FC = () => {
             <div className="space-y-5">
                 {/* Current Applied Discount */}
                 {appliedDiscountCodeDetails && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
+                    <div className="bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-2xl p-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 bg-emerald-500/20 text-emerald-500 rounded-xl flex items-center justify-center shrink-0">
+                                <div className="w-9 h-9 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] rounded-xl flex items-center justify-center shrink-0">
                                     <CheckCircle className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-emerald-500 text-sm tracking-tight">{appliedDiscountCodeDetails.code}</p>
+                                    <p className="font-semibold text-[var(--theme-status-success-text)] text-sm tracking-tight">{appliedDiscountCodeDetails.code}</p>
                                     <p className="text-xs text-[var(--theme-text-secondary)]">{appliedDiscountCodeDetails.name}</p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-base font-bold text-emerald-500 font-mono tabular-nums">
+                                <p className="text-base font-bold text-[var(--theme-status-success-text)] font-mono tabular-nums">
                                     {appliedDiscountCodeDetails.type === 'PERCENTAGE'
                                         ? `-${appliedDiscountCodeDetails.value}%`
                                         : `-${CURRENCY_SYMBOL} ${appliedDiscountCodeDetails.value}`
@@ -53,7 +53,7 @@ export const DiscountModal: React.FC = () => {
                         </div>
                         <button
                             onClick={handleRemoveDiscount}
-                            className="w-full mt-3 py-2.5 text-rose-500 text-xs font-semibold border border-rose-500/20 bg-rose-500/10 rounded-xl hover:bg-rose-500/20 transition-all cursor-pointer active:scale-95 tracking-tight"
+                            className="w-full mt-3 py-2.5 text-[var(--theme-status-danger-text)] text-xs font-semibold border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] rounded-xl bg-[var(--theme-status-danger-bg)] transition-all cursor-pointer active:scale-95 tracking-tight"
                         >
                             {t('pos.removeDiscount')}
                         </button>
@@ -88,11 +88,11 @@ export const DiscountModal: React.FC = () => {
                                         if (e.key === 'Enter') handleValidateDiscountCode();
                                     }}
                                     placeholder="Enter code (e.g., SAVE10)"
-                                    className={`w-full bg-[var(--theme-bg-subtle)] border ${discountCodeError ? 'border-rose-500' : 'border-[var(--theme-border)]'} rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] text-center text-base font-mono tracking-wider uppercase focus:border-[var(--theme-border-focus)] focus:ring-1 focus:ring-[var(--theme-border-focus)] transition-all`}
+                                    className={`w-full bg-[var(--theme-bg-subtle)] border ${discountCodeError ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] text-center text-base font-mono tracking-wider uppercase focus:border-[var(--theme-border-focus)] focus:ring-1 focus:ring-[var(--theme-border-focus)] transition-all`}
                                     autoFocus
                                 />
                                 {discountCodeError && (
-                                    <p className="mt-1.5 text-rose-500 text-xs flex items-center justify-center gap-1 font-medium">
+                                    <p className="mt-1.5 text-[var(--theme-status-danger-text)] text-xs flex items-center justify-center gap-1 font-medium">
                                         <AlertTriangle className="w-3.5 h-3.5" />
                                         {discountCodeError}
                                     </p>

@@ -212,7 +212,7 @@ export const PayrollModal: React.FC = () => {
         {/* Header Ribbon */}
         <div className="flex items-center justify-between p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] rounded-xl flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] rounded-xl flex items-center justify-center shrink-0">
               <ShieldCheck size={22} />
             </div>
             <div>
@@ -220,7 +220,7 @@ export const PayrollModal: React.FC = () => {
                 <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                   4-Eyes Dual Control Sign-Off
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20">
                   {effectiveCountry} TENANT
                 </span>
               </div>
@@ -239,11 +239,11 @@ export const PayrollModal: React.FC = () => {
         <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+              <ShieldCheck size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
               Division of Responsibility: HR & Payroll Governance
             </span>
             {isRegionalHR && (
-              <span className="text-[10px] font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 px-2 py-0.5 rounded-full border border-[#0071E3]/20">
+              <span className="text-[10px] font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-2 py-0.5 rounded-full border border-[var(--theme-border-focus)]/20">
                 Regional Auditor
               </span>
             )}
@@ -263,7 +263,7 @@ export const PayrollModal: React.FC = () => {
             </div>
           </div>
           {isRegionalHR && (
-            <p className="text-[11px] text-[#0071E3] dark:text-[#2997FF] font-medium pt-1">
+            <p className="text-[11px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-medium pt-1">
               Notice: As a Regional HR Manager, your local site attendance and leave logs feed directly into this sovereign cycle. Final country-level certification is centralized at Country HQ / Managing Director.
             </p>
           )}
@@ -281,9 +281,9 @@ export const PayrollModal: React.FC = () => {
               {currencySymbol} {totalSalaries.toLocaleString()}
             </p>
           </div>
-          <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-center">
-            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-semibold tracking-wider">Total Payout</p>
-            <p className="text-base font-bold text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
+          <div className="p-3 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-xl text-center">
+            <p className="text-[10px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] uppercase font-semibold tracking-wider">Total Payout</p>
+            <p className="text-base font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono tabular-nums mt-1">
               {currencySymbol} {totalPayout.toLocaleString()}
             </p>
           </div>
@@ -307,7 +307,7 @@ export const PayrollModal: React.FC = () => {
               type="button"
               onClick={handleInitiateRun}
               disabled={isActionLoading || activeEmployees.length === 0}
-              className="px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold rounded-xl text-xs uppercase tracking-wider inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 transition-all"
+              className="px-4 py-2 bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white font-semibold rounded-xl text-xs uppercase tracking-wider inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 transition-all"
             >
               {isActionLoading ? <Loader2 size={13} className="animate-spin" /> : <Briefcase size={14} />}
               Initialize {currentMonthYear} Batch
@@ -346,8 +346,8 @@ export const PayrollModal: React.FC = () => {
 
             {/* Rejection / Request Revision Box */}
             {isRejecting ? (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl space-y-2.5">
-                <h5 className="text-xs font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+              <div className="p-4 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl space-y-2.5">
+                <h5 className="text-xs font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-1.5">
                   <AlertTriangle size={14} /> Request Revision / Reject Batch
                 </h5>
                 <textarea
@@ -355,7 +355,7 @@ export const PayrollModal: React.FC = () => {
                   onChange={e => setRejectionReason(e.target.value)}
                   placeholder="Specify the discrepancy or reason for revision..."
                   rows={2}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)] outline-none focus:ring-1 focus:ring-rose-500 transition-all resize-none"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)] outline-none focus:ring-1 ring-[var(--theme-status-danger-border)] transition-all resize-none"
                 />
                 <div className="flex justify-end gap-2">
                   <button
@@ -369,7 +369,7 @@ export const PayrollModal: React.FC = () => {
                     type="button"
                     onClick={handleReject}
                     disabled={isActionLoading || !rejectionReason.trim()}
-                    className="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-xl transition-all shadow-sm disabled:opacity-50"
+                    className="px-4 py-1.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white font-semibold text-xs rounded-xl transition-all shadow-sm disabled:opacity-50"
                   >
                     Confirm Rejection
                   </button>
@@ -381,7 +381,7 @@ export const PayrollModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsRejecting(true)}
-                    className="text-xs text-[var(--theme-text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 transition-colors cursor-pointer"
+                    className="text-xs text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-1 transition-colors cursor-pointer"
                   >
                     <XCircle size={14} /> Request Revision
                   </button>
@@ -409,7 +409,7 @@ export const PayrollModal: React.FC = () => {
                 disabled={!isDualApproved || isActionLoading}
                 className={`px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center gap-2 transition-all ${
                   isDualApproved
-                    ? 'bg-[#0071E3] hover:bg-[#0077ED] text-white shadow-sm cursor-pointer'
+                    ? 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white shadow-sm cursor-pointer'
                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] cursor-not-allowed opacity-60'
                 }`}
                 title={!isDualApproved ? 'Both HR and Finance must sign before disbursing' : 'Disburse payout'}
@@ -425,7 +425,7 @@ export const PayrollModal: React.FC = () => {
           )}
 
           {isDisbursed && (
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1.5">
               <CheckCircle2 size={16} /> Disbursed &amp; Reconciled
             </span>
           )}

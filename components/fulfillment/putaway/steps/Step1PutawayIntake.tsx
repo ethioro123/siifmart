@@ -101,7 +101,7 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
                                                 {item.sku || prod?.sku}
                                             </span>
                                             {formatProductSize(prod || item) && (
-                                                <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                                <span className="text-[11px] font-mono text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2 py-0.5 rounded border border-[var(--theme-status-success-border)]">
                                                     {formatProductSize(prod || item)}
                                                 </span>
                                             )}

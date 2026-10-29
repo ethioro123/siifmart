@@ -31,12 +31,12 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
     const isRegional = ['regional_operations_manager', 'regional_supply_chain_manager', 'regional_hr_manager', 'regional_procurement_manager', 'regional_finance_manager', 'regional_logistics_manager', 'regional_security_manager'].includes(user?.role || '')
         || (user?.role === 'talent_recruiter' && Boolean(user?.regionCode || (user as any)?.region_code));
     const userRegion = user?.regionCode || (user as any)?.region_code || activeSite?.regionCode || (activeSite as any)?.region_code;
-    const regionalSites = isRegional && userRegion 
+    const regionalSites = isRegional && userRegion
         ? sites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion)
         : sites;
 
-    const defaultSiteId = isSiteManager 
-        ? (user?.siteId || activeSite?.id || '') 
+    const defaultSiteId = isSiteManager
+        ? (user?.siteId || activeSite?.id || '')
         : (isRegional ? (regionalSites.find(s => s.id === activeSite?.id)?.id || regionalSites[0]?.id || '') : (activeSite?.id || ''));
 
     const [reqId, setReqId] = useState(selectedReqId || '');
@@ -86,7 +86,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
             <form onSubmit={handleSubmit} className="bg-[var(--theme-bg-panel)] rounded-3xl border border-[var(--theme-border)] shadow-[var(--shadow-modal)] p-6 max-w-lg w-full space-y-4 animate-in fade-in zoom-in-95 duration-150">
                 <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <UserPlus size={16} />
                         </div>
                         <div>
@@ -218,7 +218,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
                     <button
                         type="submit"
                         disabled={isSubmitting || !name.trim() || !email.trim()}
-                        className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs font-semibold active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                        className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:opacity-50"
                     >
                         {isSubmitting ? 'Enrolling...' : 'Enroll Candidate'}
                     </button>

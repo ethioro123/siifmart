@@ -98,8 +98,8 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
 
     return (
         <div className="space-y-3">
-            <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-[var(--theme-text-primary)]">
-                <AlertTriangle size={18} className="shrink-0 text-amber-600" />
+            <div className="flex items-center gap-2 rounded-xl border border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] p-3 text-xs text-[var(--theme-text-primary)]">
+                <AlertTriangle size={18} className="shrink-0 text-[var(--theme-status-warning-text)]" />
                 <span>{t('warehouse.blindCountNotice')}</span>
             </div>
 
@@ -115,8 +115,8 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                             <div className="min-w-0">
                                 <p className="truncate text-sm font-semibold text-[var(--theme-text-primary)]">{item.name}</p>
                                 <p className="truncate font-mono text-[11px] text-[var(--theme-text-secondary)]">{item.location || t('warehouse.nA')} · {item.sku}</p>
-                                {item.hasVariance && <p className="mt-1 text-xs font-semibold text-amber-600">{t('warehouse.varianceDetectedRecount')}</p>}
-                                {item.status === 'Counted' && !item.hasVariance && <p className="mt-1 text-xs font-semibold text-emerald-600">{t('warehouse.countRecorded')}</p>}
+                                {item.hasVariance && <p className="mt-1 text-xs font-semibold text-[var(--theme-status-warning-text)]">{t('warehouse.varianceDetectedRecount')}</p>}
+                                {item.status === 'Counted' && !item.hasVariance && <p className="mt-1 text-xs font-semibold text-[var(--theme-status-success-text)]">{t('warehouse.countRecorded')}</p>}
                             </div>
                         </div>
                         {mayEnterCount ? (

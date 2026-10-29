@@ -79,17 +79,17 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                 aria-label={`Open putaway job ${formatJobId(job)}`}
                                 key={job.id}
                                 className={`w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] flex items-center gap-2.5 bg-[var(--theme-bg-card)] border rounded-xl p-2.5 min-h-[48px] active:scale-[0.98] transition-transform cursor-pointer shadow-xs ${
-                                    isCritical 
-                                        ? 'border-red-500/40' 
-                                        : job.status === 'In-Progress' 
+                                    isCritical
+                                        ? 'border-[var(--theme-status-danger-border)]'
+                                        : job.status === 'In-Progress'
                                             ? 'border-[var(--theme-accent)]/60 bg-[var(--theme-accent)]/5 ring-1 ring-[var(--theme-accent)]/20'
                                             : 'border-[var(--theme-border)]'
                                 }`}
                                 onClick={() => onShowDetails(job)}
                             >
                                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold font-mono shrink-0 border ${
-                                    progress >= 100 
-                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' 
+                                    progress >= 100
+                                        ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]'
                                         : 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
                                 }`}>
                                     {Math.round(progress)}%
@@ -100,7 +100,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             {formatJobId(job)}
                                         </span>
                                         {isCritical && (
-                                            <span className="bg-red-500 text-white text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
+                                            <span className="bg-[var(--theme-status-danger-bg)] text-white text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
                                                 !
                                             </span>
                                         )}
@@ -123,7 +123,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                     }
 
                     return (
-                        <div key={job.id} className={`group p-4 sm:p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] relative overflow-hidden transition-all shadow-[var(--shadow-sm)] ${isCritical ? 'border-red-500/40' : ''}`}>
+                        <div key={job.id} className={`group p-4 sm:p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] relative overflow-hidden transition-all shadow-[var(--shadow-sm)] ${isCritical ? 'border-[var(--theme-status-danger-border)]' : ''}`}>
                             <div className="flex justify-between items-start mb-4 sm:mb-6 relative z-10">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2.5 flex-wrap">
@@ -136,7 +136,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                     </div>
                                     <div className="flex items-center gap-2 mt-2 font-mono">
                                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--theme-bg-subtle)] rounded-lg border border-[var(--theme-border)]">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
                                             <span className="text-[11px] text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider">
                                                 {job.items} {t('warehouse.items')}
                                             </span>
@@ -153,7 +153,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             </span>
                                         </div>
                                         {isCritical && (
-                                            <div className="flex items-center gap-1 px-2.5 py-1 bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[11px] font-semibold rounded-lg uppercase tracking-wider">
+                                            <div className="flex items-center gap-1 px-2.5 py-1 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] text-[11px] font-semibold rounded-lg uppercase tracking-wider">
                                                 <Zap size={11} className="fill-current" />
                                                 {t('warehouse.priority')}
                                             </div>
@@ -180,16 +180,16 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                 <div>
                                     <div className="flex justify-between text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-2">
                                         <span>{t('warehouse.putaway.putawayProgress')}</span>
-                                        <span className={`font-mono ${progress === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'}`}>{Math.round(progress)}%</span>
+                                        <span className={`font-mono ${progress === 100 ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-primary)]'}`}>{Math.round(progress)}%</span>
                                     </div>
                                     <div className="w-full h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full transition-[width] duration-500 rounded-full ${progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'}`}
+                                            className={`h-full transition-[width] duration-500 rounded-full ${progress === 100 ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-status-info-bg)]'}`}
                                             ref={(el) => { if (el) el.style.width = `${Math.round(progress)}%`; }}
                                         />
                                     </div>
                                 </div>
-                                    
+
                                 <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-4">
                                     <div>
                                         {workerId ? (
@@ -213,12 +213,12 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             })()
                                         ) : (
                                             <div className="flex items-center gap-2.5">
-                                                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                                                <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center">
                                                     <User size={16} />
                                                 </div>
                                                 <div>
                                                     <p className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider mb-0.5">{workerLabel}</p>
-                                                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-tight">{t('warehouse.putaway.unassigned')}</p>
+                                                    <p className="text-xs font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] uppercase tracking-tight">{t('warehouse.putaway.unassigned')}</p>
                                                 </div>
                                             </div>
                                         )}
@@ -246,7 +246,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                 <button
                                     onClick={() => onShowDetails(job)}
                                     disabled={isSubmitting}
-                                    className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm min-h-[48px]"
+                                    className="w-full h-12 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm min-h-[48px]"
                                 >
                                     {isSubmitting ? (
                                         <Loader2 size={18} className="animate-spin" />

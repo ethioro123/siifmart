@@ -34,9 +34,9 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
             {/* Header */}
             <div className="p-4 md:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center">
                 <div className="flex items-center gap-3 md:gap-4">
-                    <button 
-                        onClick={onBack} 
-                        className="p-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" 
+                    <button
+                        onClick={onBack}
+                        className="p-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                         aria-label="Go Back"
                     >
                         <ArrowLeft size={18} />
@@ -45,8 +45,8 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
                         <div className="flex items-center gap-2.5">
                             <h2 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight font-mono">Job {formatJobId(job)}</h2>
                             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${
-                                job.priority === 'Critical' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20' :
-                                job.priority === 'High' ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20' : 
+                                job.priority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' :
+                                job.priority === 'High' ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20' :
                                 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                             }`}>
                                 {job.priority} Priority
@@ -66,7 +66,7 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
                     </div>
                     <div className="h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden">
                         <div
-                            className={`h-full transition-all duration-500 rounded-full ${progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'}`}
+                            className={`h-full transition-all duration-500 rounded-full ${progress === 100 ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-status-info-bg)]'}`}
                             ref={(el) => { if (el) el.style.width = `${Math.round(progress)}%`; }}
                         />
                     </div>
@@ -84,14 +84,14 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
 
                         return (
                             <div key={idx} className={`p-4 rounded-xl border transition-colors ${
-                                isCompleted ? 'bg-[var(--theme-bg-card)] border-emerald-500/20 opacity-70' :
+                                isCompleted ? 'bg-[var(--theme-bg-card)] border-[var(--theme-status-success-border)] opacity-70' :
                                 isCurrent ? 'bg-[var(--theme-bg-card)] border-[var(--theme-accent)] ring-1 ring-[var(--theme-accent-muted)]' :
                                 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
                             }`}>
                                 <div className="flex justify-between items-start">
                                     <div className="flex items-start gap-3.5">
                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
-                                            isCompleted ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' :
+                                            isCompleted ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' :
                                             isCurrent ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-accent)] text-[var(--theme-text-primary)]' :
                                             'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
                                         }`}>
@@ -139,7 +139,7 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
                     <button
                         onClick={onCompleteJob}
                         disabled={isSubmitting}
-                        className="w-full h-12 md:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase tracking-wider text-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+                        className="w-full h-12 md:h-14 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase tracking-wider text-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
                     >
                         {isSubmitting ? (
                             <Loader2 size={20} className="animate-spin" />
@@ -153,7 +153,7 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
                     <button
                         onClick={onStartScanning}
                         disabled={isSubmitting}
-                        className="w-full h-12 md:h-14 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase tracking-wider text-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+                        className="w-full h-12 md:h-14 bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase tracking-wider text-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
                     >
                         {isSubmitting ? (
                             <Loader2 size={20} className="animate-spin" />

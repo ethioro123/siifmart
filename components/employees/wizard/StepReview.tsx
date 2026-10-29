@@ -26,18 +26,18 @@ export default function StepReview({
     return (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
             {quotaResult?.canAutoActivate ? (
-                <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
-                    <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] flex items-start gap-3">
+                    <CheckCircle2 size={18} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0 mt-0.5" />
                     <div className="text-xs">
-                        <span className="font-bold text-emerald-800 dark:text-emerald-300 block">Pre-Approved Headcount Slot (Instant Floor Activation)</span>
-                        <span className="text-emerald-700 dark:text-emerald-400 mt-0.5 block">
+                        <span className="font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] block">Pre-Approved Headcount Slot (Instant Floor Activation)</span>
+                        <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-0.5 block">
                             {quotaResult.reason} This frontline candidate will be activated immediately upon confirmation, issuing login credentials and adding them to the shift roster with zero HQ delay.
                         </span>
                     </div>
                 </div>
             ) : !isDirect ? (
-                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
-                    <ShieldCheck size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-start gap-3">
+                    <ShieldCheck size={18} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" />
                     <div className="text-xs">
                         <span className="font-bold text-[var(--theme-text-primary)] block">Corporate HQ Exception Queue</span>
                         <span className="text-[var(--theme-text-secondary)] mt-0.5 block">
@@ -53,7 +53,7 @@ export default function StepReview({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Personal Information */}
                 <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[#E2DCCE] dark:border-white/10">
-                    <h4 className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-bold mb-3 flex items-center gap-2">
+                    <h4 className="text-xs text-[var(--theme-primary)] dark:text-[#A9CBA2] uppercase font-bold mb-3 flex items-center gap-2">
                         <User size={14} /> Personal Information
                     </h4>
                     <div className="space-y-2 text-xs">
@@ -78,13 +78,13 @@ export default function StepReview({
 
                 {/* Role & Location */}
                 <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[#E2DCCE] dark:border-white/10">
-                    <h4 className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-bold mb-3 flex items-center gap-2">
+                    <h4 className="text-xs text-[var(--theme-primary)] dark:text-[#A9CBA2] uppercase font-bold mb-3 flex items-center gap-2">
                         <Briefcase size={14} /> Role & Operating Facility
                     </h4>
                     <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
                             <span className="text-stone-500">Job Title:</span>
-                            <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{newEmpData.jobTitle || getJobTitleForRole(newEmpData.role)}</span>
+                            <span className="text-[var(--theme-primary)] dark:text-[#A9CBA2] font-bold">{newEmpData.jobTitle || getJobTitleForRole(newEmpData.role)}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-stone-500">App Access:</span>
@@ -107,7 +107,7 @@ export default function StepReview({
 
                 {/* Attached Documents Review */}
                 <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[#E2DCCE] dark:border-white/10 sm:col-span-2">
-                    <h4 className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-bold mb-3 flex items-center gap-2">
+                    <h4 className="text-xs text-[var(--theme-primary)] dark:text-[#A9CBA2] uppercase font-bold mb-3 flex items-center gap-2">
                         <IdCard size={14} /> Attached Personnel Documents
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -130,7 +130,7 @@ export default function StepReview({
 
                         {/* Resume */}
                         <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/5 flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-lg bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                                 <FileText size={18} />
                             </div>
                             <div className="min-w-0">
@@ -143,7 +143,7 @@ export default function StepReview({
 
                         {/* Certificates */}
                         <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/5 flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-lg bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                 <Award size={18} />
                             </div>
                             <div className="min-w-0">
@@ -159,7 +159,7 @@ export default function StepReview({
                     {(newEmpData.certificates || []).length > 0 && (
                         <div className="mt-3 pt-3 border-t border-[#E2DCCE]/60 dark:border-white/10 space-y-2">
                             <p className="text-[11px] font-bold text-stone-600 dark:text-stone-300 uppercase tracking-wider flex items-center gap-1.5">
-                                <Award size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                <Award size={13} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
                                 <span>Verified Credentials for Sign-off ({(newEmpData.certificates || []).length})</span>
                             </p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -170,7 +170,7 @@ export default function StepReview({
                                     >
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-1.5 flex-wrap">
-                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 shrink-0">
+                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[var(--theme-primary)]/10 dark:bg-[#A9CBA2]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]/20 shrink-0">
                                                     {cert.category || 'Professional Certificate'}
                                                 </span>
                                                 <span className="text-[10px] text-stone-400 font-mono">
@@ -193,10 +193,10 @@ export default function StepReview({
                     <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[#E2DCCE] dark:border-white/10 sm:col-span-2">
                         <div className="flex justify-between items-center text-xs">
                             <span className="text-stone-500 font-semibold flex items-center gap-1.5">
-                                <DollarSign size={14} className="text-[#2C5E3B]" />
+                                <DollarSign size={14} className="text-[var(--theme-primary)]" />
                                 Base Monthly Compensation:
                             </span>
-                            <span className="font-extrabold text-[#2C5E3B] dark:text-[#A9CBA2] text-sm">
+                            <span className="font-extrabold text-[var(--theme-primary)] dark:text-[#A9CBA2] text-sm">
                                 {currencySymbol} {parseFloat(newEmpData.salary).toLocaleString()} / month
                             </span>
                         </div>
@@ -205,7 +205,7 @@ export default function StepReview({
             </div>
 
             {/* Profile Ribbon Summary */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-[#2C5E3B]/5 to-transparent border border-emerald-500/20 flex items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-[#2C5E3B]/5 to-transparent border border-[var(--theme-status-success-border)] flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5 min-w-0">
                     <img
                         src={newEmpData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(newEmpData.firstName + ' ' + newEmpData.lastName)}&background=2C5E3B&color=ffffff`}
@@ -223,7 +223,7 @@ export default function StepReview({
                 </div>
                 <div className="text-right shrink-0">
                     <span className="text-[10px] text-stone-400 uppercase font-bold block">ID Number</span>
-                    <span className="text-xs font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">Auto-Generated</span>
+                    <span className="text-xs font-mono font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2]">Auto-Generated</span>
                 </div>
             </div>
         </div>

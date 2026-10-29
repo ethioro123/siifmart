@@ -1,22 +1,22 @@
 import React from 'react';
-import { 
-    Cpu, 
-    Shirt, 
-    Apple, 
-    ShieldCheck, 
-    Milk, 
-    Coffee, 
-    Layers, 
-    Sparkles, 
-    Baby, 
-    Car, 
-    Tag, 
+import {
+    Cpu,
+    Shirt,
+    Apple,
+    ShieldCheck,
+    Milk,
+    Coffee,
+    Layers,
+    Sparkles,
+    Baby,
+    Car,
+    Tag,
     Cookie,
     UtensilsCrossed,
     Snowflake,
     PawPrint,
     BookOpen,
-    ChevronDown, 
+    ChevronDown,
     SlidersHorizontal,
     Info
 } from 'lucide-react';
@@ -175,14 +175,14 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
                         <div key={field.key} className={`${colSpanClass} space-y-1`}>
                             <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                                 {field.label}
-                                {field.required && <span className="text-rose-500 ml-0.5">*</span>}
+                                {field.required && <span className="text-[var(--theme-status-danger-text)] ml-0.5">*</span>}
                             </label>
 
                             {field.type === 'select' ? (
                                 <div className="relative">
                                     <select
                                         title={field.label}
-                                        className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors[field.key] ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer`}
+                                        className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors[field.key] ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer`}
                                         value={currentValue}
                                         onChange={e => handleValueChange(field, e.target.value)}
                                     >
@@ -200,14 +200,14 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
                             ) : (
                                 <input
                                     type={field.type === 'number' ? 'number' : 'text'}
-                                    className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors[field.key] ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold`}
+                                    className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors[field.key] ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold`}
                                     placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
                                     value={currentValue}
                                     onChange={e => handleValueChange(field, e.target.value)}
                                 />
                             )}
                             {errors[field.key] && (
-                                <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors[field.key]}</span>
+                                <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors[field.key]}</span>
                             )}
                         </div>
                     );

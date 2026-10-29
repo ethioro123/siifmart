@@ -109,7 +109,7 @@ export const PayrollTab: React.FC = () => {
                     {/* Header */}
                     <div className="p-5 border-b border-[var(--theme-border)] flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                 <Briefcase size={18} />
                             </div>
                             <div>
@@ -238,14 +238,14 @@ export const PayrollTab: React.FC = () => {
                                                 </td>
                                                 <td className="p-4 text-right font-mono tabular-nums">
                                                     {bonus > 0 ? (
-                                                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                                                        <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">
                                                             +{currencySymbol} {bonus.toLocaleString()}
                                                         </span>
                                                     ) : (
                                                         <span className="text-[var(--theme-text-secondary)] opacity-50">—</span>
                                                     )}
                                                 </td>
-                                                <td className="p-4 text-right font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400">
+                                                <td className="p-4 text-right font-mono tabular-nums font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                                     {currencySymbol} {total.toLocaleString()}
                                                 </td>
                                             </tr>
@@ -309,7 +309,7 @@ export const PayrollTab: React.FC = () => {
                                             onClick={() => setPayrollPage(page)}
                                             className={`w-6 h-6 rounded-lg text-xs font-semibold transition-all ${
                                                 payrollPage === page
-                                                    ? 'bg-[#0071E3] text-white shadow-xs'
+                                                    ? 'bg-[var(--theme-accent)] text-white shadow-xs'
                                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                             }`}
                                         >

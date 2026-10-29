@@ -28,7 +28,7 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-4 md:p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center">
                             <ShieldCheck size={22} />
                         </div>
                         <div>
@@ -41,7 +41,7 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                         </div>
                     </div>
 
-                    <span className="px-3 py-1 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 font-mono font-bold text-xs uppercase">
+                    <span className="px-3 py-1 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono font-bold text-xs uppercase">
                         {t('warehouse.countedNotSaved', { count: totalScanned }) || `${totalScanned} Counted · Not saved`}
                     </span>
                 </div>
@@ -75,8 +75,8 @@ export const Step3ReceiveHandover: React.FC<Step3ReceiveHandoverProps> = ({
                             <div className="flex items-center gap-3 sm:justify-end">
                                 <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
                                     v.condition === 'Damaged'
-                                        ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
-                                        : 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
+                                        ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
+                                        : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                                 }`}>
                                     {v.condition === 'Damaged' ? (t('warehouse.conditionDamaged') || 'Damaged') : (t('warehouse.conditionGood') || 'Good')}
                                 </span>

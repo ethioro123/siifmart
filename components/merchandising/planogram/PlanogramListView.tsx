@@ -118,12 +118,12 @@ export const PlanogramListView: React.FC<PlanogramListViewProps> = ({
 
                     <td className="p-3">
                       {pending ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                           <Clock size={10} />
                           <span>Moving to {pending.proposedChanges?.shelfPosition || 'New Tier'}</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400">
+                        <span className="inline-flex items-center gap-1 text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                           <CheckCircle size={11} />
                           <span>Active Layout</span>
                         </span>

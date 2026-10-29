@@ -207,7 +207,7 @@ export default function WMSSettings() {
                                     onChange={(val) => setInbound(prev => ({ ...prev, receivingLogic: val }))}
                                 />
                                 {inbound.receivingLogic === 'verified' && (
-                                    <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-700 dark:text-amber-300 font-medium">
+                                    <div className="flex items-center gap-2 p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium">
                                         <AlertTriangle size={14} className="shrink-0" />
                                         <span>Verified Receive exposes expected quantities to staff. Zero-trust blind receiving is recommended.</span>
                                     </div>
@@ -366,7 +366,7 @@ export default function WMSSettings() {
                                             warning={!isHQAdmin ? 'HQ Executive Admin required to toggle barcode scanning' : undefined}
                                         />
                                         {!outbound.strictScanning && (
-                                            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-[11px] font-medium p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                                            <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-medium p-2.5 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
                                                 <AlertTriangle size={14} className="shrink-0" />
                                                 <span>Barcode validation disabled — scan fraud risk elevated. HQ audit active.</span>
                                             </div>

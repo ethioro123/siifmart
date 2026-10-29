@@ -39,7 +39,7 @@ export default function ResetPasswordModal({
                         value={passwordInput}
                         onChange={(e) => setPasswordInput(e.target.value)}
                         autoComplete="new-password"
-                        className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-10 py-3 text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none font-mono placeholder:text-gray-400"
+                        className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-10 py-3 text-gray-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none font-mono placeholder:text-gray-400"
                         placeholder="New Password"
                     />
                     <button
@@ -55,7 +55,7 @@ export default function ResetPasswordModal({
                     <button
                         onClick={handleConfirmResetPassword}
                         disabled={isResetting}
-                        className="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black rounded-lg text-xs uppercase tracking-widest transition-all"
+                        className="px-6 py-2 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-black font-black rounded-lg text-xs uppercase tracking-widest transition-all"
                     >
                         {isResetting ? 'Processing...' : 'Reset Password'}
                     </button>

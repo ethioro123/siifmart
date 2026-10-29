@@ -39,12 +39,12 @@ export const Step1PackItems: React.FC<Step1PackItemsProps> = ({
                 <ProgressBar
                     progress={progressPercent}
                     containerClassName="mt-2 h-2 rounded-full bg-[var(--theme-bg-subtle)]"
-                    fillClassName={`h-full rounded-full transition-all duration-300 ${isFullyPacked ? 'bg-green-500' : 'bg-[var(--theme-accent)]'}`}
+                    fillClassName={`h-full rounded-full transition-all duration-300 ${isFullyPacked ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-accent)]'}`}
                 />
             </div>
 
             {isFullyPacked && (
-                <div className="shrink-0 flex items-center gap-2 border-b border-green-500/20 bg-green-500/10 px-4 py-3 text-sm font-semibold text-green-700 dark:text-green-300 md:px-6">
+                <div className="shrink-0 flex items-center gap-2 border-b border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] px-4 py-3 text-sm font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] md:px-6">
                     <CheckCircle size={18} />
                     <span>{t('warehouse.packing.allItemsVerifiedContinue') || 'All items verified. Continue with the bottom action.'}</span>
                 </div>

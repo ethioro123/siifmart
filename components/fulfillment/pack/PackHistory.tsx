@@ -218,8 +218,8 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                         onClick={() => { setStatusFilter('completed'); setCurrentPage(1); }}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all min-h-[34px] shrink-0 border ${
                             statusFilter === 'completed'
-                                ? 'bg-emerald-600 text-white border-emerald-600'
-                                : 'bg-[var(--theme-bg-subtle)] text-emerald-600 dark:text-emerald-400 border-[var(--theme-border)] hover:border-emerald-500/30'
+                                ? 'bg-[var(--theme-status-success-bg)] text-white border-[var(--theme-status-success-border)]'
+                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-border)] border-[var(--theme-status-success-border)]'
                         }`}
                     >
                         {t('warehouse.completed') || 'Completed'} ({completedCount})
@@ -230,8 +230,8 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                             onClick={() => { setStatusFilter('returned'); setCurrentPage(1); }}
                             className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all min-h-[34px] shrink-0 border ${
                                 statusFilter === 'returned'
-                                    ? 'bg-red-600 text-white border-red-600'
-                                    : 'bg-[var(--theme-bg-subtle)] text-red-600 dark:text-red-400 border-[var(--theme-border)] hover:border-red-500/30'
+                                    ? 'bg-[var(--theme-status-danger-bg)] text-white border-[var(--theme-status-danger-border)]'
+                                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-border)] border-[var(--theme-status-danger-border)]'
                             }`}
                         >
                             {t('warehouse.withReturns') || 'With Returns'} ({returnedCount})
@@ -279,13 +279,13 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             <span className={`text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider border ${
                                                 isCompleted
-                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                                    : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+                                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                                    : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                             }`}>
                                                 {job.status}
                                             </span>
                                             {job.hasReturns && (
-                                                <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                                                <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                                                     {t('warehouse.packing.returned') || 'Returned'}
                                                 </span>
                                             )}
@@ -348,7 +348,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                 <button
                                                     type="button"
                                                     onClick={() => onReturn(job)}
-                                                    className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold uppercase tracking-wider flex items-center gap-1 min-h-[36px] transition-colors active:scale-95 touch-manipulation"
+                                                    className="px-2.5 py-1.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-xs font-semibold uppercase tracking-wider flex items-center gap-1 min-h-[36px] transition-colors active:scale-95 touch-manipulation"
                                                     title={t('warehouse.packing.returnItemsToWarehouse') || 'Return to warehouse'}
                                                 >
                                                     <Undo2 size={12} />

@@ -58,7 +58,7 @@ export function AppealModal({
     };
 
     return (
-        <div 
+        <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
@@ -93,7 +93,7 @@ export function AppealModal({
                 <div className="p-4 mx-6 mt-4 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] space-y-1.5 text-xs">
                     <div className="flex items-center justify-between">
                         <span className="font-bold text-[var(--theme-text-primary)]">{record.title}</span>
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                             {record.severity} Severity
                         </span>
                     </div>
@@ -109,7 +109,7 @@ export function AppealModal({
                 <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
                     <div className="space-y-1.5">
                         <label className="font-semibold text-[var(--theme-text-primary)]">
-                            Grounds for Appeal & Statement of Defense <span className="text-red-500">*</span>
+                            Grounds for Appeal & Statement of Defense <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <textarea
                             value={appealNotes}
@@ -117,10 +117,10 @@ export function AppealModal({
                             placeholder="State the procedural irregularities, conflicting evidence, or mitigating circumstances..."
                             rows={4}
                             required
-                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3] resize-none"
+                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[var(--theme-border-focus)] resize-none"
                         />
                         <p className="text-[11px] text-[var(--theme-text-secondary)] flex items-center gap-1 mt-1">
-                            <AlertCircle size={12} className="text-amber-500 shrink-0" />
+                            <AlertCircle size={12} className="text-[var(--theme-status-warning-text)] shrink-0" />
                             <span>Under Maker-Checker rules, the original issuing supervisor cannot adjudicate this appeal.</span>
                         </p>
                     </div>

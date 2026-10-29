@@ -69,8 +69,8 @@ export const RulesTab: React.FC = () => {
 
             {/* Overlap & Conflict Warning Banner */}
             {conflicts.length > 0 && (
-               <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-1.5 text-xs">
-                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold">
+               <div className="p-3.5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl space-y-1.5 text-xs">
+                  <div className="flex items-center gap-2 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold">
                      <AlertTriangle size={15} className="shrink-0" />
                      <span>Rule Overlap Detected ({conflicts.length})</span>
                   </div>
@@ -158,7 +158,7 @@ export const RulesTab: React.FC = () => {
                                  {rule.name}
                               </h3>
                               {rule.isActive ? (
-                                 <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 rounded-full uppercase border border-emerald-500/20 font-semibold tracking-wider">
+                                 <span className="text-[10px] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] px-2.5 py-0.5 rounded-full uppercase border border-[var(--theme-status-success-border)] font-semibold tracking-wider">
                                     Enabled
                                  </span>
                               ) : (
@@ -212,7 +212,7 @@ export const RulesTab: React.FC = () => {
                            onClick={() => toggleRuleStatus(rule.id)}
                            className={`min-h-11 min-w-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)] p-2.5 rounded-2xl border transition-all cursor-pointer ${
                               rule.isActive
-                                 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                 ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                  : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
                            }`}
                            title={rule.isActive ? 'Pause Rule' : 'Enable Rule'}
@@ -224,7 +224,7 @@ export const RulesTab: React.FC = () => {
                            disabled={isSubmitting || isSimulating || pricingRulesMutating}
                            aria-label={`Delete ${rule.name}`}
                            onClick={() => { if (window.confirm(`Delete pricing rule "${rule.name}"? Existing price proposals will remain.`)) deleteRule(rule.id); }}
-                           className="min-h-11 min-w-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)] p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-2xl transition-colors cursor-pointer"
+                           className="min-h-11 min-w-11 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)] p-2.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] rounded-2xl transition-colors cursor-pointer"
                            title="Delete Rule"
                         >
                            <Trash2 size={16} />
@@ -272,7 +272,7 @@ export const RulesTab: React.FC = () => {
             <div>
                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--theme-border)]">
                   <div className="flex items-center gap-3">
-                     <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                     <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <Sparkles size={18} />
                      </div>
                      <div>
@@ -280,7 +280,7 @@ export const RulesTab: React.FC = () => {
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Pre-flight impact testing</p>
                      </div>
                   </div>
-                  <span className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
+                  <span className="text-[10px] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
                      Model Estimate
                   </span>
                </div>
@@ -315,7 +315,7 @@ export const RulesTab: React.FC = () => {
                      <span className="text-[var(--theme-text-secondary)] font-medium">Est. Revenue Delta</span>
                      <span
                         className={`font-mono font-semibold tabular-nums ${
-                           simResult && simResult.rev > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'
+                           simResult && simResult.rev > 0 ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-primary)]'
                         }`}
                      >
                         {simResult ? `${simResult.rev > 0 ? '+' : ''}${Math.round(simResult.rev)}%` : '--'}
@@ -325,7 +325,7 @@ export const RulesTab: React.FC = () => {
                      <span className="text-[var(--theme-text-secondary)] font-medium">Est. Gross Profit Delta</span>
                      <span
                         className={`font-mono font-semibold tabular-nums ${
-                           !simResult || simResult.margin === null ? 'text-[var(--theme-text-primary)]' : simResult.profitChange < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
+                           !simResult || simResult.margin === null ? 'text-[var(--theme-text-primary)]' : simResult.profitChange < 0 ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                         }`}
                      >
                         {simResult ? simResult.margin === null ? 'Not available' : `${simResult.margin > 0 ? '+' : ''}${simResult.margin}%` : '--'}

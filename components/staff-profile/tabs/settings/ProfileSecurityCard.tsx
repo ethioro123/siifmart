@@ -30,7 +30,7 @@ export const ProfileSecurityCard: React.FC<ProfileSecurityCardProps> = ({
     return (
         <div className="bg-[var(--theme-bg-card)] p-6 rounded-2xl border border-[var(--theme-border)] space-y-4">
             <div className="flex items-center gap-2.5 border-b border-[var(--theme-border)] pb-3">
-                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
+                <div className="p-2 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]">
                     <Key size={18} />
                 </div>
                 <div>

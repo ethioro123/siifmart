@@ -35,7 +35,7 @@ export const CampaignRejectModal: React.FC<CampaignRejectModalProps> = ({
    return (
       <Modal isOpen={isOpen} onClose={onClose} title={`Reject Proposal: ${proposal.code}`}>
          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3.5 text-xs text-rose-600 dark:text-rose-400 flex items-start gap-2.5">
+            <div className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-3.5 text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-start gap-2.5">
                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                <div>
                   <p className="font-semibold">Governance Rejection Audit</p>
@@ -54,12 +54,12 @@ export const CampaignRejectModal: React.FC<CampaignRejectModalProps> = ({
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="e.g. Discount depth exceeds quarterly margin budget for the region."
-                  className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-rose-500 transition-colors"
+                  className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 ring-[var(--theme-status-danger-border)] transition-colors"
                   aria-label="Rejection Reason"
                />
                <div className="flex items-center justify-between text-[10px] text-[var(--theme-text-muted)]">
                   <span>Minimum 3 characters</span>
-                  <span className={trimmedReason.length >= 3 ? 'text-emerald-500' : 'text-rose-500'}>
+                  <span className={trimmedReason.length >= 3 ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}>
                      {trimmedReason.length}/3 min
                   </span>
                </div>
@@ -77,7 +77,7 @@ export const CampaignRejectModal: React.FC<CampaignRejectModalProps> = ({
                <button
                   type="submit"
                   disabled={!isValid || isSubmitting}
-                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-40"
+                  className="px-4 py-2 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-40"
                >
                   {isSubmitting ? (
                      <>

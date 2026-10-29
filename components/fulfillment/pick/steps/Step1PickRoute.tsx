@@ -72,7 +72,7 @@ export const Step1PickRoute: React.FC<Step1PickRouteProps> = ({
                                 key={idx}
                                 className={`p-2.5 sm:p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 transition-colors ${
                                     isDone
-                                        ? 'bg-green-500/5 border-green-500/20'
+                                        ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
                                 }`}
                             >

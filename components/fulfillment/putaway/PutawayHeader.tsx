@@ -72,7 +72,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                     <div>
                         <h3 className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">{t('warehouse.putaway.putaway')}</h3>
                         <div className="flex items-center gap-2 mt-1 font-mono">
-                            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="flex h-2 w-2 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
                             <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{t('warehouse.putaway.active')}</p>
                         </div>
                     </div>
@@ -112,8 +112,8 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
 
                         {/* Mobile Dot Numbers */}
                         <div className="flex items-center gap-1.5 px-2 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-[10px] font-mono shrink-0">
-                            <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title={t('warehouse.putaway.active') || 'Active'}>
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="inline-flex items-center gap-1 text-[var(--theme-status-success-text)] font-bold" title={t('warehouse.putaway.active') || 'Active'}>
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
                                 {filteredJobsCount.active}
                             </span>
                         </div>
@@ -146,7 +146,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                         <button
                             onClick={onStartScanning}
                             disabled={isSubmitting}
-                            className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
+                            className="w-full h-12 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
                         >
                             <Smartphone size={16} /> {t('warehouse.scanBarcode')}
                         </button>
@@ -217,7 +217,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                             <button
                                 onClick={onCompleteJob}
                                 disabled={isSubmitting}
-                                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                                className="px-5 py-2.5 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white text-xs font-semibold uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
                             >
                                 {isSubmitting ? (
                                     <Loader2 size={18} className="animate-spin" />

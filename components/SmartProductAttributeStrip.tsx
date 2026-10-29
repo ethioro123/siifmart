@@ -20,12 +20,12 @@ interface SmartProductAttributeStripProps {
 const TONE_CLASSES: Record<AttributeTone, string> = {
     neutral: 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]',
     accent: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20',
-    green: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
-    amber: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
+    green: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
+    amber: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
     cyan: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20',
-    blue: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
+    blue: 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
     purple: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
-    rose: 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
+    rose: 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
 };
 
 function getPillIcon(key: string) {
@@ -113,7 +113,7 @@ export const SmartProductAttributeStrip: React.FC<SmartProductAttributeStripProp
 
             {showInboundQc && profile.inboundQcDirective && (
                 <span
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 leading-tight"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] leading-tight"
                     title={profile.inboundQcDirective}
                 >
                     <ShieldCheck size={11} className="shrink-0" />

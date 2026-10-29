@@ -59,7 +59,7 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
 
                 <button
                     onClick={() => handleKeyPress('clear')}
-                    className="h-14 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 active:bg-rose-500/30 text-rose-500 text-xs font-semibold uppercase transition-all border border-rose-500/20 active:scale-95 flex items-center justify-center tracking-wider cursor-pointer select-none"
+                    className="h-14 rounded-2xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-xs font-semibold uppercase transition-all border border-[var(--theme-status-danger-border)] active:scale-95 flex items-center justify-center tracking-wider cursor-pointer select-none"
                 >
                     {t('common.clear')}
                 </button>

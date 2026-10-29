@@ -100,7 +100,7 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                                 ? 'bg-[var(--theme-primary-text)]/15 text-[var(--theme-primary-text)]'
                                 : 'bg-[var(--theme-text-muted)]/15 text-[var(--theme-text-primary)]'
                         }`}>
-                            <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                            <span className="w-1 h-1 rounded-full bg-[var(--theme-status-success-bg)]" />
                             {outstandingOrders.length + incomingTransfers.length}
                         </span>
                     </button>}

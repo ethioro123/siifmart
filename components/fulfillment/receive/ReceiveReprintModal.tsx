@@ -226,8 +226,8 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                             ))}
                         </div>
                         {printPriceTagAt !== 'receive' && (
-                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-2.5 text-[11px] text-emerald-800 dark:text-emerald-300 font-medium">
-                                <Info size={14} className="shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+                            <div className="p-3 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-xl flex items-start gap-2.5 text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium">
+                                <Info size={14} className="shrink-0 mt-0.5 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                                 <span>
                                     {t('warehouse.inventoryLabelModeNotice') || 'Inventory Label Mode: Inbound receiving labels identify SKU, batch & barcode. Retail shelf price tags are printed in POS Command / Store Shelf Hub to maintain scanner price parity.'}
                                 </span>
@@ -241,7 +241,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                             <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
                                 <ScanLine size={14} /> {t('warehouse.printOutputPreview') || 'Print Output Preview'}
                             </label>
-                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                            <span className="text-[10px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-bold uppercase tracking-wider">
                                 {t('warehouse.labelLayout') || 'Label layout'}
                             </span>
                         </div>
@@ -257,7 +257,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     <button
                         disabled={isSubmitting}
                         onClick={handleReprintLabels}
-                        className="w-full py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-xs md:text-sm uppercase tracking-wider min-h-[48px] flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
+                        className="w-full py-3.5 px-6 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] active:scale-95 text-white font-semibold text-xs md:text-sm uppercase tracking-wider min-h-[48px] flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
                     >
                         {isSubmitting ? (
                             <RefreshCw className="animate-spin" size={18} />

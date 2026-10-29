@@ -31,7 +31,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
 }) => (
     <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 flex flex-col justify-between hover:border-[var(--theme-accent)]/30 transition-all shadow-xs relative">
         {connected && (
-            <div className="absolute top-3 right-3 px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold rounded-full flex items-center gap-1">
+            <div className="absolute top-3 right-3 px-2 py-0.5 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-[10px] font-semibold rounded-full flex items-center gap-1">
                 <CheckCircle2 size={11} /> Active
             </div>
         )}
@@ -39,7 +39,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
             <div className="flex items-start gap-3 mb-3">
                 <div className={`w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 ${
                     connected
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                         : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                 }`}>
                     <Icon size={18} />
@@ -376,7 +376,7 @@ export default function IntegrationsSettings() {
                                             <button
                                                 type="button"
                                                 onClick={() => deleteKey(key.id)}
-                                                className="p-1.5 hover:bg-red-500/10 rounded-lg text-[var(--theme-text-secondary)] hover:text-red-500 transition-colors cursor-pointer"
+                                                className="p-1.5 bg-[var(--theme-status-danger-bg)] rounded-lg text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] transition-colors cursor-pointer"
                                                 title="Revoke Key"
                                             >
                                                 <Trash2 size={14} />

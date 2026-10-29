@@ -118,7 +118,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                   <span>Checker • Agreement Sign-Off</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 text-[11px] font-semibold">
                   <Clock size={12} />
                   <span>Maker • Vendor Sourcing</span>
                 </span>
@@ -197,7 +197,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                       <h3 className="font-bold text-[var(--theme-text-primary)] text-base tracking-tight">{sup?.name || 'Verified Vendor'}</h3>
                       <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">Period: {sc.evaluationPeriod}</p>
                     </div>
-                    <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold font-mono tabular-nums">
+                    <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-bold font-mono tabular-nums">
                       <Star size={11} fill="currentColor" /> {sc.overallScore}%
                     </div>
                   </div>
@@ -253,14 +253,14 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                       <div className="text-right">
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
                           c.status === 'Active'
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                            ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                            : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                         }`}>
                           {c.status}
                         </span>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono font-medium mt-1">Expires: {c.endDate}</p>
                         {c.signedOffBy && c.signedOffAt && (
-                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">
+                          <p className="text-[10px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono font-medium">
                             Authorized by {c.signedOffBy}
                           </p>
                         )}
@@ -269,7 +269,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                         <button
                           type="button"
                           onClick={() => handleAuthorizeContract(c)}
-                          className="h-8 px-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm"
+                          className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm"
                         >
                           <Check size={13} /> Sign Off
                         </button>
@@ -302,7 +302,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                 <div key={f.id} className="p-5 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] space-y-2">
                   <div className="flex justify-between items-center">
                     <h4 className="font-bold text-sm text-[var(--theme-text-primary)]">{f.cooperativeName}</h4>
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                       Fair Trade
                     </span>
                   </div>

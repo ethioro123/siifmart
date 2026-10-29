@@ -65,14 +65,14 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
                     return {
                         title: 'ET · Kalandara Itoophiyaa',
                         dateString: raw,
-                        badgeTheme: 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10'
+                        badgeTheme: 'border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]'
                     };
                 } else if (language === 'en') {
                     // Pure English
                     return {
                         title: 'ET · Ethiopian Solar Calendar',
                         dateString: raw.charAt(0).toUpperCase() + raw.slice(1),
-                        badgeTheme: 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10'
+                        badgeTheme: 'border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]'
                     };
                 } else {
                     // Pure Amharic (Zero Oromo)
@@ -101,14 +101,14 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
                     return {
                         title: 'ET · የኢትዮጵያ ዘመን አቆጣጠር',
                         dateString: `${raw} ዓ.ም`,
-                        badgeTheme: 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10'
+                        badgeTheme: 'border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]'
                     };
                 }
             } catch {
                 return {
                     title: 'ET · Ethiopian Calendar',
                     dateString: 'ETHIOPIAN CALENDAR',
-                    badgeTheme: 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10'
+                    badgeTheme: 'border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]'
                 };
             }
         } else if (activeCountry === 'KE') {
@@ -120,13 +120,13 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
                 return {
                     title: 'KE · Kenyan National Calendar',
                     dateString: sw,
-                    badgeTheme: 'border-emerald-600/30 text-emerald-800 dark:text-emerald-400 bg-emerald-600/10'
+                    badgeTheme: 'border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)]'
                 };
             } catch {
                 return {
                     title: 'KE · Kenyan Calendar',
                     dateString: time.toDateString().toUpperCase(),
-                    badgeTheme: 'border-emerald-600/30 text-emerald-800 dark:text-emerald-400 bg-emerald-600/10'
+                    badgeTheme: 'border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)]'
                 };
             }
         } else {

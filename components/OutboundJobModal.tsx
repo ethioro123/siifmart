@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
     X, Printer, Navigation, Truck, CheckCircle, Package, Box, MapPin,
-    Calendar, User as UserIcon, AlertTriangle, ArrowRight, Info, Phone, 
+    Calendar, User as UserIcon, AlertTriangle, ArrowRight, Info, Phone,
     Clock, ExternalLink, ShieldCheck, ClipboardList, TrendingUp, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { WMSJob, User, Site, Product } from '../types';
@@ -156,13 +156,13 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
     return (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-black/60 overflow-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-4xl max-h-[92vh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col isolate overflow-hidden relative">
-                
+
                 {/* --- TOP NAVIGATION BAR --- */}
                 <div className="px-4 sm:px-6 py-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center shrink-0">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0 border ${
                             job.transferStatus === 'In-Transit' ? 'bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400' :
-                            job.status === 'Completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' :
+                            job.status === 'Completed' ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' :
                             'bg-[var(--theme-primary)]/10 border-[var(--theme-primary)]/20 text-[var(--theme-primary)]'
                         }`}>
                             {job.type === 'DISPATCH' ? <Truck size={20} /> : <Package size={20} />}
@@ -177,7 +177,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                 </span>
                             </div>
                             <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)] mt-0.5">
-                                <span className={`flex items-center gap-1 font-semibold ${job.priority === 'Critical' ? 'text-red-500' : 'text-[var(--theme-primary)]'}`}>
+                                <span className={`flex items-center gap-1 font-semibold ${job.priority === 'Critical' ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-primary)]'}`}>
                                     <TrendingUp size={12} />
                                     {job.priority}
                                 </span>
@@ -189,8 +189,8 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                             </div>
                         </div>
                     </div>
-                    <button 
-                        onClick={onClose} 
+                    <button
+                        onClick={onClose}
                         aria-label="Close"
                         className="w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-[var(--theme-bg-card)] rounded-full text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0 touch-manipulation"
                     >
@@ -200,11 +200,11 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
 
                 {/* --- MAIN SCROLLABLE BODY --- */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-5">
-                    
+
                     {/* 1. PROGRESS STEPPER */}
                     <div className="relative px-4 py-2">
                         <div className="absolute top-[20px] sm:top-[24px] left-[40px] sm:left-[60px] right-[40px] sm:right-[60px] h-0.5 bg-[var(--theme-border)]" />
-                        <div 
+                        <div
                             className="absolute top-[20px] sm:top-[24px] left-[40px] sm:left-[60px] h-0.5 bg-[var(--theme-primary)] transition-all duration-500 ease-out"
                             ref={(el) => { if (el) el.style.width = `${Math.max(0, (currentStep - 1) * (100 / 3))}%`; }}
                         />
@@ -217,8 +217,8 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                             ].map((s, i) => (
                                 <div key={i} className="flex flex-col items-center gap-1.5">
                                     <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center border-2 transition-all ${
-                                        currentStep >= s.step 
-                                            ? 'bg-[var(--theme-bg-card)] border-[var(--theme-primary)] text-[var(--theme-primary)] ring-2 ring-[var(--theme-primary)]/20 shadow-xs' 
+                                        currentStep >= s.step
+                                            ? 'bg-[var(--theme-bg-card)] border-[var(--theme-primary)] text-[var(--theme-primary)] ring-2 ring-[var(--theme-primary)]/20 shadow-xs'
                                             : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-muted)]'
                                     }`}>
                                         <s.icon size={16} />
@@ -235,7 +235,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
 
                     {/* 2. GRID INFO SECTION */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        
+
                         {/* DESTINATION INTEL */}
                         <div className="md:col-span-5 space-y-4">
                             <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 space-y-4">
@@ -303,7 +303,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                         {/* RIGHT: MANIFEST */}
                         <div className="md:col-span-7 flex flex-col gap-3">
                             <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 flex flex-col">
-                                <div 
+                                <div
                                     onClick={() => setIsManifestExpanded(!isManifestExpanded)}
                                     className="flex items-center justify-between cursor-pointer md:cursor-default"
                                 >

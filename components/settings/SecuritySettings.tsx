@@ -20,15 +20,15 @@ const SecurityCard: React.FC<SecurityCardProps> = ({ title, status, desc, icon: 
         <div>
             <div className="flex justify-between items-start mb-3">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                    status === 'secure' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
-                    status === 'warning' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
-                    'bg-red-500/10 text-red-600 dark:text-red-400'
+                    status === 'secure' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' :
+                    status === 'warning' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' :
+                    'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                 }`}>
                     <Icon size={18} />
                 </div>
-                {status === 'secure' && <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400" />}
-                {status === 'warning' && <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400" />}
-                {status === 'critical' && <AlertTriangle size={16} className="text-red-600 dark:text-red-400" />}
+                {status === 'secure' && <CheckCircle2 size={16} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />}
+                {status === 'warning' && <AlertTriangle size={16} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" />}
+                {status === 'critical' && <AlertTriangle size={16} className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]" />}
             </div>
             <h4 className="font-semibold text-[var(--theme-text-primary)] text-xs mb-1">{title}</h4>
             <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">{desc}</p>
@@ -245,7 +245,7 @@ export default function SecuritySettings() {
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveIp(ip)}
-                                                className="text-[var(--theme-text-secondary)] hover:text-red-500 transition-colors cursor-pointer p-0.5"
+                                                className="text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] transition-colors cursor-pointer p-0.5"
                                                 title="Remove IP range"
                                             >
                                                 <X size={12} />

@@ -54,7 +54,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
             {/* Header Card */}
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-wrap justify-between items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                         <Coins size={20} />
                     </div>
                     <div>
@@ -68,7 +68,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold font-mono">
+                    <span className="px-2.5 py-1 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-[11px] font-semibold font-mono">
                         {effectiveCountry} SOVEREIGN LEDGER
                     </span>
                     {isManager ? (
@@ -77,7 +77,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                             <span>Checker • Manager Sign-Off</span>
                         </span>
                     ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 text-[11px] font-semibold">
                             <Clock size={12} />
                             <span>Maker • Staff Draft</span>
                         </span>
@@ -91,7 +91,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Vault Cash Balance
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1">
                         {currencySymbol} 485,000
                     </div>
                     <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
@@ -103,7 +103,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Pending Float Sweeps
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-amber-600 dark:text-amber-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1">
                         {currencySymbol} 25,000
                     </div>
                     <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
@@ -119,10 +119,10 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Gateway Settlement Status
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-[#0071E3] dark:text-[#2997FF] mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mt-1">
                         99.8% Matched
                     </div>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 block">
+                    <span className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1 block">
                         Zero anomalous leakage detected
                     </span>
                 </div>
@@ -148,8 +148,8 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                                 disabled={sweepBatchStatus === 'authorized'}
                                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                     sweepBatchStatus === 'authorized'
-                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 opacity-70 cursor-not-allowed'
-                                        : 'bg-[#0071E3] hover:bg-[#0077ED] text-white cursor-pointer'
+                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] opacity-70 cursor-not-allowed'
+                                        : 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white cursor-pointer'
                                 }`}
                             >
                                 <Check size={13} />
@@ -162,8 +162,8 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                                 disabled={sweepBatchStatus !== 'draft'}
                                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                     sweepBatchStatus === 'draft'
-                                        ? 'bg-[#0071E3] hover:bg-[#0077ED] text-white cursor-pointer'
-                                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 opacity-80 cursor-not-allowed'
+                                        ? 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white cursor-pointer'
+                                        : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] opacity-80 cursor-not-allowed'
                                 }`}
                             >
                                 <Send size={13} />
@@ -183,7 +183,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                 <div className="divide-y divide-[var(--theme-border)] text-xs">
                     <div className="p-4 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)] transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                                 <Building2 size={16} />
                             </div>
                             <div>
@@ -199,7 +199,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                             <span className="font-mono tabular-nums font-bold text-[var(--theme-text-primary)] text-sm block">
                                 {currencySymbol} 320,000
                             </span>
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                 <CheckCircle2 size={11} /> Reconciled
                             </span>
                         </div>
@@ -207,7 +207,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
 
                     <div className="p-4 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)] transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                 <Smartphone size={16} />
                             </div>
                             <div>
@@ -223,7 +223,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                             <span className="font-mono tabular-nums font-bold text-[var(--theme-text-primary)] text-sm block">
                                 {currencySymbol} 140,000
                             </span>
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#0071E3] dark:text-[#2997FF]">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                 <RefreshCw size={11} /> Real-Time Synced
                             </span>
                         </div>
@@ -231,7 +231,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
 
                     <div className="p-4 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)] transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                 <Coins size={16} />
                             </div>
                             <div>
@@ -249,15 +249,15 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                                     {currencySymbol} 25,000
                                 </span>
                                 {transitStatus === 'authorized' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                         <CheckCircle2 size={11} /> Authorized &amp; Released
                                     </span>
                                 ) : transitStatus === 'submitted' ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                                         <Clock size={11} /> Pending Manager Sign-Off
                                     </span>
                                 ) : (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 dark:text-blue-400">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]">
                                         <Clock size={11} /> Reconciled In-Store
                                     </span>
                                 )}
@@ -269,7 +269,7 @@ export const TreasuryDesk: React.FC<TreasuryDeskProps> = ({
                                     <button
                                         type="button"
                                         onClick={handleManagerAuthorizeTransit}
-                                        className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold transition-all cursor-pointer"
+                                        className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-[11px] font-semibold transition-all cursor-pointer"
                                     >
                                         Authorize Release
                                     </button>

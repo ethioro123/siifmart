@@ -113,7 +113,7 @@ export const POSTab: React.FC = () => {
                             <p className="text-[11px] text-[var(--theme-text-secondary)]">Target: exactly 100%</p>
                         </div>
                     </div>
-                    <div className={`w-full text-center py-2 rounded-xl font-semibold text-xs border ${totalRolePercentage === 100 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'}`}>
+                    <div className={`w-full text-center py-2 rounded-xl font-semibold text-xs border ${totalRolePercentage === 100 ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'}`}>
                         {totalRolePercentage}% allocated
                     </div>
                 </div>
@@ -169,7 +169,7 @@ export const POSTab: React.FC = () => {
                                         </button>
                                     </div>
                                     <div className="mt-2 pt-2 border-t border-[var(--theme-border)]">
-                                        <p className={`text-[11px] font-medium ${isEnabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-secondary)]'}`}>
+                                        <p className={`text-[11px] font-medium ${isEnabled ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-secondary)]'}`}>
                                             {isEnabled ? 'Earning team points' : 'Not participating'}
                                         </p>
                                     </div>
@@ -180,8 +180,8 @@ export const POSTab: React.FC = () => {
                 )}
 
                 <div className="flex gap-4 text-xs">
-                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <div className="flex items-center gap-1.5 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">
+                        <div className="w-2 h-2 rounded-full bg-[var(--theme-status-success-bg)]"></div>
                         {stores.filter(s => s.bonusEnabled !== false).length} stores enabled
                     </div>
                     <div className="flex items-center gap-1.5 text-[var(--theme-text-secondary)]">
@@ -196,7 +196,7 @@ export const POSTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <Star className="text-amber-500" size={18} />
+                            <Star className="text-[var(--theme-status-warning-text)]" size={18} />
                             Store Bonus Tiers
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -260,7 +260,7 @@ export const POSTab: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => handleDeleteTier(tier.id, 'pos')}
-                                        className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                                        className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] transition-colors cursor-pointer"
                                         title={`Delete ${tier.tierName}`}
                                     >
                                         <Trash2 size={14} />

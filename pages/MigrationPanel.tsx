@@ -51,7 +51,7 @@ export default function MigrationPanel() {
                 </div>
 
                 {/* Warning */}
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 flex gap-3">
+                <div className="bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl p-4 flex gap-3">
                     <AlertTriangle className="text-[var(--theme-status-warning-text)] shrink-0" size={20} />
                     <div>
                         <p className="text-[var(--theme-status-warning-text)] font-bold text-sm">Important</p>

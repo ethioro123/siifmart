@@ -97,14 +97,14 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
 
       {/* Tuesday Cycle Count SLA Enforcement Banner */}
       {overdueFacilities.length > 0 && (
-        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="p-3.5 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2.5">
-            <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0" />
+            <ShieldAlert className="w-4 h-4 text-[var(--theme-status-danger-text)] shrink-0" />
             <span className="text-[var(--theme-text-primary)] font-medium">
               <strong>Tuesday Audit Enforcement:</strong> {overdueFacilities.length} facility node(s) have missed the 5:00 PM Tuesday blind cycle count deadline (SOP-INV-012).
             </span>
           </div>
-          <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-600 dark:text-rose-400 shrink-0 self-end sm:self-auto">
+          <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] shrink-0 self-end sm:self-auto">
             Operational SLA Breached
           </span>
         </div>
@@ -135,10 +135,10 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
 
                 <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                   isAdministration
-                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                     : isWarehouse
-                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
-                        : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                        ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
+                        : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                 }`}>
                   {isAdministration ? 'Administration' : isWarehouse ? site.type : 'Retail Store'}
                 </span>
@@ -174,25 +174,25 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
                   <span>Tuesday Audit</span>
                 </div>
                 {cycleCountStatus === 'COMPLIANT' && (
-                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <span className="text-[11px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" />
                     Audit Compliant
                   </span>
                 )}
                 {cycleCountStatus === 'DUE_TODAY' && (
-                  <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                  <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     Due Today (Before 5PM)
                   </span>
                 )}
                 {cycleCountStatus === 'OVERDUE_BREACH' && (
-                  <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                  <span className="text-[11px] font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-1">
                     <ShieldAlert className="w-3 h-3" />
                     Overdue (Past 5PM)
                   </span>
                 )}
                 {cycleCountStatus === 'MISSED_PRIOR' && (
-                  <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                  <span className="text-[11px] font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3" />
                     Prior Tuesday Missed
                   </span>

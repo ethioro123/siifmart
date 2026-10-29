@@ -109,7 +109,7 @@ export const TransferDispatchModal: React.FC<TransferDispatchModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -170,7 +170,7 @@ export const TransferDispatchModal: React.FC<TransferDispatchModalProps> = ({
                 Select Verified Fleet Driver ({verifiedDrivers.length} Available)
               </label>
               {verifiedDrivers.length === 0 ? (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400">
+                <div className="p-3 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                   No registered drivers found in active region. Please onboard drivers via Regional Workforce or dispatch via External Courier.
                 </div>
               ) : (

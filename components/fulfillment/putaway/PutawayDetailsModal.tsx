@@ -87,19 +87,19 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                         <div>
                             <div className="flex items-center gap-2.5 mb-1.5">
                                 <h3 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] tracking-tight font-mono leading-none">#{data.reference}</h3>
-                                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${data.status === 'Completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'}`}>
+                                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${data.status === 'Completed' ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'}`}>
                                     {data.status === 'Completed' ? t('warehouse.completed') : data.status === 'Pending' ? t('warehouse.pending') : t('warehouse.inProgress')}
                                 </span>
                             </div>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
                                 {data.title}
                             </p>
                         </div>
                     </div>
-                    <button 
-                        onClick={onClose} 
-                        className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors shrink-0" 
+                    <button
+                        onClick={onClose}
+                        className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors shrink-0"
                         aria-label={t('warehouse.dismiss')}
                     >
                         <X size={20} />
@@ -133,7 +133,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                             <Box size={12} /> {data.items.length} {t('warehouse.itemPlural')}
                         </div>
                     </div>
-                    
+
                     <div className="space-y-3">
                         {data.items.map((item: any, idx: number) => (
                             <div key={idx} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-center justify-between transition-colors shadow-sm">
@@ -175,7 +175,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                         {canDelete && onDeleteJob && (
                             <button
                                 onClick={handleDelete}
-                                className="flex items-center gap-1.5 md:gap-2 px-3.5 md:px-4 py-2.5 min-h-[44px] bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors"
+                                className="flex items-center gap-1.5 md:gap-2 px-3.5 md:px-4 py-2.5 min-h-[44px] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors"
                                 title={t('common.delete') || 'Delete Job'}
                             >
                                 <Trash2 size={14} />

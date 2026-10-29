@@ -136,7 +136,7 @@ export const BudgetTab: React.FC = () => {
                     <div>
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="font-semibold text-sm text-[var(--theme-text-primary)] flex items-center gap-2">
-                                <Users size={16} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                <Users size={16} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                                 Department Utilization
                             </h3>
                             <span className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums">
@@ -171,7 +171,7 @@ export const BudgetTab: React.FC = () => {
 
                     <div className="pt-3 border-t border-[var(--theme-border)] text-xs text-[var(--theme-text-secondary)] flex justify-between items-center mt-2">
                         <span>Total Monthly Payroll</span>
-                        <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                        <span className="font-mono font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] tabular-nums">
                             {currencySymbol} {deptUtilization.reduce((sum, d) => sum + d.totalSalary, 0).toLocaleString()}
                         </span>
                     </div>
@@ -186,7 +186,7 @@ export const BudgetTab: React.FC = () => {
                             <h3 className="font-semibold text-sm text-[var(--theme-text-primary)]">
                                 Electronic Tender &amp; Gateway Reconciliation
                             </h3>
-                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-medium">
                                 <ShieldCheck size={12} />
                                 <span>External Bank / Telco Match</span>
                             </div>
@@ -198,7 +198,7 @@ export const BudgetTab: React.FC = () => {
 
                     <button
                         onClick={() => setIsReconciliationModalOpen(true)}
-                        className="bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                        className="bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
                     >
                         <Plus size={14} />
                         <span>Reconcile Gateway Tender</span>
@@ -245,15 +245,15 @@ export const BudgetTab: React.FC = () => {
                                             {currencySymbol} {t.feeDeductions.toLocaleString()}
                                         </td>
                                         <td className={`py-3.5 px-4 text-xs text-right font-semibold tabular-nums whitespace-nowrap ${
-                                            t.variance === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                                            t.variance === 0 ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                                         }`}>
                                             {t.variance > 0 ? '+' : ''}{currencySymbol} {t.variance.toLocaleString()}
                                         </td>
                                         <td className="py-3.5 px-4 text-center whitespace-nowrap font-sans">
                                             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
                                                 t.status === 'Reconciled' || t.status === 'Matched'
-                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                                    : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                             }`}>
                                                 {t.status === 'Reconciled' || t.status === 'Matched' ? <CheckCircle2 size={11} /> : <AlertTriangle size={11} />}
                                                 <span>{t.status.replace(/_/g, ' ')}</span>
@@ -308,27 +308,27 @@ export const BudgetTab: React.FC = () => {
                     </div>
 
                     <div className="space-y-2.5">
-                        <div className="flex justify-between items-center p-2.5 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
+                        <div className="flex justify-between items-center p-2.5 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-xl">
                             <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Current (&le;30 Days)</span>
-                            <span className="text-emerald-600 dark:text-emerald-400 font-mono font-semibold text-xs tabular-nums">
+                            <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono font-semibold text-xs tabular-nums">
                                 {currencySymbol} {apAging.current.toLocaleString()}
                             </span>
                         </div>
-                        <div className="flex justify-between items-center p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+                        <div className="flex justify-between items-center p-2.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-xl">
                             <span className="text-xs text-[var(--theme-text-secondary)] font-medium">1-30 Days Overdue</span>
-                            <span className="text-blue-600 dark:text-blue-400 font-mono font-semibold text-xs tabular-nums">
+                            <span className="text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] font-mono font-semibold text-xs tabular-nums">
                                 {currencySymbol} {apAging.days1to30.toLocaleString()}
                             </span>
                         </div>
-                        <div className="flex justify-between items-center p-2.5 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                        <div className="flex justify-between items-center p-2.5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl">
                             <span className="text-xs text-[var(--theme-text-secondary)] font-medium">31-60 Days Overdue</span>
-                            <span className="text-amber-600 dark:text-amber-400 font-mono font-semibold text-xs tabular-nums">
+                            <span className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono font-semibold text-xs tabular-nums">
                                 {currencySymbol} {apAging.days31to60.toLocaleString()}
                             </span>
                         </div>
-                        <div className="flex justify-between items-center p-2.5 bg-rose-500/5 border border-rose-500/20 rounded-xl">
+                        <div className="flex justify-between items-center p-2.5 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl">
                             <span className="text-xs text-[var(--theme-text-secondary)] font-medium">60+ Days Overdue</span>
-                            <span className="text-rose-600 dark:text-rose-400 font-mono font-semibold text-xs tabular-nums">
+                            <span className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-mono font-semibold text-xs tabular-nums">
                                 {currencySymbol} {apAging.days60Plus.toLocaleString()}
                             </span>
                         </div>

@@ -110,9 +110,9 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
 
                             {/* Available Warehouse Sources List */}
                             {distHubAvailableSources.length === 0 ? (
-                                <div className="p-6 bg-[var(--theme-bg-card)] border border-dashed border-red-500/20 rounded-2xl text-center">
-                                    <AlertTriangle size={24} className="mx-auto text-amber-500 mb-2" />
-                                    <p className="text-xs text-red-500 font-bold uppercase tracking-wider">No Available Warehouse Stock</p>
+                                <div className="p-6 bg-[var(--theme-bg-card)] border border-dashed border-[var(--theme-status-danger-border)] rounded-2xl text-center">
+                                    <AlertTriangle size={24} className="mx-auto text-[var(--theme-status-warning-text)] mb-2" />
+                                    <p className="text-xs text-[var(--theme-status-danger-text)] font-bold uppercase tracking-wider">No Available Warehouse Stock</p>
                                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
                                         No warehouses in the network have available stock of this SKU.
                                     </p>
@@ -130,7 +130,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                             <div className="flex items-start justify-between gap-2 mb-2">
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                                        {isWarehouse ? <Warehouse size={14} className="text-primary" /> : <ShoppingBag size={14} className="text-amber-500" />}
+                                                        {isWarehouse ? <Warehouse size={14} className="text-primary" /> : <ShoppingBag size={14} className="text-[var(--theme-status-warning-text)]" />}
                                                         <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">
                                                             {source.site?.name}
                                                         </span>
@@ -139,7 +139,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                                         Zone: <span className="text-[var(--theme-text-primary)] font-semibold">{getZoneName(source.site?.logisticsZoneId)}</span>
                                                     </div>
                                                     {isCrossZone && settings?.enforceRegionalZoning && (
-                                                        <span className="inline-flex items-center gap-1 mt-1 text-[11px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded font-semibold tracking-wider uppercase">
+                                                        <span className="inline-flex items-center gap-1 mt-1 text-[11px] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] px-2 py-0.5 rounded font-semibold tracking-wider uppercase">
                                                             <AlertTriangle size={12} /> Cross-Zone Override
                                                         </span>
                                                     )}
@@ -207,14 +207,14 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
             <div className="h-[46%] flex flex-col bg-[var(--theme-bg-card)] overflow-hidden shrink-0">
                 <div className="p-3.5 border-b border-[var(--theme-border)] flex items-center justify-between bg-[var(--theme-bg-subtle)] shrink-0">
                     <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-5 bg-amber-500 rounded-full shadow-xs" />
+                        <div className="w-1.5 h-5 bg-[var(--theme-status-warning-bg)] rounded-full shadow-xs" />
                         <div>
                             <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">Staged Manifests</h3>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold">Review transfer loads before deployment</p>
                         </div>
                     </div>
                     {dbDraftJobs.length > 0 && (
-                        <div className="px-2.5 py-1 bg-amber-500/10 rounded-lg border border-amber-500/20 text-[11px] font-mono text-amber-600 dark:text-amber-400 font-bold shrink-0">
+                        <div className="px-2.5 py-1 bg-[var(--theme-status-warning-bg)] rounded-lg border border-[var(--theme-status-warning-border)] text-[11px] font-mono text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-bold shrink-0">
                             {dbDraftJobs.length} {dbDraftJobs.length === 1 ? 'LOAD' : 'LOADS'}
                         </div>
                     )}
@@ -263,7 +263,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                                         }
                                                     }
                                                 }}
-                                                className="min-h-[36px] min-w-[36px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-red-500 p-1 hover:bg-red-500/10 rounded-lg transition-colors touch-manipulation"
+                                                className="min-h-[36px] min-w-[36px] flex items-center justify-center text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] p-1 bg-[var(--theme-status-danger-bg)] rounded-lg transition-colors touch-manipulation"
                                                 title="Delete Manifest"
                                                 aria-label="Delete Manifest"
                                             >
@@ -293,7 +293,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                                         <div className="flex items-center gap-1.5 mt-0.5">
                                                             <span className="text-[var(--theme-text-secondary)] font-mono text-[11px]">{item.sku}</span>
                                                             {physicalMeasure !== null && (
-                                                                <span className="text-[11px] font-bold text-amber-500 font-mono">
+                                                                <span className="text-[11px] font-bold text-[var(--theme-status-warning-text)] font-mono">
                                                                     ({physicalMeasure} {itemConfig.unit.shortLabel})
                                                                 </span>
                               )}
@@ -318,7 +318,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                                         />
                                                         <button
                                                             onClick={() => removeDraftItem(draft.id, idx)}
-                                                            className="min-h-[36px] min-w-[36px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-red-500 p-1 rounded-lg transition-colors touch-manipulation"
+                                                            className="min-h-[36px] min-w-[36px] flex items-center justify-center text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] p-1 rounded-lg transition-colors touch-manipulation"
                                                             title="Remove Item"
                                                             aria-label="Remove Item"
                                                         >

@@ -153,7 +153,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                      filterOnlySales
-                        ? 'bg-amber-500/10 text-amber-500 border-amber-500/30'
+                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                         : 'bg-[var(--theme-bg-panel)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                   }`}
                >
@@ -237,7 +237,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                                  <div className="flex items-center gap-2">
                                     <span>{p.name}</span>
                                     {p.isOnSale && (
-                                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                           Sale
                                        </span>
                                     )}
@@ -248,9 +248,9 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                               <td className="p-3.5">
                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
                                     p.shelfPosition === 'Eye Level'
-                                       ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                       ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                        : p.shelfPosition === 'Top Shelf'
-                                       ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                                       ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                                        : 'bg-[var(--theme-bg-panel)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                  }`}>
                                     {p.shelfPosition || 'Unassigned'}
@@ -262,7 +262,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                                        <span className="line-through text-[var(--theme-text-secondary)] text-[10px] mr-1.5 font-normal">
                                           {currencySymbol} {regularWhole}
                                        </span>
-                                       <span className="text-amber-500 font-bold">
+                                       <span className="text-[var(--theme-status-warning-text)] font-bold">
                                           {currencySymbol} {saleWhole}
                                        </span>
                                     </div>
@@ -279,7 +279,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                                           {currencySymbol} {effectivePrice}
                                        </span>
                                        {isHalal && (
-                                          <span className="text-[7px] uppercase font-bold text-emerald-500">Halal</span>
+                                          <span className="text-[7px] uppercase font-bold text-[var(--theme-status-success-text)]">Halal</span>
                                        )}
                                     </div>
                                  </div>

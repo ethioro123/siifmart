@@ -125,7 +125,7 @@ export default function UnknownBarcodeModal({
         ctx.font = `bold ${fontSize}px monospace`;
 
         const timestampStr = new Date().toLocaleString([], { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-        
+
         // Resolve human-readable staff and location names (eliminate raw UUIDs)
         const staffName = user?.name || (employees || []).find((e: any) => e.id === user?.id)?.name || 'Authorized Staff';
         const currentSite = (sites || []).find((s: any) => s.id === user?.siteId || s.id === activeSite?.id) || activeSite;
@@ -301,7 +301,7 @@ export default function UnknownBarcodeModal({
                                                 setCaptureMode('idle');
                                             }}
                                             aria-label="Close Camera"
-                                            className="p-2 rounded-full bg-black/60 text-white hover:bg-red-500 transition-colors pointer-events-auto cursor-pointer"
+                                            className="p-2 rounded-full bg-black/60 text-white bg-[var(--theme-status-danger-bg)] transition-colors pointer-events-auto cursor-pointer"
                                         >
                                             <X size={18} />
                                         </button>

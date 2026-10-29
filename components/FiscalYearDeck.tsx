@@ -70,7 +70,7 @@ const FiscalYearDeck: React.FC<FiscalYearDeckProps> = ({ year, currentQuarter, m
                                 <h3 className={`font-bold text-lg font-mono ${isCurrent ? 'text-cyber-primary' : 'text-white'}`}>Q{q}</h3>
                                 <p className="text-[10px] text-gray-400 font-mono uppercase">{getQuarterDates(q)}</p>
                             </div>
-                            <div className={`p-2 rounded-lg ${isCurrent ? 'bg-cyber-primary/20 text-cyber-primary' : isCompleted ? 'bg-green-500/10 text-green-400' : 'bg-gray-800 text-gray-600'}`}>
+                            <div className={`p-2 rounded-lg ${isCurrent ? 'bg-cyber-primary/20 text-cyber-primary' : isCompleted ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]' : 'bg-gray-800 text-gray-600'}`}>
                                 {isCurrent ? <Clock size={16} className="animate-pulse" /> : isCompleted ? <CheckCircle size={16} /> : <Lock size={16} />}
                             </div>
                         </div>
@@ -81,7 +81,7 @@ const FiscalYearDeck: React.FC<FiscalYearDeckProps> = ({ year, currentQuarter, m
                                 <p className="text-2xl font-bold text-white tracking-tight">{data.value}</p>
                                 <p className="text-[10px] text-gray-500">{data.label}</p>
                                 {data.trend && (
-                                    <div className="mt-1 text-xs flex items-center gap-1 text-green-400">
+                                    <div className="mt-1 text-xs flex items-center gap-1 text-[var(--theme-status-success-text)]">
                                         <TrendingUp size={10} /> {data.trend}
                                     </div>
                                 )}

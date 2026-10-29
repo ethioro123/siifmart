@@ -41,7 +41,7 @@ export default function DirectoryHeader({
    totalCount, tasksCount, canViewAll, restricted, setCurrentPage, visibleEmployees,
    pendingSalaryCount = 0, onOpenSalaryQueue, isOnlyManagers = false
 }: DirectoryHeaderProps) {
-   
+
    const handleRegionChange = (newRegion: string) => {
       if (setFilterRegion) {
          setFilterRegion(newRegion);
@@ -91,7 +91,7 @@ export default function DirectoryHeader({
                      Team Directory
                   </h3>
                   {isOnlyManagers && (
-                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                         Management Tier
                      </span>
                   )}
@@ -108,7 +108,7 @@ export default function DirectoryHeader({
                   onClick={() => setIsTaskQueueOpen(!isTaskQueueOpen)}
                   aria-pressed={isTaskQueueOpen}
                   className={`min-h-11 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
-                     isTaskQueueOpen 
+                     isTaskQueueOpen
                         ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] border-[var(--theme-accent)] shadow-xs'
                         : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                   }`}
@@ -117,7 +117,7 @@ export default function DirectoryHeader({
                   <span>Tasks</span>
                   {tasksCount > 0 && (
                      <span className={`text-[11px] font-mono tabular-nums px-1.5 py-0.2 rounded-full font-semibold ${
-                        isTaskQueueOpen ? 'bg-white/20 text-white' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                        isTaskQueueOpen ? 'bg-white/20 text-white' : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                      }`}>
                         {tasksCount}
                      </span>
@@ -134,7 +134,7 @@ export default function DirectoryHeader({
                      <ShieldCheck size={14} />
                      <span>Compensation</span>
                      {pendingSalaryCount > 0 && (
-                        <span className="text-[11px] font-mono tabular-nums px-1.5 py-0.2 rounded-full font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="text-[11px] font-mono tabular-nums px-1.5 py-0.2 rounded-full font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                            {pendingSalaryCount}
                         </span>
                      )}

@@ -171,7 +171,7 @@ export default function Customers() {
                            </div>
                         </div>
                         <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${customer.tier === 'Platinum' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
-                           customer.tier === 'Gold' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10' :
+                           customer.tier === 'Gold' ? 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)]' :
                               customer.tier === 'Silver' ? 'text-gray-300 border-gray-500/30 bg-gray-500/10' :
                                  'text-orange-400 border-orange-500/30 bg-orange-500/10'
                            }`}>
@@ -205,7 +205,7 @@ export default function Customers() {
                         <div className="w-24 h-24 rounded-full bg-[var(--theme-bg-subtle)] mx-auto flex items-center justify-center border border-[var(--theme-border)] mb-4">
                            <Crown size={40} className={
                               selectedCustomer.tier === 'Platinum' ? 'text-purple-400' :
-                                 selectedCustomer.tier === 'Gold' ? 'text-yellow-400' :
+                                 selectedCustomer.tier === 'Gold' ? 'text-[var(--theme-status-warning-text)]' :
                                     selectedCustomer.tier === 'Silver' ? 'text-gray-300' : 'text-orange-400'
                            } />
                         </div>

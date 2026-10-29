@@ -58,21 +58,21 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     title: '3. Physical Specifications (Hardware Dimensions & Form Factor)',
                     subtitle: 'Device dimensions, unit weight, and physical finish',
                     icon: Cpu,
-                    colorClass: 'text-blue-500'
+                    colorClass: 'text-[var(--theme-status-info-text)]'
                 };
             case 'homewares_kitchen':
                 return {
                     title: '3. Physical Specifications (Dimensions, Capacity & Material)',
                     subtitle: 'Cookware / tableware dimensions, volume capacity, and primary material',
                     icon: UtensilsCrossed,
-                    colorClass: 'text-amber-500'
+                    colorClass: 'text-[var(--theme-status-warning-text)]'
                 };
             default:
                 return {
                     title: '3. Physical Specifications (Consumer Unit / Each)',
                     subtitle: 'Pure content specs strictly separated from logistics packaging',
                     icon: Scale,
-                    colorClass: 'text-emerald-500'
+                    colorClass: 'text-[var(--theme-status-success-text)]'
                 };
         }
     };
@@ -98,12 +98,12 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     {/* Apparel Size / Fitment */}
                     <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                            Size / Fitment <span className="text-rose-500">*</span>
+                            Size / Fitment <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <div className="relative">
                             <select
                                 data-po-field="size" title="Apparel Size"
-                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer`}
+                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer`}
                                 value={customAttributes.identity?.variant || customAttributes.categorySpecific?.apparelSize || ''}
                                 onChange={e => {
                                     const val = e.target.value;
@@ -121,7 +121,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                             </select>
                             <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                         </div>
-                        {errors.size && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.size}</span>}
+                        {errors.size && <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors.size}</span>}
                     </div>
 
                     {/* Colorway / Pattern */}
@@ -163,7 +163,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     {/* Net Liquid Volume */}
                     <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                            Net Volume <span className="text-rose-500">*</span>
+                            Net Volume <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <div className="flex gap-1">
                             <input
@@ -172,7 +172,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                                 step="any"
                                 title="Net Liquid Volume"
                                 placeholder="e.g. 500"
-                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none`}
+                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none`}
                                 data-po-field="size" value={customItemSize}
                                 onChange={e => handleNetWeightChange(e.target.value)}
                             />
@@ -193,7 +193,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                                 <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                             </div>
                         </div>
-                        {errors.size && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.size}</span>}
+                        {errors.size && <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors.size}</span>}
                     </div>
 
                     {/* Container Format */}
@@ -374,7 +374,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     {/* Net Content / Net Weight */}
                     <div className="col-span-2 sm:col-span-2 min-w-0 space-y-1">
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                            Net Content / Weight {isConsumable ? <span className="text-rose-500">*</span> : <span className="text-[9px] text-[var(--theme-text-secondary)] font-normal normal-case">(e.g. 500g, 1kg)</span>}
+                            Net Content / Weight {isConsumable ? <span className="text-[var(--theme-status-danger-text)]">*</span> : <span className="text-[9px] text-[var(--theme-text-secondary)] font-normal normal-case">(e.g. 500g, 1kg)</span>}
                         </label>
                         <div className="flex gap-1">
                             <input
@@ -383,14 +383,14 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                                 step="any"
                                 title="Net Content Value"
                                 placeholder="e.g. 500"
-                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all`}
+                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all`}
                                 data-po-field="size" value={customItemSize}
                                 onChange={e => handleNetWeightChange(e.target.value)}
                             />
                             <div className="relative min-w-[75px]">
                                 <select
                                     title="Net Content Unit"
-                                    className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size && !sizeType ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-r-xl px-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-bold text-center cursor-pointer`}
+                                    className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size && !sizeType ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-r-xl px-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-bold text-center cursor-pointer`}
                                     value={sizeType}
                                     onChange={e => {
                                         setSizeType(e.target.value);
@@ -403,7 +403,7 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                                 <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                             </div>
                         </div>
-                        {errors.size && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.size}</span>}
+                        {errors.size && <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors.size}</span>}
                     </div>
 
                     {/* Gross Weight */}

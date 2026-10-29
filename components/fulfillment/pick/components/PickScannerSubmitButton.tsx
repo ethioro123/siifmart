@@ -33,11 +33,11 @@ export const PickScannerSubmitButton: React.FC<PickScannerSubmitButtonProps> = (
                 (!isReady || isProcessing)
                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] opacity-60 cursor-not-allowed'
                     : (!currentItem)
-                    ? 'bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white'
+                    ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-white'
                     : (isItemMatched)
-                    ? 'bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white'
+                    ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-white'
                     : hasValue && !isStrictlyValid
-                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-500'
+                    ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)]'
                     : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white'
             }`}
         >

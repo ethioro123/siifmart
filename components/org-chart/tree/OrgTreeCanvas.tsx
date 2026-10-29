@@ -237,7 +237,7 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
                 </div>
             ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                    <div className="w-14 h-14 rounded-2xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 flex items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] mb-3">
+                    <div className="w-14 h-14 rounded-2xl bg-[var(--theme-primary)]/10 dark:bg-[#A9CBA2]/10 flex items-center justify-center text-[var(--theme-primary)] dark:text-[#A9CBA2] mb-3">
                         <Users size={28} />
                     </div>
                     <h4 className="text-base font-bold text-[#1E3F27] dark:text-[#EAE5D9]">
@@ -250,7 +250,7 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
                         <button
                             type="button"
                             onClick={onResetFilters}
-                            className="mt-4 px-4 py-2 text-xs font-bold rounded-lg bg-[#2C5E3B] text-white hover:bg-[#1E3F27] transition-colors cursor-pointer"
+                            className="mt-4 px-4 py-2 text-xs font-bold rounded-lg bg-[var(--theme-primary)] text-white hover:bg-[#1E3F27] transition-colors cursor-pointer"
                         >
                             Reset Filters
                         </button>

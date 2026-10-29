@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Briefcase, Plus, CheckCircle2, Clock, 
-    ArrowRight, ShieldCheck, Banknote, UserPlus, Building2, Sparkles 
+import {
+    Briefcase, Plus, CheckCircle2, Clock,
+    ArrowRight, ShieldCheck, Banknote, UserPlus, Building2, Sparkles
 } from 'lucide-react';
 import { recruitmentService } from '../../../services/recruitment.service';
 import type { JobRequisition, JobCandidate, CandidateStage } from '../../../types/hr-advanced';
@@ -55,9 +55,9 @@ export default function RecruitmentPipelineTab() {
     const handleApproveRequisition = async (reqId: string) => {
         try {
             await recruitmentService.approveRequisition(
-                reqId, 
+                reqId,
                 {
-                    id: user?.id || 'hq_approver', 
+                    id: user?.id || 'hq_approver',
                     name: user?.name || 'Operations Director',
                     role: user?.role || 'country_operations_director'
                 }
@@ -100,7 +100,7 @@ export default function RecruitmentPipelineTab() {
             {/* Apple Section Banner */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-2xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Briefcase size={20} />
                     </div>
                     <div>
@@ -109,16 +109,16 @@ export default function RecruitmentPipelineTab() {
                                 Delegated Recruitment & 4-Eyes Onboarding
                             </h3>
                             {['country_hr_director', 'country_operations_director', 'regional_operations_manager', 'country_managing_director', 'group_ceo'].includes(user?.role || '') ? (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                     Checker • HR Compliance Sign-Off
                                 </span>
                             ) : (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-status-info-border)]">
                                     Maker • Talent Sourcing
                                 </span>
                             )}
                             {isSiteManager && (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-status-info-border)]">
                                     Branch Scope
                                 </span>
                             )}
@@ -148,7 +148,7 @@ export default function RecruitmentPipelineTab() {
                             <button
                                 type="button"
                                 onClick={() => setIsReqModalOpen(true)}
-                                className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
+                                className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
                             >
                                 <Plus size={15} />
                                 <span>New Requisition</span>
@@ -181,7 +181,7 @@ export default function RecruitmentPipelineTab() {
                                 onClick={() => setSelectedReqId(isSelected ? null : req.id)}
                                 className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
                                     isSelected
-                                        ? 'bg-[var(--theme-bg-card)] border-[#0071E3] dark:border-[#2997FF] ring-1 ring-[#0071E3]/20 shadow-[0_2px_12px_rgba(0,113,227,0.12)]'
+                                        ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-focus)] dark:border-[var(--theme-border-focus)] ring-1 ring-[#0071E3]/20 shadow-[0_2px_12px_rgba(0,113,227,0.12)]'
                                         : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-[var(--shadow-sm)] hover:border-[var(--theme-border-strong)]'
                                 }`}
                             >
@@ -197,8 +197,8 @@ export default function RecruitmentPipelineTab() {
                                         </div>
                                         <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shrink-0 ${
                                             req.status === 'approved' || req.status === 'active_recruiting'
-                                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                                : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                         }`}>
                                             {req.status === 'pending_hq_approval' ? 'Pending HQ' : req.status}
                                         </span>
@@ -215,7 +215,7 @@ export default function RecruitmentPipelineTab() {
                                         <button
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleApproveRequisition(req.id); }}
-                                            className="h-7 px-2.5 rounded-lg bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-[11px] font-semibold cursor-pointer active:scale-[0.98] transition-all"
+                                            className="h-7 px-2.5 rounded-lg bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-[11px] font-semibold cursor-pointer active:scale-[0.98] transition-all"
                                         >
                                             Approve HQ
                                         </button>
@@ -243,7 +243,7 @@ export default function RecruitmentPipelineTab() {
                         <button
                             type="button"
                             onClick={() => setSelectedReqId(null)}
-                            className="text-xs text-[#0071E3] dark:text-[#2997FF] font-medium hover:underline cursor-pointer"
+                            className="text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-medium hover:underline cursor-pointer"
                         >
                             Clear Requisition Filter
                         </button>
@@ -274,8 +274,8 @@ export default function RecruitmentPipelineTab() {
                                             const hasFin = Boolean(cand.finance_approved_at);
 
                                             return (
-                                                <div 
-                                                    key={cand.id} 
+                                                <div
+                                                    key={cand.id}
                                                     onClick={() => setApprovalCandidate(cand)}
                                                     className="p-3 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] space-y-2 shadow-xs hover:border-[var(--theme-border-strong)] transition-all cursor-pointer"
                                                 >
@@ -287,13 +287,13 @@ export default function RecruitmentPipelineTab() {
                                                     {/* Dual 4-Eyes Compliance Badges */}
                                                     <div className="flex items-center gap-1.5 pt-1 border-t border-[var(--theme-border-subtle)] text-[10px]">
                                                         <span className={`px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${
-                                                            hasHR ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
+                                                            hasHR ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
                                                         }`}>
                                                             <ShieldCheck size={10} />
                                                             <span>HR {hasHR ? 'Verified' : 'Pending'}</span>
                                                         </span>
                                                         <span className={`px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${
-                                                            hasFin ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
+                                                            hasFin ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
                                                         }`}>
                                                             <Banknote size={10} />
                                                             <span>Fin {hasFin ? 'Approved' : 'Pending'}</span>
@@ -306,7 +306,7 @@ export default function RecruitmentPipelineTab() {
                                                             <button
                                                                 type="button"
                                                                 onClick={(e) => { e.stopPropagation(); setApprovalCandidate(cand); }}
-                                                                className="w-full h-7 rounded-lg bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                                                className="w-full h-7 rounded-lg bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
                                                             >
                                                                 <Sparkles size={11} />
                                                                 <span>Review 4-Eyes</span>
@@ -320,13 +320,13 @@ export default function RecruitmentPipelineTab() {
                                                                     const next = stages[stages.indexOf(stage) + 1];
                                                                     if (next) handleStageUpdate(cand.id, next);
                                                                 }}
-                                                                className="w-full h-7 rounded-lg bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[#0071E3] dark:text-[#2997FF] border border-[var(--theme-border)] text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98] transition-all"
+                                                                className="w-full h-7 rounded-lg bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border)] text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98] transition-all"
                                                             >
                                                                 <span>Advance</span>
                                                                 <ArrowRight size={11} />
                                                             </button>
                                                         ) : (
-                                                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 justify-center w-full py-0.5">
+                                                            <span className="text-[10px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold flex items-center gap-1 justify-center w-full py-0.5">
                                                                 <CheckCircle2 size={12} />
                                                                 <span>Active Staff</span>
                                                             </span>

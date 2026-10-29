@@ -69,8 +69,8 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                             {t('warehouse.destination') || 'Destination'}
                         </span>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${
-                            job.priority === 'Critical' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' :
-                            job.priority === 'High' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' :
+                            job.priority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' :
+                            job.priority === 'High' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]' :
                             'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                         }`}>
                             {job.priority} Priority
@@ -115,7 +115,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                             <ShieldCheck size={13} className="text-[var(--theme-accent)]" />
                             {t('warehouse.packing.packagingDirectives') || 'Packaging Directives'}
                         </span>
-                        <span className="text-[10px] uppercase font-bold text-green-600 dark:text-green-400">
+                        <span className="text-[10px] uppercase font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                             Zero-Trust
                         </span>
                     </div>
@@ -127,7 +127,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                             </span>
                         )}
                         {hasFragileItems && (
-                            <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 flex items-center gap-1.5">
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] flex items-center gap-1.5">
                                 <AlertTriangle size={13} />
                                 {t('warehouse.packing.fragileCushion') || 'Fragile (Cushion Wrap)'}
                             </span>
@@ -184,7 +184,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                                 </div>
 
                                 <div className="text-right shrink-0">
-                                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider block">
+                                    <span className="text-[10px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold uppercase tracking-wider block">
                                         {t('warehouse.packing.scanRequired') || 'Scan Required'}
                                     </span>
                                 </div>

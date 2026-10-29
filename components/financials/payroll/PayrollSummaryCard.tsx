@@ -60,11 +60,11 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
 
                 {/* Performance Bonuses */}
                 {totalBonuses > 0 && (
-                    <div className="p-3.5 bg-emerald-500/5 rounded-xl border border-emerald-500/20">
-                        <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
+                    <div className="p-3.5 bg-[var(--theme-status-success-bg)] rounded-xl border border-[var(--theme-status-success-border)]">
+                        <span className="text-[11px] font-medium text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] uppercase tracking-wider block">
                             Performance Bonuses
                         </span>
-                        <div className="text-xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-1">
+                        <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1">
                             +{currencySymbol} {totalBonuses.toLocaleString()}
                         </div>
                         <span className="text-[10px] text-[var(--theme-text-secondary)] mt-1 block">
@@ -78,7 +78,7 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
                     <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider block">
                         Total Monthly Payout
                     </span>
-                    <div className="text-2xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-1">
+                    <div className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1">
                         {currencySymbol} {totalPayout.toLocaleString()}
                     </div>
                     <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1.5 block">
@@ -96,10 +96,10 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
                         </span>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold font-mono border ${
                             latestRun.status === 'disbursed'
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                 : latestRun.status === 'approved'
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                         }`}>
                             {latestRun.status === 'disbursed'
                                 ? 'Disbursed'
@@ -114,14 +114,14 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
                     </div>
                     <div className="flex items-center justify-between text-xs pt-1">
                         <span className={`flex items-center gap-1 ${
-                            latestRun.hrApprovedBy ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-[var(--theme-text-secondary)]'
+                            latestRun.hrApprovedBy ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold' : 'text-[var(--theme-text-secondary)]'
                         }`}>
                             {latestRun.hrApprovedBy ? <CheckCircle2 size={12} /> : <Clock size={12} />}
                             {latestRun.hrApprovedBy ? 'HR Certified' : 'HR Pending'}
                         </span>
                         <span className="text-[var(--theme-border)]">|</span>
                         <span className={`flex items-center gap-1 ${
-                            latestRun.financeApprovedBy ? 'text-[#0071E3] dark:text-[#2997FF] font-semibold' : 'text-[var(--theme-text-secondary)]'
+                            latestRun.financeApprovedBy ? 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold' : 'text-[var(--theme-text-secondary)]'
                         }`}>
                             {latestRun.financeApprovedBy ? <CheckCircle2 size={12} /> : <Clock size={12} />}
                             {latestRun.financeApprovedBy ? 'Finance Authorized' : 'Finance Pending'}
@@ -134,7 +134,7 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
             <button
                 type="button"
                 onClick={onProcessPayroll}
-                className="w-full py-2.5 bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm"
+                className="w-full py-2.5 bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white font-semibold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm"
             >
                 <ShieldCheck size={16} /> Zero-Trust Payroll Run (HR + Finance)
             </button>
@@ -150,11 +150,11 @@ export const PayrollSummaryCard: React.FC<PayrollSummaryCardProps> = ({
                     <span>Salary Approvals (4-Eyes)</span>
                 </div>
                 {pendingSalaryCount > 0 ? (
-                    <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">
+                    <span className="bg-[var(--theme-status-warning-bg)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">
                         {pendingSalaryCount} Pending
                     </span>
                 ) : (
-                    <span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold">
+                    <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-[10px] font-semibold">
                         Queue Clear
                     </span>
                 )}

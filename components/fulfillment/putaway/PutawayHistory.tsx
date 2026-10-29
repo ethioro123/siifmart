@@ -200,7 +200,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                                 <div>
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-lg ${item.type === 'REPLENISH' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20'}`}>
+                                            <div className={`p-1.5 rounded-lg ${item.type === 'REPLENISH' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]' : 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20'}`}>
                                                 <PackageCheck size={14} />
                                             </div>
                                             <span className="text-[11px] uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)]">

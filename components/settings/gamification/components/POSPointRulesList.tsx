@@ -85,7 +85,7 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
                         {rule.pointsPerRevenue && (
                             <div className="text-right px-3 border-l border-[var(--theme-border)]">
                                 <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium">Per {currency}{rule.revenueThreshold}</p>
-                                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">+{rule.pointsPerRevenue}</p>
+                                <p className="text-sm font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">+{rule.pointsPerRevenue}</p>
                             </div>
                         )}
 
@@ -107,7 +107,7 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
                             <button
                                 type="button"
                                 onClick={() => handleDeletePointRule(rule.id)}
-                                className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                                className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] transition-colors cursor-pointer"
                                 title="Delete Rule"
                                 aria-label="Delete Rule"
                             >

@@ -155,16 +155,16 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                     </div>
                     <div className="flex flex-col items-end gap-2">
                         <div className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${
-                            po.status === 'Received' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                            po.status === 'Approved' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                            po.status === 'Pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                            po.status === 'Received' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' :
+                            po.status === 'Approved' ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]' :
+                            po.status === 'Pending' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]' :
                             po.status === 'Draft' ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]' :
-                            'bg-red-500/10 text-red-500 border-red-500/20'
+                            'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                         }`}>
                             {po.status}
                         </div>
                         <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border uppercase tracking-wide ${
-                            po.priority === 'High' || po.priority === 'Urgent' ? 'text-red-500 border-red-500/20 bg-red-500/10' :
+                            po.priority === 'High' || po.priority === 'Urgent' ? 'text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)]' :
                             'text-[var(--theme-text-secondary)] border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]'
                         }`}>
                             Priority: {po.priority || 'Normal'}
@@ -183,8 +183,8 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         <p className="text-[var(--theme-text-primary)] font-semibold text-sm truncate">{po.requestedBy || po.createdBy || 'Unknown'}</p>
                     </div>
                     {po.approvedBy && (
-                        <div className="rounded-2xl p-4 border border-emerald-500/20 bg-emerald-500/5 shadow-sm">
-                            <p className="text-[10px] text-emerald-500 uppercase tracking-wider font-semibold mb-1">Approved By</p>
+                        <div className="rounded-2xl p-4 border border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] shadow-sm">
+                            <p className="text-[10px] text-[var(--theme-status-success-text)] uppercase tracking-wider font-semibold mb-1">Approved By</p>
                             <p className="text-[var(--theme-text-primary)] font-semibold text-sm truncate">{po.approvedBy}</p>
                         </div>
                     )}
@@ -276,7 +276,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="text-xs font-bold text-[var(--theme-text-primary)] flex items-center gap-1">
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-semibold uppercase">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-semibold uppercase">
                                                             <Package size={11} className="shrink-0" /> {pkg.packBadge || pkg.manifestUnitName}
                                                         </span>
                                                     </div>
@@ -383,7 +383,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 Record finance clearance
                             </button>}
                             {canRecommendCountryMd && <button onClick={() => setApprovalModal({ isOpen: true, mode: 'recommend' })}
-                                disabled={isSubmitting} className="h-11 px-5 bg-amber-600 text-white font-semibold text-sm rounded-full disabled:opacity-50">
+                                disabled={isSubmitting} className="h-11 px-5 bg-[var(--theme-status-warning-bg)] text-white font-semibold text-sm rounded-full disabled:opacity-50">
                                 Recommend PO (Country MD)
                             </button>}
                             {isCEO && !canApprove && !isCreator && <button onClick={handleOpenReject}
@@ -401,7 +401,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
                     {/* Status Messages */}
                     {po.status === 'Received' && (
-                        <div className="p-3.5 px-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-2.5 text-emerald-500 text-xs font-medium">
+                        <div className="p-3.5 px-4 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-2xl flex items-center gap-2.5 text-[var(--theme-status-success-text)] text-xs font-medium">
                             <CheckCircle size={16} />
                             <span>Order received and processed</span>
                         </div>
@@ -422,7 +422,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             1. CEO/Country Commercial Director can Edit/Delete anything NOT fully Received.
                             2. Other staff can ONLY Edit/Delete their own Draft POs.
                         */}
-                        {((canFullDelete && po.status !== 'Received') || 
+                        {((canFullDelete && po.status !== 'Received') ||
                           (!isFinanceRole && po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                             <>
                                 <button
@@ -436,7 +436,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 </button>
                                 <button
                                     onClick={handleDeletePO}
-                                    className="h-10 px-4 bg-[var(--theme-bg-subtle)] hover:bg-red-500/10 text-[var(--theme-text-secondary)] hover:text-red-400 rounded-full border border-[var(--theme-border)] hover:border-red-500/30 transition-all flex items-center justify-center gap-1.5 font-medium text-xs active:scale-[0.98]"
+                                    className="h-10 px-4 bg-[var(--theme-bg-subtle)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] rounded-full border border-[var(--theme-border)] border-[var(--theme-status-danger-border)] transition-all flex items-center justify-center gap-1.5 font-medium text-xs active:scale-[0.98]"
                                 >
                                     <Trash2 size={14} /> Delete
                                 </button>

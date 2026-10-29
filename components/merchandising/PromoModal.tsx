@@ -64,7 +64,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-[var(--theme-text-secondary)]">Campaign Code</label>
                   {newPromo.code && (
-                     <span className={`text-[10px] font-medium ${codeValid ? 'text-emerald-500' : 'text-rose-500'}`}>
+                     <span className={`text-[10px] font-medium ${codeValid ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}`}>
                         {codeValid ? 'Valid code' : '3-32 chars (A-Z, 0-9, -, _)'}
                      </span>
                   )}
@@ -72,7 +72,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                <input
                   className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] uppercase font-mono font-semibold focus:outline-none focus:ring-1 transition-colors ${
                      newPromo.code && !codeValid
-                        ? 'border-rose-500/60 focus:ring-rose-500'
+                        ? 'border-[var(--theme-status-danger-border)] ring-[var(--theme-status-danger-border)]'
                         : 'border-[var(--theme-border)] focus:ring-[var(--theme-accent)]'
                   }`}
                   placeholder="e.g. FLASH50, SUMMER20"
@@ -111,7 +111,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                   <div className="flex items-center justify-between">
                      <label className="text-xs font-semibold text-[var(--theme-text-secondary)]">Discount Value</label>
                      {newPromo.value !== undefined && !valueValid && (
-                        <span className="text-[10px] font-medium text-rose-500">
+                        <span className="text-[10px] font-medium text-[var(--theme-status-danger-text)]">
                            {isPercentage ? '1 - 100% (whole)' : '> 0 (whole)'}
                         </span>
                      )}
@@ -123,7 +123,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                      max={isPercentage ? 100 : undefined}
                      className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-medium tabular-nums focus:outline-none focus:ring-1 transition-colors ${
                         newPromo.value !== undefined && !valueValid
-                           ? 'border-rose-500/60 focus:ring-rose-500'
+                           ? 'border-[var(--theme-status-danger-border)] ring-[var(--theme-status-danger-border)]'
                            : 'border-[var(--theme-border)] focus:ring-[var(--theme-accent)]'
                      }`}
                      value={newPromo.value !== undefined ? newPromo.value : ''}
@@ -145,7 +145,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-[var(--theme-text-secondary)]">Expiration Date</label>
                   {expiryDate && (
-                     <span className={`text-[10px] font-medium ${isExpiryValid ? 'text-emerald-500' : 'text-rose-500'}`}>
+                     <span className={`text-[10px] font-medium ${isExpiryValid ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}`}>
                         {isExpiryValid ? 'Valid date' : 'Must be future date'}
                      </span>
                   )}
@@ -155,7 +155,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                   min={minExpiryDate}
                   className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none focus:ring-1 transition-colors ${
                      expiryDate && !isExpiryValid
-                        ? 'border-rose-500/60 focus:ring-rose-500'
+                        ? 'border-[var(--theme-status-danger-border)] ring-[var(--theme-status-danger-border)]'
                         : 'border-[var(--theme-border)] focus:ring-[var(--theme-accent)]'
                   }`}
                   value={newPromo.expiryDate || ''}

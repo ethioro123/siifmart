@@ -90,7 +90,7 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                 {hasWeight && (
                     <div className="animate-in fade-in">
                         {isExceeded ? (
-                            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-600 dark:text-red-400 flex items-center gap-2.5">
+                            <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-2.5">
                                 <AlertTriangle size={18} className="shrink-0" />
                                 <div>
                                     <p className="font-bold uppercase tracking-tight">
@@ -102,8 +102,8 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-xs text-green-700 dark:text-green-400 flex items-center gap-2.5 font-semibold">
-                                <Check size={18} className="shrink-0 text-green-600 dark:text-green-400" />
+                            <div className="p-3 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-2.5 font-semibold">
+                                <Check size={18} className="shrink-0 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                                 <div>
                                     <p className="font-bold uppercase tracking-tight">
                                         Scale weight verified within ±{tol}% tolerance (Variance: ±{diffPct.toFixed(1)}%)
@@ -137,7 +137,7 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                         </div>
 
                         {requireSeal && (
-                            <span className="px-2.5 py-1 rounded-md bg-red-500/10 border border-red-500/20 text-xs font-bold font-mono text-red-600 dark:text-red-400 uppercase">
+                            <span className="px-2.5 py-1 rounded-md bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs font-bold font-mono text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] uppercase">
                                 {t('warehouse.packing.mandatoryPolicy') || 'Mandatory Policy'}
                             </span>
                         )}

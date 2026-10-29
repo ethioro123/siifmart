@@ -180,7 +180,7 @@ const DiscountCodesSettings: React.FC = () => {
       case 'Active': return 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20';
       case 'Expired': return 'bg-neutral-500/10 text-neutral-500 dark:text-neutral-400 border-neutral-500/20';
       case 'Disabled': return 'bg-neutral-500/10 text-neutral-400 dark:text-neutral-500 border-neutral-500/20';
-      case 'Scheduled': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+      case 'Scheduled': return 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
       default: return 'bg-neutral-500/10 text-neutral-400 border-neutral-500/20';
     }
   };
@@ -256,7 +256,7 @@ const DiscountCodesSettings: React.FC = () => {
         </div>
         <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
           <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Scheduled</p>
-          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+          <p className="text-2xl font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
             {discountCodes.filter(c => getEffectiveStatus(c) === 'Scheduled').length}
           </p>
         </div>
@@ -383,7 +383,7 @@ const DiscountCodesSettings: React.FC = () => {
                             <button
                               onClick={() => handleDelete(code.id)}
                               disabled={isPending}
-                              className="px-2 py-0.5 bg-red-600 text-white text-[10px] rounded-lg font-semibold cursor-pointer disabled:opacity-50"
+                              className="px-2 py-0.5 bg-[var(--theme-status-danger-bg)] text-white text-[10px] rounded-lg font-semibold cursor-pointer disabled:opacity-50"
                             >
                               Confirm
                             </button>
@@ -398,7 +398,7 @@ const DiscountCodesSettings: React.FC = () => {
                           <button
                             onClick={() => setDeleteConfirm(code.id)}
                             disabled={isPending}
-                            className="p-1.5 text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                            className="p-1.5 text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] rounded-lg transition-colors cursor-pointer"
                             title="Delete Discount Code"
                           >
                             <Trash2 size={14} />

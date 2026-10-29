@@ -315,7 +315,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                     return (
                                                         <button
                                                             onClick={(e) => handleSingleApprove(e, po)}
-                                                            className="h-8 px-3.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium transition-all active:scale-[0.98] flex items-center gap-1.5"
+                                                            className="h-8 px-3.5 rounded-full border border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-xs font-medium transition-all active:scale-[0.98] flex items-center gap-1.5"
                                                             title="Review this purchase order before approval"
                                                         >
                                                             <CheckCircle size={13} /> Review
@@ -335,7 +335,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
 
                                                 return (
                                                     <span
-                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]"
                                                         title="Awaiting Country Commercial Director Sign-Off"
                                                     >
                                                         <Clock size={11} /> In Review
@@ -353,14 +353,14 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                     <Edit3 size={14} />
                                                 </button>
                                             )}
-                                            {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') || 
+                                            {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') ||
                                               (isOperationalDirector && po.status !== 'Received' && po.status !== 'Cancelled') ||
                                               (isProcurementManager && po.status !== 'Received' && po.status !== 'Cancelled') ||
                                               (po.status === 'Draft' && !['country_finance_director', 'regional_finance_manager'].includes(user?.role || '') &&
                                                 (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => handleDeletePO(e, po)}
-                                                    className="w-8 h-8 rounded-full flex items-center justify-center border border-transparent hover:border-red-500/30 hover:bg-red-500/10 text-[var(--theme-text-secondary)] hover:text-red-400 transition-all active:scale-[0.95]"
+                                                    className="w-8 h-8 rounded-full flex items-center justify-center border border-transparent border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] transition-all active:scale-[0.95]"
                                                     title="Cancel PO"
                                                 >
                                                     <Trash2 size={14} />

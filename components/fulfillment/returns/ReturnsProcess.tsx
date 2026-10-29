@@ -303,7 +303,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                                                     </td>
                                                     <td className="p-3.5 text-[var(--theme-text-secondary)] text-xs">{ri.reason}</td>
                                                     <td className="p-3.5">
-                                                        <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${ri.action === 'Restock' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : ri.action === 'Discard' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'}`}>
+                                                        <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${ri.action === 'Restock' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]' : ri.action === 'Discard' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'}`}>
                                                             {ri.action}
                                                         </span>
                                                     </td>
@@ -414,8 +414,8 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
             {/* Step 4: Complete */}
             {returnStep === 'Complete' && (
                 <div className="flex-1 flex flex-col items-center justify-center space-y-6 py-12">
-                    <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20 shadow-xs">
-                        <CheckCircle className="text-emerald-500" size={36} />
+                    <div className="w-20 h-20 bg-[var(--theme-status-success-bg)] rounded-full flex items-center justify-center border border-[var(--theme-status-success-border)] shadow-xs">
+                        <CheckCircle className="text-[var(--theme-status-success-text)]" size={36} />
                     </div>
                     <div className="text-center space-y-1.5">
                         <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight">

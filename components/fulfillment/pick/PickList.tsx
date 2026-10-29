@@ -116,17 +116,17 @@ export const PickList: React.FC<PickListProps> = ({
                                         <div
                                             key={job.id}
                                             className={`flex items-center gap-2.5 bg-[var(--theme-bg-card)] border rounded-xl p-2.5 min-h-[48px] active:scale-[0.98] transition-transform cursor-pointer shadow-xs ${
-                                                job.priority === 'Critical' 
-                                                    ? 'border-red-500/40' 
-                                                    : job.status === 'In-Progress' 
+                                                job.priority === 'Critical'
+                                                    ? 'border-[var(--theme-status-danger-border)]'
+                                                    : job.status === 'In-Progress'
                                                         ? 'border-[var(--theme-accent)]/60 bg-[var(--theme-accent)]/5 ring-1 ring-[var(--theme-accent)]/20'
                                                         : 'border-[var(--theme-border)]'
                                             }`}
                                             onClick={() => handleStartJob(job)}
                                         >
                                             <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold font-mono shrink-0 border ${
-                                                progress >= 100 
-                                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' 
+                                                progress >= 100
+                                                    ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]'
                                                     : 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
                                             }`}>
                                                 {Math.round(progress)}%
@@ -137,7 +137,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                         {formatJobId(job)}
                                                     </span>
                                                     {job.priority === 'Critical' && (
-                                                        <span className="bg-red-500 text-white text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
+                                                        <span className="bg-[var(--theme-status-danger-bg)] text-white text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
                                                             !
                                                         </span>
                                                     )}
@@ -168,10 +168,10 @@ export const PickList: React.FC<PickListProps> = ({
                                         key={job.id}
                                         onClick={() => handleStartJob(job)}
                                         className={`bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border rounded-2xl p-5 sm:p-6 transition-colors cursor-pointer flex flex-col justify-between ${
-                                            job.priority === 'Critical' 
-                                                ? 'border-red-500/30' 
-                                                : job.status === 'In-Progress' 
-                                                    ? 'border-[var(--theme-accent)]/50' 
+                                            job.priority === 'Critical'
+                                                ? 'border-[var(--theme-status-danger-border)]'
+                                                : job.status === 'In-Progress'
+                                                    ? 'border-[var(--theme-accent)]/50'
                                                     : 'border-[var(--theme-border)]'
                                         }`}
                                     >
@@ -183,7 +183,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                             {formatJobId(job)}
                                                         </span>
                                                         {job.priority === 'Critical' && (
-                                                            <div className="flex items-center gap-1 bg-red-500/10 text-red-500 text-[11px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider border border-red-500/20">
+                                                            <div className="flex items-center gap-1 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[11px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider border border-[var(--theme-status-danger-border)]">
                                                                 <AlertTriangle size={10} className="fill-current" />
                                                                 {t('warehouse.urgentLabel')}
                                                             </div>
@@ -217,7 +217,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                         job.status === 'In-Progress'
                                                             ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20'
                                                             : job.priority === 'High'
-                                                                ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                                ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                                     }`}>
                                                         {job.status === 'In-Progress' ? t('warehouse.activeLabel') : job.priority}
@@ -228,14 +228,14 @@ export const PickList: React.FC<PickListProps> = ({
                                             <div className="space-y-3 mt-4">
                                                 <div className="flex justify-between text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                                     <span>{t('warehouse.putaway.progress')}</span>
-                                                    <span className={`font-mono ${progress >= 100 ? 'text-emerald-500' : 'text-[var(--theme-accent)]'}`}>
+                                                    <span className={`font-mono ${progress >= 100 ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-accent)]'}`}>
                                                         {Math.round(progress)}%
                                                     </span>
                                                 </div>
 
                                                 <div className="w-full h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden border border-[var(--theme-border)]">
                                                     <div
-                                                        className={`h-full transition-all duration-500 ${progress >= 100 ? 'bg-emerald-500' : 'bg-[var(--theme-accent)]'}`}
+                                                        className={`h-full transition-all duration-500 ${progress >= 100 ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-accent)]'}`}
                                                         style={{ width: `${Math.round(progress)}%` }}
                                                     />
                                                 </div>

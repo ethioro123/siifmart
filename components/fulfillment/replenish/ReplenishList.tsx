@@ -67,17 +67,17 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                 const restockQty = Math.min(maxStock - p.stock, 50);
 
                 let urgencyLabel = 'Stable';
-                let urgencyBadgeClass = 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
+                let urgencyBadgeClass = 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';
 
                 if (p.stock === 0) {
                     urgencyLabel = 'Critical';
-                    urgencyBadgeClass = 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
+                    urgencyBadgeClass = 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]';
                 } else if (p.stock < minStock / 2) {
                     urgencyLabel = 'High';
                     urgencyBadgeClass = 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
                 } else if (p.stock < minStock) {
                     urgencyLabel = 'Low';
-                    urgencyBadgeClass = 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+                    urgencyBadgeClass = 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
                 }
 
                 return (
@@ -163,7 +163,7 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                                         {t('warehouse.stockLevel')}
                                     </p>
                                     <div className="flex items-baseline gap-1 justify-end font-mono tabular-nums">
-                                        <span className={`text-lg sm:text-xl font-bold ${p.stock < minStock ? 'text-amber-500' : 'text-[var(--theme-text-primary)]'}`}>
+                                        <span className={`text-lg sm:text-xl font-bold ${p.stock < minStock ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-text-primary)]'}`}>
                                             {p.stock}
                                         </span>
                                         <span className="text-xs text-[var(--theme-text-secondary)] font-medium">/ {minStock}</span>
@@ -202,7 +202,7 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
 
                                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 shadow-sm">
                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                                            <AlertTriangle size={12} className="text-amber-500" /> {t('warehouse.velocityAlerts')}
+                                            <AlertTriangle size={12} className="text-[var(--theme-status-warning-text)]" /> {t('warehouse.velocityAlerts')}
                                         </p>
                                         {(() => {
                                             const pendingOrders = sales.filter(s =>
@@ -212,7 +212,7 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                                             return (
                                                 <>
                                                     <p className="text-xs text-[var(--theme-text-primary)] font-semibold mb-1">
-                                                        {t('warehouse.statusLabel')}: <span className={pendingOrders > 0 ? 'text-amber-500' : 'text-green-500'}>{pendingOrders > 0 ? t('warehouse.backlogged') : t('warehouse.stable')}</span>
+                                                        {t('warehouse.statusLabel')}: <span className={pendingOrders > 0 ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-status-success-text)]'}>{pendingOrders > 0 ? t('warehouse.backlogged') : t('warehouse.stable')}</span>
                                                     </p>
                                                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums">{t('warehouse.ordersAwaitingResupply', { count: pendingOrders })}</p>
                                                 </>
@@ -287,7 +287,7 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
 
             {sortedReplenishItems.length === 0 && (
                 <div className="py-16 px-4 flex flex-col items-center justify-center text-center bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-sm">
-                    <div className="w-14 h-14 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center mb-3 text-green-500">
+                    <div className="w-14 h-14 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-full flex items-center justify-center mb-3 text-[var(--theme-status-success-text)]">
                         <CheckCircle size={28} />
                     </div>
                     <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">

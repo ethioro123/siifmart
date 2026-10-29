@@ -59,7 +59,7 @@ export const RetailLossPreventionCard: React.FC = () => {
                         </p>
                     </div>
                 </div>
-                <span className="self-start sm:self-auto px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full text-[11px] font-semibold tracking-wide">
+                <span className="self-start sm:self-auto px-2.5 py-1 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] rounded-full text-[11px] font-semibold tracking-wide">
                     Loss Prevention Active
                 </span>
             </div>

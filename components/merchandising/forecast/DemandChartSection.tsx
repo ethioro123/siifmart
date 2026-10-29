@@ -41,13 +41,13 @@ export const DemandChartSection: React.FC<DemandChartSectionProps> = ({
                         <span className="w-2 h-2 bg-[var(--theme-accent)] rounded-full"></span> Observed Sales
                     </span>
                     <span className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 bg-amber-500 rounded-full"></span> Average Baseline
+                        <span className="w-2 h-2 bg-[var(--theme-status-warning-bg)] rounded-full"></span> Average Baseline
                     </span>
                 </div>
             </div>
 
             {!hasSalesData && (
-                <div className="mb-4 flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-800 dark:text-amber-300 text-xs">
+                <div className="mb-4 flex items-center gap-2 p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs">
                     <Info size={15} className="shrink-0" />
                     <span>No completed POS sales recorded for this store in the last 30 days. Historical sales show zero.</span>
                 </div>

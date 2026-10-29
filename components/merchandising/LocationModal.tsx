@@ -103,7 +103,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                                                    </div>
                                                 )}
                                                 {incomingCost > 0 && incomingCost !== (p.costPrice || 0) && (
-                                                   <div className={`text-[10px] font-mono tabular-nums flex items-center gap-1 ${incomingCost > (p.costPrice || 0) ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                                   <div className={`text-[10px] font-mono tabular-nums flex items-center gap-1 ${incomingCost > (p.costPrice || 0) ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'}`}>
                                                       {incomingCost > (p.costPrice || 0) ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
                                                       New Cost: {currencySymbol} {(incomingCost).toFixed(2)}
                                                    </div>
@@ -113,7 +113,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                                        })()}
                                     </td>
                                     <td className="p-3.5 align-top text-center">
-                                       <span className={`px-2 py-0.5 rounded-lg text-xs font-mono font-medium tabular-nums border ${p.stock < 20 ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'}`}>
+                                       <span className={`px-2 py-0.5 rounded-lg text-xs font-mono font-medium tabular-nums border ${p.stock < 20 ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'}`}>
                                           {p.stock} Units
                                        </span>
                                     </td>

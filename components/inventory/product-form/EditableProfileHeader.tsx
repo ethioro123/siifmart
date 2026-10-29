@@ -37,24 +37,24 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
     // Determine status badge based on live values
     let statusConfig = {
         label: 'In Stock',
-        badgeClass: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30',
-        dotClass: 'bg-emerald-500',
-        stockTextClass: 'text-emerald-700 dark:text-emerald-400'
+        badgeClass: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
+        dotClass: 'bg-[var(--theme-status-success-bg)]',
+        stockTextClass: 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
     };
 
     if (stock <= 0) {
         statusConfig = {
             label: 'Out of Stock',
-            badgeClass: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30',
-            dotClass: 'bg-red-500',
-            stockTextClass: 'text-red-600 dark:text-red-400'
+            badgeClass: 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]',
+            dotClass: 'bg-[var(--theme-status-danger-bg)]',
+            stockTextClass: 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
         };
     } else if (minStock !== undefined && stock <= minStock) {
         statusConfig = {
             label: 'Low Stock Alert',
-            badgeClass: 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/30',
-            dotClass: 'bg-amber-500',
-            stockTextClass: 'text-amber-700 dark:text-amber-400'
+            badgeClass: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
+            dotClass: 'bg-[var(--theme-status-warning-bg)]',
+            stockTextClass: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
         };
     }
 
@@ -156,7 +156,7 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                         </span>
                     </div>
                     {salePrice > 0 && (
-                        <span className="inline-block mt-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 font-mono">
+                        <span className="inline-block mt-1 text-[11px] font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono">
                             Promo: {currencySymbol} {formatPriceValue(salePrice)}
                         </span>
                     )}
@@ -201,7 +201,7 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                             Gross Margin
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                            <span className="text-lg sm:text-xl font-mono font-bold text-emerald-600 dark:text-emerald-400 tracking-tight tabular-nums">
+                            <span className="text-lg sm:text-xl font-mono font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] tracking-tight tabular-nums">
                                 {marginPct > 0 ? `${marginPct.toFixed(1)}%` : '0%'}
                             </span>
                         </div>
@@ -215,7 +215,7 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                             Min Safety Threshold
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                            <span className="text-lg sm:text-xl font-mono font-bold text-amber-600 dark:text-amber-400 tracking-tight">
+                            <span className="text-lg sm:text-xl font-mono font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] tracking-tight">
                                 {minStock !== undefined ? `${minStock} units` : 'Not Set'}
                             </span>
                         </div>

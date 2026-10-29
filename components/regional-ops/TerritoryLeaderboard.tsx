@@ -143,7 +143,7 @@ export const TerritoryLeaderboard: React.FC<TerritoryLeaderboardProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-amber-500" />
+            <Trophy className="w-4 h-4 text-[var(--theme-status-warning-text)]" />
             <span>Regional Facility Performance Leaderboard</span>
           </h3>
           <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -202,17 +202,17 @@ export const TerritoryLeaderboard: React.FC<TerritoryLeaderboardProps> = ({
 
       {/* Top Performer Spotlight Card */}
       {topPerformer && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[var(--theme-bg-card)] to-[var(--theme-bg-card)] border border-amber-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[var(--theme-bg-card)] to-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold text-lg shrink-0 border border-amber-500/30">
+            <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center font-bold text-lg shrink-0 border border-[var(--theme-status-warning-border)]">
               <Trophy className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
+                <span className="text-xs font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] uppercase tracking-wide">
                   Territory Benchmark Leader (#{topPerformer.rank})
                 </span>
-                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                   {topPerformer.compositeScore}/100 Index
                 </span>
               </div>
@@ -227,15 +227,15 @@ export const TerritoryLeaderboard: React.FC<TerritoryLeaderboardProps> = ({
 
           <div className="flex items-center gap-4 text-xs font-mono self-end md:self-auto">
             <div className="text-center">
-              <div className="text-emerald-500 font-bold">{topPerformer.salesScore}%</div>
+              <div className="text-[var(--theme-status-success-text)] font-bold">{topPerformer.salesScore}%</div>
               <div className="text-[10px] text-[var(--theme-text-secondary)]">Sales</div>
             </div>
             <div className="text-center">
-              <div className="text-blue-500 font-bold">{topPerformer.cycleCountScore}%</div>
+              <div className="text-[var(--theme-status-info-text)] font-bold">{topPerformer.cycleCountScore}%</div>
               <div className="text-[10px] text-[var(--theme-text-secondary)]">Inventory SLA</div>
             </div>
             <div className="text-center">
-              <div className="text-amber-500 font-bold">{topPerformer.cashAccuracyScore}%</div>
+              <div className="text-[var(--theme-status-warning-text)] font-bold">{topPerformer.cashAccuracyScore}%</div>
               <div className="text-[10px] text-[var(--theme-text-secondary)]">Cash Accuracy</div>
             </div>
           </div>
@@ -256,11 +256,11 @@ export const TerritoryLeaderboard: React.FC<TerritoryLeaderboardProps> = ({
                 {/* Rank Badge */}
                 <div className={`w-8 h-8 rounded-xl font-bold font-mono text-xs flex items-center justify-center shrink-0 border ${
                   card.rank === 1
-                    ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                     : card.rank === 2
                       ? 'bg-stone-300/20 text-stone-600 dark:text-stone-300 border-stone-300/30'
                       : card.rank === 3
-                        ? 'bg-amber-700/20 text-amber-700 dark:text-amber-300 border-amber-700/30'
+                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                 }`}>
                   {card.rank === 1 ? <Trophy className="w-4 h-4" /> : `#${card.rank}`}
@@ -299,10 +299,10 @@ export const TerritoryLeaderboard: React.FC<TerritoryLeaderboardProps> = ({
                 <div className="px-3 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-right">
                   <div className={`text-xs font-mono font-bold ${
                     card.cycleCountStatus === 'OVERDUE_BREACH'
-                      ? 'text-rose-500'
+                      ? 'text-[var(--theme-status-danger-text)]'
                       : card.cycleCountStatus === 'DUE_TODAY'
-                        ? 'text-amber-500'
-                        : 'text-emerald-500'
+                        ? 'text-[var(--theme-status-warning-text)]'
+                        : 'text-[var(--theme-status-success-text)]'
                   }`}>
                     {card.cycleCountStatus === 'OVERDUE_BREACH' ? 'Breach' : `${card.cycleCountScore}%`}
                   </div>
@@ -311,7 +311,7 @@ export const TerritoryLeaderboard: React.FC<TerritoryLeaderboardProps> = ({
 
                 {/* Pillar 3: Cash Accuracy */}
                 <div className="px-3 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-right">
-                  <div className={`text-xs font-mono font-bold ${card.totalCashVariance > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                  <div className={`text-xs font-mono font-bold ${card.totalCashVariance > 0 ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-status-success-text)]'}`}>
                     {card.cashAccuracyScore}%
                   </div>
                   <div className="text-[10px] text-[var(--theme-text-secondary)]">Cash Acc.</div>

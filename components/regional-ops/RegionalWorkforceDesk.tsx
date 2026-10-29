@@ -179,7 +179,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
 
         {pendingCandidates.length === 0 ? (
           <div className="p-6 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
-            <UserCheck className="w-8 h-8 mx-auto text-emerald-500 opacity-60 mb-2" />
+            <UserCheck className="w-8 h-8 mx-auto text-[var(--theme-status-success-text)] opacity-60 mb-2" />
             <p className="text-xs text-[var(--theme-text-secondary)]">
               No frontline candidate drafts awaiting regional certification. All store talent rosters verified.
             </p>
@@ -198,7 +198,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
                       <span className="text-sm font-semibold text-[var(--theme-text-primary)]">
                         {candidate.name}
                       </span>
-                      <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                      <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                         Drafted Candidate
                       </span>
                     </div>
@@ -315,7 +315,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
                         <span className="font-semibold text-[var(--theme-text-primary)]">
                           {emp.name}
                         </span>
-                        <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                           Loaned
                         </span>
                       </div>
@@ -323,7 +323,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
                         <span>Base: <strong className="text-[var(--theme-text-primary)]">{homeSite?.name || 'Home Station'}</strong></span>
                         <span>&rarr;</span>
                         <span>Station: <strong className="text-[var(--theme-text-primary)]">{currentSite?.name || 'Loaned Branch'}</strong></span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-medium">
+                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)] font-medium">
                           Payroll & Hours: Home Station
                         </span>
                       </div>

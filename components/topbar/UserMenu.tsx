@@ -110,7 +110,7 @@ export function UserMenu({
                      user.name.charAt(0).toUpperCase()
                   )}
                </div>
-               <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 md:w-3 md:h-3 bg-emerald-500 border-2 border-[var(--theme-bg-panel)] rounded-full animate-pulse"></div>
+               <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 md:w-3 md:h-3 bg-[var(--theme-status-success-bg)] border-2 border-[var(--theme-bg-panel)] rounded-full animate-pulse"></div>
             </div>
 
             <div className="topbar-profile-name hidden md:flex flex-col text-left">
@@ -141,7 +141,7 @@ export function UserMenu({
                      <div className="flex items-start gap-3">
                         <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center text-lg font-bold">
                            {user.avatar ? <img src={user.avatar} alt="" className="h-full w-full object-cover" /> : user.name.charAt(0).toUpperCase()}
-                           <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-[var(--theme-bg-panel)] bg-emerald-500" />
+                           <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-[var(--theme-bg-panel)] bg-[var(--theme-status-success-bg)]" />
                         </div>
                         <div className="min-w-0 flex-1 pt-0.5">
                            <p className="mt-0.5 truncate text-base font-bold text-[var(--theme-text-primary)]">{user.name}</p>
@@ -152,19 +152,19 @@ export function UserMenu({
                            <X size={18} />
                         </button>
                      </div>
-                     
+
                      {user.loginLocation && (() => {
                         const geofence = evaluateGeofence(user.loginLocation, currentMarket);
                         return (
                               <div className={`flex items-center gap-1.5 mt-3 text-[11px] font-medium px-2.5 py-1.5 rounded-lg border max-w-full w-fit ${
                               geofence.isForeignAnomaly
-                                 ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+                                 ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                  : geofence.isOffPremise
-                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                     : 'text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
                            }`}>
                               {geofence.isForeignAnomaly ? (
-                                 <AlertTriangle size={13} className="text-red-500 shrink-0" />
+                                 <AlertTriangle size={13} className="text-[var(--theme-status-danger-text)] shrink-0" />
                               ) : (
                                  <MapPin size={13} className="text-[var(--theme-primary)] shrink-0" />
                               )}
@@ -186,14 +186,14 @@ export function UserMenu({
                         <div className="grid grid-cols-2 gap-2.5 mt-4">
                            <div className="bg-[var(--theme-bg-card)] rounded-xl p-3 border border-[var(--theme-border)]">
                               <div className="flex items-center gap-1.5 mb-1.5">
-                                 <Trophy size={14} className="text-amber-500" />
+                                 <Trophy size={14} className="text-[var(--theme-status-warning-text)]" />
                                  <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wide">Points</span>
                               </div>
                               <p className="text-base font-bold tabular-nums text-[var(--theme-text-primary)]">{currentUserPoints.totalPoints?.toLocaleString() || 0}</p>
                            </div>
                            <div className="bg-[var(--theme-bg-card)] rounded-xl p-3 border border-[var(--theme-border)]">
                               <div className="flex items-center gap-1.5 mb-1.5">
-                                 <TrendingUp size={14} className="text-blue-500" />
+                                 <TrendingUp size={14} className="text-[var(--theme-status-info-text)]" />
                                  <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wide">Rank</span>
                               </div>
                               <p className="text-base font-bold tabular-nums text-[var(--theme-text-primary)]">#{currentUserPoints.rank || '-'}</p>
@@ -208,20 +208,20 @@ export function UserMenu({
                                     <p className="text-[10px] font-black text-[var(--theme-text-primary)] leading-tight">{currentUserPoints.levelTitle || 'Rookie'}</p>
                                  </div>
                               </div>
-                              <Crown size={14} className="text-amber-500 opacity-60" />
+                              <Crown size={14} className="text-[var(--theme-status-warning-text)] opacity-60" />
                            </div>
                         </div>
                      )}
 
                      {/* Today's Completed Jobs Card */}
                      {todayJobsTotal > 0 && (
-                        <div className="mt-3 bg-blue-500/10 rounded-2xl p-3.5 border border-blue-500/20">
+                        <div className="mt-3 bg-[var(--theme-status-info-bg)] rounded-2xl p-3.5 border border-[var(--theme-status-info-border)]">
                            <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-1.5">
-                                 <ClipboardList size={14} className="text-blue-500" />
-                                 <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Today’s completed jobs</span>
+                                 <ClipboardList size={14} className="text-[var(--theme-status-info-text)]" />
+                                 <span className="text-[10px] font-bold text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] uppercase tracking-wider">Today’s completed jobs</span>
                               </div>
-                                 <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-500/15 px-2 py-1 rounded-lg border border-blue-500/20">
+                                 <span className="text-xs font-mono font-bold text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] px-2 py-1 rounded-lg border border-[var(--theme-status-info-border)]">
                                  {todayJobsTotal}
                               </span>
                            </div>
@@ -231,9 +231,9 @@ export function UserMenu({
                                     j.type === 'PICK' ? <PackageCheck size={10} /> :
                                        j.type === 'RECEIVE' ? <Truck size={10} /> :
                                           <BoxIcon size={10} />;
-                                 const color = j.type === 'PUTAWAY' ? 'text-blue-500 bg-blue-500/15 border-blue-500/20' :
+                                 const color = j.type === 'PUTAWAY' ? 'text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)]' :
                                     j.type === 'PICK' ? 'text-purple-500 bg-purple-500/15 border-purple-500/20' :
-                                       j.type === 'RECEIVE' ? 'text-emerald-500 bg-emerald-500/15 border-emerald-500/20' :
+                                       j.type === 'RECEIVE' ? 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]' :
                                           'text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] border-[var(--theme-border)]';
                                  return (
                                     <div key={j.type} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold ${color}`}>
@@ -283,11 +283,11 @@ export function UserMenu({
                            </p>
                            {isCeoUser ? (
                               isSwitchingMarket ? (
-                                 <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 flex items-center gap-1 animate-pulse">
+                                 <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-1.5 py-0.5 rounded border border-[var(--theme-status-warning-border)] flex items-center gap-1 animate-pulse">
                                     <RefreshCw size={9} className="animate-spin" /> Reloading...
                                  </span>
                               ) : (
-                                 <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
+                                 <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-1.5 py-0.5 rounded border border-[var(--theme-status-success-border)] flex items-center gap-1">
                                     <ShieldCheck size={9} /> CEO Control
                                  </span>
                               )
@@ -347,7 +347,7 @@ export function UserMenu({
                               <span className="text-xs font-bold text-[var(--theme-text-primary)] flex items-center gap-1.5">
                                  <Globe size={13} className="text-[var(--theme-text-muted)]" /> {currentMarketProfile.supportedLanguages[0]?.label || 'English'}
                               </span>
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-1.5 py-0.5 rounded border border-[var(--theme-status-warning-border)]">
                                  Locked
                               </span>
                            </div>
@@ -389,7 +389,7 @@ export function UserMenu({
                   <div className="sticky bottom-0 bg-[var(--theme-bg-panel)] p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] border-t border-[var(--theme-border)] sm:pb-3">
                      <button
                         onClick={() => { logout(); setIsUserMenuOpen(false); }}
-                        className="w-full min-h-12 flex items-center gap-3 px-3.5 py-3 text-sm font-semibold text-red-500 dark:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                        className="w-full min-h-12 flex items-center gap-3 px-3.5 py-3 text-sm font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] rounded-xl transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger-border)]"
                      >
                         <LogOut size={16} />
                         <span>Sign out</span>

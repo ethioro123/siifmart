@@ -81,8 +81,8 @@ export const TransferItemsSection: React.FC<TransferItemsSectionProps> = ({
                                     <span
                                         className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded flex items-center gap-1 tabular-nums ${
                                             isWarning
-                                                ? 'bg-red-500/10 text-red-500 border border-red-500/20'
-                                                : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                                ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
+                                                : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                                         }`}
                                     >
                                         Source: {formatTransferStock(rawStock, unitProduct)} <ArrowRight size={10} /> Rem:{' '}
@@ -128,7 +128,7 @@ export const TransferItemsSection: React.FC<TransferItemsSectionProps> = ({
                                         newItems.splice(idx, 1);
                                         setTransferItems(newItems);
                                     }}
-                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-red-500 rounded-xl hover:bg-red-500/10 transition-colors touch-manipulation"
+                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] rounded-xl bg-[var(--theme-status-danger-bg)] transition-colors touch-manipulation"
                                     aria-label="Remove Item"
                                 >
                                     <Trash2 size={16} />

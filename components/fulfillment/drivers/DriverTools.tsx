@@ -21,9 +21,9 @@ export const DriverTools: React.FC<DriverToolsProps> = ({
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2.5 flex items-center justify-between gap-2.5 shadow-xs">
             {[
                 { icon: QrCode, label: t('warehouse.driverHub.scan'), action: () => setDriverScannerOpen(true), color: 'text-[var(--theme-primary)]', bg: 'bg-[var(--theme-primary)]/10' },
-                { icon: AlertTriangle, label: t('warehouse.driverHub.report'), action: onIssue, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                { icon: AlertTriangle, label: t('warehouse.driverHub.report'), action: onIssue, color: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]' },
                 { icon: FileText, label: t('warehouse.driverHub.docs'), action: onDocs, color: 'text-[var(--theme-primary)]', bg: 'bg-[var(--theme-primary)]/10' },
-                { icon: LogOut, label: t('warehouse.driverHub.finish'), action: onEnd, color: 'text-red-500', bg: 'bg-red-500/10' }
+                { icon: LogOut, label: t('warehouse.driverHub.finish'), action: onEnd, color: 'text-[var(--theme-status-danger-text)]', bg: 'bg-[var(--theme-status-danger-bg)]' }
             ].map((btn, i) => (
                 <button
                     key={i}

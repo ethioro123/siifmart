@@ -65,8 +65,8 @@ export default function StaffProfileHeader({
                     <div
                         title={isOnline ? 'Online now' : 'Offline'}
                         className={`absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full border-2 border-[var(--theme-bg-card)] text-[11px] font-semibold flex items-center gap-1 shadow-xs ${
-                            isOnline 
-                                ? 'bg-emerald-500 text-white' 
+                            isOnline
+                                ? 'bg-[var(--theme-status-success-bg)] text-white'
                                 : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
                         }`}
                     >
@@ -85,7 +85,7 @@ export default function StaffProfileHeader({
                                 {employee.name}
                             </h2>
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-[var(--theme-accent)] border border-blue-500/20">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] border border-[var(--theme-status-info-border)]">
                                     <ShieldCheck size={13} />
                                     {getEmployeeJobTitle(employee)}
                                 </span>
@@ -102,14 +102,14 @@ export default function StaffProfileHeader({
                         {/* Status Badge */}
                         <div className="self-center lg:self-start shrink-0">
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
-                                isActive 
-                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                isActive
+                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                     : isPending
-                                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                                        : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
+                                        : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                             }`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${
-                                    isActive ? 'bg-emerald-500' : isPending ? 'bg-amber-500 animate-pulse' : 'bg-rose-500'
+                                    isActive ? 'bg-[var(--theme-status-success-bg)]' : isPending ? 'bg-[var(--theme-status-warning-bg)] animate-pulse' : 'bg-[var(--theme-status-danger-bg)]'
                                 }`} />
                                 {employee.status}
                             </span>
@@ -153,7 +153,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onResetPassword}
-                                        className="min-h-11 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 text-xs font-semibold text-amber-600 dark:text-amber-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="min-h-11 px-3 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-xs font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <Key size={14} />
                                         <span>Reset</span>
@@ -164,7 +164,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onTerminate}
-                                        className="min-h-11 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 text-xs font-semibold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="min-h-11 px-3 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <AlertTriangle size={14} />
                                         <span>Terminate</span>
@@ -175,7 +175,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onDelete}
-                                        className="min-h-11 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 text-xs font-semibold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="min-h-11 px-3 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <Trash2 size={14} />
                                         <span>Delete</span>

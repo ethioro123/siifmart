@@ -44,7 +44,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                 size="sm"
             >
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-800/40">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
                         <Copy size={24} className="shrink-0" />
                         <p className="text-xs">
                             This will replicate all shifts from the preceding week into <strong>{weekLabel}</strong>. Any existing draft shifts will be updated.
@@ -80,7 +80,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                 size="sm"
             >
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-800/40">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
                         <Send size={24} className="shrink-0" />
                         <p className="text-xs">
                             Publishing will confirm and finalize the schedule for <strong>{weekLabel}</strong>. Shifts will be visible to all staff profiles and POS/WMS terminals.
@@ -116,8 +116,8 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                 size="sm"
             >
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/40">
-                        <AlertTriangle size={24} className="shrink-0 text-red-500" />
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-danger-bg)] dark:bg-red-950/20 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]">
+                        <AlertTriangle size={24} className="shrink-0 text-[var(--theme-status-danger-text)]" />
                         <p className="text-xs">
                             Are you sure you want to clear all shifts for <strong>{weekLabel}</strong>? Shifts will be set to Off (Day Off). Remember to click <strong>Save Changes</strong> to persist.
                         </p>
@@ -134,7 +134,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                         <button
                             type="button"
                             onClick={onConfirmClear}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                            className="px-4 py-2 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
                         >
                             <Trash2 size={14} />
                             <span>Clear Shifts</span>

@@ -80,7 +80,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                         <button
                             type="button"
                             onClick={onRemoveVariant}
-                            className="p-2 text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            className="p-2 text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] rounded-xl transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
                             title={t('warehouse.removeScan')}
                             aria-label={t('warehouse.removeScan') || 'Remove split'}
                         >
@@ -100,7 +100,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             min="0"
                             value={variant.quantity === 0 ? '' : variant.quantity}
                             onChange={(e) => onUpdateVariant({ quantity: Math.max(0, parseInt(e.target.value) || 0) })}
-                            className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-lg md:text-xl font-bold font-mono text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 tabular-nums min-h-[44px]"
+                            className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-lg md:text-xl font-bold font-mono text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)] tabular-nums min-h-[44px]"
                             aria-label="Quantity"
                             placeholder="0"
                         />
@@ -134,7 +134,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             <select
                                 value={variant.condition || 'Good'}
                                 onChange={(e) => onUpdateVariant({ condition: e.target.value })}
-                                className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[44px] cursor-pointer appearance-none pr-9"
+                                className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)] min-h-[44px] cursor-pointer appearance-none pr-9"
                                 aria-label="Condition"
                             >
                                 <option value="Good">{t('warehouse.conditionGood')}</option>
@@ -165,7 +165,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             type="date"
                             value={variant.expiryDate || ''}
                             onChange={(e) => onUpdateVariant({ expiryDate: e.target.value })}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)]"
                             aria-label="Expiry Date"
                         />
                     </div>
@@ -190,7 +190,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             value={variant.batchNumber || ''}
                             onChange={(e) => onUpdateVariant({ batchNumber: e.target.value })}
                             placeholder="e.g. LOT-20261003-KEGR001-01"
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono tracking-wide text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono tracking-wide text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)]"
                             aria-label={t('warehouse.batchLotNo') || 'Batch Number'}
                         />
                         <p className="text-[11px] text-[var(--theme-text-secondary)] pl-0.5 font-mono">
@@ -221,7 +221,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                                 }}
                                 onPaste={scanOnlyHandlers.onPaste}
                                 placeholder={t('warehouse.scanBarcodePlaceholder')}
-                                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)]"
                                 aria-label="New Barcode Input"
                             />
                             <ScanBarcode className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
@@ -252,7 +252,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => onRemoveBarcode(code)}
-                                    className="opacity-50 hover:opacity-100 hover:text-red-500 transition-opacity ml-0.5"
+                                    className="opacity-50 hover:opacity-100 text-[var(--theme-status-danger-text)] transition-opacity ml-0.5"
                                     aria-label="Remove barcode"
                                 >
                                     <X size={12} />

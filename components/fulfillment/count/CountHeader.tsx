@@ -70,7 +70,7 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                                 if (confirm(t('warehouse.cancelCurrentSessionPrompt'))) onCancelSession();
                             }}
                             disabled={isSubmitting}
-                            className="text-red-600 dark:text-red-400 hover:bg-red-500/10 text-xs font-semibold border border-red-500/20 px-3.5 py-2 rounded-xl transition-colors min-h-[44px]"
+                            className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] text-xs font-semibold border border-[var(--theme-status-danger-border)] px-3.5 py-2 rounded-xl transition-colors min-h-[44px]"
                         >
                             {t('warehouse.cancelSession')}
                         </button>
@@ -85,8 +85,8 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                     <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">
                         {t('warehouse.auditShort')}
                     </span>
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
                         {countSessionStatus}
                     </span>
                 </div>
@@ -121,7 +121,7 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                                 if (confirm(t('warehouse.cancelCurrentSessionPrompt'))) onCancelSession();
                             }}
                             disabled={isSubmitting}
-                            className="text-red-500 text-[10px] font-semibold border border-red-500/20 px-2 py-1 rounded-lg min-h-[30px]"
+                            className="text-[var(--theme-status-danger-text)] text-[10px] font-semibold border border-[var(--theme-status-danger-border)] px-2 py-1 rounded-lg min-h-[30px]"
                         >
                             {t('warehouse.cancelShort')}
                         </button>

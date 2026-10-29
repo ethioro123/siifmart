@@ -132,7 +132,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                   <span>Checker • Disposition Sign-Off</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 text-[11px] font-semibold">
                   <Clock size={12} />
                   <span>Maker • Dock QC Inspector</span>
                 </span>
@@ -174,10 +174,10 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                   </div>
                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
                     effectiveDisposition === 'Accepted' || isWaived
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                      ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                       : effectiveDisposition === 'Rejected'
-                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                      ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                      : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                   }`}>
                     {isWaived ? 'Supervisory Waiver Signed' : effectiveDisposition}
                   </span>
@@ -185,7 +185,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
 
                 <div className="grid grid-cols-2 gap-2.5 text-xs">
                   <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] flex items-center gap-2.5">
-                    <Thermometer size={16} className={qc.tempComplianceStatus === 'Breach' ? 'text-rose-500 shrink-0' : 'text-emerald-500 shrink-0'} />
+                    <Thermometer size={16} className={qc.tempComplianceStatus === 'Breach' ? 'text-[var(--theme-status-danger-text)] shrink-0' : 'text-[var(--theme-status-success-text)] shrink-0'} />
                     <div>
                       <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Temp</p>
                       <p className="font-bold font-mono text-[var(--theme-text-primary)]">{qc.coldChainTempCelsius !== undefined ? `${qc.coldChainTempCelsius}°C` : 'Dry'}</p>
@@ -201,7 +201,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                 </div>
 
                 {qc.discrepancyDetails && (
-                  <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-mono font-medium">
+                  <div className="p-3 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-xs font-mono font-medium">
                     {qc.discrepancyDetails}
                   </div>
                 )}
@@ -212,7 +212,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                       Inspector: {qc.inspectorName}
                     </p>
                     {qc.supervisorWaivedAt && qc.supervisorWaivedBy && (
-                      <p className="text-[10px] text-amber-600 dark:text-amber-400 font-mono font-semibold">
+                      <p className="text-[10px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono font-semibold">
                         Waiver signed by {qc.supervisorWaivedBy} on {formatDateTime(qc.supervisorWaivedAt)}
                       </p>
                     )}
@@ -221,7 +221,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                     <button
                       type="button"
                       onClick={() => handleSignOffWaiver(qc)}
-                      className="h-8 px-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
+                      className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
                     >
                       <Check size={13} /> Sign Off Waiver
                     </button>

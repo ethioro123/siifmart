@@ -164,7 +164,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                     <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 flex-1">
                         <div className={`w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 border ${
                             isFullyPicked
-                                ? 'bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400'
+                                ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                 : 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
                         }`}>
                             <Package size={20} className="sm:w-[22px] sm:h-[22px]" />
@@ -300,7 +300,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                         onClose();
                                     }
                                 }}
-                                className="min-h-[44px] px-2.5 sm:px-3.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors active:scale-95 cursor-pointer touch-manipulation"
+                                className="min-h-[44px] px-2.5 sm:px-3.5 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors active:scale-95 cursor-pointer touch-manipulation"
                                 title={t('common.delete') || 'Delete'}
                             >
                                 <Trash2 size={14} />
@@ -338,7 +338,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 type="button"
                                 onClick={() => onCompleteJob(job)}
                                 disabled={isSubmitting}
-                                className="min-h-[44px] px-5 sm:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                                className="min-h-[44px] px-5 sm:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <Loader2 size={16} className="animate-spin" />

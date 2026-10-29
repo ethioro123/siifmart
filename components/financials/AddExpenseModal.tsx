@@ -21,14 +21,14 @@ export const AddExpenseModal: React.FC = () => {
     const isEscalatedToCeo = amountVal > countryLimit;
     const isRegionalEscalated = amountVal > regionalLimit && !isEscalatedToCeo;
 
-    const inputBase = "w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors placeholder:text-[var(--theme-text-secondary)]/50";
+    const inputBase = "w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[var(--theme-border-focus)] dark:focus:border-[var(--theme-border-focus)] transition-colors placeholder:text-[var(--theme-text-secondary)]/50";
     const labelBase = "text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5 block";
 
     return (
         <Modal isOpen={isAddExpenseOpen} onClose={() => setIsAddExpenseOpen(false)} title="Log Expense Record (Zero-Trust)">
             <div className="space-y-4">
-                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-3">
-                    <ShieldCheck className="text-[#0071E3] dark:text-[#2997FF] shrink-0" size={18} />
+                <div className="p-3 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-xl flex items-center gap-3">
+                    <ShieldCheck className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" size={18} />
                     <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
                         Under SIIFMART 4-Eyes Governance, new entries enter as <strong className="text-[var(--theme-text-primary)] font-semibold">Pending Approval</strong>. The submitter cannot approve their own expense.
                     </p>
@@ -91,8 +91,8 @@ export const AddExpenseModal: React.FC = () => {
                 </div>
 
                 {isEscalatedToCeo && (
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5 text-xs text-amber-700 dark:text-amber-300">
-                        <AlertCircle size={16} className="shrink-0 text-amber-500" />
+                    <div className="p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl flex items-center gap-2.5 text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
+                        <AlertCircle size={16} className="shrink-0 text-[var(--theme-status-warning-text)]" />
                         <span>
                             Amount exceeds country autonomous limit ({currencySymbol} {countryLimit.toLocaleString()}). Requires <strong className="font-semibold">Group CFO / Group CEO Executive Sign-Off</strong>.
                         </span>
@@ -100,8 +100,8 @@ export const AddExpenseModal: React.FC = () => {
                 )}
 
                 {isRegionalEscalated && (
-                    <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-2.5 text-xs text-blue-700 dark:text-blue-300">
-                        <AlertCircle size={16} className="shrink-0 text-blue-500" />
+                    <div className="p-3 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-xl flex items-center gap-2.5 text-xs text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]">
+                        <AlertCircle size={16} className="shrink-0 text-[var(--theme-status-info-text)]" />
                         <span>
                             Amount exceeds regional autonomous limit ({currencySymbol} {regionalLimit.toLocaleString()}). Requires <strong className="font-semibold">Country Finance Director Sign-Off</strong>.
                         </span>
@@ -111,7 +111,7 @@ export const AddExpenseModal: React.FC = () => {
                 <button
                     onClick={handleAddExpense}
                     disabled={isSubmitting || !newExpData.description || !newExpData.amount}
-                    className="w-full py-2.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold text-xs rounded-xl mt-2 flex items-center justify-center gap-2 transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-2.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white font-semibold text-xs rounded-xl mt-2 flex items-center justify-center gap-2 transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : null}
                     {isSubmitting ? 'Submitting to HQ...' : 'Submit Expense for Approval'}

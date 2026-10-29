@@ -33,8 +33,8 @@ export const FiscalCloseModal: React.FC<FiscalCloseModalProps> = ({
             size="md"
         >
             <div className="p-5 space-y-4">
-                <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                <div className="p-3.5 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                         <Lock size={18} />
                     </div>
                     <div>
@@ -54,7 +54,7 @@ export const FiscalCloseModal: React.FC<FiscalCloseModalProps> = ({
                     <textarea
                         value={lockReason}
                         onChange={(e) => setLockReason(e.target.value)}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl p-3 text-xs focus:outline-none focus:border-rose-500 transition-colors resize-none h-24 placeholder:text-[var(--theme-text-secondary)]/50"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl p-3 text-xs focus:outline-none border-[var(--theme-status-danger-border)] transition-colors resize-none h-24 placeholder:text-[var(--theme-text-secondary)]/50"
                         placeholder="Enter period-close reconciliation memo, supervisory sign-off notes, or auditor reference..."
                         aria-label="Period Close Reason"
                     />
@@ -74,7 +74,7 @@ export const FiscalCloseModal: React.FC<FiscalCloseModalProps> = ({
                     <button
                         onClick={handleConfirm}
                         disabled={lockReason.trim().length < 5 || isActionLoading}
-                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {isActionLoading && <Loader2 className="animate-spin" size={14} />}
                         <span>Confirm Period Lock</span>

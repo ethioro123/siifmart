@@ -28,7 +28,7 @@ export default function SendMessageModal({
                 <textarea
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-gray-900 dark:text-white mb-6 focus:border-[#2C5E3B] dark:focus:border-emerald-500 transition-all min-h-[150px] outline-none placeholder:text-gray-400"
+                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-gray-900 dark:text-white mb-6 focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] transition-all min-h-[150px] outline-none placeholder:text-gray-400"
                     placeholder="Type your communication here..."
                 />
                 <div className="flex justify-end gap-4">

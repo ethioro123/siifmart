@@ -335,10 +335,10 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 {/* Matched Product Summary & Live Preview */}
                                 {searchSku.trim() && (
                                     <div className="space-y-3">
-                                        <div className={`p-4 rounded-2xl border transition-colors ${matchedProduct ? 'bg-[var(--theme-accent)]/5 border-[var(--theme-accent)]/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
+                                        <div className={`p-4 rounded-2xl border transition-colors ${matchedProduct ? 'bg-[var(--theme-accent)]/5 border-[var(--theme-accent)]/20' : 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'}`}>
                                             <div className="flex flex-wrap gap-2 justify-between items-start">
                                                 <div>
-                                                    <h4 className={`text-sm font-semibold mb-1 ${matchedProduct ? 'text-[var(--theme-text-primary)]' : 'text-amber-700 dark:text-amber-400'}`}>
+                                                    <h4 className={`text-sm font-semibold mb-1 ${matchedProduct ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'}`}>
                                                         {matchedProduct ? matchedProduct.name : t('warehouse.noUniqueProductMatch')}
                                                     </h4>
                                                     <div className="flex flex-wrap gap-3 break-all text-xs font-mono tabular-nums tracking-wider">

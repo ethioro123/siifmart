@@ -22,7 +22,7 @@ const LOCATION_CATEGORIES: CategoryConfig[] = [
         types: ['Warehouse'],
         label: 'Warehouse',
         desc: 'Storage & Fulfillment',
-        dotColor: 'bg-blue-500',
+        dotColor: 'bg-[var(--theme-status-info-bg)]',
         shadowColor: 'shadow-[0_0_8px_rgba(59,130,246,0.3)]',
     },
     {
@@ -36,7 +36,7 @@ const LOCATION_CATEGORIES: CategoryConfig[] = [
         types: ['Store'],
         label: 'Retail Store',
         desc: 'Customer-facing',
-        dotColor: 'bg-emerald-600',
+        dotColor: 'bg-[var(--theme-status-success-bg)]',
         shadowColor: 'shadow-[0_0_8px_rgba(44,94,59,0.3)]',
     }
 ];

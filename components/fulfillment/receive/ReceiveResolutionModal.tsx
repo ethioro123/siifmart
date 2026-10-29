@@ -40,9 +40,9 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
                         <span>{t('warehouse.resolveUnknownBarcode')}:</span>
                         <span className="text-[var(--theme-text-primary)] font-mono px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-xs md:text-sm">{resolvingBarcode.barcode}</span>
                     </h3>
-                    <button 
-                        onClick={() => setResolvingBarcode(null)} 
-                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" 
+                    <button
+                        onClick={() => setResolvingBarcode(null)}
+                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                         aria-label="Close Resolution Modal"
                     >
                         <X size={20} />
@@ -56,7 +56,7 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
                             placeholder={t('warehouse.searchProductToMap')}
                             value={resolutionSearch}
                             onChange={(e) => setResolutionSearch(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs md:text-sm text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-mono min-h-[44px]"
+                            className="w-full pl-11 pr-4 py-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs md:text-sm text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)] font-mono min-h-[44px]"
                             aria-label="Search product to map"
                         />
                     </div>

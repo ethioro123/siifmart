@@ -93,22 +93,22 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
 
     return (
         <div className="space-y-5 sm:space-y-6">
-            <StaffProfileHeader 
-                employee={employee} sites={sites} isOwnProfile={isOwnProfile} canManageEmployees={canManageTarget} 
+            <StaffProfileHeader
+                employee={employee} sites={sites} isOwnProfile={isOwnProfile} canManageEmployees={canManageTarget}
                 canResetPassword={userRoleLevel > targetRoleLevel && !isTargetCEO} canTerminate={canTerminate} canDelete={canDelete}
                 canApprove={canApprove} onApprove={handleApprove}
                 isOnline={isOnline}
                 onPhotoRequest={onRequestPhotoChange || (() => profile.profilePhotoInputRef.current?.click())}
                 onIdCard={() => profile.setIdCardOpen(true)} onMessage={() => profile.setIsMessageModalOpen(true)}
-                onResetPassword={() => profile.setIsPasswordModalOpen(true)} 
+                onResetPassword={() => profile.setIsPasswordModalOpen(true)}
                 onTerminate={props.handleConfirmTermination || (() => {})} onDelete={() => {}}
                 photoInputRef={profile.profilePhotoInputRef} handleProfilePhotoSelect={profile.handleProfilePhotoSelect}
             />
 
             {employee.status === 'Pending Approval' && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="p-4 sm:p-5 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                             <AlertCircle size={18} />
                         </div>
                         <div>
@@ -122,7 +122,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                         <button
                             type="button"
                             onClick={handleApprove}
-                            className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer shadow-xs active:scale-[0.98]"
+                            className="h-10 px-4 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-semibold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer shadow-xs active:scale-[0.98]"
                         >
                             <CheckCircle size={15} />
                             <span>Approve Talent</span>
@@ -131,7 +131,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                 </div>
             )}
 
-            <StaffProfileNavigation 
+            <StaffProfileNavigation
                 activeProfileTab={profile.activeProfileTab} setActiveProfileTab={profile.setActiveProfileTab}
                 canViewPayroll={canViewPayroll}
             />

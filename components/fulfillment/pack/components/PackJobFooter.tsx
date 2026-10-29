@@ -67,7 +67,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                                 onClose();
                             }
                         }}
-                        className="min-h-[44px] px-3.5 md:px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
+                        className="min-h-[44px] px-3.5 md:px-4 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
                         title={t('common.delete') || 'Delete Job'}
                     >
                         <Trash2 size={14} />
@@ -127,7 +127,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                         type="button"
                         onClick={handleFinalComplete}
                         disabled={isSubmitting}
-                        className="min-h-[44px] px-6 md:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                        className="min-h-[44px] px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                     >
                         {isSubmitting ? (
                             <Loader2 size={16} className="animate-spin" />

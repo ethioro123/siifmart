@@ -30,7 +30,7 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
                     </h3>
                 </div>
                 {thresholdsDisabled && (
-                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1.5 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                    <span className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-bold uppercase tracking-wider flex items-center gap-1.5 bg-[var(--theme-status-warning-bg)] px-2.5 py-0.5 rounded-full border border-[var(--theme-status-warning-border)]">
                         <Lock size={11} /> Manager Access Required
                     </span>
                 )}
@@ -43,14 +43,14 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
                         Min Stock (Reorder Point)
                     </label>
                     <div className="flex items-center gap-1.5">
-                        <TrendingDown size={14} className="text-amber-500 shrink-0" />
+                        <TrendingDown size={14} className="text-[var(--theme-status-warning-text)] shrink-0" />
                         <input
                             type="number"
                             min="0"
                             {...register('minStock', { valueAsNumber: true })}
                             placeholder="e.g. 10"
                             disabled={thresholdsDisabled}
-                            className={`w-full bg-transparent text-sm font-mono font-bold text-amber-600 dark:text-amber-400 focus:outline-none ${
+                            className={`w-full bg-transparent text-sm font-mono font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] focus:outline-none ${
                                 thresholdsDisabled ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
                         />
@@ -64,14 +64,14 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
                         Max Stock (Capacity)
                     </label>
                     <div className="flex items-center gap-1.5">
-                        <TrendingUp size={14} className="text-emerald-500 shrink-0" />
+                        <TrendingUp size={14} className="text-[var(--theme-status-success-text)] shrink-0" />
                         <input
                             type="number"
                             min="0"
                             {...register('maxStock', { valueAsNumber: true })}
                             placeholder="e.g. 100"
                             disabled={thresholdsDisabled}
-                            className={`w-full bg-transparent text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400 focus:outline-none ${
+                            className={`w-full bg-transparent text-sm font-mono font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] focus:outline-none ${
                                 thresholdsDisabled ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
                         />
@@ -85,11 +85,11 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
                 <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-2">
                     <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
                         {isLow ? (
-                            <span className="text-red-500 flex items-center gap-1">
+                            <span className="text-[var(--theme-status-danger-text)] flex items-center gap-1">
                                 <AlertTriangle size={12} className="shrink-0" /> Below Min — Triggers Replenishment
                             </span>
                         ) : isOptimal ? (
-                            <span className="text-emerald-500 flex items-center gap-1">
+                            <span className="text-[var(--theme-status-success-text)] flex items-center gap-1">
                                 <CheckCircle size={12} className="shrink-0" /> Optimal Stock Range
                             </span>
                         ) : (
@@ -105,7 +105,7 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
                         <div className="w-full h-1.5 bg-[var(--theme-bg-card)] rounded-full overflow-hidden border border-[var(--theme-border)]">
                             <div
                                 className={`h-full rounded-full transition-all duration-500 ${
-                                    isLow ? 'bg-red-500' : stockPct > 80 ? 'bg-emerald-500' : 'bg-amber-500'
+                                    isLow ? 'bg-[var(--theme-status-danger-bg)]' : stockPct > 80 ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-status-warning-bg)]'
                                 }`}
                                 style={{ width: `${Math.min(100, Math.max(0, stockPct))}%` }}
                             />

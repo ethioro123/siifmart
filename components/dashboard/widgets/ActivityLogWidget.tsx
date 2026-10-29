@@ -16,7 +16,7 @@ export const ActivityLogWidget = ({ logs }: ActivityLogWidgetProps) => {
                     <Activity className="text-[var(--theme-accent)]" size={16} />
                     Live System Activity
                 </h3>
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span className="w-2 h-2 bg-[var(--theme-status-success-bg)] rounded-full animate-pulse"></span>
             </div>
 
             <div className="space-y-3 overflow-y-auto custom-scrollbar pr-1 relative z-10">

@@ -188,7 +188,7 @@ export default function AdjustSalaryModal({
 
                 {/* Forbidden Governance Warning */}
                 {isForbidden && (
-                    <div className="p-3.5 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 rounded-xl border border-rose-200 dark:border-rose-900/40 text-xs flex items-start gap-2.5">
+                    <div className="p-3.5 bg-[var(--theme-status-danger-bg)] dark:bg-rose-950/30 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-xl border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] text-xs flex items-start gap-2.5">
                         <AlertCircle size={16} className="shrink-0 mt-0.5" />
                         <div>
                             <p className="font-bold">Action Prohibited Under Governance Rules</p>
@@ -203,14 +203,14 @@ export default function AdjustSalaryModal({
                         Proposed Monthly Salary ({currency}) *
                     </label>
                     <div className="relative">
-                        <DollarSign size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 dark:text-emerald-400" />
+                        <DollarSign size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                         <input
                             type="number"
                             step="any"
                             value={proposedSalaryStr}
                             onChange={(e) => handleInputChange(e.target.value)}
                             disabled={isForbidden}
-                            className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl pl-12 pr-4 py-3 text-stone-900 dark:text-white text-lg font-mono focus:border-emerald-600 dark:focus:border-emerald-500 outline-none placeholder:text-stone-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl pl-12 pr-4 py-3 text-stone-900 dark:text-white text-lg font-mono border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] outline-none placeholder:text-stone-400 disabled:opacity-50 disabled:cursor-not-allowed"
                             placeholder="0.00"
                             required
                         />
@@ -220,9 +220,9 @@ export default function AdjustSalaryModal({
                 {/* Delta Badge */}
                 {isValidAmount && diff !== 0 && (
                     <div className={`p-3 rounded-xl flex items-center justify-between text-xs font-bold border ${
-                        diff > 0 
-                            ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/30' 
-                            : 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/30'
+                        diff > 0
+                            ? 'bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]'
+                            : 'bg-[var(--theme-status-warning-bg)] dark:bg-amber-950/20 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)]'
                     }`}>
                         <div className="flex items-center gap-1.5">
                             {diff > 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
@@ -244,7 +244,7 @@ export default function AdjustSalaryModal({
                         onChange={(e) => { setReason(e.target.value); if (errorMessage) setErrorMessage(''); }}
                         disabled={isForbidden}
                         rows={3}
-                        className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl p-3 text-sm text-stone-900 dark:text-white focus:border-emerald-600 dark:focus:border-emerald-500 outline-none resize-none placeholder:text-stone-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl p-3 text-sm text-stone-900 dark:text-white border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] outline-none resize-none placeholder:text-stone-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="Provide formal rationale (e.g. annual merit review, promotion to lead, market benchmarking)..."
                         required
                     />
@@ -261,8 +261,8 @@ export default function AdjustSalaryModal({
                             type="button"
                             onClick={() => setDirectOverride(!directOverride)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                                directOverride 
-                                    ? 'bg-amber-600 text-white' 
+                                directOverride
+                                    ? 'bg-[var(--theme-status-warning-bg)] text-white'
                                     : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-stone-300'
                             }`}
                         >
@@ -272,8 +272,8 @@ export default function AdjustSalaryModal({
                 )}
 
                 {/* Policy Notice */}
-                <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/10 rounded-xl border border-emerald-200/50 dark:border-emerald-800/20 flex items-start gap-2.5 text-[11px] text-stone-600 dark:text-stone-400">
-                    <ShieldAlert size={15} className="text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <div className="p-3 bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/10 rounded-xl border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] flex items-start gap-2.5 text-[11px] text-stone-600 dark:text-stone-400">
+                    <ShieldAlert size={15} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0 mt-0.5" />
                     <span>
                         <strong>SOP-GOV-018 4-Eyes Policy:</strong> Salary adjustments cannot be applied unilaterally by HR. All requests require Country Finance Director or CEO co-signature before payroll sync.
                     </span>
@@ -281,7 +281,7 @@ export default function AdjustSalaryModal({
 
                 {/* Error Banner */}
                 {errorMessage && (
-                    <div className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 rounded-xl border border-rose-200 dark:border-rose-900 text-xs flex items-center gap-2">
+                    <div className="p-3 bg-[var(--theme-status-danger-bg)] dark:bg-rose-950/30 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-xl border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] text-xs flex items-center gap-2">
                         <AlertCircle size={15} />
                         <span>{errorMessage}</span>
                     </div>

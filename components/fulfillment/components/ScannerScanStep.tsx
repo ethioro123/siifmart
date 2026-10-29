@@ -151,7 +151,7 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                         >
                             <ArrowLeft size={14} /> Re-scan
                         </button>
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2 py-0.5 rounded-full border border-[var(--theme-status-success-border)]">
                             Barcode Verified
                         </span>
                     </div>
@@ -194,14 +194,14 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                         </div>
 
                         {enteredQty < currentItem.expectedQty && (
-                            <div className="mt-3 p-2 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-center gap-2 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+                            <div className="mt-3 p-2 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl flex items-center justify-center gap-2 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs font-semibold">
                                 <AlertTriangle size={14} />
                                 <span>Short pick: {enteredQty} of {currentItem.expectedQty} units</span>
                             </div>
                         )}
 
                         {qtyError && (
-                            <p className="text-xs font-semibold text-rose-500 mt-2">{qtyError}</p>
+                            <p className="text-xs font-semibold text-[var(--theme-status-danger-text)] mt-2">{qtyError}</p>
                         )}
                     </div>
 

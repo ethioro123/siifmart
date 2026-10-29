@@ -58,10 +58,10 @@ export const PointRuleModal: React.FC = () => {
                             }}
                             placeholder="e.g., Premium Electronics"
                             className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-colors ${
-                                ruleNameError ? 'border-red-500' : 'border-[var(--theme-border)]'
+                                ruleNameError ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'
                             }`}
                         />
-                        {ruleNameError && <p className="text-[10px] text-red-500 mt-0.5">Rule name is required</p>}
+                        {ruleNameError && <p className="text-[10px] text-[var(--theme-status-danger-text)] mt-0.5">Rule name is required</p>}
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-semibold text-[var(--theme-text-primary)] block">

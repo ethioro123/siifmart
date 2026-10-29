@@ -359,8 +359,8 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                     setWaveProducts([]);
                                 }}
                                 className={`w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm focus:outline-none touch-manipulation ${
-                                    isRestricted 
-                                        ? 'text-[var(--theme-text-secondary)] opacity-60 cursor-not-allowed' 
+                                    isRestricted
+                                        ? 'text-[var(--theme-text-secondary)] opacity-60 cursor-not-allowed'
                                         : 'text-[var(--theme-text-primary)] focus:border-primary'
                                 }`}
                                 aria-label="Select Distribution Source"
@@ -380,11 +380,11 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         </div>
 
                         {isCrossZone && settings?.enforceRegionalZoning && ['group_ceo', 'country_managing_director', 'regional_operations_manager', 'country_operations_director', 'country_supply_chain_director'].includes(user?.role || '') && (
-                             <div className="bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-4 rounded-xl flex items-start gap-3">
-                                 <AlertTriangle className="shrink-0 mt-0.5 text-amber-500" size={18} />
+                             <div className="bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] p-4 rounded-xl flex items-start gap-3">
+                                 <AlertTriangle className="shrink-0 mt-0.5 text-[var(--theme-status-warning-text)]" size={18} />
                                  <div>
-                                     <h4 className="font-bold text-sm text-amber-700 dark:text-amber-400">Cross-Zone Allocation Override</h4>
-                                     <p className="text-xs mt-1 text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+                                     <h4 className="font-bold text-sm text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">Cross-Zone Allocation Override</h4>
+                                     <p className="text-xs mt-1 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] leading-relaxed">
                                          You are distributing stock from <span className="font-bold text-[var(--theme-text-primary)]">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to stores in different Logistics Zones: {crossZoneStores.map(s => `${s.name} (${getZoneName(s.logisticsZoneId)})`).join(', ')}. Emergency leadership authorization active.
                                      </p>
                                  </div>

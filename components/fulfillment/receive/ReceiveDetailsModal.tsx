@@ -127,9 +127,9 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                             </p>
                         </div>
                     </div>
-                    <button 
-                        onClick={onClose} 
-                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" 
+                    <button
+                        onClick={onClose}
+                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                         aria-label="Close details"
                     >
                         <X size={20} />
@@ -203,9 +203,9 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                                 </span>
                                             )}
                                             {item.condition && (
-                                                <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${item.condition === 'Good' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' :
-                                                    item.condition === 'Damaged' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' :
-                                                        'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                                <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${item.condition === 'Good' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' :
+                                                    item.condition === 'Damaged' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' :
+                                                        'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                                     }`}>
                                                     {item.condition}
                                                 </span>
@@ -257,11 +257,11 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
 
                                 <div className="flex items-center gap-3 md:gap-5 flex-shrink-0 ml-2">
                                     <div className="text-right">
-                                        <p className={`text-[11px] uppercase font-semibold tracking-wider mb-1 ${isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? 'text-amber-600 dark:text-amber-400' : 'text-[var(--theme-text-secondary)]'}`}>
+                                        <p className={`text-[11px] uppercase font-semibold tracking-wider mb-1 ${isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-text-secondary)]'}`}>
                                             {t('warehouse.quantityToReceive')}{isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? ` (${t('warehouse.blindAudit') || 'Blind'})` : ''}
                                         </p>
                                         {isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? (
-                                            <p className="text-base md:text-lg font-bold text-amber-600 dark:text-amber-400 tabular-nums font-mono leading-none tracking-widest">
+                                            <p className="text-base md:text-lg font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] tabular-nums font-mono leading-none tracking-widest">
                                                 ***
                                             </p>
                                         ) : (

@@ -129,18 +129,18 @@ export default function AuditSettings() {
     const getLevelBadge = (module: string) => {
         switch ((module || '').toLowerCase()) {
             case 'system':
-                return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
+                return 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]';
             case 'compliance':
             case 'security':
-                return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+                return 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
             case 'inventory':
             case 'wms':
-                return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+                return 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';
             case 'hr':
                 return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
             case 'finance':
             case 'pos':
-                return 'bg-blue-500/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-blue-500/20';
+                return 'bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-status-info-border)]';
             default:
                 return 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]';
         }
@@ -176,7 +176,7 @@ export default function AuditSettings() {
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
                         <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">System Audit Log</h4>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center gap-1">
                             <ShieldCheck size={11} /> Immutable Ledger
                         </span>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">

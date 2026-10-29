@@ -46,8 +46,8 @@ export function SiteCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className={`w-2 h-2 rounded-full shrink-0 ${
-              site.status === 'Active' ? 'bg-emerald-500' :
-              site.status === 'Maintenance' ? 'bg-amber-500' : 'bg-red-500'
+              site.status === 'Active' ? 'bg-[var(--theme-status-success-bg)]' :
+              site.status === 'Maintenance' ? 'bg-[var(--theme-status-warning-bg)]' : 'bg-[var(--theme-status-danger-bg)]'
             }`} />
             <h6 className="text-[var(--theme-text-primary)] font-semibold text-xs leading-tight truncate" title={site.name}>
               {site.name}
@@ -106,8 +106,8 @@ export function SiteCard({
             <div>
               <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Status</span>
               <span className={`font-semibold mt-0.5 block ${
-                site.status === 'Active' ? 'text-emerald-600 dark:text-emerald-400' :
-                site.status === 'Maintenance' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'
+                site.status === 'Active' ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' :
+                site.status === 'Maintenance' ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
               }`}>{site.status}</span>
             </div>
           </div>
@@ -184,7 +184,7 @@ export function SiteCard({
             ) : (
               <button
                 onClick={() => handleDeleteSite(site.id)}
-                className="h-8 px-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
+                className="h-8 px-3 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-lg text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
                 title="Delete Location"
                 disabled={isDeleting}
               >

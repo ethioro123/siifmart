@@ -103,7 +103,7 @@ export const ExpensesTab: React.FC = () => {
                             <h3 className="font-semibold text-sm text-[var(--theme-text-primary)]">
                                 Operational Expenses Ledger
                             </h3>
-                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-medium">
                                 <ShieldCheck size={12} />
                                 <span>Zero-Trust 4-Eyes</span>
                             </div>
@@ -144,7 +144,7 @@ export const ExpensesTab: React.FC = () => {
                     <button
                         onClick={() => setIsAddExpenseOpen(true)}
                         type="button"
-                        className="bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white px-3.5 min-h-11 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-stretch sm:self-start md:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white px-3.5 min-h-11 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0 self-stretch sm:self-start md:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         <Plus size={15} />
                         <span>Log Expense Request</span>
@@ -236,23 +236,23 @@ export const ExpensesTab: React.FC = () => {
                                                         {exp.description}
                                                     </span>
                                                     {isCeoEscalated ? (
-                                                        <span className="inline-flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium mt-0.5">
-                                                            <Crown size={12} className="text-amber-500 shrink-0" />
+                                                        <span className="inline-flex items-center gap-1 text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium mt-0.5">
+                                                            <Crown size={12} className="text-[var(--theme-status-warning-text)] shrink-0" />
                                                             <span>Escalated to Group HQ (&gt; 20M)</span>
                                                         </span>
                                                     ) : isRegionalEscalated ? (
-                                                        <span className="inline-flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 font-medium mt-0.5">
-                                                            <ShieldCheck size={12} className="text-blue-500 shrink-0" />
+                                                        <span className="inline-flex items-center gap-1 text-[11px] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] font-medium mt-0.5">
+                                                            <ShieldCheck size={12} className="text-[var(--theme-status-info-text)] shrink-0" />
                                                             <span>Country Sign-Off Required (&gt; 2M)</span>
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
-                                                            <ShieldCheck size={12} className="text-emerald-500 shrink-0" />
+                                                        <span className="inline-flex items-center gap-1 text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium mt-0.5">
+                                                            <ShieldCheck size={12} className="text-[var(--theme-status-success-text)] shrink-0" />
                                                             <span>Regional Autonomous (≤ 2M)</span>
                                                         </span>
                                                     )}
                                                     {exp.voidReason && (
-                                                        <span className="text-[11px] text-rose-500 dark:text-rose-400 italic mt-0.5">
+                                                        <span className="text-[11px] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] italic mt-0.5">
                                                             Void Reason: {exp.voidReason}
                                                         </span>
                                                     )}
@@ -264,14 +264,14 @@ export const ExpensesTab: React.FC = () => {
                                             <td className="py-3.5 px-4 text-center whitespace-nowrap">
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
                                                     exp.status === 'Paid'
-                                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                                         : exp.status === 'Approved'
-                                                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                                                            ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                                                             : exp.status === 'Pending'
-                                                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                                                ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                                                 : exp.status === 'Voided'
                                                                     ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
-                                                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                                                    : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                                 }`}>
                                                     {exp.status === 'Paid' && <CheckCircle2 size={11} />}
                                                     {exp.status === 'Approved' && <CheckCircle2 size={11} />}
@@ -286,14 +286,14 @@ export const ExpensesTab: React.FC = () => {
                                                     {exp.createdByName || 'Staff Member'}
                                                 </span>
                                                 {isCreator && (
-                                                    <span className="ml-1 text-[10px] text-[#0071E3] dark:text-[#2997FF] font-mono font-medium">
+                                                    <span className="ml-1 text-[10px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-mono font-medium">
                                                         (You)
                                                     </span>
                                                 )}
                                             </td>
                                             <td className="py-3.5 px-4 text-xs whitespace-nowrap">
                                                 {exp.approvedBy ? (
-                                                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                                                    <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium">
                                                         {exp.approvedBy}
                                                     </span>
                                                 ) : (
@@ -323,7 +323,7 @@ export const ExpensesTab: React.FC = () => {
                                                                 className={`min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)] ${
                                                                     approveDisabled
                                                                         ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/40 cursor-not-allowed'
-                                                                        : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                                        : 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                                                 }`}
                                                                 title={approveTooltip}
                                                                 aria-label="Approve Expense"
@@ -333,7 +333,7 @@ export const ExpensesTab: React.FC = () => {
                                                             <button
                                                                 onClick={() => handleRejectExpense(exp.id)}
                                                                 disabled={isSubmitting}
-                                                                className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                                                                className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                                                                 title="Reject Expense"
                                                                 aria-label="Reject Expense"
                                                             >
@@ -347,7 +347,7 @@ export const ExpensesTab: React.FC = () => {
                                                         <button
                                                             onClick={() => handleTriggerVoidExpense(exp)}
                                                             disabled={isSubmitting}
-                                                            className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg hover:bg-amber-500/10 text-[var(--theme-text-secondary)] hover:text-amber-600 dark:hover:text-amber-400 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                                                            className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-secondary)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                                                             title="Void Expense (Audit Reason Required)"
                                                             aria-label="Void Expense"
                                                         >

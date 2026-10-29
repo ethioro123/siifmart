@@ -17,7 +17,7 @@ export function EthiopiaGatewaysPanel({
             <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] flex items-center justify-center font-bold text-xs">
                             TB
                         </div>
                         <div>

@@ -58,7 +58,7 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
     if (step === 'QUANTITY') {
         return (
             <div className="text-center z-10 mb-1 sm:mb-6 w-full max-w-2xl px-2">
-                <p className="text-amber-600 dark:text-amber-400 text-xs sm:text-base uppercase tracking-wider font-bold">
+                <p className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs sm:text-base uppercase tracking-wider font-bold">
                     {t('warehouse.picking.enterPhysicalQtyPicked') || 'Enter the physical quantity picked'}
                 </p>
                 <ProductIdentity item={currentItem} product={currentProduct} t={t} />
@@ -101,11 +101,11 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
                         type="button"
                         onClick={() => setShortPickMode(!shortPickMode)}
                         className={`min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors border flex items-center justify-center gap-1.5 mx-auto ${shortPickMode
-                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
-                            : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-amber-600 hover:border-amber-400/40'
+                            ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
+                            : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                             }`}
                     >
-                        <AlertTriangle size={14} className={shortPickMode ? 'text-amber-500' : 'text-[var(--theme-text-secondary)]'} />
+                        <AlertTriangle size={14} className={shortPickMode ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-text-secondary)]'} />
                         <span>{shortPickMode ? t('warehouse.picking.shortPickModeOn') : t('warehouse.shortPick')}</span>
                     </button>
                 </div>
@@ -123,7 +123,7 @@ const ProductIdentity: React.FC<{ item: any; product?: Product; matched?: boolea
                     : <Package size={30} className="text-[var(--theme-text-secondary)] sm:w-12 sm:h-12" aria-hidden="true" />}
             </div>
             <div className="w-full min-w-0">
-                <h2 className={`text-xl sm:text-4xl md:text-5xl leading-tight font-bold break-words line-clamp-2 ${matched ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'}`}>
+                <h2 className={`text-xl sm:text-4xl md:text-5xl leading-tight font-bold break-words line-clamp-2 ${matched ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-primary)]'}`}>
                     {item?.name || product?.name || t('warehouse.picking.unknownProduct') || 'Unknown product'}
                 </h2>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -131,7 +131,7 @@ const ProductIdentity: React.FC<{ item: any; product?: Product; matched?: boolea
                         {item?.sku || product?.sku || t('warehouse.picking.noSKU') || 'No SKU'}
                     </span>
                     {formatProductSize(product || item) && (
-                        <span className="inline-flex min-h-8 items-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 text-xs sm:text-base font-semibold text-emerald-700 dark:text-emerald-400">
+                        <span className="inline-flex min-h-8 items-center rounded-lg bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] px-2.5 text-xs sm:text-base font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                             {formatProductSize(product || item)}
                         </span>
                     )}

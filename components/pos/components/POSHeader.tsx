@@ -89,7 +89,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                     {!searchTerm && (
                         <div className="hidden sm:flex items-center gap-1.5">
                             <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono font-medium text-[var(--theme-text-muted)] select-none">
-                                <ScanBarcode size={11} className="text-blue-500" />
+                                <ScanBarcode size={11} className="text-[var(--theme-status-info-text)]" />
                                 <span>{t('pos.scan')}</span>
                             </div>
                             <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono font-medium text-[var(--theme-text-muted)] select-none">
@@ -106,7 +106,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 {/* Unknown Barcode Alert */}
                 {unknownBarcode && (
                     <div role="alert" className="absolute left-0 right-0 top-full mt-2 z-50">
-                        <div className="bg-[var(--theme-bg-card)] border border-amber-500/30 rounded-2xl p-4 shadow-lg animate-in fade-in slide-in-from-top-2">
+                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] rounded-2xl p-4 shadow-lg animate-in fade-in slide-in-from-top-2">
                             <button
                                 type="button"
                                 onClick={() => setUnknownBarcode('')}
@@ -117,7 +117,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                             </button>
                             <div className="flex flex-col items-center gap-3">
                                 <div className="text-center">
-                                    <p className="text-amber-500 text-xs font-semibold mb-1">{t('pos.unknownBarcodeDetected')}</p>
+                                    <p className="text-[var(--theme-status-warning-text)] text-xs font-semibold mb-1">{t('pos.unknownBarcodeDetected')}</p>
                                     <p className="text-[var(--theme-text-primary)] text-xl font-mono font-bold tracking-wider">{unknownBarcode}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -171,20 +171,20 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                     onClick={() => triggerSync()}
                     aria-label={`Sync point of sale${posSyncStatus === 'offline' ? ', offline' : posSyncStatus === 'syncing' ? ', syncing' : (posPendingSyncCount || 0) > 0 ? `, ${posPendingSyncCount} pending` : ', online'}`}
                     className={`min-h-11 flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold border transition-all tracking-tight shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${posSyncStatus === 'offline' ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)]' :
-                        posSyncStatus === 'syncing' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
-                            (posPendingSyncCount || 0) > 0 ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
+                        posSyncStatus === 'syncing' ? 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)]' :
+                            (posPendingSyncCount || 0) > 0 ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]' :
                                 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                          }`}
                     title={posLatencyMs ? `Server Latency: ${posLatencyMs}ms (Click to force sync)` : 'Click to force sync'}
                 >
                     {posSyncStatus === 'syncing' ? (
-                        <RefreshCw size={13} className="animate-spin text-blue-500" />
+                        <RefreshCw size={13} className="animate-spin text-[var(--theme-status-info-text)]" />
                     ) : posSyncStatus === 'offline' ? (
-                        <WifiOff size={13} className="text-rose-500" />
+                        <WifiOff size={13} className="text-[var(--theme-status-danger-text)]" />
                     ) : (posPendingSyncCount || 0) > 0 ? (
-                        <CloudOff size={13} className="text-amber-500" />
+                        <CloudOff size={13} className="text-[var(--theme-status-warning-text)]" />
                     ) : (
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                        <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success-bg)] shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                     )}
                     <span className="hidden lg:inline text-[11px] font-medium">
                         {posSyncStatus === 'offline' ? t('pos.offline') :
@@ -205,7 +205,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
             {settings.posBonusEnabled !== false && currentStorePoints && storeBonus && (
                 <div className="relative group hidden lg:block shrink-0">
                     <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border-subtle)] rounded-full px-3.5 py-2 text-xs font-semibold text-[var(--theme-text-primary)] cursor-pointer transition-all shadow-2xs">
-                        <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                        <div className="w-5 h-5 rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                             <Trophy size={13} />
                         </div>
                         <span className="font-mono tabular-nums text-[11px] tracking-tight">{currentStorePoints.monthlyPoints.toLocaleString()} {t('pos.pts')}</span>

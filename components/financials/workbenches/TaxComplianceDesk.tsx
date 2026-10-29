@@ -44,7 +44,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
             {/* Header Card */}
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-wrap justify-between items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <FileCheck size={20} />
                     </div>
                     <div>
@@ -58,7 +58,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold font-mono">
+                    <span className="px-2.5 py-1 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 text-[11px] font-semibold font-mono">
                         {authorityName}
                     </span>
                     {isManager ? (
@@ -67,7 +67,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                             <span>Checker • Statutory Sign-Off</span>
                         </span>
                     ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 text-[11px] font-semibold">
                             <Clock size={12} />
                             <span>Maker • Draft Compilation</span>
                         </span>
@@ -81,7 +81,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Output VAT Collected
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-rose-600 dark:text-rose-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] mt-1">
                         +{currencySymbol} 142,500
                     </div>
                     <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
@@ -93,10 +93,10 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Input VAT Tax Credits
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1">
                         -{currencySymbol} 68,200
                     </div>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 block">
+                    <span className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1 block">
                         Verified supplier procurement receipts
                     </span>
                 </div>
@@ -108,7 +108,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                     <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)] mt-1">
                         {currencySymbol} 74,300
                     </div>
-                    <span className="text-[11px] text-[#0071E3] dark:text-[#2997FF] mt-1 block">
+                    <span className="text-[11px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] mt-1 block">
                         {returnStatus === 'certified'
                             ? 'Statutorily Certified for Sovereign Remittance'
                             : returnStatus === 'submitted'
@@ -138,7 +138,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                                 disabled={returnStatus === 'certified'}
                                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                     returnStatus === 'certified'
-                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 opacity-80 cursor-default'
+                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] opacity-80 cursor-default'
                                         : 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
                                 }`}
                                 title="Country Finance Director supervisory authority to certify statutory sovereign tax filing"
@@ -153,8 +153,8 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                                 disabled={returnStatus !== 'draft'}
                                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                     returnStatus === 'draft'
-                                        ? 'bg-[#0071E3] hover:bg-[#0077ED] text-white cursor-pointer'
-                                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 opacity-80 cursor-default'
+                                        ? 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white cursor-pointer'
+                                        : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] opacity-80 cursor-default'
                                 }`}
                             >
                                 <Send size={13} />
@@ -174,7 +174,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                 <div className="p-4 space-y-3 text-xs">
                     <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                            <ShieldCheck size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <ShieldCheck size={16} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0" />
                             <div>
                                 <span className="font-semibold text-[var(--theme-text-primary)] block">
                                     Electronic Fiscal Device (EFD / TIMS) Checksum Handshake
@@ -184,14 +184,14 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                                 </span>
                             </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] font-mono">
                             100% MATCHED
                         </span>
                     </div>
 
                     <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                            <CheckCircle2 size={16} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                            <CheckCircle2 size={16} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                             <div>
                                 <span className="font-semibold text-[var(--theme-text-primary)] block">
                                     Vendor Withholding Tax (WHT) Credit Certificates
@@ -201,7 +201,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                                 </span>
                             </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 font-mono">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 font-mono">
                             VALIDATED
                         </span>
                     </div>

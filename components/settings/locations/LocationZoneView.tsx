@@ -26,7 +26,7 @@ export const LocationZoneView: React.FC<LocationZoneViewProps> = ({
                     >
                         <div className="flex flex-col gap-1 border-b border-[var(--theme-border)] pb-2.5">
                             <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                                <span className="w-2 h-2 rounded-full bg-[var(--theme-status-warning-bg)] shrink-0" />
                                 <h5 className="text-[var(--theme-text-primary)] font-semibold text-xs tracking-tight truncate" title={zone.name}>
                                     {zone.name}
                                 </h5>

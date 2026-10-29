@@ -133,10 +133,10 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                 <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-3">
-                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)] flex items-center justify-center">
                                 <BarChart3 size={20} />
                             </div>
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                                 telemetry
                             </span>
                         </div>
@@ -160,10 +160,10 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                 <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-3">
-                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center justify-center">
                                 <ShieldCheck size={20} />
                             </div>
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                 security
                             </span>
                         </div>
@@ -212,13 +212,13 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
 
                 {/* 4. Store Operations Auditor Pod */}
                 <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-1.5 h-full bg-amber-500" />
+                    <div className="absolute top-0 right-0 w-1.5 h-full bg-[var(--theme-status-warning-bg)]" />
                     <div>
                         <div className="flex items-center justify-between mb-3">
-                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] flex items-center justify-center">
                                 <ClipboardCheck size={20} />
                             </div>
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                 audit force
                             </span>
                         </div>
@@ -258,8 +258,8 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                     <span className="text-[11px] font-bold text-[var(--theme-text-secondary)]">
                         Zero-Trust Compliance:
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                        <CheckCircle2 size={13} className="text-emerald-500" /> Active
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
+                        <CheckCircle2 size={13} className="text-[var(--theme-status-success-text)]" /> Active
                     </span>
                 </div>
             </div>
@@ -337,10 +337,10 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                                         <td className="py-3 px-4 font-mono">
                                             <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                                                 audit.planogram_score >= 90
-                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                                                     : audit.planogram_score >= 75
-                                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
-                                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                                                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
+                                                    : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                                             }`}>
                                                 {audit.planogram_score}%
                                             </span>
@@ -351,8 +351,8 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                                                     audit.cash_variance === 0
                                                         ? 'text-[var(--theme-text-primary)]'
                                                         : audit.cash_variance > 0
-                                                        ? 'text-blue-500'
-                                                        : 'text-rose-500'
+                                                        ? 'text-[var(--theme-status-info-text)]'
+                                                        : 'text-[var(--theme-status-danger-text)]'
                                                 }`}>
                                                     {audit.cash_variance >= 0 ? `+${audit.cash_variance.toFixed(2)}` : audit.cash_variance.toFixed(2)} {currencySymbol}
                                                 </span>
@@ -362,22 +362,22 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                                         </td>
                                         <td className="py-3 px-4">
                                             {audit.halal_catalog_compliant ? (
-                                                <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                                                    <CheckCircle2 size={12} className="text-emerald-500" /> Compliant
+                                                <span className="inline-flex items-center gap-1 text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium">
+                                                    <CheckCircle2 size={12} className="text-[var(--theme-status-success-text)]" /> Compliant
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 text-[11px] text-rose-600 dark:text-rose-400 font-medium">
-                                                    <AlertTriangle size={12} className="text-rose-500" /> Violation
+                                                <span className="inline-flex items-center gap-1 text-[11px] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-medium">
+                                                    <AlertTriangle size={12} className="text-[var(--theme-status-danger-text)]" /> Violation
                                                 </span>
                                             )}
                                         </td>
                                         <td className="py-3 px-4">
                                             <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
                                                 audit.status === 'passed'
-                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                                                     : audit.status === 'action_required'
-                                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
-                                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                                                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
+                                                    : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                                             }`}>
                                                 {audit.status.replace(/_/g, ' ')}
                                             </span>

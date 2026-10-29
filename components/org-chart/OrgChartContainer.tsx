@@ -155,7 +155,7 @@ export const OrgChartContainer: React.FC<OrgChartContainerProps> = ({
     if (isLoading && (!employees || employees.length === 0)) {
         return (
             <div className="w-full h-96 flex flex-col items-center justify-center gap-3">
-                <Loader2 size={32} className="animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                <Loader2 size={32} className="animate-spin text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
                 <p className="text-xs font-semibold text-stone-500 dark:text-stone-400">
                     Loading organizational structure...
                 </p>

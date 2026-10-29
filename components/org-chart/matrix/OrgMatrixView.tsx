@@ -220,7 +220,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
             <div className={`w-full min-h-[400px] flex flex-col items-center justify-center p-8 rounded-2xl border text-center ${
                 isDark ? 'bg-[#18201B] border-[#2C4D35] text-stone-300' : 'bg-white border-[#E2DCCE] text-stone-600'
             }`}>
-                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-[var(--theme-status-warning-bg)] flex items-center justify-center text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mb-4">
                     <FilterX size={28} />
                 </div>
                 <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-1">
@@ -233,7 +233,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                     <button
                         type="button"
                         onClick={onResetFilters}
-                        className="px-4 py-2 text-xs font-bold rounded-xl bg-[#2C5E3B] hover:bg-[#1E3F27] text-white shadow-sm transition-all cursor-pointer"
+                        className="px-4 py-2 text-xs font-bold rounded-xl bg-[var(--theme-primary)] hover:bg-[#1E3F27] text-white shadow-sm transition-all cursor-pointer"
                     >
                         Reset All Matrix Filters
                     </button>
@@ -264,7 +264,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                             onClick={() => setGroupBy('department')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                 groupBy === 'department'
-                                    ? 'bg-[#2C5E3B] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-primary)] text-white shadow-xs'
                                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                             }`}
                         >
@@ -276,7 +276,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                             onClick={() => setGroupBy('level')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                 groupBy === 'level'
-                                    ? 'bg-[#2C5E3B] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-primary)] text-white shadow-xs'
                                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                             }`}
                         >
@@ -288,7 +288,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                             onClick={() => setGroupBy('site')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                 groupBy === 'site'
-                                    ? 'bg-[#2C5E3B] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-primary)] text-white shadow-xs'
                                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                             }`}
                         >
@@ -349,7 +349,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                                         <button
                                             type="button"
                                             onClick={onOpenAddEmployee}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 transition-colors cursor-pointer"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-[var(--theme-primary)]/10 hover:bg-[var(--theme-primary)]/20 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]/20 transition-colors cursor-pointer"
                                             title={`Add new member to ${dept.label}`}
                                         >
                                             <UserPlus size={13} />
@@ -448,7 +448,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                                 subtitle={`${siteEmps.filter(e => e.status === 'Active').length} active personnel`}
                                 count={siteEmps.length}
                                 icon={
-                                    <div className="w-9 h-9 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 flex items-center justify-center shrink-0">
+                                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-primary)]/10 dark:bg-[#A9CBA2]/15 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]/20 flex items-center justify-center shrink-0">
                                         <MapPin size={17} />
                                     </div>
                                 }

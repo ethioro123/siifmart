@@ -118,7 +118,7 @@ export const ShelfTagParityVerifier: React.FC<ShelfTagParityVerifierProps> = ({
                   </span>
                ) : (
                   <div className="flex items-center gap-1.5">
-                     <span className="text-amber-500 font-medium">Select Facility:</span>
+                     <span className="text-[var(--theme-status-warning-text)] font-medium">Select Facility:</span>
                      <select
                         onChange={(e) => onSelectFacility(e.target.value)}
                         className="px-2 py-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] text-xs text-[var(--theme-text-primary)]"
@@ -192,8 +192,8 @@ export const ShelfTagParityVerifier: React.FC<ShelfTagParityVerifierProps> = ({
          {auditResult && (
             <div className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-3 ${
                auditResult.status === 'MATCH'
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-rose-500/10 border-rose-500/30 text-rose-500 dark:text-rose-400'
+                  ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
+                  : 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
             }`}>
                <div className="flex items-center gap-2">
                   {auditResult.status === 'MATCH' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}

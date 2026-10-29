@@ -122,7 +122,7 @@ export default function DocumentsTab({
                                     </button>
                                     <button
                                         onClick={() => handleDeleteDocument(doc.id)}
-                                        className="p-2 rounded-xl text-[var(--theme-text-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                                        className="p-2 rounded-xl text-[var(--theme-text-muted)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] transition-colors cursor-pointer"
                                         title="Delete Document"
                                     >
                                         <Trash2 size={16} />

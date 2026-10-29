@@ -88,7 +88,7 @@ export default function AccessReviewTab() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <Shield size={20} />
                     </div>
                     <div>
@@ -102,7 +102,7 @@ export default function AccessReviewTab() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-semibold">
+                    <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-xs font-semibold">
                         {dormantCount} Dormant Accounts Flagged
                     </span>
                 </div>
@@ -112,7 +112,7 @@ export default function AccessReviewTab() {
             <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-[var(--shadow-sm)] space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--theme-border)] pb-3">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Landmark size={16} />
                         </div>
                         <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">
@@ -205,7 +205,7 @@ export default function AccessReviewTab() {
                         type="checkbox"
                         checked={filterDormantOnly}
                         onChange={(e) => setFilterDormantOnly(e.target.checked)}
-                        className="rounded border-[var(--theme-border)] text-[#0071E3] focus:ring-0"
+                        className="rounded border-[var(--theme-border)] text-[var(--theme-accent)] focus:ring-0"
                     />
                     <span>Dormant Only (&gt; 30 Days)</span>
                 </label>
@@ -252,11 +252,11 @@ export default function AccessReviewTab() {
                                             </td>
                                             <td className="py-3.5 px-4">
                                                 {rec.is_dormant ? (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[11px] font-semibold tracking-wide uppercase">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] text-[11px] font-semibold tracking-wide uppercase">
                                                         Dormant
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold tracking-wide uppercase">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-[11px] font-semibold tracking-wide uppercase">
                                                         Active
                                                     </span>
                                                 )}
@@ -264,7 +264,7 @@ export default function AccessReviewTab() {
                                             <td className="py-3.5 px-4 text-right">
                                                 {rec.is_dormant && (
                                                     isPending ? (
-                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[11px] font-semibold">
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-[11px] font-semibold">
                                                             <Clock size={12} />
                                                             Pending 4-Eyes Sign-Off
                                                         </span>
@@ -272,7 +272,7 @@ export default function AccessReviewTab() {
                                                         <button
                                                             type="button"
                                                             onClick={() => handleRequestDeactivation(rec.user_id, rec.name)}
-                                                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[11px] font-semibold cursor-pointer transition-all active:scale-[0.98]"
+                                                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] text-[11px] font-semibold cursor-pointer transition-all active:scale-[0.98]"
                                                         >
                                                             Request Deactivation
                                                         </button>

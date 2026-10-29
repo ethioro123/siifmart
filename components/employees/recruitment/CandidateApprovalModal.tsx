@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    X, ShieldCheck, CheckCircle2, Clock, AlertCircle, 
+import {
+    X, ShieldCheck, CheckCircle2, Clock, AlertCircle,
     Banknote, Sparkles, Building2, User, UserCheck, Flame
 } from 'lucide-react';
 import { recruitmentService } from '../../../services/recruitment.service';
@@ -168,11 +168,11 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                 Stage: {candidate.stage.toUpperCase()}
                             </span>
                             {isException ? (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1">
                                     <Flame size={11} /> Exception Path
                                 </span>
                             ) : (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1">
                                     <CheckCircle2 size={11} /> Delegated Fast-Path
                                 </span>
                             )}
@@ -192,7 +192,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
 
                 {/* Anti-Self-Approval Alert */}
                 {isOwnRecord && (
-                    <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
+                    <div className="p-3 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-2">
                         <AlertCircle size={15} className="shrink-0" />
                         <span>Separation of Duties: You cannot approve, clear, or confirm your own candidate profile.</span>
                     </div>
@@ -203,14 +203,14 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                     <div>
                         <span className="text-[var(--theme-text-muted)] block text-[10px] uppercase font-semibold">Location</span>
                         <span className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5 mt-0.5">
-                            <Building2 size={13} className="text-[#0071E3] dark:text-[#2997FF]" />
+                            <Building2 size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             {siteObj?.name || targetSiteId || 'Assigned Site'}
                         </span>
                     </div>
                     <div>
                         <span className="text-[var(--theme-text-muted)] block text-[10px] uppercase font-semibold">Target Position</span>
                         <span className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5 mt-0.5">
-                            <User size={13} className="text-[#0071E3] dark:text-[#2997FF]" />
+                            <User size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             {targetRole}
                         </span>
                     </div>
@@ -226,12 +226,12 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                 <div className="space-y-3">
                     {/* Step 1: HR Credentials & Salary Band Clearance */}
                     <div className={`p-4 rounded-2xl border transition-all ${
-                        hasHRApproval ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                        hasHRApproval ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
                     }`}>
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                    hasHRApproval ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-blue-500/10 text-[#0071E3]'
+                                    hasHRApproval ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)]'
                                 }`}>
                                     <ShieldCheck size={16} />
                                 </div>
@@ -245,12 +245,12 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                 </div>
                             </div>
                             {hasHRApproval ? (
-                                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <span className="text-[11px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1">
                                     <CheckCircle2 size={13} />
                                     <span>Cleared</span>
                                 </span>
                             ) : (
-                                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1">
                                     <Clock size={13} />
                                     <span>Pending</span>
                                 </span>
@@ -276,7 +276,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                             type="button"
                                             onClick={handleApproveHR}
                                             disabled={isProcessing}
-                                            className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                            className="h-8 px-3 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
                                         >
                                             <ShieldCheck size={14} />
                                             <span>Sign Off HR Clearance</span>
@@ -294,12 +294,12 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                     {/* Step 2 for Routine Hiring: Authorized Hiring Manager Confirmation */}
                     {!isException ? (
                         <div className={`p-4 rounded-2xl border transition-all ${
-                            hasManagerConfirm ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                            hasManagerConfirm ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
                         }`}>
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                        hasManagerConfirm ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-blue-500/10 text-[#0071E3]'
+                                        hasManagerConfirm ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)]'
                                     }`}>
                                         <UserCheck size={16} />
                                     </div>
@@ -313,12 +313,12 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                     </div>
                                 </div>
                                 {hasManagerConfirm ? (
-                                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                    <span className="text-[11px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1">
                                         <CheckCircle2 size={13} />
                                         <span>Confirmed</span>
                                     </span>
                                 ) : (
-                                    <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                    <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1">
                                         <Clock size={13} />
                                         <span>Pending</span>
                                     </span>
@@ -344,7 +344,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                                 type="button"
                                                 onClick={handleConfirmManager}
                                                 disabled={isProcessing || !hasHRApproval}
-                                                className="h-8 px-3 rounded-lg bg-[#0071E3] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                                className="h-8 px-3 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
                                             >
                                                 <UserCheck size={14} />
                                                 <span>Confirm Hiring Offer</span>
@@ -361,12 +361,12 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                     ) : (
                         /* Step 2 for Exception Hiring: Finance Budget & Salary Exception Clearance */
                         <div className={`p-4 rounded-2xl border transition-all ${
-                            hasFinanceApproval ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                            hasFinanceApproval ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
                         }`}>
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                        hasFinanceApproval ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-emerald-500/10 text-emerald-600'
+                                        hasFinanceApproval ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]'
                                     }`}>
                                         <Banknote size={16} />
                                     </div>
@@ -380,12 +380,12 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                     </div>
                                 </div>
                                 {hasFinanceApproval ? (
-                                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                    <span className="text-[11px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1">
                                         <CheckCircle2 size={13} />
                                         <span>Authorized</span>
                                     </span>
                                 ) : (
-                                    <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                    <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1">
                                         <Clock size={13} />
                                         <span>Pending</span>
                                     </span>
@@ -416,7 +416,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                                 type="button"
                                                 onClick={handleApproveFinance}
                                                 disabled={isProcessing}
-                                                className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                                className="h-8 px-3 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
                                             >
                                                 <Banknote size={14} />
                                                 <span>Authorize Salary & Exception</span>
@@ -435,8 +435,8 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
 
                 {/* Activation Banner / Controls */}
                 {candidate.stage === 'hired' ? (
-                    <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2.5">
-                        <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
+                    <div className="p-4 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-2.5">
+                        <CheckCircle2 size={18} className="shrink-0 text-[var(--theme-status-success-text)]" />
                         <div>
                             <p className="font-semibold">Worker Successfully Hired & Activated</p>
                             <p className="text-[11px] opacity-80 mt-0.5">
@@ -448,12 +448,12 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                     <div className="pt-2 border-t border-[var(--theme-border)] flex flex-col sm:flex-row items-center justify-between gap-3">
                         <div className="text-xs text-[var(--theme-text-secondary)]">
                             {canActivateHire ? (
-                                <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1.5">
+                                <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium flex items-center gap-1.5">
                                     <CheckCircle2 size={14} />
                                     <span>Governance requirements satisfied — ready for automatic activation.</span>
                                 </span>
                             ) : (
-                                <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                                <span className="flex items-center gap-1.5 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                                     <AlertCircle size={14} />
                                     <span>
                                         {isException
@@ -478,7 +478,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                     type="button"
                                     onClick={handleFinalizeActivation}
                                     disabled={isProcessing}
-                                    className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                                    className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
                                 >
                                     <Sparkles size={14} />
                                     <span>Finalize & Activate Employee</span>

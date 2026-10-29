@@ -70,8 +70,8 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
 
                     {/* Mobile Dot Numbers */}
                     <div className="flex sm:hidden items-center gap-2 px-2.5 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[11px] font-mono shrink-0">
-                        <span className="inline-flex items-center gap-1 text-amber-500 font-bold" title="Active">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        <span className="inline-flex items-center gap-1 text-[var(--theme-status-warning-text)] font-bold" title="Active">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-warning-bg)] animate-pulse" />
                             {filteredJobs.filter(j => j.type === 'TRANSFER' && !['Received', 'Cancelled'].includes(j.transferStatus || '')).length}
                         </span>
                     </div>
@@ -94,14 +94,14 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
             {/* Desktop Transfer Summary */}
             <div className="hidden sm:flex items-center gap-5 text-xs flex-wrap pt-3 border-t border-[var(--theme-border)]">
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    <span className="w-2 h-2 rounded-full bg-[var(--theme-status-warning-bg)]" />
                     <span className="text-[var(--theme-text-secondary)] font-medium">{t('warehouse.activeTransfers').split(' ')[0]}:</span>
                     <span className="font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
                         {filteredJobs.filter(j => j.type === 'TRANSFER' && !['Received', 'Cancelled'].includes(j.transferStatus || '')).length}
                     </span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-400" />
+                    <span className="w-2 h-2 rounded-full bg-[var(--theme-status-info-bg)]" />
                     <span className="text-[var(--theme-text-secondary)] font-medium">{t('warehouse.inTransitLabel')}:</span>
                     <span className="font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
                         {filteredJobs.filter(j => {
@@ -114,15 +114,15 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                     </span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-400" />
+                    <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success-bg)]" />
                     <span className="text-[var(--theme-text-secondary)] font-medium">{t('warehouse.completed')}:</span>
                     <span className="font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
                         {filteredJobs.filter(j => j.type === 'TRANSFER' && j.transferStatus === 'Received').length}
                     </span>
                 </div>
                 {filteredJobs.filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status) && (j.lineItems || []).some((item: any) => item.receivedQty !== undefined && item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) && !['Resolved', 'Completed'].includes(item.status))).length > 0 && (
-                    <div className="flex items-center gap-1.5 text-red-500 font-medium">
-                        <AlertTriangle size={14} className="text-red-500 shrink-0" />
+                    <div className="flex items-center gap-1.5 text-[var(--theme-status-danger-text)] font-medium">
+                        <AlertTriangle size={14} className="text-[var(--theme-status-danger-text)] shrink-0" />
                         <span>{t('warehouse.discrepancyCount')}:</span>
                         <span className="font-bold font-mono tabular-nums">
                             {filteredJobs.filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status) && (j.lineItems || []).some((item: any) => item.receivedQty !== undefined && item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) && !['Resolved', 'Completed'].includes(item.status))).length}

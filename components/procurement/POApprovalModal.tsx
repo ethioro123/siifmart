@@ -147,8 +147,8 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
           <div className="flex items-center gap-2.5">
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
               isApprove || isFinance || isRecommend
-                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
+                : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
             }`}>
               {isApprove || isFinance || isRecommend ? <ShieldCheck size={20} /> : <XCircle size={20} />}
             </div>
@@ -195,8 +195,8 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
                     className={`p-3 rounded-2xl border transition-all cursor-pointer ${
                       isSelected
                         ? isApprove
-                          ? 'bg-emerald-500/10 border-emerald-500/40 text-[var(--theme-text-primary)] shadow-xs'
-                          : 'bg-rose-500/10 border-rose-500/40 text-[var(--theme-text-primary)] shadow-xs'
+                          ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-text-primary)] shadow-xs'
+                          : 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-text-primary)] shadow-xs'
                         : 'bg-[var(--theme-bg-subtle)]/70 border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]'
                     }`}
                   >
@@ -205,8 +205,8 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
                       <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
                         isSelected
                           ? isApprove
-                            ? 'border-emerald-500 bg-emerald-500'
-                            : 'border-rose-500 bg-rose-500'
+                            ? 'border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)]'
+                            : 'border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)]'
                           : 'border-[var(--theme-border)]'
                       }`}>
                         {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -261,8 +261,8 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
               disabled={isSubmitting}
               className={`h-11 px-6 rounded-full text-xs font-semibold text-white shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer ${
                 isApprove || isFinance || isRecommend
-                  ? 'bg-emerald-600 hover:bg-emerald-700'
-                  : 'bg-rose-600 hover:bg-rose-700'
+                  ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)]'
+                  : 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)]'
               }`}
             >
               {isSubmitting

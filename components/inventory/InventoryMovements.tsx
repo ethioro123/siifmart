@@ -53,7 +53,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
             try {
                 const offset = (currentMovementsPage - 1) * MOVEMENTS_PER_PAGE;
 
-                // Enforce Visibility: 
+                // Enforce Visibility:
                 // 1. If HQ View + group_ceo -> Use dropdown filter
                 // 2. If Warehouse View -> ALWAYS use activeSite.id, regardless of dropdown (security)
                 let siteIdToQuery = activeSite?.id;
@@ -257,7 +257,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                                                 move.type === 'IN'
                                                     ? 'text-[#34C759] border-[#34C759]/20 bg-[#34C759]/10'
                                                     : move.type === 'OUT'
-                                                    ? 'text-[#0071E3] dark:text-[#2997FF] border-[#0071E3]/20 bg-[#0071E3]/10'
+                                                    ? 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-border-focus)]/20 bg-[var(--theme-accent)]/10'
                                                     : move.type === 'TRANSFER'
                                                     ? 'text-[#AF52DE] border-[#AF52DE]/20 bg-[#AF52DE]/10'
                                                     : 'text-[#FF9F0A] border-[#FF9F0A]/20 bg-[#FF9F0A]/10'

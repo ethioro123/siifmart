@@ -28,8 +28,8 @@ export const FulfillmentHeaderMetrics: React.FC<FulfillmentHeaderMetricsProps> =
         {
             value: pending,
             label: labels?.pending || 'Pending',
-            numColor: 'text-amber-600 dark:text-amber-400',
-            dotColor: 'bg-amber-500'
+            numColor: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
+            dotColor: 'bg-[var(--theme-status-warning-bg)]'
         },
         {
             value: active,
@@ -40,8 +40,8 @@ export const FulfillmentHeaderMetrics: React.FC<FulfillmentHeaderMetricsProps> =
         {
             value: completed,
             label: labels?.completed || 'Completed',
-            numColor: 'text-emerald-600 dark:text-emerald-400',
-            dotColor: 'bg-emerald-500'
+            numColor: 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]',
+            dotColor: 'bg-[var(--theme-status-success-bg)]'
         }
     ];
 

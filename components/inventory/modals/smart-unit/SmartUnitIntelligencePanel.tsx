@@ -30,10 +30,10 @@ export const SmartUnitIntelligencePanel: React.FC<SmartUnitIntelligencePanelProp
             <div className="bg-[var(--theme-bg-subtle)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-3 relative overflow-hidden">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Sparkles size={16} className="text-amber-500 animate-pulse" />
+                        <Sparkles size={16} className="text-[var(--theme-status-warning-text)] animate-pulse" />
                         <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Smart Intelligence</h4>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                         Auto-Detected
                     </span>
                 </div>
@@ -43,7 +43,7 @@ export const SmartUnitIntelligencePanel: React.FC<SmartUnitIntelligencePanelProp
                         {smartIntelligence?.autoConversionText}
                     </p>
                     {smartIntelligence?.subUnitRateText && (
-                        <p className="text-xs text-amber-600 dark:text-amber-400 font-bold font-mono">
+                        <p className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-bold font-mono">
                             = {smartIntelligence.subUnitRateText}
                         </p>
                     )}

@@ -48,7 +48,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                         </p>
                     </div>
                     <div className="text-right">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#2C5E3B] dark:text-[#A9CBA2] block">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--theme-primary)] dark:text-[#A9CBA2] block">
                             Payslip ID
                         </span>
                         <span className="font-mono text-xs font-bold text-stone-700 dark:text-stone-300">
@@ -73,7 +73,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                     </div>
                     <div>
                         <span className="text-stone-400 text-[10px] uppercase font-bold block">Pay Period</span>
-                        <span className="font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{payslip.period}</span>
+                        <span className="font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2]">{payslip.period}</span>
                     </div>
                 </div>
 
@@ -95,7 +95,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                                     {payslip.grossSalary.toLocaleString()}
                                 </td>
                                 <td className="p-3 font-semibold text-stone-800 dark:text-stone-200">Income Tax (PAYE 15%)</td>
-                                <td className="p-3 text-right font-mono text-red-600 dark:text-red-400 font-bold">
+                                <td className="p-3 text-right font-mono text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-bold">
                                     -{payslip.taxDeduction.toLocaleString()}
                                 </td>
                             </tr>
@@ -103,19 +103,19 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                                 <td className="p-3 text-stone-500">Allowances / Benefits</td>
                                 <td className="p-3 text-right font-mono text-stone-500">0</td>
                                 <td className="p-3 font-semibold text-stone-800 dark:text-stone-200">Pension Scheme (7%)</td>
-                                <td className="p-3 text-right font-mono text-red-600 dark:text-red-400 font-bold">
+                                <td className="p-3 text-right font-mono text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-bold">
                                     -{payslip.pensionDeduction.toLocaleString()}
                                 </td>
                             </tr>
                         </tbody>
                         <tfoot>
-                            <tr className="bg-emerald-50/70 dark:bg-emerald-950/20 border-t border-emerald-200 dark:border-emerald-800/40 font-bold text-sm">
+                            <tr className="bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 border-t border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] font-bold text-sm">
                                 <td className="p-3 text-[#1E3F27] dark:text-[#EAE5D9]">Total Gross Earnings</td>
                                 <td className="p-3 text-right font-mono text-[#1E3F27] dark:text-[#EAE5D9]">
                                     {currencySymbol} {payslip.grossSalary.toLocaleString()}
                                 </td>
-                                <td className="p-3 text-emerald-800 dark:text-emerald-200 font-black">Net Take-Home Pay</td>
-                                <td className="p-3 text-right font-mono text-lg font-black text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                <td className="p-3 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-black">Net Take-Home Pay</td>
+                                <td className="p-3 text-right font-mono text-lg font-black text-[var(--theme-primary)] dark:text-[#A9CBA2]">
                                     {currencySymbol} {payslip.netSalary.toLocaleString()}
                                 </td>
                             </tr>
@@ -126,7 +126,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                 {/* Status & Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-[#E2DCCE] dark:border-white/10">
                     <div className="flex items-center gap-2 text-xs text-stone-500">
-                        <CheckCircle2 size={16} className="text-emerald-600" />
+                        <CheckCircle2 size={16} className="text-[var(--theme-status-success-text)]" />
                         <span>Disbursed via Direct Bank Deposit • Released {payslip.releaseDate}</span>
                     </div>
 

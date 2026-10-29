@@ -94,21 +94,21 @@ export default function PayrollTab({
 
             {/* Pending Salary Request Alert */}
             {pendingRequest && (
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start sm:items-center justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-amber-500/15 text-amber-500">
+                        <div className="p-2 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]">
                             <Clock size={18} />
                         </div>
                         <div>
                             <p className="text-xs font-bold text-[var(--theme-text-primary)]">
-                                Pending Salary Adjustment: <span className="font-mono tabular-nums">{currencySymbol} {Number(pendingRequest.currentSalary).toLocaleString()}</span> → <span className="font-mono tabular-nums text-amber-500">{currencySymbol} {Number(pendingRequest.proposedSalary).toLocaleString()}</span>
+                                Pending Salary Adjustment: <span className="font-mono tabular-nums">{currencySymbol} {Number(pendingRequest.currentSalary).toLocaleString()}</span> → <span className="font-mono tabular-nums text-[var(--theme-status-warning-text)]">{currencySymbol} {Number(pendingRequest.proposedSalary).toLocaleString()}</span>
                             </p>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 Proposed by {pendingRequest.requestedBy} ({pendingRequest.requestedByRole}) • Awaiting Country Finance Director / CEO Authorization
                             </p>
                         </div>
                     </div>
-                    <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/25 shrink-0">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] shrink-0">
                         In Queue
                     </span>
                 </div>
@@ -139,7 +139,7 @@ export default function PayrollTab({
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelectPayslip(slip); }}
                         >
                             <div className="flex items-center gap-4">
-                                <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 group-hover:scale-105 transition-transform shrink-0">
+                                <div className="w-11 h-11 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] flex items-center justify-center text-[var(--theme-status-success-text)] group-hover:scale-105 transition-transform shrink-0">
                                     <DollarSign size={20} />
                                 </div>
                                 <div>

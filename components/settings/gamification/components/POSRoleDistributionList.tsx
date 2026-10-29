@@ -44,7 +44,7 @@ export const POSRoleDistributionList: React.FC<POSRoleDistributionListProps> = (
                             <button
                                 type="button"
                                 onClick={() => handleDeleteRole(role.id)}
-                                className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                                className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] transition-colors cursor-pointer"
                                 title={`Delete ${role.role}`}
                             >
                                 <Trash2 size={13} />

@@ -57,17 +57,17 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
 
     if (isFullyPacked) {
         return (
-            <div className="w-full max-w-3xl rounded-2xl sm:rounded-3xl border border-emerald-500/30 bg-emerald-500/10 p-5 sm:p-8 text-center">
-                <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
-                    <CheckCircle size={32} className="text-emerald-600 dark:text-emerald-400" />
+            <div className="w-full max-w-3xl rounded-2xl sm:rounded-3xl border border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] p-5 sm:p-8 text-center">
+                <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] flex items-center justify-center">
+                    <CheckCircle size={32} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                 </div>
-                <h1 className="mt-3 text-xl sm:text-3xl font-bold text-emerald-700 dark:text-emerald-300">
+                <h1 className="mt-3 text-xl sm:text-3xl font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                     {t('warehouse.packing.allItemsPacked') || 'All items packed'}
                 </h1>
                 <p className="mt-1 text-xs sm:text-base text-[var(--theme-text-secondary)]">
                     {t('warehouse.packing.continueToCartonWeighLabel') || 'Continue to carton, weigh and label steps.'}
                 </p>
-                <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 px-3 py-1 text-xs sm:text-sm font-mono font-semibold text-emerald-700 dark:text-emerald-300">
+                <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] px-3 py-1 text-xs sm:text-sm font-mono font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                     <CheckCircle size={14} />
                     {t('warehouse.packing.linesVerified') ? t('warehouse.packing.linesVerified').replace('{total}', String(totalLines)) : `${totalLines} job lines verified`}
                 </p>
@@ -88,14 +88,14 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                     role={showError ? 'alert' : 'status'}
                     className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 ${
                         showError
-                            ? 'border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300'
-                            : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                            ? 'border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
+                            : 'border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                     }`}
                 >
                     {showError ? (
-                        <AlertTriangle size={18} className="shrink-0 text-rose-600 dark:text-rose-400" />
+                        <AlertTriangle size={18} className="shrink-0 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]" />
                     ) : (
-                        <CheckCircle size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                        <CheckCircle size={18} className="shrink-0 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                     )}
                     <div className="min-w-0 flex-1">
                         <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">
@@ -113,7 +113,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                 <div
                     className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wider border ${
                         step === 'CONFIRM_QTY'
-                            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                            ? 'border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                             : 'border-[var(--theme-accent)]/25 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]'
                     }`}
                 >
@@ -174,7 +174,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                             </span>
                         )}
                         {sizeText && (
-                            <span className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-xs font-mono tabular-nums font-semibold text-emerald-700 dark:text-emerald-300">
+                            <span className="rounded-lg border border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] px-2 py-0.5 text-xs font-mono tabular-nums font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                 {sizeText}
                             </span>
                         )}
@@ -190,7 +190,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                             </span>
                         )}
                         {isFragile && (
-                            <span className="inline-flex items-center gap-1 rounded-lg border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
+                            <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] px-2 py-0.5 text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                                 <AlertTriangle size={12} />
                                 {t('warehouse.packing.fragile') || 'Fragile'}
                             </span>

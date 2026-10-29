@@ -43,14 +43,14 @@ export const RegionalQuotaRequestList: React.FC<RegionalQuotaRequestListProps> =
                   <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                     {req.siteName || req.siteId}
                   </span>
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                     {req.requestType === 'TEMPORARY_SURGE' ? 'Temporary Surge' : 'Permanent Expansion'}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3 text-[11px] text-[var(--theme-text-secondary)] flex-wrap">
                   <span>Quota: <strong className="text-[var(--theme-text-primary)]">{req.currentQuota} &rarr; {req.requestedQuota}</strong></span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">(+{req.increaseAmount} Slots)</span>
+                  <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">(+{req.increaseAmount} Slots)</span>
                   <span>• Submitted by {req.requestedBy}</span>
                   {req.requestedAt && (
                     <span>({new Date(req.requestedAt).toLocaleDateString()})</span>
@@ -70,19 +70,19 @@ export const RegionalQuotaRequestList: React.FC<RegionalQuotaRequestListProps> =
 
               <div className="shrink-0 self-start md:self-center">
                 {isPending && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-semibold text-xs">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] font-semibold text-xs">
                     <Clock className="w-3.5 h-3.5" />
                     <span>Awaiting HQ Authorization</span>
                   </div>
                 )}
                 {isApproved && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold text-xs">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] font-semibold text-xs">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Approved by HQ</span>
                   </div>
                 )}
                 {isRejected && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-semibold text-xs">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] font-semibold text-xs">
                     <XCircle className="w-3.5 h-3.5" />
                     <span>Declined by HQ</span>
                   </div>

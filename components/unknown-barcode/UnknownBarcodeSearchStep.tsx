@@ -42,7 +42,7 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                     type="text"
                     placeholder="Search product name or SKU..."
                     aria-label="Search products"
-                    className="w-full bg-white dark:bg-black/50 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-colors"
+                    className="w-full bg-white dark:bg-black/50 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-10 pr-4 py-3 text-[#1E3F27] dark:text-white focus:border-[var(--theme-border)] dark:focus:border-[#A9CBA2] focus:outline-none transition-colors"
                     value={searchTerm || ''}
                     onChange={e => setSearchTerm(e.target.value)}
                     onKeyDown={onKeyDown}
@@ -59,8 +59,8 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                             type="button"
                             onClick={() => setSelectedProduct(product)}
                             className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer ${selectedProduct?.id === product.id
-                                ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] dark:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2]'
-                                : 'bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-white/5 text-stone-700 dark:text-gray-300 hover:bg-white dark:hover:bg-[#18201B]/40 hover:border-[#2C5E3B]/30'
+                                ? 'bg-[var(--theme-primary)]/10 border-[var(--theme-border)] dark:border-[#A9CBA2] text-[var(--theme-primary)] dark:text-[#A9CBA2]'
+                                : 'bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-white/5 text-stone-700 dark:text-gray-300 hover:bg-white dark:hover:bg-[#18201B]/40 hover:border-[var(--theme-border)]/30'
                                 }`}
                         >
                             <div className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{product.name}</div>
@@ -68,9 +68,9 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                                 <span className="font-mono">{product.sku}</span>
                                 <div className="flex items-center gap-2">
                                     {isLocalStock ? (
-                                        <span className="px-2 py-0.5 bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] rounded text-[10px] font-bold">Store: {product.stock}</span>
+                                        <span className="px-2 py-0.5 bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] rounded text-[10px] font-bold">Store: {product.stock}</span>
                                     ) : (
-                                        <span className="px-2 py-0.5 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded text-[10px] font-bold">Global: {product.stock}</span>
+                                        <span className="px-2 py-0.5 bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] rounded text-[10px] font-bold">Global: {product.stock}</span>
                                     )}
                                 </div>
                             </div>
@@ -84,16 +84,16 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
 
             <div className="flex justify-between items-center pt-4 border-t border-[#E2DCCE] dark:border-white/5">
                 {selectedProduct ? (
-                    <div className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-semibold truncate max-w-[200px]">
+                    <div className="text-xs text-[var(--theme-primary)] dark:text-[#A9CBA2] font-semibold truncate max-w-[200px]">
                         Linking to: <b>{selectedProduct.name}</b>
                     </div>
                 ) : <div />}
-                
+
                 <div className="flex items-center gap-3">
                     <button
                         type="button"
                         onClick={onBack}
-                        className="px-4 py-2 text-stone-700 hover:text-[#2C5E3B] dark:text-gray-300 dark:hover:text-white font-bold text-sm transition-colors cursor-pointer"
+                        className="px-4 py-2 text-stone-700 hover:text-[var(--theme-primary)] dark:text-gray-300 dark:hover:text-white font-bold text-sm transition-colors cursor-pointer"
                     >
                         Back
                     </button>

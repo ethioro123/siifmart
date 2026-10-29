@@ -54,7 +54,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                         type="button"
                         onClick={onDelete}
                         title="Delete Jurisdiction"
-                        className="text-[var(--theme-text-secondary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg cursor-pointer"
+                        className="text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg cursor-pointer"
                     >
                         <Trash2 size={15} />
                     </button>
@@ -68,7 +68,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                     {assignedSites.length === 0 && (
-                        <span className="text-[11px] text-amber-600 dark:text-amber-400 italic">No locations linked</span>
+                        <span className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] italic">No locations linked</span>
                     )}
                     {assignedSites.map((s) => (
                         <span key={s.id} className="text-[11px] font-medium bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-2.5 py-1 rounded-lg text-[var(--theme-text-primary)] flex items-center gap-1.5 shadow-2xs">
@@ -77,7 +77,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                                 <button
                                     type="button"
                                     onClick={() => onUnassignSite(s.id)}
-                                    className="text-[var(--theme-text-secondary)] hover:text-red-500 cursor-pointer ml-0.5 p-0.5 rounded transition-colors"
+                                    className="text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] cursor-pointer ml-0.5 p-0.5 rounded transition-colors"
                                     title="Unassign"
                                 >
                                     <X size={11} />
@@ -115,7 +115,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                                     <button
                                         type="button"
                                         onClick={() => onDeleteRule(zone.id, idx)}
-                                        className="text-[var(--theme-text-secondary)] hover:text-red-500 cursor-pointer p-0.5 rounded transition-colors"
+                                        className="text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] cursor-pointer p-0.5 rounded transition-colors"
                                         title="Delete rule"
                                     >
                                         <X size={11} />

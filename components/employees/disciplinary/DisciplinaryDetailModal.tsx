@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { 
-    X, AlertTriangle, Scale, Clock, CheckCircle2, 
-    XCircle, Calendar, Shield, User, FileText, Lock 
+import {
+    X, AlertTriangle, Scale, Clock, CheckCircle2,
+    XCircle, Calendar, Shield, User, FileText, Lock
 } from 'lucide-react';
 import type { DisciplinaryRecord } from '../../../types/hr-advanced';
 
@@ -37,7 +37,7 @@ export function DisciplinaryDetailModal({
     const isExpired = record.expires_at ? new Date(record.expires_at) < new Date() : false;
 
     return (
-        <div 
+        <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
@@ -49,8 +49,8 @@ export function DisciplinaryDetailModal({
                     <div className="flex items-center gap-3">
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                             record.severity === 'Critical' || record.severity === 'High'
-                                ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                                ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
+                                : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                         }`}>
                             <Scale size={18} />
                         </div>
@@ -61,10 +61,10 @@ export function DisciplinaryDetailModal({
                                 </h3>
                                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${
                                     record.severity === 'Critical'
-                                        ? 'bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30'
+                                        ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                                         : record.severity === 'High'
                                         ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30'
-                                        : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                                        : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                 }`}>
                                     {record.severity} Severity
                                 </span>
@@ -125,7 +125,7 @@ export function DisciplinaryDetailModal({
                     {/* Mandated Corrective Action */}
                     <div className="space-y-1.5">
                         <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Mandated Sanction / Corrective Plan</span>
-                        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 font-medium">
+                        <div className="p-3 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium">
                             {record.action_taken}
                         </div>
                     </div>
@@ -141,12 +141,12 @@ export function DisciplinaryDetailModal({
                                     </span>
                                 )}
                                 {record.appeal_status === 'Upheld' && (
-                                    <span className="font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
+                                    <span className="font-bold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-1">
                                         <XCircle size={13} /> Sanction Upheld
                                     </span>
                                 )}
                                 {record.appeal_status === 'Overturned' && (
-                                    <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                    <span className="font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1">
                                         <CheckCircle2 size={13} /> Warning Overturned
                                     </span>
                                 )}
@@ -160,7 +160,7 @@ export function DisciplinaryDetailModal({
                             <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Validity Period</span>
                             <p className="mt-1 font-semibold text-[var(--theme-text-primary)]">
                                 {record.expires_at ? (
-                                    <span className={isExpired ? 'text-stone-400 line-through' : 'text-emerald-600 dark:text-emerald-400'}>
+                                    <span className={isExpired ? 'text-stone-400 line-through' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'}>
                                         {isExpired ? `Expired (${record.expires_at})` : `Expires: ${record.expires_at}`}
                                     </span>
                                 ) : (
@@ -209,7 +209,7 @@ export function DisciplinaryDetailModal({
                         {record.appeal_status === 'Pending Appeal' && canAdjudicate && (
                             <>
                                 {isIssuer ? (
-                                    <span className="text-[11px] text-amber-500 font-semibold px-2">
+                                    <span className="text-[11px] text-[var(--theme-status-warning-text)] font-semibold px-2">
                                         4-Eyes rule: As notice issuer, you cannot adjudicate
                                     </span>
                                 ) : (
@@ -220,7 +220,7 @@ export function DisciplinaryDetailModal({
                                                 onResolveAppeal(record.id, 'Overturned');
                                                 onClose();
                                             }}
-                                            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/30 transition-all cursor-pointer"
+                                            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] transition-all cursor-pointer"
                                         >
                                             Overturn Sanction
                                         </button>
@@ -230,7 +230,7 @@ export function DisciplinaryDetailModal({
                                                 onResolveAppeal(record.id, 'Upheld');
                                                 onClose();
                                             }}
-                                            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-xs transition-all cursor-pointer"
+                                            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] shadow-xs transition-all cursor-pointer"
                                         >
                                             Uphold Sanction
                                         </button>

@@ -35,7 +35,7 @@ export const PayrollHrCard: React.FC<PayrollHrCardProps> = ({
     <div
       className={`p-4 rounded-2xl border transition-all ${
         isHrSigned
-          ? 'bg-emerald-500/5 border-emerald-500/20'
+          ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
           : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
       }`}
     >
@@ -44,8 +44,8 @@ export const PayrollHrCard: React.FC<PayrollHrCardProps> = ({
           <div
             className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
               isHrSigned
-                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
+                : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
             }`}
           >
             <UserCheck size={18} />
@@ -60,20 +60,20 @@ export const PayrollHrCard: React.FC<PayrollHrCardProps> = ({
           </div>
         </div>
         {isHrSigned ? (
-          <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 shrink-0">
+          <span className="px-2.5 py-1 rounded-full bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 shrink-0">
             <CheckCircle2 size={12} /> Certified
           </span>
         ) : (
-          <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 shrink-0">
+          <span className="px-2.5 py-1 rounded-full bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 shrink-0">
             <Clock size={12} /> Pending HR
           </span>
         )}
       </div>
 
       {activeRun.regionalAttestedBy && (
-        <div className="mb-3 p-2.5 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs">
+        <div className="mb-3 p-2.5 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-xs">
           <div className="flex justify-between items-center text-[11px]">
-            <span className="text-[#0071E3] dark:text-[#2997FF] font-semibold flex items-center gap-1">
+            <span className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-semibold flex items-center gap-1">
               <CheckCircle2 size={12} /> Regional HR Audit Attested
             </span>
             <span className="font-mono text-[var(--theme-text-secondary)] text-[10px]">
@@ -117,7 +117,7 @@ export const PayrollHrCard: React.FC<PayrollHrCardProps> = ({
         <div className="mt-3 pt-3 border-t border-[var(--theme-border)]">
           {isHR ? (
             isCurrentUserFinanceSignatory && !isSuperAdminOrCeo ? (
-              <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5 font-medium">
+              <p className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1.5 font-medium">
                 <AlertTriangle size={14} className="shrink-0" />
                 Zero-Trust Notice: You already signed as Finance. A distinct HR officer must certify this department.
               </p>
@@ -134,7 +134,7 @@ export const PayrollHrCard: React.FC<PayrollHrCardProps> = ({
                   type="button"
                   onClick={handleSignHR}
                   disabled={isActionLoading}
-                  className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+                  className="w-full py-2 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-semibold rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
                 >
                   {isActionLoading ? <Loader2 size={13} className="animate-spin" /> : <UserCheck size={14} />}
                   Certify Roster as HR

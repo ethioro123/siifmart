@@ -103,7 +103,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                             {employee.department || 'Operations'} • {date}
                         </p>
                     </div>
-                    <div className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-800/40 text-xs font-bold font-mono">
+                    <div className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] text-xs font-bold font-mono">
                         {status === 'Cancelled' ? '0h' : `${hours}h`}
                     </div>
                 </div>
@@ -117,7 +117,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                         <button
                             type="button"
                             onClick={() => applyPreset('M')}
-                            className="p-2 rounded-xl border border-amber-300 dark:border-amber-700/50 bg-amber-500/10 text-amber-800 dark:text-amber-200 text-xs font-bold flex flex-col items-center gap-1 hover:bg-amber-500/20 cursor-pointer"
+                            className="p-2 rounded-xl border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs font-bold flex flex-col items-center gap-1 bg-[var(--theme-status-warning-bg)] cursor-pointer"
                         >
                             <Sun size={14} />
                             <span>Morning</span>
@@ -153,7 +153,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                 <div className="grid grid-cols-2 gap-3">
                     <div>
                         <label className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1 flex items-center gap-1">
-                            <Clock size={12} className="text-[#2C5E3B]" /> Start Time
+                            <Clock size={12} className="text-[var(--theme-primary)]" /> Start Time
                         </label>
                         <input
                             type="time"
@@ -165,7 +165,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                     </div>
                     <div>
                         <label className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1 flex items-center gap-1">
-                            <Clock size={12} className="text-[#2C5E3B]" /> End Time
+                            <Clock size={12} className="text-[var(--theme-primary)]" /> End Time
                         </label>
                         <input
                             type="time"

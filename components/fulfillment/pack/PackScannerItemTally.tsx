@@ -83,7 +83,7 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                                         </div>
                                     </div>
 
-                                    <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-lg">
+                                    <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] px-2 py-1 rounded-lg">
                                         {t('warehouse.packing.scanReady') || 'Scan Ready'}
                                     </span>
                                 </div>
@@ -98,10 +98,10 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                 <div>
                     <div className="flex items-center justify-between mb-1.5 px-1">
                         <h4 className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                            <CheckCircle size={13} className="text-emerald-500" />
+                            <CheckCircle size={13} className="text-[var(--theme-status-success-text)]" />
                             {t('warehouse.packing.packedItems') || 'Packed Items'}
                         </h4>
-                        <span className="text-[11px] font-mono tabular-nums font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                        <span className="text-[11px] font-mono tabular-nums font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2.5 py-0.5 rounded-full border border-[var(--theme-status-success-border)]">
                             {packedItems.length} / {totalItems}
                         </span>
                     </div>
@@ -117,13 +117,13 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                             return (
                                 <div
                                     key={`packed-${item.sku || idx}-${idx}`}
-                                    className="bg-[var(--theme-bg-card)] border border-emerald-500/20 rounded-xl p-2.5 flex items-center gap-2.5 shadow-2xs"
+                                    className="bg-[var(--theme-bg-card)] border border-[var(--theme-status-success-border)] rounded-xl p-2.5 flex items-center gap-2.5 shadow-2xs"
                                 >
-                                    <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden shrink-0">
+                                    <div className="w-9 h-9 rounded-lg bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] flex items-center justify-center overflow-hidden shrink-0">
                                         {product?.image ? (
                                              <img src={product.image} alt="" className="w-full h-full object-cover" />
                                         ) : (
-                                            <Package size={15} className="text-emerald-600 dark:text-emerald-400" />
+                                            <Package size={15} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                                         )}
                                     </div>
 
@@ -146,13 +146,13 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
                                     <div className="shrink-0 flex items-center gap-1.5">
                                         <span className={`text-xs font-mono tabular-nums font-bold px-2 py-0.5 rounded-md border whitespace-nowrap ${
                                             isDone
-                                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                                : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                         }`}>
                                             {packed} {t('warehouse.packing.packed') || 'packed'}
                                         </span>
                                         {isDone && (
-                                            <CheckCircle size={15} className="text-emerald-500 shrink-0" aria-label={t('warehouse.completed') || 'Done'} />
+                                            <CheckCircle size={15} className="text-[var(--theme-status-success-text)] shrink-0" aria-label={t('warehouse.completed') || 'Done'} />
                                         )}
                                     </div>
                                 </div>

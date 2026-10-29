@@ -72,7 +72,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
     // Compact version for sidebar/header
     if (compact) {
         return (
-            <div className="group relative flex items-center gap-3 bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 backdrop-blur-md border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/30 rounded-full py-1.5 pr-5 pl-1.5 transition-all duration-300 cursor-default">
+            <div className="group relative flex items-center gap-3 bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 backdrop-blur-md border border-[#E2DCCE] dark:border-white/5 hover:border-[var(--theme-border)]/30 rounded-full py-1.5 pr-5 pl-1.5 transition-all duration-300 cursor-default">
                 {/* Level Badge with Ring */}
                 <div className={`relative w-9 h-9 flex items-center justify-center`}>
                     <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${levelColor} opacity-20 animate-pulse`} />
@@ -84,7 +84,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                 <div className="flex flex-col gap-0.5">
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-sm font-bold text-[#1E3F27] dark:text-white leading-none tracking-tight">{points.totalPoints.toLocaleString()}</span>
-                        <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase tracking-wider">PTS</span>
+                        <span className="text-[10px] text-[var(--theme-primary)] dark:text-[#A9CBA2] font-bold uppercase tracking-wider">PTS</span>
                     </div>
                     {/* Micro Progress Bar */}
                     <div className="w-24 h-1 bg-stone-200 dark:bg-white/10 rounded-full overflow-hidden">
@@ -97,7 +97,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
 
                 {/* Rank Indicator (Subtle) */}
                 {points.rank <= 3 && (
-                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-yellow-400 flex items-center justify-center shadow-lg animate-bounce">
+                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[var(--theme-status-warning-bg)] flex items-center justify-center shadow-lg animate-bounce">
                         <Crown size={10} className="text-black" />
                     </div>
                 )}
@@ -131,8 +131,8 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
             <div className="relative overflow-hidden bg-gradient-to-br from-white via-stone-50 to-[#2C5E3B]/5 dark:from-[#18201B]/40 dark:via-[#18201B]/30 dark:to-emerald-950/20 rounded-2xl border border-[#E2DCCE] dark:border-white/10 shadow-sm">
                 {/* Animated background */}
                 <div className="absolute inset-0 opacity-30">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#2C5E3B]/10 rounded-full blur-3xl animate-pulse" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl animate-pulse [animation-delay:1s]" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--theme-primary)]/10 rounded-full blur-3xl animate-pulse" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-[var(--theme-status-success-bg)] rounded-full blur-3xl animate-pulse [animation-delay:1s]" />
                 </div>
 
                 <div className="relative p-6">
@@ -168,15 +168,15 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                         {/* Today's points */}
                         <div className="text-right">
                             <p className="text-xs text-gray-400 uppercase font-bold">Today</p>
-                            <p className="text-2xl font-black text-amber-600 dark:text-amber-400">+{points.todayPoints}</p>
+                            <p className="text-2xl font-black text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">+{points.todayPoints}</p>
                         </div>
                     </div>
 
                     {/* Total Points Display */}
-                    <div className="bg-[#2C5E3B]/5 dark:bg-black/30 rounded-xl p-4 mb-4 border border-[#2C5E3B]/10 dark:border-transparent">
+                    <div className="bg-[var(--theme-primary)]/5 dark:bg-black/30 rounded-xl p-4 mb-4 border border-[var(--theme-border)]/10 dark:border-transparent">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-[#4D6E56] dark:text-gray-400 text-sm font-bold uppercase flex items-center gap-2">
-                                <Sparkles size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Total Points
+                                <Sparkles size={16} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" /> Total Points
                             </span>
                             <span className="text-4xl font-black bg-gradient-to-r from-amber-600 to-amber-400 dark:from-amber-400 dark:to-yellow-300 text-transparent bg-clip-text">
                                 {points.totalPoints.toLocaleString()}
@@ -199,7 +199,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                             <p className="text-center text-xs text-stone-500 dark:text-gray-400">
                                 {levelInfo.pointsToNext > 0
                                     ? <><strong className="text-[#1E3F27] dark:text-white font-bold">{levelInfo.pointsToNext}</strong> points to reach <strong className="text-[#1E3F27] dark:text-white font-bold">{levelInfo.nextLevel.title}</strong></>
-                                    : <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">🎉 Maximum Level Achieved!</span>
+                                    : <span className="text-[var(--theme-primary)] dark:text-[#A9CBA2] font-bold">🎉 Maximum Level Achieved!</span>
                                 }
                             </p>
                         </div>
@@ -211,13 +211,13 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                             icon={<Package size={18} />}
                             label="Jobs Done"
                             value={points.totalJobsCompleted}
-                            color="text-blue-400"
+                            color="text-[var(--theme-status-info-text)]"
                         />
                         <StatCard
                             icon={<Target size={18} />}
                             label="Accuracy"
                             value={`${points.averageAccuracy}%`}
-                            color="text-green-400"
+                            color="text-[var(--theme-status-success-text)]"
                         />
                         <StatCard
                             icon={<Flame size={18} />}
@@ -242,7 +242,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
 
                     {/* Bonus Earnings Section */}
                     {showBonus && bonusInfo && (
-                        <div className="mt-4 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/5 rounded-xl border border-green-500/20">
+                        <div className="mt-4 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/5 rounded-xl border border-[var(--theme-status-success-border)]">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                     <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getBonusTierColor(bonusInfo.tier.tierColor)} flex items-center justify-center`}>
@@ -259,7 +259,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-2xl font-black text-emerald-700 dark:text-green-400">
+                                    <p className="text-2xl font-black text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                         {currency}{bonusInfo.bonus.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                     </p>
                                     <p className="text-[10px] text-[#4D6E56]/70 dark:text-gray-500">this period</p>
@@ -302,7 +302,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
             {points.achievements && points.achievements.length > 0 && (
                 <div className="bg-black/60 backdrop-blur-2xl rounded-2xl border border-white/5 p-6">
                     <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <Trophy className="text-yellow-400" size={20} />
+                        <Trophy className="text-[var(--theme-status-warning-text)]" size={20} />
                         Achievements ({points.achievements.length})
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -324,7 +324,7 @@ const WorkerPointsDisplay: React.FC<WorkerPointsDisplayProps> = ({ employeeId, c
 // Sub-components
 function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string | number; color: string }) {
     return (
-        <div className="bg-white dark:bg-black/20 rounded-xl p-3 border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 dark:hover:border-white/10 transition-colors shadow-sm">
+        <div className="bg-white dark:bg-black/20 rounded-xl p-3 border border-[#E2DCCE] dark:border-white/5 hover:border-[var(--theme-border)]/20 dark:hover:border-white/10 transition-colors shadow-sm">
             <div className={`${color} mb-1`}>{icon}</div>
             <p className="text-lg font-bold text-[#1E3F27] dark:text-white">{value}</p>
             <p className="text-[10px] text-stone-400 dark:text-gray-500 uppercase">{label}</p>
@@ -344,11 +344,11 @@ function TimeCard({ label, points, icon }: { label: string; points: number; icon
 
 function AchievementBadge({ achievement }: { achievement: WorkerAchievement }) {
     return (
-        <div className="bg-gradient-to-br from-amber-500/5 to-yellow-500/5 rounded-xl p-3 border border-amber-500/20 dark:border-yellow-500/20 hover:border-[#2C5E3B]/30 hover:bg-[#2C5E3B]/5 transition-all group cursor-pointer">
+        <div className="bg-gradient-to-br from-amber-500/5 to-yellow-500/5 rounded-xl p-3 border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] hover:border-[var(--theme-border)]/30 hover:bg-[var(--theme-primary)]/5 transition-all group cursor-pointer">
             <div className="text-2xl mb-1">{getAchievementIcon(achievement.type)}</div>
             <p className="text-sm font-bold text-[#1E3F27] dark:text-white truncate">{achievement.name}</p>
             <p className="text-[10px] text-[#4D6E56] dark:text-gray-400 truncate">{achievement.description}</p>
-            <p className="text-[10px] text-amber-700 dark:text-yellow-400 mt-1 font-bold">+{achievement.pointsAwarded} pts</p>
+            <p className="text-[10px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 font-bold">+{achievement.pointsAwarded} pts</p>
         </div>
     );
 }
@@ -377,12 +377,12 @@ export function PointsEarnedPopup({
         <div className="fixed top-24 right-6 z-50 animate-in slide-in-from-right fade-in duration-300">
             <div className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xl backdrop-blur-lg rounded-2xl p-4 border border-[var(--theme-border)] min-w-[280px]">
                 <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-border-focus)]/20 shrink-0">
                         <Sparkles size={24} />
                     </div>
                     <div className="flex-1">
                         <p className="text-xs text-[var(--theme-text-secondary)] font-medium">{message}</p>
-                        <p className="text-2xl font-black font-mono text-amber-500">+{points}</p>
+                        <p className="text-2xl font-black font-mono text-[var(--theme-status-warning-text)]">+{points}</p>
                         <p className="text-[11px] text-[var(--theme-text-secondary)]">points earned!</p>
                     </div>
                 </div>
@@ -391,7 +391,7 @@ export function PointsEarnedPopup({
                         {bonuses.map((bonus, i) => (
                             <div key={i} className="flex justify-between text-xs">
                                 <span className="text-[var(--theme-text-secondary)]">{bonus.label}</span>
-                                <span className="text-amber-500 font-bold font-mono">+{bonus.points}</span>
+                                <span className="text-[var(--theme-status-warning-text)] font-bold font-mono">+{bonus.points}</span>
                             </div>
                         ))}
                     </div>

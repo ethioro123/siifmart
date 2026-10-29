@@ -103,7 +103,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
 
             // Search product names and SKUs
             const items = j.lineItems || (j as any).line_items || [];
-            const matchesItems = items.some((item: any) => 
+            const matchesItems = items.some((item: any) =>
                 (item.name || '').toLowerCase().includes(q) ||
                 (item.productName || '').toLowerCase().includes(q) ||
                 (item.sku || '').toLowerCase().includes(q)
@@ -181,11 +181,11 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-sm font-bold text-[var(--theme-text-primary)] font-mono tracking-wide uppercase">{formattedId}</span>
-                                                <span className={`text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold ${isCompleted ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                                <span className={`text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold ${isCompleted ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'}`}>
                                                     {job.status}
                                                 </span>
                                                 {(job.lineItems || []).some((li: any) => li.returnedQty > 0) && (
-                                                    <span className="text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold bg-red-500/10 text-red-500 border border-red-500/20">
+                                                    <span className="text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                                                         {t('warehouse.picking.returning')}
                                                     </span>
                                                 )}
@@ -224,11 +224,11 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                <span className={`text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold ${isCompleted ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                                <span className={`text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold ${isCompleted ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'}`}>
                                                     {job.status}
                                                 </span>
                                                 {(job.lineItems || []).some((li: any) => li.returnedQty > 0) && (
-                                                    <span className="text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold bg-red-500/10 text-red-500 border border-red-500/20">
+                                                    <span className="text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                                                         {(job.lineItems || []).filter((li: any) => li.returnedQty > 0).length} {t('warehouse.returned')}
                                                     </span>
                                                 )}
@@ -279,7 +279,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                             {isCompleted && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setReturnJob(job); }}
-                                                    className="flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-2 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors min-h-[32px]"
+                                                    className="flex items-center gap-1 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] px-2 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors min-h-[32px]"
                                                     title={t('warehouse.packing.returnItemsToWarehouse')}
                                                 >
                                                     <Undo2 size={11} />

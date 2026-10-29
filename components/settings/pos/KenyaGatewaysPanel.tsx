@@ -45,13 +45,13 @@ export function KenyaGatewaysPanel({
             <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center font-bold text-xs">
                             M1
                         </div>
                         <div>
                             <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                                 Lipa Na M-Pesa (Buy Goods Till)
-                                <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-semibold">Popular</span>
+                                <span className="text-[10px] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] px-2 py-0.5 rounded-full font-semibold">Popular</span>
                             </h4>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 Walk-in customers pay via M-Pesa menu; cashier enters 10-character SMS confirmation code.
@@ -195,13 +195,13 @@ export function KenyaGatewaysPanel({
             <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-red-500/10 text-[#ED1C24] flex items-center justify-center font-bold text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-danger-bg)] text-[#ED1C24] flex items-center justify-center font-bold text-xs">
                             AM
                         </div>
                         <div>
                             <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                                 Airtel Money (Lipa / Interoperable)
-                                <span className="text-[10px] bg-red-500/10 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-semibold">0% Till Fee</span>
+                                <span className="text-[10px] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] px-2 py-0.5 rounded-full font-semibold">0% Till Fee</span>
                             </h4>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 Accept Airtel Money payments via dedicated Airtel Till or interoperable merchant code.
@@ -240,7 +240,7 @@ export function KenyaGatewaysPanel({
             <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center font-bold text-xs">
                             PB
                         </div>
                         <div>

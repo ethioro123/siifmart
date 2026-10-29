@@ -177,9 +177,9 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
             <div
               className={`h-full rounded-full transition-all duration-300 ${
                 isOverBudget
-                  ? 'bg-rose-500'
+                  ? 'bg-[var(--theme-status-danger-bg)]'
                   : isNearCap
-                    ? 'bg-amber-500'
+                    ? 'bg-[var(--theme-status-warning-bg)]'
                     : 'bg-[var(--theme-accent)]'
               }`}
               style={{ width: `${budgetPercent}%` }}
@@ -193,7 +193,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
 
         {/* Warning Banner if Near or Over Budget */}
         {isOverBudget && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-xs flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 shrink-0" />
             <span>
               <strong>Budget Exceeded:</strong> Regional monthly procurement ceiling has been surpassed. All new purchase orders are automatically routed to HQ Central Operations.
@@ -202,7 +202,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
         )}
 
         {isNearCap && !isOverBudget && (
-          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>
               <strong>Budget Alert:</strong> Territory spend has reached {budgetPercent}% of monthly ceiling. Exercise caution on non-critical replenishment.
@@ -215,7 +215,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
       {activeTab === 'autonomous' ? (
         pendingAutonomousPOs.length === 0 ? (
           <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
-            <CheckCircle2 className="w-10 h-10 mx-auto text-emerald-500 opacity-60 mb-3" />
+            <CheckCircle2 className="w-10 h-10 mx-auto text-[var(--theme-status-success-text)] opacity-60 mb-3" />
             <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">
               No Pending Autonomous POs
             </h4>
@@ -235,7 +235,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                     <span className="text-sm font-semibold text-[var(--theme-text-primary)]">
                       {formatPONumber(po)}
                     </span>
-                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                       SOP-MGT-020 Autonomous
                     </span>
                   </div>
@@ -263,7 +263,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                     });
                     if (policy.isCreator && user?.role !== 'group_ceo') {
                       return (
-                        <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
+                        <span className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold flex items-center gap-1">
                           <ShieldAlert className="w-3.5 h-3.5" />
                           Created by You — Dual Control Required
                         </span>
@@ -297,7 +297,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
       ) : activeTab === 'escalated' ? (
         pendingEscalatedPOs.length === 0 ? (
           <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
-            <CheckCircle2 className="w-10 h-10 mx-auto text-emerald-500 opacity-60 mb-3" />
+            <CheckCircle2 className="w-10 h-10 mx-auto text-[var(--theme-status-success-text)] opacity-60 mb-3" />
             <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">
               No Escalated POs
             </h4>
@@ -324,7 +324,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                   <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)] mt-1">
                     <span className="font-medium text-[var(--theme-text-primary)]">{po.supplierName}</span>
                     <span>•</span>
-                    <span className="text-rose-500">
+                    <span className="text-[var(--theme-status-danger-text)]">
                       Exceeds {formatCompactNumber(autonomousLimit, { currency: currencySymbol })} limit
                     </span>
                   </div>
@@ -351,7 +351,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
           </div>
         ) : pendingExpenses.length === 0 ? (
           <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
-            <CheckCircle2 className="w-10 h-10 mx-auto text-emerald-500 opacity-60 mb-3" />
+            <CheckCircle2 className="w-10 h-10 mx-auto text-[var(--theme-status-success-text)] opacity-60 mb-3" />
             <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">
               No Pending Petty Cash Requests
             </h4>
@@ -377,7 +377,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                       </span>
                       <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md border ${
                         isAutonomous
-                          ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                          ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                           : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
                       }`}>
                         {isAutonomous ? 'Local Sign-Off' : 'Treasury Escalate'}

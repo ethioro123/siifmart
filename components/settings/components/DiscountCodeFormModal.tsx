@@ -62,7 +62,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
-              Code <span className="text-red-500">*</span>
+              Code <span className="text-[var(--theme-status-danger-text)]">*</span>
             </label>
             <input
               type="text"
@@ -75,7 +75,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
           </div>
           <div>
             <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
-              Name / Description <span className="text-red-500">*</span>
+              Name / Description <span className="text-[var(--theme-status-danger-text)]">*</span>
             </label>
             <input
               type="text"
@@ -121,7 +121,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
           </div>
           <div>
             <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
-              Value <span className="text-red-500">*</span>
+              Value <span className="text-[var(--theme-status-danger-text)]">*</span>
             </label>
             <div className="relative">
               <input

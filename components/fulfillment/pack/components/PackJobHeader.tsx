@@ -24,7 +24,7 @@ export const PackJobHeader: React.FC<PackJobHeaderProps> = ({
                 <div className="flex items-center gap-2.5 sm:gap-3 md:gap-4 min-w-0 flex-1">
                     <div className={`w-10 h-10 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-2xl border flex items-center justify-center shadow-sm shrink-0 ${
                         isFullyPacked
-                            ? 'bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400'
+                            ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                             : 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
                     }`}>
                         {isFullyPacked ? <ShieldCheck size={20} className="md:w-7 md:h-7" /> : <Archive size={20} className="md:w-7 md:h-7" />}
@@ -40,8 +40,8 @@ export const PackJobHeader: React.FC<PackJobHeaderProps> = ({
                         </div>
                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 text-xs font-medium text-[var(--theme-text-secondary)] mt-0.5">
                             <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] uppercase font-semibold tracking-wider border shrink-0 ${
-                                job.priority === 'Critical' ? 'border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10' :
-                                job.priority === 'High' ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10' :
+                                job.priority === 'Critical' ? 'border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)]' :
+                                job.priority === 'High' ? 'border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]' :
                                 'border-[var(--theme-border)] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]'
                             }`}>
                                 {job.priority}

@@ -22,9 +22,9 @@ export default function WizardStepper({ currentStep, steps }: WizardStepperProps
                             <div
                                 className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 ${
                                     isCurrent
-                                        ? 'bg-[#2C5E3B] text-white ring-4 ring-emerald-500/20 shadow-md scale-110'
+                                        ? 'bg-[var(--theme-primary)] text-white ring-4 ring-[var(--theme-status-success-border)] shadow-md scale-110'
                                         : isCompleted
-                                            ? 'bg-emerald-600 text-white'
+                                            ? 'bg-[var(--theme-status-success-bg)] text-white'
                                             : 'bg-stone-200 dark:bg-white/10 text-stone-500 dark:text-stone-400'
                                 }`}
                             >
@@ -33,9 +33,9 @@ export default function WizardStepper({ currentStep, steps }: WizardStepperProps
                             <span
                                 className={`text-[10px] mt-1.5 uppercase font-bold tracking-wider hidden sm:block ${
                                     isCurrent
-                                        ? 'text-[#2C5E3B] dark:text-[#A9CBA2]'
+                                        ? 'text-[var(--theme-primary)] dark:text-[#A9CBA2]'
                                         : isCompleted
-                                            ? 'text-emerald-700 dark:text-emerald-400'
+                                            ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                             : 'text-stone-400'
                                 }`}
                             >

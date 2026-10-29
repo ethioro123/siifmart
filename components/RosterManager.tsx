@@ -59,8 +59,8 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
     const daySchedules = useMemo(() => {
         if (!activeSite) return [];
         const validEmployeeIds = new Set(siteEmployees.map(e => e.id));
-        return schedules.filter(s => 
-            s.date === selectedDate && 
+        return schedules.filter(s =>
+            s.date === selectedDate &&
             (s.siteId === activeSite.id || validEmployeeIds.has(s.employeeId))
         );
     }, [schedules, selectedDate, activeSite, siteEmployees]);
@@ -166,7 +166,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
             {/* Header with Date Navigation */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Calendar size={20} />
                     </div>
                     <div>
@@ -194,7 +194,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                         <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
                             {new Date(selectedDate).toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' })}
                         </span>
-                        <span className="text-[10px] text-[#0071E3] dark:text-[#2997FF] font-mono font-medium">
+                        <span className="text-[10px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-mono font-medium">
                             {selectedDate}
                         </span>
                     </div>
@@ -217,7 +217,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                     daySchedules.map((schedule) => (
                         <div
                             key={schedule.id}
-                            className="group p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[#0071E3]/30 transition-all shadow-xs"
+                            className="group p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)]/30 transition-all shadow-xs"
                         >
                             <div className="flex items-center gap-3.5 min-w-0">
                                 <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center shrink-0">
@@ -227,11 +227,11 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                     <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{schedule.employeeName}</h4>
                                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                                         <span className="text-[11px] text-[var(--theme-text-secondary)] flex items-center gap-1">
-                                            <Briefcase size={12} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                            <Briefcase size={12} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                                             {schedule.role}
                                         </span>
                                         <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono flex items-center gap-1">
-                                            <Clock size={12} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                            <Clock size={12} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                                             {schedule.startTime} - {schedule.endTime}
                                         </span>
                                     </div>
@@ -253,7 +253,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                     onClick={() => handleDelete(schedule)}
                                     title="Delete Shift"
                                     aria-label="Delete Shift"
-                                    className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
+                                    className="p-2 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] transition-all cursor-pointer"
                                 >
                                     <Trash2 size={13} />
                                 </button>
@@ -268,7 +268,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                         <button
                             type="button"
                             onClick={() => handleOpenModal()}
-                            className="mt-4 px-4 py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                            className="mt-4 px-4 py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
                         >
                             {t('common.add')} Shift
                         </button>
@@ -280,7 +280,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                     <button
                         type="button"
                         onClick={() => handleOpenModal()}
-                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-dashed border-[var(--theme-border)] text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[#0071E3] dark:hover:text-[#2997FF] hover:border-[#0071E3]/40 dark:hover:border-[#2997FF]/40 transition-all cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-dashed border-[var(--theme-border)] text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] dark:hover:text-[var(--theme-accent)] hover:border-[var(--theme-border-focus)]/40 dark:hover:border-[var(--theme-border-focus)]/40 transition-all cursor-pointer"
                     >
                         <Plus size={15} />
                         <span>Schedule Shift for {activeSite.name}</span>
@@ -315,7 +315,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                 }}
                                 required
                                 title="Select Staff Member"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                             >
                                 <option value="">Select Appointed Staff Member...</option>
                                 {siteEmployees.map(emp => (
@@ -334,7 +334,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                     onChange={(e) => setFormState({ ...formState, startTime: e.target.value })}
                                     required
                                     title="Shift Start Time"
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                                 />
                             </div>
                             <div>
@@ -345,7 +345,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                     onChange={(e) => setFormState({ ...formState, endTime: e.target.value })}
                                     required
                                     title="Shift End Time"
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                                 />
                             </div>
                         </div>
@@ -359,7 +359,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                 value={formState.role}
                                 onChange={(e) => setFormState({ ...formState, role: e.target.value })}
                                 title="Assigned Role"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                             />
                         </div>
 
@@ -370,7 +370,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                 rows={3}
                                 value={formState.notes}
                                 onChange={(e) => setFormState({ ...formState, notes: e.target.value })}
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                                 placeholder="Station assignment, task details or specific notes..."
                                 title="Shift Notes"
                             />
@@ -378,7 +378,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
 
                         {/* Error Alert */}
                         {timeError && (
-                            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-600 dark:text-red-400 font-medium">
+                            <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-medium">
                                 {timeError}
                             </div>
                         )}
@@ -396,7 +396,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 h-10 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                            className="flex-1 h-10 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                         >
                             {isSubmitting ? (
                                 <>

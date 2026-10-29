@@ -16,9 +16,9 @@ interface AssignActiveMatrixProps {
 
 const TYPE_STYLES: Record<string, { bg: string; text: string; border: string; dot: string }> = {
     PICK:     { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20', dot: 'bg-primary' },
-    PACK:     { bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400', border: 'border-emerald-500/20', dot: 'bg-emerald-600 dark:bg-emerald-400' },
-    RECEIVE:  { bg: 'bg-amber-500/10', text: 'text-amber-700 dark:text-amber-400', border: 'border-amber-500/20', dot: 'bg-amber-600 dark:bg-amber-400' },
-    PUTAWAY:  { bg: 'bg-blue-500/10', text: 'text-blue-700 dark:text-blue-400', border: 'border-blue-500/20', dot: 'bg-blue-600 dark:bg-blue-400' },
+    PACK:     { bg: 'bg-[var(--theme-status-success-bg)]', text: 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]', border: 'border-[var(--theme-status-success-border)]', dot: 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)]' },
+    RECEIVE:  { bg: 'bg-[var(--theme-status-warning-bg)]', text: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]', border: 'border-[var(--theme-status-warning-border)]', dot: 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)]' },
+    PUTAWAY:  { bg: 'bg-[var(--theme-status-info-bg)]', text: 'text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]', border: 'border-[var(--theme-status-info-border)]', dot: 'bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)]' },
     DISPATCH: { bg: 'bg-purple-500/10', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-500/20', dot: 'bg-purple-600 dark:bg-purple-400' },
     DRIVER:   { bg: 'bg-cyan-500/10', text: 'text-cyan-700 dark:text-cyan-400', border: 'border-cyan-500/20', dot: 'bg-cyan-600 dark:bg-cyan-400' },
     DEFAULT:  { bg: 'bg-[var(--theme-bg-subtle)]', text: 'text-[var(--theme-text-secondary)]', border: 'border-[var(--theme-border)]', dot: 'bg-[var(--theme-text-muted)]' },
@@ -188,7 +188,7 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                                                             )}
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); unassignJob(job.id); }}
-                                                                className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-red-500/10 text-[var(--theme-text-muted)] hover:text-red-500 rounded-xl transition-colors touch-manipulation cursor-pointer"
+                                                                className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-muted)] text-[var(--theme-status-danger-text)] rounded-xl transition-colors touch-manipulation cursor-pointer"
                                                                 title={t('warehouse.unassignAction')}
                                                                 aria-label={t('warehouse.unassignAction')}
                                                             >

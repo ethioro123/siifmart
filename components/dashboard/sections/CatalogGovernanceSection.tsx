@@ -166,7 +166,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                     >
                         <span>Pending Review</span>
                         {pendingProducts.length > 0 && (
-                            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                                 {pendingProducts.length}
                             </span>
                         )}
@@ -232,7 +232,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                         </div>
                     ) : filteredPending.length === 0 ? (
                         <div className="p-12 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] text-center space-y-2">
-                            <ShieldCheck size={28} className="mx-auto text-emerald-500" />
+                            <ShieldCheck size={28} className="mx-auto text-[var(--theme-status-success-text)]" />
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                                 Zero Pending Product Proposals
                             </h3>
@@ -248,7 +248,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                                     className="p-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
                                 >
                                     <div className="flex items-start gap-3.5">
-                                        <div className="p-2.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-500/20 shrink-0 mt-0.5">
+                                        <div className="p-2.5 bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] rounded-xl border border-[var(--theme-status-warning-border)] shrink-0 mt-0.5">
                                             <Package size={18} />
                                         </div>
                                         <div>
@@ -292,7 +292,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                                                     type="button"
                                                     disabled={!rejectReason.trim() || rejectMutation.isPending}
                                                     onClick={() => rejectMutation.mutate({ id: item.id, reason: rejectReason })}
-                                                    className="px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+                                                    className="px-3 py-1 bg-[var(--theme-status-danger-bg)] text-white text-xs font-semibold rounded-lg bg-[var(--theme-status-danger-bg)] disabled:opacity-50 cursor-pointer"
                                                 >
                                                     Confirm
                                                 </button>
@@ -309,7 +309,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                                                 <button
                                                     type="button"
                                                     onClick={() => setRejectingId(item.id)}
-                                                    className="px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded-xl border border-red-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
+                                                    className="px-3 py-1.5 text-xs font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] rounded-xl border border-[var(--theme-status-danger-border)] flex items-center gap-1.5 transition-all cursor-pointer"
                                                 >
                                                     <XCircle size={14} />
                                                     <span>Reject</span>
@@ -318,7 +318,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                                                     type="button"
                                                     disabled={approveMutation.isPending}
                                                     onClick={() => approveMutation.mutate({ id: item.id })}
-                                                    className="px-3.5 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                                                    className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-sm disabled:opacity-50"
                                                 >
                                                     <CheckCircle2 size={14} />
                                                     <span>Approve for POS</span>
@@ -401,7 +401,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                         </div>
                     ) : mergeCandidates.length === 0 ? (
                         <div className="p-12 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] text-center space-y-2">
-                            <ShieldCheck size={28} className="mx-auto text-emerald-500" />
+                            <ShieldCheck size={28} className="mx-auto text-[var(--theme-status-success-text)]" />
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                                 Zero Duplicate Items Detected
                             </h3>

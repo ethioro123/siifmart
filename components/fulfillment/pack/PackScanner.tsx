@@ -288,7 +288,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                     <div
                         style={{ width: `${totalItems ? (packedItems.length / totalItems) * 100 : 0}%` }}
                         className={`h-full rounded-full transition-[width] duration-300 ${
-                            isFullyPacked ? 'bg-emerald-500' : 'bg-[var(--theme-accent)]'
+                            isFullyPacked ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-accent)]'
                         }`}
                     />
                 </div>
@@ -429,7 +429,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     isProcessing || isSubmitting
                                         ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/60 cursor-not-allowed'
                                         : isFullyPacked
-                                            ? 'bg-emerald-600 hover:bg-emerald-700 border-emerald-500 text-white'
+                                            ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-white'
                                             : step === 'CONFIRM_QTY'
                                                 ? 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white'
                                                 : !inputVal.trim()

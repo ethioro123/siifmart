@@ -19,7 +19,7 @@ export const WasteHeader: React.FC<WasteHeaderProps> = ({
             <div className="hidden sm:flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-lg tracking-tight">
-                        <AlertOctagon className="text-red-500" size={22} />
+                        <AlertOctagon className="text-[var(--theme-status-danger-text)]" size={22} />
                         {t('warehouse.wasteManagementTitle')}
                     </h3>
                     <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -54,12 +54,12 @@ export const WasteHeader: React.FC<WasteHeaderProps> = ({
             {/* Mobile compact single row */}
             <div className="flex sm:hidden items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
-                    <AlertOctagon className="text-red-500 shrink-0" size={14} />
+                    <AlertOctagon className="text-[var(--theme-status-danger-text)] shrink-0" size={14} />
                     <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">
                         {t('warehouse.waste')}
                     </span>
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-500 border border-red-500/20 shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-danger-bg)]" />
                         {t('warehouse.writeOffsBadge')}
                     </span>
                 </div>

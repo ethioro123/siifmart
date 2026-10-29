@@ -89,8 +89,8 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
             <span>Override Velocity</span>
             <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md border ${
               isVelocityBreached
-                ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
             }`}>
               {isVelocityBreached ? 'Breached' : 'Compliant'}
             </span>
@@ -107,7 +107,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
         <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
           <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)]">
             <span>Till Cash Discrepancies</span>
-            <FileWarning className="w-4 h-4 text-amber-500" />
+            <FileWarning className="w-4 h-4 text-[var(--theme-status-warning-text)]" />
           </div>
           <div className="text-xl font-bold font-mono text-[var(--theme-text-primary)] mt-2">
             {varianceShifts.length}
@@ -121,7 +121,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
         <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
           <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)]">
             <span>Receiving Variances</span>
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <ShieldCheck className="w-4 h-4 text-[var(--theme-status-success-text)]" />
           </div>
           <div className="text-xl font-bold font-mono text-[var(--theme-text-primary)] mt-2">
             {discrepancyTransfers.length}
@@ -134,15 +134,15 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
 
       {/* 24-Hour Managerial Override Velocity High-Priority Breaches */}
       {overrideVelocityBreaches && overrideVelocityBreaches.length > 0 && (
-        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 space-y-3">
+        <div className="p-4 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-rose-500" />
-              <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide">
+              <ShieldAlert className="w-4 h-4 text-[var(--theme-status-danger-text)]" />
+              <span className="text-xs font-bold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] uppercase tracking-wide">
                 Active Managerial Override Velocity Breaches (SOP-MGT-020)
               </span>
             </div>
-            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300">
+            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
               Limit: &lt; 3.0%
             </span>
           </div>
@@ -151,14 +151,14 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
             {overrideVelocityBreaches.map(breach => (
               <div
                 key={breach.siteId}
-                className="p-3 rounded-xl bg-[var(--theme-bg-card)] border border-rose-500/30 flex items-center justify-between gap-3 shadow-sm"
+                className="p-3 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-status-danger-border)] flex items-center justify-between gap-3 shadow-sm"
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
                       {breach.siteName}
                     </span>
-                    <span className="text-[10px] font-mono font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-mono font-bold text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] px-1.5 py-0.5 rounded">
                       {breach.velocityRate}% Velocity
                     </span>
                   </div>
@@ -166,7 +166,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
                     Supervisor / Manager: <strong>{breach.managerName}</strong> • {breach.totalOverrides} flagged overrides
                   </p>
                 </div>
-                <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded bg-rose-500 text-white shrink-0">
+                <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded bg-[var(--theme-status-danger-bg)] text-white shrink-0">
                   Audit Flagged
                 </span>
               </div>
@@ -184,7 +184,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
 
         {varianceShifts.length === 0 && discrepancyTransfers.length === 0 ? (
           <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
-            <CheckCircle2 className="w-10 h-10 mx-auto text-emerald-500 opacity-60 mb-3" />
+            <CheckCircle2 className="w-10 h-10 mx-auto text-[var(--theme-status-success-text)] opacity-60 mb-3" />
             <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">
               Territorial Security Clean
             </h4>
@@ -202,10 +202,10 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
               return (
                 <div
                   key={shift.id}
-                  className="p-4 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-amber-500/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="p-4 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] border-[var(--theme-status-warning-border)] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                       <AlertTriangle className="w-4 h-4" />
                     </div>
                     <div>
@@ -213,7 +213,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
                         <span className="text-sm font-semibold text-[var(--theme-text-primary)]">
                           Shift #{shift.shiftNumber || shift.id.slice(0, 8)}
                         </span>
-                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                           Till Variance
                         </span>
                       </div>
@@ -229,7 +229,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
 
                   <div className="flex items-center gap-3 self-end sm:self-center">
                     <div className="text-right">
-                      <div className={`font-mono font-bold text-sm ${isNegative ? 'text-rose-500' : 'text-emerald-500'}`}>
+                      <div className={`font-mono font-bold text-sm ${isNegative ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-success-text)]'}`}>
                         {isNegative ? '-' : '+'}{formatCompactNumber(Math.abs(varianceVal), { currency: currencySymbol })}
                       </div>
                       <span className="text-[10px] text-[var(--theme-text-secondary)]">Cash Variance</span>
@@ -247,10 +247,10 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
               return (
                 <div
                   key={transfer.id}
-                  className="p-4 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-amber-500/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="p-4 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] border-[var(--theme-status-warning-border)] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                       <ShieldAlert className="w-4 h-4" />
                     </div>
                     <div>
@@ -260,8 +260,8 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
                         </span>
                         <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md border ${
                           isLocal
-                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                            ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
+                            : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                         }`}>
                           {isLocal ? 'Manager Resolved' : 'LP Escalated'}
                         </span>
@@ -291,7 +291,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
       <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-rose-500" />
+            <ShieldAlert className="w-4 h-4 text-[var(--theme-status-danger-text)]" />
             <span>Active Security & LP Investigations ({investigationTasks.length})</span>
           </h4>
           <span className="text-xs px-2.5 py-0.5 rounded-full font-mono bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
@@ -301,7 +301,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
 
         {investigationTasks.length === 0 ? (
           <div className="p-5 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
-            <ShieldCheck className="w-8 h-8 mx-auto text-emerald-500 opacity-60 mb-2" />
+            <ShieldCheck className="w-8 h-8 mx-auto text-[var(--theme-status-success-text)] opacity-60 mb-2" />
             <p className="text-xs text-[var(--theme-text-secondary)]">
               No active loss prevention investigation tasks assigned in {regionCode}.
             </p>
@@ -311,14 +311,14 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
             {investigationTasks.map(task => (
               <div
                 key={task.id}
-                className="p-4 rounded-xl bg-[var(--theme-bg-card)] border border-rose-500/30 hover:border-rose-500/60 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-4 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-[var(--theme-text-primary)]">
                       {task.title}
                     </span>
-                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                       High Priority LP Audit
                     </span>
                   </div>
@@ -335,7 +335,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
                 <button
                   type="button"
                   onClick={() => handleResolveInvestigation(task.id)}
-                  className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm self-end sm:self-center shrink-0"
+                  className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm self-end sm:self-center shrink-0"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Resolve & Close Task</span>

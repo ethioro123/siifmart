@@ -59,13 +59,13 @@ export const SmartReplenishHeader: React.FC<SmartReplenishHeaderProps> = ({
                 <div className="hidden lg:flex items-center gap-2 text-[11px] font-mono shrink-0">
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs">
                         <span className="text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider text-[11px]">Stock Health:</span>
-                        <span className={`font-bold tabular-nums ${distHubSectorIntegrity >= 80 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-500'}`}>
+                        <span className={`font-bold tabular-nums ${distHubSectorIntegrity >= 80 ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-warning-text)]'}`}>
                             {distHubSectorIntegrity.toFixed(0)}%
                         </span>
                     </div>
 
                     {criticalCount > 0 && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 shadow-xs font-bold tabular-nums">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] shadow-xs font-bold tabular-nums">
                             <ShieldAlert size={14} className="animate-pulse" />
                             <span>{criticalCount} Critical</span>
                         </div>

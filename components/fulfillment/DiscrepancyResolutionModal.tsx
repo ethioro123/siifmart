@@ -77,21 +77,21 @@ export function DiscrepancyResolutionModal({
     const productName = item.item.productName || item.item.name || 'Unknown Product';
 
     const DISCREPANCY_TYPES: { id: DiscrepancyType, label: string, icon: any, color: string }[] = [
-        { id: 'shortage', label: 'Shortage (Received Less)', icon: ArrowDown, color: 'text-amber-500' },
+        { id: 'shortage', label: 'Shortage (Received Less)', icon: ArrowDown, color: 'text-[var(--theme-status-warning-text)]' },
         { id: 'overage', label: 'Overage (Received More)', icon: ArrowLeft, color: 'text-primary' },
-        { id: 'damaged', label: 'Damaged Items', icon: AlertTriangle, color: 'text-red-500' },
-        { id: 'wrong_item', label: 'Wrong Item Sent', icon: AlertOctagon, color: 'text-amber-600 dark:text-amber-400' },
+        { id: 'damaged', label: 'Damaged Items', icon: AlertTriangle, color: 'text-[var(--theme-status-danger-text)]' },
+        { id: 'wrong_item', label: 'Wrong Item Sent', icon: AlertOctagon, color: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' },
         { id: 'missing', label: 'Completely Missing', icon: X, color: 'text-[var(--theme-text-muted)]' },
     ];
 
     const RESOLUTION_ACTIONS: { id: ResolutionType, label: string, desc: string, icon: any, color: string, reqAuth: boolean }[] = [
-        { id: 'accept', label: 'Accept As-Is', desc: 'Update inventory to match received qty.', icon: CheckCircle, color: 'text-emerald-500', reqAuth: false },
-        { id: 'investigate', label: 'Request Investigation', desc: 'Flag for warehouse team to check.', icon: Search, color: 'text-amber-500', reqAuth: false },
-        { id: 'claim', label: 'File Loss Claim', desc: 'Record a carrier or internal loss claim.', icon: FileText, color: 'text-amber-600', reqAuth: true },
+        { id: 'accept', label: 'Accept As-Is', desc: 'Update inventory to match received qty.', icon: CheckCircle, color: 'text-[var(--theme-status-success-text)]', reqAuth: false },
+        { id: 'investigate', label: 'Request Investigation', desc: 'Flag for warehouse team to check.', icon: Search, color: 'text-[var(--theme-status-warning-text)]', reqAuth: false },
+        { id: 'claim', label: 'File Loss Claim', desc: 'Record a carrier or internal loss claim.', icon: FileText, color: 'text-[var(--theme-status-warning-text)]', reqAuth: true },
         { id: 'replace', label: 'Resend Missing Items', desc: 'Generate a new transfer from warehouse.', icon: FileText, color: 'text-primary', reqAuth: true },
         { id: 'adjust', label: 'Adjust Inventory', desc: 'Accept with manual adjustment record.', icon: RefreshCw, color: 'text-primary', reqAuth: true },
-        { id: 'reject', label: 'Reject & Return', desc: 'Send items back to source.', icon: RotateCcw, color: 'text-red-500', reqAuth: true },
-        { id: 'dispose', label: 'Dispose / Destroy', desc: 'Remove from inventory (Waste).', icon: Trash2, color: 'text-red-500', reqAuth: true },
+        { id: 'reject', label: 'Reject & Return', desc: 'Send items back to source.', icon: RotateCcw, color: 'text-[var(--theme-status-danger-text)]', reqAuth: true },
+        { id: 'dispose', label: 'Dispose / Destroy', desc: 'Remove from inventory (Waste).', icon: Trash2, color: 'text-[var(--theme-status-danger-text)]', reqAuth: true },
         { id: 'recount', label: 'Request Recount', desc: 'Ask source to count again.', icon: Hash, color: 'text-primary', reqAuth: false },
     ];
 
@@ -238,14 +238,14 @@ export function DiscrepancyResolutionModal({
                         <h4 className="text-base font-bold text-[var(--theme-text-primary)] mb-1">{productName}</h4>
                         <div className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums">
                             Expected: <span className="text-[var(--theme-text-primary)] font-semibold">{item.item.expectedQty}</span> &nbsp;|&nbsp;
-                            Received: <span className="text-amber-600 dark:text-amber-400 font-semibold">{item.item.receivedQty || 0}</span>
+                            Received: <span className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold">{item.item.receivedQty || 0}</span>
                         </div>
                     </div>
                     <div className="text-right">
-                        <div className="text-2xl font-bold text-red-500 font-mono tabular-nums">
+                        <div className="text-2xl font-bold text-[var(--theme-status-danger-text)] font-mono tabular-nums">
                             {diff > 0 ? '+' : ''}{diff}
                         </div>
-                        <div className="text-[11px] uppercase tracking-wider text-red-500 font-semibold">Variance</div>
+                        <div className="text-[11px] uppercase tracking-wider text-[var(--theme-status-danger-text)] font-semibold">Variance</div>
                     </div>
                 </div>
 
@@ -321,7 +321,7 @@ export function DiscrepancyResolutionModal({
                                             <div className="text-[var(--theme-text-secondary)] text-[11px] mt-1 leading-relaxed">{a.desc}</div>
                                         </div>
                                         {!allowed && <div className="absolute inset-0 bg-black/75 flex items-center justify-center">
-                                            <span className="bg-red-500/20 text-red-500 border border-red-500/50 px-2 py-1 rounded text-xs font-semibold uppercase flex items-center gap-1">
+                                            <span className="bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] px-2 py-1 rounded text-xs font-semibold uppercase flex items-center gap-1">
                                                 <Lock size={12} /> Locked
                                             </span>
                                         </div>}
@@ -419,7 +419,7 @@ export function DiscrepancyResolutionModal({
                                     {claimAmount && (
                                         <div>
                                             <div className="text-[var(--theme-text-muted)] mb-1">Claim Value</div>
-                                            <div className="text-emerald-600 dark:text-emerald-400 font-mono tabular-nums font-semibold">${claimAmount}</div>
+                                            <div className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono tabular-nums font-semibold">${claimAmount}</div>
                                         </div>
                                     )}
                                 </div>

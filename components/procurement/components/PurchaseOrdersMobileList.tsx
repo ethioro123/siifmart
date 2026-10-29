@@ -37,7 +37,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
         const p = (priority || 'Normal').toLowerCase();
         if (p === 'urgent' || p === 'high') {
             return (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wide uppercase bg-red-500/10 text-red-500 border border-red-500/20">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wide uppercase bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                     {priority || 'Normal'}
                 </span>
             );
@@ -60,19 +60,19 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
         switch (status) {
             case 'Received':
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                         Received
                     </span>
                 );
             case 'Partially Received':
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                         Partially Received
                     </span>
                 );
             case 'Approved':
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                         Approved
                     </span>
                 );
@@ -90,14 +90,14 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                 );
             case 'Pending':
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                         Pending
                     </span>
                 );
             case 'Cancelled':
             case 'Rejected':
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                         {status}
                     </span>
                 );
@@ -197,7 +197,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                 {isDraft && canApprove && (
                                     <button
                                         onClick={(e) => handleSingleApprove(e, po)}
-                                        className="h-7 px-3 text-[11px] font-medium rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20 transition-all active:scale-[0.98]"
+                                        className="h-7 px-3 text-[11px] font-medium rounded-full bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] transition-all active:scale-[0.98]"
                                     >
                                         Review
                                     </button>
@@ -221,7 +221,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                         (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={(e) => handleDeletePO(e, po)}
-                                        className="w-7 h-7 rounded-full flex items-center justify-center border border-transparent hover:border-red-500/30 hover:bg-red-500/10 text-[var(--theme-text-secondary)] hover:text-red-400 transition-all active:scale-[0.95]"
+                                        className="w-7 h-7 rounded-full flex items-center justify-center border border-transparent border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] transition-all active:scale-[0.95]"
                                         title="Cancel PO"
                                         aria-label="Cancel Purchase Order"
                                     >

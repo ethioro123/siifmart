@@ -27,7 +27,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
 
     return (
         <div className={`group relative bg-[var(--theme-bg-card)] border ${
-            isDone ? 'border-green-500/20 bg-green-500/[0.02]' : 'border-[var(--theme-border)]'
+            isDone ? 'border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)]/[0.02]' : 'border-[var(--theme-border)]'
         } rounded-2xl px-3.5 py-3 flex flex-col shadow-sm`}>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
@@ -42,7 +42,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                             </div>
                         )}
                         {isDone && (
-                            <div className="absolute inset-0 bg-green-500/30 flex items-center justify-center">
+                            <div className="absolute inset-0 bg-[var(--theme-status-success-bg)] flex items-center justify-center">
                                 <CheckCircle size={18} className="text-white" />
                             </div>
                         )}
@@ -57,8 +57,8 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                             {/* Mobile-only status pill in top row */}
                             <span className={`sm:hidden px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border shrink-0 flex items-center gap-1 ${
                                 isDone
-                                    ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400'
-                                    : 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+                                    ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
+                                    : 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                             }`}>
                                 {isDone ? (
                                     <>
@@ -72,7 +72,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                                 {item.sku || product?.sku || 'NO SKU'}
                             </span>
                             {formatProductSize(product || item) && (
-                                <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 shrink-0">
+                                <span className="text-[11px] font-mono text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2 py-0.5 rounded-md border border-[var(--theme-status-success-border)] shrink-0">
                                     {formatProductSize(product || item)}
                                 </span>
                             )}
@@ -89,7 +89,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                 {/* Pack Details / Actions */}
                 <div className="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)]/60 shrink-0">
                     <div className="text-left sm:text-right">
-                        <span className={`text-xs font-mono tabular-nums font-semibold ${isDone ? 'text-green-600 dark:text-green-400' : 'text-[var(--theme-text-primary)]'}`}>
+                        <span className={`text-xs font-mono tabular-nums font-semibold ${isDone ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-primary)]'}`}>
                             {packed} <span className="text-[var(--theme-text-secondary)] font-normal">{t('warehouse.packing.packed') || 'packed'}</span>
                         </span>
                     </div>
@@ -98,8 +98,8 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                         {/* Desktop-only status badge */}
                         <span className={`hidden sm:flex px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider border items-center gap-1 ${
                             isDone
-                                ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400'
-                                : 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+                                ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
+                                : 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                         }`}>
                             {isDone ? (
                                 <>

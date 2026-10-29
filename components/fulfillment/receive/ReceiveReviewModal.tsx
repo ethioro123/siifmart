@@ -71,9 +71,9 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                             Manifest #{po.poNumber} • <span className="text-[var(--theme-text-primary)] font-semibold">{po.supplierName}</span>
                         </p>
                     </div>
-                    <button 
-                        onClick={onClose} 
-                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" 
+                    <button
+                        onClick={onClose}
+                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                         aria-label="Close"
                     >
                         <X size={20} />
@@ -96,7 +96,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                                 </p>
                             )}
                         </div>
-                        <div className={`p-4 md:p-5 rounded-2xl border text-center transition-all shadow-sm ${isFullyReceived ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'}`}>
+                        <div className={`p-4 md:p-5 rounded-2xl border text-center transition-all shadow-sm ${isFullyReceived ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'}`}>
                             <p className="text-[11px] uppercase font-semibold tracking-wider mb-1.5 text-[var(--theme-text-secondary)]">{t('warehouse.totalReceived')}</p>
                             <p className="text-xl md:text-2xl font-bold tabular-nums font-mono leading-none">
                                 {stats.totalReceivedSellable} <span className="text-xs opacity-75 font-normal">{t('warehouse.unitsLabel')}</span>
@@ -105,11 +105,11 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     </div>
 
                     {!isFullyReceived && (
-                        <div className="p-4 md:p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex gap-3 shadow-sm border-l-4 border-l-amber-500">
-                            <AlertTriangle className="text-amber-600 dark:text-amber-400 shrink-0" size={20} />
+                        <div className="p-4 md:p-5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex gap-3 shadow-sm border-l-4 border-l-amber-500">
+                            <AlertTriangle className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0" size={20} />
                             <div>
-                                <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-200 tracking-tight">{t('warehouse.discrepancyDetected')}</h4>
-                                <p className="text-[11px] text-amber-700/90 dark:text-amber-400/90 mt-1 font-medium leading-relaxed">
+                                <h4 className="text-sm font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] tracking-tight">{t('warehouse.discrepancyDetected')}</h4>
+                                <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 font-medium leading-relaxed">
                                     Finalizing with {stats.totalExpectedSellable - stats.totalReceivedSellable} {t('warehouse.missingItems')}.
                                     Marked as <span className="font-semibold underline decoration-amber-500/30">{t('warehouse.partialReceipt')}</span>.
                                 </p>
@@ -158,8 +158,8 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                                             )}
                                         </td>
                                         <td className="p-3 md:p-4 text-right">
-                                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${item.status === 'Complete' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' :
-                                                item.status === 'Partial' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
+                                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${item.status === 'Complete' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' :
+                                                item.status === 'Partial' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]' :
                                                     'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                                 }`}>
                                                 {item.status === 'Complete' ? (t('warehouse.statusComplete') || 'Complete') : item.status === 'Partial' ? (t('warehouse.statusPartial') || 'Partial') : (t('warehouse.statusPending') || item.status)}
@@ -185,7 +185,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     <button
                         onClick={onFinalize}
                         disabled={isSubmitting}
-                        className="w-full md:w-auto px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 transition-all order-1 md:order-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        className="w-full md:w-auto px-8 py-3 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] active:scale-95 text-white font-semibold text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 transition-all order-1 md:order-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     >
                         {isSubmitting ? (
                             <>

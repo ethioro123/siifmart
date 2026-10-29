@@ -81,7 +81,7 @@ export const PutawayStepIndicator: React.FC<PutawayStepIndicatorProps> = ({
                                     : isActive
                                         ? 'bg-[var(--theme-bg-card)] border-[var(--theme-accent)] shadow-sm cursor-pointer'
                                         : st.isComplete
-                                            ? 'bg-[var(--theme-bg-card)]/60 border-green-500/30 hover:border-green-500/50 cursor-pointer'
+                                            ? 'bg-[var(--theme-bg-card)]/60 border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] cursor-pointer'
                                             : 'bg-[var(--theme-bg-card)]/40 border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 cursor-pointer'
                             }`}
                         >
@@ -92,7 +92,7 @@ export const PutawayStepIndicator: React.FC<PutawayStepIndicatorProps> = ({
                                         : isActive
                                             ? 'bg-[var(--theme-accent)] text-white'
                                             : st.isComplete && st.id === 'SLOTTING'
-                                                ? 'bg-green-600 text-white'
+                                                ? 'bg-[var(--theme-status-success-bg)] text-white'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                 }`}
                             >

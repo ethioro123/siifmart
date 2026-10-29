@@ -52,7 +52,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] flex items-center justify-between gap-3 bg-[var(--theme-bg-card)]">
                     <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)] text-[#2C5E3B] dark:text-[#A9CBA2] border border-[var(--theme-border)]">
+                        <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]">
                             <FileText size={18} />
                         </div>
                         <div>
@@ -60,7 +60,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                 <h3 className="text-base font-bold text-[var(--theme-text-primary)]">
                                     Saved Worker Drafts
                                 </h3>
-                                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)]/20">
                                     {drafts.length}
                                 </span>
                             </div>
@@ -74,7 +74,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                         <button
                             type="button"
                             onClick={onStartNewCandidate}
-                            className="px-3 py-1.5 rounded-xl bg-[#2C5E3B] hover:bg-[#234b2f] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                            className="px-3 py-1.5 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                             title="Start New Candidate"
                         >
                             <Plus size={14} />
@@ -117,8 +117,8 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                     key={draft.id}
                                     className={`p-4 rounded-2xl border transition-all ${
                                         isActive
-                                            ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-[#2C5E3B] shadow-xs'
-                                            : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[#2C5E3B]/40'
+                                            ? 'bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 border-[var(--theme-border)] shadow-xs'
+                                            : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-border)]/40'
                                     }`}
                                 >
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -129,12 +129,12 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                                     {draft.title}
                                                 </h4>
                                                 {isActive && (
-                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#2C5E3B] text-white flex items-center gap-1 shrink-0">
+                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--theme-primary)] text-white flex items-center gap-1 shrink-0">
                                                         <CheckCircle2 size={11} />
                                                         Active in Wizard
                                                     </span>
                                                 )}
-                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-[var(--theme-bg-subtle)] text-[#2C5E3B] dark:text-[#A9CBA2] border border-[var(--theme-border)] shrink-0">
+                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-[var(--theme-bg-subtle)] text-[var(--theme-primary)] dark:text-[#A9CBA2] border border-[var(--theme-border)] shrink-0">
                                                     {getJobTitleForRole(draft.role || 'Staff')}
                                                 </span>
                                             </div>
@@ -156,7 +156,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                             </div>
 
                                             <div className="flex items-center gap-2 pt-1 flex-wrap">
-                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                                     Progress: Step {draft.step}/5 ({stepName})
                                                 </span>
                                                 {draft.attachedDocsCount > 0 && (
@@ -173,7 +173,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                             <button
                                                 type="button"
                                                 onClick={() => onResumeDraft(draft.id)}
-                                                className="px-3.5 py-2 rounded-xl bg-[#2C5E3B] hover:bg-[#234b2f] text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                                className="px-3.5 py-2 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                                                 title="Resume Draft"
                                             >
                                                 <span>{isActive ? 'Continue Editing' : 'Resume Draft'}</span>
@@ -182,7 +182,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                             <button
                                                 type="button"
                                                 onClick={() => onDeleteDraft(draft.id)}
-                                                className="p-2 rounded-xl text-[var(--theme-text-muted)] hover:text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                                                className="p-2 rounded-xl text-[var(--theme-text-muted)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] transition-colors cursor-pointer"
                                                 title="Delete Draft"
                                             >
                                                 <Trash2 size={16} />

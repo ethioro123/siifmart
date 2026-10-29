@@ -28,7 +28,7 @@ export function POValidationFeedback({ issues }: { issues: POFieldIssue[] }) {
         return () => fields.forEach(field => { field?.removeAttribute('aria-invalid'); field?.removeAttribute('aria-describedby'); });
     }, [issues, id]);
     if (!issues.length) return null;
-    return <>{issues.map((issue, index) => targets[index]?.parentElement ? createPortal(<p id={`${id}-${index}`} className="mt-2 text-xs font-semibold text-rose-700 dark:text-rose-300">{issue.message}</p>, targets[index]!.parentElement!) : null)}<div ref={summary} tabIndex={-1} role="alert" className="mb-4 rounded-xl border border-rose-500/50 bg-rose-500/10 p-4 text-sm text-[var(--theme-text-primary)]">
+    return <>{issues.map((issue, index) => targets[index]?.parentElement ? createPortal(<p id={`${id}-${index}`} className="mt-2 text-xs font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">{issue.message}</p>, targets[index]!.parentElement!) : null)}<div ref={summary} tabIndex={-1} role="alert" className="mb-4 rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-4 text-sm text-[var(--theme-text-primary)]">
         <p className="font-semibold">Complete these fields to continue</p>
         <ul className="mt-2 space-y-2">{issues.map((issue, index) => <li key={index}>
             <button type="button" className="text-left underline underline-offset-2 min-h-8 focus-visible:outline focus-visible:outline-2" onClick={() => focusPOField(issue.selector)}>{issue.message}</button>

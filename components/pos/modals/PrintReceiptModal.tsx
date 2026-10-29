@@ -66,7 +66,7 @@ export const PrintReceiptModal: React.FC = () => {
                         onClick={handleEmailReceipt}
                         className="flex flex-col items-center justify-center gap-2.5 p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] rounded-2xl text-[var(--theme-text-primary)] transition-all cursor-pointer active:scale-95 shadow-xs"
                     >
-                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center text-amber-500">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-status-warning-text)]">
                             <Mail size={20} />
                         </div>
                         <span className="text-xs font-bold uppercase tracking-wider">{t('pos.digitalCopy')}</span>

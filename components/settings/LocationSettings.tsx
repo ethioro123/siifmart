@@ -302,7 +302,7 @@ export default function LocationSettings() {
         <Protected permission="MANAGE_SITES" fallback={
             <div className="max-w-2xl mx-auto py-12">
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-8 text-center shadow-xs">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center mx-auto mb-3">
                         <Lock size={20} />
                     </div>
                     <h3 className="text-base font-semibold text-[var(--theme-text-primary)] mb-1">Access Restricted</h3>
@@ -330,7 +330,7 @@ export default function LocationSettings() {
                                 <Box size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Warehouse').length} Warehouses</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2.5 py-1 rounded-full border border-[var(--theme-status-success-border)]">
                                 <Store size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Store').length} Stores</span>
                             </div>

@@ -78,8 +78,8 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                     <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">
                         {t('warehouse.replenish')}
                     </span>
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-warning-bg)]" />
                         {t('warehouse.alertsCount', { count: alertCount })}
                     </span>
                 </div>

@@ -87,8 +87,8 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                     {/* Mobile Dot Numbers */}
                     {filteredJobsCount && (
                         <div className="flex sm:hidden items-center gap-1.5 px-2 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-[10px] font-mono shrink-0">
-                            <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title={t('warehouse.activeLabel') || 'Active'}>
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="inline-flex items-center gap-1 text-[var(--theme-status-success-text)] font-bold" title={t('warehouse.activeLabel') || 'Active'}>
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
                                 {filteredJobsCount.active}
                             </span>
                         </div>
@@ -149,9 +149,9 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                             {isScanning ? (
                                 <Loader2 size={16} className="text-[var(--theme-accent)] animate-spin" />
                             ) : scanSuccess ? (
-                                <CheckCircle size={16} className="text-emerald-500" />
+                                <CheckCircle size={16} className="text-[var(--theme-status-success-text)]" />
                             ) : scanError ? (
-                                <AlertTriangle size={16} className="text-red-500" />
+                                <AlertTriangle size={16} className="text-[var(--theme-status-danger-text)]" />
                             ) : (
                                 <ScanLine size={16} className="text-[var(--theme-accent)]" />
                             )}
@@ -176,9 +176,9 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                                 packSearch && onGlobalScan ? 'pr-20 sm:pr-24' : packSearch ? 'pr-8 sm:pr-9' : 'pr-3'
                             } ${
                                 scanSuccess
-                                    ? '!bg-emerald-500/5 border-emerald-500/50 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                                    ? '!bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] focus:ring-2 ring-[var(--theme-status-success-border)]'
                                     : scanError
-                                        ? '!bg-red-500/5 border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+                                        ? '!bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] focus:ring-2 ring-[var(--theme-status-danger-border)]'
                                         : '!bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20'
                             }`}
                         />
@@ -213,8 +213,8 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                     {(scanSuccess || scanError) && (
                         <div className={`mt-1.5 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 animate-in fade-in duration-150 ${
                             scanSuccess
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                                : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
+                                : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                         }`}>
                             {scanSuccess ? <CheckCircle size={13} className="shrink-0" /> : <AlertTriangle size={13} className="shrink-0" />}
                             <span className="truncate">{scanSuccess || scanError}</span>

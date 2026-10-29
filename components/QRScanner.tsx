@@ -164,7 +164,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                 <div className="bg-black border-x border-white/10 relative flex-1 sm:flex-none sm:aspect-video overflow-hidden">
                     {error ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                            <AlertCircle className="text-red-400 mb-4" size={48} />
+                            <AlertCircle className="text-[var(--theme-status-danger-text)] mb-4" size={48} />
                             <p className="text-white font-bold mb-2">Camera Error</p>
                             <p className="text-gray-400 text-sm">{error}</p>
                         </div>

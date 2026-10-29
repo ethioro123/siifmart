@@ -96,7 +96,7 @@ export default function LoginPage() {
 
       {/* Main 3-Column Layout: Left (Ethiopia) | Center (Login) | Right (Kenya) */}
       <div className="w-full max-w-[1380px] mx-auto flex flex-col lg:flex-row items-center justify-center gap-4 xl:gap-6 relative z-10 py-4 px-2 sm:px-4">
-        
+
         {/* Left: Ethiopian Quick Logins (Desktop) */}
         {mode === 'login' && (
           <div className="hidden lg:block shrink-0">
@@ -111,7 +111,7 @@ export default function LoginPage() {
 
         {/* Center: Main Login Card */}
         <div className="max-w-[440px] w-full shrink-0 bg-white dark:bg-[#111111] border border-stone-200 dark:border-white/10 rounded-[32px] p-8 sm:p-10 relative z-10 shadow-2xl transition-all duration-300">
-          
+
           {/* Header Branding section */}
           <div className="flex flex-col items-center justify-center mb-6">
             <div className="mb-2 select-none flex flex-col items-center">
@@ -130,13 +130,13 @@ export default function LoginPage() {
                   type="button"
                   disabled={loading}
                   onClick={() => handleQuickLogin(stagingExecutive.email)}
-                  className="w-full py-2 px-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/40 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                  className="w-full py-2 px-3 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <Crown size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                    <Crown size={14} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0" />
                     <div className="text-left">
                       <span className="font-bold text-stone-900 dark:text-white block leading-tight">{stagingExecutive.name || 'Dr. Shukri Idriss'}</span>
-                      <span className="text-[10px] text-amber-700 dark:text-amber-300 font-semibold block">Group Chief Executive Officer • Rank L1</span>
+                      <span className="text-[10px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold block">Group Chief Executive Officer • Rank L1</span>
                     </div>
                   </div>
                   <span className="text-[10px] font-mono opacity-70 shrink-0">Global HQ</span>
@@ -150,7 +150,7 @@ export default function LoginPage() {
                       type="button"
                       disabled={loading}
                       onClick={() => handleQuickLogin(stagingKeRegionalMgr.email)}
-                      className="py-1.5 px-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 hover:border-blue-500/40 text-blue-800 dark:text-blue-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      className="py-1.5 px-2.5 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                       title={`Quick Login: ${stagingKeRegionalMgr.name} (${stagingKeRegionalMgr.role})`}
                     >
                       <div className="flex flex-col items-start min-w-0 pr-1 text-left">
@@ -168,7 +168,7 @@ export default function LoginPage() {
                       type="button"
                       disabled={loading}
                       onClick={() => handleQuickLogin(stagingEtRegionalMgr.email)}
-                      className="py-1.5 px-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 hover:border-blue-500/40 text-blue-800 dark:text-blue-200 text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      className="py-1.5 px-2.5 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
                       title={`Quick Login: ${stagingEtRegionalMgr.name} (${stagingEtRegionalMgr.role})`}
                     >
                       <div className="flex flex-col items-start min-w-0 pr-1 text-left">
@@ -187,14 +187,14 @@ export default function LoginPage() {
           )}
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 dark:bg-red-500/5 border border-red-500/20 rounded-2xl flex items-start gap-3 text-red-600 dark:text-red-400 text-xs leading-relaxed animate-fade-in">
+            <div className="mb-6 p-4 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl flex items-start gap-3 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-xs leading-relaxed animate-fade-in">
               <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/20 rounded-2xl flex items-start gap-3 text-emerald-600 dark:text-emerald-400 text-xs leading-relaxed animate-fade-in">
+            <div className="mb-6 p-4 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-2xl flex items-start gap-3 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-xs leading-relaxed animate-fade-in">
               <CheckCircle size={16} className="shrink-0 mt-0.5" />
               <span>{success}</span>
             </div>

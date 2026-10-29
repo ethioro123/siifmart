@@ -133,7 +133,7 @@ export const ToggleRow: React.FC<ToggleRowProps> = ({
             <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{label}</p>
             {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] leading-tight">{sub}</p>}
             {warning && (
-                <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-1 font-medium">
+                <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1 mt-1 font-medium">
                     <AlertTriangle size={12} className="shrink-0" /> {warning}
                 </p>
             )}

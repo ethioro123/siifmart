@@ -61,7 +61,7 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
                         <div className="text-right shrink-0">
                             {loc.batchNumber&&<p className="text-xs text-[var(--theme-text-secondary)]">Lot {loc.batchNumber}</p>}
                             {loc.expiryDate&&<p className="text-xs text-[var(--theme-text-secondary)]">Expiry {loc.expiryDate}</p>}
-                            <p className={`text-xs font-bold font-mono ${loc.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+                            <p className={`text-xs font-bold font-mono ${loc.stock > 0 ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}`}>
                                 {formatStockDisplay(loc.stock, product)}
                             </p>
                         </div>

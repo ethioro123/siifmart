@@ -61,12 +61,12 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
                            <td className="p-3 text-right font-mono font-bold text-[var(--theme-text-primary)]">
                               {currencySymbol} {rec.systemPrice}
                            </td>
-                           <td className="p-3 text-right font-mono font-bold text-rose-500">
+                           <td className="p-3 text-right font-mono font-bold text-[var(--theme-status-danger-text)]">
                               {currencySymbol} {rec.shelfPrice}
                            </td>
                            <td className="p-3 text-center font-mono font-bold">
                               <span className={`px-2 py-0.5 rounded text-[10px] ${
-                                 rec.variance > 0 ? 'bg-rose-500/10 text-rose-500' : 'bg-amber-500/10 text-amber-500'
+                                 rec.variance > 0 ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)]' : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]'
                               }`}>
                                  {rec.variance > 0 ? `+${rec.variance}` : rec.variance}
                               </span>
@@ -74,12 +74,12 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
                            <td className="p-3 text-center">
                               <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                                  isVerified
-                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                                     : isPrinted
                                     ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20'
                                     : isQueued
-                                    ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                                    : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
+                                    : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                               }`}>
                                  {isVerified && <CheckCircle2 size={10} />}
                                  {isPrinted && <Printer size={10} />}
@@ -107,14 +107,14 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
                                        <button
                                           type="button"
                                           onClick={() => onUpdateStatus(rec.id, 'verified')}
-                                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold flex items-center gap-1 shadow-xs"
+                                          className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-[11px] font-semibold flex items-center gap-1 shadow-xs"
                                        >
                                           <Check size={11} /> Mark Verified
                                        </button>
                                     </>
                                  )}
                                  {isVerified && (
-                                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                                    <span className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">
                                        Resolved
                                     </span>
                                  )}

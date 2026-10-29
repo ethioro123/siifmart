@@ -54,9 +54,9 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
       case 6:
       case 7:
       case 8:
-        return 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30';
+        return 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]';
       case 9:
-        return 'bg-sky-500/10 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30';
+        return 'bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]';
       case 10:
       default:
         return 'bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/30';
@@ -149,11 +149,11 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
         className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-stone-100/70 dark:bg-white/[0.03] hover:bg-stone-200/60 dark:hover:bg-white/[0.06] border border-[#E2DCCE]/60 dark:border-white/[0.06] transition-all duration-200 cursor-pointer select-none group"
       >
         <div className="flex items-center gap-2">
-          <ShieldCheck size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+          <ShieldCheck size={14} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
           <span className="text-xs font-semibold text-[#1E3F27] dark:text-[#EAE5D9]">
             Staging Quick Login
           </span>
-          <span className="text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-md bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2]">
+          <span className="text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-md bg-[var(--theme-primary)]/10 dark:bg-[#A9CBA2]/15 text-[var(--theme-primary)] dark:text-[#A9CBA2]">
             {accounts.length} Roles
           </span>
         </div>
@@ -192,7 +192,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search role, name, facility (e.g. cashier, picker)..."
-                className="w-full pl-7 pr-7 py-1.5 text-xs rounded-lg bg-white/80 dark:bg-black/40 border border-[#E2DCCE]/60 dark:border-white/[0.08] focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
+                className="w-full pl-7 pr-7 py-1.5 text-xs rounded-lg bg-white/80 dark:bg-black/40 border border-[#E2DCCE]/60 dark:border-white/[0.08] focus:outline-none focus:border-[var(--theme-border)] dark:focus:border-[#A9CBA2] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
               />
               {searchQuery && (
                 <button
@@ -254,7 +254,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                     setRoleFilter('ALL');
                     setCountryFilter('ALL');
                   }}
-                  className="text-[9px] font-semibold text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline cursor-pointer"
+                  className="text-[9px] font-semibold text-[var(--theme-primary)] dark:text-[#A9CBA2] hover:underline cursor-pointer"
                 >
                   Reset
                 </button>
@@ -267,7 +267,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
               <p className="text-xs text-[var(--theme-text-secondary)] py-4">Loading test employees…</p>
             ) : error ? (
               <div role="alert" className="text-center py-4 space-y-1.5">
-                <p className="text-xs text-red-600 dark:text-red-400 font-medium">{error.message}</p>
+                <p className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-medium">{error.message}</p>
                 <button
                   type="button"
                   onClick={() => refetch()}
@@ -317,14 +317,14 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                           className={`p-2 text-left bg-white/85 dark:bg-black/35 hover:bg-stone-50 dark:hover:bg-white/[0.05] border border-[#E2DCCE]/60 dark:border-white/[0.06] ${siteTheme.borderCard} rounded-xl transition-all duration-200 flex flex-col justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                           <div className="flex items-start justify-between gap-1 w-full">
-                            <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors truncate">
+                            <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[var(--theme-primary)] dark:group-hover:text-white transition-colors truncate">
                               {acc.role}
                             </span>
                             <div className="flex items-center gap-1 shrink-0">
                               <span className={`text-[8px] font-bold px-1 py-0.2 rounded shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
                                 Rank L{acc.level}
                               </span>
-                              <UserCheck size={10} className="text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
+                              <UserCheck size={10} className="text-stone-400 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2] transition-colors" />
                             </div>
                           </div>
                           <div className="flex items-center justify-between w-full mt-1">

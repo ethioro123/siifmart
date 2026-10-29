@@ -139,7 +139,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                         <img
                             src={avatar}
                             alt={employee.name}
-                            className="w-16 h-16 rounded-2xl object-cover border-2 border-[#2C5E3B]/30 dark:border-white/20 shadow-md"
+                            className="w-16 h-16 rounded-2xl object-cover border-2 border-[var(--theme-border)]/30 dark:border-white/20 shadow-md"
                             onError={(e) => {
                                 (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=2C5E3B&color=EAE5D9&size=160`;
                             }}
@@ -148,7 +148,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                             title={isOnline ? 'Online now' : 'Offline'}
                             className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#18201B] transition-colors duration-500 ${
                                 isOnline
-                                    ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)] animate-pulse'
+                                    ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_6px_rgba(52,211,153,0.7)] animate-pulse'
                                     : 'bg-stone-300 dark:bg-stone-600'
                             }`}
                         />
@@ -160,13 +160,13 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                 {employee.name}
                             </h3>
                             {employee.code && (
-                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-bold bg-[#EAE5D9] dark:bg-black/40 text-[#2C5E3B] dark:text-emerald-400">
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-bold bg-[#EAE5D9] dark:bg-black/40 text-[var(--theme-primary)] text-[var(--theme-status-success-text)]">
                                     {formatDisplayEmployeeId(employee)}
                                 </span>
                             )}
                         </div>
 
-                        <p className="text-sm font-semibold text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5">
+                        <p className="text-sm font-semibold text-[var(--theme-primary)] dark:text-[#A9CBA2] mt-0.5">
                             {roleTitle}
                         </p>
 
@@ -184,16 +184,16 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                             <span
                                 className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                                     employee.status === 'Active'
-                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                                         : employee.status === 'On Leave'
-                                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                         : 'bg-stone-500/10 text-stone-600 dark:text-stone-400 border border-stone-500/20'
                                 }`}
                             >
                                 {employee.status || 'Active'}
                             </span>
                             <span className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center gap-1 truncate">
-                                <MapPin size={11} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                                <MapPin size={11} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] shrink-0" />
                                 <span className="truncate">{siteName}</span>
                             </span>
                         </div>
@@ -210,13 +210,13 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                         <div className="grid grid-cols-2 gap-3">
                             <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'}`}>
                                 <div className="text-[11px] text-stone-500 dark:text-stone-400">Performance Score</div>
-                                <div className="text-lg font-bold text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5">
+                                <div className="text-lg font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2] mt-0.5">
                                     {employee.performanceScore ? `${employee.performanceScore}%` : 'N/A'}
                                 </div>
                             </div>
                             <div className={`p-3 rounded-xl border ${isDark ? 'bg-[#1E2822] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'}`}>
                                 <div className="text-[11px] text-stone-500 dark:text-stone-400">Attendance Rate</div>
-                                <div className="text-lg font-bold text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5">
+                                <div className="text-lg font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2] mt-0.5">
                                     {employee.attendanceRate ? `${employee.attendanceRate}%` : '98%'}
                                 </div>
                             </div>
@@ -241,7 +241,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                 </select>
                             </label>
                             {reportingMessage && <p role="status" className="text-[11px] text-stone-500 dark:text-stone-400">{reportingMessage}</p>}
-                            <button type="button" onClick={saveReportingLines} disabled={savingReportingLines} className="w-full rounded-lg bg-[#2C5E3B] px-3 py-2 text-xs font-bold text-white disabled:opacity-50">
+                            <button type="button" onClick={saveReportingLines} disabled={savingReportingLines} className="w-full rounded-lg bg-[var(--theme-primary)] px-3 py-2 text-xs font-bold text-white disabled:opacity-50">
                                 {savingReportingLines ? 'Saving…' : 'Save reporting relationships'}
                             </button>
                         </section>
@@ -257,9 +257,9 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                 <div className="flex items-center justify-between p-2.5 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
                                     <a
                                         href={`mailto:${employee.email}`}
-                                        className="flex items-center gap-2.5 min-w-0 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] transition-colors"
+                                        className="flex items-center gap-2.5 min-w-0 hover:text-[var(--theme-primary)] dark:hover:text-[#A9CBA2] transition-colors"
                                     >
-                                        <Mail size={15} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                                        <Mail size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] shrink-0" />
                                         <span className="text-xs truncate">{employee.email}</span>
                                     </a>
                                     <button
@@ -268,7 +268,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                         className="p-1 rounded hover:bg-stone-200 dark:hover:bg-white/10 text-stone-500 transition-colors cursor-pointer"
                                         title="Copy email"
                                     >
-                                        {copiedEmail ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                        {copiedEmail ? <Check size={14} className="text-[var(--theme-status-success-text)]" /> : <Copy size={14} />}
                                     </button>
                                 </div>
                             )}
@@ -277,9 +277,9 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                 <div className="flex items-center justify-between p-2.5 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
                                     <a
                                         href={`tel:${employee.phone}`}
-                                        className="flex items-center gap-2.5 min-w-0 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] transition-colors"
+                                        className="flex items-center gap-2.5 min-w-0 hover:text-[var(--theme-primary)] dark:hover:text-[#A9CBA2] transition-colors"
                                     >
-                                        <Phone size={15} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                                        <Phone size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] shrink-0" />
                                         <span className="text-xs font-mono">{employee.phone}</span>
                                     </a>
                                     <button
@@ -288,21 +288,21 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                         className="p-1 rounded hover:bg-stone-200 dark:hover:bg-white/10 text-stone-500 transition-colors cursor-pointer"
                                         title="Copy phone number"
                                     >
-                                        {copiedPhone ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                        {copiedPhone ? <Check size={14} className="text-[var(--theme-status-success-text)]" /> : <Copy size={14} />}
                                     </button>
                                 </div>
                             )}
 
                             {employee.joinDate && (
                                 <div className="flex items-center gap-2.5 p-2.5 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
-                                    <Calendar size={15} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
+                                    <Calendar size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2] shrink-0" />
                                     <span className="text-xs">Joined {new Date(employee.joinDate).toLocaleDateString()}</span>
                                 </div>
                             )}
 
                             {employee.emergencyContact && (
                                 <div className="flex items-center gap-2.5 p-2.5 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
-                                    <AlertCircle size={15} className="text-amber-500 shrink-0" />
+                                    <AlertCircle size={15} className="text-[var(--theme-status-warning-text)] shrink-0" />
                                     <span className="text-xs">Emergency: {employee.emergencyContact}</span>
                                 </div>
                             )}
@@ -331,7 +331,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                             </h4>
                             <div className="flex flex-wrap gap-1.5">
                                 {employee.badges.map((b, idx) => (
-                                    <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#EAE5D9] dark:bg-black/30 text-[#2C5E3B] dark:text-emerald-300 border border-[#2C5E3B]/20">
+                                    <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#EAE5D9] dark:bg-black/30 text-[var(--theme-primary)] text-[var(--theme-status-success-text)] border border-[var(--theme-border)]/20">
                                         {b}
                                     </span>
                                 ))}
@@ -358,7 +358,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                     onClose();
                                     onOpenIdCard(employee);
                                 }}
-                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-[#2C5E3B]/30 hover:bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] transition-colors cursor-pointer"
+                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-[var(--theme-border)]/30 hover:bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] transition-colors cursor-pointer"
                                 title="View & Print Employee ID Badge"
                             >
                                 <CreditCard size={14} />
@@ -373,7 +373,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                                     onClose();
                                     onOpenProfile(employee);
                                 }}
-                                className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[#2C5E3B] hover:bg-[#1E3F27] text-white shadow-sm transition-all cursor-pointer"
+                                className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-[var(--theme-primary)] hover:bg-[#1E3F27] text-white shadow-sm transition-all cursor-pointer"
                                 title="Open full profile modal to edit credentials, shifts, or permissions"
                             >
                                 <ExternalLink size={14} />

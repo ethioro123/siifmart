@@ -157,11 +157,11 @@ export const AccountsPayableTab: React.FC = () => {
                         <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                             3-Way Matched &amp; Ready
                         </span>
-                        <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-lg bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center">
                             <CheckCircle2 size={13} />
                         </div>
                     </div>
-                    <h4 className="text-xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono tabular-nums mt-1">
                         {stats.matchedCount} bills
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -174,11 +174,11 @@ export const AccountsPayableTab: React.FC = () => {
                         <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                             Match Discrepancies
                         </span>
-                        <div className="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-lg bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center justify-center">
                             <AlertTriangle size={13} />
                         </div>
                     </div>
-                    <h4 className="text-xl font-semibold tracking-tight text-rose-600 dark:text-rose-400 font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-mono tabular-nums mt-1">
                         {stats.discrepancyCount} bills
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -191,11 +191,11 @@ export const AccountsPayableTab: React.FC = () => {
                         <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                             Payment Batch Staged
                         </span>
-                        <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-lg bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center">
                             <CreditCard size={13} />
                         </div>
                     </div>
-                    <h4 className="text-xl font-semibold tracking-tight text-[#0071E3] dark:text-[#2997FF] font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-mono tabular-nums mt-1">
                         {selectedInvoiceIds.length > 0 ? `${currencySymbol} ${stats.selectedAmount.toLocaleString()}` : '0 staged'}
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -213,7 +213,7 @@ export const AccountsPayableTab: React.FC = () => {
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                                 Accounts Payable (AP) Ledger
                             </h3>
-                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-medium">
                                 <ShieldCheck size={12} />
                                 <span>3-Way Match Hardened</span>
                             </div>
@@ -256,7 +256,7 @@ export const AccountsPayableTab: React.FC = () => {
                             <button
                                 onClick={handleCreatePaymentRun}
                                 disabled={isActionLoading}
-                                className="bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0"
+                                className="bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0"
                             >
                                 {isActionLoading ? <Loader2 className="animate-spin" size={14} /> : <DollarSign size={14} />}
                                 <span>Create Payment Run ({selectedInvoiceIds.length})</span>
@@ -285,7 +285,7 @@ export const AccountsPayableTab: React.FC = () => {
                             {loading ? (
                                 <tr>
                                     <td colSpan={9} className="py-16 text-center text-[var(--theme-text-secondary)]">
-                                        <Loader2 className="animate-spin inline mr-2 text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                        <Loader2 className="animate-spin inline mr-2 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                                         <span className="text-xs">Loading Accounts Payable invoices...</span>
                                     </td>
                                 </tr>
@@ -318,7 +318,7 @@ export const AccountsPayableTab: React.FC = () => {
                                                     checked={selectedInvoiceIds.includes(inv.id)}
                                                     onChange={() => toggleSelect(inv.id)}
                                                     disabled={!canCreatePaymentRun || !isMatched || inv.status === 'Paid'}
-                                                    className="rounded text-[#0071E3] dark:text-[#2997FF] focus:ring-0 disabled:opacity-30 cursor-pointer"
+                                                    className="rounded text-[var(--theme-accent)] dark:text-[var(--theme-accent)] focus:ring-0 disabled:opacity-30 cursor-pointer"
                                                 />
                                             </td>
                                             <td className="py-3.5 px-4 font-mono text-xs font-semibold text-[var(--theme-text-primary)] whitespace-nowrap">
@@ -339,10 +339,10 @@ export const AccountsPayableTab: React.FC = () => {
                                             <td className="py-3.5 px-4 text-center whitespace-nowrap">
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
                                                     inv.matchStatus === 'Matched'
-                                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                                         : inv.matchStatus === 'Manual_Override'
-                                                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
-                                                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                                            ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
+                                                            : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                                 }`}>
                                                     {inv.matchStatus === 'Matched' && <CheckCircle2 size={11} />}
                                                     {inv.matchStatus === 'Manual_Override' && <ShieldAlert size={11} />}
@@ -353,7 +353,7 @@ export const AccountsPayableTab: React.FC = () => {
                                             <td className="py-3.5 px-4 text-center whitespace-nowrap">
                                                 <span className={`text-[11px] font-medium uppercase font-mono ${
                                                     inv.status === 'Paid'
-                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                        ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                                         : 'text-[var(--theme-text-secondary)]'
                                                 }`}>
                                                     {inv.status.replace(/_/g, ' ')}

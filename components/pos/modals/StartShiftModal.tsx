@@ -89,13 +89,13 @@ export const StartShiftModal: React.FC = () => {
                 <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-2.5">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center border border-blue-500/20 shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center border border-[var(--theme-status-info-border)] shrink-0">
                                 <User size={16} />
                             </div>
                             <div>
                                 <div className="flex items-center gap-2">
                                     <p className="text-xs font-semibold text-[var(--theme-text-primary)] leading-tight tracking-tight">{user?.name || 'Cashier'}</p>
-                                    <span className="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-600 dark:text-blue-400 font-mono text-[10px] font-black tracking-wider border border-blue-500/20">
+                                    <span className="px-2 py-0.5 rounded-md bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] font-mono text-[10px] font-black tracking-wider border border-[var(--theme-status-info-border)]">
                                         {cashierBadge}
                                     </span>
                                 </div>
@@ -104,17 +104,17 @@ export const StartShiftModal: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)] shadow-xs">
-                            <Store size={13} className="text-emerald-500" />
+                            <Store size={13} className="text-[var(--theme-status-success-text)]" />
                             <span>{activeSite?.name || 'POS Station'}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between text-xs font-medium text-[var(--theme-text-secondary)] pt-2 border-t border-[var(--theme-border-subtle)]">
                         <div className="flex items-center gap-1.5">
-                            <Clock size={13} className="text-amber-500" />
+                            <Clock size={13} className="text-[var(--theme-status-warning-text)]" />
                             <span>{t('pos.startingShiftAt', { time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })}</span>
                         </div>
-                        <span className="text-[10px] uppercase font-bold text-amber-500">{t('pos.cashierResponsibility')}</span>
+                        <span className="text-[10px] uppercase font-bold text-[var(--theme-status-warning-text)]">{t('pos.cashierResponsibility')}</span>
                     </div>
                 </div>
 
@@ -142,31 +142,31 @@ export const StartShiftModal: React.FC = () => {
                                     onClick={() => setSelectedCounter(counter)}
                                     className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
                                         isOccupied
-                                            ? 'bg-rose-500/5 border-rose-500/20 opacity-60 cursor-not-allowed'
+                                            ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] opacity-60 cursor-not-allowed'
                                             : isSelected
-                                                ? 'bg-blue-500/10 border-blue-500/50 shadow-xs ring-1 ring-blue-500/30 cursor-pointer'
+                                                ? 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] shadow-xs ring-1 ring-[var(--theme-status-info-border)] cursor-pointer'
                                                 : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] cursor-pointer'
                                     }`}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <span className={`text-xs font-bold ${isSelected ? 'text-blue-500' : 'text-[var(--theme-text-primary)]'}`}>
+                                        <span className={`text-xs font-bold ${isSelected ? 'text-[var(--theme-status-info-text)]' : 'text-[var(--theme-text-primary)]'}`}>
                                             {counter}
                                         </span>
                                         {isOccupied ? (
-                                            <Lock size={12} className="text-rose-500" />
+                                            <Lock size={12} className="text-[var(--theme-status-danger-text)]" />
                                         ) : isSelected ? (
-                                            <CheckCircle2 size={12} className="text-blue-500" />
+                                            <CheckCircle2 size={12} className="text-[var(--theme-status-info-text)]" />
                                         ) : (
-                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
                                         )}
                                     </div>
                                     <span className="text-[10px] font-mono mt-1">
                                         {isOccupied ? (
-                                            <span className="text-rose-500 font-semibold truncate block">
+                                            <span className="text-[var(--theme-status-danger-text)] font-semibold truncate block">
                                                 {occ?.cashierCode || t('pos.occupied')}
                                             </span>
                                         ) : (
-                                            <span className="text-emerald-500 font-semibold">{t('pos.available')}</span>
+                                            <span className="text-[var(--theme-status-success-text)] font-semibold">{t('pos.available')}</span>
                                         )}
                                     </span>
                                 </button>
@@ -220,8 +220,8 @@ export const StartShiftModal: React.FC = () => {
                 </div>
 
                 {/* Anti-Skimming Notice */}
-                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-2.5">
-                    <ShieldCheck size={18} className="text-blue-500 shrink-0 mt-0.5" />
+                <div className="p-3 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-2xl flex items-start gap-2.5">
+                    <ShieldCheck size={18} className="text-[var(--theme-status-info-text)] shrink-0 mt-0.5" />
                     <p className="text-xs text-[var(--theme-text-primary)] leading-relaxed font-medium">
                         {t('pos.antiSkimmingNotice', { counter: selectedCounter, badge: cashierBadge })}
                     </p>

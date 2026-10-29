@@ -84,14 +84,14 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                                     {unitSuffix}
                                 </span>
                             )}{' '}
-                            <span className="text-rose-500">*</span>
+                            <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <input
                             type="number"
                             aria-label="Order quantity"
                             step="1"
                             min="1"
-                            className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.qty ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums`}
+                            className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.qty ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums`}
                             value={currentQty || ''}
                             onChange={e => {
                                 const val = parseInt(e.target.value) || 0;
@@ -105,20 +105,20 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                                 = {totalUnits.toLocaleString()} sellable {sellUnit === 'ea' ? 'units' : `${sellUnit}s`}
                             </span>
                         )}
-                        {errors.qty && <span className="text-[9px] text-rose-500 block text-center font-semibold">{errors.qty}</span>}
+                        {errors.qty && <span className="text-[9px] text-[var(--theme-status-danger-text)] block text-center font-semibold">{errors.qty}</span>}
                     </div>
 
                     {/* Manifest Unit Cost */}
                     <div className={`${showRetailInput ? 'col-span-4' : 'col-span-6'} space-y-1`}>
                         <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold ml-1 block">
-                            Cost / {orderUnitName} <span className="text-rose-500">*</span>
+                            Cost / {orderUnitName} <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <input
                             type="number"
                             aria-label="Buying cost per order unit"
                             step="0.01"
                             min="0"
-                            className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.cost ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums`}
+                            className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.cost ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-2xl px-4 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums`}
                             value={currentCost || ''}
                             onChange={e => {
                                 setCurrentCost(purchaseAmount(parseFloat(e.target.value) || 0));
@@ -131,24 +131,24 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                                 = ~{currencySymbol} {costPerSellUnit.toLocaleString(undefined, { maximumFractionDigits: 2 })} / {sellUnit}
                             </span>
                         )}
-                        {errors.cost && <span className="text-[9px] text-rose-500 block text-center font-semibold">{errors.cost}</span>}
+                        {errors.cost && <span className="text-[9px] text-[var(--theme-status-danger-text)] block text-center font-semibold">{errors.cost}</span>}
                     </div>
 
                     {/* Retail Input (Shown for Catalog items) */}
                     {showRetailInput && (
                         <div className="col-span-4 space-y-1 relative">
                             <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold ml-1 block">
-                                Retail / {sellUnit} <span className="text-rose-500">*</span>
+                                Retail / {sellUnit} <span className="text-[var(--theme-status-danger-text)]">*</span>
                             </label>
                             <div className="relative">
                                 {(() => {
                                     if (!currentRetailPrice || !costPerSellUnit) return null;
                                     const marginPct = ((currentRetailPrice - costPerSellUnit) / currentRetailPrice) * 100;
                                     const badgeClass = marginPct >= 40
-                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                                         : marginPct >= 20
-                                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
-                                        : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20';
+                                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
+                                        : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]';
                                     return (
                                         <div className={`absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${badgeClass}`}>
                                             {Math.round(marginPct)}%
@@ -159,7 +159,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                                     type="number"
                                     step="1"
                                     min="0"
-                                    className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.retail ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums ${currentRetailPrice > 0 && currentCost > 0 ? 'pl-16 pr-2' : 'px-4'}`}
+                                    className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.retail ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-2xl text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] text-center font-bold outline-none transition-all tabular-nums ${currentRetailPrice > 0 && currentCost > 0 ? 'pl-16 pr-2' : 'px-4'}`}
                                     value={currentRetailPrice || ''}
                                     onChange={e => {
                                         setCurrentRetailPrice(Math.round(parseFloat(e.target.value) || 0));
@@ -168,7 +168,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                                     placeholder="0"
                                 />
                             </div>
-                            {errors.retail && <span className="text-[9px] text-rose-500 block text-center font-semibold">{errors.retail}</span>}
+                            {errors.retail && <span className="text-[9px] text-[var(--theme-status-danger-text)] block text-center font-semibold">{errors.retail}</span>}
                         </div>
                     )}
                 </div>

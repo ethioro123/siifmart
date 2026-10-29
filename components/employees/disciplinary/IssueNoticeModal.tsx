@@ -89,7 +89,7 @@ export function IssueNoticeModal({
     };
 
     return (
-        <div 
+        <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
@@ -99,7 +99,7 @@ export function IssueNoticeModal({
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                             <AlertTriangle size={18} />
                         </div>
                         <div>
@@ -125,13 +125,13 @@ export function IssueNoticeModal({
                     {/* Target Personnel */}
                     <div className="space-y-1.5">
                         <label className="font-semibold text-[var(--theme-text-primary)]">
-                            Target Personnel <span className="text-red-500">*</span>
+                            Target Personnel <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <select
                             value={targetEmpId}
                             onChange={(e) => setTargetEmpId(e.target.value)}
                             required
-                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] font-medium focus:outline-hidden focus:border-[#0071E3] transition-colors"
+                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] font-medium focus:outline-hidden focus:border-[var(--theme-border-focus)] transition-colors"
                         >
                             <option value="">Select Employee...</option>
                             {employees.map(emp => (
@@ -146,12 +146,12 @@ export function IssueNoticeModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1.5">
                             <label className="font-semibold text-[var(--theme-text-primary)]">
-                                Notice Type <span className="text-red-500">*</span>
+                                Notice Type <span className="text-[var(--theme-status-danger-text)]">*</span>
                             </label>
                             <select
                                 value={recordType}
                                 onChange={(e) => setRecordType(e.target.value as DisciplinaryType)}
-                                className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] font-medium focus:outline-hidden focus:border-[#0071E3]"
+                                className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] font-medium focus:outline-hidden focus:border-[var(--theme-border-focus)]"
                             >
                                 <option value="Verbal Warning">Verbal Warning</option>
                                 <option value="Written Warning">Written Warning</option>
@@ -164,12 +164,12 @@ export function IssueNoticeModal({
 
                         <div className="space-y-1.5">
                             <label className="font-semibold text-[var(--theme-text-primary)]">
-                                Severity Classification <span className="text-red-500">*</span>
+                                Severity Classification <span className="text-[var(--theme-status-danger-text)]">*</span>
                             </label>
                             <select
                                 value={severity}
                                 onChange={(e) => setSeverity(e.target.value as DisciplinarySeverity)}
-                                className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] font-medium focus:outline-hidden focus:border-[#0071E3]"
+                                className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] font-medium focus:outline-hidden focus:border-[var(--theme-border-focus)]"
                             >
                                 <option value="Low">Low — Minor Infraction</option>
                                 <option value="Medium">Medium — Standard Violation</option>
@@ -182,7 +182,7 @@ export function IssueNoticeModal({
                     {/* Incident Subject / Title */}
                     <div className="space-y-1.5">
                         <label className="font-semibold text-[var(--theme-text-primary)]">
-                            Incident Title / Subject <span className="text-red-500">*</span>
+                            Incident Title / Subject <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <input
                             type="text"
@@ -190,14 +190,14 @@ export function IssueNoticeModal({
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="e.g. Unreconciled Till Variance or Safety Breach"
                             required
-                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3]"
+                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[var(--theme-border-focus)]"
                         />
                     </div>
 
                     {/* Description & Evidence */}
                     <div className="space-y-1.5">
                         <label className="font-semibold text-[var(--theme-text-primary)]">
-                            Description & Evidentiary Findings <span className="text-red-500">*</span>
+                            Description & Evidentiary Findings <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <textarea
                             value={description}
@@ -205,14 +205,14 @@ export function IssueNoticeModal({
                             placeholder="Document the specific facts, CCTV timestamps, witness statements, or transaction audit logs..."
                             rows={3}
                             required
-                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3] resize-none"
+                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[var(--theme-border-focus)] resize-none"
                         />
                     </div>
 
                     {/* Mandated Corrective Action */}
                     <div className="space-y-1.5">
                         <label className="font-semibold text-[var(--theme-text-primary)]">
-                            Mandated Corrective Action / Sanction <span className="text-red-500">*</span>
+                            Mandated Corrective Action / Sanction <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <input
                             type="text"
@@ -220,7 +220,7 @@ export function IssueNoticeModal({
                             onChange={(e) => setActionTaken(e.target.value)}
                             placeholder="e.g. 90-day active record, till handling retraining, and loss recovery"
                             required
-                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3]"
+                            className="w-full px-3.5 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[var(--theme-border-focus)]"
                         />
                     </div>
 
@@ -247,7 +247,7 @@ export function IssueNoticeModal({
                                     }}
                                     className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                                         expirationDays === preset.val && !customExpiry
-                                            ? 'bg-[#0071E3] text-white shadow-xs'
+                                            ? 'bg-[var(--theme-accent)] text-white shadow-xs'
                                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
                                     }`}
                                 >
@@ -268,7 +268,7 @@ export function IssueNoticeModal({
                             onChange={(e) => setConfidentialNotes(e.target.value)}
                             placeholder="Internal HR-only notes regarding legal counsel, disciplinary history..."
                             rows={2}
-                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3] resize-none"
+                            className="w-full px-3.5 py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[var(--theme-border-focus)] resize-none"
                         />
                     </div>
 
@@ -285,7 +285,7 @@ export function IssueNoticeModal({
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-5 py-2.5 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
+                            className="px-5 py-2.5 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white font-semibold flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                         >
                             <ShieldAlert size={14} />
                             <span>{isSubmitting ? 'Issuing...' : 'Issue Formal Notice'}</span>

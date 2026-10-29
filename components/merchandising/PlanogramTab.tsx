@@ -231,12 +231,12 @@ export const PlanogramTab: React.FC = () => {
             Layout Workflow:
           </span>
           <div className="flex items-center gap-1.5 text-[var(--theme-text-secondary)]">
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+            <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold flex items-center gap-1">
               <CheckCircle2 size={13} /> Current placements
             </span>
             <span>→</span>
             <span className={`font-semibold flex items-center gap-1 ${
-              pendingCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-[var(--theme-text-secondary)]'
+              pendingCount > 0 ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-text-secondary)]'
             }`}>
               <Clock size={13} />
               <span>{pendingCount} Loaded Pending Moves</span>

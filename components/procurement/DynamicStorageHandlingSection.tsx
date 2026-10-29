@@ -24,8 +24,8 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
     const storageConfig = getCategoryStorageDefaults(domainId);
 
     const storageType = customAttributes.storage?.type || storageConfig.defaultStorage;
-    const isPerishable = customAttributes.storage?.isPerishable !== undefined 
-        ? customAttributes.storage?.isPerishable 
+    const isPerishable = customAttributes.storage?.isPerishable !== undefined
+        ? customAttributes.storage?.isPerishable
         : storageConfig.defaultPerishable;
 
     const handleFlagChange = (flagId: string, checked: boolean) => {
@@ -100,13 +100,13 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                 {/* Shelf Life Days */}
                 <div className="col-span-full sm:col-span-2 space-y-1">
                     <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                        Total product shelf life (days) {isPerishable && <span className="text-rose-500">*</span>}
+                        Total product shelf life (days) {isPerishable && <span className="text-[var(--theme-status-danger-text)]">*</span>}
                     </label>
                     <input
                         type="number"
                         aria-label="Total product shelf life (days)"
                         min="1" step="1"
-                        className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.shelfLifeDays ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
+                        className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.shelfLifeDays ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                         placeholder={storageConfig.defaultShelfLife ? `e.g. ${storageConfig.defaultShelfLife}` : 'Leave blank if durable'}
                         value={customAttributes.storage?.shelfLifeDays || ''}
                         onChange={e => {
@@ -124,7 +124,7 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                             }));
                         }}
                     />
-                    {errors.shelfLifeDays && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.shelfLifeDays}</span>}
+                    {errors.shelfLifeDays && <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors.shelfLifeDays}</span>}
                 </div>
 
                 {/* Max Stack Limit */}
@@ -145,7 +145,7 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
             {/* Inbound QC Receiving Verification Protocol */}
             <div className="space-y-1 pt-1">
                 <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 flex items-center gap-1">
-                    <ShieldCheck size={11} className="text-emerald-500" />
+                    <ShieldCheck size={11} className="text-[var(--theme-status-success-text)]" />
                     <span>Inbound QC Receiving Protocol & Verification Directive</span>
                 </label>
                 <div className="relative">
@@ -185,7 +185,7 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                             />
                             <span className={`text-xs font-semibold transition-colors ${
                                 flag.isAlert && isChecked
-                                    ? 'text-rose-500 font-bold'
+                                    ? 'text-[var(--theme-status-danger-text)] font-bold'
                                     : 'text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)]'
                             }`}>
                                 {flag.label}

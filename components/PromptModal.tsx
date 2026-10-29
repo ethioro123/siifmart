@@ -101,7 +101,7 @@ export default function PromptModal({
             autoFocus
           />
           {error && (
-            <p className="text-red-400 text-xs mt-1">{error}</p>
+            <p className="text-[var(--theme-status-danger-text)] text-xs mt-1">{error}</p>
           )}
         </div>
       </div>

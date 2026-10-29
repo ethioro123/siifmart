@@ -59,7 +59,7 @@ export default function SiteRoster({
         <div className={`space-y-6 ${className}`}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Users size={20} />
                     </div>
                     <div>
@@ -100,8 +100,8 @@ export default function SiteRoster({
                             className={`
                                 relative overflow-hidden group transition-all rounded-2xl border
                                 ${isHighlighted
-                                    ? 'bg-[var(--theme-bg-card)] border-[#0071E3] dark:border-[#2997FF] ring-2 ring-[#0071E3]/20 shadow-sm'
-                                    : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-xs hover:border-[#0071E3]/30'}
+                                    ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-focus)] dark:border-[var(--theme-border-focus)] ring-2 ring-[#0071E3]/20 shadow-sm'
+                                    : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-xs hover:border-[var(--theme-border-focus)]/30'}
                                 ${layout === 'grid' ? 'p-4 sm:p-5' : 'p-3.5 flex items-center gap-3.5'}
                             `}
                         >
@@ -117,7 +117,7 @@ export default function SiteRoster({
                                                     <User size={20} className="text-[var(--theme-text-secondary)]" />
                                                 )}
                                             </div>
-                                            <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded-full bg-[#0071E3] text-white text-[9px] font-semibold">
+                                            <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded-full bg-[var(--theme-accent)] text-white text-[9px] font-semibold">
                                                 L{emp.level}
                                             </div>
                                         </div>
@@ -163,7 +163,7 @@ export default function SiteRoster({
                                             {(emp.badges && emp.badges.length > 0) ? (
                                                 emp.badges.slice(0, 3).map((b, i) => (
                                                     <div key={i} className="w-5 h-5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[10px]">
-                                                        <Award size={11} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                                        <Award size={11} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                                                     </div>
                                                 ))
                                             ) : (

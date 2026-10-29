@@ -68,13 +68,13 @@ export const OverviewTab: React.FC = () => {
                                 {formatCompactNumber(totalRevenue, { currency: currencySymbol })}
                             </h3>
                         </div>
-                        <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <TrendingUp size={16} />
                         </div>
                     </div>
                     <div className="mt-4 pt-2.5 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
                         <span>Sales turnover</span>
-                        <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium">Inflows</span>
+                        <span className="font-mono text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium">Inflows</span>
                     </div>
                 </div>
 
@@ -85,17 +85,17 @@ export const OverviewTab: React.FC = () => {
                             <span className="text-xs font-medium text-[var(--theme-text-secondary)]">
                                 Total Expenses
                             </span>
-                            <h3 className="text-2xl font-semibold tracking-tight text-rose-600 dark:text-rose-400 font-mono tabular-nums mt-1">
+                            <h3 className="text-2xl font-semibold tracking-tight text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-mono tabular-nums mt-1">
                                 {formatCompactNumber(totalExpenses, { currency: currencySymbol })}
                             </h3>
                         </div>
-                        <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                             <Receipt size={16} />
                         </div>
                     </div>
                     <div className="mt-4 pt-2.5 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
                         <span>OpEx & payroll</span>
-                        <span className="font-mono text-rose-600 dark:text-rose-400 font-medium">Outlays</span>
+                        <span className="font-mono text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-medium">Outlays</span>
                     </div>
                 </div>
 
@@ -106,17 +106,17 @@ export const OverviewTab: React.FC = () => {
                             <span className="text-xs font-medium text-[var(--theme-text-secondary)]">
                                 Customer Refunds
                             </span>
-                            <h3 className="text-2xl font-semibold tracking-tight text-amber-600 dark:text-amber-400 font-mono tabular-nums mt-1">
+                            <h3 className="text-2xl font-semibold tracking-tight text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono tabular-nums mt-1">
                                 {formatCompactNumber(totalRefunds, { currency: currencySymbol })}
                             </h3>
                         </div>
-                        <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                             <RotateCcw size={16} />
                         </div>
                     </div>
                     <div className="mt-4 pt-2.5 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
                         <span>Credit notes & RMA</span>
-                        <span className="font-mono text-amber-600 dark:text-amber-400 font-medium">Reversals</span>
+                        <span className="font-mono text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium">Reversals</span>
                     </div>
                 </div>
 
@@ -149,13 +149,13 @@ export const OverviewTab: React.FC = () => {
                                 Net Operating Profit
                             </span>
                             <h3 className={`text-2xl font-semibold tracking-tight font-mono tabular-nums mt-1 ${
-                                netProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                                netProfit >= 0 ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                             }`}>
                                 {formatCompactNumber(netProfit, { currency: currencySymbol })}
                             </h3>
                         </div>
                         <div className={`w-8 h-8 rounded-xl ${
-                            netProfit >= 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                            netProfit >= 0 ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                         } flex items-center justify-center shrink-0`}>
                             <CircleDollarSign size={16} />
                         </div>
@@ -164,8 +164,8 @@ export const OverviewTab: React.FC = () => {
                         <span className="text-[var(--theme-text-secondary)]">Bottom line</span>
                         <span className={`px-2 py-0.5 rounded-full font-semibold ${
                             netProfit >= 0
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
+                                : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                         }`}>
                             {netProfit >= 0 ? '+' : ''}{profitMargin.toFixed(1)}% Margin
                         </span>
@@ -293,7 +293,7 @@ export const OverviewTab: React.FC = () => {
                     {/* Chart Legend */}
                     <div className="flex items-center justify-end gap-5 mt-3 pt-3 border-t border-[var(--theme-border)] text-xs text-[var(--theme-text-secondary)]">
                         <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-[#0071E3]" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--theme-accent)]" />
                             <span>Gross Revenue</span>
                         </div>
                         <div className="flex items-center gap-2">

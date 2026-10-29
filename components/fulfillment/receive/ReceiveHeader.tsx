@@ -124,8 +124,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         <div className="flex items-center gap-1.5 min-w-0">
                             <Truck size={13} className="text-[var(--theme-accent)] shrink-0 sm:hidden" />
                             <span className="text-xs font-bold text-[var(--theme-text-primary)] md:hidden">{t('warehouse.queueShort') || 'Queue'}</span>
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] shrink-0">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
                                 {filteredReceiveOrders.length}
                             </span>
                         </div>

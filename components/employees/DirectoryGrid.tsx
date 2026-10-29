@@ -64,7 +64,7 @@ export default function DirectoryGrid({
                            title={isOnline ? 'Online now' : 'Offline'}
                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--theme-bg-card)] transition-colors duration-300 ${
                               isOnline
-                                 ? 'bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.6)] animate-pulse'
+                                 ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_6px_rgba(52,211,153,0.6)] animate-pulse'
                                  : 'bg-neutral-400'
                            }`}
                         />
@@ -72,11 +72,11 @@ export default function DirectoryGrid({
 
                      <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
-                           <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] truncate group-hover:text-[#0071E3] dark:group-hover:text-[#2997FF] transition-colors">
+                           <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] truncate group-hover:text-[var(--theme-accent)] dark:group-hover:text-[var(--theme-accent)] transition-colors">
                               {employee.name}
                            </h4>
                            {employee.status === 'Pending Approval' && (
-                              <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold border border-amber-500/20 shrink-0">
+                              <span className="text-[11px] px-2 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold border border-[var(--theme-status-warning-border)] shrink-0">
                                  Pending
                               </span>
                            )}
@@ -85,10 +85,10 @@ export default function DirectoryGrid({
                            {getEmployeeJobTitle(employee) || roleConfig.label}
                         </p>
                         <div className="mt-1"><WorkforceScopeBadge employee={employee} /></div>
-                        
+
                         {/* Site Scoping / Unassigned Warning */}
                         {siteInfo.isWarning ? (
-                           <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 truncate font-medium flex items-center gap-1" title="Workplace facility assignment is mandatory">
+                           <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1.5 truncate font-medium flex items-center gap-1" title="Workplace facility assignment is mandatory">
                               <AlertTriangle size={11} className="shrink-0" />
                               <span>{siteInfo.label}</span>
                            </p>
@@ -103,8 +103,8 @@ export default function DirectoryGrid({
                                  </span>
                               ) : siteInfo.facilityId ? (
                                  <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded shrink-0 font-semibold ${
-                                    siteInfo.isHQ 
-                                       ? 'bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20' 
+                                    siteInfo.isHQ
+                                       ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20'
                                        : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                  }`} title={`Assigned Facility ID: ${siteInfo.facilityId}`}>
                                     {siteInfo.facilityId}
@@ -117,8 +117,8 @@ export default function DirectoryGrid({
                         {canSeeLocation && geofence ? (
                            geofence.isForeignAnomaly ? (
                               <div className="flex items-center gap-1 mt-1" title={`Security Alert: ${geofence.anomalyReason || 'Off-Premise anomaly detected'}`}>
-                                 <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-semibold border border-rose-500/20 truncate">
-                                    <AlertTriangle size={10} className="text-rose-500 shrink-0" />
+                                 <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-semibold border border-[var(--theme-status-danger-border)] truncate">
+                                    <AlertTriangle size={10} className="text-[var(--theme-status-danger-text)] shrink-0" />
                                     Foreign Premise
                                  </span>
                               </div>
@@ -143,10 +143,10 @@ export default function DirectoryGrid({
                               const loggedInToday = date.getDate() === today.getDate() &&
                                  date.getMonth() === today.getMonth() &&
                                  date.getFullYear() === today.getFullYear();
-                              
+
                               return loggedInToday ? (
-                                 <div className="inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 mt-2 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20 w-fit">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                 <div className="inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 mt-2 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold border border-[var(--theme-status-success-border)] w-fit">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
                                     Active Today
                                  </div>
                               ) : null;

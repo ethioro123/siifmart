@@ -19,7 +19,7 @@ const StatCard = ({ title, value, icon: Icon, iconBg, iconColor, onClick, active
          onClick ? 'cursor-pointer active:scale-[0.98]' : ''
       } ${
          active
-            ? 'border-[#0071E3] dark:border-[#2997FF] shadow-[0_2px_12px_rgba(0,113,227,0.15)] ring-1 ring-[#0071E3]/20'
+            ? 'border-[var(--theme-border-focus)] dark:border-[var(--theme-border-focus)] shadow-[0_2px_12px_rgba(0,113,227,0.15)] ring-1 ring-[#0071E3]/20'
             : 'border-[var(--theme-border)] shadow-[var(--shadow-sm)] hover:border-[var(--theme-border-strong)]'
       }`}
    >
@@ -42,7 +42,7 @@ const StatCard = ({ title, value, icon: Icon, iconBg, iconColor, onClick, active
          {onClick && (
             <div className={`inline-flex items-center gap-1 text-[11px] font-semibold transition-colors ${
                active
-                  ? 'text-[#0071E3] dark:text-[#2997FF]'
+                  ? 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)]'
                   : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
             }`}>
                <span>{active ? 'Hide' : 'Queue'}</span>
@@ -93,22 +93,22 @@ export default function EmployeeStats({
             title="Workforce"
             value={employees.length.toLocaleString()}
             icon={User}
-            iconBg="bg-blue-500/10"
-            iconColor="text-[#0071E3] dark:text-[#2997FF]"
+            iconBg="bg-[var(--theme-status-info-bg)]"
+            iconColor="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]"
          />
          <StatCard
             title="Active Shift"
             value={activeShiftsCount.toLocaleString()}
             icon={Clock}
-            iconBg="bg-emerald-500/10"
-            iconColor="text-emerald-600 dark:text-emerald-400"
+            iconBg="bg-[var(--theme-status-success-bg)]"
+            iconColor="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]"
          />
          <StatCard
             title="Pending Tasks"
             value={tasks.filter(t => t.status !== 'Completed').length.toLocaleString()}
             icon={ClipboardList}
-            iconBg="bg-amber-500/10"
-            iconColor="text-amber-600 dark:text-amber-400"
+            iconBg="bg-[var(--theme-status-warning-bg)]"
+            iconColor="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]"
             onClick={() => setIsTaskQueueOpen(!isTaskQueueOpen)}
             active={isTaskQueueOpen}
          />

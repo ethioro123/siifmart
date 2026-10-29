@@ -13,7 +13,7 @@ export const ReceivingPendingList: React.FC = () => {
     const { activeSite, sites } = useData();
     const { user } = useStore();
     const { jobs, transfers } = useFulfillmentData();
-    
+
     const {
         orderRefScanInput,
         setOrderRefScanInput,
@@ -56,7 +56,7 @@ export const ReceivingPendingList: React.FC = () => {
 
         return allTransferSources.filter(t => {
             if (String(t.destSiteId) !== String(activeSite?.id)) return false;
-            
+
             const transferStatus = String((t as any).transferStatus || '').toLowerCase().replace(/[-_]/g, '');
             const jobStatus = String((t as any).status || '').toLowerCase().replace(/[-_]/g, '');
 
@@ -82,7 +82,7 @@ export const ReceivingPendingList: React.FC = () => {
             <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 mb-2">
                 <div className="flex items-center justify-between mb-3">
                     <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                        <div className="w-5 h-5 rounded-md bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                             <Scan size={13} />
                         </div>
                         {t('posCommand.quickScanHandover')}
@@ -113,7 +113,7 @@ export const ReceivingPendingList: React.FC = () => {
             {/* Inbound Shipment List */}
             <div className="space-y-3">
                 <h3 className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-1">{t('posCommand.inboundShipments')}</h3>
-                
+
                 {pendingItems.length === 0 ? (
                     <div className="text-center py-12 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
                         <Truck size={40} className="mx-auto mb-4 opacity-30 text-[var(--theme-text-secondary)]" />
@@ -126,7 +126,7 @@ export const ReceivingPendingList: React.FC = () => {
                             const isExpanded = expandedTransferId === item.id;
                             const sourceSite = sites.find(s => String(s.id) === String(item.sourceSiteId));
                             const originName = sourceSite ? sourceSite.name : `Site #${item.sourceSiteId}`;
-                            
+
                             return (
                                 <div
                                     key={item.id}
@@ -143,7 +143,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                 <span className="font-mono font-bold text-sm text-[var(--theme-text-primary)] uppercase tracking-tight">
                                                     {formatJobId({ ...item, type: 'TRANSFER' } as any)}
                                                 </span>
-                                                <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
+                                                <span className="px-2.5 py-0.5 bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] rounded-full text-[9px] font-semibold uppercase tracking-wider">
                                                     {(() => {
                                                         const stat = ((item as any).transferStatus || item.status || '').toLowerCase();
                                                         return stat === 'in_transit' || stat === 'dispatched' ? t('posCommand.inTransit') : t('posCommand.pending');
@@ -188,7 +188,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                     }
                                                 })()}
                                             </div>
-                                            
+
                                             <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs font-semibold text-[var(--theme-text-secondary)]">
                                                 <span className="flex items-center gap-1.5">
                                                     <MapPin size={12} className="text-[var(--theme-text-secondary)]" />

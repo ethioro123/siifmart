@@ -143,8 +143,8 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                     <form onSubmit={handleProceedToAuth} className="space-y-4">
                         {/* Till Telemetry Banner */}
                         <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
-                            isOverThreshold 
-                                ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]' 
+                            isOverThreshold
+                                ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'
                         }`}>
                             <ArrowDownCircle size={20} className={isOverThreshold ? 'text-[var(--theme-status-warning)] mt-0.5' : 'text-[var(--theme-text-primary)] mt-0.5'} />
@@ -233,20 +233,20 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                 ) : (
                     /* Step 2: 4-Eyes Supervisor Authentication */
                     <div className="space-y-5 animate-in fade-in">
-                        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-start gap-3">
-                            <Lock size={22} className="text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
+                        <div className="p-4 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-2xl flex items-start gap-3">
+                            <Lock size={22} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0 mt-0.5" />
                             <div className="space-y-0.5">
-                                <h4 className="text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase tracking-wider">
+                                <h4 className="text-xs font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] uppercase tracking-wider">
                                     Supervisor Co-Sign Required (4-Eyes Principle)
                                 </h4>
-                                <p className="text-xs text-emerald-800 dark:text-emerald-300 font-medium leading-relaxed">
+                                <p className="text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium leading-relaxed">
                                     Authorizing drop of <b>{policy.currency} {amountNum.toLocaleString()}</b> into Bag #{safeBagNumber}. Store Manager or Supervisor must enter their staff PIN to verify physical cash deposit into drop safe.
                                 </p>
                             </div>
                         </div>
 
                         {pinError && (
-                            <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold text-center rounded-xl animate-shake">
+                            <div className="p-3 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-xs font-bold text-center rounded-xl animate-shake">
                                 {pinError}
                             </div>
                         )}

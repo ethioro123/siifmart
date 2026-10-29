@@ -25,16 +25,16 @@ export const SystemLoadWidget = () => {
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 flex flex-col justify-center relative overflow-hidden shadow-sm h-full w-full min-w-0">
             <div className="flex items-center justify-between mb-4 relative z-10 w-full">
                 <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                    <div className="p-2 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] shrink-0">
                         <Server size={16} />
                     </div>
                     <div className="min-w-0 flex-1">
                         <span className="text-[11px] text-[var(--theme-text-primary)] font-bold uppercase tracking-wider block truncate">System Load</span>
-                        <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold tracking-wider truncate block">OPTIMAL</span>
+                        <span className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono font-semibold tracking-wider truncate block">OPTIMAL</span>
                     </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
                 </div>
             </div>
 

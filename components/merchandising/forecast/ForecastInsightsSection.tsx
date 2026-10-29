@@ -23,7 +23,7 @@ export const ForecastInsightsSection: React.FC<ForecastInsightsSectionProps> = (
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div>
                 <div className="flex items-center gap-3 mb-1">
-                    <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <Sparkles size={18} />
                     </div>
                     <div>
@@ -39,8 +39,8 @@ export const ForecastInsightsSection: React.FC<ForecastInsightsSectionProps> = (
                 <div className="space-y-3 mt-4">
                     <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
                         <div className="flex items-center gap-1.5 mb-0.5">
-                            <AlertTriangle size={12} className="text-rose-500" />
-                            <p className="text-[10px] text-rose-500 font-semibold uppercase tracking-wider">
+                            <AlertTriangle size={12} className="text-[var(--theme-status-danger-text)]" />
+                            <p className="text-[10px] text-[var(--theme-status-danger-text)] font-semibold uppercase tracking-wider">
                                 Inventory Deficits
                             </p>
                         </div>

@@ -41,7 +41,7 @@ export const EditableFinancialsCard: React.FC<EditableFinancialsCardProps> = ({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {/* 1. Retail Price */}
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
-                    <DollarSign size={14} className="mt-1 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <DollarSign size={14} className="mt-1 flex-shrink-0 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                     <div className="space-y-1 min-w-0 flex-1">
                         <label className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
                             Retail Price *
@@ -62,10 +62,10 @@ export const EditableFinancialsCard: React.FC<EditableFinancialsCardProps> = ({
                 {/* 2. Promo / Sale Price */}
                 <div className={`p-3 rounded-xl flex items-start gap-3 border ${
                     salePrice > 0
-                        ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-400/5 dark:border-amber-400/10'
+                        ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'
                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
                 }`}>
-                    <Tag size={14} className="mt-1 flex-shrink-0 text-amber-500" />
+                    <Tag size={14} className="mt-1 flex-shrink-0 text-[var(--theme-status-warning-text)]" />
                     <div className="space-y-1 min-w-0 flex-1">
                         <label className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
                             Promo Price
@@ -86,10 +86,10 @@ export const EditableFinancialsCard: React.FC<EditableFinancialsCardProps> = ({
                 {/* 3. Discount Percentage */}
                 <div className={`p-3 rounded-xl flex items-start gap-3 border ${
                     salePrice > 0 && discountPct > 0
-                        ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-400/5 dark:border-amber-400/10'
+                        ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'
                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
                 }`}>
-                    <Percent size={14} className="mt-1 flex-shrink-0 text-amber-500" />
+                    <Percent size={14} className="mt-1 flex-shrink-0 text-[var(--theme-status-warning-text)]" />
                     <div className="space-y-0.5 min-w-0 flex-1">
                         <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">Discount</span>
                         <div className="text-xs font-mono font-bold text-[var(--theme-text-primary)] leading-tight pt-1">
@@ -101,9 +101,9 @@ export const EditableFinancialsCard: React.FC<EditableFinancialsCardProps> = ({
                 {/* 4. Competitor Price */}
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     {compDiff > 0 ? (
-                        <TrendingDown size={14} className="mt-1 flex-shrink-0 text-red-500" />
+                        <TrendingDown size={14} className="mt-1 flex-shrink-0 text-[var(--theme-status-danger-text)]" />
                     ) : (
-                        <TrendingUp size={14} className="mt-1 flex-shrink-0 text-emerald-500" />
+                        <TrendingUp size={14} className="mt-1 flex-shrink-0 text-[var(--theme-status-success-text)]" />
                     )}
                     <div className="space-y-1 min-w-0 flex-1">
                         <label className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
@@ -147,7 +147,7 @@ export const EditableFinancialsCard: React.FC<EditableFinancialsCardProps> = ({
 
                         {/* 6. Gross Profit */}
                         <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
-                            <TrendingUp size={14} className="mt-1 flex-shrink-0 text-emerald-500" />
+                            <TrendingUp size={14} className="mt-1 flex-shrink-0 text-[var(--theme-status-success-text)]" />
                             <div className="space-y-0.5 min-w-0 flex-1">
                                 <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">Gross Profit</span>
                                 <div className="text-xs font-mono font-bold text-[var(--theme-text-primary)] leading-tight pt-1">
@@ -158,10 +158,10 @@ export const EditableFinancialsCard: React.FC<EditableFinancialsCardProps> = ({
 
                         {/* 7. Gross Margin */}
                         <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
-                            <Percent size={14} className="mt-1 flex-shrink-0 text-emerald-500" />
+                            <Percent size={14} className="mt-1 flex-shrink-0 text-[var(--theme-status-success-text)]" />
                             <div className="space-y-0.5 min-w-0 flex-1">
                                 <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">Gross Margin</span>
-                                <div className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 leading-tight pt-1">
+                                <div className="text-xs font-mono font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] leading-tight pt-1">
                                     {marginPct > 0 ? `${marginPct.toFixed(1)}%` : <span className="text-[var(--theme-text-muted)] font-medium">—</span>}
                                 </div>
                             </div>

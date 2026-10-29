@@ -88,7 +88,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
             <div className={cardBase}>
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--theme-border-subtle)]">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center justify-center shrink-0">
                             <Truck size={16} />
                         </div>
                         <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">Supplier Information</h3>
@@ -150,8 +150,8 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                     {(newPOSupplier || manualVendorName) && (
                         <div className={`flex items-start gap-2.5 text-[11px] p-3 rounded-xl border ${
                             isUnverifiedVendor
-                                ? 'text-amber-800 dark:text-amber-300 bg-amber-500/10 border-amber-500/30'
-                                : 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                                ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'
+                                : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
                         }`}>
                             {isUnverifiedVendor ? (
                                 <AlertTriangle size={14} className="mt-0.5 shrink-0" />
@@ -182,7 +182,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
             <div className={cardBase}>
                 <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--theme-border-subtle)]">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] flex items-center justify-center shrink-0">
                             <MapPin size={16} />
                         </div>
                         <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">Logistics & Receiving</h3>
@@ -194,7 +194,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                     <div className="space-y-1.5 relative" ref={siteDropdownRef}>
                         <div className="flex flex-col items-start gap-1 xl:flex-row xl:items-center xl:justify-between ml-1">
                             <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block">
-                                Receiving Facility <span className="text-amber-600 dark:text-amber-400 font-bold">(Warehouse / DC Only)</span>
+                                Receiving Facility <span className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-bold">(Warehouse / DC Only)</span>
                             </label>
                             <span className="text-[9px] text-[var(--theme-text-secondary)] italic font-medium">
                                 {isEditMode ? 'Locked on existing PO' : 'No direct store delivery'}
@@ -241,7 +241,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                         <button
                                             type="button"
                                             onClick={() => setDestinationSiteIds([])}
-                                            className="text-[10px] text-red-500 font-bold hover:underline cursor-pointer"
+                                            className="text-[10px] text-[var(--theme-status-danger-text)] font-bold hover:underline cursor-pointer"
                                         >
                                             Clear
                                         </button>
@@ -263,7 +263,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                                 );
                                             }}
                                             className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-colors ${destinationSiteIds.includes(s.id)
-                                                ? 'bg-emerald-500/20 text-emerald-950 dark:text-emerald-100 font-bold border border-emerald-500/30'
+                                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-bold border border-[var(--theme-status-success-border)]'
                                                 : 'hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-transparent'
                                             }`}
                                         >
@@ -276,7 +276,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">{s.name}</span>
-                                                    <span className="text-[9px] px-1 py-0.5 rounded font-mono font-bold uppercase bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30">
+                                                    <span className="text-[9px] px-1 py-0.5 rounded font-mono font-bold uppercase bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                                         {s.type === 'Distribution Center' ? 'DC' : 'Warehouse'}
                                                     </span>
                                                 </div>
@@ -284,7 +284,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                                     <span className="font-bold text-[var(--theme-text-primary)]">{formatDisplaySiteId(s)}</span> • {s.address || 'Central Storage'}
                                                 </p>
                                             </div>
-                                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${s.country === 'KE' ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-500/20 border border-emerald-500/30' : 'text-sky-800 dark:text-sky-300 bg-sky-500/20 border border-sky-500/30'}`}>
+                                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${s.country === 'KE' ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)]' : 'text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)]'}`}>
                                                 {s.country === 'KE' ? 'KE' : 'ET'}
                                             </span>
                                         </div>
@@ -299,16 +299,16 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                 {destinationSiteIds.map(id => {
                                     const site = sites.find(s => s.id === id);
                                     return (
-                                        <span key={id} className="text-xs bg-emerald-500/20 border border-emerald-500/40 text-emerald-950 dark:text-emerald-100 px-3 py-1.5 rounded-xl flex items-center gap-2 font-bold shadow-sm backdrop-blur-sm">
-                                            <span className="font-mono text-emerald-950 dark:text-emerald-200 font-bold">{formatDisplaySiteId(site)}</span>
+                                        <span key={id} className="text-xs bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] px-3 py-1.5 rounded-xl flex items-center gap-2 font-bold shadow-sm backdrop-blur-sm">
+                                            <span className="font-mono text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-bold">{formatDisplaySiteId(site)}</span>
                                             <span className="truncate max-w-[140px] text-[var(--theme-text-primary)] font-bold">{site?.name}</span>
-                                            <span className="text-[10px] uppercase font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-500/25 text-amber-950 dark:text-amber-200 border border-amber-500/40">
+                                            <span className="text-[10px] uppercase font-mono font-semibold px-1.5 py-0.5 rounded bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                                 [{site?.type === 'Distribution Center' ? 'DC' : 'WH'}]
                                             </span>
                                             {!isEditMode && (
                                                 <X
                                                     size={13}
-                                                    className="cursor-pointer text-[var(--theme-text-secondary)] hover:text-red-500 dark:hover:text-red-400 transition-colors ml-0.5"
+                                                    className="cursor-pointer text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] transition-colors ml-0.5"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         setDestinationSiteIds(prev => prev.filter(sid => sid !== id));

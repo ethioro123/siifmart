@@ -41,7 +41,7 @@ const PermissionToggle: React.FC<PermissionToggleProps> = ({
             disabled ? 'opacity-40 cursor-not-allowed' : ''
         } ${
             enabled
-                ? danger ? 'bg-red-500' : 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]'
+                ? danger ? 'bg-[var(--theme-status-danger-bg)]' : 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]'
                 : 'bg-neutral-300 dark:bg-neutral-700'
         }`}
     >
@@ -82,8 +82,8 @@ const SecurityScore: React.FC<SecurityScoreProps> = ({ policies, role }) => {
 
     const getColor = (s: number) => {
         if (s >= 90) return 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/30';
-        if (s >= 70) return 'text-amber-600 dark:text-amber-400 border-amber-500/30';
-        return 'text-red-500 border-red-500/30';
+        if (s >= 70) return 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
+        return 'text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]';
     };
 
     return (
@@ -98,9 +98,9 @@ const SecurityScore: React.FC<SecurityScoreProps> = ({ policies, role }) => {
                 </div>
             </div>
             {issues.length > 0 && (
-                <div className="text-xs text-amber-800 dark:text-amber-300 bg-amber-500/10 px-3.5 py-2.5 rounded-xl border border-amber-500/20">
+                <div className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-3.5 py-2.5 rounded-xl border border-[var(--theme-status-warning-border)]">
                     <div className="flex items-center gap-1.5 font-semibold mb-1">
-                        <AlertTriangle size={13} className="text-amber-600 dark:text-amber-400" /> Audit Advisories:
+                        <AlertTriangle size={13} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" /> Audit Advisories:
                     </div>
                     <ul className="list-disc list-inside text-[11px] opacity-90 space-y-0.5">
                         {issues.map((issue, i) => <li key={i}>{issue}</li>)}
@@ -168,8 +168,8 @@ export default function RoleSettings() {
 
         return [
             { id: 'admin', name: 'Assistant CEO / Admin', users: counts.admin, badge: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20', description: 'HQ executive administration with complete audit visibility' },
-            { id: 'store_manager', name: 'Store Manager', users: counts.store_manager, badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20', description: 'Branch retail oversight constrained by Zero-Trust approval rules' },
-            { id: 'cashier', name: 'Retail Staff (Cashier)', users: counts.cashier, badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', description: 'POS checkout operators locked to local terminal registers' },
+            { id: 'store_manager', name: 'Store Manager', users: counts.store_manager, badge: 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]', description: 'Branch retail oversight constrained by Zero-Trust approval rules' },
+            { id: 'cashier', name: 'Retail Staff (Cashier)', users: counts.cashier, badge: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]', description: 'POS checkout operators locked to local terminal registers' },
             { id: 'warehouse', name: 'Warehouse Ops', users: counts.warehouse, badge: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20', description: 'Fulfillment and putaway personnel governed by blind scanning' },
         ];
     }, [employees]);
@@ -238,10 +238,10 @@ export default function RoleSettings() {
                 </div>
                 <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-full border border-[var(--theme-border)]">
                     <span className="flex h-2 w-2 relative">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--theme-status-success-bg)] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--theme-status-success-bg)]"></span>
                     </span>
-                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Active & Enforced</span>
+                    <span className="text-[10px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] uppercase tracking-wider">Active & Enforced</span>
                 </div>
             </div>
 
@@ -324,7 +324,7 @@ export default function RoleSettings() {
                                                         <div className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
                                                             {perm.label}
                                                             {perm.hqApprovalRequired && (
-                                                                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                                                                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                                                     HQ Control
                                                                 </span>
                                                             )}
@@ -364,10 +364,10 @@ export default function RoleSettings() {
                             <SecurityScore policies={currentPolicy} role={activeRole} />
 
                             {activeRole === 'admin' && (
-                                <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5">
-                                    <AlertCircle className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" size={16} />
-                                    <div className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed font-medium">
-                                        <strong className="font-semibold text-amber-900 dark:text-amber-200">Admin Safety Guardrail:</strong> Modifying Geo-IP or Shift Hour restrictions on the <strong>Admin</strong> role can prevent emergency system recovery outside working hours. Keep emergency bypass credentials secure.
+                                <div className="p-3.5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl flex items-start gap-2.5">
+                                    <AlertCircle className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" size={16} />
+                                    <div className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] leading-relaxed font-medium">
+                                        <strong className="font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">Admin Safety Guardrail:</strong> Modifying Geo-IP or Shift Hour restrictions on the <strong>Admin</strong> role can prevent emergency system recovery outside working hours. Keep emergency bypass credentials secure.
                                     </div>
                                 </div>
                             )}
@@ -435,7 +435,7 @@ export default function RoleSettings() {
                                 <div className="space-y-2.5">
                                     <div className="flex items-center justify-between p-3 border border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-card)]">
                                         <div className="flex items-center gap-2.5 pr-2">
-                                            <MapPin size={15} className="text-amber-600 dark:text-amber-400" />
+                                            <MapPin size={15} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" />
                                             <div>
                                                 <div className="text-xs font-semibold text-[var(--theme-text-primary)]">Location Fencing (Geo-IP)</div>
                                                 <div className="text-[11px] text-[var(--theme-text-secondary)]">Restrict login to corporate IP / VPN ranges only</div>

@@ -65,12 +65,12 @@ export const ProposalDiffView: React.FC<ProposalDiffViewProps> = ({
           <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2">
             <span className="font-semibold text-[var(--theme-text-primary)]">Pricing & Margin Impact</span>
             {pricingAnalysis.requiresFinance ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                 <AlertTriangle size={12} />
                 Below {MARGIN_FLOOR_PCT}% Floor · Finance Co-Approval Required
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                 <CheckCircle size={12} />
                 Complies with Margin Floor
               </span>
@@ -98,7 +98,7 @@ export const ProposalDiffView: React.FC<ProposalDiffViewProps> = ({
             </div>
             <div>
               <p className="text-[10px] text-[var(--theme-text-secondary)]">Effective Gross Margin</p>
-              <p className={`font-bold ${pricingAnalysis.requiresFinance ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+              <p className={`font-bold ${pricingAnalysis.requiresFinance ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'}`}>
                 {pricingAnalysis.effectiveMarginPct !== null ? `${pricingAnalysis.effectiveMarginPct.toFixed(1)}%` : 'N/A'}
                 {pricingAnalysis.currentMarginPct !== null && (
                   <span className="text-[10px] font-normal text-[var(--theme-text-secondary)] ml-1">

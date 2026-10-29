@@ -59,7 +59,7 @@ export const PODraftBanner: React.FC<PODraftBannerProps> = ({
                 <button
                     type="button"
                     onClick={onDiscard}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-red-500 hover:text-red-600 hover:bg-red-500/10 transition-colors border border-red-500/20 active:scale-[0.98] cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] transition-colors border border-[var(--theme-status-danger-border)] active:scale-[0.98] cursor-pointer"
                     title="Permanently remove saved draft and start fresh"
                 >
                     <Trash2 size={13} />

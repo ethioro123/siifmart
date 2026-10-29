@@ -306,20 +306,20 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                 required
                                 maxLength={4}
                                 className={`w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-subtle)] border rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] uppercase ${
-                                    !codeValidation.valid ? 'border-amber-500 ring-1 ring-amber-500/30' : 'border-[var(--theme-border)]'
+                                    !codeValidation.valid ? 'border-[var(--theme-status-warning-border)] ring-1 ring-[var(--theme-status-warning-border)]' : 'border-[var(--theme-border)]'
                                 }`}
                             />
                             {!codeValidation.valid && (
-                                <div className="mt-1.5 p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-between gap-1 text-[11px] text-amber-700 dark:text-amber-300">
+                                <div className="mt-1.5 p-2 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-lg flex items-center justify-between gap-1 text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                                     <div className="flex items-center gap-1.5 min-w-0 pr-1">
-                                        <AlertTriangle size={12} className="shrink-0 text-amber-500" />
+                                        <AlertTriangle size={12} className="shrink-0 text-[var(--theme-status-warning-text)]" />
                                         <span className="truncate">{codeValidation.error}</span>
                                     </div>
                                     {codeValidation.suggestedCode && (
                                         <button
                                             type="button"
                                             onClick={() => handleApplySuggestion(codeValidation.suggestedCode!)}
-                                            className="shrink-0 px-2 py-0.5 rounded font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-colors cursor-pointer text-[10px]"
+                                            className="shrink-0 px-2 py-0.5 rounded font-semibold bg-[var(--theme-status-warning-bg)] text-white bg-[var(--theme-status-warning-bg)] transition-colors cursor-pointer text-[10px]"
                                         >
                                             Use {codeValidation.suggestedCode}
                                         </button>

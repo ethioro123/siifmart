@@ -99,7 +99,7 @@ export default function TimeOffTab({
                     </div>
                     <div className="w-full h-2.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden border border-[var(--theme-border)]">
                         <div
-                            className="h-full bg-amber-500 transition-all rounded-full"
+                            className="h-full bg-[var(--theme-status-warning-bg)] transition-all rounded-full"
                             style={{ width: `${Math.min(100, (remainingSick / TOTAL_SICK) * 100)}%` }}
                         />
                     </div>
@@ -153,9 +153,9 @@ export default function TimeOffTab({
                         const reason = (req as any).reason;
 
                         const statusColors = {
-                            Approved: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/25',
-                            Pending: 'bg-amber-500/15 text-amber-500 border-amber-500/25',
-                            Rejected: 'bg-rose-500/15 text-rose-500 border-rose-500/25'
+                            Approved: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
+                            Pending: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
+                            Rejected: 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                         }[status as 'Approved' | 'Pending' | 'Rejected'] || 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]';
 
                         return (
@@ -192,7 +192,7 @@ export default function TimeOffTab({
                                     <div className="flex items-center gap-2 shrink-0">
                                         <button
                                             onClick={() => onRejectRequest(req.id)}
-                                            className="px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-500 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                                            className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] transition-colors cursor-pointer"
                                         >
                                             Reject
                                         </button>

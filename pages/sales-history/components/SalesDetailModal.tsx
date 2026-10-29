@@ -50,7 +50,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                     {/* Modal Header Card */}
                     <div className="flex items-center justify-between mb-5 bg-[var(--theme-bg-card)] p-4 sm:p-5 rounded-2xl border border-[var(--theme-border)] shadow-[var(--shadow-sm)]">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                 <Receipt size={18} />
                             </div>
                             <div>
@@ -208,7 +208,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
 
                                 {/* Event 1: Completed */}
                                 <div className="flex gap-4 relative items-start">
-                                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0 z-10">
+                                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center justify-center shrink-0 z-10">
                                         <CheckCircle size={15} />
                                     </div>
                                     <div>
@@ -227,7 +227,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                 {auditLogs.length > 0 ? (
                                     auditLogs.map(log => (
                                         <div key={log.id} className="flex gap-4 relative items-start">
-                                            <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20 flex items-center justify-center shrink-0 z-10">
+                                            <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-status-info-border)] flex items-center justify-center shrink-0 z-10">
                                                 <Shield size={15} />
                                             </div>
                                             <div>
@@ -289,7 +289,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                             <button
                                 type="button"
                                 onClick={onIssueReturn}
-                                className="flex-1 h-11 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 border border-rose-500/20 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
+                                className="flex-1 h-11 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
                             >
                             <RotateCcw size={16} /> Continue return in POS
                             </button>

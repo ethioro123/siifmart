@@ -160,9 +160,9 @@ export function CountryQuickLoginPanel({
       case 6:
       case 7:
       case 8:
-        return 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30';
+        return 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]';
       case 9:
-        return 'bg-sky-500/10 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30';
+        return 'bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]';
       case 10:
       default:
         return 'bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/30';
@@ -171,15 +171,15 @@ export function CountryQuickLoginPanel({
 
   const isEthiopia = country === 'ET';
   const badgeColor = isEthiopia
-    ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/30'
-    : 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30';
+    ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
+    : 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';
 
   return (
-    <div role="region" aria-label={title} className="w-full lg:w-[360px] xl:w-[390px] bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[750px] max-h-[90vh] transition-all duration-300">
+    <div role="region" aria-label={title} className="w-full lg:w-[360px] xl:w-[390px] bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] border-[var(--theme-status-success-border)] rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[750px] max-h-[90vh] transition-all duration-300">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#E2DCCE]/50 dark:border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <ShieldCheck size={16} className={isEthiopia ? 'text-amber-600 dark:text-amber-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'} />
+          <ShieldCheck size={16} className={isEthiopia ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-primary)] dark:text-[#A9CBA2]'} />
           <h3 className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">
             {title}
           </h3>
@@ -199,7 +199,7 @@ export function CountryQuickLoginPanel({
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles, titles, or sites...`}
-          className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-stone-100/70 dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/[0.06] focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
+          className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-stone-100/70 dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/[0.06] focus:outline-none focus:border-[var(--theme-border)] dark:focus:border-[#A9CBA2] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
         />
         {searchQuery && (
           <button
@@ -356,7 +356,7 @@ export function CountryQuickLoginPanel({
               setOpsSiteFilter('ALL_OPS');
               setLevelFilter('ALL');
             }}
-            className="text-[9px] font-semibold text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline cursor-pointer"
+            className="text-[9px] font-semibold text-[var(--theme-primary)] dark:text-[#A9CBA2] hover:underline cursor-pointer"
           >
             Reset filters
           </button>
@@ -369,7 +369,7 @@ export function CountryQuickLoginPanel({
           <p className="text-xs text-[var(--theme-text-secondary)] py-4">Loading test employees…</p>
         ) : error ? (
           <div role="alert" className="text-center py-6 px-3 space-y-2">
-            <p className="text-xs text-red-600 dark:text-red-400 font-medium">{error.message}</p>
+            <p className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-medium">{error.message}</p>
             <button
               type="button"
               onClick={() => refetch()}
@@ -427,7 +427,7 @@ export function CountryQuickLoginPanel({
                       <div className="flex flex-col min-w-0 pr-2">
                         <div className="flex items-center gap-1.5">
                           {/* Clean Worker Role Title without rainbow color pills */}
-                          <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors truncate">
+                          <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[var(--theme-primary)] dark:group-hover:text-white transition-colors truncate">
                             {acc.role}
                           </span>
                           <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
@@ -445,7 +445,7 @@ export function CountryQuickLoginPanel({
                         <span className="text-[8.5px] font-mono tabular-nums font-semibold text-stone-500 dark:text-stone-400">
                           {acc.code}
                         </span>
-                        <UserCheck size={11} className="text-stone-300 dark:text-stone-600 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
+                        <UserCheck size={11} className="text-stone-300 dark:text-stone-600 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2] transition-colors" />
                       </div>
                     </button>
                   ))}

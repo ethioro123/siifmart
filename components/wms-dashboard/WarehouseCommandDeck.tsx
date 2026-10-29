@@ -132,7 +132,7 @@ export const WarehouseCommandDeck: React.FC<WarehouseCommandDeckProps> = ({
               </div>
               <div className="flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
                   {card.statusLeft}
                 </span>
                 <span className="text-[11px] text-[var(--theme-accent)] font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">

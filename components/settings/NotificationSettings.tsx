@@ -105,7 +105,7 @@ export default function NotificationSettings() {
                             <div className="flex items-center gap-2">
                                 <span className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full border ${
                                     emailEnabled
-                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                 }`}>
                                     {emailEnabled ? 'Active' : 'Disabled'}

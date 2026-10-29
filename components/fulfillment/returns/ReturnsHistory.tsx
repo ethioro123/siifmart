@@ -24,7 +24,7 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
             const query = returnHistorySearch.toLowerCase();
             filtered = filtered.filter(s => {
                 const itemsList = s.items || s.lineItems || s.line_items || [];
-                const matchesItems = itemsList.some((item: any) => 
+                const matchesItems = itemsList.some((item: any) =>
                     (item.name || item.productName || item.product_name || '').toLowerCase().includes(query) ||
                     (item.sku || '').toLowerCase().includes(query)
                 );
@@ -123,7 +123,7 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                                                 {formatCompactNumber(sale.total, { currency: CURRENCY_SYMBOL })}
                                             </td>
                                             <td className="p-4 text-center">
-                                                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${sale.status === 'Refunded' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'}`}>
+                                                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${sale.status === 'Refunded' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'}`}>
                                                     {sale.status}
                                                 </span>
                                             </td>

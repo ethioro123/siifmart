@@ -98,7 +98,7 @@ export const LowMarginQueueTab: React.FC = () => {
             {/* Header Toolbar */}
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-wrap justify-between items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <ShieldAlert size={20} />
                     </div>
                     <div>
@@ -128,7 +128,7 @@ export const LowMarginQueueTab: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Pending Reviews */}
                 <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <ShieldAlert size={20} />
                     </div>
                     <div>
@@ -138,7 +138,7 @@ export const LowMarginQueueTab: React.FC = () => {
                         <div className="text-xl font-bold text-[var(--theme-text-primary)] font-mono tabular-nums mt-0.5">
                             {pendingCount}
                         </div>
-                        <div className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5">
+                        <div className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-0.5">
                             Awaiting clearance
                         </div>
                     </div>
@@ -146,7 +146,7 @@ export const LowMarginQueueTab: React.FC = () => {
 
                 {/* Approved Exceptions */}
                 <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                         <CheckCircle2 size={20} />
                     </div>
                     <div>
@@ -156,7 +156,7 @@ export const LowMarginQueueTab: React.FC = () => {
                         <div className="text-xl font-bold text-[var(--theme-text-primary)] font-mono tabular-nums mt-0.5">
                             {approvedCount}
                         </div>
-                        <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                        <div className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-0.5">
                             Policy overrides active
                         </div>
                     </div>
@@ -164,7 +164,7 @@ export const LowMarginQueueTab: React.FC = () => {
 
                 {/* Rejected Cuts */}
                 <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                         <XCircle size={20} />
                     </div>
                     <div>
@@ -174,7 +174,7 @@ export const LowMarginQueueTab: React.FC = () => {
                         <div className="text-xl font-bold text-[var(--theme-text-primary)] font-mono tabular-nums mt-0.5">
                             {rejectedCount}
                         </div>
-                        <div className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5">
+                        <div className="text-[11px] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] mt-0.5">
                             Floor protected
                         </div>
                     </div>
@@ -182,7 +182,7 @@ export const LowMarginQueueTab: React.FC = () => {
 
                 {/* Avg Hurdle Deficit */}
                 <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <TrendingDown size={20} />
                     </div>
                     <div>
@@ -261,7 +261,7 @@ export const LowMarginQueueTab: React.FC = () => {
                                 <tr>
                                     <td colSpan={9} className="p-12 text-center">
                                         <div className="flex flex-col items-center justify-center gap-2">
-                                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] flex items-center justify-center">
                                                 <ShieldCheck size={20} />
                                             </div>
                                             <span className="text-sm font-medium text-[var(--theme-text-primary)]">
@@ -313,7 +313,7 @@ export const LowMarginQueueTab: React.FC = () => {
                                             </td>
 
                                             {/* Proposed Margin */}
-                                            <td className="p-4 text-right font-mono tabular-nums font-semibold text-rose-600 dark:text-rose-400">
+                                            <td className="p-4 text-right font-mono tabular-nums font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                                                 {r.proposedMarginPct.toFixed(1)}%
                                             </td>
 
@@ -324,7 +324,7 @@ export const LowMarginQueueTab: React.FC = () => {
 
                                             {/* Variance */}
                                             <td className="p-4 text-center">
-                                                <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 font-mono">
+                                                <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] px-2 py-0.5 rounded-full border border-[var(--theme-status-danger-border)] font-mono">
                                                     <ArrowDownRight size={11} /> {Math.abs(r.marginVariancePct).toFixed(1)}%
                                                 </span>
                                             </td>
@@ -341,10 +341,10 @@ export const LowMarginQueueTab: React.FC = () => {
                                             <td className="p-4 text-center">
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
                                                     isApproved
-                                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                                         : isRejected
-                                                            ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                                                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                                            ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                                                            : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                                 }`}>
                                                     {isApproved && <CheckCircle2 size={11} />}
                                                     {isRejected && <XCircle size={11} />}
@@ -372,7 +372,7 @@ export const LowMarginQueueTab: React.FC = () => {
                                                                 type="button"
                                                                 onClick={() => handleSignOff(r.id, 'Approved')}
                                                                 disabled={isActionLoading}
-                                                                className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 transition-all disabled:opacity-50"
+                                                                className="p-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] transition-all disabled:opacity-50"
                                                                 title="Quick Approve Exception"
                                                             >
                                                                 <Check size={13} />
@@ -381,7 +381,7 @@ export const LowMarginQueueTab: React.FC = () => {
                                                                 type="button"
                                                                 onClick={() => handleSignOff(r.id, 'Rejected')}
                                                                 disabled={isActionLoading}
-                                                                className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 transition-all disabled:opacity-50"
+                                                                className="p-1.5 rounded-lg bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] transition-all disabled:opacity-50"
                                                                 title="Quick Reject Price Cut"
                                                             >
                                                                 <X size={13} />

@@ -52,18 +52,18 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 rounded-xl flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] rounded-xl flex items-center justify-center shrink-0">
                             <CheckCircle size={18} />
                         </div>
                         <h4 className="text-[var(--theme-text-secondary)] text-xs font-semibold uppercase tracking-wider">{t('warehouse.inventoryAccuracy')}</h4>
                     </div>
                     <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">98.5%</p>
-                    <p className="text-[11px] text-green-600 dark:text-green-400 mt-1 font-medium">{t('warehouse.varianceFromLastMonth')}</p>
+                    <p className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1 font-medium">{t('warehouse.varianceFromLastMonth')}</p>
                 </div>
 
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] rounded-xl flex items-center justify-center shrink-0">
                             <AlertTriangle size={18} />
                         </div>
                         <h4 className="text-[var(--theme-text-secondary)] text-xs font-semibold uppercase tracking-wider">{t('warehouse.netVarianceValue')}</h4>
@@ -140,8 +140,8 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                             </span>
                                             <span className={`text-[11px] px-2.5 py-0.5 rounded-full uppercase font-semibold border ${
                                                 m.type === 'IN'
-                                                    ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20'
-                                                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                                    : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                             }`}>
                                                 {m.type}
                                             </span>

@@ -353,10 +353,10 @@ export default function SalesHistory() {
                         >
                            <td className="py-3.5 px-4">
                               <div className="flex items-center gap-2.5">
-                                 <div className="w-7 h-7 rounded-lg bg-[var(--theme-bg-subtle)] group-hover:bg-blue-500/10 text-[var(--theme-text-secondary)] group-hover:text-[#0071E3] dark:group-hover:text-[#2997FF] flex items-center justify-center shrink-0 transition-colors">
+                                 <div className="w-7 h-7 rounded-lg bg-[var(--theme-bg-subtle)] group-hover:bg-[var(--theme-status-info-bg)] text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-accent)] dark:group-hover:text-[var(--theme-accent)] flex items-center justify-center shrink-0 transition-colors">
                                     <Receipt size={14} />
                                  </div>
-                                 <span className="text-xs sm:text-sm font-mono tabular-nums text-[var(--theme-text-primary)] font-semibold group-hover:text-[#0071E3] dark:group-hover:text-[#2997FF] transition-colors">
+                                 <span className="text-xs sm:text-sm font-mono tabular-nums text-[var(--theme-text-primary)] font-semibold group-hover:text-[var(--theme-accent)] dark:group-hover:text-[var(--theme-accent)] transition-colors">
                                     {sale.receiptNumber || `S${sale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}
                                  </span>
                               </div>
@@ -404,11 +404,11 @@ export default function SalesHistory() {
                            </td>
                            <td className="py-3.5 px-4 text-center">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-                                 sale.status === 'Completed' 
-                                    ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' 
-                                    : sale.status === 'Pending' 
-                                       ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20' 
-                                       : 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20'
+                                 sale.status === 'Completed'
+                                    ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
+                                    : sale.status === 'Pending'
+                                       ? 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'
+                                       : 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)]'
                               }`}>
                                  {sale.status}
                               </span>

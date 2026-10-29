@@ -33,7 +33,7 @@ export default function TerminateEmployeeModal({
                 <div className="p-4 bg-stone-50 dark:bg-black/40 border border-[#E2DCCE] dark:border-white/5 rounded-xl mb-6">
                     <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Target Personnel</p>
                     <p className="text-stone-900 dark:text-white font-bold">{employee.name}</p>
-                    <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">{employee.id}</p>
+                    <p className="text-[10px] text-[var(--theme-primary)] dark:text-[#A9CBA2] font-mono">{employee.id}</p>
                 </div>
                 <div className="space-y-4 mb-6">
                     <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest block text-center">Type "TERMINATE" to confirm action</p>
@@ -56,8 +56,8 @@ export default function TerminateEmployeeModal({
                         disabled={terminateInput !== 'TERMINATE'}
                         onClick={handleConfirmTermination}
                         className={`px-6 py-2 font-black rounded-lg text-xs uppercase shadow-lg flex items-center gap-2 transition-all ${
-                            terminateInput === 'TERMINATE' 
-                            ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20' 
+                            terminateInput === 'TERMINATE'
+                            ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'
                             : 'bg-black/40 text-gray-500 cursor-not-allowed border border-white/5'
                         }`}
                     >

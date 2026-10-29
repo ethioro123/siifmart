@@ -74,7 +74,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
 
             // Search product names and SKUs
             const items = job.lineItems || (job as any).line_items || [];
-            const matchesItems = items.some((item: any) => 
+            const matchesItems = items.some((item: any) =>
                 (item.name || '').toLowerCase().includes(q) ||
                 (item.productName || '').toLowerCase().includes(q) ||
                 (item.sku || '').toLowerCase().includes(q)
@@ -202,7 +202,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                                         <td className="px-4 py-3.5 text-right">
                                             <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
                                                 job.status === 'Completed' || job.transferStatus === 'Shipped' ? 'bg-primary/10 text-primary border border-primary/20' :
-                                                job.status === 'Cancelled' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                                                job.status === 'Cancelled' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' :
                                                 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]'
                                             }`}>
                                                 {job.transferStatus || job.status}

@@ -148,7 +148,7 @@ export function ZoneManagerModal({
                 <div key={zone.id} className="p-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <h5 className="text-[var(--theme-text-primary)] font-semibold text-xs truncate flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] shrink-0" />
                       {zone.name}
                     </h5>
                     {zone.description && (
@@ -172,7 +172,7 @@ export function ZoneManagerModal({
                     <button
                       type="button"
                       onClick={() => handleDeleteZone(zone.id)}
-                      className="h-8 px-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-[0.98]"
+                      className="h-8 px-2.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-lg text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-[0.98]"
                       title="Delete Zone"
                     >
                       <Trash2 size={11} />

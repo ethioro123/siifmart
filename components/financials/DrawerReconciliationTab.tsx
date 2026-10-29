@@ -112,11 +112,11 @@ export const DrawerReconciliationTab: React.FC = () => {
                         <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                             Pending Review
                         </span>
-                        <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center">
                             <Clock size={13} />
                         </div>
                     </div>
-                    <h4 className="text-xl font-semibold tracking-tight text-amber-600 dark:text-amber-400 font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono tabular-nums mt-1">
                         {stats.pendingCount}
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -129,11 +129,11 @@ export const DrawerReconciliationTab: React.FC = () => {
                         <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                             Reconciled Shifts
                         </span>
-                        <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-lg bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center">
                             <CheckCircle2 size={13} />
                         </div>
                     </div>
-                    <h4 className="text-xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono tabular-nums mt-1">
                         {stats.reconciledCount}
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -146,11 +146,11 @@ export const DrawerReconciliationTab: React.FC = () => {
                         <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                             Flagged Variances
                         </span>
-                        <div className="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-lg bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center justify-center">
                             <AlertTriangle size={13} />
                         </div>
                     </div>
-                    <h4 className="text-xl font-semibold tracking-tight text-rose-600 dark:text-rose-400 font-mono tabular-nums mt-1">
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-mono tabular-nums mt-1">
                         {stats.flaggedCount}
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
@@ -169,9 +169,9 @@ export const DrawerReconciliationTab: React.FC = () => {
                     </div>
                     <h4 className={`text-xl font-semibold tracking-tight font-mono tabular-nums mt-1 ${
                         stats.netVariance === 0
-                            ? 'text-emerald-600 dark:text-emerald-400'
+                            ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                             : stats.netVariance < 0
-                                ? 'text-rose-600 dark:text-rose-400'
+                                ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                                 : 'text-cyan-600 dark:text-cyan-400'
                     }`}>
                         {stats.netVariance > 0 ? '+' : ''}{currencySymbol} {stats.netVariance.toLocaleString()}
@@ -191,7 +191,7 @@ export const DrawerReconciliationTab: React.FC = () => {
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                                 Daily Drawer Reconciliation Queue
                             </h3>
-                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-medium">
                                 <ShieldCheck size={12} />
                                 <span>Rule 18 Co-Attribution</span>
                             </div>
@@ -232,7 +232,7 @@ export const DrawerReconciliationTab: React.FC = () => {
                             type="checkbox"
                             checked={onlyFlagged}
                             onChange={(e) => setOnlyFlagged(e.target.checked)}
-                            className="rounded text-[#0071E3] dark:text-[#2997FF] focus:ring-0"
+                            className="rounded text-[var(--theme-accent)] dark:text-[var(--theme-accent)] focus:ring-0"
                         />
                         <span className="font-medium text-[var(--theme-text-primary)]">
                             Flagged Variances Only (&gt; 500 {currencySymbol})
@@ -260,7 +260,7 @@ export const DrawerReconciliationTab: React.FC = () => {
                             {loading ? (
                                 <tr>
                                     <td colSpan={9} className="py-16 text-center text-[var(--theme-text-secondary)]">
-                                        <Loader2 className="animate-spin inline mr-2 text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                        <Loader2 className="animate-spin inline mr-2 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                                         <span className="text-xs">Loading drawer reconciliation records...</span>
                                     </td>
                                 </tr>
@@ -308,12 +308,12 @@ export const DrawerReconciliationTab: React.FC = () => {
                                             <td className="py-3.5 px-4 text-xs text-right font-mono font-semibold whitespace-nowrap tabular-nums">
                                                 <span className={
                                                     s.variance === 0
-                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                        ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                                         : s.variance > 0
                                                             ? 'text-cyan-600 dark:text-cyan-400'
                                                             : isExcessive
-                                                                ? 'text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-lg border border-rose-500/20'
-                                                                : 'text-amber-600 dark:text-amber-400'
+                                                                ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] px-2 py-0.5 rounded-lg border border-[var(--theme-status-danger-border)]'
+                                                                : 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                                                 }>
                                                     {s.variance > 0 ? '+' : ''}{currencySymbol} {s.variance.toLocaleString()}
                                                 </span>
@@ -321,7 +321,7 @@ export const DrawerReconciliationTab: React.FC = () => {
                                             <td className="py-3.5 px-4 text-xs whitespace-nowrap">
                                                 {s.supervisorName ? (
                                                     <div className="flex items-center gap-1.5 text-[var(--theme-text-primary)]">
-                                                        <UserCheck size={13} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                                        <UserCheck size={13} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0" />
                                                         <span className="truncate max-w-[120px] font-medium">{s.supervisorName}</span>
                                                     </div>
                                                 ) : (
@@ -331,10 +331,10 @@ export const DrawerReconciliationTab: React.FC = () => {
                                             <td className="py-3.5 px-4 text-center whitespace-nowrap">
                                                 <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
                                                     s.reconciliationStatus === 'Reconciled'
-                                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                                         : s.reconciliationStatus === 'Flagged'
-                                                            ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                                                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                                            ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                                                            : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                                 }`}>
                                                     {s.reconciliationStatus === 'Reconciled' && <CheckCircle2 size={11} />}
                                                     {s.reconciliationStatus === 'Flagged' && <AlertTriangle size={11} />}

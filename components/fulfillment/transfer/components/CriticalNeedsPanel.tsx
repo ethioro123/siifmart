@@ -121,8 +121,8 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                         onClick={() => setFilterStatus('CRITICAL')}
                         className={`min-h-[36px] px-3 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all flex items-center gap-1 touch-manipulation ${
                             filterStatus === 'CRITICAL'
-                                ? 'bg-red-500 text-white shadow-xs'
-                                : 'text-[var(--theme-text-secondary)] hover:text-red-500'
+                                ? 'bg-[var(--theme-status-danger-bg)] text-white shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)]'
                         }`}
                     >
                         <AlertCircle size={12} />
@@ -132,8 +132,8 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                         onClick={() => setFilterStatus('LOW')}
                         className={`min-h-[36px] px-3 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all flex items-center gap-1 touch-manipulation ${
                             filterStatus === 'LOW'
-                                ? 'bg-amber-600 text-white shadow-xs'
-                                : 'text-[var(--theme-text-secondary)] hover:text-amber-600'
+                                ? 'bg-[var(--theme-status-warning-bg)] text-white shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] text-[var(--theme-status-warning-text)]'
                         }`}
                     >
                         <AlertTriangle size={12} />
@@ -185,8 +185,8 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                                                 </span>
                                                 <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider border ${
                                                     isCritical
-                                                        ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20'
-                                                        : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
+                                                        ? 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]'
+                                                        : 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)]'
                                                 }`}>
                                                     {isCritical ? 'CRITICAL (≤30%)' : 'LOW STOCK'}
                                                 </span>
@@ -201,7 +201,7 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                                             <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider leading-none mb-1">
                                                 Deficit Gap
                                             </span>
-                                            <div className="px-2.5 py-1 bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 rounded-lg text-xs font-mono font-bold tabular-nums">
+                                            <div className="px-2.5 py-1 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] rounded-lg text-xs font-mono font-bold tabular-nums">
                                                 +{deficit} {quantityUnit}
                                             </div>
                                         </div>
@@ -211,7 +211,7 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                                     <div className="mt-3 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between gap-4">
                                         <div className="flex items-center gap-2 text-xs font-mono font-semibold text-[var(--theme-text-secondary)] tabular-nums">
                                             <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider">Current:</span>
-                                            <span className={isCritical ? 'text-red-500 font-bold' : 'text-amber-500 font-bold'}>
+                                            <span className={isCritical ? 'text-[var(--theme-status-danger-text)] font-bold' : 'text-[var(--theme-status-warning-text)] font-bold'}>
                                                 {formatTransferStock(item.stock, item)}
                                             </span>
                                             <span className="text-[var(--theme-text-secondary)] opacity-50">/</span>
@@ -224,7 +224,7 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                                             <ProgressBar
                                                 progress={Math.min(100, (item.stock / (item.minStock || 1)) * 100)}
                                                 containerClassName="h-full w-full bg-transparent"
-                                                fillClassName={`h-full ${isCritical ? 'bg-red-500' : 'bg-amber-500'}`}
+                                                fillClassName={`h-full ${isCritical ? 'bg-[var(--theme-status-danger-bg)]' : 'bg-[var(--theme-status-warning-bg)]'}`}
                                             />
                                         </div>
 

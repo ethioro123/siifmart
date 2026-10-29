@@ -26,7 +26,7 @@ export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark })
                 <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Total Workforce</div>
                 <div className="flex items-baseline gap-1.5 mt-1">
                     <span className="text-lg font-black text-stone-900 dark:text-white">{metrics.total}</span>
-                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">{metrics.active} active</span>
+                    <span className="text-[10px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">{metrics.active} active</span>
                 </div>
             </div>
 
@@ -41,7 +41,7 @@ export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark })
 
             {/* L3-L5 Directors */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
-                <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                     <Building2 size={12} />
                     <span>L3-L5 Directors</span>
                 </div>
@@ -50,7 +50,7 @@ export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark })
 
             {/* L6-L8 Supervisors */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
-                <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                     <ShieldCheck size={12} />
                     <span>L6-L8 Managers</span>
                 </div>
@@ -59,7 +59,7 @@ export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark })
 
             {/* L9-L10 Frontline */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
-                <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-sky-500">
+                <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-status-info-text)]">
                     <Zap size={12} />
                     <span>L9-L10 Staff</span>
                 </div>

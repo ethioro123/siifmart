@@ -38,24 +38,24 @@ export const RuleModal: React.FC<RuleModalProps> = ({
 
             <div className="space-y-1">
                <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">
-                  Rule Name <span className="text-rose-500">*</span>
+                  Rule Name <span className="text-[var(--theme-status-danger-text)]">*</span>
                </label>
                <input
                   disabled={isSubmitting}
                   className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-medium transition-colors ${
-                     errors.name ? 'border-rose-500' : 'border-[var(--theme-border)]'
+                     errors.name ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'
                   }`}
                   placeholder="e.g. Low Stock Dynamic Clearance"
                   value={newRule.name || ''}
                   onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
                   aria-label="Rule Name"
                />
-               {errors.name && <p className="text-[11px] text-rose-500 mt-1">{errors.name}</p>}
+               {errors.name && <p className="text-[11px] text-[var(--theme-status-danger-text)] mt-1">{errors.name}</p>}
             </div>
 
             <div className="space-y-1">
                <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">
-                  Target Category <span className="text-rose-500">*</span>
+                  Target Category <span className="text-[var(--theme-status-danger-text)]">*</span>
                </label>
                <select
                   disabled={isSubmitting}
@@ -75,7 +75,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                      </optgroup>
                   ))}
                </select>
-               {errors.targetCategory && <p className="text-[11px] text-rose-500 mt-1">{errors.targetCategory}</p>}
+               {errors.targetCategory && <p className="text-[11px] text-[var(--theme-status-danger-text)] mt-1">{errors.targetCategory}</p>}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -95,7 +95,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                </div>
                <div className="space-y-1">
                   <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">
-                     Threshold Value (X) <span className="text-rose-500">*</span>
+                     Threshold Value (X) <span className="text-[var(--theme-status-danger-text)]">*</span>
                   </label>
                   <input
                      disabled={isSubmitting}
@@ -103,7 +103,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                      step="1"
                      min="0"
                      className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-mono font-medium tabular-nums transition-colors ${
-                        errors.threshold ? 'border-rose-500' : 'border-[var(--theme-border)]'
+                        errors.threshold ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'
                      }`}
                      value={newRule.threshold !== undefined && newRule.threshold !== null ? newRule.threshold : ''}
                      onChange={(e) => {
@@ -113,7 +113,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                      placeholder="0"
                      aria-label="Threshold Value"
                   />
-                  {errors.threshold && <p className="text-[11px] text-rose-500 mt-1">{errors.threshold}</p>}
+                  {errors.threshold && <p className="text-[11px] text-[var(--theme-status-danger-text)] mt-1">{errors.threshold}</p>}
                </div>
             </div>
             <p className="text-[11px] text-[var(--theme-text-secondary)] -mt-2">
@@ -139,14 +139,14 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                </div>
                <div className="space-y-1">
                   <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">
-                     Value (%) <span className="text-rose-500">*</span>
+                     Value (%) <span className="text-[var(--theme-status-danger-text)]">*</span>
                   </label>
                   <input
                      disabled={isSubmitting}
                      type="number"
                      step="1"
                      className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-mono font-medium tabular-nums transition-colors ${
-                        errors.value ? 'border-rose-500' : 'border-[var(--theme-border)]'
+                        errors.value ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'
                      }`}
                      value={newRule.value !== undefined && newRule.value !== null ? newRule.value : ''}
                      onChange={(e) => {
@@ -156,7 +156,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                      placeholder="0"
                      aria-label="Action Value"
                   />
-                  {errors.value && <p className="text-[11px] text-rose-500 mt-1">{errors.value}</p>}
+                  {errors.value && <p className="text-[11px] text-[var(--theme-status-danger-text)] mt-1">{errors.value}</p>}
                </div>
             </div>
             <p className="text-[11px] text-[var(--theme-text-secondary)] -mt-2">

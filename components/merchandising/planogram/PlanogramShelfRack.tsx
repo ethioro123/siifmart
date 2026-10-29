@@ -52,11 +52,11 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
 
         {showHeatmap && (
           <div className="flex items-center gap-3 text-xs bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)]">
-            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span> High Vel
+            <span className="flex items-center gap-1.5 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-medium">
+              <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success-bg)]"></span> High Vel
             </span>
-            <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-medium">
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span> Med
+            <span className="flex items-center gap-1.5 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium">
+              <span className="w-2 h-2 rounded-full bg-[var(--theme-status-warning-bg)]"></span> Med
             </span>
             <span className="flex items-center gap-1.5 text-[var(--theme-text-secondary)] font-medium">
               <span className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-600"></span> Low
@@ -162,9 +162,9 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
                           : 'border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 bg-[var(--theme-bg-card)]'
                       } ${
                         showHeatmap && isHot
-                          ? 'ring-2 ring-emerald-500/50 bg-emerald-500/10'
+                          ? 'ring-2 ring-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)]'
                           : showHeatmap && isMedium
-                          ? 'ring-1 ring-amber-500/50 bg-amber-500/10'
+                          ? 'ring-1 ring-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)]'
                           : ''
                       }`}
                     >
@@ -184,7 +184,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
                         )}
 
                         {pendingProposal && (
-                          <div className="absolute inset-0 bg-amber-500/80 flex items-center justify-center text-white text-[9px] font-semibold tracking-wider uppercase gap-0.5">
+                          <div className="absolute inset-0 bg-[var(--theme-status-warning-bg)] flex items-center justify-center text-white text-[9px] font-semibold tracking-wider uppercase gap-0.5">
                             <Clock size={10} />
                             <span>Pending</span>
                           </div>

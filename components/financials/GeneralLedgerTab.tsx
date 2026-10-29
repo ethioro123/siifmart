@@ -86,7 +86,7 @@ export const GeneralLedgerTab: React.FC = () => {
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                             General Ledger (GL) &amp; Fiscal Period Governance
                         </h3>
-                        <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                        <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-xs font-medium">
                             <ShieldCheck size={12} />
                             <span>Double-Entry Equilibrium</span>
                         </div>
@@ -112,8 +112,8 @@ export const GeneralLedgerTab: React.FC = () => {
                     {/* Status Pill */}
                     <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium ${
                         periodStatus?.status === 'Closed' || periodStatus?.status === 'Locked'
-                            ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                            : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                            ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                            : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                     }`}>
                         {periodStatus?.status === 'Closed' || periodStatus?.status === 'Locked' ? <Lock size={12} /> : <Unlock size={12} />}
                         <span>{periodStatus?.status || 'Open'}</span>
@@ -123,7 +123,7 @@ export const GeneralLedgerTab: React.FC = () => {
                     {periodStatus?.status === 'Open' && canLockPeriod && (
                         <button
                             onClick={() => setLockModalOpen(true)}
-                            className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs"
+                            className="px-3 py-1.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs"
                         >
                             <Lock size={12} />
                             <span>Close Period</span>
@@ -144,7 +144,7 @@ export const GeneralLedgerTab: React.FC = () => {
                             Assets &amp; expense postings
                         </p>
                     </div>
-                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Scale size={18} />
                     </div>
                 </div>
@@ -159,19 +159,19 @@ export const GeneralLedgerTab: React.FC = () => {
                             Liabilities, equity &amp; revenues
                         </p>
                     </div>
-                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Scale size={18} />
                     </div>
                 </div>
 
                 <div className={`rounded-2xl p-4 shadow-xs flex items-center justify-between border ${
                     isBalanced
-                        ? 'bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20'
-                        : 'bg-rose-500/5 dark:bg-rose-500/10 border-rose-500/30'
+                        ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
+                        : 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)]'
                 }`}>
                     <div>
                         <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Equilibrium Status</span>
-                        <h4 className={`text-base font-semibold mt-1 ${isBalanced ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                        <h4 className={`text-base font-semibold mt-1 ${isBalanced ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'}`}>
                             {isBalanced ? 'Trial Balance Balanced' : 'Unbalanced Variance Detected'}
                         </h4>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 font-mono tabular-nums">
@@ -179,7 +179,7 @@ export const GeneralLedgerTab: React.FC = () => {
                         </p>
                     </div>
                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                        isBalanced ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                        isBalanced ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                     }`}>
                         {isBalanced ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
                     </div>
@@ -229,14 +229,14 @@ export const GeneralLedgerTab: React.FC = () => {
                                 {loading ? (
                                     <tr>
                                         <td colSpan={6} className="py-16 text-center text-[var(--theme-text-secondary)] font-sans">
-                                            <Loader2 className="animate-spin inline mr-2 text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                            <Loader2 className="animate-spin inline mr-2 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" size={18} />
                                             <span className="text-xs">Loading Trial Balance...</span>
                                         </td>
                                     </tr>
                                 ) : (
                                     trialBalance.map((row) => (
                                         <tr key={row.accountCode} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
-                                            <td className="py-3.5 px-4 font-semibold text-xs text-[#0071E3] dark:text-[#2997FF]">
+                                            <td className="py-3.5 px-4 font-semibold text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                                 {row.accountCode}
                                             </td>
                                             <td className="py-3.5 px-4 text-xs font-sans text-[var(--theme-text-primary)] font-medium">
@@ -277,7 +277,7 @@ export const GeneralLedgerTab: React.FC = () => {
                             <tbody className="divide-y divide-[var(--theme-border)]">
                                 {accounts.map((acc) => (
                                     <tr key={acc.code} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
-                                        <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[#0071E3] dark:text-[#2997FF]">
+                                        <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                             {acc.code}
                                         </td>
                                         <td className="py-3.5 px-4 text-xs font-medium text-[var(--theme-text-primary)]">
@@ -292,7 +292,7 @@ export const GeneralLedgerTab: React.FC = () => {
                                             {acc.normalBalance}
                                         </td>
                                         <td className="py-3.5 px-4 text-center">
-                                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                                 Active
                                             </span>
                                         </td>

@@ -124,11 +124,11 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <div className="flex items-center gap-2 mb-1">
                                 <h3 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight font-mono leading-none">{data.reference}</h3>
                                 <div className="flex gap-1.5">
-                                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${data.status === 'Completed' ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
+                                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${data.status === 'Completed' ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'}`}>
                                         {data.status}
                                     </span>
                                     {itemsArray.some(li => (li.returnedQty || 0) > 0) && (
-                                        <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400">
+                                        <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                                             {itemsArray.filter(li => (li.returnedQty || 0) > 0).length} {t('warehouse.packing.ret')}
                                         </span>
                                     )}
@@ -160,7 +160,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <p className="text-xs text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight break-words leading-tight">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
-                    
+
                     <div className="bg-[var(--theme-bg-card)] p-3 md:p-4 flex items-center gap-2.5 md:gap-3">
                         <div className="w-8 h-8 shrink-0 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shadow-xs">
                             <span className="text-xs font-semibold">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
@@ -198,7 +198,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             </p>
                         </div>
                     </div>
-                    
+
                     <div className="bg-[var(--theme-bg-card)] p-3 md:p-4 flex items-center gap-2.5 md:gap-3 col-span-2 sm:col-span-1">
                         <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
                             <ArrowRight size={16} />
@@ -227,7 +227,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             const isItemPacked = isJobCompleted || (item as any).packed === true;
 
                             // Resolve expected (required) quantity with robust fallbacks
-                            const expected = item.expectedQty || (item as any).quantity || item.orderedQty || 
+                            const expected = item.expectedQty || (item as any).quantity || item.orderedQty ||
                                 (item.packedQty ? item.packedQty : (item.pickedQty || 0));
 
                             // Resolve packed quantity: prioritize packedQty, then if completed/packed use expected, then fall back to pickedQty
@@ -282,8 +282,8 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                     <div className="flex items-center gap-3 sm:gap-6 ml-0 sm:ml-0 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)]/60 justify-between sm:justify-end">
                                         {item.returnedQty > 0 && (
                                             <div className="text-right">
-                                                <p className="text-[10px] md:text-[11px] text-red-500 uppercase font-semibold tracking-wider">{t('warehouse.packing.returned')}</p>
-                                                <p className="text-sm md:text-lg font-bold text-red-600 dark:text-red-400 tabular-nums font-mono leading-none">
+                                                <p className="text-[10px] md:text-[11px] text-[var(--theme-status-danger-text)] uppercase font-semibold tracking-wider">{t('warehouse.packing.returned')}</p>
+                                                <p className="text-sm md:text-lg font-bold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] tabular-nums font-mono leading-none">
                                                     {item.returnedQty}
                                                 </p>
                                             </div>
@@ -292,7 +292,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                             <p className="text-[10px] md:text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">{t('warehouse.packing.reqPkd')}</p>
                                             <div className="flex items-center gap-1.5 md:gap-2 justify-end">
                                                 {isShortPicked && (
-                                                    <span className="text-xs font-mono font-semibold text-red-500 line-through opacity-80 leading-none" title={t('warehouse.packing.shortPicked')}>{item.orderedQty}</span>
+                                                    <span className="text-xs font-mono font-semibold text-[var(--theme-status-danger-text)] line-through opacity-80 leading-none" title={t('warehouse.packing.shortPicked')}>{item.orderedQty}</span>
                                                 )}
                                                 <div className="text-sm md:text-lg font-bold text-[var(--theme-text-primary)] tabular-nums font-mono leading-none">
                                                     {(() => {
@@ -302,7 +302,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                                                         return (
                                                             <div className="flex flex-col items-end">
-                                                                <span className={`text-sm md:text-lg font-mono font-bold ${isUnderpacked ? 'text-amber-500' : 'text-[var(--theme-accent)]'}`}>
+                                                                <span className={`text-sm md:text-lg font-mono font-bold ${isUnderpacked ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-accent)]'}`}>
                                                                     {packed} / {expected} <span className="text-[10px] md:text-[11px] font-semibold uppercase">{unitLabel}</span>
                                                                 </span>
                                                                 {packDesc && (
@@ -329,7 +329,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                         {data.status === 'Completed' && (
                             <button
                                 onClick={() => onReturn?.(selectedItem)}
-                                className="flex items-center gap-1.5 px-3 md:px-4 py-2 min-h-[44px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors active:scale-95 touch-manipulation"
+                                className="flex items-center gap-1.5 px-3 md:px-4 py-2 min-h-[44px] bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors active:scale-95 touch-manipulation"
                             >
                                 <Undo2 size={14} />
                                 <span className="hidden sm:inline">{t('warehouse.packing.returnItems') || 'Return Items'}</span>
@@ -370,7 +370,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                         {canDelete && onDeleteJob && (
                             <button
                                 onClick={handleDelete}
-                                className="flex items-center gap-1.5 px-3 md:px-4 py-2 min-h-[44px] bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors active:scale-95 touch-manipulation"
+                                className="flex items-center gap-1.5 px-3 md:px-4 py-2 min-h-[44px] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors active:scale-95 touch-manipulation"
                                 title={t('common.delete') || 'Delete Job'}
                             >
                                 <Trash2 size={14} />

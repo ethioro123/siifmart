@@ -98,9 +98,9 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
                 <div className="flex justify-between items-center w-full">
                     <div className="text-sm text-gray-400">
                         {imageLoadError ? (
-                            <span className="text-red-400">⚠️ Error occurred</span>
+                            <span className="text-[var(--theme-status-danger-text)]">⚠️ Error occurred</span>
                         ) : imageLoading ? (
-                            <span className="text-yellow-400">Loading image...</span>
+                            <span className="text-[var(--theme-status-warning-text)]">Loading image...</span>
                         ) : (
                             'Drag to move, scroll to zoom'
                         )}
@@ -132,13 +132,13 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
         >
             <div className="relative w-full h-80 bg-black rounded-xl overflow-hidden">
                 {imageLoadError ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
-                        <AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
-                        <p className="text-red-400 font-medium mb-2">Image Load Failed</p>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl p-6 text-center">
+                        <AlertTriangle className="w-12 h-12 text-[var(--theme-status-danger-text)] mb-4" />
+                        <p className="text-[var(--theme-status-danger-text)] font-medium mb-2">Image Load Failed</p>
                         <p className="text-gray-400 text-sm max-w-xs">{imageLoadError}</p>
                         <button
                             onClick={onCancel}
-                            className="mt-4 px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 flex items-center gap-2"
+                            className="mt-4 px-4 py-2 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] rounded-lg bg-[var(--theme-status-danger-bg)] flex items-center gap-2"
                         >
                             <RefreshCw size={16} />
                             Try Different Image
@@ -214,7 +214,7 @@ async function getCroppedImg(
     // Goal: Keep profile photos high quality but under 300KB.
     // 512px is industry standard for high-res icons/avatars (LinkedIn/GitHub use similar).
     const MAX_DIMENSION = 512;
-    
+
     // Calculate the output dimensions (always 1:1 since the cropper aspect is 1)
     // If the crop is smaller than 512px, keep original size.
     // If larger, scale down to 512px.

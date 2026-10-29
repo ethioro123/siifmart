@@ -43,9 +43,9 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
       <div className="space-y-3">
          {/* Governance Banner: Compensation Adjustments */}
          {pendingSalaryCount > 0 && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                      <ShieldCheck size={18} />
                   </div>
                   <div>
@@ -60,7 +60,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                <button
                   type="button"
                   onClick={onOpenSalaryQueue}
-                  className="h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
+                  className="h-9 px-3.5 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
                >
                   Review Salary Queue
                </button>
@@ -69,9 +69,9 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
 
          {/* Governance Banner: Profile Changes */}
          {pendingChangeCount > 0 && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                      <ShieldCheck size={18} />
                   </div>
                   <div>
@@ -86,7 +86,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                <button
                   type="button"
                   onClick={onOpenChangeModal}
-                  className="h-9 px-3.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
+                  className="h-9 px-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
                >
                   Review Approvals Queue
                </button>
@@ -95,9 +95,9 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
 
          {/* Governance Banner: Payroll Certification */}
          {pendingPayrollRun && !pendingPayrollRun.hrApprovedBy && pendingPayrollRun.status !== 'disbursed' && pendingPayrollRun.status !== 'rejected' && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-blue-500/5 border border-blue-500/20 shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                      <DollarSign size={18} />
                   </div>
                   <div>
@@ -114,7 +114,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                <div className="flex items-center gap-2 shrink-0">
                   {pendingPayrollRun.regionalAttestedBy ? (
                      <span
-                        className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1"
+                        className="text-[11px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] px-2.5 py-1 rounded-full border border-[var(--theme-status-success-border)] flex items-center gap-1"
                         title={`Attested by ${pendingPayrollRun.regionalAttestedBy} (${pendingPayrollRun.regionalAttestedByRole || 'Regional HR'})`}
                      >
                         <ShieldCheck size={12} />
@@ -124,7 +124,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                      <button
                         type="button"
                         onClick={onAttestRegionalPayroll}
-                        className="h-9 px-3.5 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
+                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
                      >
                         <ShieldCheck size={14} />
                         <span>Attest Regional Audit</span>
@@ -141,7 +141,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                      <button
                         type="button"
                         onClick={onCertifyPayroll}
-                        className="h-9 px-3.5 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
+                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
                      >
                         <ShieldCheck size={14} />
                         <span>Certify Roster</span>
@@ -153,9 +153,9 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
 
          {/* Pending Recruits Alert */}
          {pendingRecruitsCount > 0 && onFilterPendingRecruits && onShowAllRecruits && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                      <AlertTriangle size={18} />
                   </div>
                   <div>
@@ -172,7 +172,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                      <button
                         type="button"
                         onClick={onFilterPendingRecruits}
-                        className="h-9 px-3.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs transition-colors cursor-pointer active:scale-[0.98]"
+                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white font-semibold text-xs transition-colors cursor-pointer active:scale-[0.98]"
                      >
                         Filter Pending ({pendingRecruitsCount})
                      </button>
@@ -191,9 +191,9 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
 
          {/* Headcount Quota Surge Alert */}
          {(pendingQuotaCount ?? 0) > 0 && onOpenQuotaModal && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-blue-500/5 border border-blue-500/20 shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                      <TrendingUp size={18} />
                   </div>
                   <div>

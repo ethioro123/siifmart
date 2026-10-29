@@ -196,7 +196,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] shrink-0 flex justify-between items-center">
                     <div className="flex items-center gap-3 sm:gap-4">
-                        <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+                        <div className="w-10 h-10 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-center justify-center text-[var(--theme-status-warning-text)] shrink-0">
                             <Undo2 size={18} />
                         </div>
                         <div>
@@ -219,8 +219,8 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar">
                     {step === 'done' ? (
                         <div className="flex flex-col items-center justify-center py-8 sm:py-12 space-y-5">
-                            <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
-                                <CheckCircle className="text-emerald-500" size={32} />
+                            <div className="w-16 h-16 bg-[var(--theme-status-success-bg)] rounded-2xl flex items-center justify-center border border-[var(--theme-status-success-border)]">
+                                <CheckCircle className="text-[var(--theme-status-success-text)]" size={32} />
                             </div>
                             <div className="text-center space-y-1.5">
                                 <h3 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">{t('warehouse.returnSubmittedTitle')}</h3>
@@ -241,9 +241,9 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                     ) : step === 'confirm' ? (
                         <>
                             {/* Confirm Step */}
-                            <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3.5">
-                                <AlertTriangle className="text-amber-500 shrink-0" size={18} />
-                                <p className="text-amber-600 dark:text-amber-300 text-xs sm:text-sm font-semibold leading-snug">
+                            <div className="flex items-center gap-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl p-3.5">
+                                <AlertTriangle className="text-[var(--theme-status-warning-text)] shrink-0" size={18} />
+                                <p className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs sm:text-sm font-semibold leading-snug">
                                     {t('warehouse.confirmReturnStockAdjustmentWarning', { count: selectedItems.length, role: returnType === 'procurement' ? t('warehouse.procurementOrSuperAdminRole') : t('warehouse.warehouseManagerRole') })}
                                 </p>
                             </div>
@@ -266,15 +266,15 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                                                     <p className="text-[var(--theme-text-secondary)] text-[11px] font-mono">{item.sku}</p>
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
-                                                    <span className="font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 text-xs tabular-nums">
+                                                    <span className="font-mono font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2 py-0.5 rounded-full border border-[var(--theme-status-warning-border)] text-xs tabular-nums">
                                                         {item.returnQty}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 text-[var(--theme-text-secondary)] text-xs">{getReasonLabel(item.reason, t)}</td>
                                                 <td className="px-4 py-3">
-                                                    <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold ${item.condition === 'Good' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' :
-                                                        item.condition === 'Damaged' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' :
-                                                            'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                                                    <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold ${item.condition === 'Good' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]' :
+                                                        item.condition === 'Damaged' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' :
+                                                            'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                                         }`}>
                                                         {getConditionLabel(item.condition, t)}
                                                     </span>
@@ -390,7 +390,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                             <button
                                 disabled={isSubmitting}
                                 onClick={handleSubmit}
-                                className="min-h-[44px] px-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 touch-manipulation active:scale-[0.98] cursor-pointer"
+                                className="min-h-[44px] px-6 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 touch-manipulation active:scale-[0.98] cursor-pointer"
                             >
                                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Undo2 size={16} />}
                                 {isSubmitting ? t('warehouse.submittingWord') : t('warehouse.submitForApprovalButton')}

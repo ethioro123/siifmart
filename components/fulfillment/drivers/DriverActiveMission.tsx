@@ -162,7 +162,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                     );
                                                 })()
                                             ) : (
-                                                <div className="py-1.5 sm:py-2 px-2.5 sm:px-3.5 min-h-[34px] sm:min-h-[44px] bg-emerald-500/10 border border-emerald-500/20 rounded-lg sm:rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1.5">
+                                                <div className="py-1.5 sm:py-2 px-2.5 sm:px-3.5 min-h-[34px] sm:min-h-[44px] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-lg sm:rounded-xl text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center gap-1.5">
                                                     <CheckCircle size={14} className="sm:w-[15px] sm:h-[15px]" /> {t('warehouse.driverHub.completedCaps') || 'Success'}
                                                 </div>
                                             )}

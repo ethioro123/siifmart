@@ -24,11 +24,11 @@ export const ShiftCoverageBar: React.FC<ShiftCoverageBarProps> = ({
     const totalScheduledShifts = dailyCoverage.reduce((sum, d) => sum + d.headcount, 0);
 
     return (
-        <div className="bg-white/90 dark:bg-black/30 p-4 rounded-2xl border border-[#E2DCCE] dark:border-emerald-950/30 shadow-xs space-y-3">
+        <div className="bg-white/90 dark:bg-black/30 p-4 rounded-2xl border border-[#E2DCCE] border-[var(--theme-status-success-border)] shadow-xs space-y-3">
             {/* Header / Summary Strip */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E2DCCE] dark:border-white/10">
                 <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-[#2C5E3B] dark:text-[#A9CBA2]">
+                    <div className="p-2 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/30 text-[var(--theme-primary)] dark:text-[#A9CBA2]">
                         <Users size={18} />
                     </div>
                     <div>
@@ -42,23 +42,23 @@ export const ShiftCoverageBar: React.FC<ShiftCoverageBarProps> = ({
                 </div>
 
                 <div className="flex items-center gap-4 text-xs font-bold">
-                    <div className="flex items-center gap-1.5 text-[#2C5E3B] dark:text-[#A9CBA2]">
+                    <div className="flex items-center gap-1.5 text-[var(--theme-primary)] dark:text-[#A9CBA2]">
                         <Clock size={15} />
                         <span>{totalWeekHours} Total Weekly Hours</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 text-stone-600 dark:text-stone-300">
-                        <ShieldCheck size={15} className="text-emerald-500" />
+                        <ShieldCheck size={15} className="text-[var(--theme-status-success-text)]" />
                         <span>{totalScheduledShifts} Shifts</span>
                     </div>
 
                     {overtimeCount > 0 ? (
-                        <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-800/40">
+                        <div className="flex items-center gap-1.5 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] dark:bg-amber-950/30 px-2.5 py-1 rounded-lg border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)]">
                             <AlertTriangle size={14} />
                             <span>{overtimeCount} Overtime ({'>'}40h)</span>
                         </div>
                     ) : (
-                        <div className="text-[11px] text-emerald-600 dark:text-emerald-400 hidden sm:block">
+                        <div className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] hidden sm:block">
                             ✓ No Overtime
                         </div>
                     )}
@@ -76,7 +76,7 @@ export const ShiftCoverageBar: React.FC<ShiftCoverageBarProps> = ({
                             key={day.date}
                             className={`p-2.5 rounded-xl border text-center transition-colors ${
                                 day.isToday
-                                    ? 'bg-emerald-500/10 border-emerald-500/30'
+                                    ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
                                     : isZero
                                     ? 'bg-stone-100/50 dark:bg-white/5 border-dashed border-stone-200 dark:border-stone-800'
                                     : 'bg-white dark:bg-black/20 border-[#E2DCCE] dark:border-white/10'
@@ -90,7 +90,7 @@ export const ShiftCoverageBar: React.FC<ShiftCoverageBarProps> = ({
                             }`}>
                                 {cov.headcount} <span className="text-[11px] font-semibold text-stone-400">staff</span>
                             </p>
-                            <p className="text-[10px] font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
+                            <p className="text-[10px] font-mono font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2]">
                                 {cov.totalHours} hrs
                             </p>
                         </div>

@@ -194,7 +194,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                             </h4>
                                             {(product.stock || 0) <= (product.minStock || 10) && (
                                                 <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider shrink-0 ${
-                                                    (product.stock || 0) === 0 ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                                                    (product.stock || 0) === 0 ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                                 }`}>
                                                     {(product.stock || 0) === 0 ? 'Out' : 'Low'}
                                                 </span>
@@ -218,7 +218,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                              </div>
                                              <div className="flex items-center gap-1 font-mono border-l border-[var(--theme-border)] pl-3">
                                                  <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold">Cost</span>
-                                                 <span className="text-emerald-600 dark:text-emerald-400 font-bold tabular-nums">
+                                                 <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-bold tabular-nums">
                                                      {currencySymbol} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
                                                  </span>
                                              </div>

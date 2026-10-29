@@ -166,7 +166,7 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveMapping(mapping.category)}
-                                            className="p-2 text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                                            className="p-2 text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] rounded-lg transition-colors cursor-pointer"
                                             title="Remove Rule"
                                         >
                                             <Trash2 size={16} />

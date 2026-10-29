@@ -30,7 +30,7 @@ export const Step3PutawayPlacement: React.FC<Step3PutawayPlacementProps> = ({
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-4 md:p-6 shadow-sm space-y-4">
                 <div className="flex flex-wrap items-start justify-between gap-2 pb-3 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center">
                             <ShieldCheck size={22} />
                         </div>
                         <div>
@@ -43,7 +43,7 @@ export const Step3PutawayPlacement: React.FC<Step3PutawayPlacementProps> = ({
                         </div>
                     </div>
 
-                    <span className="px-3 py-1 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 font-mono font-bold text-xs uppercase">
+                    <span className="px-3 py-1 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono font-bold text-xs uppercase">
                         {completedItems} / {totalItems} {t('warehouse.putaway.itemsVerified') || 'Items Verified'}
                     </span>
                 </div>

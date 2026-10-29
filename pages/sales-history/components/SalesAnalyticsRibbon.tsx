@@ -24,7 +24,7 @@ export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metr
          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 sm:p-5 rounded-2xl shadow-[var(--shadow-sm)] transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                      <TrendingUp size={16} />
                   </div>
                   <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
@@ -32,7 +32,7 @@ export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metr
                   </span>
                </div>
                {!canViewRevenue && (
-                  <span className="inline-flex items-center gap-1 text-[11px] text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full font-medium">
+                  <span className="inline-flex items-center gap-1 text-[11px] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] px-2 py-0.5 rounded-full font-medium">
                      <Shield size={12} /> Hidden
                   </span>
                )}
@@ -61,7 +61,7 @@ export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metr
          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 sm:p-5 rounded-2xl shadow-[var(--shadow-sm)] transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                      <ShoppingBag size={16} />
                   </div>
                   <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
@@ -69,7 +69,7 @@ export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metr
                   </span>
                </div>
                {!canViewRevenue && (
-                  <span className="inline-flex items-center gap-1 text-[11px] text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full font-medium">
+                  <span className="inline-flex items-center gap-1 text-[11px] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] px-2 py-0.5 rounded-full font-medium">
                      <Shield size={12} /> Hidden
                   </span>
                )}

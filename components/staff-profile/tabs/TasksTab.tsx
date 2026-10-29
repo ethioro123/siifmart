@@ -64,8 +64,8 @@ export default function TasksTab({
                         <div key={task.id} className="group flex items-center justify-between bg-[var(--theme-bg-card)] p-4 rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 transition-colors shadow-xs">
                             <div className="flex items-center gap-4">
                                 <div
-                                    className={`w-3 h-3 rounded-full ${task.priority === 'High' ? 'bg-red-500' :
-                                        task.priority === 'Medium' ? 'bg-amber-500' : 'bg-sky-500'
+                                    className={`w-3 h-3 rounded-full ${task.priority === 'High' ? 'bg-[var(--theme-status-danger-bg)]' :
+                                        task.priority === 'Medium' ? 'bg-[var(--theme-status-warning-bg)]' : 'bg-[var(--theme-status-info-bg)]'
                                         }`}
                                     role="status"
                                     aria-label={`${task.priority} priority`}
@@ -79,7 +79,7 @@ export default function TasksTab({
                                             Due: {task.dueDate}
                                         </span>
                                         {task.status === 'Completed' && (
-                                            <span className="text-[11px] text-emerald-500 font-semibold uppercase tracking-wider flex items-center gap-1">
+                                            <span className="text-[11px] text-[var(--theme-status-success-text)] font-semibold uppercase tracking-wider flex items-center gap-1">
                                                 <CheckCircle size={12} /> Completed
                                             </span>
                                         )}
@@ -89,7 +89,7 @@ export default function TasksTab({
                             {task.status !== 'Completed' && (
                                 <button
                                     onClick={() => handleCompleteTask(task.id)}
-                                    className="p-2.5 bg-[var(--theme-bg-subtle)] hover:bg-emerald-500/10 text-[var(--theme-text-secondary)] hover:text-emerald-500 rounded-xl transition-colors border border-[var(--theme-border)] hover:border-emerald-500/30 cursor-pointer"
+                                    className="p-2.5 bg-[var(--theme-bg-subtle)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-secondary)] text-[var(--theme-status-success-text)] rounded-xl transition-colors border border-[var(--theme-border)] border-[var(--theme-status-success-border)] cursor-pointer"
                                     title="Complete Task"
                                 >
                                     <CheckCircle size={18} />

@@ -32,10 +32,10 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                         <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Status</p>
                         <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border mt-0.5 ${
                             supplier.status === 'Active'
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                         }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${supplier.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full ${supplier.status === 'Active' ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-status-danger-bg)]'}`} />
                             {supplier.status}
                         </div>
                     </div>
@@ -45,7 +45,7 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                 <div className="grid grid-cols-3 gap-3">
                     <div className="p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-center">
                         <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1">Performance</p>
-                        <div className="flex items-center justify-center gap-1 text-amber-500 font-bold font-mono tabular-nums text-sm">
+                        <div className="flex items-center justify-center gap-1 text-[var(--theme-status-warning-text)] font-bold font-mono tabular-nums text-sm">
                             <Star size={13} fill="currentColor" /> {supplier.rating}
                         </div>
                     </div>

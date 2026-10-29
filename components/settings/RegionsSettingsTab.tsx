@@ -244,8 +244,8 @@ export default function RegionsSettingsTab() {
                     Loading regional governance structure...
                 </div>
             ) : loadError ? (
-                <div className="border border-red-500/20 bg-red-500/5 rounded-2xl p-10 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#FF3B30] mx-auto mb-3">
+                <div className="border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] rounded-2xl p-10 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex items-center justify-center text-[#FF3B30] mx-auto mb-3">
                         <Shield size={24} />
                     </div>
                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">

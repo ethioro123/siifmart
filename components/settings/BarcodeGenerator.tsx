@@ -74,7 +74,7 @@ export const BarcodeGenerator: React.FC = () => {
                     onClick={generateCSV}
                     disabled={isGenerating}
                     className={`px-6 py-3 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center gap-2 transition-all ${isComplete
-                        ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                         : 'bg-cyber-primary text-black hover:bg-cyber-primary/90'
                         }`}
                 >

@@ -114,8 +114,8 @@ export const ReturnModal: React.FC = () => {
             setHqOtp('');
             handleProcessReturn(refundMethod, customerPhone, verifiedOtp);
         } else {
-            setPinError(customPin || supervisorStaff.length > 0 
-                ? 'Invalid Authorization PIN. A secondary manager or supervisor must authenticate.' 
+            setPinError(customPin || supervisorStaff.length > 0
+                ? 'Invalid Authorization PIN. A secondary manager or supervisor must authenticate.'
                 : 'No Manager Security PIN configured in Settings. Refund rejected under Zero-Trust policy.');
             setHqOtp('');
         }
@@ -131,13 +131,13 @@ export const ReturnModal: React.FC = () => {
             <div className="space-y-6">
                 {isPinStep ? (
                     <div className="space-y-6 animate-in fade-in">
-                        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3">
-                            <ShieldAlert className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" size={22} />
+                        <div className="p-4 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex items-start gap-3">
+                            <ShieldAlert className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] shrink-0 mt-0.5" size={22} />
                             <div className="space-y-1">
-                                <h4 className="text-sm font-black text-rose-800 dark:text-rose-300 uppercase tracking-wider">
+                                <h4 className="text-sm font-black text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] uppercase tracking-wider">
                                     Central HQ Authorization OTP Required
                                 </h4>
-                                <p className="text-xs text-rose-700 dark:text-rose-400 leading-relaxed">
+                                <p className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] leading-relaxed">
                                     Zero-Trust Anti-Collusion Policy: Store Manager PIN cannot authorize cash withdrawals from the drawer. A cash refund of <b>{CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}</b> requires a 6-digit One-Time Passcode (OTP) issued directly by Central HQ Finance or the Store Owner.
                                 </p>
                             </div>
@@ -148,13 +148,13 @@ export const ReturnModal: React.FC = () => {
                             <span className="text-sm font-black text-[var(--theme-text-primary)] font-mono block truncate">
                                 {foundSaleForReturn?.receiptNumber || `TX-${foundSaleForReturn?.id}`}
                             </span>
-                            <span className="text-lg font-mono text-rose-500 font-black block mt-1 tabular-nums">
+                            <span className="text-lg font-mono text-[var(--theme-status-danger-text)] font-black block mt-1 tabular-nums">
                                 {t('pos.cashPayout')}: {CURRENCY_SYMBOL} {totalRefundAmount.toLocaleString()}
                             </span>
                         </div>
 
                         {pinError && (
-                            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-bold text-center animate-shake">
+                            <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-xs font-bold text-center animate-shake">
                                 {pinError}
                             </div>
                         )}
@@ -284,7 +284,7 @@ export const ReturnModal: React.FC = () => {
                                                     <select
                                                         value={itemConfig.condition}
                                                         onChange={(e) => updateReturnConfig(item.id, 'condition', e.target.value)}
-                                                        className={`bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs outline-none font-bold ${itemConfig.condition === 'Damaged' ? 'text-red-500' : 'text-emerald-500'}`}
+                                                        className={`bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs outline-none font-bold ${itemConfig.condition === 'Damaged' ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-success-text)]'}`}
                                                         aria-label="Condition"
                                                     >
                                                         <option value="Resalable">Return to Stock (Resalable)</option>
@@ -320,8 +320,8 @@ export const ReturnModal: React.FC = () => {
                                             type="button"
                                             onClick={() => setRefundMethod('M_PESA')}
                                             className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'M_PESA'
-                                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-emerald-500/40'
+                                                ? 'bg-[var(--theme-status-success-bg)] text-white border-[var(--theme-status-success-border)] shadow-xs'
+                                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] border-[var(--theme-status-success-border)]'
                                                 }`}
                                         >
                                             M-Pesa (Safaricom)
@@ -332,8 +332,8 @@ export const ReturnModal: React.FC = () => {
                                                 type="button"
                                                 onClick={() => setRefundMethod('TELEBIRR')}
                                                 className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'TELEBIRR'
-                                                    ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-                                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-sky-500/40'
+                                                    ? 'bg-[var(--theme-status-info-bg)] text-white border-[var(--theme-status-info-border)] shadow-xs'
+                                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] border-[var(--theme-status-info-border)]'
                                                     }`}
                                             >
                                                 Telebirr
@@ -354,8 +354,8 @@ export const ReturnModal: React.FC = () => {
                                         type="button"
                                         onClick={() => setRefundMethod('CASH')}
                                         className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'CASH'
-                                            ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
-                                            : 'bg-[var(--theme-bg-card)] text-rose-500 border-rose-500/20 hover:border-rose-500/50'
+                                            ? 'bg-[var(--theme-status-danger-bg)] text-white border-[var(--theme-status-danger-border)] shadow-xs'
+                                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]'
                                             }`}
                                     >
                                         Cash (HQ OTP)
@@ -389,8 +389,8 @@ export const ReturnModal: React.FC = () => {
 
                             {totalRefundAmount > 0 && (
                                 <div className={`p-3 rounded-lg flex items-start gap-3 border ${refundMethod === 'CASH'
-                                    ? 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-300'
-                                    : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300'
+                                    ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
+                                    : 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                     }`}>
                                     <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                                     <p className="text-xs font-medium leading-relaxed">
@@ -415,7 +415,7 @@ export const ReturnModal: React.FC = () => {
                                     onClick={handleInitiateRefund}
                                     disabled={totalRefundAmount === 0 || isProcessing || (refundMethod !== 'CASH' && !customerPhone.trim())}
                                     className={`flex-1 py-3 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:shadow-none text-xs uppercase tracking-wider ${refundMethod === 'CASH'
-                                        ? 'bg-rose-600 hover:bg-rose-700'
+                                        ? 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)]'
                                         : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'
                                         }`}
                                 >

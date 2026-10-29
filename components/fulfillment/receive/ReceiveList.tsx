@@ -113,7 +113,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                             open={!isMobile || isActiveReceiveJob}
                             className={`group bg-[var(--theme-bg-card)] p-2 sm:p-5 md:p-6 rounded-lg sm:rounded-2xl border transition-all shadow-xs ${
                                 allItemsReceived
-                                    ? 'border-emerald-500/40 dark:border-emerald-500/30 ring-1 ring-emerald-500/20'
+                                    ? 'border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] ring-1 ring-[var(--theme-status-success-border)]'
                                     : isActiveReceiveJob
                                         ? 'border-[var(--theme-accent)]/60 bg-[var(--theme-accent)]/5 ring-1 ring-[var(--theme-accent)]/20'
                                     : 'border-[var(--theme-border)] hover:border-[var(--theme-border-strong)]'
@@ -123,7 +123,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                 <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
                                     <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border transition-all ${
                                         allItemsReceived
-                                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                            ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                     }`}>
                                         <Layers size={20} />
@@ -151,7 +151,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                 </div>
                                 <div className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border shadow-xs transition-all ${
                                     allItemsReceived
-                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                 }`}>
                                     {allItemsReceived ? (
@@ -167,7 +167,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
 
                             {!po.lineItems?.length && <div className="mb-4 space-y-2">
                                 <p className="text-sm text-[var(--theme-text-secondary)]">{t('warehouse.openManifestItemsPrompt') || 'Open this manifest’s items to begin receiving. Stock changes only after you confirm the receipt.'}</p>
-                                {manifestError(po.id) && <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">{manifestError(po.id)}</p>}
+                                {manifestError(po.id) && <p role="alert" className="text-sm text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">{manifestError(po.id)}</p>}
                                 <button type="button" onClick={() => loadManifest(po.id)} disabled={isLoadingManifest(po.id)} className="min-h-11 px-4 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-sm font-semibold disabled:opacity-50">
                                     {isLoadingManifest(po.id) ? (t('warehouse.loadingItems') || 'Loading items…') : (t('warehouse.loadItemsToReceive') || 'Load items to receive')}
                                 </button>
@@ -178,9 +178,9 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                     const { effectiveReceived: receivedQty, expectedSellable, remaining: remainingQty, isComplete, product, resolvedSku } = progress;
 
                                     const employeeId = employees?.find((e: any) => e.email === user?.email || e.name === user?.name || e.id === user?.id)?.id;
-                                    const isAssigned = jobs.some(j => 
-                                        j.type === 'RECEIVE' && 
-                                        j.orderRef === po.id && 
+                                    const isAssigned = jobs.some(j =>
+                                        j.type === 'RECEIVE' &&
+                                        j.orderRef === po.id &&
                                         j.assignedTo === employeeId &&
                                         !['completed', 'cancelled', 'deleted'].includes(j.status?.toLowerCase() || '')
                                     );
@@ -206,7 +206,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                         {(() => {
                                                             const badge = formatPackBadge(item);
                                                             return badge ? (
-                                                                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-semibold">
+                                                                <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-semibold">
                                                                     {badge}
                                                                 </span>
                                                             ) : null;
@@ -232,7 +232,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                     }`}>
                                                                         {receivedQty}
                                                                         {isBlindReceiving && !isComplete ? (
-                                                                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">{t('warehouse.blindCountBadge') || 'received · blind count'}</span>
+                                                                            <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.blindCountBadge') || 'received · blind count'}</span>
                                                                         ) : (
                                                                             <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                         )}
@@ -247,7 +247,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 }`}>
                                                                     {receivedQty}
                                                                     {isBlindReceiving && !isComplete ? (
-                                                                        <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 ml-1">{t('warehouse.blindCountBadge') || 'received · blind count'}</span>
+                                                                        <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] ml-1">{t('warehouse.blindCountBadge') || 'received · blind count'}</span>
                                                                     ) : (
                                                                         <span className="text-[var(--theme-text-secondary)]">/{expectedSellable}</span>
                                                                     )}
@@ -269,7 +269,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             progress={expectedSellable > 0 ? Math.min(100, (receivedQty / expectedSellable) * 100) : 0}
                                                             containerClassName="h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden"
                                                             fillClassName={`h-full transition-all duration-500 rounded-full ${
-                                                                isComplete ? 'bg-emerald-500' : 'bg-[var(--theme-accent)]'
+                                                                isComplete ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-accent)]'
                                                             }`}
                                                         />
                                                     </div>
@@ -359,7 +359,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                             {allItemsReceived && (
                                 <div className="mt-5 pt-4 border-t border-[var(--theme-border)] flex flex-col sm:flex-row justify-between items-center gap-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center justify-center shrink-0">
                                             <CheckCircle size={18} />
                                         </div>
                                         <div>
@@ -391,7 +391,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                 }
                                             }}
                                             disabled={isSubmitting}
-                                            className="flex-1 sm:flex-initial px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] cursor-pointer touch-manipulation"
+                                            className="flex-1 sm:flex-initial px-6 py-2.5 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold rounded-xl shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] cursor-pointer touch-manipulation"
                                         >
                                             {isSubmitting ? (
                                                 <Loader2 size={16} className="animate-spin" />

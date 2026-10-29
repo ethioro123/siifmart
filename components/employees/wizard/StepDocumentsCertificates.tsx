@@ -104,7 +104,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
     const updateCertCategory = (id: string, newCategory: string) => {
         setNewEmpData((prev: any) => ({
             ...prev,
-            certificates: (prev.certificates || []).map((c: any) => 
+            certificates: (prev.certificates || []).map((c: any) =>
                 c.id === id ? { ...c, category: newCategory } : c
             )
         }));
@@ -115,7 +115,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
         <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
             <div className="flex items-center justify-between mb-3">
                 <label className="text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-bold uppercase tracking-wide flex items-center gap-2">
-                    <Award size={15} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <Award size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
                     <span>Certificates & Verification Credentials</span>
                 </label>
                 <span className="text-[10px] text-stone-400 font-mono">
@@ -123,7 +123,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                 </span>
             </div>
 
-            <div 
+            <div
                 onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingCert(true); }}
                 onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingCert(true); }}
                 onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingCert(false); }}
@@ -135,7 +135,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                     if (file) processCertFile(file);
                 }}
                 className={`flex flex-col sm:flex-row gap-2 mb-3 p-2 rounded-2xl transition-all ${
-                    isDraggingCert ? 'border-2 border-dashed border-[#2C5E3B] bg-emerald-50/30 dark:bg-emerald-500/10' : ''
+                    isDraggingCert ? 'border-2 border-dashed border-[var(--theme-border)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)]' : ''
                 }`}
             >
                 <select
@@ -176,7 +176,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                             className="p-2.5 rounded-xl bg-stone-50 dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between gap-3 text-xs"
                         >
                             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                                <div className="p-1.5 rounded-lg bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0">
                                     <Award size={14} />
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -185,7 +185,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                                         <select
                                             value={cert.category || 'Professional Certificate'}
                                             onChange={(e) => updateCertCategory(cert.id, e.target.value)}
-                                            className="text-[10px] font-bold bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-md px-2 py-0.5 text-[#2C5E3B] dark:text-[#A9CBA2] outline-none cursor-pointer hover:border-[#2C5E3B]"
+                                            className="text-[10px] font-bold bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-md px-2 py-0.5 text-[var(--theme-primary)] dark:text-[#A9CBA2] outline-none cursor-pointer hover:border-[var(--theme-border)]"
                                             title="Change Document Category"
                                         >
                                             {DOCUMENT_CATEGORIES.map(cat => (
@@ -201,7 +201,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                             <button
                                 type="button"
                                 onClick={(e) => removeCertificate(e, cert.id)}
-                                className="p-1 text-stone-400 hover:text-rose-600 transition-colors cursor-pointer"
+                                className="p-1 text-stone-400 text-[var(--theme-status-danger-text)] transition-colors cursor-pointer"
                                 title="Delete Document"
                             >
                                 <Trash2 size={14} />

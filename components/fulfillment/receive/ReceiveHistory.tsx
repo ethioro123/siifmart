@@ -71,7 +71,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             const isFullyReceived = (o.lineItems || []).length > 0 &&
                 (o.lineItems || []).every(li => (li.receivedQty || 0) >= convertToSellableUnits(li.quantity, li));
             const isMarkedReceived = o.status === 'Received' || (o.status as any) === 'Closed';
-            
+
             if (!isFullyReceived && !isMarkedReceived) return false;
 
             if (isStaffWithLimitedAccess) {
@@ -145,21 +145,21 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             // Resolve User Name: Prioritize the person who actually completed the job!
             const userId = j.completedBy || (j as any).completed_by || j.receivedBy || (j as any).received_by || j.assignedTo || j.createdBy;
             const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-            let userObj = employees.find(e => 
-                e.id === userId || 
-                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
+            let userObj = employees.find(e =>
+                e.id === userId ||
+                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) ||
                 (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
                 (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
             );
             if (!userObj && user && userId && (
-                userId.toLowerCase() === user.id?.toLowerCase() || 
-                userId.toLowerCase() === user.email?.toLowerCase() || 
-                userId.toLowerCase() === user.name?.toLowerCase() || 
+                userId.toLowerCase() === user.id?.toLowerCase() ||
+                userId.toLowerCase() === user.email?.toLowerCase() ||
+                userId.toLowerCase() === user.name?.toLowerCase() ||
                 userId.toLowerCase() === user.employeeId?.toLowerCase()
             )) {
-                userObj = employees.find(e => 
-                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
-                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
+                userObj = employees.find(e =>
+                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) ||
+                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) ||
                     e.id === user.employeeId
                 );
             }
@@ -366,7 +366,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                 </span>
                                             )}
                                             {item.isPartial && (
-                                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                                     {t('warehouse.partial') || 'Partial'}
                                                 </span>
                                             )}
@@ -374,7 +374,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                 <span className="text-[11px] text-[var(--theme-text-secondary)]">{item.varianceText}</span>
                                             )}
                                             {item.type === 'JOB' && ((item.rawData as any)?.lineItems || (item.rawData as any)?.line_items || []).some((li: any) => (li.returnedQty || li.returned_qty) > 0) && (
-                                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                                                     {t('warehouse.returned') || 'Returned'}
                                                 </span>
                                             )}
@@ -409,7 +409,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                     setReturnType('warehouse');
                                                     setReturnJob(item.rawData as WMSJob);
                                                 }}
-                                                className="flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-lg border border-amber-500/20 text-[11px] font-semibold transition-all cursor-pointer"
+                                                className="flex items-center gap-1 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] px-2 py-1 rounded-lg border border-[var(--theme-status-warning-border)] text-[11px] font-semibold transition-all cursor-pointer"
                                                 title={t('warehouse.returnToWarehouse')}
                                             >
                                                 <Undo2 size={12} />
@@ -438,7 +438,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                                     setReturnType('procurement');
                                                     setReturnJob(adaptedJob as any);
                                                 }}
-                                                className="flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-lg border border-amber-500/20 text-[11px] font-semibold transition-all cursor-pointer"
+                                                className="flex items-center gap-1 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] px-2 py-1 rounded-lg border border-[var(--theme-status-warning-border)] text-[11px] font-semibold transition-all cursor-pointer"
                                                 title={t('warehouse.returnToWarehouse')}
                                             >
                                                 <Undo2 size={12} />

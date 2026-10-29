@@ -43,8 +43,8 @@ export const PnLWaterfallCard: React.FC<PnLWaterfallCardProps> = ({
             amount: totalRevenue,
             type: 'add' as const,
             icon: ArrowUpRight,
-            color: 'text-blue-600 dark:text-blue-400',
-            bg: 'bg-blue-500/10'
+            color: 'text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]',
+            bg: 'bg-[var(--theme-status-info-bg)]'
         },
         {
             id: 'refunds',
@@ -53,8 +53,8 @@ export const PnLWaterfallCard: React.FC<PnLWaterfallCardProps> = ({
             amount: totalRefunds,
             type: 'subtract' as const,
             icon: ArrowDownRight,
-            color: 'text-amber-600 dark:text-amber-400',
-            bg: 'bg-amber-500/10'
+            color: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
+            bg: 'bg-[var(--theme-status-warning-bg)]'
         },
         {
             id: 'net_revenue',
@@ -73,8 +73,8 @@ export const PnLWaterfallCard: React.FC<PnLWaterfallCardProps> = ({
             amount: totalOpEx,
             type: 'subtract' as const,
             icon: Receipt,
-            color: 'text-rose-600 dark:text-rose-400',
-            bg: 'bg-rose-500/10'
+            color: 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]',
+            bg: 'bg-[var(--theme-status-danger-bg)]'
         },
         {
             id: 'payroll',
@@ -83,8 +83,8 @@ export const PnLWaterfallCard: React.FC<PnLWaterfallCardProps> = ({
             amount: totalSalaries,
             type: 'subtract' as const,
             icon: Users,
-            color: 'text-rose-600 dark:text-rose-400',
-            bg: 'bg-rose-500/10'
+            color: 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]',
+            bg: 'bg-[var(--theme-status-danger-bg)]'
         },
         {
             id: 'ebitda',
@@ -93,7 +93,7 @@ export const PnLWaterfallCard: React.FC<PnLWaterfallCardProps> = ({
             amount: operatingEbitda,
             type: 'subtotal' as const,
             icon: Building2,
-            color: operatingEbitda >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400',
+            color: operatingEbitda >= 0 ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]',
             bg: 'bg-[var(--theme-bg-subtle)]'
         },
         {
@@ -120,7 +120,7 @@ export const PnLWaterfallCard: React.FC<PnLWaterfallCardProps> = ({
                         Reconciled P&L waterfall from gross turnover to net retained profit.
                     </p>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium w-fit">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-xs font-medium w-fit">
                     <CheckCircle2 size={13} />
                     <span>Zero-Trust Ledger Verified</span>
                 </div>
@@ -167,9 +167,9 @@ export const PnLWaterfallCard: React.FC<PnLWaterfallCardProps> = ({
 
                 {/* Final Retained Bottom Line */}
                 <div className="pt-3 mt-2">
-                    <div className="p-3.5 rounded-xl bg-emerald-500/5 dark:bg-emerald-400/5 border border-emerald-500/20 flex items-center justify-between">
+                    <div className="p-3.5 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] flex items-center justify-between">
                         <div>
-                            <span className="text-xs uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-400">
+                            <span className="text-xs uppercase tracking-wider font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                 Net Operating Income (Bottom Line)
                             </span>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
@@ -177,7 +177,7 @@ export const PnLWaterfallCard: React.FC<PnLWaterfallCardProps> = ({
                             </p>
                         </div>
                         <span className={`font-mono font-bold text-lg tabular-nums ${
-                            netProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                            netProfit >= 0 ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                         }`}>
                             {formatCompactNumber(netProfit, { currency: currencySymbol })}
                         </span>

@@ -49,8 +49,8 @@ export const DrawerSignOffModal: React.FC<DrawerSignOffModalProps> = ({
         >
             <div className="p-5 space-y-4">
                 {/* Header Banner */}
-                <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                <div className="p-3.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-xl flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <ShieldCheck size={18} />
                     </div>
                     <div>
@@ -74,7 +74,7 @@ export const DrawerSignOffModal: React.FC<DrawerSignOffModalProps> = ({
                     <div>
                         <span className="text-[11px] text-[var(--theme-text-secondary)] block">On-Duty Supervisor</span>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                            <UserCheck size={13} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <UserCheck size={13} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0" />
                             <span className="text-[var(--theme-text-primary)] font-medium text-xs truncate">
                                 {shift.supervisorName || 'Unassigned'}
                             </span>
@@ -96,10 +96,10 @@ export const DrawerSignOffModal: React.FC<DrawerSignOffModalProps> = ({
                         <span className="text-xs font-semibold text-[var(--theme-text-primary)]">Net Variance</span>
                         <span className={`font-mono font-semibold text-sm tabular-nums ${
                             shift.variance === 0
-                                ? 'text-emerald-600 dark:text-emerald-400'
+                                ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                 : isExcessive
-                                    ? 'text-rose-600 dark:text-rose-400'
-                                    : 'text-amber-600 dark:text-amber-400'
+                                    ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
+                                    : 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                         }`}>
                             {shift.variance > 0 ? '+' : ''}{currencySymbol} {shift.variance.toLocaleString()}
                         </span>
@@ -108,8 +108,8 @@ export const DrawerSignOffModal: React.FC<DrawerSignOffModalProps> = ({
 
                 {/* Cashier Discrepancy Note */}
                 {shift.discrepancyReason && (
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs space-y-1">
-                        <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-semibold text-[11px]">
+                    <div className="p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl text-xs space-y-1">
+                        <div className="flex items-center gap-1.5 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold text-[11px]">
                             <AlertTriangle size={13} />
                             <span>Cashier Discrepancy Explanation</span>
                         </div>
@@ -127,7 +127,7 @@ export const DrawerSignOffModal: React.FC<DrawerSignOffModalProps> = ({
                     <textarea
                         value={auditNotes}
                         onChange={(e) => setAuditNotes(e.target.value)}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl p-3 text-xs focus:outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors resize-none h-20 placeholder:text-[var(--theme-text-secondary)]/50"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl p-3 text-xs focus:outline-none focus:border-[var(--theme-border-focus)] dark:focus:border-[var(--theme-border-focus)] transition-colors resize-none h-20 placeholder:text-[var(--theme-text-secondary)]/50"
                         placeholder="Enter supervisory verification findings, CCTV cross-check notes, or required audit follow-ups..."
                         aria-label="HQ Audit Notes"
                     />
@@ -145,14 +145,14 @@ export const DrawerSignOffModal: React.FC<DrawerSignOffModalProps> = ({
                     <button
                         onClick={() => handleConfirm('Flagged')}
                         disabled={isActionLoading}
-                        className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 transition-all shadow-xs"
+                        className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] transition-all shadow-xs"
                     >
                         Flag Discrepancy
                     </button>
                     <button
                         onClick={() => handleConfirm('Reconciled')}
                         disabled={isActionLoading}
-                        className="px-4 py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                        className="px-4 py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
                     >
                         {isActionLoading && <Loader2 className="animate-spin" size={14} />}
                         <span>Sign-off &amp; Reconcile</span>

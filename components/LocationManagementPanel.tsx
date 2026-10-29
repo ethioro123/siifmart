@@ -103,8 +103,8 @@ export default function LocationManagementPanel({ products, sites, currentSiteId
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <StatCard icon={Package} label="Total Inventory" value={stats.totalProducts} color="text-white" subValue="items" />
-                <StatCard icon={CheckCircle} label="Assigned Locations" value={stats.productsWithLocation} color="text-green-400" subValue={`${((stats.productsWithLocation / stats.totalProducts) * 100).toFixed(0)}%`} />
-                <StatCard icon={AlertTriangle} label="Unassigned" value={stats.productsWithoutLocation} color="text-yellow-400" subValue="Attn. Req" />
+                <StatCard icon={CheckCircle} label="Assigned Locations" value={stats.productsWithLocation} color="text-[var(--theme-status-success-text)]" subValue={`${((stats.productsWithLocation / stats.totalProducts) * 100).toFixed(0)}%`} />
+                <StatCard icon={AlertTriangle} label="Unassigned" value={stats.productsWithoutLocation} color="text-[var(--theme-status-warning-text)]" subValue="Attn. Req" />
                 <StatCard icon={TrendingUp} label="Space Utilization" value={`${stats.utilizationRate.toFixed(1)}%`} color="text-cyber-primary" subValue="capacity" />
             </div>
 
@@ -222,7 +222,7 @@ export default function LocationManagementPanel({ products, sites, currentSiteId
                                                                         {location.formatted}
                                                                     </span>
                                                                 ) : (
-                                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">NO LOC</span>
+                                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">NO LOC</span>
                                                                 )}
                                                             </div>
                                                             <p className="text-[10px] text-gray-500 truncate mt-0.5">{product.sku}</p>

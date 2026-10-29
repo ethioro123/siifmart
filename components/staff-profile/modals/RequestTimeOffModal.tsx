@@ -64,7 +64,7 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
                 <div className="grid grid-cols-2 gap-3">
                     <div>
                         <label className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1 flex items-center gap-1">
-                            <Calendar size={12} className="text-[#2C5E3B]" /> Start Date
+                            <Calendar size={12} className="text-[var(--theme-primary)]" /> Start Date
                         </label>
                         <input
                             type="date"
@@ -77,7 +77,7 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
                     </div>
                     <div>
                         <label className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1 flex items-center gap-1">
-                            <Calendar size={12} className="text-[#2C5E3B]" /> End Date
+                            <Calendar size={12} className="text-[var(--theme-primary)]" /> End Date
                         </label>
                         <input
                             type="date"
@@ -90,7 +90,7 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
                     </div>
                 </div>
 
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 rounded-xl text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-between">
+                <div className="p-3 bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] rounded-xl text-xs font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2] flex items-center justify-between">
                     <span>Duration:</span>
                     <span className="font-mono text-sm">{days} {days === 1 ? 'Day' : 'Days'}</span>
                 </div>

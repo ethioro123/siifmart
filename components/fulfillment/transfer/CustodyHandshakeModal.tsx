@@ -60,11 +60,11 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
     const modalContent = (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-                
+
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-[var(--theme-border)] flex items-center justify-between bg-[var(--theme-bg-subtle)]">
                     <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl ${hasDiscrepancy ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'}`}>
+                        <div className={`p-2.5 rounded-xl ${hasDiscrepancy ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]' : 'bg-primary/10 text-primary'}`}>
                             {hasDiscrepancy ? <AlertTriangle size={22} /> : <ShieldCheck size={22} />}
                         </div>
                         <div>
@@ -88,7 +88,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
 
                 {/* Body Content */}
                 <div className="p-6 overflow-y-auto space-y-4 custom-scrollbar text-xs">
-                    
+
                     {/* Legal Custody Notice */}
                     <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] leading-relaxed font-normal">
                         {t('warehouse.legalCustodyNotice')}
@@ -97,7 +97,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                     {/* Parties Handshake Card */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="p-3.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
-                            <div className="flex items-center gap-1.5 mb-1 text-[11px] font-semibold text-amber-500 uppercase tracking-wider">
+                            <div className="flex items-center gap-1.5 mb-1 text-[11px] font-semibold text-[var(--theme-status-warning-text)] uppercase tracking-wider">
                                 <Truck size={14} /> {t('warehouse.relinquishingCustody')}
                             </div>
                             <p className="font-bold text-[var(--theme-text-primary)] break-words text-sm leading-tight">{driverName}</p>
@@ -115,26 +115,26 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
 
                     {/* Clean Receipt vs Discrepancy Alert */}
                     {!hasDiscrepancy ? (
-                        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center gap-3">
-                            <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <div className="p-4 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-3">
+                            <CheckCircle size={20} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0" />
                             <div>
                                 <p className="font-bold text-sm tracking-tight">{t('warehouse.countMatchedDispatchRecord')}</p>
-                                <p className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">
+                                <p className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-0.5">
                                     {t('warehouse.allUnitsGoodCondition', { jobId: formatJobId(activeTransferJob) })}
                                 </p>
                             </div>
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-300 flex items-start gap-3">
-                                <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                            <div className="p-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-start gap-3">
+                                <AlertTriangle size={18} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-bold tracking-tight">
                                         {totalDiscrepantUnits > 0
                                             ? t('warehouse.receiptVarianceRecorded', { count: totalDiscrepantUnits })
                                             : t('warehouse.conditionIssueRecorded', { count: discrepantItems.length })}
                                     </p>
-                                    <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80 mt-0.5">
+                                    <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-0.5">
                                         {t('warehouse.varianceAttributionNotice')}
                                     </p>
                                 </div>
@@ -152,10 +152,10 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                                         <div key={idx} className="p-3 flex items-center justify-between bg-[var(--theme-bg-subtle)]">
                                             <div className="min-w-0 flex-1 mr-3">
                                                 <p className="font-bold text-[var(--theme-text-primary)] truncate">{product?.name || 'Item'}</p>
-                                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{product?.sku} · Condition: <span className="font-semibold text-amber-500">{item.condition}</span></p>
+                                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{product?.sku} · Condition: <span className="font-semibold text-[var(--theme-status-warning-text)]">{item.condition}</span></p>
                                             </div>
                                             <div className="text-right shrink-0">
-                                                <span className={`font-mono font-bold text-xs px-2 py-0.5 rounded-full ${variance < 0 ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'}`}>
+                                                <span className={`font-mono font-bold text-xs px-2 py-0.5 rounded-full ${variance < 0 ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'}`}>
                                                     {isBlindReceiving
                                                         ? `Counted: ${received} (Variance)`
                                                         : `${variance > 0 ? `+${variance}` : variance} (${received}/${expected})`}
@@ -183,8 +183,8 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         onClick={handleExecute}
                         disabled={isSubmitting}
                         className={`min-h-[44px] flex-1 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm touch-manipulation ${!isSubmitting
-                            ? hasDiscrepancy 
-                                ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-[0.99] cursor-pointer'
+                            ? hasDiscrepancy
+                                ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white active:scale-[0.99] cursor-pointer'
                                 : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] active:scale-[0.99] cursor-pointer'
                             : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
                         }`}

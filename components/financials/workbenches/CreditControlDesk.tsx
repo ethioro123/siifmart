@@ -46,7 +46,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
             {/* Header Card */}
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-wrap justify-between items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <UserX size={20} />
                     </div>
                     <div>
@@ -60,7 +60,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[11px] font-semibold font-mono">
+                    <span className="px-2.5 py-1 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-[11px] font-semibold font-mono">
                         CREDIT POLICY ENFORCED
                     </span>
                     {isManager ? (
@@ -69,7 +69,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                             <span>Checker • Limit Sign-Off Authority</span>
                         </span>
                     ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 text-[11px] font-semibold">
                             <Clock size={12} />
                             <span>Maker • Collections Sentinel</span>
                         </span>
@@ -83,10 +83,10 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Accounts on Credit Hold
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-rose-600 dark:text-rose-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] mt-1">
                         {holdReleaseStatus === 'unlocked' ? '2 Accounts' : '3 Accounts'}
                     </div>
-                    <span className="text-[11px] text-rose-600 dark:text-rose-400 mt-1 block">
+                    <span className="text-[11px] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] mt-1 block">
                         {holdReleaseStatus === 'unlocked'
                             ? '1 account granted temporary exception'
                             : 'Overdue > 60 days • Sales locked'}
@@ -97,10 +97,10 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Near-Limit Accounts (&gt;85%)
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-amber-600 dark:text-amber-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1">
                         5 Accounts
                     </div>
-                    <span className="text-[11px] text-amber-600 dark:text-amber-400 mt-1 block">
+                    <span className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 block">
                         Credit warning dispatched
                     </span>
                 </div>
@@ -109,10 +109,10 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Average Collection Days (DSO)
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1">
                         26 Days
                     </div>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 block">
+                    <span className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1 block">
                         Target: &le; 30 Days (On Target)
                     </span>
                 </div>
@@ -137,7 +137,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                             disabled={remindersSent}
                             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                 remindersSent
-                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 cursor-default'
+                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] cursor-default'
                                     : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] cursor-pointer'
                             }`}
                         >
@@ -153,8 +153,8 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                         <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                                 holdReleaseStatus === 'unlocked'
-                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
+                                    : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                             }`}>
                                 {holdReleaseStatus === 'unlocked' ? <Unlock size={16} /> : <Lock size={16} />}
                             </div>
@@ -171,14 +171,14 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                         <div className="flex items-center gap-4">
                             <div className="text-right">
                                 <span className={`font-mono tabular-nums font-bold text-sm block ${
-                                    holdReleaseStatus === 'unlocked' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                                    holdReleaseStatus === 'unlocked' ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
                                 }`}>
                                     {currencySymbol} 95,000 / 80,000
                                 </span>
                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                                     holdReleaseStatus === 'unlocked'
-                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                                        : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
+                                        : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                 }`}>
                                     {holdReleaseStatus === 'unlocked' ? 'OVERRIDE GRANTED' : '118% LIMIT EXCEEDED'}
                                 </span>
@@ -208,7 +208,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                                         Submit Release Request
                                     </button>
                                 ) : holdReleaseStatus === 'submitted' ? (
-                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                                         <Clock size={12} /> Pending Manager Review
                                     </span>
                                 ) : null
@@ -219,7 +219,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                     {/* Account 2: Ethio Supermarket Hub - Near Limit */}
                     <div className="p-4 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)] transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                 <AlertTriangle size={16} />
                             </div>
                             <div>
@@ -232,10 +232,10 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className="font-mono tabular-nums font-bold text-amber-600 dark:text-amber-400 text-sm block">
+                            <span className="font-mono tabular-nums font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-sm block">
                                 {currencySymbol} 180,000 / 200,000
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                 90% UTILIZATION
                             </span>
                         </div>
@@ -244,7 +244,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                     {/* Account 3: Rift Valley Grocers - In Good Standing */}
                     <div className="p-4 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)] transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                                 <Users size={16} />
                             </div>
                             <div>
@@ -260,7 +260,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                             <span className="font-mono tabular-nums font-bold text-[var(--theme-text-primary)] text-sm block">
                                 {currencySymbol} 45,000 / 50,000
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                 CURRENT &bull; 90%
                             </span>
                         </div>

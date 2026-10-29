@@ -35,8 +35,8 @@ export const SubmitChangeRequestModal: React.FC<SubmitChangeRequestModalProps> =
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Cross-Department Change Authorization" size="lg">
             <div className="space-y-5 p-2">
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-[var(--theme-text-primary)] space-y-1.5">
-                    <div className="flex items-center gap-2 font-bold text-amber-500">
+                <div className="p-4 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-xs text-[var(--theme-text-primary)] space-y-1.5">
+                    <div className="flex items-center gap-2 font-bold text-[var(--theme-status-warning-text)]">
                         <ShieldCheck size={16} />
                         Zero-Trust Segregation of Duties Governance
                     </div>
@@ -64,7 +64,7 @@ export const SubmitChangeRequestModal: React.FC<SubmitChangeRequestModalProps> =
                                         {String(diff.oldValue || 'None')}
                                     </span>
                                     <ArrowRight size={12} className="text-[var(--theme-text-muted)]" />
-                                    <span className="text-emerald-500 font-bold">
+                                    <span className="text-[var(--theme-status-success-text)] font-bold">
                                         {String(diff.newValue || 'None')}
                                     </span>
                                 </div>
@@ -76,7 +76,7 @@ export const SubmitChangeRequestModal: React.FC<SubmitChangeRequestModalProps> =
                 {/* Reason Input */}
                 <div className="space-y-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block">
-                        Operational Justification <span className="text-rose-500">*</span>
+                        Operational Justification <span className="text-[var(--theme-status-danger-text)]">*</span>
                     </label>
                     <textarea
                         value={reason}
@@ -89,7 +89,7 @@ export const SubmitChangeRequestModal: React.FC<SubmitChangeRequestModalProps> =
                         className="w-full bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-primary)] transition-colors resize-none"
                     />
                     {error && (
-                        <p className="text-[11px] text-rose-500 flex items-center gap-1 font-semibold">
+                        <p className="text-[11px] text-[var(--theme-status-danger-text)] flex items-center gap-1 font-semibold">
                             <AlertCircle size={12} />
                             {error}
                         </p>
@@ -118,7 +118,7 @@ export const SubmitChangeRequestModal: React.FC<SubmitChangeRequestModalProps> =
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting || !reason.trim()}
-                        className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all disabled:opacity-40 cursor-pointer shadow-xs"
+                        className="px-5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all disabled:opacity-40 cursor-pointer shadow-xs"
                     >
                         {isSubmitting ? (
                             <Loader2 size={15} className="animate-spin" />

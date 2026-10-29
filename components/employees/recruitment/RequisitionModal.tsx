@@ -35,8 +35,8 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
     }, [sites, country, isRegional, userRegion]);
 
     // Default site locked for site managers
-    const defaultSiteId = isSiteManager 
-        ? (user?.siteId || activeSite?.id || '') 
+    const defaultSiteId = isSiteManager
+        ? (user?.siteId || activeSite?.id || '')
         : (availableSites[0]?.id || activeSite?.id || sites[0]?.id || '');
 
     const [siteId, setSiteId] = useState(defaultSiteId);
@@ -105,7 +105,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                 </div>
 
                 {allowedRoles.length === 0 ? (
-                    <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                    <div className="p-4 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-2">
                         <ShieldAlert size={16} className="shrink-0" />
                         <span>Staff-level roles are restricted from opening headcount requisitions.</span>
                     </div>
@@ -114,7 +114,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                         {/* Location Lock Indicator */}
                         <div className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between text-xs">
                             <div className="flex items-center gap-2 text-[var(--theme-text-secondary)]">
-                                <Building2 size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                <Building2 size={15} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                                 <span className="font-medium">Assigned Location:</span>
                             </div>
                             {isSiteManager ? (
@@ -237,7 +237,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                             <button
                                 type="submit"
                                 disabled={isSubmitting || !title.trim()}
-                                className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs font-semibold active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                                className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Submitting...' : 'Submit to HR & Finance'}
                             </button>

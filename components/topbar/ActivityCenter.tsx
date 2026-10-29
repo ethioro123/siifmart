@@ -74,7 +74,7 @@ export function ActivityCenter({
          >
             <Bell size={18} className={isNotifOpen ? 'animate-bounce' : 'group-hover:rotate-12 transition-transform'} />
             {totalAlerts > 0 && (
-               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-[var(--theme-bg-panel)] shadow-sm animate-pulse">
+               <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--theme-status-danger-bg)] text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-[var(--theme-bg-panel)] shadow-sm animate-pulse">
                   {totalAlerts}
                </span>
             )}
@@ -104,14 +104,14 @@ export function ActivityCenter({
                                  <div className="w-px h-3 bg-[var(--theme-border)]" />
                                  <button
                                     onClick={handleClearAll}
-                                    className="text-[10px] font-bold text-red-500 hover:text-red-400 uppercase transition-colors cursor-pointer"
+                                    className="text-[10px] font-bold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] uppercase transition-colors cursor-pointer"
                                  >
                                     Clear all
                                  </button>
                               </>
                            )}
-                           <button 
-                              onClick={() => setIsNotifOpen(false)} 
+                           <button
+                              onClick={() => setIsNotifOpen(false)}
                               className="text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] cursor-pointer"
                               title="Close Activity Center"
                               aria-label="Close"
@@ -130,7 +130,7 @@ export function ActivityCenter({
                            <Bell size={12} />
                            Recent events
                            {filteredNotifications.length > 0 && (
-                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'all' ? 'bg-white/20' : 'bg-red-500 text-white'}`}>
+                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'all' ? 'bg-white/20' : 'bg-[var(--theme-status-danger-bg)] text-white'}`}>
                                  {filteredNotifications.length}
                               </span>
                            )}
@@ -142,7 +142,7 @@ export function ActivityCenter({
                            <CheckSquare size={12} />
                            Tasks
                            {tasksAssignedToMe.filter(t => t.status === 'Pending').length > 0 && (
-                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'tasks' ? 'bg-white/20' : 'bg-blue-500 text-white'}`}>
+                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'tasks' ? 'bg-white/20' : 'bg-[var(--theme-status-info-bg)] text-white'}`}>
                                  {tasksAssignedToMe.filter(t => t.status === 'Pending').length}
                               </span>
                            )}
@@ -159,12 +159,12 @@ export function ActivityCenter({
                            {displayedNotifications.length > 0 ? (
                               <div className="divide-y divide-white/5 flex-1">
                                  {displayedNotifications.map(notif => (
-                                    <div key={notif.id} className={`p-4 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors relative group ${!notif.read ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5' : ''}`}>
+                                    <div key={notif.id} className={`p-4 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors relative group ${!notif.read ? 'bg-[var(--theme-primary)]/5 dark:bg-[#A9CBA2]/5' : ''}`}>
                                        <div className="flex gap-3">
-                                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${(notif.type === 'error' || notif.type === 'alert') ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
-                                             notif.type === 'warning' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
-                                                notif.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
-                                                   'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${(notif.type === 'error' || notif.type === 'alert') ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' :
+                                             notif.type === 'warning' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]' :
+                                                notif.type === 'success' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]' :
+                                                   'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]'
                                              }`}>
                                              {(notif.type === 'error' || notif.type === 'alert') ? <AlertTriangle size={16} /> :
                                                 notif.type === 'warning' ? <AlertTriangle size={16} /> :
@@ -188,7 +188,7 @@ export function ActivityCenter({
                                           </div>
                                           <button
                                              onClick={() => handleClearSingle(notif.id)}
-                                             className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-500 hover:text-red-400 transition-all border border-transparent hover:border-red-500/30 rounded bg-red-500/0 hover:bg-red-500/10"
+                                             className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-500 text-[var(--theme-status-danger-text)] transition-all border border-transparent border-[var(--theme-status-danger-border)] rounded bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)]"
                                              title="Remove notification"
                                              aria-label="Remove"
                                           >
@@ -216,14 +216,14 @@ export function ActivityCenter({
                                        <div className="flex items-start gap-3">
                                           <button
                                              onClick={() => handleTaskStatusChange(task.id, task.status === 'Completed' ? 'Pending' : 'Completed')}
-                                             className={`mt-0.5 w-4 h-4 rounded border transition-all flex items-center justify-center ${task.status === 'Completed' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] border-[#2C5E3B] dark:border-[#A9CBA2]' : 'border-stone-300 dark:border-gray-600 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2]'}`}
+                                             className={`mt-0.5 w-4 h-4 rounded border transition-all flex items-center justify-center ${task.status === 'Completed' ? 'bg-[var(--theme-primary)] dark:bg-[#A9CBA2] border-[var(--theme-border)] dark:border-[#A9CBA2]' : 'border-stone-300 dark:border-gray-600 hover:border-[var(--theme-border)] dark:hover:border-[#A9CBA2]'}`}
                                           >
                                              {task.status === 'Completed' && <X size={12} className="text-black" />}
                                           </button>
                                           <div className="flex-1 min-w-0">
                                              <p className={`text-xs font-bold transition-all ${task.status === 'Completed' ? 'text-gray-500 line-through' : 'text-white'}`}>{task.title}</p>
                                              <div className="flex items-center gap-3 mt-1">
-                                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-sm ${task.priority === 'Urgent' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'}`}>
+                                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-sm ${task.priority === 'Urgent' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' : 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]'}`}>
                                                    {task.priority}
                                                 </span>
                                                 <div className="flex items-center gap-2 text-[10px] text-gray-500 font-mono">

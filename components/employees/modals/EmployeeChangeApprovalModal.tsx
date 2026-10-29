@@ -55,7 +55,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
         }
 
         const targetEmp = employees.find(e => e.id === req.employeeId);
-        const isTargetCEO = (targetEmp?.role && isSovereignCEO(targetEmp.role)) || 
+        const isTargetCEO = (targetEmp?.role && isSovereignCEO(targetEmp.role)) ||
             Boolean(req.fullProposedEmployee?.role && isSovereignCEO(req.fullProposedEmployee.role));
 
         if (isTargetCEO && !isCEO) {
@@ -131,7 +131,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                                 Segregation of Duties (SoD) Authorization Ledger
                             </span>
                             {isCEO && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                                     CEO Universal Sign-Off
                                 </span>
                             )}
@@ -174,7 +174,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                             const targetEmp = employees.find(e => e.id === req.employeeId);
                             const targetRegion = targetEmp?.regionCode || targetEmp?.region_code;
                             const userRegion = user?.regionCode || user?.region_code;
-                            const userCanApprove = (isCEO && req.employeeId !== user?.id) || req.requiredApprovers.some(auth => 
+                            const userCanApprove = (isCEO && req.employeeId !== user?.id) || req.requiredApprovers.some(auth =>
                                 canApproveChangeRequest(user?.role || '', auth, {
                                     userRegionCode: userRegion,
                                     targetRegionCode: targetRegion,
@@ -188,8 +188,8 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                             const isBusy = actionId === req.id;
 
                             return (
-                                <div 
-                                    key={req.id} 
+                                <div
+                                    key={req.id}
                                     className="p-4 rounded-2xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-3"
                                 >
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--theme-border)] pb-2.5">
@@ -210,8 +210,8 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
 
                                         <div className="flex flex-wrap gap-1">
                                             {req.requiredApprovers.map((dept, i) => (
-                                                <span 
-                                                    key={i} 
+                                                <span
+                                                    key={i}
                                                     className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]"
                                                 >
                                                     {dept}
@@ -241,7 +241,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                                                         {String(diff.oldValue || 'None')}
                                                     </span>
                                                     <ArrowRight size={11} className="text-[var(--theme-text-muted)]" />
-                                                    <span className="text-emerald-500 font-bold">
+                                                    <span className="text-[var(--theme-status-success-text)] font-bold">
                                                         {String(diff.newValue || 'None')}
                                                     </span>
                                                 </div>
@@ -254,7 +254,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
                                             <div className="text-[11px] text-[var(--theme-text-muted)]">
                                                 {userCanApprove ? (
-                                                    <span className="text-emerald-500 font-bold">✓ Authorized to approve this request</span>
+                                                    <span className="text-[var(--theme-status-success-text)] font-bold">✓ Authorized to approve this request</span>
                                                 ) : (
                                                     <span>Requires sign-off from {req.requiredApprovers.join(', ')}</span>
                                                 )}
@@ -265,14 +265,14 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                                                     <button
                                                         onClick={() => setRejectionModalId(req.id)}
                                                         disabled={isBusy}
-                                                        className="px-3 py-1.5 rounded-lg border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] text-rose-500 font-bold text-xs transition-colors cursor-pointer"
+                                                        className="px-3 py-1.5 rounded-lg border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-status-danger-text)] font-bold text-xs transition-colors cursor-pointer"
                                                     >
                                                         Reject
                                                     </button>
                                                     <button
                                                         onClick={() => handleApprove(req)}
                                                         disabled={isBusy}
-                                                        className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer shadow-xs disabled:opacity-40"
+                                                        className="px-4 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer shadow-xs disabled:opacity-40"
                                                     >
                                                         {isBusy ? (
                                                             <Loader2 size={13} className="animate-spin" />
@@ -297,9 +297,9 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
 
                                     {/* Rejection input dropdown */}
                                     {rejectionModalId === req.id && (
-                                        <div className="p-3 bg-[var(--theme-bg-card)] rounded-xl border border-rose-500/20 space-y-2 animate-in fade-in">
-                                            <label className="text-[10px] font-bold uppercase text-rose-500 block">
-                                                Reason for Rejection <span className="text-rose-500">*</span>
+                                        <div className="p-3 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-status-danger-border)] space-y-2 animate-in fade-in">
+                                            <label className="text-[10px] font-bold uppercase text-[var(--theme-status-danger-text)] block">
+                                                Reason for Rejection <span className="text-[var(--theme-status-danger-text)]">*</span>
                                             </label>
                                             <input
                                                 type="text"
@@ -318,7 +318,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                                                 <button
                                                     onClick={() => handleReject(req)}
                                                     disabled={!rejectionReason.trim() || isBusy}
-                                                    className="px-3 py-1 rounded-lg bg-rose-500 text-white text-xs font-bold"
+                                                    className="px-3 py-1 rounded-lg bg-[var(--theme-status-danger-bg)] text-white text-xs font-bold"
                                                 >
                                                     Confirm Rejection
                                                 </button>

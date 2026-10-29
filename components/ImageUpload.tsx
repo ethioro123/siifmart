@@ -101,14 +101,14 @@ export default function ImageUpload({ value, onChange, onError, placeholder = 'U
             <input ref={cameraInputRef} aria-label="Camera Capture" title="Camera Capture" type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && processFile(e.target.files[0])} className="hidden" disabled={disabled} />
 
             <div onClick={!disabled && !value ? () => fileInputRef.current?.click() : undefined} onDragOver={(e) => { e.preventDefault(); !disabled && setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (!disabled && e.dataTransfer.files?.[0]) processFile(e.dataTransfer.files[0]); }}
-                className={`${sizeClasses[size]} relative rounded-2xl border-2 border-dashed transition-all overflow-hidden ${isDragging ? 'border-cyber-primary bg-cyber-primary/10 scale-105' : 'border-gray-200 dark:border-white/20 hover:border-cyber-primary/40'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${error ? 'border-red-500' : ''} bg-gray-50 dark:bg-black/20 shadow-inner`}>
+                className={`${sizeClasses[size]} relative rounded-2xl border-2 border-dashed transition-all overflow-hidden ${isDragging ? 'border-cyber-primary bg-cyber-primary/10 scale-105' : 'border-gray-200 dark:border-white/20 hover:border-cyber-primary/40'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${error ? 'border-[var(--theme-status-danger-border)]' : ''} bg-gray-50 dark:bg-black/20 shadow-inner`}>
                 {value ? (
                     <div className="relative w-full h-full group">
                         <img src={value} alt="Product" className="w-full h-full object-cover" />
                         {!disabled && (
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                                 <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2.5 bg-white/20 hover:bg-white/30 rounded-xl" title="Change Image" aria-label="Change Image"><RefreshCw size={18} className="text-white" /></button>
-                                <button type="button" onClick={() => onChange('')} className="p-2.5 bg-red-500/50 hover:bg-red-500/70 rounded-xl" title="Remove Image" aria-label="Remove Image"><X size={18} className="text-white" /></button>
+                                <button type="button" onClick={() => onChange('')} className="p-2.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] rounded-xl" title="Remove Image" aria-label="Remove Image"><X size={18} className="text-white" /></button>
                             </div>
                         )}
                     </div>
@@ -140,7 +140,7 @@ export default function ImageUpload({ value, onChange, onError, placeholder = 'U
                     <button type="button" onClick={handleUrlSubmit} className="w-full py-3 bg-cyber-primary/20 hover:bg-cyber-primary text-cyber-primary hover:text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all">Link Media Asset</button>
                 </div>
             )}
-            {error && <p className="text-[10px] text-red-500 mt-2 text-center font-black uppercase tracking-widest">{error}</p>}
+            {error && <p className="text-[10px] text-[var(--theme-status-danger-text)] mt-2 text-center font-black uppercase tracking-widest">{error}</p>}
         </div>
     );
 }

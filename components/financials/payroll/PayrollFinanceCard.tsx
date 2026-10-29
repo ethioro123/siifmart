@@ -35,7 +35,7 @@ export const PayrollFinanceCard: React.FC<PayrollFinanceCardProps> = ({
     <div
       className={`p-4 rounded-2xl border transition-all ${
         isFinanceSigned
-          ? 'bg-emerald-500/5 border-emerald-500/20'
+          ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
           : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
       }`}
     >
@@ -44,8 +44,8 @@ export const PayrollFinanceCard: React.FC<PayrollFinanceCardProps> = ({
           <div
             className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
               isFinanceSigned
-                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                : 'bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]'
+                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
+                : 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]'
             }`}
           >
             <Building2 size={18} />
@@ -60,11 +60,11 @@ export const PayrollFinanceCard: React.FC<PayrollFinanceCardProps> = ({
           </div>
         </div>
         {isFinanceSigned ? (
-          <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 shrink-0">
+          <span className="px-2.5 py-1 rounded-full bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 shrink-0">
             <CheckCircle2 size={12} /> Authorized
           </span>
         ) : (
-          <span className="px-2.5 py-1 rounded-full bg-[#0071E3]/10 border border-[#0071E3]/20 text-[#0071E3] dark:text-[#2997FF] text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 shrink-0">
+          <span className="px-2.5 py-1 rounded-full bg-[var(--theme-accent)]/10 border border-[var(--theme-border-focus)]/20 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 shrink-0">
             <Clock size={12} /> Pending Finance
           </span>
         )}
@@ -96,7 +96,7 @@ export const PayrollFinanceCard: React.FC<PayrollFinanceCardProps> = ({
         <div className="mt-3 pt-3 border-t border-[var(--theme-border)]">
           {isFinance ? (
             isCurrentUserHrSignatory && !isSuperAdminOrCeo ? (
-              <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5 font-medium">
+              <p className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1.5 font-medium">
                 <AlertTriangle size={14} className="shrink-0" />
                 Zero-Trust Notice: You already certified as HR. A distinct Finance officer must authorize this department.
               </p>
@@ -113,7 +113,7 @@ export const PayrollFinanceCard: React.FC<PayrollFinanceCardProps> = ({
                   type="button"
                   onClick={handleSignFinance}
                   disabled={isActionLoading}
-                  className="w-full py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+                  className="w-full py-2 bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white font-semibold rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
                 >
                   {isActionLoading ? <Loader2 size={13} className="animate-spin" /> : <Building2 size={14} />}
                   Authorize Funds as Finance

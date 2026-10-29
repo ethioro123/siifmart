@@ -29,29 +29,29 @@ export interface KnowledgeEntry {
 // ============================================================================
 
 export const DEPARTMENTS = {
-  stores: { label: 'Stores', icon: Store, color: 'bg-emerald-500', text: 'text-emerald-400', bgLight: 'bg-emerald-500/20' },
-  warehouses: { label: 'Warehouses', icon: Warehouse, color: 'bg-blue-500', text: 'text-blue-400', bgLight: 'bg-blue-500/20' },
+  stores: { label: 'Stores', icon: Store, color: 'bg-[var(--theme-status-success-bg)]', text: 'text-[var(--theme-status-success-text)]', bgLight: 'bg-[var(--theme-status-success-bg)]' },
+  warehouses: { label: 'Warehouses', icon: Warehouse, color: 'bg-[var(--theme-status-info-bg)]', text: 'text-[var(--theme-status-info-text)]', bgLight: 'bg-[var(--theme-status-info-bg)]' },
   admin: { label: 'Administration', icon: Building2, color: 'bg-purple-500', text: 'text-purple-400', bgLight: 'bg-purple-500/20' },
   pos: { label: 'Point of Sale', icon: ShoppingCart, color: 'bg-orange-500', text: 'text-orange-400', bgLight: 'bg-orange-500/20' },
-  logistics: { label: 'Logistics', icon: Truck, color: 'bg-rose-500', text: 'text-rose-400', bgLight: 'bg-rose-500/20' },
+  logistics: { label: 'Logistics', icon: Truck, color: 'bg-[var(--theme-status-danger-bg)]', text: 'text-[var(--theme-status-danger-text)]', bgLight: 'bg-[var(--theme-status-danger-bg)]' },
   hr: { label: 'Human Resources', icon: Users, color: 'bg-indigo-500', text: 'text-indigo-400', bgLight: 'bg-indigo-500/20' },
-  finance: { label: 'Finance', icon: BarChart3, color: 'bg-yellow-500', text: 'text-yellow-400', bgLight: 'bg-yellow-500/20' },
+  finance: { label: 'Finance', icon: BarChart3, color: 'bg-[var(--theme-status-warning-bg)]', text: 'text-[var(--theme-status-warning-text)]', bgLight: 'bg-[var(--theme-status-warning-bg)]' },
   general: { label: 'General', icon: Lightbulb, color: 'bg-gray-500', text: 'text-gray-400', bgLight: 'bg-gray-500/20' },
   policy: { label: 'Policy', icon: FileText, color: 'bg-cyan-500', text: 'text-cyan-400', bgLight: 'bg-cyan-500/20' },
   workflow: { label: 'Workflow', icon: Target, color: 'bg-pink-500', text: 'text-pink-400', bgLight: 'bg-pink-500/20' }
 };
 
 export const ENTRY_TYPES = {
-  idea: { label: 'Idea', icon: Lightbulb, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+  idea: { label: 'Idea', icon: Lightbulb, color: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]' },
   policy: { label: 'Policy', icon: FileText, color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
   workflow: { label: 'Workflow', icon: Target, color: 'text-pink-400', bg: 'bg-pink-500/20' },
-  note: { label: 'Note', icon: BookOpen, color: 'text-blue-400', bg: 'bg-blue-500/20' },
-  improvement: { label: 'Improvement', icon: Star, color: 'text-green-400', bg: 'bg-green-500/20' }
+  note: { label: 'Note', icon: BookOpen, color: 'text-[var(--theme-status-info-text)]', bg: 'bg-[var(--theme-status-info-bg)]' },
+  improvement: { label: 'Improvement', icon: Star, color: 'text-[var(--theme-status-success-text)]', bg: 'bg-[var(--theme-status-success-bg)]' }
 };
 
 export const STATUSES = {
   draft: { label: 'Draft', color: 'text-gray-400', bg: 'bg-gray-500/20' },
-  active: { label: 'Active', color: 'text-green-400', bg: 'bg-green-500/20' },
+  active: { label: 'Active', color: 'text-[var(--theme-status-success-text)]', bg: 'bg-[var(--theme-status-success-bg)]' },
   archived: { label: 'Archived', color: 'text-orange-400', bg: 'bg-orange-500/20' },
   implemented: { label: 'Implemented', color: 'text-cyan-400', bg: 'bg-cyan-500/20' }
 };

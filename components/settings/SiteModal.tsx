@@ -99,7 +99,7 @@ export function SiteModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Facility Country Immutability Notice */}
                 {!!newSite.id && (
-                  <div className="md:col-span-2 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-medium">
+                  <div className="md:col-span-2 flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs font-medium">
                     <Lock size={14} className="shrink-0" />
                     <span>Operating market is permanently locked for existing facilities. Sovereign borders cannot be altered after creation.</span>
                   </div>
@@ -170,7 +170,7 @@ export function SiteModal({
                     {displaySiteCode}
                   </span>
                   {newSite.id && (
-                    <span className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold" title="Internal DB ID and Site Code are immutable">
+                    <span className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1 font-semibold" title="Internal DB ID and Site Code are immutable">
                       <Lock size={11} /> Locked
                     </span>
                   )}
@@ -297,7 +297,7 @@ export function SiteModal({
                     <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
                       {newSite.code}
                     </div>
-                    <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
+                    <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
                   </div>
                 )}
                 <div>
@@ -351,7 +351,7 @@ export function SiteModal({
                     <div className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 flex items-center text-[var(--theme-text-secondary)] font-mono text-xs">
                       {newSite.code}
                     </div>
-                    <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
+                    <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 flex items-center gap-1 font-semibold"><Lock size={11} /> Immutable Identifier</p>
                   </div>
                 )}
                 <div>
@@ -385,7 +385,7 @@ export function SiteModal({
               </>
             ) : (
               <>
-                <Store size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <Store size={16} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0" />
                 <span><strong className="text-[var(--theme-text-primary)]">Retail Stores</strong> are customer-facing supermarkets and convenience stations equipped with POS cash tills.</span>
               </>
             )}

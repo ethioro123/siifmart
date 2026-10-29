@@ -39,12 +39,12 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
                                 {t('warehouse.driverHub.driverTitle')} {t('warehouse.driverHub.hubTitle')}
                             </h2>
                             {activeCount !== undefined ? (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] shrink-0">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
                                     {t('warehouse.driverHub.activeCountSuffix', { count: activeCount })}
                                 </span>
                             ) : (
-                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 shrink-0" />
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[var(--theme-status-success-bg)] shrink-0" />
                             )}
                         </div>
                         <p className="hidden sm:block text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5 truncate">

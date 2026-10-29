@@ -48,7 +48,7 @@ export const TransferReceiveItemCard: React.FC<TransferReceiveItemCardProps> = (
                         </span>
                         <p className="font-mono text-[var(--theme-text-primary)] font-bold tabular-nums text-xs sm:text-sm">
                             {isBlindReceiving ? (
-                                <span className="text-amber-500 font-mono tracking-widest font-bold">***</span>
+                                <span className="text-[var(--theme-status-warning-text)] font-mono tracking-widest font-bold">***</span>
                             ) : (
                                 <>
                                     {item.expectedQty}

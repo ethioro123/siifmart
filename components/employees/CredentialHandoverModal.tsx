@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-    Key, Copy, Check, Printer, ShieldCheck, 
+import {
+    Key, Copy, Check, Printer, ShieldCheck,
     ExternalLink, CheckCircle2, User, Building2, Eye, EyeOff
 } from 'lucide-react';
 import Modal from '../Modal';
@@ -44,7 +44,7 @@ export function CredentialHandoverModal({
     const assignedSite = sites.find(s => s.id === employee.siteId) || activeSite;
     const parsed = parseEmployeeCode(employee.code || employee.id);
     const numericPin = parsed?.seq ? String(parsed.seq).padStart(4, '0') : (employee.code?.replace(/\D/g, '').slice(-4) || '1234');
-    
+
     // Resolve saved password or standard initial password pattern across multiple identifier keys
     const codeKey = (employee.code || '').toLowerCase();
     const nameKey = (employee.name || '').toLowerCase();
@@ -118,7 +118,7 @@ Authorized by Site Management
                 {/* Employee Profile Header */}
                 <div className="p-4 sm:p-5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5">
-                        <div className="w-12 h-12 rounded-2xl bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 flex items-center justify-center font-bold text-base shrink-0">
+                        <div className="w-12 h-12 rounded-2xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 flex items-center justify-center font-bold text-base shrink-0">
                             {employee.avatar ? (
                                 <img src={employee.avatar} alt={employee.name} className="w-full h-full rounded-2xl object-cover" />
                             ) : (
@@ -130,13 +130,13 @@ Authorized by Site Management
                                 <h3 className="text-base font-bold text-[var(--theme-text-primary)]">
                                     {employee.name}
                                 </h3>
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)] animate-pulse" />
                                     Active (Approved)
                                 </span>
                             </div>
                             <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)] mt-0.5">
-                                <span className="font-semibold uppercase tracking-wider text-[11px] text-[#0071E3] dark:text-[#2997FF]">
+                                <span className="font-semibold uppercase tracking-wider text-[11px] text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                     {getEmployeeJobTitle(employee)}
                                 </span>
                                 <span>•</span>
@@ -161,7 +161,7 @@ Authorized by Site Management
                 {/* Primary Credentials Grid */}
                 <div className="space-y-3">
                     <h4 className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
-                        <Key size={13} className="text-[#0071E3] dark:text-[#2997FF]" />
+                        <Key size={13} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                         Web & Terminal Sign-In Credentials
                     </h4>
 
@@ -182,7 +182,7 @@ Authorized by Site Management
                                 className="p-2 rounded-lg hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer"
                                 title="Copy Email"
                             >
-                                {copiedField === 'Login Email' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                {copiedField === 'Login Email' ? <Check size={14} className="text-[var(--theme-status-success-text)]" /> : <Copy size={14} />}
                             </button>
                         </div>
 
@@ -211,7 +211,7 @@ Authorized by Site Management
                                     className="p-2 rounded-lg hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer"
                                     title="Copy Password"
                                 >
-                                    {copiedField === 'Password' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                    {copiedField === 'Password' ? <Check size={14} className="text-[var(--theme-status-success-text)]" /> : <Copy size={14} />}
                                 </button>
                             </div>
                         </div>
@@ -222,7 +222,7 @@ Authorized by Site Management
                                 <span className="text-[10px] font-bold uppercase text-[var(--theme-text-secondary)] block">
                                     Terminal / POS Quick PIN
                                 </span>
-                                <span className="text-base font-mono font-black tracking-widest text-[#0071E3] dark:text-[#2997FF] select-all">
+                                <span className="text-base font-mono font-black tracking-widest text-[var(--theme-accent)] dark:text-[var(--theme-accent)] select-all">
                                     {numericPin}
                                 </span>
                             </div>
@@ -232,7 +232,7 @@ Authorized by Site Management
                                 className="p-2 rounded-lg hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer"
                                 title="Copy PIN"
                             >
-                                {copiedField === 'Terminal PIN' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                {copiedField === 'Terminal PIN' ? <Check size={14} className="text-[var(--theme-status-success-text)]" /> : <Copy size={14} />}
                             </button>
                         </div>
 
@@ -252,15 +252,15 @@ Authorized by Site Management
                                 className="p-2 rounded-lg hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer"
                                 title="Copy URL"
                             >
-                                {copiedField === 'Portal URL' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                {copiedField === 'Portal URL' ? <Check size={14} className="text-[var(--theme-status-success-text)]" /> : <Copy size={14} />}
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Handover Guidance Note */}
-                <div className="p-3.5 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs text-[var(--theme-text-secondary)] space-y-1">
-                    <div className="flex items-center gap-1.5 font-semibold text-[#0071E3] dark:text-[#2997FF]">
+                <div className="p-3.5 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-xs text-[var(--theme-text-secondary)] space-y-1">
+                    <div className="flex items-center gap-1.5 font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                         <ShieldCheck size={14} />
                         <span>Security & Access Protocol</span>
                     </div>
@@ -301,7 +301,7 @@ Authorized by Site Management
                         <button
                             type="button"
                             onClick={handleMarkComplete}
-                            className="px-4 py-2 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-95"
+                            className="px-4 py-2 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-95"
                         >
                             <CheckCircle2 size={14} />
                             <span>Mark as Handed Over</span>

@@ -146,9 +146,9 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
                                 {/* Header */}
                                 <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
                                     {site.type === 'Warehouse' ? (
-                                        <Building className="text-blue-500" size={20} />
+                                        <Building className="text-[var(--theme-status-info-text)]" size={20} />
                                     ) : (
-                                        <Store className="text-green-500" size={20} />
+                                        <Store className="text-[var(--theme-status-success-text)]" size={20} />
                                     )}
                                     <div>
                                         <h3 className="font-bold text-[var(--theme-text-primary)]">{site.name}</h3>
@@ -172,8 +172,8 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
 
                                 {/* Alerts */}
                                 {hasAlerts && (
-                                    <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-lg p-2 flex items-start gap-2">
-                                        <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
+                                    <div className="bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-lg p-2 flex items-start gap-2">
+                                        <AlertTriangle className="text-[var(--theme-status-danger-text)] shrink-0 mt-0.5" size={16} />
                                         <div className="text-xs font-medium">
                                             {outOfStockCount > 0 && (
                                                 <p className="font-bold">{outOfStockCount} out of stock</p>
@@ -205,15 +205,15 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
                 <p className="text-xs font-bold text-[var(--theme-text-primary)] mb-2">Legend</p>
                 <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 rounded-full bg-blue-500 shrink-0"></div>
+                        <div className="w-3.5 h-3.5 rounded-full bg-[var(--theme-status-info-bg)] shrink-0"></div>
                         <span className="text-xs text-[var(--theme-text-secondary)]">Warehouse</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0"></div>
+                        <div className="w-3.5 h-3.5 rounded-full bg-[var(--theme-status-success-bg)] shrink-0"></div>
                         <span className="text-xs text-[var(--theme-text-secondary)]">Store</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 rounded-full bg-rose-500 shrink-0"></div>
+                        <div className="w-3.5 h-3.5 rounded-full bg-[var(--theme-status-danger-bg)] shrink-0"></div>
                         <span className="text-xs text-[var(--theme-text-secondary)]">Has Alerts</span>
                     </div>
                 </div>

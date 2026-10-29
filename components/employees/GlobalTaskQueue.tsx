@@ -38,14 +38,14 @@ export default function GlobalTaskQueue({ tasks, employees, setIsTaskQueueOpen }
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 overflow-x-auto pb-2">
                {['High', 'Medium', 'Low'].map(priority => {
                   const priorityTasks = activeTasks.filter(t => t.priority === priority);
-                  const color = priority === 'High' ? 'text-red-400 border-red-500/30 bg-red-500/5' :
-                     priority === 'Medium' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/5' :
-                        'text-blue-400 border-blue-500/30 bg-blue-500/5';
+                  const color = priority === 'High' ? 'text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)]' :
+                     priority === 'Medium' ? 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)]' :
+                        'text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)] bg-[var(--theme-status-info-bg)]';
 
                   return (
                      <div key={priority} className={`rounded-xl border ${color.split(' ')[1]} ${color.split(' ')[2]} p-4 min-w-[250px]`}>
                         <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
-                           <span className={`text-xs font-bold uppercase ${priority === 'High' ? 'text-red-400' : priority === 'Medium' ? 'text-yellow-400' : 'text-blue-400'}`}>
+                           <span className={`text-xs font-bold uppercase ${priority === 'High' ? 'text-[var(--theme-status-danger-text)]' : priority === 'Medium' ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-status-info-text)]'}`}>
                               {priority} Priority
                            </span>
                            <span className="text-xs bg-black/30 px-2 py-0.5 rounded-full text-white/50">{priorityTasks.length}</span>

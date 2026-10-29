@@ -67,7 +67,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">
                             Performance Score
                         </span>
-                        <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] flex items-center justify-center">
                             <Award size={18} />
                         </div>
                     </div>
@@ -78,12 +78,12 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         <span className="text-xs font-semibold text-[var(--theme-text-muted)]">/ 100</span>
                     </div>
                     <div className="w-full bg-[var(--theme-bg-subtle)] h-1.5 rounded-full mt-3 overflow-hidden">
-                        <div 
-                            className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
-                            style={{ width: `${Math.min(100, Math.max(0, score))}%` }} 
+                        <div
+                            className="bg-[var(--theme-status-success-bg)] h-full rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
                         />
                     </div>
-                    <p className="text-[11px] text-emerald-500 font-semibold mt-2.5 flex items-center gap-1">
+                    <p className="text-[11px] text-[var(--theme-status-success-text)] font-semibold mt-2.5 flex items-center gap-1">
                         <span>●</span> {score >= 90 ? 'Top Tier (Excellent Standing)' : score >= 75 ? 'Meets Operational Standards' : 'Requires Manager Coaching'}
                     </p>
                 </div>
@@ -105,9 +105,9 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         <span className="text-xs font-semibold text-[var(--theme-text-muted)]">punctuality</span>
                     </div>
                     <div className="w-full bg-[var(--theme-bg-subtle)] h-1.5 rounded-full mt-3 overflow-hidden">
-                        <div 
-                            className="bg-[var(--theme-primary)] h-full rounded-full transition-all duration-500" 
-                            style={{ width: `${Math.min(100, Math.max(0, attendance))}%` }} 
+                        <div
+                            className="bg-[var(--theme-primary)] h-full rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(100, Math.max(0, attendance))}%` }}
                         />
                     </div>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold mt-2.5 flex items-center gap-1">
@@ -121,7 +121,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">
                             Tasks Completed
                         </span>
-                        <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center">
                             <CheckSquare size={18} />
                         </div>
                     </div>
@@ -132,9 +132,9 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         <span className="text-xs font-semibold text-[var(--theme-text-muted)]">/ {totalTasks} assigned</span>
                     </div>
                     <div className="w-full bg-[var(--theme-bg-subtle)] h-1.5 rounded-full mt-3 overflow-hidden">
-                        <div 
-                            className="bg-blue-500 h-full rounded-full transition-all duration-500" 
-                            style={{ width: `${taskPercent}%` }} 
+                        <div
+                            className="bg-[var(--theme-status-info-bg)] h-full rounded-full transition-all duration-500"
+                            style={{ width: `${taskPercent}%` }}
                         />
                     </div>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold mt-2.5 flex items-center gap-1">
@@ -160,7 +160,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         {/* Email */}
                         <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 flex-shrink-0">
+                                <div className="w-9 h-9 rounded-lg bg-[var(--theme-status-success-bg)] flex items-center justify-center text-[var(--theme-status-success-text)] flex-shrink-0">
                                     <Mail size={16} />
                                 </div>
                                 <div className="min-w-0">
@@ -174,7 +174,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                     className="p-2 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer flex-shrink-0"
                                     title="Copy Email"
                                 >
-                                    {copiedKey === 'email' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                    {copiedKey === 'email' ? <Check size={14} className="text-[var(--theme-status-success-text)]" /> : <Copy size={14} />}
                                 </button>
                             )}
                         </div>
@@ -182,7 +182,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         {/* Phone */}
                         <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 flex-shrink-0">
+                                <div className="w-9 h-9 rounded-lg bg-[var(--theme-status-success-bg)] flex items-center justify-center text-[var(--theme-status-success-text)] flex-shrink-0">
                                     <Phone size={16} />
                                 </div>
                                 <div className="min-w-0">
@@ -196,7 +196,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                     className="p-2 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer flex-shrink-0"
                                     title="Copy Phone"
                                 >
-                                    {copiedKey === 'phone' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                    {copiedKey === 'phone' ? <Check size={14} className="text-[var(--theme-status-success-text)]" /> : <Copy size={14} />}
                                 </button>
                             )}
                         </div>
@@ -204,7 +204,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         {/* Residence */}
                         <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 flex-shrink-0">
+                                <div className="w-9 h-9 rounded-lg bg-[var(--theme-status-warning-bg)] flex items-center justify-center text-[var(--theme-status-warning-text)] flex-shrink-0">
                                     <MapPin size={16} />
                                 </div>
                                 <div className="min-w-0">
@@ -218,7 +218,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         {(employee.lastLoginGps || (isOwnProfile && user?.loginLocation)) && (
                             <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                                 <div className="flex items-center gap-3 min-w-0">
-                                    <div className="w-9 h-9 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-500 flex-shrink-0">
+                                    <div className="w-9 h-9 rounded-lg bg-[var(--theme-status-info-bg)] flex items-center justify-center text-[var(--theme-status-info-text)] flex-shrink-0">
                                         <MapPin size={16} />
                                     </div>
                                     <div className="min-w-0">
@@ -237,7 +237,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                 <div className="bg-[var(--theme-bg-card)] p-6 sm:p-7 rounded-2xl border border-[var(--theme-border)] shadow-xs">
                     <div className="flex items-center justify-between mb-5 pb-3 border-b border-[var(--theme-border)]">
                         <h4 className="text-base font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5">
-                            <div className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
+                            <div className="p-2 bg-[var(--theme-status-info-bg)] rounded-xl text-[var(--theme-status-info-text)]">
                                 <Briefcase size={16} />
                             </div>
                             <span>Employment Details</span>
@@ -280,7 +280,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                 <ShieldCheck size={14} className="text-[var(--theme-text-muted)]" />
                                 Account Standing
                             </span>
-                            <span className="text-xs font-bold text-emerald-500">
+                            <span className="text-xs font-bold text-[var(--theme-status-success-text)]">
                                 {employee.status === 'Active' ? 'Active & Compliant' : employee.status}
                             </span>
                         </div>
@@ -289,7 +289,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                     {employee.emergencyContact && (
                         <div className="mt-5 pt-4 border-t border-[var(--theme-border)]">
                             <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider mb-2">Emergency Safety Contact</p>
-                            <div className="p-3 bg-rose-500/10 rounded-xl border border-rose-500/20 flex items-center gap-2.5 text-xs text-rose-500 font-semibold">
+                            <div className="p-3 bg-[var(--theme-status-danger-bg)] rounded-xl border border-[var(--theme-status-danger-border)] flex items-center gap-2.5 text-xs text-[var(--theme-status-danger-text)] font-semibold">
                                 <Phone size={14} />
                                 <span>{employee.emergencyContact}</span>
                             </div>
@@ -320,9 +320,9 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" vertical={false} />
                             <XAxis dataKey="day" stroke="var(--theme-text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
                             <Tooltip
-                                contentStyle={{ 
-                                    backgroundColor: 'var(--theme-bg-panel)', 
-                                    border: '1px solid var(--theme-border)', 
+                                contentStyle={{
+                                    backgroundColor: 'var(--theme-bg-panel)',
+                                    border: '1px solid var(--theme-border)',
                                     borderRadius: '12px',
                                     color: 'var(--theme-text-primary)',
                                     fontSize: '12px',
@@ -368,7 +368,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                 )}
                             </div>
                         )}
-                        
+
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <p className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">Recent Authenticated Sessions</p>

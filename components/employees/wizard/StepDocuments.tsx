@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-    Upload, FileText, CheckCircle2, Trash2, IdCard, 
-    FileUp, Sparkles, Loader2, ShieldCheck 
+import {
+    Upload, FileText, CheckCircle2, Trash2, IdCard,
+    FileUp, Sparkles, Loader2, ShieldCheck
 } from 'lucide-react';
 import { compressImageFile, readDocumentFile, validateFileSize, MAX_DOCUMENT_FILE_SIZE_MB } from '../../../utils/imageCompression';
 import { StepDocumentsCertificates } from './StepDocumentsCertificates';
@@ -140,14 +140,14 @@ export default function StepDocuments({
             <div className="flex items-center justify-between pb-3 border-b border-[#E2DCCE]/60 dark:border-white/5">
                 <div>
                     <h4 className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2">
-                        <ShieldCheck size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <ShieldCheck size={16} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
                         <span>Personnel Credentials & Documents</span>
                     </h4>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
                         Upload or drag & drop official ID, resume/CV, and certifications (up to 5MB with auto-compression).
                     </p>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
                     Max 5MB / file
                 </span>
             </div>
@@ -156,11 +156,11 @@ export default function StepDocuments({
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                     <label className="text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-bold uppercase tracking-wide flex items-center gap-2">
-                        <IdCard size={15} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        <span>National ID / Passport Document Photo <span className="text-rose-500">*</span></span>
+                        <IdCard size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
+                        <span>National ID / Passport Document Photo <span className="text-[var(--theme-status-danger-text)]">*</span></span>
                     </label>
                     {newEmpData.nationalIdInfo && (
-                        <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200 dark:border-emerald-500/20">
+                        <span className="text-[10px] font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] px-2 py-0.5 rounded-full flex items-center gap-1 border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
                             <Sparkles size={11} />
                             <span>{newEmpData.nationalIdInfo.reductionPercent ?? 0}% size reduction</span>
                         </span>
@@ -189,7 +189,7 @@ export default function StepDocuments({
                                     <button
                                         type="button"
                                         onClick={removeNationalId}
-                                        className="p-1.5 rounded-lg bg-rose-600/80 text-white hover:bg-rose-700 text-xs font-bold transition-colors cursor-pointer"
+                                        className="p-1.5 rounded-lg bg-[var(--theme-status-danger-bg)] text-white bg-[var(--theme-status-danger-bg)] text-xs font-bold transition-colors cursor-pointer"
                                         title="Remove ID Photo"
                                     >
                                         <Trash2 size={14} />
@@ -210,19 +210,19 @@ export default function StepDocuments({
                                     if (file) processIdFile(file);
                                 }}
                                 className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all aspect-[4/3] group ${
-                                    isDraggingId 
-                                        ? 'border-[#2C5E3B] dark:border-emerald-400 bg-emerald-50/40 dark:bg-emerald-500/10 scale-[1.02]' 
-                                        : 'border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B] dark:hover:border-emerald-500/50 bg-stone-50/50 dark:bg-white/[0.01]'
+                                    isDraggingId
+                                        ? 'border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] scale-[1.02]'
+                                        : 'border-[#E2DCCE] dark:border-white/10 hover:border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-stone-50/50 dark:bg-white/[0.01]'
                                 }`}
                             >
                                 {isCompressingId ? (
                                     <div className="flex flex-col items-center">
-                                        <Loader2 size={24} className="animate-spin text-[#2C5E3B] dark:text-[#A9CBA2] mb-2" />
-                                        <span className="text-[11px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">Compressing...</span>
+                                        <Loader2 size={24} className="animate-spin text-[var(--theme-primary)] dark:text-[#A9CBA2] mb-2" />
+                                        <span className="text-[11px] font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2]">Compressing...</span>
                                     </div>
                                 ) : (
                                     <>
-                                        <FileUp size={24} className={`mb-1.5 transition-transform ${isDraggingId ? 'scale-125 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] group-hover:scale-110'}`} />
+                                        <FileUp size={24} className={`mb-1.5 transition-transform ${isDraggingId ? 'scale-125 text-[var(--theme-primary)] dark:text-[#A9CBA2]' : 'text-stone-400 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2] group-hover:scale-110'}`} />
                                         <span className="text-xs font-bold text-stone-700 dark:text-stone-200">
                                             {isDraggingId ? 'Drop ID Card Photo Here' : 'Upload or Drop ID Card'}
                                         </span>
@@ -248,7 +248,7 @@ export default function StepDocuments({
                                 National ID / Passport Number
                             </label>
                             <input
-                                className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none text-sm font-mono"
+                                className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-mono"
                                 placeholder="e.g. ET-10492819 or KE-3891024"
                                 value={newEmpData.nationalIdNumber || ''}
                                 onChange={e => setNewEmpData((prev: any) => ({ ...prev, nationalIdNumber: e.target.value }))}
@@ -257,13 +257,13 @@ export default function StepDocuments({
                         </div>
 
                         {newEmpData.nationalIdInfo ? (
-                            <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 space-y-1">
+                            <div className="p-3 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] space-y-1">
                                 <p className="font-bold flex items-center gap-1.5">
-                                    <CheckCircle2 size={13} className="text-emerald-600 dark:text-emerald-400" />
+                                    <CheckCircle2 size={13} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                                     <span>High-Efficiency Compression Applied</span>
                                 </p>
                                 <p className="text-[11px] text-stone-600 dark:text-stone-300 font-mono">
-                                    Original: <span className="line-through text-stone-400">{newEmpData.nationalIdInfo.originalSize || 'N/A'}</span> → Compressed: <strong className="text-emerald-700 dark:text-emerald-400">{newEmpData.nationalIdInfo.compressedSize || 'N/A'}</strong>
+                                    Original: <span className="line-through text-stone-400">{newEmpData.nationalIdInfo.originalSize || 'N/A'}</span> → Compressed: <strong className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">{newEmpData.nationalIdInfo.compressedSize || 'N/A'}</strong>
                                 </p>
                             </div>
                         ) : (
@@ -279,7 +279,7 @@ export default function StepDocuments({
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                     <label className="text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-bold uppercase tracking-wide flex items-center gap-2">
-                        <FileText size={15} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <FileText size={15} className="text-[var(--theme-primary)] dark:text-[#A9CBA2]" />
                         <span>Curriculum Vitae / Resume</span>
                     </label>
                     <span className="text-[10px] text-stone-400 font-mono">PDF, DOC, DOCX</span>
@@ -288,7 +288,7 @@ export default function StepDocuments({
                 {newEmpData.resume ? (
                     <div className="p-3 rounded-xl bg-stone-50 dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/10 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-lg bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-center shrink-0">
+                            <div className="w-9 h-9 rounded-lg bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[#A9CBA2] flex items-center justify-center shrink-0">
                                 <FileText size={18} />
                             </div>
                             <div className="min-w-0">
@@ -302,14 +302,14 @@ export default function StepDocuments({
                             <button
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); resumeInputRef.current?.click(); }}
-                                className="px-2.5 py-1 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-[#2C5E3B] hover:bg-stone-200/50 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                                className="px-2.5 py-1 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-[var(--theme-primary)] hover:bg-stone-200/50 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
                             >
                                 Replace
                             </button>
                             <button
                                 type="button"
                                 onClick={removeResume}
-                                className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                                className="p-1.5 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] rounded-lg transition-colors cursor-pointer"
                                 title="Remove Resume"
                             >
                                 <Trash2 size={15} />
@@ -330,23 +330,23 @@ export default function StepDocuments({
                             if (file) processResumeFile(file);
                         }}
                         className={`border-2 border-dashed rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all group ${
-                            isDraggingResume 
-                                ? 'border-[#2C5E3B] dark:border-emerald-400 bg-emerald-50/40 dark:bg-emerald-500/10 scale-[1.01]' 
-                                : 'border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B] dark:hover:border-emerald-500/50 bg-stone-50/50 dark:bg-white/[0.01]'
+                            isDraggingResume
+                                ? 'border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] scale-[1.01]'
+                                : 'border-[#E2DCCE] dark:border-white/10 hover:border-[var(--theme-border)] border-[var(--theme-status-success-border)] bg-stone-50/50 dark:bg-white/[0.01]'
                         }`}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${isDraggingResume ? 'bg-[#2C5E3B] text-white' : 'bg-stone-200/60 dark:bg-white/5 text-stone-500 dark:text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]'}`}>
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${isDraggingResume ? 'bg-[var(--theme-primary)] text-white' : 'bg-stone-200/60 dark:bg-white/5 text-stone-500 dark:text-stone-400 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2]'}`}>
                                 {isUploadingResume ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
                             </div>
                             <div>
-                                <p className="text-xs font-bold text-stone-700 dark:text-stone-200 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">
+                                <p className="text-xs font-bold text-stone-700 dark:text-stone-200 group-hover:text-[var(--theme-primary)] dark:group-hover:text-[#A9CBA2] transition-colors">
                                     {isDraggingResume ? 'Drop Resume File Here' : 'Upload or Drop Candidate Resume'}
                                 </p>
                                 <p className="text-[10px] text-stone-400">PDF, DOC, DOCX up to 5MB</p>
                             </div>
                         </div>
-                        <span className="text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] px-3 py-1.5 rounded-lg bg-[#2C5E3B]/10 dark:bg-emerald-500/10 border border-[#2C5E3B]/20 dark:border-emerald-500/20">
+                        <span className="text-xs font-bold text-[var(--theme-primary)] dark:text-[#A9CBA2] px-3 py-1.5 rounded-lg bg-[var(--theme-primary)]/10 bg-[var(--theme-status-success-bg)] border border-[var(--theme-border)]/20 border-[var(--theme-status-success-border)]">
                             Browse
                         </span>
                     </div>

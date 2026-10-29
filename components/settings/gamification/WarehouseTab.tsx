@@ -140,7 +140,7 @@ export const WarehouseTab: React.FC = () => {
                                         </button>
                                     </div>
                                     <div className="mt-2 pt-2 border-t border-[var(--theme-border)]">
-                                        <p className={`text-[11px] font-medium ${isEnabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-secondary)]'}`}>
+                                        <p className={`text-[11px] font-medium ${isEnabled ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-secondary)]'}`}>
                                             {isEnabled ? 'Workers earn bonuses' : 'Not participating'}
                                         </p>
                                     </div>
@@ -151,8 +151,8 @@ export const WarehouseTab: React.FC = () => {
                 )}
 
                 <div className="flex gap-4 text-xs">
-                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <div className="flex items-center gap-1.5 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">
+                        <div className="w-2 h-2 rounded-full bg-[var(--theme-status-success-bg)]"></div>
                         {warehouses.filter(w => w.warehouseBonusEnabled !== false).length} warehouses enabled
                     </div>
                     <div className="flex items-center gap-1.5 text-[var(--theme-text-secondary)]">
@@ -318,7 +318,7 @@ export const WarehouseTab: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => setWarehousePointRules(prev => prev.filter(r => r.id !== rule.id))}
-                                        className="p-1 rounded-lg text-[var(--theme-text-secondary)] hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                                        className="p-1 rounded-lg text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                                         title={`Delete ${rule.action} rule`}
                                     >
                                         <Trash2 size={13} />
@@ -335,7 +335,7 @@ export const WarehouseTab: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <Star className="text-amber-500" size={18} />
+                            <Star className="text-[var(--theme-status-warning-text)]" size={18} />
                             Bonus Tiers
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
@@ -400,7 +400,7 @@ export const WarehouseTab: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => handleDeleteTier(tier.id, 'warehouse')}
-                                        className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                                        className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] transition-colors cursor-pointer"
                                         title={`Delete ${tier.tierName}`}
                                     >
                                         <Trash2 size={14} />

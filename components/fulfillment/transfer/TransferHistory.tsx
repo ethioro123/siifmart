@@ -202,9 +202,9 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                 )}
                                                 <span className={`text-[11px] px-2.5 py-0.5 rounded-full uppercase font-semibold border ${
                                                     isCancelled
-                                                        ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                        ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                                         : isReceived
-                                                            ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20'
+                                                            ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-[var(--theme-border)]'
                                                 }`}>
                                                     {transfer.transferStatus === 'Received' ? t('warehouse.received') : isCancelled ? t('warehouse.cancelled') : (transfer.transferStatus || transfer.status)}

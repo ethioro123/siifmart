@@ -33,7 +33,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
         switch (shiftCode) {
             case 'M':
                 return {
-                    bg: 'bg-amber-500/15 dark:bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-300/80 dark:border-amber-700/40',
+                    bg: 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)]',
                     icon: Sun,
                     label: 'Morning',
                     timeStr: schedule?.startTime && schedule?.endTime ? `${schedule.startTime}–${schedule.endTime}` : '08:00–16:00'
@@ -54,7 +54,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
                 };
             case 'C':
                 return {
-                    bg: 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border-emerald-300/80 dark:border-emerald-700/40',
+                    bg: 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]',
                     icon: Clock,
                     label: 'Custom',
                     timeStr: schedule ? `${schedule.startTime}–${schedule.endTime}` : '09:00–17:00'
@@ -100,7 +100,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
                             </span>
                         )}
                         {isConfirmed && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Confirmed Shift" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" title="Confirmed Shift" />
                         )}
                     </div>
                 </div>
@@ -123,7 +123,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
                         onEdit();
                     }}
                     title="Edit shift details & notes"
-                    className="absolute top-2 right-2 p-1 rounded-md bg-white dark:bg-stone-900 border border-[#E2DCCE] dark:border-white/10 shadow-xs text-stone-600 dark:text-stone-300 opacity-0 group-hover:opacity-100 hover:text-[#2C5E3B] transition-opacity cursor-pointer z-10"
+                    className="absolute top-2 right-2 p-1 rounded-md bg-white dark:bg-stone-900 border border-[#E2DCCE] dark:border-white/10 shadow-xs text-stone-600 dark:text-stone-300 opacity-0 group-hover:opacity-100 hover:text-[var(--theme-primary)] transition-opacity cursor-pointer z-10"
                 >
                     <Edit3 size={12} />
                 </button>

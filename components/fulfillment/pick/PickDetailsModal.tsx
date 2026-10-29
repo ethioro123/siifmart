@@ -117,12 +117,12 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                 <h3 className="text-xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight font-mono">{data.reference}</h3>
                                 <div className="flex gap-2">
                                     <span className={`px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold border ${
-                                        isCompleted ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-red-500/10 border-red-500/20 text-red-500'
+                                        isCompleted ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)]'
                                     }`}>
                                         {data.status}
                                     </span>
                                     {itemsArray.some(li => (li.returnedQty || 0) > 0) && (
-                                        <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold border bg-red-500/10 border-red-500/20 text-red-500">
+                                        <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold border bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)]">
                                             {itemsArray.filter(li => (li.returnedQty || 0) > 0).length} {t('warehouse.packing.returned').toUpperCase()}
                                         </span>
                                     )}
@@ -166,7 +166,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                     </div>
 
                     <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 flex items-center gap-3">
-                        <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-emerald-500 border border-[var(--theme-border)] shrink-0">
+                        <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-status-success-text)] border border-[var(--theme-border)] shrink-0">
                             <MapPin size={16} />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -246,8 +246,8 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                     <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--theme-border)]">
                                         {item.returnedQty > 0 && (
                                             <div className="text-right">
-                                                <p className="text-[11px] text-red-500 uppercase font-semibold tracking-wider">{t('warehouse.packing.returned')}</p>
-                                                <p className="text-base font-bold text-red-500 tabular-nums font-mono">
+                                                <p className="text-[11px] text-[var(--theme-status-danger-text)] uppercase font-semibold tracking-wider">{t('warehouse.packing.returned')}</p>
+                                                <p className="text-base font-bold text-[var(--theme-status-danger-text)] tabular-nums font-mono">
                                                     {item.returnedQty}
                                                 </p>
                                             </div>
@@ -256,13 +256,13 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">{t('warehouse.picking.reqPkd')}</p>
                                             <div className="flex items-center gap-2 justify-end">
                                                 {isShortPicked && (
-                                                    <span className="text-xs font-mono font-bold text-red-500 line-through opacity-80" title="Short Picked">{item.orderedQty}</span>
+                                                    <span className="text-xs font-mono font-bold text-[var(--theme-status-danger-text)] line-through opacity-80" title="Short Picked">{item.orderedQty}</span>
                                                 )}
                                                 <div>
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || item.orderedQty || 0;
-                                                        const picked = item.pickedQty !== undefined && item.pickedQty !== null 
-                                                            ? item.pickedQty 
+                                                        const picked = item.pickedQty !== undefined && item.pickedQty !== null
+                                                            ? item.pickedQty
                                                             : ((data.status === 'Completed' || item.status === 'Picked' || item.status === 'Completed') ? expected : 0);
                                                         const packDesc = formatPackagingDescription(productInfo, expected);
                                                         const unitDef = getSellUnit(productInfo?.unit || item.unit);
@@ -270,8 +270,8 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
 
                                                         return (
                                                             <div className="flex flex-col items-end">
-                                                                <span className="text-base font-mono font-bold text-emerald-500 tabular-nums">
-                                                                    {picked} / {expected} <span className="text-xs uppercase font-semibold text-emerald-500/70">{unitLabel}</span>
+                                                                <span className="text-base font-mono font-bold text-[var(--theme-status-success-text)] tabular-nums">
+                                                                    {picked} / {expected} <span className="text-xs uppercase font-semibold text-[var(--theme-status-success-text)]">{unitLabel}</span>
                                                                 </span>
                                                                 {packDesc && (
                                                                     <span className="text-[11px] font-mono text-[var(--theme-text-secondary)] uppercase">
@@ -297,7 +297,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                         {isCompleted && (
                             <button
                                 onClick={() => onReturn?.(selectedItem)}
-                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors min-h-[44px]"
+                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors min-h-[44px]"
                             >
                                 <Undo2 size={14} />
                                 {t('warehouse.picking.returnItems')}
@@ -307,7 +307,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                         {isCompleted && (
                             <button
                                 onClick={() => setAmendModalOpen(true)}
-                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors min-h-[44px]"
+                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors min-h-[44px]"
                             >
                                 <FileEdit size={14} />
                                 {t('warehouse.picking.amendQuantities')}
@@ -316,7 +316,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                         {canDelete && onDeleteJob && (
                             <button
                                 onClick={handleDelete}
-                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors min-h-[44px]"
+                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors min-h-[44px]"
                                 title={t('common.delete') || 'Delete Job'}
                             >
                                 <Trash2 size={14} />

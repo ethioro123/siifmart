@@ -95,7 +95,7 @@ export default function Finance() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                <div>
                   <h1 className="text-2xl font-semibold tracking-tight text-[var(--theme-text-primary)] flex items-center gap-2.5">
-                     <div className="w-8 h-8 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 flex items-center justify-center text-[#0071E3] dark:text-[#2997FF] shrink-0">
+                     <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 flex items-center justify-center text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0">
                         <DollarSign size={18} />
                      </div>
                      Financial Command Center
@@ -115,7 +115,7 @@ export default function Finance() {
                         </div>
                         <div className="h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden">
                            <div
-                              className="h-full bg-[#0071E3] dark:bg-[#2997FF] transition-all duration-500 rounded-full"
+                              className="h-full bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] transition-all duration-500 rounded-full"
                               ref={(el) => { if (el) el.style.width = `${state.getQuarterProgress()}%`; }}
                            />
                         </div>
@@ -136,10 +136,10 @@ export default function Finance() {
                      </span>
                   </div>
 
-                  <div className="h-9 px-3 flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                     <TrendingUp size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div className="h-9 px-3 flex items-center gap-2 bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] rounded-xl">
+                     <TrendingUp size={14} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0" />
                      <span className="text-xs text-[var(--theme-text-secondary)]">Margin:</span>
-                     <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">{state.profitMargin.toFixed(1)}%</span>
+                     <span className="text-xs font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-mono tabular-nums">{state.profitMargin.toFixed(1)}%</span>
                   </div>
 
                   {/* Maker-Checker Sign-off Hub Badge */}
@@ -154,11 +154,11 @@ export default function Finance() {
                         <button
                            type="button"
                            onClick={() => state.setActiveTab('expenses')}
-                           className="h-9 px-3 flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl transition-all cursor-pointer shadow-xs"
+                           className="h-9 px-3 flex items-center gap-1.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl transition-all cursor-pointer shadow-xs"
                            title={`${pendingExpenses} staff expense voucher(s) awaiting manager sign-off`}
                         >
-                           <ShieldAlert size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
-                           <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 font-mono tabular-nums">
+                           <ShieldAlert size={14} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0" />
+                           <span className="text-xs font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono tabular-nums">
                               {pendingExpenses} Pending Sign-Off{pendingExpenses > 1 ? 's' : ''}
                            </span>
                         </button>
@@ -188,7 +188,7 @@ export default function Finance() {
                      <button
                         type="button"
                         onClick={state.handleGenerateReport}
-                        className="min-h-11 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white px-3.5 rounded-xl text-xs font-semibold flex items-center transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="min-h-11 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white px-3.5 rounded-xl text-xs font-semibold flex items-center transition-all shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                      >
                         <Download className="w-3.5 h-3.5 mr-1.5" /> PDF Report
                      </button>
@@ -200,7 +200,7 @@ export default function Finance() {
             <RegionalScopeBanner
                moduleName="Financials"
                guardrailBadge={
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[#0071E3] dark:text-[#2997FF] text-xs font-semibold">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] text-xs font-semibold">
                      <span>Autonomous Expense Limit: {effectiveCountry === 'KE' ? 'KES' : 'ETB'} {Number(autonomousExpenseLimit).toLocaleString()}</span>
                   </div>
                }

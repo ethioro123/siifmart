@@ -71,7 +71,7 @@ export default function GamificationTab({
             <div className="p-6 sm:p-7 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs relative overflow-hidden">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+                        <div className="w-14 h-14 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-center justify-center text-[var(--theme-status-warning-text)] shrink-0">
                             <Trophy size={28} />
                         </div>
                         <div>
@@ -79,7 +79,7 @@ export default function GamificationTab({
                                 {isWarehouse ? 'Warehouse Pro' : 'Store Elite'}
                             </h4>
                             <div className="flex items-center gap-2 mt-1">
-                                <span className="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/25 uppercase tracking-wider">
+                                <span className="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] uppercase tracking-wider">
                                     {empTierName || 'Standard'}
                                 </span>
                                 <span className="text-[var(--theme-text-secondary)] text-xs font-medium">
@@ -92,7 +92,7 @@ export default function GamificationTab({
                     {empBonus > 0 && (
                         <div className="bg-[var(--theme-bg-subtle)] px-5 py-3 rounded-xl border border-[var(--theme-border)] text-center md:text-right">
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-0.5">Estimated Bonus</p>
-                            <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-emerald-500">
+                            <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[var(--theme-status-success-text)]">
                                 {formatCompactNumber(empBonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                             </p>
                         </div>
@@ -105,14 +105,14 @@ export default function GamificationTab({
                 {isWarehouse && empPoints ? (
                     <>
                         <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
-                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3 text-emerald-500">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] flex items-center justify-center mx-auto mb-3 text-[var(--theme-status-success-text)]">
                                 <Trophy size={20} />
                             </div>
                             <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{empPoints.totalPoints.toLocaleString()}</p>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Lifetime</p>
                         </div>
                         <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
-                            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mx-auto mb-3 text-sky-500">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] flex items-center justify-center mx-auto mb-3 text-[var(--theme-status-info-text)]">
                                 <Target size={20} />
                             </div>
                             <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{empPoints.monthlyPoints.toLocaleString()}</p>
@@ -126,7 +126,7 @@ export default function GamificationTab({
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">{empPoints.levelTitle}</p>
                         </div>
                         <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
-                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-3 text-amber-500">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-center justify-center mx-auto mb-3 text-[var(--theme-status-warning-text)]">
                                 <Award size={20} />
                             </div>
                             <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">#{empPoints.rank || '12'}</p>
@@ -136,14 +136,14 @@ export default function GamificationTab({
                 ) : storePointsData ? (
                     <>
                         <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
-                            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mx-auto mb-3 text-sky-500">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] flex items-center justify-center mx-auto mb-3 text-[var(--theme-status-info-text)]">
                                 <Store size={20} />
                             </div>
                             <p className="text-lg font-bold text-[var(--theme-text-primary)] truncate">{empSite?.name}</p>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Origin Site</p>
                         </div>
                         <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
-                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-3 text-amber-500">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-center justify-center mx-auto mb-3 text-[var(--theme-status-warning-text)]">
                                 <Trophy size={20} />
                             </div>
                             <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{storePointsData.monthlyPoints.toLocaleString()}</p>
@@ -177,12 +177,12 @@ export default function GamificationTab({
                 {/* Badges & Achievements */}
                 <div className="bg-[var(--theme-bg-card)] p-6 rounded-2xl border border-[var(--theme-border)] shadow-xs">
                     <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider mb-6 flex items-center gap-2">
-                        <Star size={18} className="text-amber-500" /> Badges & Achievements
+                        <Star size={18} className="text-[var(--theme-status-warning-text)]" /> Badges & Achievements
                     </h4>
                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-4">
                         {(employee.badges || ['Early Bird', 'Fast Picker', 'No Errors']).map((badge, i) => (
                             <div key={i} className="flex flex-col items-center gap-2 group cursor-help">
-                                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-xs group-hover:scale-105 transition-transform">
+                                <div className="w-12 h-12 rounded-xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-center justify-center text-[var(--theme-status-warning-text)] shadow-xs group-hover:scale-105 transition-transform">
                                     <Award size={22} />
                                 </div>
                                 <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium text-center tracking-normal leading-tight max-w-[80px] truncate">{badge}</span>
@@ -207,10 +207,10 @@ export default function GamificationTab({
                     </h4>
                     <div className="space-y-3">
                         {[
-                            { action: 'PICK completed', points: '+15', time: '2 hours ago', icon: Package, color: 'text-sky-500 bg-sky-500/10 border-sky-500/20' },
-                            { action: '100% Accuracy Bonus', points: '+50', time: 'Yesterday', icon: CheckCircle, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
+                            { action: 'PICK completed', points: '+15', time: '2 hours ago', icon: Package, color: 'text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)]' },
+                            { action: '100% Accuracy Bonus', points: '+50', time: 'Yesterday', icon: CheckCircle, color: 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]' },
                             { action: 'Shift Finished', points: '+10', time: '2 days ago', icon: Clock, color: 'text-purple-500 bg-purple-500/10 border-purple-500/20' },
-                            { action: 'Team Multiplier', points: 'x2', time: 'Active', icon: Zap, color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
+                            { action: 'Team Multiplier', points: 'x2', time: 'Active', icon: Zap, color: 'text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]' },
                         ].map((log, i) => (
                             <div key={i} className="flex items-center justify-between p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors">
                                 <div className="flex items-center gap-3">
@@ -222,7 +222,7 @@ export default function GamificationTab({
                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">{log.time}</p>
                                     </div>
                                 </div>
-                                <span className={`text-sm font-bold font-mono tabular-nums ${log.points.startsWith('+') ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                <span className={`text-sm font-bold font-mono tabular-nums ${log.points.startsWith('+') ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-warning-text)]'}`}>
                                     {log.points}
                                 </span>
                             </div>

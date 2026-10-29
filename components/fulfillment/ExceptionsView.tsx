@@ -48,7 +48,7 @@ export function ExceptionsView({ activeSite, onResolve }: ExceptionsViewProps) {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
-                        <AlertTriangle className="text-red-500" size={20} />
+                        <AlertTriangle className="text-[var(--theme-status-danger-text)]" size={20} />
                         Exception Management
                     </h2>
                     <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Resolve outstanding inventory discrepancies across all operations.</p>
@@ -62,7 +62,7 @@ export function ExceptionsView({ activeSite, onResolve }: ExceptionsViewProps) {
                 </div>
             ) : discrepancies.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-[var(--theme-text-muted)]">
-                    <CheckCircle size={48} className="mb-3 text-emerald-500/50" />
+                    <CheckCircle size={48} className="mb-3 text-[var(--theme-status-success-text)]" />
                     <p className="text-base font-bold text-[var(--theme-text-primary)]">All Clear</p>
                     <p className="text-xs text-[var(--theme-text-muted)] mt-1">No open discrepancies found.</p>
                 </div>
@@ -109,15 +109,15 @@ export function ExceptionsView({ activeSite, onResolve }: ExceptionsViewProps) {
                                         </div>
                                     </td>
                                     <td className="p-3.5">
-                                        <span className="px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20 text-[11px] font-semibold uppercase tracking-wider">
+                                        <span className="px-2 py-0.5 rounded bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] text-[11px] font-semibold uppercase tracking-wider">
                                             ACTION REQ
                                         </span>
                                     </td>
                                     <td className="p-3.5 font-mono tabular-nums text-xs">
                                         <div className="flex flex-col">
                                             <span className="text-[var(--theme-text-secondary)]">Exp: {d.item.expectedQty}</span>
-                                            <span className="text-amber-600 dark:text-amber-400">Rec: {d.item.receivedQty || 0}</span>
-                                            <span className="text-red-500 font-bold border-t border-[var(--theme-border)] pt-0.5 mt-0.5">
+                                            <span className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">Rec: {d.item.receivedQty || 0}</span>
+                                            <span className="text-[var(--theme-status-danger-text)] font-bold border-t border-[var(--theme-border)] pt-0.5 mt-0.5">
                                                 Diff: {(d.item.receivedQty || 0) - (d.item.expectedQty || 0)}
                                             </span>
                                         </div>

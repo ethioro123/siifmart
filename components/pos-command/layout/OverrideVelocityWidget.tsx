@@ -36,8 +36,8 @@ export const OverrideVelocityWidget: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--theme-border)] pb-4">
                 <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-                        stats.isExcessive 
-                            ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' 
+                        stats.isExcessive
+                            ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                             : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                     }`}>
                         {stats.isExcessive ? <ShieldAlert size={20} /> : <ShieldCheck size={20} />}
@@ -84,7 +84,7 @@ export const OverrideVelocityWidget: React.FC = () => {
             {/* Metrics Breakdown */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex items-center gap-3 shadow-2xs">
-                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                         <Trash2 size={15} />
                     </div>
                     <div className="min-w-0">
@@ -94,7 +94,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                 </div>
 
                 <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex items-center gap-3 shadow-2xs">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <RefreshCcw size={15} />
                     </div>
                     <div className="min-w-0">

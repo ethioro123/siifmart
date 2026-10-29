@@ -107,7 +107,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                         >
                             <Icon size={14} /> {subTab.label}
                             {subTab.count ? (
-                                <span className="px-1.5 py-0.5 bg-red-500 text-white rounded-full text-[10px] font-semibold">
+                                <span className="px-1.5 py-0.5 bg-[var(--theme-status-danger-bg)] text-white rounded-full text-[10px] font-semibold">
                                     {subTab.count}
                                 </span>
                             ) : null}

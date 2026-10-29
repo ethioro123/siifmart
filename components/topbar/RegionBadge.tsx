@@ -97,7 +97,7 @@ export function RegionBadge() {
                 disabled={!canSwitchRegion}
                 className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border transition-colors text-left min-h-[44px] ${
                     canSwitchRegion
-                        ? 'border-[#E2DCCE] dark:border-white/10 hover:border-[#0071E3]/50 bg-white/70 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 cursor-pointer shadow-xs'
+                        ? 'border-[#E2DCCE] dark:border-white/10 hover:border-[var(--theme-border-focus)]/50 bg-white/70 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 cursor-pointer shadow-xs'
                         : 'border-[#E2DCCE]/50 dark:border-white/5 bg-white/40 dark:bg-black/10 cursor-default select-none'
                 }`}
                 aria-label={canSwitchRegion ? 'Regional jurisdiction lens switcher' : 'Assigned regional jurisdiction'}
@@ -105,7 +105,7 @@ export function RegionBadge() {
                 {/* Accent icon */}
                 <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                     activeRegionCode
-                        ? 'bg-[#0071E3]/15 text-[#0071E3] dark:text-[#2997FF]'
+                        ? 'bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]'
                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)]'
                 }`}>
                     <Network size={14} />
@@ -141,7 +141,7 @@ export function RegionBadge() {
                         <button
                             type="button"
                             onClick={() => { setIsOpen(false); navigate('/settings'); }}
-                            className="text-[10px] font-bold text-[#0071E3] dark:text-[#2997FF] hover:underline flex items-center gap-0.5 cursor-pointer"
+                            className="text-[10px] font-bold text-[var(--theme-accent)] dark:text-[var(--theme-accent)] hover:underline flex items-center gap-0.5 cursor-pointer"
                         >
                             <span>Manage</span>
                             <ExternalLink size={10} />
@@ -155,19 +155,19 @@ export function RegionBadge() {
                             onClick={() => handleSelectRegion(null)}
                             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
                                 activeRegionCode === null
-                                    ? 'bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] font-bold'
+                                    ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-bold'
                                     : 'hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]'
                             }`}
                         >
                             <div className="flex items-center gap-2 min-w-0">
-                                <Shield size={14} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                                <Shield size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                                 <div className="min-w-0">
                                     <p className="text-xs font-semibold truncate leading-tight">All Regions (National HQ)</p>
                                     <p className="text-[9px] text-[var(--theme-text-secondary)] leading-none mt-0.5">Aggregate Country View</p>
                                 </div>
                             </div>
                             {activeRegionCode === null && (
-                                <Check size={14} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                                <Check size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                             )}
                         </button>
 
@@ -193,12 +193,12 @@ export function RegionBadge() {
                                         onClick={() => handleSelectRegion(r.code)}
                                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left transition-colors cursor-pointer ${
                                             isSelected
-                                                ? 'bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] font-bold'
+                                                ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-bold'
                                                 : 'hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]'
                                         }`}
                                     >
                                         <div className="flex items-center gap-2 min-w-0">
-                                            <Building2 size={14} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                                            <Building2 size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                                             <div className="min-w-0">
                                                 <p className="text-xs font-semibold truncate leading-tight">{r.name}</p>
                                                 <p className="text-[9px] font-mono text-[var(--theme-text-secondary)] leading-none mt-0.5">
@@ -207,7 +207,7 @@ export function RegionBadge() {
                                             </div>
                                         </div>
                                         {isSelected && (
-                                            <Check size={14} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                                            <Check size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)] shrink-0" />
                                         )}
                                     </button>
                                 );

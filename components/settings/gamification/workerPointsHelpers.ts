@@ -2,7 +2,7 @@ import { POINTS_CONFIG, BonusTier, DEFAULT_BONUS_TIERS } from '../../../types';
 
 // Calculate bonus from points and tiers
 export const calculateBonus = (
-    points: number, 
+    points: number,
     tiers: BonusTier[] = DEFAULT_BONUS_TIERS
 ): { tier: BonusTier; bonus: number } => {
     // Find the applicable tier
@@ -52,9 +52,9 @@ export const getLevelInfo = (totalPoints: number) => {
 
 // Get rank medal color
 export const getRankStyle = (rank: number) => {
-    if (rank === 1) return { bg: 'from-yellow-400 to-amber-500', text: 'text-yellow-900', icon: '🥇' };
+    if (rank === 1) return { bg: 'from-yellow-400 to-amber-500', text: 'text-[var(--theme-status-warning-text)]', icon: '🥇' };
     if (rank === 2) return { bg: 'from-gray-300 to-gray-400', text: 'text-gray-800', icon: '🥈' };
-    if (rank === 3) return { bg: 'from-amber-600 to-amber-700', text: 'text-amber-100', icon: '🥉' };
+    if (rank === 3) return { bg: 'from-amber-600 to-amber-700', text: 'text-[var(--theme-status-warning-text)]', icon: '🥉' };
     return { bg: 'from-white/10 to-white/5', text: 'text-white', icon: `#${rank}` };
 };
 

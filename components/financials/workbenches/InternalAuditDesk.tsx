@@ -62,7 +62,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                             <span>Supervisory Review • Audit Target</span>
                         </span>
                     ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 text-[11px] font-semibold">
                             <Clock size={12} />
                             <span>Staff Telemetry Stream</span>
                         </span>
@@ -76,10 +76,10 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Supervisory Override Velocity
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1">
                         1.4%
                     </div>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 block">
+                    <span className="text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-1 block">
                         Within zero-trust threshold (&le; 3%)
                     </span>
                 </div>
@@ -100,10 +100,10 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Unresolved Shift Variances
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-amber-600 dark:text-amber-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1">
                         {inquiryDispatched ? '0 Pending Inquiries' : '1 Shift'}
                     </div>
-                    <span className="text-[11px] text-amber-600 dark:text-amber-400 mt-1 block">
+                    <span className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 block">
                         {inquiryDispatched ? 'Formal inquiry registered for supervisor' : 'Flagged for CCTV co-inspection'}
                     </span>
                 </div>
@@ -145,7 +145,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                 <div className="divide-y divide-[var(--theme-border)] text-xs">
                     <div className="p-4 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)] transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                 <AlertTriangle size={16} />
                             </div>
                             <div>
@@ -163,7 +163,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                                     AUDIT INQUIRY PENDING RESPONSE
                                 </span>
                             )}
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                 CCTV REVIEW
                             </span>
                         </div>
@@ -171,7 +171,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
 
                     <div className="p-4 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)] transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                                 <Fingerprint size={16} />
                             </div>
                             <div>
@@ -183,7 +183,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                                 </span>
                             </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                             AUTHENTICATED
                         </span>
                     </div>

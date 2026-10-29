@@ -173,7 +173,7 @@ export const PromosTab: React.FC = () => {
         <p className="p-8 text-center text-sm text-[var(--theme-text-secondary)]">Loading campaign plans…</p>
       )}
       {error && (
-        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-5 text-xs text-rose-500">
+        <div className="rounded-2xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-5 text-xs text-[var(--theme-status-danger-text)]">
           Could not load campaign plans: {(error as Error).message}
         </div>
       )}
@@ -210,10 +210,10 @@ export const PromosTab: React.FC = () => {
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                       isApproved
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                        ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                         : isRejected
-                        ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
-                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                        ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
+                        : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                     }`}
                   >
                     {isApproved && <CheckCircle2 size={11} />}
@@ -250,8 +250,8 @@ export const PromosTab: React.FC = () => {
                   </div>
 
                   {isApproved && (
-                    <div className="mt-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10 p-2 text-[10px]">
-                      <div className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <div className="mt-2 rounded-lg bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] p-2 text-[10px]">
+                      <div className="font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1">
                         <ShieldCheck size={12} />
                         <span>Approved by {proposal.approver?.name || 'Executive'}</span>
                       </div>
@@ -262,8 +262,8 @@ export const PromosTab: React.FC = () => {
                   )}
 
                   {isRejected && (
-                    <div className="mt-2 rounded-lg bg-rose-500/5 border border-rose-500/10 p-2 text-[10px]">
-                      <div className="font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                    <div className="mt-2 rounded-lg bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] p-2 text-[10px]">
+                      <div className="font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-1">
                         <XCircle size={12} />
                         <span>Rejected by {proposal.rejector?.name || 'Executive'}</span>
                       </div>
@@ -284,7 +284,7 @@ export const PromosTab: React.FC = () => {
                     type="button"
                     disabled={approve.isPending || reject.isPending}
                     onClick={() => handleApprove(proposal)}
-                    className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white px-3 py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
                   >
                     Approve Plan
                   </button>
@@ -292,7 +292,7 @@ export const PromosTab: React.FC = () => {
                     type="button"
                     disabled={approve.isPending || reject.isPending}
                     onClick={() => setRejectModalProposal(proposal)}
-                    className="rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-50"
+                    className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-50"
                   >
                     Reject
                   </button>

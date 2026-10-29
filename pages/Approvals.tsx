@@ -61,7 +61,7 @@ export default function Approvals() {
       )}
 
       {query.isError && (
-        <div role="alert" className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-400">
+        <div role="alert" className="rounded-2xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-4 text-sm text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
           The inbox could not be loaded. Refresh to retry. Pending totals are unavailable.
         </div>
       )}
@@ -101,7 +101,7 @@ export default function Approvals() {
               >
                 Specialist Clearances
                 {clearanceCount > 0 && (
-                  <span className="rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 px-1.5 py-0.2 text-[10px] font-bold">
+                  <span className="rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] px-1.5 py-0.2 text-[10px] font-bold">
                     {clearanceCount}
                   </span>
                 )}
@@ -117,7 +117,7 @@ export default function Approvals() {
               >
                 Final Line Approvals
                 {lineApprovalCount > 0 && (
-                  <span className="rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.2 text-[10px] font-bold">
+                  <span className="rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] px-1.5 py-0.2 text-[10px] font-bold">
                     {lineApprovalCount}
                   </span>
                 )}
@@ -150,7 +150,7 @@ export default function Approvals() {
                       {isSpecialist ? (
                         <span
                           data-testid={`badge-${q.key}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-300"
+                          className="inline-flex items-center gap-1 rounded-full border border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] px-2 py-0.5 text-[11px] font-medium text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]"
                         >
                           <ShieldAlert size={12} aria-hidden="true" />
                           {config.clearanceBadge}
@@ -158,7 +158,7 @@ export default function Approvals() {
                       ) : (
                         <span
                           data-testid={`badge-${q.key}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300"
+                          className="inline-flex items-center gap-1 rounded-full border border-[var(--theme-status-success-border)] bg-[var(--theme-status-success-bg)] px-2 py-0.5 text-[11px] font-medium text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]"
                         >
                           <CheckCircle2 size={12} aria-hidden="true" />
                           Final Line Approval

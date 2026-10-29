@@ -58,7 +58,7 @@ export const CustomerSelectionModal: React.FC = () => {
                                 <p className="font-bold text-[var(--theme-text-primary)]">{t('pos.walkInCustomer')}</p>
                                 <p className="text-xs text-[var(--theme-text-muted)]">{t('pos.defaultGuestAccount')}</p>
                             </div>
-                            {!selectedCustomer && <CheckCircle size={16} className="text-emerald-500" />}
+                            {!selectedCustomer && <CheckCircle size={16} className="text-[var(--theme-status-success-text)]" />}
                         </button>
 
                         {filteredCustomers.map(customer => {
@@ -79,11 +79,11 @@ export const CustomerSelectionModal: React.FC = () => {
                                             <p className="font-bold text-[var(--theme-text-primary)]">{customer.name}</p>
                                             <p className="text-xs text-[var(--theme-text-secondary)] font-mono">{maskPhoneNumber(customer.phone)} • {customer.email}</p>
                                             <div className="flex gap-3 mt-1 text-xs font-medium">
-                                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{stats.totalVisits} {t('pos.visits')}</span>
+                                                <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">{stats.totalVisits} {t('pos.visits')}</span>
                                                 <span className="text-[var(--theme-text-secondary)]">{formatCompactNumber(stats.totalSpent, { currency: CURRENCY_SYMBOL })} {t('pos.spent')}</span>
                                             </div>
                                         </div>
-                                        {isSelected && <CheckCircle size={16} className="text-emerald-500" />}
+                                        {isSelected && <CheckCircle size={16} className="text-[var(--theme-status-success-text)]" />}
                                     </div>
                                 </button>
                             );
@@ -113,7 +113,7 @@ export const CustomerSelectionModal: React.FC = () => {
                                     </div>
                                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-lg">
                                         <p className="text-xs text-[var(--theme-text-secondary)] font-medium">{t('pos.storeSpent')}</p>
-                                        <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCompactNumber(getCustomerStats(selectedCustomer.id).totalSpent, { currency: CURRENCY_SYMBOL })}</p>
+                                        <p className="text-xl font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">{formatCompactNumber(getCustomerStats(selectedCustomer.id).totalSpent, { currency: CURRENCY_SYMBOL })}</p>
                                     </div>
                                 </div>
 

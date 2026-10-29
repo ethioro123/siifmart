@@ -144,7 +144,7 @@ export function StoreBonusWidget({
             </div>
             {userShare && (
                 <div className="text-right pl-2.5 border-l border-[var(--theme-border)] ml-auto">
-                    <p className="text-xs text-[#0071E3] dark:text-[#2997FF] font-black font-mono">
+                    <p className="text-xs text-[var(--theme-accent)] dark:text-[var(--theme-accent)] font-black font-mono">
                         {formatCompactNumber(userShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                     </p>
                     <p className="text-[10px] text-[var(--theme-text-secondary)]">{t('posCommand.yourShare')} ({userShare.percentage}%)</p>
@@ -247,7 +247,7 @@ export default function StoreBonusDisplay({
         return (
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-8 text-center shadow-xs">
                 <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center mx-auto mb-3 text-[var(--theme-text-secondary)]">
-                    <Store size={22} className="text-[#0071E3] dark:text-[#2997FF]" />
+                    <Store size={22} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                 </div>
                 <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">Branch Performance &amp; Team Bonus</h4>
                 <p className="text-xs text-[var(--theme-text-secondary)] mt-1 max-w-sm mx-auto leading-relaxed">
@@ -262,7 +262,7 @@ export default function StoreBonusDisplay({
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-2xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-accent)]/10 dark:bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-border-focus)]/20 flex items-center justify-center shrink-0">
                         <Store size={22} />
                     </div>
                     <div>
@@ -270,14 +270,14 @@ export default function StoreBonusDisplay({
                             <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
                                 Store Team Bonus &amp; Performance
                             </h3>
-                            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                 {bonusInfo.tier.tierName} Tier
                             </span>
                         </div>
                         <div className="flex items-center gap-2 mt-1 text-xs text-[var(--theme-text-secondary)]">
                             <span className="flex h-2 w-2 relative">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--theme-status-success-bg)] opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--theme-status-success-bg)]"></span>
                             </span>
                             <span className="font-medium text-[var(--theme-text-primary)]">{effectiveStore.siteName}</span>
                             <span>•</span>
@@ -288,7 +288,7 @@ export default function StoreBonusDisplay({
 
                 <div className="text-left sm:text-right bg-[var(--theme-bg-subtle)] sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none border sm:border-0 border-[var(--theme-border)]">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">Store Bonus Pool</p>
-                    <p className="text-2xl font-black font-mono text-[#0071E3] dark:text-[#2997FF]">
+                    <p className="text-2xl font-black font-mono text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                         {formatCompactNumber(bonusInfo.bonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                     </p>
                 </div>
@@ -300,13 +300,13 @@ export default function StoreBonusDisplay({
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4">
                     <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">Team Points</span>
-                        <Trophy size={14} className="text-amber-500" />
+                        <Trophy size={14} className="text-[var(--theme-status-warning-text)]" />
                     </div>
                     <p className="text-2xl font-black font-mono text-[var(--theme-text-primary)]">
                         {effectiveStore.monthlyPoints.toLocaleString()}
                     </p>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] flex items-center gap-1 font-medium mt-1">
-                        <TrendingUp size={11} className="text-emerald-500" />
+                        <TrendingUp size={11} className="text-[var(--theme-status-success-text)]" />
                         <span>+{effectiveStore.todayPoints.toLocaleString()} today</span>
                     </p>
                 </div>
@@ -315,7 +315,7 @@ export default function StoreBonusDisplay({
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4">
                     <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">Your Score</span>
-                        <Zap size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                        <Zap size={14} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                     </div>
                     <p className="text-2xl font-black font-mono text-[var(--theme-text-primary)]">
                         {(workerPoints?.totalPoints || 0).toLocaleString()}
@@ -329,7 +329,7 @@ export default function StoreBonusDisplay({
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4">
                     <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">Branch Rank</span>
-                        <Crown size={14} className="text-amber-500" />
+                        <Crown size={14} className="text-[var(--theme-status-warning-text)]" />
                     </div>
                     <div className="flex items-baseline gap-1.5">
                         <p className="text-2xl font-black font-mono text-[var(--theme-text-primary)]">
@@ -352,11 +352,11 @@ export default function StoreBonusDisplay({
                         Current: <strong className="text-[var(--theme-text-primary)] font-semibold">{bonusInfo.tier.tierName}</strong>
                     </span>
                     {nextTier ? (
-                        <span className="text-xs font-semibold text-[#0071E3] dark:text-[#2997FF]">
+                        <span className="text-xs font-semibold text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                             {(nextTier.minPoints - effectiveStore.monthlyPoints).toLocaleString()} pts to {nextTier.tierName}
                         </span>
                     ) : (
-                        <span className="text-xs font-semibold text-amber-500">Maximum Tier Achieved</span>
+                        <span className="text-xs font-semibold text-[var(--theme-status-warning-text)]">Maximum Tier Achieved</span>
                     )}
                 </div>
 
@@ -380,9 +380,9 @@ export default function StoreBonusDisplay({
 
             {/* Personal Share Estimate & Info Note */}
             {userShare ? (
-                <div className="bg-[#0071E3]/5 dark:bg-[#2997FF]/10 border border-[#0071E3]/20 dark:border-[#2997FF]/20 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="bg-[var(--theme-accent)]/5 dark:bg-[var(--theme-accent)]/10 border border-[var(--theme-border-focus)]/20 dark:border-[var(--theme-border-focus)]/20 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0 shadow-2xs">
                             <DollarSign size={17} />
                         </div>
                         <div>
@@ -395,7 +395,7 @@ export default function StoreBonusDisplay({
                         </div>
                     </div>
                     <div className="text-left sm:text-right pl-12 sm:pl-0">
-                        <p className="text-xl font-black font-mono text-[#0071E3] dark:text-[#2997FF]">
+                        <p className="text-xl font-black font-mono text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                             {formatCompactNumber(userShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                         </p>
                         <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium">Est. Personal Payout</p>
@@ -403,7 +403,7 @@ export default function StoreBonusDisplay({
                 </div>
             ) : (
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 flex items-center gap-3 text-xs text-[var(--theme-text-secondary)]">
-                    <Sparkles size={16} className="text-amber-500 shrink-0" />
+                    <Sparkles size={16} className="text-[var(--theme-status-warning-text)] shrink-0" />
                     <span>
                         Team points accrue automatically on completed checkout sales, revenue milestones, and priority catalog items.
                     </span>
@@ -441,7 +441,7 @@ export function StoreLeaderboard({
     return (
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
             <h3 className="font-semibold text-xs text-[var(--theme-text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Trophy className="text-amber-500" size={15} />
+                <Trophy className="text-[var(--theme-status-warning-text)]" size={15} />
                 <span>{t('posCommand.storeRankings')}</span>
             </h3>
             <div className="space-y-2">
@@ -454,14 +454,14 @@ export function StoreLeaderboard({
                             key={store.id}
                             className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${
                                 isCurrentStore
-                                    ? 'bg-[#0071E3]/5 dark:bg-[#2997FF]/10 border-[#0071E3]/30 dark:border-[#2997FF]/30'
-                                    : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:border-[#0071E3]/20'
+                                    ? 'bg-[var(--theme-accent)]/5 dark:bg-[var(--theme-accent)]/10 border-[var(--theme-border-focus)]/30 dark:border-[var(--theme-border-focus)]/30'
+                                    : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:border-[var(--theme-border-focus)]/20'
                             }`}
                         >
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs font-mono shrink-0 ${
-                                index === 0 ? 'bg-amber-500 text-white shadow-2xs' :
+                                index === 0 ? 'bg-[var(--theme-status-warning-bg)] text-white shadow-2xs' :
                                 index === 1 ? 'bg-slate-300 dark:bg-slate-600 text-slate-800 dark:text-slate-100' :
-                                index === 2 ? 'bg-amber-700 text-white' :
+                                index === 2 ? 'bg-[var(--theme-status-warning-bg)] text-white' :
                                 'bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
                             }`}>
                                 {index + 1}
@@ -470,7 +470,7 @@ export function StoreLeaderboard({
                                 <p className="font-semibold text-[var(--theme-text-primary)] text-xs truncate flex items-center gap-1.5">
                                     <span>{store.siteName}</span>
                                     {isCurrentStore && (
-                                        <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-full bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/15 dark:text-[#2997FF]">
+                                        <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)]">
                                             {t('posCommand.you')}
                                         </span>
                                     )}
@@ -480,7 +480,7 @@ export function StoreLeaderboard({
                                 </p>
                             </div>
                             <div className="text-right">
-                                <p className="text-xs font-black font-mono text-[#0071E3] dark:text-[#2997FF]">
+                                <p className="text-xs font-black font-mono text-[var(--theme-accent)] dark:text-[var(--theme-accent)]">
                                     {formatCompactNumber(bonus.bonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                                 </p>
                             </div>

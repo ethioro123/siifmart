@@ -366,7 +366,7 @@ export default function Roadmap() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      {entry.isStarred && <Star size={14} className="text-yellow-400 fill-yellow-400" />}
+                      {entry.isStarred && <Star size={14} className="text-[var(--theme-status-warning-text)] fill-yellow-400" />}
                       <h3 className="text-white font-bold truncate">{entry.title}</h3>
                     </div>
                     <p className="text-gray-400 text-sm line-clamp-2 mb-3">{entry.description || 'No description'}</p>

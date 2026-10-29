@@ -48,8 +48,8 @@ export default function ClickableKPICard({
     <div
       onClick={isClickable ? handleClick : undefined}
       className={`
-        bg-cyber-gray border border-white/5 rounded-2xl p-6 
-        flex items-center justify-between 
+        bg-cyber-gray border border-white/5 rounded-2xl p-6
+        flex items-center justify-between
         transition-all group
         ${isClickable ? 'cursor-pointer hover:border-cyber-primary/50 hover:bg-white/5' : 'hover:border-white/10'}
         ${bg || ''}
@@ -60,7 +60,7 @@ export default function ClickableKPICard({
           <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{title}</p>
           {trend && trendValue && (
             <div className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold ${
-              trend === 'up' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+              trend === 'up' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)]'
             }`}>
               {trend === 'up' ? '↑' : '↓'} {trendValue}
             </div>

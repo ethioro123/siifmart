@@ -29,7 +29,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
 
             // Search product names and SKUs inside order items
             const items = po.lineItems || po.line_items || [];
-            const matchesItems = items.some((item: any) => 
+            const matchesItems = items.some((item: any) =>
                 (item.name || item.productName || '').toLowerCase().includes(q) ||
                 (item.sku || '').toLowerCase().includes(q)
             );
@@ -140,7 +140,7 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                                     </td>
                                     <td className="px-4 py-3.5 text-right">
                                         <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
-                                            po.status === 'Approved' ? 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20' :
+                                            po.status === 'Approved' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]' :
                                             po.status === 'Received' ? 'bg-primary/10 text-primary border border-primary/20' :
                                             'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]'
                                         }`}>

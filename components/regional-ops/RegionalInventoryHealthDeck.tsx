@@ -81,24 +81,24 @@ export const RegionalInventoryHealthDeck: React.FC<RegionalInventoryHealthDeckPr
           <div className="w-full h-3 rounded-full overflow-hidden flex bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
             <div
               style={{ width: `${optimalPercent}%` }}
-              className="bg-emerald-500 h-full transition-all duration-300"
+              className="bg-[var(--theme-status-success-bg)] h-full transition-all duration-300"
               title={`Optimal: ${optimalStockCount} SKUs`}
             />
             <div
               style={{ width: `${lowPercent}%` }}
-              className="bg-amber-500 h-full transition-all duration-300"
+              className="bg-[var(--theme-status-warning-bg)] h-full transition-all duration-300"
               title={`Low Stock: ${lowStockCount} SKUs`}
             />
             <div
               style={{ width: `${outPercent}%` }}
-              className="bg-rose-500 h-full transition-all duration-300"
+              className="bg-[var(--theme-status-danger-bg)] h-full transition-all duration-300"
               title={`Out of Stock: ${outOfStockCount} SKUs`}
             />
           </div>
 
           <div className="grid grid-cols-3 gap-2 mt-4">
             <div className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-              <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-semibold">
                 <ShieldCheck size={12} />
                 <span>Optimal</span>
               </div>
@@ -109,7 +109,7 @@ export const RegionalInventoryHealthDeck: React.FC<RegionalInventoryHealthDeckPr
             </div>
 
             <div className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-              <div className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-semibold">
                 <AlertTriangle size={12} />
                 <span>Low Stock</span>
               </div>
@@ -120,7 +120,7 @@ export const RegionalInventoryHealthDeck: React.FC<RegionalInventoryHealthDeckPr
             </div>
 
             <div className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-              <div className="flex items-center gap-1.5 text-[11px] text-rose-600 dark:text-rose-400 font-semibold">
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-semibold">
                 <Box size={12} />
                 <span>Out of Stock</span>
               </div>

@@ -101,14 +101,14 @@ export default function TerminateEmployeeModal({
         <Modal isOpen={isOpen} onClose={onClose} title="Operational Action: Dual-Control Termination" size="lg">
             <div className="p-6 space-y-5">
                 {/* 4-Eyes & Zero-Trust Notice */}
-                <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                    <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={22} />
+                <div className="flex items-start gap-3 p-4 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl">
+                    <AlertTriangle className="text-[var(--theme-status-danger-text)] shrink-0 mt-0.5" size={22} />
                     <div className="space-y-1">
-                        <h4 className="font-bold text-red-600 dark:text-red-400 text-sm">
+                        <h4 className="font-bold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-sm">
                             4-Eyes Dual-Control & Rule 18 Supervisory Action
                         </h4>
                         <p className="text-xs text-stone-600 dark:text-stone-300">
-                            You are initiating formal offboarding for <strong className="font-bold">{employee?.name}</strong> ({employee?.code || employee?.id}). 
+                            You are initiating formal offboarding for <strong className="font-bold">{employee?.name}</strong> ({employee?.code || employee?.id}).
                             Under Zero-Trust Rule 18, this action requires a mandatory structured reason code, checklist sign-off, and secondary manager approval.
                         </p>
                     </div>
@@ -117,12 +117,12 @@ export default function TerminateEmployeeModal({
                 {/* Structured Reason Code Selector */}
                 <div className="space-y-1.5">
                     <label className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
-                        Mandatory Reason Code <span className="text-red-500">*</span>
+                        Mandatory Reason Code <span className="text-[var(--theme-status-danger-text)]">*</span>
                     </label>
                     <select
                         value={reasonCode}
                         onChange={(e) => setReasonCode(e.target.value as TerminationReasonCode)}
-                        className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-bold text-stone-900 dark:text-white focus:border-red-500 outline-none"
+                        className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-bold text-stone-900 dark:text-white border-[var(--theme-status-danger-border)] outline-none"
                     >
                         {TERMINATION_REASONS.map(r => (
                             <option key={r.code} value={r.code}>
@@ -138,14 +138,14 @@ export default function TerminateEmployeeModal({
                 {/* Reason Details & Investigation Summary */}
                 <div className="space-y-1.5">
                     <label className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider block">
-                        Reason Details & Incident Summary <span className="text-red-500">*</span>
+                        Reason Details & Incident Summary <span className="text-[var(--theme-status-danger-text)]">*</span>
                     </label>
                     <textarea
                         value={reasonDetails}
                         onChange={(e) => setReasonDetails(e.target.value)}
                         placeholder="Document the exact circumstances, incident reports, or departure terms..."
                         rows={2}
-                        className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-stone-900 dark:text-white focus:border-red-500 outline-none resize-none"
+                        className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-stone-900 dark:text-white border-[var(--theme-status-danger-border)] outline-none resize-none"
                         required
                     />
                 </div>
@@ -159,14 +159,14 @@ export default function TerminateEmployeeModal({
                         type="date"
                         value={effectiveDate}
                         onChange={(e) => setEffectiveDate(e.target.value)}
-                        className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-stone-900 dark:text-white focus:border-red-500 outline-none"
+                        className="w-full bg-white dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs font-mono font-bold text-stone-900 dark:text-white border-[var(--theme-status-danger-border)] outline-none"
                     />
                 </div>
 
                 {/* Zero-Trust Asset & Access Revocation Checklist */}
                 <div className="space-y-2 p-4 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl">
                     <h5 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider flex items-center gap-1.5">
-                        <ShieldAlert size={14} className="text-amber-600 dark:text-amber-400" />
+                        <ShieldAlert size={14} className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" />
                         Asset Revocation & Security Handshake Checklist
                     </h5>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
@@ -175,7 +175,7 @@ export default function TerminateEmployeeModal({
                                 type="checkbox"
                                 checked={posAccessRevoked}
                                 onChange={(e) => setPosAccessRevoked(e.target.checked)}
-                                className="rounded text-[#2C5E3B] focus:ring-0"
+                                className="rounded text-[var(--theme-primary)] focus:ring-0"
                             />
                             <span className="text-stone-700 dark:text-stone-300">POS Register PIN Revoked</span>
                         </label>
@@ -184,7 +184,7 @@ export default function TerminateEmployeeModal({
                                 type="checkbox"
                                 checked={wmsBadgeDeactivated}
                                 onChange={(e) => setWmsBadgeDeactivated(e.target.checked)}
-                                className="rounded text-[#2C5E3B] focus:ring-0"
+                                className="rounded text-[var(--theme-primary)] focus:ring-0"
                             />
                             <span className="text-stone-700 dark:text-stone-300">WMS Scanner Access Revoked</span>
                         </label>
@@ -193,7 +193,7 @@ export default function TerminateEmployeeModal({
                                 type="checkbox"
                                 checked={keysSurrendered}
                                 onChange={(e) => setKeysSurrendered(e.target.checked)}
-                                className="rounded text-[#2C5E3B] focus:ring-0"
+                                className="rounded text-[var(--theme-primary)] focus:ring-0"
                             />
                             <span className="text-stone-700 dark:text-stone-300">Physical Facility Keys Returned</span>
                         </label>
@@ -202,7 +202,7 @@ export default function TerminateEmployeeModal({
                                 type="checkbox"
                                 checked={cashDrawerReconciled}
                                 onChange={(e) => setCashDrawerReconciled(e.target.checked)}
-                                className="rounded text-[#2C5E3B] focus:ring-0"
+                                className="rounded text-[var(--theme-primary)] focus:ring-0"
                             />
                             <span className="text-stone-700 dark:text-stone-300">Cash Till Reconciled (No Float)</span>
                         </label>
@@ -211,7 +211,7 @@ export default function TerminateEmployeeModal({
                                 type="checkbox"
                                 checked={assetsReturned}
                                 onChange={(e) => setAssetsReturned(e.target.checked)}
-                                className="rounded text-[#2C5E3B] focus:ring-0"
+                                className="rounded text-[var(--theme-primary)] focus:ring-0"
                             />
                             <span className="text-stone-700 dark:text-stone-300">Hardware, ID Badges & Uniforms Returned</span>
                         </label>
@@ -227,7 +227,7 @@ export default function TerminateEmployeeModal({
                         type="text"
                         value={currentInput}
                         onChange={(e) => updateInput(e.target.value)}
-                        className="w-full bg-black/5 dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-center font-mono font-bold text-stone-900 dark:text-white focus:border-red-500 outline-none uppercase transition-colors"
+                        className="w-full bg-black/5 dark:bg-black/40 border border-stone-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-center font-mono font-bold text-stone-900 dark:text-white border-[var(--theme-status-danger-border)] outline-none uppercase transition-colors"
                         placeholder="TERMINATE"
                     />
                 </div>
@@ -247,7 +247,7 @@ export default function TerminateEmployeeModal({
                         disabled={currentInput !== 'TERMINATE'}
                         className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${
                             currentInput === 'TERMINATE'
-                                ? 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20'
+                                ? 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white shadow-lg shadow-red-600/20'
                                 : 'bg-stone-300 dark:bg-stone-800 text-stone-500 cursor-not-allowed'
                         }`}
                     >

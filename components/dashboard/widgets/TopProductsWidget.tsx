@@ -11,7 +11,7 @@ export const TopProductsWidget = ({ products }: TopProductsWidgetProps) => {
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 h-full relative overflow-hidden flex flex-col shadow-sm">
             <div className="flex justify-between items-center mb-4 relative z-10">
                 <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-sm">
-                    <Zap className="text-amber-500" size={16} />
+                    <Zap className="text-[var(--theme-status-warning-text)]" size={16} />
                     Top Performing Products
                 </h3>
             </div>

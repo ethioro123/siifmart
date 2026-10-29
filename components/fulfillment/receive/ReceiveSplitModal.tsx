@@ -101,7 +101,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
         const code = barcodeInput[variantId];
         if (!code) return;
 
-        const matchedProduct = allProducts?.find(p => 
+        const matchedProduct = allProducts?.find(p =>
             (p.siteId || p.site_id) === splitReceivingPO.siteId && (p.barcode === code || (Array.isArray(p.barcodes) && p.barcodes.includes(code)))
         );
 
@@ -109,8 +109,8 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
             if (v.id === variantId) {
                 const current = v.barcodes || [];
                 if (current.includes(code)) return v;
-                return { 
-                    ...v, 
+                return {
+                    ...v,
                     barcodes: [...current, code],
                     sku: (v.sku && v.sku !== 'UNKNOWN') ? v.sku : (matchedProduct?.sku || v.sku),
                     productId: v.productId || matchedProduct?.id
@@ -266,7 +266,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 {(() => {
                                     const badge = formatPackBadge(splitReceivingItem);
                                     return badge ? (
-                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-semibold">
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-semibold">
                                             <Package size={12} className="shrink-0" /> {badge}
                                         </span>
                                     ) : null;
@@ -411,7 +411,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 type="button"
                                 onClick={handleConfirmReceipt}
                                 disabled={isSubmitting || localSubmitting || !countsValid}
-                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting || localSubmitting ? (
                                     <Loader2 size={16} className="animate-spin" />

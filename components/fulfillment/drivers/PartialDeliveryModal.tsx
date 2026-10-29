@@ -175,14 +175,14 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
 
                 {step === 'DONE' ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 text-center overflow-y-auto custom-scrollbar">
-                        <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 mb-4">
-                            <CheckCircle size={30} className="text-emerald-500" />
+                        <div className="w-14 h-14 bg-[var(--theme-status-success-bg)] rounded-2xl flex items-center justify-center border border-[var(--theme-status-success-border)] mb-4">
+                            <CheckCircle size={30} className="text-[var(--theme-status-success-text)]" />
                         </div>
                         <h4 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight mb-2">
                             {hasUndelivered ? t('warehouse.driverHub.arrivalRecordedTitle') : t('warehouse.driverHub.arrivalRecordedTitle')}
                         </h4>
                         <p className="text-xs text-[var(--theme-text-secondary)] max-w-xs leading-relaxed">
-                            <strong className="text-emerald-500 font-mono tabular-nums">{totalDelivered}</strong> {t('warehouse.driverHub.to')} <strong className="text-[var(--theme-text-primary)] font-mono tabular-nums">{totalDispatched}</strong> {t('warehouse.driverHub.units').toLowerCase()} {t('warehouse.driverHub.arrived').toLowerCase()} {t('warehouse.driverHub.to').toLowerCase()} {destSite?.name || t('warehouse.driverHub.localHub')}.
+                            <strong className="text-[var(--theme-status-success-text)] font-mono tabular-nums">{totalDelivered}</strong> {t('warehouse.driverHub.to')} <strong className="text-[var(--theme-text-primary)] font-mono tabular-nums">{totalDispatched}</strong> {t('warehouse.driverHub.units').toLowerCase()} {t('warehouse.driverHub.arrived').toLowerCase()} {t('warehouse.driverHub.to').toLowerCase()} {destSite?.name || t('warehouse.driverHub.localHub')}.
                         </p>
                         <p className="text-[11px] text-[var(--theme-text-muted)] mt-2">{t('warehouse.driverHub.arrivalRecordedNotice')}</p>
                         <button
@@ -195,14 +195,14 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                 ) : step === 'QUANTITIES' ? (
                     <>
                         {/* Progress summary */}
-                        <div className="mx-4 sm:mx-5 mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-between shrink-0">
+                        <div className="mx-4 sm:mx-5 mt-4 p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex items-center justify-between shrink-0">
                             <div>
-                                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">{t('warehouse.driverHub.delivering')}</p>
+                                <p className="text-xs font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">{t('warehouse.driverHub.delivering')}</p>
                                 <p className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] font-mono tabular-nums">{totalDelivered} <span className="text-xs text-[var(--theme-text-muted)] font-normal">/ {totalDispatched}</span></p>
                             </div>
                             <div className="text-right">
                                 <p className="text-xs font-medium text-[var(--theme-text-secondary)]">{t('warehouse.driverHub.to')}</p>
-                                <p className="text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 truncate max-w-[180px]">{destSite?.name || t('warehouse.driverHub.localHub')}</p>
+                                <p className="text-xs sm:text-sm font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] truncate max-w-[180px]">{destSite?.name || t('warehouse.driverHub.localHub')}</p>
                             </div>
                         </div>
 
@@ -214,11 +214,11 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                 const isShort = !isNaN(deliveredVal) && deliveredVal < line.dispatched;
                                 const isFull = !isNaN(deliveredVal) && deliveredVal === line.dispatched;
                                 return (
-                                    <div key={i} className={`p-3.5 sm:p-4 rounded-2xl border transition-colors ${isShort ? 'bg-amber-500/5 border-amber-500/30' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'}`}>
+                                    <div key={i} className={`p-3.5 sm:p-4 rounded-2xl border transition-colors ${isShort ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'}`}>
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                             <div className="flex items-center gap-3 min-w-0">
-                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isFull ? 'bg-emerald-500/10' : isShort ? 'bg-amber-500/10' : 'bg-[var(--theme-bg-card)]'}`}>
-                                                    <Package size={16} className={isFull ? 'text-emerald-500' : isShort ? 'text-amber-500' : 'text-[var(--theme-text-muted)]'} />
+                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isFull ? 'bg-[var(--theme-status-success-bg)]' : isShort ? 'bg-[var(--theme-status-warning-bg)]' : 'bg-[var(--theme-bg-card)]'}`}>
+                                                    <Package size={16} className={isFull ? 'text-[var(--theme-status-success-text)]' : isShort ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-text-muted)]'} />
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{line.name}</p>
@@ -230,7 +230,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                                     <p className="text-[11px] font-medium text-[var(--theme-text-muted)]">{t('warehouse.driverHub.dispatched')}</p>
                                                     <p className="text-xs sm:text-sm font-semibold font-mono tabular-nums text-[var(--theme-text-secondary)]">{line.dispatched}</p>
                                                 </div>
-                                                <ArrowRight size={14} className={isShort ? 'text-amber-500' : 'text-[var(--theme-text-muted)]'} />
+                                                <ArrowRight size={14} className={isShort ? 'text-[var(--theme-status-warning-text)]' : 'text-[var(--theme-text-muted)]'} />
                                                 <div className="text-right sm:text-center flex items-center gap-2 sm:block">
                                                     <p className="text-[11px] font-medium text-[var(--theme-text-muted)] sm:mb-1">{t('warehouse.driverHub.delivered')}</p>
                                                     <input
@@ -244,7 +244,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                                         title={t('warehouse.driverHub.deliveredQuantities')}
                                                         onChange={e => setLineDelivered(i, e.target.value)}
                                                         className={`w-16 min-h-[38px] text-center text-xs font-bold font-mono tabular-nums border rounded-xl px-2 py-1 focus:outline-none transition-colors ${isShort
-                                                            ? 'border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 focus:border-amber-500'
+                                                            ? 'border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                                             : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] focus:border-[var(--theme-primary)]'
                                                         }`}
                                                     />
@@ -253,7 +253,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                         </div>
                                         {isShort && (
                                             <div className="mt-2 flex justify-end">
-                                                <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                                                <span className="text-[11px] font-medium text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] px-2.5 py-0.5 rounded-full border border-[var(--theme-status-warning-border)]">
                                                     {line.dispatched - (deliveredVal || 0)} {t('warehouse.driverHub.undeliveredReturned')}
                                                 </span>
                                             </div>
@@ -279,7 +279,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                     }
                                 }}
                                 disabled={isSubmitting}
-                                className={`min-h-[44px] px-6 sm:px-8 py-2.5 ${hasUndelivered ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'} font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-2 active:scale-[0.98] touch-manipulation cursor-pointer`}
+                                className={`min-h-[44px] px-6 sm:px-8 py-2.5 ${hasUndelivered ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white' : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'} font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-2 active:scale-[0.98] touch-manipulation cursor-pointer`}
                             >
                                 {isSubmitting ? (
                                     <><Loader2 size={14} className="animate-spin" /> {t('warehouse.driverHub.saving')}</>
@@ -302,11 +302,11 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                         key={r.id}
                                         onClick={() => setRejectReason(r.id as any)}
                                         className={`w-full flex items-center gap-3 p-3 min-h-[44px] rounded-xl border text-left transition-all active:scale-[0.98] touch-manipulation ${rejectReason === r.id
-                                            ? 'bg-amber-500/10 border-amber-500/30'
+                                            ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'
                                             : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                     >
-                                        <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 ${rejectReason === r.id ? 'border-amber-500 bg-amber-500' : 'border-[var(--theme-border)]'}`} />
+                                        <div className={`w-3.5 h-3.5 rounded-full border-2 shrink-0 ${rejectReason === r.id ? 'border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)]' : 'border-[var(--theme-border)]'}`} />
                                         <div>
                                             <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{r.label}</p>
                                             <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">{r.desc}</p>
@@ -323,7 +323,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                     aria-label={t('warehouse.driverHub.driverNotes')}
                                     title={t('warehouse.driverHub.driverNotes')}
                                     rows={3}
-                                    className="w-full text-xs border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-3 sm:px-4 py-2.5 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-colors resize-none"
+                                    className="w-full text-xs border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-3 sm:px-4 py-2.5 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none border-[var(--theme-status-warning-border)] focus:ring-1 ring-[var(--theme-status-warning-border)] transition-colors resize-none"
                                 />
                             </div>
                         </div>
@@ -338,7 +338,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                             <button
                                 disabled={isSubmitting}
                                 onClick={handleConfirm}
-                                className="min-h-[44px] px-6 sm:px-8 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-2 active:scale-[0.98] touch-manipulation"
+                                className="min-h-[44px] px-6 sm:px-8 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] disabled:opacity-50 text-white font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-2 active:scale-[0.98] touch-manipulation"
                             >
                                 {isSubmitting
                                     ? <><Loader2 size={14} className="animate-spin" /> {t('warehouse.driverHub.saving')}</>

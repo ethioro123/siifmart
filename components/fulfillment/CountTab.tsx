@@ -109,7 +109,7 @@ export const CountTab: React.FC<CountTabProps> = ({
                 onCancelSession={cancelSession}
                 isSubmitting={isSubmitting}
             />
-            {loadError && <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-[var(--theme-text-primary)]">{t('warehouse.couldNotRestoreActiveCount')}</p>}
+            {loadError && <p role="alert" className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-3 text-sm text-[var(--theme-text-primary)]">{t('warehouse.couldNotRestoreActiveCount')}</p>}
             {countViewMode === 'Operations' ? (
                 <CountOperations
                     products={products}

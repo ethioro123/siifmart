@@ -69,16 +69,16 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
             <div className="flex items-center justify-between mb-2">
                 <div>
                     <h2 className="text-2xl font-black text-white flex items-center gap-3">
-                        <div className="p-2 bg-yellow-500/20 rounded-xl border border-yellow-500/30">
-                            <Trophy className="text-yellow-400" size={24} />
+                        <div className="p-2 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
+                            <Trophy className="text-[var(--theme-status-warning-text)]" size={24} />
                         </div>
-                        OPERATIONAL PERFORMANCE <span className="text-yellow-400">& GAMIFICATION</span>
+                        OPERATIONAL PERFORMANCE <span className="text-[var(--theme-status-warning-text)]">& GAMIFICATION</span>
                     </h2>
                     <p className="text-gray-400 text-sm font-medium mt-1">Real-time engagement and productivity metrics across the central network.</p>
                 </div>
                 <div className="flex gap-2">
                     <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md flex items-center gap-2">
-                        <Activity size={14} className="text-emerald-500 dark:text-emerald-400 animate-pulse" />
+                        <Activity size={14} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] animate-pulse" />
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Global Status: OPTIMAL</span>
                     </div>
                 </div>
@@ -123,7 +123,7 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                 <div className="lg:col-span-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <BarChart3 size={16} className="text-emerald-500 dark:text-emerald-400" />
+                        <BarChart3 size={16} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                         Network Synergy Score
                     </h3>
                     <div className="w-full h-[250px]">
@@ -161,15 +161,15 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                 {/* 2. GLOBAL INDIVIDUAL LEADERBOARD */}
                 <div className="lg:col-span-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col relative overflow-hidden group">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <Crown size={18} className="text-yellow-400" />
+                        <Crown size={18} className="text-[var(--theme-status-warning-text)]" />
                         Top Individual Performers
                     </h3>
                     <div className="space-y-4">
                         {topIndividual.map((w, i) => (
                             <div key={w.id} className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all duration-300 group/item hover:-translate-x-1">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-amber-500 text-stone-950' :
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-[var(--theme-status-warning-bg)] text-stone-950' :
                                     i === 1 ? 'bg-stone-300 dark:bg-stone-700 text-stone-900 dark:text-stone-100' :
-                                        i === 2 ? 'bg-amber-700 dark:bg-amber-800 text-white' : 'bg-white/10 text-[var(--theme-text-muted)]'
+                                        i === 2 ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white' : 'bg-white/10 text-[var(--theme-text-muted)]'
                                     }`}>
                                     {i + 1}
                                 </div>
@@ -178,13 +178,13 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                                     <p className="text-[10px] text-gray-500 font-mono uppercase truncate">{w.levelTitle} • LVL {w.level}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-mono font-bold text-emerald-500 dark:text-emerald-400">{formatCompactNumber(w.totalPoints)}</p>
+                                    <p className="font-mono font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">{formatCompactNumber(w.totalPoints)}</p>
                                     <p className="text-[8px] text-gray-500 uppercase font-bold">Total Pts</p>
                                  </div>
                             </div>
                         ))}
                     </div>
-                    <button className="mt-auto pt-6 text-xs text-emerald-500 dark:text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
+                    <button className="mt-auto pt-6 text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-bold uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
                         View Full Global Ranks <TrendingUp size={14} />
                     </button>
                 </div>
@@ -192,13 +192,13 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                 {/* 3. GLOBAL TEAM LEADERBOARD */}
                 <div className="lg:col-span-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col relative overflow-hidden group">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <Users size={18} className="text-blue-400" />
+                        <Users size={18} className="text-[var(--theme-status-info-text)]" />
                         Top Performing Teams
                     </h3>
                     <div className="space-y-4">
                         {topTeams.map((s, i) => (
                             <div key={s.id} className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all duration-300 group/item hover:-translate-x-1">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-emerald-500 text-stone-950' : 'bg-white/10 text-[var(--theme-text-muted)]'
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-[var(--theme-status-success-bg)] text-stone-950' : 'bg-white/10 text-[var(--theme-text-muted)]'
                                     }`}>
                                     <Shield size={14} className={i === 0 ? 'text-stone-950' : 'text-[var(--theme-text-muted)]'} />
                                 </div>
@@ -207,7 +207,7 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                                     <p className="text-[10px] text-gray-500 font-mono uppercase truncate">Team Score • {s.monthlyPoints > 1000 ? 'GOLD TIER' : 'SILVER TIER'}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-mono font-bold text-blue-400">{formatCompactNumber(s.totalPoints)}</p>
+                                    <p className="font-mono font-bold text-[var(--theme-status-info-text)]">{formatCompactNumber(s.totalPoints)}</p>
                                     <p className="text-[8px] text-gray-500 uppercase font-bold">Team Pts</p>
                                 </div>
                             </div>
@@ -228,7 +228,7 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
 const PerformanceCard = ({ title, value, sub, icon: Icon, color }: any) => {
     const colors: any = {
         cyan: { text: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20' },
-        emerald: { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+        emerald: { text: 'text-[var(--theme-status-success-text)]', bg: 'bg-[var(--theme-status-success-bg)]', border: 'border-[var(--theme-status-success-border)]' },
         purple: { text: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
         orange: { text: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
     };
@@ -249,7 +249,7 @@ const PerformanceCard = ({ title, value, sub, icon: Icon, color }: any) => {
                 <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">{title}</p>
                 <h3 className="text-2xl font-mono font-black text-white mt-1 break-all">{value}</h3>
                 <p className="text-[10px] text-gray-400 font-medium mt-2 flex items-center gap-1">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500" />
+                    <span className="w-1 h-1 rounded-full bg-[var(--theme-status-success-bg)]" />
                     {sub}
                 </p>
             </div>

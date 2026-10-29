@@ -163,8 +163,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
           <IconComponent size={18} />
           {isError && (
             <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5" aria-hidden="true">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--theme-status-danger-bg)] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--theme-status-danger-bg)]" />
             </span>
           )}
         </div>
@@ -207,7 +207,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
                 type="button"
                 onClick={() => setDetailsOpen(open => !open)}
                 aria-expanded={detailsOpen}
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-info-border)]"
               >
                 <FileText size={14} aria-hidden="true" />
                 {detailsOpen ? 'Hide technical details' : 'Show technical details'}
@@ -225,7 +225,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
         <button
           type="button"
           onClick={() => dismissRef.current(item.id)}
-          className="-mr-1 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-100 dark:text-stone-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          className="-mr-1 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-100 dark:text-stone-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-info-border)]"
           title="Dismiss notification"
           aria-label="Dismiss notification"
         >

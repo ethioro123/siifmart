@@ -53,10 +53,10 @@ export const ArInvoiceModal: React.FC<ArInvoiceModalProps> = ({
                     </div>
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
                         invoice.status === 'Paid'
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                            ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                             : isOverdue
-                                ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                                : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                                ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                                : 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                     }`}>
                         {invoice.status === 'Paid' && <CheckCircle2 size={12} />}
                         {isOverdue && <AlertCircle size={12} />}
@@ -67,8 +67,8 @@ export const ArInvoiceModal: React.FC<ArInvoiceModalProps> = ({
 
                 {/* Overdue Alert Banner */}
                 {isOverdue && (
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-2.5 text-xs text-rose-700 dark:text-rose-300">
-                        <AlertCircle size={16} className="text-rose-500 shrink-0" />
+                    <div className="p-3 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl flex items-center gap-2.5 text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
+                        <AlertCircle size={16} className="text-[var(--theme-status-danger-text)] shrink-0" />
                         <div>
                             <span className="font-semibold">Credit Risk Alert:</span>
                             <span className="ml-1">
@@ -95,7 +95,7 @@ export const ArInvoiceModal: React.FC<ArInvoiceModalProps> = ({
                             <Clock size={13} />
                             <span>Maturity Due Date</span>
                         </div>
-                        <p className={`font-mono tabular-nums font-medium ${isOverdue ? 'text-rose-600 dark:text-rose-400' : 'text-[var(--theme-text-primary)]'}`}>
+                        <p className={`font-mono tabular-nums font-medium ${isOverdue ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-text-primary)]'}`}>
                             {invoice.dueDate}
                         </p>
                     </div>
@@ -105,7 +105,7 @@ export const ArInvoiceModal: React.FC<ArInvoiceModalProps> = ({
                             <CheckCircle2 size={13} />
                             <span>Amount Remitted</span>
                         </div>
-                        <p className="font-mono tabular-nums font-medium text-emerald-600 dark:text-emerald-400">
+                        <p className="font-mono tabular-nums font-medium text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                             {currencySymbol} {invoice.amountPaid.toLocaleString()}
                         </p>
                     </div>

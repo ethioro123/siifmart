@@ -312,7 +312,7 @@ export const POItemForm = React.forwardRef<POItemFormHandle, POItemFormProps>(({
         <div id="po-item-form-container" tabIndex={-1} className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-sm relative overflow-hidden group">
             <POValidationFeedback issues={React.useMemo(() => Object.entries(errors).filter(([, message]) => message).map(([key, message]) => ({ message, selector: itemFieldSelectors[key] || '#po-item-form-container' })), [errors])} />
             <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2 relative z-10">
-                <div className="p-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
+                <div className="p-1.5 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] rounded-xl border border-[var(--theme-status-success-border)]">
                     <Plus size={15} />
                 </div>
                 {editingItem ? 'Edit Product Item' : 'Add Products'}

@@ -31,7 +31,7 @@ export const ProfileContactCard: React.FC<ProfileContactCardProps> = ({
         <div className="bg-[var(--theme-bg-card)] p-6 rounded-2xl border border-[var(--theme-border)] space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                 <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
+                    <div className="p-2 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]">
                         <Phone size={18} />
                     </div>
                     <div>
@@ -43,7 +43,7 @@ export const ProfileContactCard: React.FC<ProfileContactCardProps> = ({
                         </p>
                     </div>
                 </div>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                     <ShieldCheck size={12} />
                     Direct Save
                 </span>

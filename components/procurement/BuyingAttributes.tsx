@@ -150,20 +150,20 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
             </div>
 
             <div className="rounded-2xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-5 space-y-5 shadow-sm">
-                
+
                 {/* ── 1. ITEM IDENTITY & MERCHANDISING HIERARCHY ── */}
                 <div className="space-y-3">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                        <Tag size={12} className="text-blue-500" />
+                        <Tag size={12} className="text-[var(--theme-status-info-text)]" />
                         <span>1. Item Identification & Merchandising</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-6 gap-3.5">
                         <div className="col-span-full sm:col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Brand { !customAttributes.identity?.unbranded && <span className="text-rose-500">*</span> }</label>
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Brand { !customAttributes.identity?.unbranded && <span className="text-[var(--theme-status-danger-text)]">*</span> }</label>
                             <input
                                 type="text"
-                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.brand ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold`}
+                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.brand ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold`}
                                 placeholder="e.g. Amazon, Samsung, Brookside"
                                 aria-label="Brand"
                                 disabled={Boolean(customAttributes.identity?.unbranded)}
@@ -176,29 +176,29 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 setCustomAttributes((previous: POItemFormDraft['customAttributes']) => ({ ...previous, identity: { ...previous.identity, unbranded } }));
                                 setErrors(previous => ({ ...previous, brand: '' }));
                             }} />Unbranded product</label>
-                            {errors.brand && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.brand}</span>}
+                            {errors.brand && <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors.brand}</span>}
                         </div>
                         <div className="col-span-full sm:col-span-4 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Product Name / Consumer Description <span className="text-rose-500">*</span></label>
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Product Name / Consumer Description <span className="text-[var(--theme-status-danger-text)]">*</span></label>
                             <input
                                 type="text"
-                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.name ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-semibold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
+                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.name ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-semibold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                                 aria-label="Product name"
                                 placeholder="e.g. Kindle Paperwhite 16GB, Basmati Rice 5kg"
                                 value={customItemName}
                                 onChange={e => { setCustomItemName(e.target.value); setCustomAttributes((previous: POItemFormDraft['customAttributes']) => ({ ...previous, storage: { ...previous.storage, requirementsConfirmed: false } })); if (errors.name) setErrors(p => ({ ...p, name: '' })); }}
                             />
-                            {errors.name && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.name}</span>}
+                            {errors.name && <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors.name}</span>}
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-6 gap-3.5">
                         <div className="col-span-full sm:col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Category <span className="text-rose-500">*</span></label>
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Category <span className="text-[var(--theme-status-danger-text)]">*</span></label>
                             <div className="relative">
                                 <select
                                     title="Category"
-                                    className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.category ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer`}
+                                    className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.category ? 'border-[var(--theme-status-danger-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer`}
                                     value={selectedMainCategory}
                                     onChange={e => handleCategoryChange(e.target.value)}
                                 >
@@ -211,7 +211,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 </select>
                                 <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                             </div>
-                            {errors.category && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.category}</span>}
+                            {errors.category && <span className="text-[9px] text-[var(--theme-status-danger-text)] ml-1 font-semibold">{errors.category}</span>}
                         </div>
                         <div className="col-span-full sm:col-span-2 space-y-1">
                             <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Subcategory</label>
@@ -286,7 +286,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                             <Thermometer size={12} className="text-purple-500" />
                             <span>5. Storage, Inbound QC & Handling Directives</span>
                             {storageDefaults.defaultPerishable && (
-                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-semibold">
+                                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] font-semibold">
                                     Required for Perishables
                                 </span>
                             )}

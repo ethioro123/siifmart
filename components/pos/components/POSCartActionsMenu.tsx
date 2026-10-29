@@ -50,7 +50,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         }}
                         className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                     >
-                        <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                             <ShoppingBag size={14} />
                         </div>
                         <span>{t('pos.miscItem')}</span>
@@ -66,7 +66,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     disabled={heldOrdersCount === 0}
                     className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight disabled:opacity-30 cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <PlayCircle size={14} />
                     </div>
                     <span>{t('pos.recallHeld')} ({heldOrdersCount})</span>
@@ -83,7 +83,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         }}
                         className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                     >
-                        <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                             <RotateCcw size={14} />
                         </div>
                         <span>{t('pos.returnsAndRefunds')}</span>
@@ -98,7 +98,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     }}
                     className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                         <ArrowDownCircle size={14} />
                     </div>
                     <span>{t('pos.safeCashDrop')}</span>

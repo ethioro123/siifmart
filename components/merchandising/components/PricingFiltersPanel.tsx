@@ -240,7 +240,7 @@ export const ActiveFilterChips: React.FC = () => {
                     <button
                         onClick={() => setSearchTerm('')}
                         aria-label="Clear search"
-                        className="hover:text-rose-500 transition-colors opacity-70 hover:opacity-100"
+                        className="text-[var(--theme-status-danger-text)] transition-colors opacity-70 hover:opacity-100"
                     >
                         <XCircle size={13} />
                     </button>
@@ -256,7 +256,7 @@ export const ActiveFilterChips: React.FC = () => {
                     <button
                         onClick={() => setFilters({ ...filters, categories: filters.categories.filter(c => c !== cat) })}
                         aria-label={`Remove category filter ${cat}`}
-                        className="hover:text-rose-500 transition-colors text-[var(--theme-text-secondary)] hover:opacity-100"
+                        className="text-[var(--theme-status-danger-text)] transition-colors text-[var(--theme-text-secondary)] hover:opacity-100"
                     >
                         <XCircle size={13} />
                     </button>
@@ -272,7 +272,7 @@ export const ActiveFilterChips: React.FC = () => {
                     <button
                         onClick={() => setFilters({ ...filters, sites: filters.sites.filter(s => s !== sid) })}
                         aria-label="Remove site filter"
-                        className="hover:text-rose-500 transition-colors text-[var(--theme-text-secondary)] hover:opacity-100"
+                        className="text-[var(--theme-status-danger-text)] transition-colors text-[var(--theme-text-secondary)] hover:opacity-100"
                     >
                         <XCircle size={13} />
                     </button>
@@ -282,27 +282,27 @@ export const ActiveFilterChips: React.FC = () => {
                 <div
                     className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1 rounded-full text-xs text-[var(--theme-text-primary)] font-medium"
                 >
-                    <Calculator size={12} className="text-emerald-500" />
+                    <Calculator size={12} className="text-[var(--theme-status-success-text)]" />
                     <span className="font-mono tabular-nums">
                         {currencySymbol} {filters.minPrice || '0'} - {currencySymbol} {filters.maxPrice || '∞'}
                     </span>
                     <button
                         onClick={() => setFilters({ ...filters, minPrice: '', maxPrice: '' })}
                         aria-label="Clear price range filter"
-                        className="hover:text-rose-500 transition-colors text-[var(--theme-text-secondary)] hover:opacity-100"
+                        className="text-[var(--theme-status-danger-text)] transition-colors text-[var(--theme-text-secondary)] hover:opacity-100"
                     >
                         <XCircle size={13} />
                     </button>
                 </div>
             )}
             {filters.onSale && (
-                <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full text-xs text-amber-600 dark:text-amber-400 font-medium">
+                <div className="flex items-center gap-2 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] px-3 py-1 rounded-full text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-medium">
                     <Percent size={12} />
                     <span>On Sale</span>
                     <button
                         onClick={() => setFilters({ ...filters, onSale: null })}
                         aria-label="Remove sale filter"
-                        className="hover:text-rose-500 transition-colors opacity-70 hover:opacity-100"
+                        className="text-[var(--theme-status-danger-text)] transition-colors opacity-70 hover:opacity-100"
                     >
                         <XCircle size={13} />
                     </button>

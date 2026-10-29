@@ -246,7 +246,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
 
       {isLoading && <p className="text-sm text-[var(--theme-text-secondary)]">Loading proposals…</p>}
       {error && (
-        <p className="text-sm text-rose-500">
+        <p className="text-sm text-[var(--theme-status-danger-text)]">
           Could not load proposals: {(error as Error).message}
         </p>
       )}
@@ -289,19 +289,19 @@ export const MerchandisingReviewsTab: React.FC = () => {
                         {request.productName}
                       </h3>
                       {isPending && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                           <Clock size={11} />
                           Pending Review
                         </span>
                       )}
                       {isApproved && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                           <CheckCircle size={11} />
                           Approved
                         </span>
                       )}
                       {isRejected && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                           <XCircle size={11} />
                           Rejected
                         </span>
@@ -331,7 +331,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                           type="button"
                           disabled={decision.isPending}
                           onClick={() => decision.mutate({ id: request.id, action: 'finance' })}
-                          className="rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-colors"
+                          className="rounded-xl border border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-colors"
                         >
                           Finance signoff
                         </button>
@@ -341,7 +341,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                           type="button"
                           disabled={decision.isPending}
                           onClick={() => setSelectedRejectRequest(request)}
-                          className="rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-300 px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-colors"
+                          className="rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] px-3 py-2 text-xs font-semibold disabled:opacity-50 transition-colors"
                         >
                           Reject proposal
                         </button>
@@ -376,10 +376,10 @@ export const MerchandisingReviewsTab: React.FC = () => {
 
                 {/* Rejection Details Banner if Rejected */}
                 {isRejected && (
-                  <div className="flex items-start gap-2.5 rounded-xl border border-rose-500/20 bg-rose-500/5 p-3 text-xs">
-                    <AlertCircle className="shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" size={15} />
+                  <div className="flex items-start gap-2.5 rounded-xl border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] p-3 text-xs">
+                    <AlertCircle className="shrink-0 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] mt-0.5" size={15} />
                     <div className="space-y-0.5">
-                      <p className="font-semibold text-rose-700 dark:text-rose-300">
+                      <p className="font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                         Proposal Rejected {request.rejectedBy ? `by ${request.rejectedBy}` : ''}
                       </p>
                       <p className="text-[var(--theme-text-primary)]">

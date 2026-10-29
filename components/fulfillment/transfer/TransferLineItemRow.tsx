@@ -39,7 +39,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
 
     return (
         <div
-            className={`bg-[var(--theme-bg-card)] border ${isDone ? 'border-green-500/30' : 'border-[var(--theme-border)]'} rounded-xl px-4 py-3 flex items-center justify-between gap-3 shadow-sm`}
+            className={`bg-[var(--theme-bg-card)] border ${isDone ? 'border-[var(--theme-status-success-border)]' : 'border-[var(--theme-border)]'} rounded-xl px-4 py-3 flex items-center justify-between gap-3 shadow-sm`}
         >
             <div className="flex items-center gap-3 min-w-0">
                 <div className="relative w-10 h-10 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
@@ -49,13 +49,13 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
                         <Box size={18} className="text-[var(--theme-text-secondary)]/50" />
                     )}
                     {isDone && (
-                        <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
-                            <CheckCircle size={16} className="text-green-600 dark:text-green-400" />
+                        <div className="absolute inset-0 bg-[var(--theme-status-success-bg)] flex items-center justify-center">
+                            <CheckCircle size={16} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                         </div>
                     )}
                     {hasDiscrepancy && (
-                        <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
-                            <XCircle size={16} className="text-red-600 dark:text-red-400" />
+                        <div className="absolute inset-0 bg-[var(--theme-status-danger-bg)] flex items-center justify-center">
+                            <XCircle size={16} className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]" />
                         </div>
                     )}
                 </div>
@@ -75,7 +75,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
                         {t('warehouse.expected')}{isBlindExpected && !showReceived ? ' (Blind)' : ''}
                     </span>
                     {isBlindExpected && !showReceived ? (
-                        <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 tracking-widest">
+                        <span className="text-xs font-mono font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] tracking-widest">
                             *** Blind
                         </span>
                     ) : (
@@ -85,7 +85,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
 
                 {showReceived && (
                     <div className="text-right">
-                        <span className={`text-[11px] font-medium uppercase tracking-wider block ${hasDiscrepancy ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`}>
+                        <span className={`text-[11px] font-medium uppercase tracking-wider block ${hasDiscrepancy ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'}`}>
                             {t('warehouse.received')}
                         </span>
                         <TransferQtyDisplay qty={item.receivedQty} size={product?.size || item.size} unit={itemUnit} measureQty={showsPhysicalMeasure} color={hasDiscrepancy ? 'red' : 'green'} t={t} />
@@ -95,7 +95,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
                 {hasDiscrepancy && onResolveDiscrepancy && (
                     <button
                         onClick={(e) => { e.stopPropagation(); onResolveDiscrepancy(selectedJob, item, idx); }}
-                        className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[11px] uppercase font-semibold tracking-wider rounded-lg transition-colors flex items-center gap-1 min-h-[36px]"
+                        className="px-2.5 py-1.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:text-white border border-[var(--theme-status-danger-border)] text-[11px] uppercase font-semibold tracking-wider rounded-lg transition-colors flex items-center gap-1 min-h-[36px]"
                     >
                         <AlertTriangle size={12} />
                         <span>{t('warehouse.resolveDiscrepancy')}</span>

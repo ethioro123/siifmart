@@ -1,12 +1,12 @@
 import React from 'react';
-import { 
-    Thermometer, 
-    ShieldCheck, 
-    Layers, 
-    Package, 
-    AlertTriangle, 
-    Lock, 
-    Zap, 
+import {
+    Thermometer,
+    ShieldCheck,
+    Layers,
+    Package,
+    AlertTriangle,
+    Lock,
+    Zap,
     Snowflake,
     Sparkles
 } from 'lucide-react';
@@ -39,16 +39,16 @@ export const ItemAttributeBadges: React.FC<ItemAttributeBadgesProps> = ({
 }) => {
     if (!item) return null;
 
-    const matchedProduct = allProducts?.find(p => 
-        (item.productId && p.id === item.productId) || 
-        (item.sku && p.sku === item.sku) || 
+    const matchedProduct = allProducts?.find(p =>
+        (item.productId && p.id === item.productId) ||
+        (item.sku && p.sku === item.sku) ||
         (item.productName && p.name === item.productName)
     );
 
-    const attrs = item.customAttributes || 
-        item.custom_attributes || 
-        matchedProduct?.customAttributes || 
-        (matchedProduct as any)?.custom_attributes || 
+    const attrs = item.customAttributes ||
+        item.custom_attributes ||
+        matchedProduct?.customAttributes ||
+        (matchedProduct as any)?.custom_attributes ||
         {};
 
     const category = (item.category || attrs.identity?.category || matchedProduct?.category || '').toString();
@@ -81,10 +81,10 @@ export const ItemAttributeBadges: React.FC<ItemAttributeBadgesProps> = ({
     const isHalal = storageAttrs.halalVerified || attrs.categorySpecific?.halalCertified === 'Yes';
     const isSerialTracked = storageAttrs.serialTracked || attrs.categorySpecific?.serialNumberTracking;
 
-    const hasAnyContent = (showPhysical && specBadge) || 
-        (showInboundQc && inboundQc) || 
-        (showStorage && storageType) || 
-        (showPackaging && packageType) || 
+    const hasAnyContent = (showPhysical && specBadge) ||
+        (showInboundQc && inboundQc) ||
+        (showStorage && storageType) ||
+        (showPackaging && packageType) ||
         (showFlags && (isColdChain || isDeepFreeze || isHighValue || isFragile || isAntiStatic || isHalal || isSerialTracked));
 
     if (!hasAnyContent) return null;
@@ -93,7 +93,7 @@ export const ItemAttributeBadges: React.FC<ItemAttributeBadgesProps> = ({
         <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
             {/* Inbound QC Receiving Directive */}
             {showInboundQc && inboundQc && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 max-w-full truncate" title={inboundQc}>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] max-w-full truncate" title={inboundQc}>
                     <ShieldCheck size={11} className="shrink-0" />
                     <span className="truncate">QC: {inboundQc}</span>
                 </span>
@@ -102,10 +102,10 @@ export const ItemAttributeBadges: React.FC<ItemAttributeBadgesProps> = ({
             {/* Storage Mode & Temperature */}
             {showStorage && storageType && (
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border ${
-                    isDeepFreeze 
-                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' 
-                        : isColdChain 
-                            ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20' 
+                    isDeepFreeze
+                        ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
+                        : isColdChain
+                            ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20'
                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                 }`}>
                     {isDeepFreeze ? (
@@ -123,7 +123,7 @@ export const ItemAttributeBadges: React.FC<ItemAttributeBadgesProps> = ({
             {/* Packaging Architecture & Container Type */}
             {showPackaging && packageType && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
-                    <Package size={11} className="shrink-0 text-amber-500" />
+                    <Package size={11} className="shrink-0 text-[var(--theme-status-warning-text)]" />
                     <span className="truncate max-w-[140px]">{packageType}</span>
                     {packQty && Number(packQty) > 1 && (
                         <span className="font-mono text-[9px] text-[var(--theme-accent)] font-semibold">×{packQty}</span>
@@ -141,25 +141,25 @@ export const ItemAttributeBadges: React.FC<ItemAttributeBadgesProps> = ({
 
             {/* Handling Alerts & Security Flags */}
             {showFlags && isHighValue && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                     <Lock size={10} className="shrink-0" />
                     <span>Cage</span>
                 </span>
             )}
             {showFlags && isSerialTracked && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                     <Zap size={10} className="shrink-0" />
                     <span>Serial</span>
                 </span>
             )}
             {showFlags && isFragile && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                     <AlertTriangle size={10} className="shrink-0" />
                     <span>Fragile</span>
                 </span>
             )}
             {showFlags && isHalal && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                     <Sparkles size={10} className="shrink-0" />
                     <span>Halal</span>
                 </span>

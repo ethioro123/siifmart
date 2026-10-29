@@ -43,7 +43,7 @@ export const PettyCashVoucherModal: React.FC<PettyCashVoucherModalProps> = ({
         });
     };
 
-    const inputBase = "w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors placeholder:text-[var(--theme-text-secondary)]/50";
+    const inputBase = "w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[var(--theme-border-focus)] dark:focus:border-[var(--theme-border-focus)] transition-colors placeholder:text-[var(--theme-text-secondary)]/50";
     const labelBase = "text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5 block";
 
     return (
@@ -54,8 +54,8 @@ export const PettyCashVoucherModal: React.FC<PettyCashVoucherModalProps> = ({
             size="md"
         >
             <div className="p-5 space-y-4">
-                <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                <div className="p-3.5 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-xl flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <ShieldCheck size={18} />
                     </div>
                     <div>
@@ -132,7 +132,7 @@ export const PettyCashVoucherModal: React.FC<PettyCashVoucherModalProps> = ({
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting || !voucher.description || !voucher.amount || !voucher.paidTo}
-                        className="px-4 py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {isSubmitting && <Loader2 className="animate-spin" size={14} />}
                         <span>Disburse Cash Voucher</span>

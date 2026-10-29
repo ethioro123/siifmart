@@ -38,14 +38,14 @@ export default function StepRole({
                             onClick={() => handleRoleChange(roleObj.id)}
                             className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 relative ${
                                 isSelected
-                                    ? 'bg-[#2C5E3B]/10 dark:bg-emerald-500/15 border-[#2C5E3B] dark:border-emerald-500/50 shadow-sm'
+                                    ? 'bg-[var(--theme-primary)]/10 bg-[var(--theme-status-success-bg)] border-[var(--theme-border)] border-[var(--theme-status-success-border)] shadow-sm'
                                     : 'bg-white dark:bg-black/20 border-[#E2DCCE] dark:border-white/5 hover:border-stone-400 dark:hover:border-white/20'
                             }`}
                         >
                             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 flex-shrink-0 ${
-                                isSelected ? 'border-[#2C5E3B] dark:border-emerald-400' : 'border-stone-300 dark:border-stone-600'
+                                isSelected ? 'border-[var(--theme-border)] border-[var(--theme-status-success-border)]' : 'border-stone-300 dark:border-stone-600'
                             }`}>
-                                {isSelected && <div className="w-2 h-2 bg-[#2C5E3B] dark:bg-emerald-400 rounded-full" />}
+                                {isSelected && <div className="w-2 h-2 bg-[var(--theme-primary)] bg-[var(--theme-status-success-bg)] rounded-full" />}
                             </div>
 
                             <div className="flex-1 min-w-0">
@@ -55,7 +55,7 @@ export default function StepRole({
                                     </p>
                                     {hasViolations && (
                                         <div className="group/sod relative" title={`Separation of duties warning: ${violations.join(', ')}`}>
-                                            <AlertTriangle size={13} className="text-amber-500" />
+                                            <AlertTriangle size={13} className="text-[var(--theme-status-warning-text)]" />
                                         </div>
                                     )}
                                 </div>

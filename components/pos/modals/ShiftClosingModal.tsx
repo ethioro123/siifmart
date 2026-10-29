@@ -69,13 +69,13 @@ export const ShiftClosingModal: React.FC = () => {
                 {/* Step 1: Blind Physical Cash Count */}
                         {closingStep === 1 && (
                             <div className="space-y-6">
-                                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 rounded-2xl flex items-start gap-3">
-                                    <EyeOff className="text-emerald-700 dark:text-emerald-400 mt-0.5 shrink-0" size={20} />
+                                <div className="p-4 bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] rounded-2xl flex items-start gap-3">
+                                    <EyeOff className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-0.5 shrink-0" size={20} />
                                     <div className="space-y-0.5">
-                                        <p className="text-xs font-bold text-emerald-900 dark:text-emerald-300">
+                                        <p className="text-xs font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">
                                             {t('pos.blindDrawerProtocol')}
                                         </p>
-                                        <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed font-medium">
+                                        <p className="text-xs text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] leading-relaxed font-medium">
                                             {t('pos.blindDrawerInstruction')}
                                         </p>
                                     </div>
@@ -168,7 +168,7 @@ export const ShiftClosingModal: React.FC = () => {
                                             <ShieldAlert size={14} className="text-[var(--theme-primary)]" />
                                             {t('pos.zeroTrustCompliance')}
                                         </span>
-                                        <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-xs">
+                                        <span className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] font-bold uppercase tracking-wider text-xs">
                                             {t('pos.directHqDispatch')}
                                         </span>
                                     </div>
