@@ -94,7 +94,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     <span className="text-xs font-black uppercase tracking-wider">Enterprise Matrix</span>
                 </div>
 
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-[var(--theme-bg-app)] dark:bg-[#1E2822] text-xs font-semibold text-stone-700 dark:text-stone-300">
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs font-semibold text-[var(--theme-text-primary)]">
                     <Users size={13} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                     <span>{totalCount} Personnel</span>
                 </div>
@@ -211,7 +211,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     <button
                         type="button"
                         onClick={onPrint}
-                        className="p-1.5 rounded-xl border border-stone-200 dark:border-[#2C4D35] hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-xl border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
                         title="Print Organizational Matrix"
                     >
                         <Printer size={15} />

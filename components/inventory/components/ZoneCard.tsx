@@ -1,6 +1,6 @@
 import React from 'react';
-import { 
-    Thermometer, Shield, Box, Settings2, Trash2, 
+import {
+    Thermometer, Shield, Box, Settings2, Trash2,
     Lock, ShieldAlert
 } from 'lucide-react';
 import { WarehouseZone, Product } from '../../../types';
@@ -30,10 +30,10 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
     const isLockedState = zone.isLocked;
 
     return (
-        <div 
+        <div
             className={`p-5 sm:p-6 relative overflow-hidden group border transition-all duration-200 rounded-2xl shadow-xs ${
-                isLockedState 
-                    ? 'border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger)]/5 hover:border-[var(--theme-status-danger-border)]' 
+                isLockedState
+                    ? 'border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger)]/5 hover:border-[var(--theme-status-danger-border)]'
                     : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 hover:shadow-sm'
             }`}
         >
@@ -42,10 +42,10 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                     <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${
                         isLockedState
                             ? 'bg-[var(--theme-status-danger)]/10 text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
-                            : zone.type === 'Cold' 
-                                ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20' 
-                                : zone.type === 'Secure' 
-                                    ? 'bg-[var(--theme-chart-4)]/10 text-[var(--theme-chart-4)] border-[var(--theme-chart-4)]/20' 
+                            : zone.type === 'Cold'
+                                ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20'
+                                : zone.type === 'Secure'
+                                    ? 'bg-[var(--theme-chart-4)]/10 text-[var(--theme-chart-4)] border-[var(--theme-chart-4)]/20'
                                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                     }`}>
                         {isLockedState ? <Lock size={20} /> : zone.type === 'Cold' ? <Thermometer size={20} /> : zone.type === 'Secure' ? <Shield size={20} /> : <Box size={20} />}
