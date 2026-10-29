@@ -6,6 +6,7 @@ import { Product } from '../types';
 import { productsService, barcodeApprovalsService } from '../services/supabase.service';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { logger } from '../utils/logger';
 import { compressImage } from '../utils/imageCompression';
 import { validateBarcodeFormat } from '../utils/barcodeValidation';
@@ -38,6 +39,7 @@ export default function UnknownBarcodeModal({
     const searchInputRef = useRef<HTMLInputElement>(null);
     const { user, showToast } = useStore();
     const { settings, updateProduct, addNotification, sites, activeSite, employees } = useData();
+    const { t } = useLanguage();
 
     const [isCompressing, setIsCompressing] = useState(false);
     const [captureMode, setCaptureMode] = useState<'idle' | 'camera'>('idle');
@@ -254,26 +256,26 @@ export default function UnknownBarcodeModal({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Unknown Barcode Mapping" size="md">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('pos.unknownBarcodeMapping')} size="md">
             <div className="space-y-6">
-                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 p-4 rounded-2xl">
+                <div className="bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] p-4 rounded-2xl">
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                            <AlertTriangle className="text-amber-600 dark:text-amber-400 shrink-0" size={20} />
-                            <h3 className="font-bold text-[#1E3F27] dark:text-[#EAE5D9] text-sm">Unrecognized Barcode</h3>
+                            <AlertTriangle className="text-[var(--theme-status-warning)] shrink-0" size={20} />
+                            <h3 className="font-bold text-[var(--theme-text-primary)] text-sm">{t('pos.unrecognizedBarcode')}</h3>
                         </div>
-                        <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded border border-amber-500/20">
+                        <span className="text-[10px] font-mono font-bold bg-[var(--theme-bg-card)] text-[var(--theme-status-warning-text)] px-2 py-0.5 rounded border border-[var(--theme-status-warning-border)]">
                             {barcodeValidation.format}
                         </span>
                     </div>
 
-                    <div className="bg-white dark:bg-black/30 border border-amber-200 dark:border-amber-900/30 rounded-xl p-3 text-center shadow-inner">
-                        <p className="text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-0.5 font-bold">Scanned Barcode</p>
-                        <p className="text-2xl text-amber-700 dark:text-amber-300 font-mono font-black tracking-wider">{barcode || 'N/A'}</p>
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] rounded-xl p-3 text-center shadow-2xs">
+                        <p className="text-[10px] uppercase tracking-wider text-[var(--theme-status-warning)] mb-0.5 font-bold">{t('pos.scannedBarcode')}</p>
+                        <p className="text-2xl text-[var(--theme-text-primary)] font-mono font-bold tracking-wider">{barcode || 'N/A'}</p>
                     </div>
 
                     {!barcodeValidation.isValid && barcodeValidation.error && (
-                        <div className="mt-2 text-[11px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                        <div className="mt-2 text-[11px] font-bold text-[var(--theme-status-danger-text)] flex items-center gap-1">
                             <ShieldAlert size={14} /> {barcodeValidation.error}
                         </div>
                     )}
@@ -282,11 +284,11 @@ export default function UnknownBarcodeModal({
                 {step === 'evidence' && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
                         <div className="space-y-1">
-                            <h4 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-widest flex items-center gap-2">
-                                <ShieldCheck size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                            <h4 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
+                                <ShieldCheck size={16} className="text-[var(--theme-accent)]" />
                                 Live Security Photo Capture (Mandatory)
                             </h4>
-                            <p className="text-[#4D6E56] dark:text-gray-400 text-xs leading-relaxed">
+                            <p className="text-[var(--theme-text-secondary)] text-xs leading-relaxed">
                                 Point the camera at the product label. An immutable audit seal with your user ID and timestamp will be burned into the evidence.
                             </p>
                         </div>
@@ -299,14 +301,14 @@ export default function UnknownBarcodeModal({
                                         setCaptureMode('camera');
                                         startCamera();
                                     }}
-                                    className="w-full flex flex-col items-center justify-center gap-4 p-8 rounded-3xl bg-white dark:bg-black/25 border-2 border-dashed border-[#2C5E3B]/40 hover:bg-[#2C5E3B]/5 transition-all shadow-sm cursor-pointer"
+                                    className="w-full flex flex-col items-center justify-center gap-4 p-8 rounded-3xl bg-[var(--theme-bg-subtle)] border-2 border-dashed border-[var(--theme-border-strong)] hover:bg-[var(--theme-bg-card)] transition-all shadow-sm cursor-pointer"
                                 >
-                                    <div className="w-16 h-16 rounded-2xl bg-[#2C5E3B]/10 flex items-center justify-center">
-                                        <Camera size={32} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                    <div className="w-16 h-16 rounded-2xl bg-[var(--theme-accent-muted)] flex items-center justify-center">
+                                        <Camera size={32} className="text-[var(--theme-accent)]" />
                                     </div>
                                     <div className="text-center">
-                                        <span className="block text-sm font-black text-[#1E3F27] dark:text-white uppercase tracking-wider mb-1">Open Live Camera Viewfinder</span>
-                                        <span className="block text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase opacity-80">Live Hardware Capture Only</span>
+                                        <span className="block text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider mb-1">Open Live Camera Viewfinder</span>
+                                        <span className="block text-[10px] text-[var(--theme-accent)] font-bold uppercase opacity-80">Live Hardware Capture Only</span>
                                     </div>
                                 </button>
                             </div>
@@ -325,9 +327,9 @@ export default function UnknownBarcodeModal({
 
                                 <div className="absolute inset-0 flex flex-col justify-between p-4 pointer-events-none">
                                     <div className="flex justify-between items-start">
-                                        <div className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full border border-[#2C5E3B]/30 flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse" />
-                                            <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest">Live Audit Camera</span>
+                                        <div className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full border border-[var(--theme-border)] flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-[var(--theme-accent)] animate-pulse" />
+                                            <span className="text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-widest">Live Audit Camera</span>
                                         </div>
                                         <button
                                             type="button"
@@ -349,7 +351,7 @@ export default function UnknownBarcodeModal({
                                             aria-label="Capture Photo"
                                             className="group w-16 h-16 rounded-full border-4 border-white flex items-center justify-center p-1 pointer-events-auto hover:scale-110 transition-transform active:scale-95 cursor-pointer shadow-lg"
                                         >
-                                            <div className="w-full h-full rounded-full bg-white group-hover:bg-[#2C5E3B] dark:group-hover:bg-[#A9CBA2] transition-colors" />
+                                            <div className="w-full h-full rounded-full bg-white group-hover:bg-[var(--theme-accent)] transition-colors" />
                                         </button>
                                     </div>
                                 </div>
@@ -357,11 +359,11 @@ export default function UnknownBarcodeModal({
                         )}
 
                         {imagePreview && (
-                            <div className="relative rounded-3xl overflow-hidden bg-black/40 border border-[#E2DCCE] dark:border-white/10 aspect-video flex items-center justify-center group">
+                            <div className="relative rounded-3xl overflow-hidden bg-black/40 border border-[var(--theme-border)] aspect-video flex items-center justify-center group">
                                 {isCompressing ? (
                                     <div className="flex flex-col items-center gap-4">
-                                        <div className="w-12 h-12 border-4 border-[#2C5E3B] border-t-transparent rounded-full animate-spin" />
-                                        <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-[10px] uppercase tracking-[0.2em] animate-pulse">BURNING AUDIT SEAL...</span>
+                                        <div className="w-12 h-12 border-4 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin" />
+                                        <span className="text-[var(--theme-accent)] font-bold text-[10px] uppercase tracking-[0.2em] animate-pulse">BURNING AUDIT SEAL...</span>
                                     </div>
                                 ) : (
                                     <>
@@ -386,15 +388,15 @@ export default function UnknownBarcodeModal({
                             </div>
                         )}
 
-                        <div className="flex items-center justify-between pt-4 border-t border-[#E2DCCE] dark:border-white/5">
-                            <span className="text-[10px] font-black text-stone-600 dark:text-gray-400 uppercase tracking-widest">
-                                {imageFile ? '✓ Live Proof Attached' : 'Capture Required'}
+                        <div className="flex items-center justify-between pt-4 border-t border-[var(--theme-border-subtle)]">
+                            <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest">
+                                {imageFile ? 'Live Proof Attached' : 'Capture Required'}
                             </span>
                             <button
                                 type="button"
                                 onClick={() => setStep('search')}
                                 disabled={!imageFile || isCompressing || captureMode === 'camera'}
-                                className="group px-6 py-3 bg-gradient-to-br from-[#224429] to-[#2C5E3B] hover:opacity-90 text-white font-black rounded-2xl disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed transition-all flex items-center gap-3 text-xs uppercase tracking-[0.2em] shadow-md disabled:shadow-none cursor-pointer"
+                                className="group px-6 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2 text-xs uppercase tracking-wider shadow-sm cursor-pointer"
                             >
                                 Continue To Mapping
                                 <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />

@@ -58,102 +58,102 @@ export const POSDepartments: React.FC = () => {
             <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mr-1">{t('pos.activeLabel')}</span>
             
             {selectedDepartment !== 'All' && (
-                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                         <Layers size={10} />
                     </span>
                     <span>{t('pos.deptLabel')} <strong className="font-semibold">{selectedDepartment}</strong></span>
-                    <button onClick={() => setSelectedDepartment('All')} title={`${t('common.remove')} ${t('pos.deptLabel')}`} aria-label={`${t('common.remove')} ${t('pos.deptLabel')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setSelectedDepartment('All')} title={`${t('common.remove')} ${t('pos.deptLabel')}`} aria-label={`${t('common.remove')} ${t('pos.deptLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
             
             {selectedCategory !== 'All' && (
-                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
                         <Folder size={10} />
                     </span>
                     <span>{t('pos.catLabel')} <strong className="font-semibold">{selectedCategory}</strong></span>
-                    <button onClick={() => setSelectedCategory('All')} title={`${t('common.remove')} ${t('pos.catLabel')}`} aria-label={`${t('common.remove')} ${t('pos.catLabel')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setSelectedCategory('All')} title={`${t('common.remove')} ${t('pos.catLabel')}`} aria-label={`${t('common.remove')} ${t('pos.catLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
             
             {minPriceFilter !== '' && (
-                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                         <Coins size={10} />
                     </span>
                     <span>{t('pos.minPrice')}: <strong className="font-semibold font-mono">{CURRENCY_SYMBOL} {minPriceFilter}</strong></span>
-                    <button onClick={() => setMinPriceFilter('')} title={`${t('common.remove')} ${t('pos.minPrice')}`} aria-label={`${t('common.remove')} ${t('pos.minPrice')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setMinPriceFilter('')} title={`${t('common.remove')} ${t('pos.minPrice')}`} aria-label={`${t('common.remove')} ${t('pos.minPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
             {maxPriceFilter !== '' && (
-                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                         <Coins size={10} />
                     </span>
                     <span>{t('pos.maxPrice')}: <strong className="font-semibold font-mono">{CURRENCY_SYMBOL} {maxPriceFilter}</strong></span>
-                    <button onClick={() => setMaxPriceFilter('')} title={`${t('common.remove')} ${t('pos.maxPrice')}`} aria-label={`${t('common.remove')} ${t('pos.maxPrice')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setMaxPriceFilter('')} title={`${t('common.remove')} ${t('pos.maxPrice')}`} aria-label={`${t('common.remove')} ${t('pos.maxPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
             {selectedBrands.map(brand => (
-                <span key={brand} className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                <span key={brand} className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
                         <Sparkles size={10} />
                     </span>
                     <span>{t('pos.brandLabel')} <strong className="font-semibold">{brand}</strong></span>
-                    <button onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))} title={`${t('common.remove')} ${brand}`} aria-label={`${t('common.remove')} ${brand}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))} title={`${t('common.remove')} ${brand}`} aria-label={`${t('common.remove')} ${brand}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             ))}
 
             {selectedVelocities.map(vel => (
-                <span key={vel} className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                <span key={vel} className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                         <Zap size={10} />
                     </span>
                     <span>{t('pos.velocityLabel')} <strong className="font-semibold">{vel}</strong></span>
-                    <button onClick={() => setSelectedVelocities(prev => prev.filter(v => v !== vel))} title={`${t('common.remove')} ${vel}`} aria-label={`${t('common.remove')} ${vel}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setSelectedVelocities(prev => prev.filter(v => v !== vel))} title={`${t('common.remove')} ${vel}`} aria-label={`${t('common.remove')} ${vel}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             ))}
 
             {stockStatusFilter !== 'all' && (
-                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0">
                         <Package size={10} />
                     </span>
                     <span>{t('pos.stockLabel')} <strong className="font-semibold">{stockStatusFilter === 'in_stock' ? t('pos.inStockOnly') : stockStatusFilter === 'low_stock' ? t('pos.lowStockAlertsOnly') : t('pos.outOfStockOnly')}</strong></span>
-                    <button onClick={() => setStockStatusFilter('all')} title={`${t('common.remove')} ${t('pos.stockLabel')}`} aria-label={`${t('common.remove')} ${t('pos.stockLabel')}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setStockStatusFilter('all')} title={`${t('common.remove')} ${t('pos.stockLabel')}`} aria-label={`${t('common.remove')} ${t('pos.stockLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
             {onSaleOnly && (
-                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-500 border border-rose-500/20 shadow-xs">
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-500 border border-rose-500/20 shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center shrink-0">
                         <Tag size={10} />
                     </span>
                     <strong className="font-semibold">{t('pos.onSale')}</strong>
-                    <button onClick={() => setOnSaleOnly(false)} title={`${t('common.remove')} ${t('pos.onSale')}`} aria-label={`${t('common.remove')} ${t('pos.onSale')}`} className="hover:bg-rose-500/25 hover:text-rose-600 text-rose-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setOnSaleOnly(false)} title={`${t('common.remove')} ${t('pos.onSale')}`} aria-label={`${t('common.remove')} ${t('pos.onSale')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-rose-500/25 hover:text-rose-600 text-rose-500 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
             {competitorMatchedOnly && (
-                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-violet-500/10 text-violet-500 border border-violet-500/20 shadow-xs">
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-violet-500/10 text-violet-500 border border-violet-500/20 shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-violet-500/20 text-violet-500 flex items-center justify-center shrink-0">
                         <Scale size={10} />
                     </span>
                     <strong className="font-semibold">{t('pos.compPrice')}</strong>
-                    <button onClick={() => setCompetitorMatchedOnly(false)} title={`${t('common.remove')} ${t('pos.compPrice')}`} aria-label={`${t('common.remove')} ${t('pos.compPrice')}`} className="hover:bg-violet-500/25 hover:text-violet-600 text-violet-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setCompetitorMatchedOnly(false)} title={`${t('common.remove')} ${t('pos.compPrice')}`} aria-label={`${t('common.remove')} ${t('pos.compPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-violet-500/25 hover:text-violet-600 text-violet-500 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 
             {sortBy !== 'default' && (
-                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-sky-500/10 text-sky-500 border border-sky-500/20 shadow-xs">
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-sky-500/10 text-sky-500 border border-sky-500/20 shadow-xs">
                     <span className="w-4 h-4 rounded-full bg-sky-500/20 text-sky-500 flex items-center justify-center shrink-0">
                         <SlidersHorizontal size={10} />
                     </span>
                     <span>{t('pos.sortLabel')} <strong className="font-semibold">{sortBy === 'price-asc' ? t('pos.sortPriceAsc') : sortBy === 'price-desc' ? t('pos.sortPriceDesc') : sortBy === 'name-asc' ? t('pos.sortNameAsc') : sortBy}</strong></span>
-                    <button onClick={() => setSortBy('default')} title={`${t('common.remove')} ${t('pos.sortLabel')}`} aria-label={`${t('common.remove')} ${t('pos.sortLabel')}`} className="hover:bg-sky-500/25 hover:text-sky-600 text-sky-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
+                    <button type="button" onClick={() => setSortBy('default')} title={`${t('common.remove')} ${t('pos.sortLabel')}`} aria-label={`${t('common.remove')} ${t('pos.sortLabel')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-sky-500/25 hover:text-sky-600 text-sky-500 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 

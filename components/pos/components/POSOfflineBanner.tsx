@@ -16,25 +16,25 @@ export const POSOfflineBanner: React.FC = () => {
     return (
         <div className={`w-full px-4 py-2 text-xs font-semibold flex items-center justify-between transition-all duration-300 ${
             posSyncStatus === 'syncing'
-                ? 'bg-blue-500/15 border-b border-blue-500/30 text-blue-700 dark:text-blue-300'
+                ? 'bg-[var(--theme-status-info-bg)] border-b border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)]'
                 : isOffline
-                ? 'bg-amber-500/15 border-b border-amber-500/30 text-amber-800 dark:text-amber-300'
-                : 'bg-emerald-500/15 border-b border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+                ? 'bg-[var(--theme-status-warning-bg)] border-b border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]'
+                : 'bg-[var(--theme-status-success-bg)] border-b border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]'
         }`}>
             <div className="flex items-center gap-2.5">
                 {posSyncStatus === 'syncing' ? (
-                    <RefreshCw size={15} className="animate-spin text-blue-600 dark:text-blue-400" />
+                    <RefreshCw size={15} className="animate-spin text-[var(--theme-status-info)]" />
                 ) : isOffline ? (
                     <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--theme-status-warning)] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--theme-status-warning)]"></span>
                     </span>
                 ) : (
-                    <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400" />
+                    <CheckCircle2 size={15} className="text-[var(--theme-status-success)]" />
                 )}
 
                 <div className="flex items-center gap-2">
-                    <span className="font-bold uppercase tracking-wider text-xs px-2 py-0.5 rounded-md bg-black/10 dark:bg-white/10">
+                    <span className="font-bold uppercase tracking-wider text-xs px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border-subtle)] text-[var(--theme-text-primary)]">
                         {posSyncStatus === 'syncing' ? t('pos.syncInProgress') : isOffline ? t('pos.offlineTerminal') : t('pos.readyToSync')}
                     </span>
                     <span>
@@ -49,7 +49,7 @@ export const POSOfflineBanner: React.FC = () => {
 
             <div className="flex items-center gap-3">
                 {hasPending && (
-                    <span className="text-xs font-mono bg-black/10 dark:bg-white/10 px-2.5 py-0.5 rounded-full font-bold">
+                    <span className="text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border-subtle)] text-[var(--theme-text-primary)] px-2.5 py-0.5 rounded-full font-bold">
                         {posPendingSyncCount} {t('pos.queued')}
                     </span>
                 )}
@@ -57,7 +57,7 @@ export const POSOfflineBanner: React.FC = () => {
                     <button
                         onClick={() => triggerSync && triggerSync()}
                         disabled={posSyncStatus === 'syncing'}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-[var(--theme-primary)] hover:opacity-90 active:scale-95 text-[var(--theme-primary-text)] text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                     >
                         <RefreshCw size={13} className={posSyncStatus === 'syncing' ? 'animate-spin' : ''} />
                         {t('pos.syncNow')}

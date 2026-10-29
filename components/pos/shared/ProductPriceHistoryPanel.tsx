@@ -30,7 +30,7 @@ export function ProductPriceHistoryPanel({ history }: { history: POSPriceHistory
   const buttonClass = 'min-h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)] text-sm font-medium disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]';
   return <div className="space-y-4">
     <p className="text-sm text-[var(--theme-text-secondary)]">{t('pos.fullHistoryForStore')}</p>
-    {!history.error && !history.isLoading && <p className="text-sm text-[var(--theme-status-info-text)]">{t('pos.unreviewedInLast7Days', { count: history.unreviewedCount })}</p>}
+    {!history.error && !history.isLoading && <p className="text-sm text-[var(--theme-status-info-text)]">{t('pos.unreviewedUntilAcknowledged', { count: history.unreviewedCount })}</p>}
     {history.error && <div role="alert" className="flex items-center justify-between gap-3 rounded-2xl p-3 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)]">
       <span>{t('pos.priceHistoryUnavailable')}</span>
       <button type="button" onClick={history.retry} aria-label={t('pos.retryPriceHistory')} className={buttonClass}><RefreshCw size={17} aria-hidden="true" /></button>

@@ -39,19 +39,31 @@ export const RecallOrderModal: React.FC = () => {
 
             {/* Overwrite Cart Confirmation Modal */}
             <Modal isOpen={isOverwriteCartModalOpen} onClose={() => setIsOverwriteCartModalOpen(false)} title={t('pos.overwriteCartTitle')} size="sm">
-                <div className="p-6">
-                    <div className="flex items-center gap-4 mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                        <div className="p-3 bg-amber-500/20 rounded-full shrink-0">
-                            <AlertTriangle className="w-8 h-8 text-amber-600 dark:text-amber-500" />
+                <div className="space-y-4">
+                    <div className="flex items-center gap-3.5 p-4 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl">
+                        <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl text-[var(--theme-status-warning)] shrink-0 shadow-2xs">
+                            <AlertTriangle className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-[var(--theme-text-primary)]">{t('pos.cartNotEmpty')}</h3>
-                            <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">{t('pos.cartOverwriteWarning')}</p>
+                            <h3 className="text-sm font-bold text-[var(--theme-text-primary)]">{t('pos.cartNotEmpty')}</h3>
+                            <p className="text-[var(--theme-status-warning-text)] text-xs font-medium mt-0.5 leading-snug">{t('pos.cartOverwriteWarning')}</p>
                         </div>
                     </div>
-                    <div className="flex justify-end gap-3">
-                        <button onClick={() => setIsOverwriteCartModalOpen(false)} className="px-4 py-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-sm">{t('common.cancel')}</button>
-                        <button onClick={handleConfirmOverwriteCart} className="px-6 py-2 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-bold rounded-xl shadow-xs transition-transform active:scale-[0.98]">{t('pos.overwrite')}</button>
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={() => setIsOverwriteCartModalOpen(false)}
+                            className="min-h-11 px-4 py-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-xl font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        >
+                            {t('common.cancel')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleConfirmOverwriteCart}
+                            className="min-h-11 px-6 py-2 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-bold rounded-xl shadow-xs transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                        >
+                            {t('pos.overwrite')}
+                        </button>
                     </div>
                 </div>
             </Modal>

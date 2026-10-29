@@ -28,4 +28,13 @@ describe('site-scoped POS catalog activity', () => {
  it('orders newest activity first with a stable identity tie-break', () => {
   expect(getPOSCatalogUpdates([sample({id:'b'}),sample({id:'a'}),sample({id:'c',created_at:'2026-10-29T11:00:00Z'})], 'store-1', 'ET', now).map(row=>row.product.id)).toEqual(['c','a','b']);
  });
+ it('expires new notices at seven days and other notices at three days',()=>{
+  const rows=[sample({id:'new6',created_at:'2026-10-23T12:00:00Z'}),sample({id:'other2',created_at:undefined,updated_at:'2026-10-27T12:00:00Z'}),sample({id:'other3',created_at:undefined,updated_at:'2026-10-26T12:00:00Z'})];
+  expect(getPOSCatalogUpdates(rows,'store-1','ET',now).map(row=>row.product.id)).toEqual(['other2','new6']);
+ });
+ it('records a later generic revision even when the product is still recently added',()=>{
+  const row=getPOSCatalogUpdates([sample({updated_at:'2026-10-29T11:00:00Z'})],'store-1','ET',now)[0];
+  expect(row.kinds).toEqual(['new','updated']);expect(row.observations.updated).toBe(Date.parse('2026-10-29T11:00:00Z'));
+ });
+
 });

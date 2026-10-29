@@ -138,30 +138,30 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
             title={isPinStep ? t('pos.supervisorDualSignOff') : t('pos.safeCashDropTitle')}
             size="md"
         >
-            <div className="p-4 sm:p-6 space-y-6">
+            <div className="space-y-5">
                 {!isPinStep ? (
-                    <form onSubmit={handleProceedToAuth} className="space-y-5">
+                    <form onSubmit={handleProceedToAuth} className="space-y-4">
                         {/* Till Telemetry Banner */}
                         <div className={`p-4 rounded-2xl border flex items-start gap-3 ${
                             isOverThreshold 
-                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-300' 
+                                ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]' 
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'
                         }`}>
-                            <ArrowDownCircle size={22} className={isOverThreshold ? 'text-amber-600 dark:text-amber-400 mt-0.5' : 'text-[var(--theme-text-primary)] mt-0.5'} />
-                            <div className="space-y-1">
+                            <ArrowDownCircle size={20} className={isOverThreshold ? 'text-[var(--theme-status-warning)] mt-0.5' : 'text-[var(--theme-text-primary)] mt-0.5'} />
+                            <div className="space-y-1 w-full">
                                 <div className="flex items-center justify-between">
-                                    <h4 className="text-xs font-black uppercase tracking-wider">Drawer Cash Status</h4>
+                                    <h4 className="text-xs font-bold uppercase tracking-wider">{t('pos.drawerCashStatus')}</h4>
                                     <span className="text-xs font-mono font-bold tabular-nums">
-                                        Limit: {policy.currency} {policy.maximum_threshold.toLocaleString()}
+                                        {t('pos.limitLabel', { amount: `${policy.currency} ${policy.maximum_threshold.toLocaleString()}` })}
                                     </span>
                                 </div>
-                                <p className="text-sm font-mono font-black text-[var(--theme-text-primary)] tabular-nums">
-                                    Current Till Cash: {policy.currency} {shiftTelemetry.cashOnHand.toLocaleString()}
+                                <p className="text-sm font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
+                                    {t('pos.currentTillCash', { amount: `${policy.currency} ${shiftTelemetry.cashOnHand.toLocaleString()}` })}
                                 </p>
                                 {isOverThreshold && (
-                                    <p className="text-xs text-amber-800 dark:text-amber-300 font-medium leading-tight inline-flex items-center gap-1.5">
-                                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                                        <span>Safety Limit Exceeded! Company policy requires excess cash to be skimmed to the drop safe immediately.</span>
+                                    <p className="text-xs text-[var(--theme-status-warning-text)] font-medium leading-tight inline-flex items-center gap-1.5 mt-0.5">
+                                        <AlertTriangle className="w-3.5 h-3.5 text-[var(--theme-status-warning)] shrink-0" />
+                                        <span>{t('pos.safetyLimitExceeded')}</span>
                                     </p>
                                 )}
                             </div>

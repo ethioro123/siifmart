@@ -62,10 +62,10 @@ export const productPriceHistoryService = {
         return rows.map(row => ({ ...row, reviewed_by_me: reviewedIds.has(row.id) })) as ProductPriceHistoryEntry[];
     },
 
-    async countUnreviewed(siteId: string, since: string): Promise<number> {
+    async countUnreviewed(siteId: string): Promise<number> {
         const { data, error } = await supabase.rpc('count_unreviewed_product_price_history', {
             p_site_id: siteId,
-            p_since: since
+            p_since: null
         });
 
         if (error) {

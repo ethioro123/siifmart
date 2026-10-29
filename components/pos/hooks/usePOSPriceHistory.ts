@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ProductPriceHistoryEntry, productPriceHistoryService } from '../../../services/product-price-history.service';
 
 const PAGE_SIZE = 50;
-const REVIEW_COUNT_WINDOW_DAYS = 7;
 
 export function usePOSPriceHistory(siteId: string | undefined, reviewerId: string | undefined, refreshKey: string) {
     const [entries, setEntries] = useState<ProductPriceHistoryEntry[]>([]);
@@ -32,11 +31,10 @@ export function usePOSPriceHistory(siteId: string | undefined, reviewerId: strin
 
         setIsLoading(true);
         setError(null);
-        const since = new Date(Date.now() - REVIEW_COUNT_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
         try {
             const [page, count] = await Promise.all([
                 productPriceHistoryService.listBySite(siteId, 0, PAGE_SIZE),
-                productPriceHistoryService.countUnreviewed(siteId, since)
+                productPriceHistoryService.countUnreviewed(siteId)
             ]);
             if (!isCurrent()) return;
             setEntries(page);
@@ -88,9 +86,8 @@ export function usePOSPriceHistory(siteId: string | undefined, reviewerId: strin
         if (identityRef.current.siteId !== siteId || identityRef.current.reviewerId !== reviewerId) return;
         setEntries(previous => previous.map(entry => historyIds.includes(entry.id) ? { ...entry, reviewed_by_me: true } : entry));
         if (siteId) {
-            const since = new Date(Date.now() - REVIEW_COUNT_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
             try {
-                const count = await productPriceHistoryService.countUnreviewed(siteId, since);
+                const count = await productPriceHistoryService.countUnreviewed(siteId);
                 if (identityRef.current.siteId === siteId && identityRef.current.reviewerId === reviewerId) {
                     setUnreviewedCount(count);
                 }

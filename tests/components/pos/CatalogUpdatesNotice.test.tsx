@@ -7,6 +7,7 @@ import { posCommand } from '../../../utils/translations/posCommand';
 import type { POSPriceHistoryState } from '../../../components/pos/shared/ProductPriceHistoryPanel';
 import type { ProductPriceHistoryEntry } from '../../../services/product-price-history.service';
 const state = vi.hoisted(() => ({ products: [] as Array<Record<string,unknown>>, site:{id:'store-1',country:'ET',name:'Central Store'},user:{id:'reviewer'},notify:vi.fn() }));
+vi.mock('../../../hooks/usePOSCatalogReads',()=>({usePOSCatalogReads:()=>({reads:[],unreadCount:state.products.length,isLoading:false,error:null,saving:false,retry:vi.fn(),markPageRead:vi.fn()}),unreadCatalogProducts:(updates:unknown[])=>updates.length}));
 vi.mock('../../../contexts/DataContext',()=>({useData:()=>({products:state.products,activeSite:state.site,addNotification:state.notify})}));
 vi.mock('../../../contexts/CentralStore',()=>({useStore:()=>({user:state.user})}));
 vi.mock('../../../contexts/LanguageContext',()=>({useLanguage:()=>({t:(key:string,params:Record<string,unknown>={})=>{
@@ -23,7 +24,7 @@ describe('unified POS product update review',()=>{
  it.each(['pos','posCommand'] as const)('opens catalog and full price history in one dialog from %s', namespace=>{
   render(<CatalogUpdatesNotice namespace={namespace} history={historyState()}/>);
   expect(screen.getAllByRole('button')).toHaveLength(1);
-  fireEvent.click(screen.getByRole('button',{name:'Product updates · Recent products · 1'}));
+  fireEvent.click(screen.getByRole('button',{name:'Product updates · Unread product updates · 1'}));
   expect(screen.getByText('Coffee')).toBeTruthy();expect(screen.getByText('ETB 125')).toBeTruthy();
   expect(screen.getByText(/Central Store/)).toBeTruthy();
   fireEvent.click(screen.getByRole('button',{name:'Price history'}));
@@ -31,20 +32,20 @@ describe('unified POS product update review',()=>{
  });
  it('keeps older price history accessible with no recent catalog activity',()=>{
   state.products=[];render(<CatalogUpdatesNotice namespace="pos" history={historyState({entries:[entry()]})}/>);
-  fireEvent.click(screen.getByRole('button',{name:'Product updates · Recent products · 0'}));
+  fireEvent.click(screen.getByRole('button',{name:'Product updates · Unread product updates · 0'}));
   fireEvent.click(screen.getByRole('button',{name:'Price history'}));expect(screen.getByText('Coffee')).toBeTruthy();
  });
  it('closes review when the identity changes',()=>{
   const history=historyState();const view=render(<CatalogUpdatesNotice namespace="pos" history={history}/>);
-  fireEvent.click(screen.getByRole('button',{name:'Product updates · Recent products · 1'}));
+  fireEvent.click(screen.getByRole('button',{name:'Product updates · Unread product updates · 1'}));
   state.user={id:'another'};view.rerender(<CatalogUpdatesNotice namespace="pos" history={history}/>);expect(screen.queryByText('Coffee')).toBeNull();
  });
  it('paginates catalog evidence and synchronizes active languages',()=>{
   state.products=Array.from({length:30},(_,i)=>({id:String(i),siteId:'store-1',name:'Coffee '+i,sku:'ET-'+i,createdAt:new Date().toISOString()}));
-  render(<CatalogUpdatesNotice namespace="pos" history={historyState()}/>);fireEvent.click(screen.getByRole('button',{name:'Product updates · Recent products · 30'}));
+  render(<CatalogUpdatesNotice namespace="pos" history={historyState()}/>);fireEvent.click(screen.getByRole('button',{name:'Product updates · Unread product updates · 30'}));
   expect(screen.getAllByRole('listitem')).toHaveLength(25);fireEvent.click(screen.getByRole('button',{name:'Next'}));expect(screen.getAllByRole('listitem')).toHaveLength(5);
-  for(const key of ['catalogUpdates','catalogUpdatesCount','catalogWindow','catalogScopeNote','catalogUpdateFilters','catalogAll','catalogNew','catalogPrice','catalogOther','catalogEmpty','catalogPrevious','catalogNext','catalogPage','catalogCurrentPrice','updatesPriceHistory','updatesPriceReviews','updatesRecentProducts','updatesCheckingPrices','updatesPriceUnavailable'])for(const language of ['en','am','or'] as const){expect(pos[key][language]).toBeTruthy();expect(posCommand[key][language]).toBeTruthy();}
-  for(const key of ['priceReviewsSaved','priceReviewsFailed','retryPriceHistory','priceActorUnknown'])for(const language of ['en','am','or'] as const)expect(pos[key][language]).toBeTruthy();
+  for(const key of ['catalogUpdates','catalogUpdatesCount','catalogWindow','catalogScopeNote','catalogUpdateFilters','catalogAll','catalogNew','catalogPrice','catalogOther','catalogEmpty','catalogPrevious','catalogNext','catalogPage','catalogCurrentPrice','updatesPriceHistory','updatesPriceReviews','updatesRecentProducts','updatesCheckingPrices','updatesPriceUnavailable','catalogReadUnavailable','catalogReadLoading','catalogReadRetry','catalogReadSaving','catalogMarkPageRead','catalogReadFailed','catalogRead','catalogUnread'])for(const language of ['en','am','or'] as const){expect(pos[key][language]).toBeTruthy();expect(posCommand[key][language]).toBeTruthy();}
+  for(const key of ['priceReviewsSaved','priceReviewsFailed','retryPriceHistory','priceActorUnknown','unreviewedUntilAcknowledged'])for(const language of ['en','am','or'] as const)expect(pos[key][language]).toBeTruthy();
  });
  it.each(['pos','posCommand'] as const)('opens pending price review directly and saves exact history IDs from %s', async namespace=>{
   const history=historyState({entries:[entry()],unreviewedCount:1});

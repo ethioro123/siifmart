@@ -15,6 +15,8 @@ describe('shared POS price review persistence',()=>{
   await waitFor(()=>expect(result.current.entries).toHaveLength(1));
   await act(()=>result.current.markReviewed(['h1']));
   expect(service.markReviewed).toHaveBeenCalledWith(['h1'],'reviewer');
+  expect(service.countUnreviewed).toHaveBeenCalledWith('store-1');
+  expect(service.countUnreviewed.mock.calls.every(call=>call.length===1)).toBe(true);
   expect(result.current.entries[0].reviewed_by_me).toBe(true);expect(result.current.unreviewedCount).toBe(0);
  });
  it('exposes an unavailable count when the receipt saves but recount fails',async()=>{

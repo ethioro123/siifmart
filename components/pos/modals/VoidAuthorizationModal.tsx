@@ -95,15 +95,15 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
             title={t('pos.zeroTrustVoidTitle')}
             size="md"
         >
-            <div className="p-4 sm:p-6 space-y-5">
+            <div className="space-y-4">
                 {/* Warning Banner */}
-                <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-3">
-                    <ShieldAlert size={22} className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                <div className="p-4 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl flex items-start gap-3">
+                    <ShieldAlert size={20} className="text-[var(--theme-status-danger)] shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                        <h4 className="text-xs font-black text-rose-800 dark:text-rose-300 uppercase tracking-wider">
+                        <h4 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                             {t('pos.supervisoryApprovalRequired')}
                         </h4>
-                        <p className="text-xs font-medium text-rose-700 dark:text-rose-300 leading-relaxed">
+                        <p className="text-xs font-medium text-[var(--theme-status-danger-text)] leading-relaxed">
                             {t('pos.voidWarning', { count: itemsCount, amount: `${CURRENCY_SYMBOL} ${voidTotal.toLocaleString()}` })}
                         </p>
                     </div>
@@ -126,7 +126,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                 </div>
 
                 {pinError && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold text-center rounded-xl animate-shake">
+                    <div className="p-3 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-xs font-bold text-center rounded-xl animate-shake">
                         {pinError}
                     </div>
                 )}
@@ -137,11 +137,11 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                     <PinPad pin={supervisorPin} setPin={setSupervisorPin} onEnter={handleConfirmVoid} />
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 pt-2">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs transition-colors"
+                        className="min-h-11 flex-1 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         {t('common.cancel')}
                     </button>
@@ -149,7 +149,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                         type="button"
                         onClick={handleConfirmVoid}
                         disabled={supervisorPin.length < 4 || isSubmitting}
-                        className="flex-2 py-3 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all"
+                        className="min-h-11 flex-2 py-2.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] hover:opacity-90 disabled:opacity-40 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                     >
                         {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
                         {t('pos.authorizeAndVoid')}

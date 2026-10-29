@@ -1,7 +1,8 @@
 import type { Product } from '../types';
 export type CatalogUpdateKind = 'new' | 'price' | 'updated';
-export interface CatalogUpdate { product: Product; kinds: CatalogUpdateKind[]; timestamp: number }
+export interface CatalogUpdate { product: Product; kinds: CatalogUpdateKind[]; timestamp: number; observations: Partial<Record<CatalogUpdateKind, number>> }
 const WINDOW_MS = 7 * 86400000;
+const OTHER_WINDOW_MS = 3 * 86400000;
 type UpdateProduct = Product & { updatedAt?: string; updated_at?: string; countryCode?: string; country_code?: string };
 const timestamp = (value?: string) => value ? Date.parse(value) : NaN;
 /** Observed catalog timestamps, not an inferred event feed or an unread/approval count. */
@@ -19,12 +20,15 @@ export function getPOSCatalogUpdates(products: Product[], siteId: string | undef
     ];
     const recent = events.filter(([, time]) => Number.isFinite(time) && time > now - WINDOW_MS && time <= now);
     const generic = timestamp(product.updatedAt || product.updated_at);
-    if (!recent.length && Number.isFinite(generic) && generic > now - WINDOW_MS && generic <= now) recent.push(['updated', generic]);
+    const latestExplicit = Math.max(0, ...events.map(([, time]) => Number.isFinite(time) && time <= now ? time : 0));
+    if (Number.isFinite(generic) && generic > now - OTHER_WINDOW_MS && generic <= now && generic > latestExplicit) recent.push(['updated', generic]);
     if (!recent.length) continue;
     const existing = updates.get(product.id);
     const kinds = [...new Set([...(existing?.kinds || []), ...recent.map(([kind]) => kind)])];
     const latest = Math.max(...recent.map(([, time]) => time), existing?.timestamp || 0);
-    updates.set(product.id, { product, kinds, timestamp: latest });
+    const observations = { ...existing?.observations };
+    for (const [kind, time] of recent) observations[kind] = Math.max(observations[kind] || 0, time);
+    updates.set(product.id, { product, kinds, timestamp: latest, observations });
   }
   return [...updates.values()].sort((a, b) => b.timestamp - a.timestamp || a.product.id.localeCompare(b.product.id));
 }

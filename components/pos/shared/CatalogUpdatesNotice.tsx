@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { usePOSCatalogReads, unreadCatalogProducts } from '../../../hooks/usePOSCatalogReads';
 import { Bell, ArrowRight, PackagePlus, Tag, Package } from 'lucide-react';
 import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
@@ -24,22 +25,24 @@ export function CatalogUpdatesNotice({ namespace, history, isOpen, onOpenChange 
   useEffect(() => { setOpened(null); onOpenChange?.(false); setPage(0); setFilter('all'); setNow(Date.now()); }, [identity, onOpenChange]);
   useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(timer); }, []);
   const updates = getPOSCatalogUpdates(products, activeSite?.id, activeSite?.country, now);
+  const readState = usePOSCatalogReads(user?.id, activeSite?.id, activeSite?.country, updates);
   const selected = updates.filter(update => filter === 'all' || update.kinds.includes(filter));
   const lastPage = Math.max(0, Math.ceil(selected.length / 25) - 1);
   const currentPage = Math.min(page, lastPage);
   const tr = (key: string, params?: Record<string, string | number>) => t(`${namespace}.${key}`, params);
   if (!user?.id || !activeSite) return null;
-  const summary = history.error ? tr('updatesPriceUnavailable') : history.isLoading ? tr('updatesCheckingPrices') : history.unreviewedCount > 0 ? tr('updatesPriceReviews', { count: history.unreviewedCount }) : tr('updatesRecentProducts', { count: updates.length });
+  const summary = history.error ? tr('updatesPriceUnavailable') : history.isLoading ? tr('updatesCheckingPrices') : history.unreviewedCount > 0 ? tr('updatesPriceReviews', { count: history.unreviewedCount }) : readState.error ? tr('catalogReadUnavailable') : readState.isLoading ? tr('catalogReadLoading') : tr('updatesRecentProducts', { count: readState.unreadCount });
   return <>
     <button type="button" onClick={() => { setOpen(true); setFilter(history.unreviewedCount > 0 || history.error ? 'price' : 'all'); setPage(0); setNow(Date.now()); }}
       aria-label={`${tr('catalogUpdates')} · ${summary}`}
-      className="min-h-11 max-w-full inline-flex items-center gap-2 px-3 py-2 rounded-2xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-sm font-medium hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
+      className={`min-h-11 max-w-full inline-flex items-center gap-2 px-3 py-2 rounded-2xl text-sm font-medium hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${history.unreviewedCount > 0 || (!readState.isLoading && !readState.error && readState.unreadCount > 0) ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)]' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]'}`}>
       <Bell size={17} aria-hidden="true" /><span>{tr('catalogUpdates')}</span><span className="text-xs tabular-nums">{summary}</span><ArrowRight size={15} aria-hidden="true" />
     </button>
     <Modal isOpen={isOpen ?? (opened === identity)} onClose={() => setOpen(false)} title={tr('catalogUpdates')} size="lg">
       <div className="space-y-4">
         <p className="text-sm text-[var(--theme-text-secondary)]">{activeSite.name}{filter !== 'price' && <> · {tr('catalogWindow')}</>}</p>
         {filter !== 'price' && <p className="text-sm text-[var(--theme-text-secondary)]">{tr('catalogScopeNote')}</p>}
+        {readState.error && <div role="alert" className="flex flex-wrap items-center gap-2 text-sm text-[var(--theme-status-danger-text)]"><span>{tr(readState.error === 'save' ? 'catalogReadFailed' : 'catalogReadUnavailable')}</span><button type="button" onClick={readState.retry} className="min-h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)]">{tr('catalogReadRetry')}</button></div>}
         <div className="flex flex-wrap gap-2" role="group" aria-label={tr('catalogUpdateFilters')}>
           {(['all', 'new', 'updated', 'price'] as const).map(kind => {
             const count = kind === 'price' ? '' : kind === 'all' ? updates.length : updates.filter(update => update.kinds.includes(kind)).length;
@@ -54,8 +57,9 @@ export function CatalogUpdatesNotice({ namespace, history, isOpen, onOpenChange 
             <div className="flex flex-wrap justify-between gap-2"><div><h3 className="font-semibold text-[var(--theme-text-primary)] break-words">{update.product.name}</h3><p className="text-sm text-[var(--theme-text-secondary)]">{update.product.sku}</p></div>
               <time dateTime={new Date(update.timestamp).toISOString()} className="text-sm text-[var(--theme-text-secondary)]">{new Date(update.timestamp).toLocaleString()}</time></div>
             {typeof update.product.price === 'number' && Number.isFinite(update.product.price) && <p className="text-sm text-[var(--theme-text-primary)]">{tr('catalogCurrentPrice')}: <span className="font-semibold tabular-nums">{CURRENCY_SYMBOL} {formatPriceValue(getEffectiveRetailPrice(update.product))}</span></p>}
-            <div className="flex flex-wrap gap-2">{update.kinds.map(kind => { const Icon = icons[kind]; return <span key={kind} className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--theme-status-info-text)]"><Icon size={14} aria-hidden="true" />{tr(keys[kind])}</span>; })}</div>
+            <div className="flex flex-wrap gap-2">{!readState.isLoading && !readState.error && (update.observations.new !== undefined || update.observations.updated !== undefined) && <span className="text-xs text-[var(--theme-text-secondary)]">{tr(unreadCatalogProducts([update], readState.reads) > 0 ? 'catalogUnread' : 'catalogRead')}</span>}{update.kinds.map(kind => { const Icon = icons[kind]; return <span key={kind} className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--theme-status-info-text)]"><Icon size={14} aria-hidden="true" />{tr(keys[kind])}</span>; })}</div>
           </li>)}</ul>}
+        {filter !== 'price' && !readState.isLoading && !readState.error && unreadCatalogProducts(selected.slice(currentPage * 25, (currentPage + 1) * 25), readState.reads) > 0 && <button type="button" disabled={readState.saving} onClick={() => readState.markPageRead(selected.slice(currentPage * 25, (currentPage + 1) * 25))} className="min-h-11 px-3 rounded-xl text-sm bg-[var(--theme-bg-subtle)] disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{tr(readState.saving ? 'catalogReadSaving' : 'catalogMarkPageRead')}</button>}
         {filter !== 'price' && selected.length > 25 && <div className="flex flex-wrap items-center justify-between gap-2">
           <button type="button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)} className="min-h-11 px-3 rounded-xl disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">{tr('catalogPrevious')}</button>
           <span className="text-sm text-[var(--theme-text-secondary)]">{tr('catalogPage', { page: currentPage + 1, total: lastPage + 1 })}</span>

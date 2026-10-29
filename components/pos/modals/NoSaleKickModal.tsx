@@ -85,14 +85,14 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
             title={t('pos.manualDrawerKickTitle')}
             size="md"
         >
-            <div className="p-4 sm:p-6 space-y-5">
-                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-start gap-3">
-                    <ShieldAlert size={22} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-4">
+                <div className="p-4 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex items-start gap-3">
+                    <ShieldAlert size={20} className="text-[var(--theme-status-warning)] shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                        <h4 className="text-xs font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">
+                        <h4 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                             {t('pos.antiSkimmingProtocol')}
                         </h4>
-                        <p className="text-xs font-medium text-amber-800 dark:text-amber-300 leading-relaxed">
+                        <p className="text-xs font-medium text-[var(--theme-status-warning-text)] leading-relaxed">
                             {t('pos.noSaleWarning')}
                         </p>
                     </div>
@@ -115,7 +115,7 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
                 </div>
 
                 {pinError && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold text-center rounded-xl animate-shake">
+                    <div className="p-3 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-xs font-bold text-center rounded-xl animate-shake">
                         {pinError}
                     </div>
                 )}

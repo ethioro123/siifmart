@@ -122,7 +122,7 @@ export const PaymentModal: React.FC = () => {
                                     {t('pos.amountTendered')}
                                 </label>
                                 {shortage > 0 && (
-                                    <span id="amount-tendered-shortage" role="status" className="text-[11px] font-bold text-rose-600 dark:text-rose-400">
+                                    <span id="amount-tendered-shortage" role="status" className="text-[11px] font-bold text-[var(--theme-status-danger-text)]">
                                         {t('pos.needMore', { amount: `${CURRENCY_SYMBOL} ${shortage.toLocaleString()}` })}
                                     </span>
                                 )}
@@ -137,10 +137,10 @@ export const PaymentModal: React.FC = () => {
                                 onChange={(e) => setAmountTendered(e.target.value)}
                                 aria-describedby={shortage > 0 ? 'amount-tendered-shortage' : undefined}
                                 placeholder={t('pos.enterAmountPlaceholder') || 'Enter amount...'}
-                                className={`w-full bg-[var(--theme-bg-subtle)] border rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] text-2xl outline-none font-mono font-bold transition-all tabular-nums tracking-tight ${
+                                className={`w-full bg-[var(--theme-input-bg)] border rounded-xl px-4 py-3 text-[var(--theme-input-text)] text-2xl outline-none font-mono font-bold transition-all tabular-nums tracking-tight ${
                                     shortage > 0
-                                        ? 'border-rose-400 focus:border-rose-500'
-                                        : 'border-[var(--theme-border)] focus:border-[var(--theme-border-focus)] focus:ring-1 focus:ring-[var(--theme-border-focus)]'
+                                        ? 'border-[var(--theme-status-danger-border)] focus:border-[var(--theme-status-danger)]'
+                                        : 'border-[var(--theme-input-border)] focus:border-[var(--theme-border-focus)] focus:ring-1 focus:ring-[var(--theme-border-focus)]'
                                 }`}
                                 autoFocus
                             />
@@ -172,7 +172,7 @@ export const PaymentModal: React.FC = () => {
                         {/* Change Due Box */}
                         <div className="flex justify-between items-center p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
                             <span className="text-sm font-bold text-[var(--theme-text-secondary)]">{t('pos.changeDue')}:</span>
-                            <span className={`font-mono text-2xl font-black tabular-nums ${shortage > 0 ? 'text-red-500 text-lg' : 'text-[var(--theme-text-primary)]'}`}>
+                            <span className={`font-mono text-2xl font-black tabular-nums ${shortage > 0 ? 'text-[var(--theme-status-danger-text)] text-lg' : 'text-[var(--theme-text-primary)]'}`}>
                                 {shortage > 0
                                     ? `-${CURRENCY_SYMBOL} ${shortage.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                     : `${CURRENCY_SYMBOL} ${changeDue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -191,10 +191,10 @@ export const PaymentModal: React.FC = () => {
                 )}
 
                 {selectedPaymentMethod === 'Card' && (
-                    <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-3">
-                        <CreditCard className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
+                    <div className="p-4 bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] rounded-2xl flex items-start gap-3">
+                        <CreditCard className="w-5 h-5 text-[var(--theme-status-info)] mt-0.5 shrink-0" />
                         <div>
-                            <p className="text-blue-600 dark:text-blue-400 text-sm font-bold">{t('pos.cardPromptTitle')}</p>
+                            <p className="text-[var(--theme-status-info-text)] text-sm font-bold">{t('pos.cardPromptTitle')}</p>
                             <p className="text-[var(--theme-text-secondary)] text-xs mt-0.5">{t('pos.cardPromptDesc')}</p>
                         </div>
                     </div>
@@ -205,7 +205,7 @@ export const PaymentModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsPaymentModalOpen(false)}
-                        className="min-h-11 flex-1 py-3.5 px-5 bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="min-h-11 flex-1 py-3 px-5 bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-bold text-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {t('common.cancel')}
                     </button>
@@ -213,7 +213,7 @@ export const PaymentModal: React.FC = () => {
                         type="button"
                         onClick={handleComplete}
                         disabled={!canComplete}
-                        className="min-h-11 flex-[2] py-3.5 px-6 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl font-black text-sm uppercase tracking-wider disabled:cursor-not-allowed transition-all shadow-xs active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="min-h-11 flex-[2] py-3 px-6 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl font-black text-sm uppercase tracking-wider disabled:cursor-not-allowed transition-all shadow-xs active:scale-95 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                     >
                         {isProcessing ? (
                             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />

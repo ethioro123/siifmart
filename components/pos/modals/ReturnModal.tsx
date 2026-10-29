@@ -186,7 +186,7 @@ export const ReturnModal: React.FC = () => {
                                 type="button"
                                 onClick={handleVerifyHqOtp}
                                 disabled={(refundMethod === 'CASH' ? hqOtp.length !== 6 : hqOtp.length < 4) || isProcessing}
-                                className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs uppercase tracking-wider"
+                                className="px-6 py-2.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                             >
                                 {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
                                 {t('pos.verifyHqOtpAndDispense')}
@@ -214,24 +214,24 @@ export const ReturnModal: React.FC = () => {
                                 onClick={handleSearchForReturn}
                                 className="bg-[var(--theme-primary)] text-[var(--theme-primary-text)] px-6 rounded-xl font-bold hover:opacity-90 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
                             >
-                                Lookup
+                                {t('pos.lookup')}
                             </Button>
                         </div>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-2 inline-flex items-center gap-1.5">
                             <Lock className="w-3.5 h-3.5 shrink-0" />
-                            <span>All refund transactions require supervisor authorization and are logged.</span>
+                            <span>{t('pos.refundAuthNotice')}</span>
                         </p>
                     </div>
                 ) : (
                     <div className="space-y-6 animate-in fade-in">
                         <div className="flex items-center justify-between bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)]">
                             <div>
-                                <p className="text-xs text-[var(--theme-text-secondary)] uppercase font-mono">Transaction ID</p>
+                                <p className="text-xs text-[var(--theme-text-secondary)] uppercase font-mono">{t('pos.transactionId')}</p>
                                 <p className="text-[var(--theme-text-primary)] font-mono font-bold">{foundSaleForReturn.receiptNumber || `SALE-${foundSaleForReturn.id.substring(0, 8).toUpperCase()}`}</p>
                                 <p className="text-xs text-[var(--theme-text-secondary)]">{foundSaleForReturn.date}</p>
                             </div>
                             <button onClick={() => setFoundSaleForReturn(null)} className="text-xs text-[var(--theme-primary)] hover:underline cursor-pointer font-bold">
-                                Change Transaction
+                                {t('pos.changeTransaction')}
                             </button>
                         </div>
 
@@ -245,7 +245,7 @@ export const ReturnModal: React.FC = () => {
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <p className="text-sm text-[var(--theme-text-primary)] font-medium">{item.name}</p>
-                                                    <p className="text-xs text-[var(--theme-text-secondary)]">Sold: {item.quantity} @ {formatCompactNumber(item.price, { currency: CURRENCY_SYMBOL })}</p>
+                                                    <p className="text-xs text-[var(--theme-text-secondary)]">{t('pos.soldQty', { qty: item.quantity, price: formatCompactNumber(item.price, { currency: CURRENCY_SYMBOL }) })}</p>
                                                 </div>
                                                 <div className="flex items-center bg-[var(--theme-bg-card)] rounded-lg p-1 border border-[var(--theme-border)]">
                                                     <button

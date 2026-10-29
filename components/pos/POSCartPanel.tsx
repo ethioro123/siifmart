@@ -276,7 +276,7 @@ export const POSCartPanel: React.FC = () => {
                                 )}
 
                                 <div className="flex justify-between items-center text-[var(--theme-text-secondary)]">
-                                    <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-2">
                                         <span>{t('pos.cashRounding')}</span>
                                         <button
                                             type="button"
@@ -284,10 +284,19 @@ export const POSCartPanel: React.FC = () => {
                                             aria-checked={isRoundingEnabled}
                                             aria-label={t('pos.cashRounding')}
                                             title={t('pos.cashRounding')}
-                                            onClick={() => setIsRoundingEnabled(!isRoundingEnabled)}
-                                            className={`min-h-8 min-w-8 rounded-xl transition-colors relative shrink-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${isRoundingEnabled ? 'bg-[var(--theme-accent-muted)]' : 'bg-[var(--theme-bg-card)]'}`}
+                                            onClick={() => {
+                                                setIsRoundingEnabled(!isRoundingEnabled);
+                                                native.haptic();
+                                            }}
+                                            className={`w-10 h-6 rounded-full transition-colors relative shrink-0 p-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                                                isRoundingEnabled ? 'bg-[var(--theme-accent)]' : 'bg-[var(--theme-border-strong)]'
+                                            }`}
                                         >
-                                            <div className={`w-4 h-4 rounded-full absolute top-1/2 -translate-y-1/2 transition-all shadow-xs ${isRoundingEnabled ? 'left-4 bg-[var(--theme-accent)]' : 'left-0.5 bg-[var(--theme-text-muted)]'}`} />
+                                            <span
+                                                className={`block w-5 h-5 rounded-full bg-white shadow-xs transition-transform duration-200 ease-out ${
+                                                    isRoundingEnabled ? 'translate-x-4' : 'translate-x-0'
+                                                }`}
+                                            />
                                         </button>
                                     </div>
                                     <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">+{CURRENCY_SYMBOL} {roundingAdjustment.toFixed(2)}</span>
