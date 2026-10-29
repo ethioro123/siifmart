@@ -1,3 +1,4 @@
+import { useCounterFinanceReview } from '../../hooks/useCounterFinanceReview';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     ShieldCheck,
@@ -21,6 +22,7 @@ import { formatCompactNumber } from '../../utils/formatting';
 
 export const DrawerReconciliationTab: React.FC = () => {
     const { user, currencySymbol, effectiveCountry, activeSite, addNotification } = useFinance();
+    const financeReview = useCounterFinanceReview();
     const [shifts, setShifts] = useState<DrawerReconciliationRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Reconciled' | 'Flagged'>('All');
@@ -58,12 +60,7 @@ export const DrawerReconciliationTab: React.FC = () => {
     const handleSignOff = async (shiftId: string, action: 'Reconciled' | 'Flagged', notes: string) => {
         setIsActionLoading(true);
         try {
-            const updated = await drawerReconciliationService.signOff(
-                shiftId,
-                { id: user?.id || user?.employeeId || 'FIN-001', name: user?.name || 'Finance Staff', role: user?.role },
-                action,
-                { hqNotes: notes }
-            );
+            const updated = await financeReview.mutateAsync({ id: shiftId, action, notes });
             setShifts(prev => prev.map(s => s.id === shiftId ? updated : s));
             addNotification('success', `Shift #${shiftId.slice(0, 8)} signed off as ${action}`);
             setSelectedShift(null);

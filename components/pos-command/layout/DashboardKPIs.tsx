@@ -14,7 +14,7 @@ export const DashboardKPIs: React.FC = () => {
     const { user } = useStore();
     const { settings } = useData();
     const {
-        cashInDrawer,
+        cashInDrawer, cashSummaryAvailable,
         txCount,
         shiftTxCount,
         returnCount,
@@ -160,7 +160,7 @@ export const DashboardKPIs: React.FC = () => {
                                     </button>
                                 )}
                                 <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
-                                    {isCentralHQ && isRevealed ? t('posCommand.visibleToHQ') : t('posCommand.blindView')}
+                                    {isCentralHQ && isRevealed && cashSummaryAvailable ? t('posCommand.visibleToHQ') : t('posCommand.blindView')}
                                 </span>
                             </div>
                         </div>
@@ -168,7 +168,7 @@ export const DashboardKPIs: React.FC = () => {
                             {t('pos.cashInDrawer') || 'Cash Drawer'}
                         </h3>
                         <p className="text-2xl font-bold font-mono tracking-tight text-[var(--theme-text-primary)]">
-                            {isCentralHQ && isRevealed
+                            {isCentralHQ && isRevealed && cashSummaryAvailable
                                 ? `${CURRENCY_SYMBOL} ${cashInDrawer.toLocaleString()}`
                                 : t('posCommand.protectedBlind')}
                         </p>
@@ -176,7 +176,7 @@ export const DashboardKPIs: React.FC = () => {
                     <div className="mt-4 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
                         <span>{t('posCommand.cashVisibility')}</span>
                         <span className="font-medium text-[var(--theme-text-primary)]">
-                            {isCentralHQ && isRevealed ? t('posCommand.revealed') : t('posCommand.hidden')}
+                            {isCentralHQ && isRevealed && cashSummaryAvailable ? t('posCommand.revealed') : t('posCommand.hidden')}
                         </span>
                     </div>
                 </div>

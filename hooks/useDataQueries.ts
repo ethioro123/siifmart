@@ -144,7 +144,7 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
             },
             {
                 queryKey: DATA_KEYS.shifts(siteId),
-                queryFn: trackProgress('shifts', () => shiftsService.getAll(siteId, 25).catch(() => [])),
+                queryFn: trackProgress('shifts', () => shiftsService.getAll(siteId, 25)),
                 enabled: enabled && !!siteId,
                 staleTime: 1000 * 60 * 10,
             }

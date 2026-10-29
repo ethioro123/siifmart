@@ -27,6 +27,7 @@ interface POSCommandContextType {
     // App State Lookups
     activeShift: any;
     cashInDrawer: number;
+    cashSummaryAvailable: boolean;
     personalSales: number;
     txCount: number;
     shiftTxCount: number;

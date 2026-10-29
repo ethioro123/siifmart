@@ -55,28 +55,22 @@ export function mapShiftRow(row: any): ShiftRecord {
     };
 }
 
+const SHIFT_COLUMNS = 'id,site_id,country_code,cashier_id,cashier_name,cashier_code,counter_number,terminal_id,start_time,end_time,opening_float,cash_sales,card_sales,mobile_sales,expenses,cash_drops,drop_count,expected_cash,actual_cash,variance,denominations,discrepancy_reason,status,notes,closed_by,reconciled_by,reconciled_at,reconciliation_status,hq_notes,supervisor_id,supervisor_name,supervisor_role,supervisor_signed_at,shift_number,home_site_id,created_at,count_submitted_at,ledger_version';
+
 export const shiftsService = {
     /**
      * Get all shifts (optionally scoped by siteId)
      */
     async getAll(siteId?: string | string[], limit: number = 25): Promise<ShiftRecord[]> {
         try {
-            let query = supabase
-                .from('shifts')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(limit);
-
-            if (Array.isArray(siteId)) {
-                if (siteId.length === 0) return [];
-                query = query.in('site_id', siteId);
-            } else if (siteId && siteId !== 'All') {
-                query = query.eq('site_id', siteId);
-            }
-
-            const { data, error } = await query;
-            if (error) throw error;
-            return (data || []).map(mapShiftRow);
+            if (!siteId || siteId === 'All' || (Array.isArray(siteId) && !siteId.length)) return [];
+            const scope = (query: ReturnType<ReturnType<typeof supabase.from>['select']>) => Array.isArray(siteId) ? query.in('site_id', siteId) : query.eq('site_id', siteId);
+            const [active, history] = await Promise.all([
+                scope(supabase.from('shifts').select(SHIFT_COLUMNS)).eq('status', 'Open').order('start_time').limit(100),
+                scope(supabase.from('shifts').select(SHIFT_COLUMNS)).neq('status', 'Open').order('created_at', { ascending: false }).limit(limit),
+            ]);
+            if (active.error) throw active.error; if (history.error) throw history.error;
+            return [...(active.data || []), ...(history.data || [])].map(mapShiftRow);
         } catch (error) {
             logger.error('shiftsService', 'getAll failed:', error as Error);
             throw error;
@@ -90,7 +84,7 @@ export const shiftsService = {
         try {
             let query = supabase
                 .from('shifts')
-                .select('*')
+                .select(SHIFT_COLUMNS)
                 .eq('cashier_id', cashierId)
                 .eq('status', 'Open')
                 .order('created_at', { ascending: false })
@@ -117,7 +111,7 @@ export const shiftsService = {
         try {
             const { data, error } = await supabase
                 .from('shifts')
-                .select('*')
+                .select(SHIFT_COLUMNS)
                 .eq('id', id)
                 .single();
 

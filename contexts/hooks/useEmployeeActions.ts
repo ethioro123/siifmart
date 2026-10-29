@@ -100,6 +100,7 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
                 terminal_id: terminalId,
                 startTime: new Date().toISOString(),
                 status: 'Open',
+                countryCode: activeSite?.country,
                 openingFloat,
                 cashSales: 0,
                 expectedCash: openingFloat,
