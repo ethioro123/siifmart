@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
@@ -29,22 +29,44 @@ export default function Modal({
   mobileFullScreen = false,
   closeOnEscape = true
 }: ModalProps) {
-  // Close on Escape key
+  // Keep keyboard and screen-reader focus within the active dialog.
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (closeOnEscape && e.key === 'Escape') onClose();
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusFirst = window.requestAnimationFrame(() => {
+      const first = dialogRef.current?.querySelector<HTMLElement>(focusableSelector);
+      (first || dialogRef.current)?.focus();
+    });
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && closeOnEscape) {
+        event.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+      const items = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(focusableSelector));
+      if (!items.length) { event.preventDefault(); dialogRef.current.focus(); return; }
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
     };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      window.cancelAnimationFrame(focusFirst);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
     };
-  }, [isOpen, onClose, closeOnEscape]);
+  }, [isOpen, closeOnEscape]);
 
   if (!isOpen) return null;
 
@@ -59,6 +81,10 @@ export default function Modal({
   };
 
   const isSide = variant === 'side';
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const titleId = useId();
 
   const modalContent = (
     <div
@@ -82,18 +108,23 @@ export default function Modal({
           backgroundColor: 'var(--theme-bg-panel)',
           maxHeight: isSide ? '100%' : 'calc(100dvh - var(--app-top-inset, 0px) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 2.5rem)'
         }}
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         className={`relative w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} ${mobileFullScreen ? 'h-[100dvh] sm:h-auto rounded-none sm:rounded-3xl' : 'rounded-3xl'} animate-in fade-in zoom-in duration-200`} bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-[var(--shadow-modal)] transform transition-all flex flex-col my-auto print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}
       >
 
         {/* Header */}
         <div className={`flex items-center justify-between gap-3 ${mobileFullScreen ? 'px-4 py-3 sm:px-6 sm:py-5' : 'px-6 py-5'} border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-panel)] shrink-0 print:hidden`}>
-          <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2 tracking-tight">
+          <h3 id={titleId} className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2 tracking-tight">
             {title}
           </h3>
           <button
             onClick={onClose}
             aria-label="Close"
-            className={`${mobileFullScreen ? 'min-h-11 min-w-11 flex items-center justify-center shrink-0' : ''} p-2 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-border)] transition-colors cursor-pointer`}
+            className={`min-h-11 min-w-11 flex items-center justify-center shrink-0 p-2 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-border)] transition-colors cursor-pointer`}
           >
             <X size={18} />
           </button>

@@ -68,7 +68,7 @@ export function AppealModal({
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Scale size={18} />
                         </div>
                         <div>
@@ -137,7 +137,7 @@ export function AppealModal({
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold flex items-center gap-2 shadow-[0_2px_8px_rgba(147,51,234,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
+                            className="px-5 py-2.5 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] font-semibold flex items-center gap-2 shadow-sm transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                         >
                             <Send size={14} />
                             <span>{isSubmitting ? 'Submitting...' : 'Submit Appeal'}</span>

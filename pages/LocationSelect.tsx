@@ -62,7 +62,7 @@ export default function LocationSelect() {
     const warehouses = filteredSites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center');
 
     return (
-        <div className="min-h-screen bg-transparent text-white p-6 animate-in fade-in">
+        <div className="min-h-screen bg-transparent text-[var(--theme-text-primary)] p-6 animate-in fade-in">
             <div className="max-w-6xl mx-auto space-y-8">
 
                 {/* Header */}

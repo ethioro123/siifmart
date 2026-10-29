@@ -66,7 +66,7 @@ export default function Button({
     return (
         <button
             className={`
-        font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer
+        min-h-11 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer
         ${variants[variant]}
         ${sizes[size]}
         ${fullWidth ? 'w-full' : ''}
