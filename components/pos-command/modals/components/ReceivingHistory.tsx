@@ -151,16 +151,16 @@ export const ReceivingHistory: React.FC = () => {
                                 isHistory: true
                             });
                         }}
-                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all shadow-xs active:scale-[0.99]"
+                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 flex items-center justify-between cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all shadow-xs active:scale-[0.99]"
                     >
                         <div>
-                            <p className="font-mono font-bold text-[var(--theme-text-primary)]">{formatJobId({ ...item, type: 'TRANSFER' } as any)}</p>
-                            <p className="text-xs text-[var(--theme-text-secondary)]">
+                            <p className="font-mono font-bold text-[var(--theme-text-primary)] text-xs">{formatJobId({ ...item, type: 'TRANSFER' } as any)}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 {(item as any).items?.length || 0} {t('posCommand.productsLabel')} • {formatDateTime((item as any).receivedAt || (item as any).updatedAt)}
                             </p>
                         </div>
                         <div className="text-right">
-                            <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[10px] font-bold uppercase">
+                            <span className="px-2.5 py-0.5 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] rounded-full text-[10px] font-bold uppercase">
                                 {t('posCommand.received').toUpperCase()}
                             </span>
                         </div>

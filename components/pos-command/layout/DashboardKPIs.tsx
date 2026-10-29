@@ -58,9 +58,9 @@ export const DashboardKPIs: React.FC = () => {
         <div className="space-y-4">
             {/* Drawer Inactive Zero-State Banner for Cashiers */}
             {!activeShift && !isCentralHQ && (
-                <div className="bg-[var(--theme-bg-card)] border border-amber-500/25 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] flex items-center justify-center shrink-0">
                             <Lock size={16} />
                         </div>
                         <div>
@@ -75,7 +75,7 @@ export const DashboardKPIs: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsStartShiftModalOpen(true)}
-                        className="px-4 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 active:scale-95 cursor-pointer shrink-0 shadow-2xs"
+                        className="px-4 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 active:scale-95 cursor-pointer shrink-0 shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <Play size={13} className="fill-current" />
                         <span>{t('posCommand.startDailyShift')}</span>
@@ -86,13 +86,13 @@ export const DashboardKPIs: React.FC = () => {
             {/* Apple Pro 4-Card Unified Command Deck */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                 {/* Card 1: Shift Progress & Target */}
-                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[#0071E3]/40 flex flex-col justify-between">
+                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-3">
-                            <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                 <Target size={16} />
                             </div>
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                                 {progressPercent === null ? '—' : `${progressPercent.toFixed(1)}%`}
                             </span>
                         </div>
@@ -123,7 +123,7 @@ export const DashboardKPIs: React.FC = () => {
                                 aria-valuemax={100}
                                 aria-valuenow={progressPercent ?? undefined}
                                 aria-valuetext={progressPercent === null ? 'No target defined for this period' : `${progressPercent.toFixed(1)} percent`}
-                                className="h-full bg-[#0071E3] dark:bg-[#2997FF] rounded-full transition-all duration-500 ease-out"
+                                className="h-full bg-[var(--theme-accent)] rounded-full transition-all duration-500 ease-out"
                                 style={{ width: `${progressPercent ?? 0}%` }}
                             />
                         </div>
@@ -140,10 +140,10 @@ export const DashboardKPIs: React.FC = () => {
                 </div>
 
                 {/* Card 2: Cash Drawer & Blind Protocol */}
-                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[#0071E3]/40 flex flex-col justify-between">
+                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-3">
-                            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] flex items-center justify-center shrink-0">
                                 <ShieldCheck size={16} />
                             </div>
                             <div className="flex items-center gap-1.5">
@@ -154,12 +154,12 @@ export const DashboardKPIs: React.FC = () => {
                                         title={isRevealed ? "Hide Cash Total" : "Reveal Cash Total"}
                                         aria-label={isRevealed ? 'Hide cash total' : 'Reveal cash total'}
                                         aria-pressed={isRevealed}
-                                        className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                                        className="min-h-9 min-w-9 inline-flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
                                     >
                                         {isRevealed ? <EyeOff size={13} /> : <Eye size={13} />}
                                     </button>
                                 )}
-                                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                     {isCentralHQ && isRevealed ? t('posCommand.visibleToHQ') : t('posCommand.blindView')}
                                 </span>
                             </div>
@@ -182,10 +182,10 @@ export const DashboardKPIs: React.FC = () => {
                 </div>
 
                 {/* Card 3: Total Transactions / Volume */}
-                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[#0071E3]/40 flex flex-col justify-between">
+                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-3">
-                            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                 <Activity size={16} />
                             </div>
                         </div>
@@ -203,13 +203,13 @@ export const DashboardKPIs: React.FC = () => {
                 </div>
 
                 {/* Card 4: Returns & Policy Compliance */}
-                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[#0071E3]/40 flex flex-col justify-between">
+                <div className="group relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden transition-all duration-300 shadow-2xs hover:shadow-xs hover:border-[var(--theme-accent)]/40 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-3">
                             <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                                 returnCount > 0
-                                    ? 'bg-rose-500/10 text-rose-500'
-                                    : 'bg-teal-500/10 text-teal-500'
+                                    ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)]'
+                                    : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]'
                             }`}>
                                 <RefreshCw size={16} />
                             </div>

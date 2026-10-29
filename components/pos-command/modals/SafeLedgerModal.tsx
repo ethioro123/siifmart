@@ -90,7 +90,7 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
             title={t('posCommand.safeLedgerTitle')}
             size="lg"
         >
-            <div className="p-4 sm:p-6 space-y-6">
+            <div className="space-y-4">
                 {/* Header Action & Site Indicator */}
                 <div className="flex items-center justify-between gap-3 pb-1">
                     <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                         disabled={isLoading}
                         title="Refresh Safe Ledger"
                         aria-label="Refresh Safe Ledger"
-                        className="p-1.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium"
+                        className="p-1.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
                         <span>{t('common.refresh') || 'Refresh'}</span>
@@ -115,23 +115,23 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                 </div>
 
                 {/* Summary Card */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">{t('posCommand.totalInSafe')}</span>
-                        <p className="text-2xl font-mono font-bold text-[var(--theme-text-primary)]">
+                        <p className="text-xl font-mono font-bold text-[var(--theme-text-primary)]">
                             {currency} {totalInSafe.toLocaleString()}
                         </p>
                     </div>
-                    <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
+                    <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">{t('posCommand.sealedBags')}</span>
-                        <p className="text-2xl font-mono font-bold text-[var(--theme-text-primary)]">
+                        <p className="text-xl font-mono font-bold text-[var(--theme-text-primary)]">
                             {activeSafeDrops.length}
                         </p>
                     </div>
-                    <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex items-center justify-between">
+                    <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex items-center justify-between">
                         <div>
                             <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">{t('posCommand.selectedForTransit')}</span>
-                            <p className="text-xl font-mono font-bold text-[var(--theme-primary)]">
+                            <p className="text-lg font-mono font-bold text-[var(--theme-primary)]">
                                 {selectedDrops.length} bags
                             </p>
                         </div>
@@ -139,9 +139,9 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                             <button
                                 type="button"
                                 onClick={() => setIsTransferModalOpen(true)}
-                                className="px-3.5 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer uppercase tracking-wider"
+                                className="px-3 py-1.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
-                                <Truck size={14} className="text-[var(--theme-primary-text)] opacity-90" />
+                                <Truck size={13} className="text-[var(--theme-primary-text)] opacity-90" />
                                 {t('posCommand.transitBtn')}
                             </button>
                         )}
@@ -149,11 +149,11 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                 </div>
 
                 {/* Drops Table */}
-                <div className="overflow-x-auto rounded-2xl border border-[var(--theme-border)] isolate">
+                <div className="overflow-x-auto rounded-xl border border-[var(--theme-border)] isolate">
                     <table className="w-full text-left text-xs">
                         <thead>
                             <tr className="border-b border-[var(--theme-border)] text-[10px] uppercase font-bold tracking-wider text-[var(--theme-thead-text)] bg-[var(--theme-bg-subtle)]">
-                                <th className="py-2.5 px-3">
+                                <th className="py-2 px-3">
                                     <input
                                         type="checkbox"
                                         checked={selectedDrops.length > 0 && selectedDrops.length === activeSafeDrops.length}
@@ -161,12 +161,12 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                                         className="rounded border-[var(--theme-border)]"
                                     />
                                 </th>
-                                <th className="py-2.5 px-3">{t('posCommand.thBagNumber')}</th>
-                                <th className="py-2.5 px-3">{t('posCommand.cashier')}</th>
-                                <th className="py-2.5 px-3">{t('posCommand.thSupervisor')}</th>
-                                <th className="py-2.5 px-3 text-right">{t('inventory.price') || 'Amount'}</th>
-                                <th className="py-2.5 px-3 text-center">{t('posCommand.thStatus')}</th>
-                                <th className="py-2.5 px-3 text-right">{t('posCommand.thStartTime') || 'Timestamp'}</th>
+                                <th className="py-2 px-3">{t('posCommand.thBagNumber')}</th>
+                                <th className="py-2 px-3">{t('posCommand.cashier')}</th>
+                                <th className="py-2 px-3">{t('posCommand.thSupervisor')}</th>
+                                <th className="py-2 px-3 text-right">{t('inventory.price') || 'Amount'}</th>
+                                <th className="py-2 px-3 text-center">{t('posCommand.thStatus')}</th>
+                                <th className="py-2 px-3 text-right">{t('posCommand.thStartTime') || 'Timestamp'}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--theme-border)] font-mono">
@@ -195,7 +195,7 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
 
                                     return (
                                         <tr key={drop.id} className="hover:bg-[var(--theme-table-row-hover)] transition-colors">
-                                            <td className="py-3 px-3">
+                                            <td className="py-2 px-3">
                                                 {drop.status === 'deposited_in_safe' ? (
                                                     <input
                                                         type="checkbox"
@@ -208,31 +208,31 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                                                         className="rounded border-[var(--theme-border)]"
                                                     />
                                                 ) : (
-                                                    <CheckCircle2 size={14} className="text-emerald-500" />
+                                                    <CheckCircle2 size={14} className="text-[var(--theme-status-success)]" />
                                                 )}
                                             </td>
-                                            <td className="py-3 px-3 font-bold text-[var(--theme-text-primary)]">
+                                            <td className="py-2 px-3 font-bold text-[var(--theme-text-primary)]">
                                                 {drop.safe_bag_number || drop.drop_number}
                                             </td>
-                                            <td className="py-3 px-3 font-sans text-[var(--theme-text-secondary)]">
+                                            <td className="py-2 px-3 font-sans text-[var(--theme-text-secondary)]">
                                                 {drop.cashier_name}
                                             </td>
-                                            <td className="py-3 px-3 font-sans text-[var(--theme-text-muted)]">
+                                            <td className="py-2 px-3 font-sans text-[var(--theme-text-muted)]">
                                                 {drop.supervisor_name} ({drop.supervisor_role})
                                             </td>
-                                            <td className="py-3 px-3 text-right font-bold text-[var(--theme-primary)]">
+                                            <td className="py-2 px-3 text-right font-bold text-[var(--theme-primary)]">
                                                 {drop.currency || currency} {Number(drop.amount || 0).toLocaleString()}
                                             </td>
-                                            <td className="py-3 px-3 text-center">
-                                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-sans uppercase border ${
+                                            <td className="py-2 px-3 text-center">
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold font-sans uppercase border ${
                                                     drop.status === 'deposited_in_safe'
-                                                        ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                                                        : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
+                                                        : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                                 }`}>
                                                     {drop.status === 'deposited_in_safe' ? t('posCommand.inSafeStatus') : t('posCommand.transferredToBankStatus')}
                                                 </span>
                                             </td>
-                                            <td className="py-3 px-3 text-right text-[var(--theme-text-muted)] text-[11px]">
+                                            <td className="py-2 px-3 text-right text-[var(--theme-text-muted)] text-[11px]">
                                                 {timeLabel}
                                             </td>
                                         </tr>

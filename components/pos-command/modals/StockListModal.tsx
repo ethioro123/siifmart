@@ -88,8 +88,8 @@ export const StockListModal: React.FC = () => {
     const filterTabs = useMemo(() => {
         const tabs: Array<{ id: StockFilterMode; label: string; count: number; dotColor?: string; alwaysShow?: boolean }> = [
             { id: 'ALL', label: t('posCommand.filterAll'), count: filterCounts.all, alwaysShow: true },
-            { id: 'LOW_STOCK', label: t('posCommand.filterLowStock'), count: filterCounts.lowStock, dotColor: filterCounts.lowStock > 0 ? 'bg-amber-500' : undefined, alwaysShow: true },
-            { id: 'OUT_OF_STOCK', label: t('posCommand.filterOutOfStock'), count: filterCounts.outOfStock, dotColor: filterCounts.outOfStock > 0 ? 'bg-red-500' : undefined, alwaysShow: true },
+            { id: 'LOW_STOCK', label: t('posCommand.filterLowStock'), count: filterCounts.lowStock, dotColor: filterCounts.lowStock > 0 ? 'bg-[var(--theme-status-warning)]' : undefined, alwaysShow: true },
+            { id: 'OUT_OF_STOCK', label: t('posCommand.filterOutOfStock'), count: filterCounts.outOfStock, dotColor: filterCounts.outOfStock > 0 ? 'bg-[var(--theme-status-danger)]' : undefined, alwaysShow: true },
             { id: 'ON_SALE', label: t('posCommand.filterOnSale'), count: filterCounts.onSale },
             { id: 'BY_WEIGHT_VOLUME', label: t('posCommand.filterWeightedVol'), count: filterCounts.weighted },
         ];
@@ -202,10 +202,10 @@ export const StockListModal: React.FC = () => {
                     <table className="w-full text-sm">
                         <thead className="text-[var(--theme-thead-text)] bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                             <tr>
-                                <th className="text-left py-2.5 px-3.5 font-medium text-[11px] uppercase tracking-wider">{t('inventory.product')}</th>
-                                <th className="text-right py-2.5 px-3.5 font-medium text-[11px] uppercase tracking-wider">{t('inventory.price')}</th>
-                                <th className="text-right py-2.5 px-3.5 font-medium text-[11px] uppercase tracking-wider">{t('inventory.stock')}</th>
-                                <th className="text-right py-2.5 px-3.5 font-medium text-[11px] uppercase tracking-wider">{t('common.actions')}</th>
+                                <th className="text-left py-2 px-3 font-medium text-[10px] uppercase tracking-wider">{t('inventory.product')}</th>
+                                <th className="text-right py-2 px-3 font-medium text-[10px] uppercase tracking-wider">{t('inventory.price')}</th>
+                                <th className="text-right py-2 px-3 font-medium text-[10px] uppercase tracking-wider">{t('inventory.stock')}</th>
+                                <th className="text-right py-2 px-3 font-medium text-[10px] uppercase tracking-wider">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--theme-border)]">
@@ -216,38 +216,38 @@ export const StockListModal: React.FC = () => {
                                 const isPendingApproval = ((product.approvalStatus || (product as any).approval_status) || 'approved').toLowerCase() === 'pending';
                                 return (
                                     <tr key={product.id} onClick={() => setSelectedProduct(product)} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer">
-                                        <td className="py-2.5 px-3.5 max-w-[22rem]">
-                                            <button type="button" onClick={() => setSelectedProduct(product)} className="text-left rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={`${t('posCommand.productDetails')}: ${product.name}`}>
+                                        <td className="py-2 px-3 max-w-[22rem]">
+                                            <button type="button" onClick={() => setSelectedProduct(product)} className="text-left rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] w-full" aria-label={`${t('posCommand.productDetails')}: ${product.name}`}>
                                                 <span className="flex items-center gap-1.5 font-medium text-[var(--theme-text-primary)]">
-                                                    <span className="truncate">{formatProductDisplayName(product) || product.name}</span>
+                                                    <span className="break-words text-xs font-semibold leading-snug line-clamp-2">{formatProductDisplayName(product) || product.name}</span>
                                                     {isPendingApproval && (
-                                                        <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-medium shrink-0">
+                                                        <span className="px-1.5 py-0.5 rounded bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] text-[10px] font-medium shrink-0">
                                                             {t('posCommand.pendingApproval')}
                                                         </span>
                                                     )}
                                                 </span>
-                                                <span className="block mt-0.5 text-xs font-mono text-[var(--theme-text-secondary)]">
+                                                <span className="block mt-0.5 text-[11px] font-mono text-[var(--theme-text-secondary)]">
                                                     {product.sku}{product.category ? ` · ${product.category}` : ''}
                                                 </span>
                                             </button>
                                         </td>
-                                        <td className="py-2.5 px-3.5 text-right whitespace-nowrap font-mono tabular-nums font-medium text-[var(--theme-text-primary)]">
+                                        <td className="py-2 px-3 text-right whitespace-nowrap font-mono tabular-nums text-xs font-medium text-[var(--theme-text-primary)]">
                                             {CURRENCY_SYMBOL} {formatPriceValue(product.price)}
                                         </td>
-                                        <td className="py-2.5 px-3.5 text-right whitespace-nowrap">
-                                            <span className="font-mono tabular-nums text-[var(--theme-text-primary)]">{formatStockDisplay(stock, product)}</span>
+                                        <td className="py-2 px-3 text-right whitespace-nowrap">
+                                            <span className="font-mono tabular-nums text-xs text-[var(--theme-text-primary)]">{formatStockDisplay(stock, product)}</span>
                                             {stockLabel && (
-                                                <span className={`block mt-0.5 text-[11px] font-medium ${stock <= 0 ? 'text-red-500' : 'text-amber-500'}`}>
+                                                <span className={`block mt-0.5 text-[10px] font-medium ${stock <= 0 ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-warning-text)]'}`}>
                                                     {stockLabel}
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="py-2.5 px-3.5" onClick={event => event.stopPropagation()}>
+                                        <td className="py-2 px-3" onClick={event => event.stopPropagation()}>
                                             <div className="flex justify-end items-center gap-1.5">
                                                 <button
                                                     type="button"
                                                     onClick={() => setSelectedProduct(product)}
-                                                    className="min-h-[44px] px-3 rounded-lg border border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-xs font-medium text-[var(--theme-text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                    className="h-8 px-2.5 rounded-lg border border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-xs font-medium text-[var(--theme-text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] cursor-pointer"
                                                 >
                                                     {t('posCommand.productDetails')}
                                                 </button>
@@ -256,9 +256,9 @@ export const StockListModal: React.FC = () => {
                                                     onClick={() => { setLabelsToPrint([{ product, quantity: 1 }]); setIsPrintHubOpen(true); }}
                                                     aria-label={`${t('posCommand.printLabels')}: ${product.name}`}
                                                     title={t('posCommand.printLabels')}
-                                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                                                    className="h-8 w-8 flex items-center justify-center rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] cursor-pointer"
                                                 >
-                                                    <Printer size={15} />
+                                                    <Printer size={13} />
                                                 </button>
                                             </div>
                                         </td>

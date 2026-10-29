@@ -67,7 +67,7 @@ export const ShiftReconciliationTable: React.FC = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--theme-border)] pb-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <ShieldCheck size={20} />
                     </div>
                     <div>
@@ -83,7 +83,7 @@ export const ShiftReconciliationTable: React.FC = () => {
                 {/* Filters */}
                 <div className="flex items-center gap-2">
                     <div className="flex items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl px-3 py-1.5 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/15 focus-within:bg-[var(--theme-bg-card)] transition-all group shadow-2xs">
-                        <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 group-focus-within:bg-blue-500 group-focus-within:text-white transition-all">
+                        <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0 group-focus-within:bg-[var(--theme-primary)] group-focus-within:text-[var(--theme-primary-text)] transition-all">
                             <Search size={12} />
                         </div>
                         <input
@@ -120,19 +120,19 @@ export const ShiftReconciliationTable: React.FC = () => {
             </div>
 
             {/* Shift List Table */}
-            <div className="overflow-x-auto border border-[var(--theme-border)] rounded-2xl isolate">
+            <div className="overflow-x-auto border border-[var(--theme-border)] rounded-xl isolate">
                 <table className="w-full text-left text-xs">
                     <thead>
                         <tr className="border-b border-[var(--theme-border)] text-[10px] uppercase font-semibold tracking-wider text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]/70">
-                            <th className="py-3.5 px-4">{t('posCommand.thStatus')}</th>
-                            <th className="py-3.5 px-4">{t('posCommand.thCashierCounter')}</th>
-                            <th className="py-3.5 px-4">{t('posCommand.thStartTime')}</th>
-                            <th className="py-3.5 px-4 text-right">{t('posCommand.thFloat')}</th>
-                            <th className="py-3.5 px-4 text-right">{t('posCommand.thCashSales')}</th>
-                            <th className="py-3.5 px-4 text-right">{t('posCommand.thExpected')}</th>
-                            <th className="py-3.5 px-4 text-right">{t('posCommand.thActualCount')}</th>
-                            <th className="py-3.5 px-4 text-right">{t('posCommand.thVariance')}</th>
-                            <th className="py-3.5 px-4 text-center">{t('posCommand.thAuditAction')}</th>
+                            <th className="py-2.5 px-3">{t('posCommand.thStatus')}</th>
+                            <th className="py-2.5 px-3">{t('posCommand.thCashierCounter')}</th>
+                            <th className="py-2.5 px-3">{t('posCommand.thStartTime')}</th>
+                            <th className="py-2.5 px-3 text-right">{t('posCommand.thFloat')}</th>
+                            <th className="py-2.5 px-3 text-right">{t('posCommand.thCashSales')}</th>
+                            <th className="py-2.5 px-3 text-right">{t('posCommand.thExpected')}</th>
+                            <th className="py-2.5 px-3 text-right">{t('posCommand.thActualCount')}</th>
+                            <th className="py-2.5 px-3 text-right">{t('posCommand.thVariance')}</th>
+                            <th className="py-2.5 px-3 text-center">{t('posCommand.thAuditAction')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--theme-border)] font-mono">
@@ -148,33 +148,33 @@ export const ShiftReconciliationTable: React.FC = () => {
                                 return (
                                     <tr key={shift.id} className="hover:bg-[var(--theme-bg-subtle)]/50 transition-colors">
                                         {/* Status Badge */}
-                                        <td className="py-3 px-4 font-sans">
+                                        <td className="py-2 px-3 font-sans">
                                             {shift.status === 'Open' ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                                                     <Clock size={10} /> {t('posCommand.statusOpen')}
                                                 </span>
                                             ) : shift.status === 'Audited' ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                                     <CheckCircle size={10} /> {t('posCommand.statusAudited')}
                                                 </span>
                                             ) : shift.status === 'Flagged' ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                                                     <AlertTriangle size={10} /> {t('posCommand.statusFlagged')}
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]">
                                                     <Clock size={10} /> {t('posCommand.statusAwaitingHQ')}
                                                 </span>
                                             )}
                                         </td>
 
                                         {/* Cashier & Counter */}
-                                        <td className="py-3 px-4 font-sans">
+                                        <td className="py-2 px-3 font-sans">
                                             <div className="flex items-center gap-2">
-                                                <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
+                                                <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
                                                     {shift.cashierCode || shift.cashier_code || 'STAFF'}
                                                 </span>
-                                                <span className="font-semibold text-[var(--theme-text-primary)] truncate max-w-[140px]">{shift.cashierName}</span>
+                                                <span className="font-semibold text-[var(--theme-text-primary)] break-words leading-tight max-w-[160px] text-xs">{shift.cashierName}</span>
                                             </div>
                                             <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono mt-0.5 font-medium">
                                                 {shift.counterNumber || shift.counter_number || 'Counter 1'}
@@ -182,33 +182,33 @@ export const ShiftReconciliationTable: React.FC = () => {
                                         </td>
 
                                         {/* Start Time */}
-                                        <td className="py-3 px-4 text-[11px] text-[var(--theme-text-secondary)]">
+                                        <td className="py-2 px-3 text-[11px] text-[var(--theme-text-secondary)]">
                                             {shift.startTime ? formatDateTime(shift.startTime) : 'N/A'}
                                         </td>
 
                                         {/* Opening Float */}
-                                        <td className="py-3 px-4 text-right text-[var(--theme-text-secondary)]">
+                                        <td className="py-2 px-3 text-right text-[var(--theme-text-secondary)] tabular-nums">
                                             {currency} {(shift.openingFloat || 0).toLocaleString()}
                                         </td>
 
                                         {/* Cash Sales */}
-                                        <td className="py-3 px-4 text-right text-[var(--theme-text-primary)] font-bold">
+                                        <td className="py-2 px-3 text-right text-[var(--theme-text-primary)] font-bold tabular-nums">
                                             {currency} {(shift.cashSales || 0).toLocaleString()}
                                         </td>
 
                                         {/* Expected Cash */}
-                                        <td className="py-3 px-4 text-right font-semibold text-[var(--theme-text-secondary)]">
+                                        <td className="py-2 px-3 text-right font-semibold text-[var(--theme-text-secondary)] tabular-nums">
                                             {currency} {(shift.expectedCash || 0).toLocaleString()}
                                         </td>
 
                                         {/* Actual Counted */}
-                                        <td className="py-3 px-4 text-right font-bold text-[var(--theme-text-primary)]">
-                                            {shift.status === 'Open' ? 'Active...' : `${currency} ${(shift.actualCash || 0).toLocaleString()}`}
+                                        <td className="py-2 px-3 text-right font-bold text-[var(--theme-text-primary)] tabular-nums">
+                                            {shift.status === 'Open' ? (t('posCommand.statusActive') || 'Active...') : `${currency} ${(shift.actualCash || 0).toLocaleString()}`}
                                         </td>
 
                                         {/* Variance */}
-                                        <td className={`py-3 px-4 text-right font-bold ${
-                                            hasVariance ? 'text-rose-500' : 'text-[var(--theme-text-primary)]'
+                                        <td className={`py-2 px-3 text-right font-bold tabular-nums ${
+                                            hasVariance ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-text-primary)]'
                                         }`}>
                                             {shift.status === 'Open' ? '-' : (
                                                 <>
@@ -219,16 +219,16 @@ export const ShiftReconciliationTable: React.FC = () => {
                                         </td>
 
                                         {/* HQ Action */}
-                                        <td className="py-3 px-4 text-center">
+                                        <td className="py-2 px-3 text-center">
                                             <div className="flex items-center justify-center gap-1.5 font-sans">
                                                 {shift.status !== 'Open' && (
                                                     <button
                                                         type="button"
                                                         onClick={() => handlePrintShiftZReport(shift)}
-                                                        className="px-2.5 py-1 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl transition-all flex items-center gap-1 text-[10px] font-semibold cursor-pointer active:scale-95 shadow-2xs"
+                                                        className="px-2.5 py-1 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl transition-all flex items-center gap-1 text-[10px] font-semibold cursor-pointer active:scale-95 shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                                         title="Print Z-Report Slip"
                                                     >
-                                                        <Printer size={11} className="text-purple-500" />
+                                                        <Printer size={11} className="text-[var(--theme-accent)]" />
                                                         <span>{t('posCommand.zReportBtn')}</span>
                                                     </button>
                                                 )}
@@ -238,21 +238,21 @@ export const ShiftReconciliationTable: React.FC = () => {
                                                         <button
                                                             onClick={() => handleReconcile(shift.id, 'Reconciled')}
                                                             disabled={reconcilingId === shift.id}
-                                                            className="px-2.5 py-1 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[10px] font-semibold rounded-xl transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
+                                                            className="px-2.5 py-1 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[10px] font-semibold rounded-xl transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                                         >
                                                             {t('posCommand.signOff')}
                                                         </button>
                                                         <button
                                                             onClick={() => handleReconcile(shift.id, 'Discrepancy_Flagged')}
                                                             disabled={reconcilingId === shift.id}
-                                                            className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-semibold rounded-xl transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
+                                                            className="px-2.5 py-1 bg-[var(--theme-status-danger)] hover:opacity-90 text-[var(--theme-status-danger-text)] text-[10px] font-semibold rounded-xl transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                                                         >
                                                             {t('posCommand.flagDiscrepancy')}
                                                         </button>
                                                     </>
                                                 ) : shift.reconciledBy ? (
                                                     <span className="text-[10px] text-[var(--theme-text-muted)] font-sans inline-flex items-center gap-1" title={`Reconciled at ${shift.reconciledAt}`}>
-                                                        <CheckCircle size={10} className="text-emerald-500 shrink-0" />
+                                                        <CheckCircle size={10} className="text-[var(--theme-status-success)] shrink-0" />
                                                         <span>{shift.reconciledBy}</span>
                                                     </span>
                                                 ) : shift.status === 'Open' ? (

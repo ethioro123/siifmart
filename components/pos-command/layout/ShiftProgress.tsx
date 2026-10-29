@@ -21,7 +21,7 @@ export const ShiftProgress: React.FC = () => {
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--theme-status-warning)]" />
                             <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 {t('posCommand.drawerClosedBannerTitle')}
                             </h3>
@@ -113,9 +113,9 @@ export const ShiftProgress: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {isCentralHQ ? (
                         [
-                            { label: t('pos.cash'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().cash.toLocaleString()}`, icon: Banknote, color: 'bg-emerald-500/10 text-emerald-500' },
-                            { label: t('pos.card'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().card.toLocaleString()}`, icon: CreditCard, color: 'bg-blue-500/10 text-blue-500' },
-                            { label: t('pos.mobileMoney'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().mobile.toLocaleString()}`, icon: Smartphone, color: 'bg-purple-500/10 text-purple-500' },
+                            { label: t('pos.cash'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().cash.toLocaleString()}`, icon: Banknote, color: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]' },
+                            { label: t('pos.card'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().card.toLocaleString()}`, icon: CreditCard, color: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]' },
+                            { label: t('pos.mobileMoney'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().mobile.toLocaleString()}`, icon: Smartphone, color: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]' },
                         ].map(({ label, display, icon: Icon, color }) => (
                             <div key={label} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 transition-colors hover:bg-[var(--theme-bg-card-hover)] flex items-center gap-3.5 shadow-2xs">
                                 <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center shrink-0`}>
@@ -129,9 +129,9 @@ export const ShiftProgress: React.FC = () => {
                         ))
                     ) : (
                         [
-                            { label: t('pos.transactions') || "Completed Orders", display: t('posCommand.processedCount', { count: shiftTxCount }), icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-500' },
-                            { label: t('posCommand.speedAndPace'), display: t('posCommand.onSchedule'), icon: Zap, color: 'bg-amber-500/10 text-amber-500' },
-                            { label: t('posCommand.drawerProtocol'), display: t('posCommand.blindActive'), icon: Lock, color: 'bg-indigo-500/10 text-indigo-500' },
+                            { label: t('pos.transactions') || "Completed Orders", display: t('posCommand.processedCount', { count: shiftTxCount }), icon: CheckCircle2, color: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]' },
+                            { label: t('posCommand.speedAndPace'), display: t('posCommand.onSchedule'), icon: Zap, color: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]' },
+                            { label: t('posCommand.drawerProtocol'), display: t('posCommand.blindActive'), icon: Lock, color: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]' },
                         ].map(({ label, display, icon: Icon, color }) => (
                             <div key={label} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 transition-colors hover:bg-[var(--theme-bg-card-hover)] flex items-center gap-3.5 shadow-2xs">
                                 <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center shrink-0`}>

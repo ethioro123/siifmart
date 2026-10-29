@@ -110,20 +110,20 @@ export const ShiftClosureModal: React.FC = () => {
             <div className="space-y-5">
                 {isManagerPinStep ? (
                     <div className="space-y-6 animate-in fade-in">
-                        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-                            <ShieldAlert className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" size={22} />
+                        <div className="p-4 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex items-start gap-3">
+                            <ShieldAlert className="text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" size={22} />
                             <div className="space-y-1">
-                                <h4 className="text-sm font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">
+                                <h4 className="text-sm font-black text-[var(--theme-status-warning-text)] uppercase tracking-wider">
                                     {t('posCommand.cashDiscrepancyTitle')}
                                 </h4>
-                                <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
+                                <p className="text-xs text-[var(--theme-status-warning-text)] leading-relaxed">
                                     {t('posCommand.cashDiscrepancyNotice')} (<b>{currency} {Math.abs(variance).toLocaleString()} - {variance > 0 ? t('posCommand.surplus') : t('posCommand.shortage')}</b>)
                                 </p>
                             </div>
                         </div>
 
                         {pinError && (
-                            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold text-center animate-shake">
+                            <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-xs font-bold text-center animate-shake">
                                 {pinError}
                             </div>
                         )}
@@ -147,7 +147,7 @@ export const ShiftClosureModal: React.FC = () => {
                                     setManagerPin('');
                                     setPinError('');
                                 }}
-                                className="px-4 py-2.5 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs transition-colors cursor-pointer"
+                                className="min-h-11 px-4 py-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs transition-colors cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
                                 {t('common.back') || 'Back'}
                             </button>
@@ -155,7 +155,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 type="button"
                                 onClick={handleVerifyManagerPin}
                                 disabled={managerPin.length < 4 || isSubmittingShift}
-                                className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs"
+                                className="min-h-11 px-6 py-2.5 bg-[var(--theme-status-danger)] hover:opacity-90 text-[var(--theme-status-danger-text)] font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                             >
                                 {isSubmittingShift ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
                                 {t('posCommand.signOffAndFinalize')}
@@ -197,7 +197,7 @@ export const ShiftClosureModal: React.FC = () => {
                         {/* Continue button */}
                         <button
                             onClick={() => setClosingStep(2)}
-                            className="w-full py-3 text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] hover:opacity-90 select-none bg-[var(--theme-primary)] shadow-xs cursor-pointer text-sm"
+                            className="w-full min-h-11 py-2.5 text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] hover:opacity-90 select-none bg-[var(--theme-primary)] shadow-xs cursor-pointer text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                         >
                             {t('common.continue')}
                         </button>
@@ -207,20 +207,20 @@ export const ShiftClosureModal: React.FC = () => {
                         {/* Balance status banner */}
                         <div className={`p-6 rounded-2xl border text-center ${
                             !isVariance
-                                ? 'bg-emerald-500/10 border-emerald-500/20'
-                                : 'bg-rose-500/10 border-rose-500/20'
+                                ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
+                                : 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)]'
                         }`}>
                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 ${
                                 !isVariance
-                                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                                    : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
+                                    ? 'bg-[var(--theme-status-success)]/20 text-[var(--theme-status-success-text)]'
+                                    : 'bg-[var(--theme-status-danger)]/20 text-[var(--theme-status-danger-text)]'
                             }`}>
                                 {!isVariance ? <CheckCircle size={24} /> : <AlertTriangle size={24} />}
                             </div>
-                            <h3 className={`text-lg font-bold mb-1 ${!isVariance ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
+                            <h3 className={`text-lg font-bold mb-1 ${!isVariance ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}`}>
                                 {!isVariance ? t('pos.shiftBalanced') : variance > 0 ? t('pos.cashSurplus') : t('pos.cashShortage')}
                             </h3>
-                            <p className={`text-xs ${!isVariance ? 'text-emerald-600/80 dark:text-emerald-400/80' : 'text-rose-600/80 dark:text-rose-400/80'}`}>
+                            <p className={`text-xs opacity-90 ${!isVariance ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}`}>
                                 {!isVariance ? t('pos.shiftBalancedDesc') : t('pos.varianceDetectedDesc')}
                             </p>
                         </div>
@@ -241,9 +241,9 @@ export const ShiftClosureModal: React.FC = () => {
                         {/* Variance section */}
                         {isVariance && (
                             <div className="space-y-3">
-                                <div className="flex justify-between items-center p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl">
-                                    <span className="text-sm font-bold text-rose-600 dark:text-rose-400">{t('pos.variance')}</span>
-                                    <span className="text-lg font-mono font-bold text-rose-600 dark:text-rose-400">
+                                <div className="flex justify-between items-center p-4 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl">
+                                    <span className="text-sm font-bold text-[var(--theme-status-danger-text)]">{t('pos.variance')}</span>
+                                    <span className="text-lg font-mono font-bold text-[var(--theme-status-danger-text)]">
                                         {variance > 0 ? '+' : ''}{currency} {variance.toLocaleString()}
                                     </span>
                                 </div>
@@ -263,30 +263,30 @@ export const ShiftClosureModal: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setClosingStep(1)}
-                                className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 select-none cursor-pointer text-xs shadow-2xs"
+                                className="flex-1 min-h-11 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 select-none cursor-pointer text-xs shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
-                                <ArrowLeft size={14} className="text-blue-500" />
+                                <ArrowLeft size={14} className="text-[var(--theme-accent)]" />
                                 {t('posCommand.recount')}
                             </button>
                             <button
                                 type="button"
                                 onClick={handlePrintZReport}
-                                className="px-4 py-3 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer text-xs shadow-2xs"
+                                className="min-h-11 px-4 py-2.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer text-xs shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                 title="Print Physical Z-Report Slip"
                             >
-                                <Printer size={14} className="text-purple-500" />
+                                <Printer size={14} className="text-[var(--theme-accent)]" />
                                 <span>{t('posCommand.zReportBtn')}</span>
                             </button>
                             <button
                                 type="button"
                                 onClick={handleFinalizeClick}
                                 disabled={isSubmittingShift || (isVariance && !discrepancyReason)}
-                                className="flex-1 py-3 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs select-none cursor-pointer text-xs"
+                                className="flex-1 min-h-11 py-2.5 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs select-none cursor-pointer text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
                                 {isSubmittingShift ? (
                                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : isVariance && !isManagerOrAdmin ? (
-                                    <Lock size={14} className="text-amber-500" />
+                                    <Lock size={14} className="text-[var(--theme-status-warning-text)]" />
                                 ) : null}
                                 {isVariance && !isManagerOrAdmin ? t('posCommand.authorizeWithManagerPin') : t('posCommand.finalizeLogout')}
                             </button>

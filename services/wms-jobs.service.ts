@@ -277,7 +277,7 @@ export const wmsJobsService = {
         }
     },
 
-    async update(id: string, updates: Partial<WMSJob>) {
+    async update(id: string, updates: Partial<WMSJob>, expectedUpdatedAt?: string) {
         const fields: Partial<Record<keyof WMSJob, string>> = {
             status: 'status', priority: 'priority', type: 'type', location: 'location', notes: 'notes',
             countryCode: 'country_code', country_code: 'country_code', siteId: 'site_id', site_id: 'site_id',
@@ -299,12 +299,9 @@ export const wmsJobsService = {
             if (updates[key] !== undefined) dbUpdates[fields[key]!] = key === 'items' ? Math.round(updates.items || 0) : updates[key];
         }
 
-        const { data, error } = await supabase
-            .from('wms_jobs')
-            .update(dbUpdates)
-            .eq('id', id)
-            .select(WMS_JOB_COLUMNS)
-            .single();
+        let query = supabase.from('wms_jobs').update(dbUpdates).eq('id', id);
+        if (expectedUpdatedAt) query = query.eq('updated_at', expectedUpdatedAt);
+        const { data, error } = await query.select(WMS_JOB_COLUMNS).single();
 
         if (error) throw error;
 

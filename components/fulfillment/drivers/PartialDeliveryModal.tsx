@@ -135,7 +135,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                 refreshJobs();
             }
             setStep('DONE');
-            addNotification('info', `${hasUndelivered ? 'Partial delivery' : 'Delivery'} logged for ${formatJobId(job)}. ${totalDelivered}/${totalDispatched} units arrived at dock. Awaiting destination receiving inspection.`);
+            addNotification('info', t('warehouse.driverHub.arrivalRecordedNotice'));
         } catch (err: any) {
             addNotification('alert', 'Delivery failed: ' + (err?.message || 'Unknown error'));
         } finally {
@@ -156,7 +156,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                         </div>
                         <div>
                             <h3 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">
-                                {hasUndelivered ? t('warehouse.driverHub.partialDelivery') : t('warehouse.driverHub.confirmDelivery')}
+                                {hasUndelivered ? t('warehouse.driverHub.partialDelivery') : t('warehouse.driverHub.confirmArrival')}
                             </h3>
                             <p className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5">
                                 {formatJobId(job)} → {destSite?.name || t('warehouse.driverHub.localHub')}
@@ -179,10 +179,10 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                             <CheckCircle size={30} className="text-emerald-500" />
                         </div>
                         <h4 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight mb-2">
-                            {hasUndelivered ? t('warehouse.driverHub.partialDeliveryLogged') : t('warehouse.driverHub.jobCompleted')}
+                            {hasUndelivered ? t('warehouse.driverHub.arrivalRecordedTitle') : t('warehouse.driverHub.arrivalRecordedTitle')}
                         </h4>
                         <p className="text-xs text-[var(--theme-text-secondary)] max-w-xs leading-relaxed">
-                            <strong className="text-emerald-500 font-mono tabular-nums">{totalDelivered}</strong> {t('warehouse.driverHub.to')} <strong className="text-[var(--theme-text-primary)] font-mono tabular-nums">{totalDispatched}</strong> {t('warehouse.driverHub.units').toLowerCase()} {t('warehouse.driverHub.delivered').toLowerCase()} {t('warehouse.driverHub.to').toLowerCase()} {destSite?.name || t('warehouse.driverHub.localHub')}.
+                            <strong className="text-emerald-500 font-mono tabular-nums">{totalDelivered}</strong> {t('warehouse.driverHub.to')} <strong className="text-[var(--theme-text-primary)] font-mono tabular-nums">{totalDispatched}</strong> {t('warehouse.driverHub.units').toLowerCase()} {t('warehouse.driverHub.arrived').toLowerCase()} {t('warehouse.driverHub.to').toLowerCase()} {destSite?.name || t('warehouse.driverHub.localHub')}.
                         </p>
                         <p className="text-[11px] text-[var(--theme-text-muted)] mt-2">{t('warehouse.driverHub.arrivalRecordedNotice')}</p>
                         <button
@@ -286,7 +286,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                 ) : hasUndelivered ? (
                                     <>{t('warehouse.driverHub.next')} <ArrowRight size={14} /></>
                                 ) : (
-                                    <>{t('warehouse.driverHub.confirmDelivery')} <CheckCircle size={14} /></>
+                                    <>{t('warehouse.driverHub.confirmArrival')} <CheckCircle size={14} /></>
                                 )}
                             </button>
                         </div>

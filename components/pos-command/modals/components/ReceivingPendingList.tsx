@@ -162,27 +162,27 @@ export const ReceivingPendingList: React.FC = () => {
                                                     if (!isExt) {
                                                         if (!isDone) {
                                                             return (
-                                                                <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
-                                                                    Driver In-Transit (Awaiting Arrival)
+                                                                <span className="px-2.5 py-0.5 bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] rounded-full text-[9px] font-semibold uppercase tracking-wider">
+                                                                    {t('posCommand.driverInTransitAwaiting')}
                                                                 </span>
                                                             );
                                                         }
                                                         return (
-                                                            <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
-                                                                Driver Delivered — Ready to Receive
+                                                            <span className="px-2.5 py-0.5 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] rounded-full text-[9px] font-semibold uppercase tracking-wider">
+                                                                    {t('posCommand.driverDeliveredReady')}
                                                             </span>
                                                         );
                                                     } else {
                                                         if (!isDeparted) {
                                                             return (
-                                                                <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
-                                                                    EXT Carrier (Awaiting Departure)
+                                                                <span className="px-2.5 py-0.5 bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] rounded-full text-[9px] font-semibold uppercase tracking-wider">
+                                                                    {t('posCommand.extCarrierAwaitingDeparture')}
                                                                 </span>
                                                             );
                                                         }
                                                         return (
-                                                            <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
-                                                                EXT Carrier — Departure Confirmed
+                                                            <span className="px-2.5 py-0.5 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] rounded-full text-[9px] font-semibold uppercase tracking-wider">
+                                                                {t('posCommand.extCarrierDepartureConfirmed')}
                                                             </span>
                                                         );
                                                     }
@@ -227,7 +227,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                     return (
                                                         <button
                                                             onClick={() => handleSelectTransferForReceiving(item.id)}
-                                                            className="px-4 py-2.5 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-500 hover:bg-amber-500/20 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                                                            className="px-4 py-2 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] hover:opacity-90 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                                             title="Internal driver must mark delivery complete before POS can start receiving"
                                                         >
                                                             <Clock size={13} />
@@ -241,7 +241,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                         return (
                                                             <button
                                                                 onClick={() => handleSelectTransferForReceiving(item.id)}
-                                                                className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                                                                className="px-4 py-2 bg-[var(--theme-status-warning-bg)] hover:opacity-90 border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                                                 title="Warehouse authority: Click to confirm external carrier departure & start receiving"
                                                             >
                                                                 <Truck size={14} />
@@ -252,7 +252,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                     return (
                                                         <button
                                                             onClick={() => handleSelectTransferForReceiving(item.id)}
-                                                            className="px-4 py-2.5 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-500 hover:bg-amber-500/20 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                                                            className="px-4 py-2 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] hover:opacity-90 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                                             title="Warehouse authority must confirm departure before external receiving can begin"
                                                         >
                                                             <Clock size={13} />
@@ -264,7 +264,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                 return (
                                                     <button
                                                         onClick={() => handleSelectTransferForReceiving(item.id)}
-                                                        className="px-4 py-2.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                                                        className="px-4 py-2 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                                     >
                                                         {t('posCommand.startReceiving')}
                                                         <ChevronRight size={14} />
@@ -280,12 +280,12 @@ export const ReceivingPendingList: React.FC = () => {
                                             <p className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 pl-0.5">{t('posCommand.manifestItems')} ({(item as any).items?.length || 0})</p>
                                             <div className="max-h-[220px] overflow-y-auto custom-scrollbar border border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-card)] divide-y divide-[var(--theme-border)]">
                                                 {((item as any).items || []).map((lineItem: any, idx: number) => (
-                                                    <div key={idx} className="p-3 flex justify-between items-center text-xs font-medium hover:bg-[var(--theme-bg-card-hover)] transition-colors">
-                                                        <div className="min-w-0 flex-1">
-                                                            <p className="text-[var(--theme-text-primary)] truncate font-semibold">{lineItem.name}</p>
-                                                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono">SKU: {lineItem.sku}</p>
+                                                    <div key={idx} className="p-2.5 flex justify-between items-center text-xs font-medium hover:bg-[var(--theme-bg-card-hover)] transition-colors">
+                                                        <div className="min-w-0 flex-1 pr-3">
+                                                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold leading-snug break-words">{lineItem.name}</p>
+                                                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono mt-0.5">SKU: {lineItem.sku}</p>
                                                         </div>
-                                                        <span className="text-[var(--theme-text-secondary)] font-mono pl-3">
+                                                        <span className="text-[var(--theme-text-secondary)] font-mono pl-3 shrink-0 text-xs">
                                                             {['group_ceo','country_operations_director','regional_operations_manager'].includes(user?.role||'') ? (lineItem.expectedQty || lineItem.quantity || 0) : t('posCommand.blindCount')}
                                                             {lineItem.unit ? ` ${lineItem.unit}` : ''}
                                                         </span>

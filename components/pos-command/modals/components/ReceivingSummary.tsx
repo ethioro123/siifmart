@@ -16,7 +16,7 @@ export const ReceivingSummary: React.FC = () => {
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-6 text-center">
                 <div className="w-16 h-16 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle size={36} className="text-emerald-500" />
+                    <CheckCircle size={36} className="text-[var(--theme-status-success)]" />
                 </div>
                 <h3 className="text-xl font-bold text-[var(--theme-text-primary)] mb-1">
                     {(receivingSummary as any).isHistory ? t('posCommand.shipmentDetails') : t('posCommand.receivingCompleted')}
@@ -46,12 +46,12 @@ export const ReceivingSummary: React.FC = () => {
                             : `${item.receivedQty}${resolvedUnit ? ` ${resolvedUnit}` : ''}`;
 
                         return (
-                            <div key={idx} className="p-3 flex items-center justify-between hover:bg-[var(--theme-bg-card-hover)] transition-colors">
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold text-[var(--theme-text-primary)] truncate">{item.name}</p>
-                                    <p className="text-xs text-[var(--theme-text-muted)]">SKU: {item.sku}</p>
+                            <div key={idx} className="p-2.5 flex items-center justify-between hover:bg-[var(--theme-bg-card-hover)] transition-colors">
+                                <div className="flex-1 min-w-0 pr-3">
+                                    <p className="text-xs font-semibold text-[var(--theme-text-primary)] leading-snug break-words">{item.name}</p>
+                                    <p className="text-[11px] text-[var(--theme-text-muted)] font-mono mt-0.5">SKU: {item.sku}</p>
                                 </div>
-                                <div className="flex flex-col items-end">
+                                <div className="flex flex-col items-end shrink-0">
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs font-bold text-[var(--theme-text-primary)]">
                                             {t('posCommand.received')} {formattedReceived}
@@ -59,10 +59,10 @@ export const ReceivingSummary: React.FC = () => {
                                     </div>
                                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full mt-1 border ${
                                         item.condition === 'Good'
-                                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                            ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                                             : item.condition === 'Damaged'
-                                                ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                                                : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
+                                                : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                                     }`}>
                                         {item.condition === 'Good' ? t('posCommand.conditionGood') :
                                             item.condition === 'Damaged' ? t('posCommand.conditionDamaged') :
@@ -76,18 +76,18 @@ export const ReceivingSummary: React.FC = () => {
             </div>
 
             {receivingSummary.hasDiscrepancies && (
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-start gap-3">
-                    <AlertTriangle className="text-amber-500 flex-shrink-0" size={20} />
+                <div className="bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-xl p-3.5 flex items-start gap-3">
+                    <AlertTriangle className="text-[var(--theme-status-warning-text)] flex-shrink-0" size={18} />
                     <div>
-                        <p className="text-sm font-bold text-amber-500">{t('posCommand.discrepanciesReported')}</p>
-                        <p className="text-xs text-amber-500/80">Variance recorded against the private shipment manifest.</p>
+                        <p className="text-xs font-bold text-[var(--theme-status-warning-text)]">{t('posCommand.discrepanciesReported')}</p>
+                        <p className="text-[11px] text-[var(--theme-status-warning-text)]/90">{t('posCommand.varianceRecordedAgainstManifest')}</p>
                     </div>
                 </div>
             )}
 
             <button
                 onClick={handleCloseReceivingModal}
-                className="w-full py-3.5 text-[var(--theme-primary-text)] font-bold rounded-xl shadow-xs transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2 bg-[var(--theme-primary)] text-xs uppercase tracking-wider cursor-pointer"
+                className="w-full min-h-11 py-2.5 text-[var(--theme-primary-text)] font-bold rounded-xl shadow-xs transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2 bg-[var(--theme-primary)] text-xs uppercase tracking-wider cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
             >
                 {t('posCommand.closeSummary')}
             </button>

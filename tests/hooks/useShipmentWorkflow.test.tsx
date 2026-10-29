@@ -8,7 +8,8 @@ import { wmsJobsService } from '../../services/wms-jobs.service';
 import type { WMSJob } from '../../types';
 
 vi.mock('../../services/wms-jobs.service', () => ({ wmsJobsService: { update: vi.fn() } }));
-const base: WMSJob = { id: 'dispatch-1', type: 'DISPATCH', status: 'In-Progress', priority: 'Normal', siteId: 'source',
+vi.mock('../../contexts/LanguageContext',()=>({useLanguage:()=>({t:(key:string)=>key})}));
+const base: WMSJob = { updatedAt:'2026-10-30T00:00:00.123456Z', id: 'dispatch-1', type: 'DISPATCH', status: 'In-Progress', priority: 'Normal', siteId: 'source',
     sourceSiteId: 'source', destSiteId: 'dest', assignedTo: 'driver-1', transferStatus: 'Shipped', location: 'In-Transit',
     orderRef: 'parent-transfer', items: 10, lineItems: [{ productId: 'p1', sku: 'KE-FR001', name: 'Carrots', expectedQty: 10, pickedQty: 0, status: 'Pending' }] };
 function setup() {
@@ -47,7 +48,7 @@ describe('shipment mutations', () => {
     it('releases a packed, loaded shipment without setting delivery or receipt', async () => {
         const { result } = setup();
         await act(async () => { await result.current.mutateAsync({ job: { ...base, transferStatus: 'Packed', location: 'Dock D1' }, action: { type: 'depart' } }); });
-        expect(wmsJobsService.update).toHaveBeenCalledWith(base.id, expect.objectContaining({ transferStatus: 'Shipped', location: 'In-Transit', status: 'In-Progress' }));
+        expect(wmsJobsService.update).toHaveBeenCalledWith(base.id, expect.objectContaining({ transferStatus: 'Shipped', location: 'In-Transit', status: 'In-Progress' }), base.updatedAt);
         expect(vi.mocked(wmsJobsService.update).mock.calls[0][1]).not.toHaveProperty('deliveredAt');
     });
 });
@@ -60,3 +61,12 @@ describe('shipment mutations', () => {
     });
     expect(wmsJobsService.update).toHaveBeenCalledTimes(1);
  });
+
+it('rejects stale dispatch versions and missing snapshots', async()=>{
+ const {result}=setup();
+ vi.mocked(wmsJobsService.update).mockRejectedValueOnce({code:'PGRST116'});
+ await act(async()=>{await expect(result.current.mutateAsync({job:base,action:{type:'arrive',delivered:[10],note:''}})).rejects.toThrow('shipmentChanged');});
+ expect(wmsJobsService.update).toHaveBeenCalledWith(base.id,expect.any(Object),base.updatedAt);
+ await act(async()=>{await expect(result.current.mutateAsync({job:{...base,updatedAt:undefined},action:{type:'arrive',delivered:[10],note:''}})).rejects.toThrow('shipmentChanged');});
+ expect(wmsJobsService.update).toHaveBeenCalledTimes(1);
+});

@@ -39,7 +39,7 @@ export const POSCommandCharts: React.FC = () => {
             <div className={`${cardClass} relative overflow-hidden`}>
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2.5 select-none">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <TrendingUp size={14} />
                         </div>
                         <span>{t('posCommand.hourlyPerformance')}</span>
@@ -84,7 +84,7 @@ export const POSCommandCharts: React.FC = () => {
             <div className={`${cardClass} relative overflow-hidden`}>
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2.5 select-none">
-                        <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <PieChartIcon size={14} />
                         </div>
                         <span>{isCentralHQ ? t('posCommand.paymentMethods') : t('posCommand.shiftIntegrityAndSecurity')}</span>
@@ -143,7 +143,7 @@ export const POSCommandCharts: React.FC = () => {
                 ) : (
                     <div className="h-[240px] w-full flex flex-col items-center justify-center p-6 text-center space-y-3">
                         <div className="w-14 h-14 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)]">
-                            <ShieldCheck size={28} className="text-emerald-500" />
+                            <ShieldCheck size={28} className="text-[var(--theme-status-success)]" />
                         </div>
                         <div className="space-y-1">
                             <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">

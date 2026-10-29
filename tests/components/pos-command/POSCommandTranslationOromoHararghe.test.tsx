@@ -99,5 +99,12 @@ describe('POS Command Center - East Hararghe (Harargee Bahaa) Localization', () 
         expect(getEn('productsUpdatedRecently')).toContain('{count}');
         expect(getAm('productsUpdatedRecently')).toContain('{count}');
         expect(getOr('productsUpdatedRecently')).toContain('{count}');
+
+        expect(getEn('openingFloatReconcileNotice')).toContain('{counter}');
+        expect(getEn('openingFloatReconcileNotice')).toContain('{badge}');
+        expect(getAm('openingFloatReconcileNotice')).toContain('{counter}');
+        expect(getAm('openingFloatReconcileNotice')).toContain('{badge}');
+        expect(getOr('openingFloatReconcileNotice')).toContain('{counter}');
+        expect(getOr('openingFloatReconcileNotice')).toContain('{badge}');
     });
 });

@@ -43,8 +43,9 @@ export const ReceivingModal: React.FC = () => {
                 {!receivingSummary && !selectedTransferForReceiving && (
                     <div className="flex p-1 bg-[var(--theme-bg-subtle)] rounded-2xl mb-4 border border-[var(--theme-border)]">
                         <button
+                            type="button"
                             onClick={() => setActiveTab2('pending')}
-                            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                            className={`flex-1 min-h-9 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                 activeTab === 'pending'
                                     ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
@@ -53,8 +54,9 @@ export const ReceivingModal: React.FC = () => {
                             {t('posCommand.pendingTab')}{activeSite?.name ? ` (${activeSite.name.trim()})` : ''}
                         </button>
                         <button
+                            type="button"
                             onClick={() => setActiveTab2('history')}
-                            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                            className={`flex-1 min-h-9 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                 activeTab === 'history'
                                     ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'

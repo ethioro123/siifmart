@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { logger } from '../utils/logger';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { JobItem, WMSJob } from '../types';
@@ -16,9 +17,11 @@ export type ShipmentAction =
 
 export function useShipmentWorkflow(onRefresh: () => Promise<void>) {
     const lock = useRef(false);
+    const { t } = useLanguage();
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({ job, action }: { job: WMSJob; action: ShipmentAction }) => {
+            if (!job.updatedAt) throw new Error(t('warehouse.driverHub.shipmentChanged'));
             if (!isShipment(job)) throw new Error('Use the transfer workflow for transfer requests.');
             const phase = getShipmentPhase(job);
             const updates: Partial<WMSJob> = {};
@@ -58,7 +61,11 @@ export function useShipmentWorkflow(onRefresh: () => Promise<void>) {
             // The database validates the actor/driver and synchronizes linked records in one transaction.
             if (lock.current) throw new Error('A shipment action is already being saved.');
             lock.current = true;
-            try { return await wmsJobsService.update(job.id, updates); }
+            try { return await wmsJobsService.update(job.id, updates, job.updatedAt); }
+            catch (error) {
+                if (error && typeof error === 'object' && 'code' in error && error.code === 'PGRST116') throw new Error(t('warehouse.driverHub.shipmentChanged'));
+                throw error;
+            }
             finally { lock.current = false; }
         },
         onSuccess: async () => {

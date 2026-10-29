@@ -131,14 +131,14 @@ const POSCommandContent: React.FC = () => {
               onClick={handleBack}
               className="min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-2xl transition-colors border border-[var(--theme-border)] shadow-2xs flex items-center gap-2 text-xs font-semibold group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
             >
-              <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 transition-transform group-hover:-translate-x-0.5">
+              <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0 transition-transform group-hover:-translate-x-0.5">
                 <ArrowLeft size={13} />
               </div>
               <span>{t('common.back') || 'Back'}</span>
             </button>
 
             <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="w-2 h-2 rounded-full bg-[var(--theme-status-warning)]" />
               <span>{activeSite?.name || t('posCommand.loadingLocation')}</span>
             </span>
 
@@ -182,7 +182,7 @@ const POSCommandContent: React.FC = () => {
                 className="min-h-11 px-4 bg-[var(--theme-status-danger-bg)] hover:opacity-90 text-[var(--theme-status-danger-text)] text-xs font-semibold rounded-2xl border border-[var(--theme-status-danger-border)] transition-colors flex items-center gap-2 shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
                 title="End Shift and Reconcile Cash Drawer"
               >
-                <div className="w-5 h-5 rounded-md bg-rose-500/20 text-rose-500 flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 rounded-md bg-[var(--theme-status-danger)]/20 text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                   <Power size={13} />
                 </div>
                 <span>{t('posCommand.endShift') || 'End Shift'}</span>
@@ -212,7 +212,7 @@ const POSCommandContent: React.FC = () => {
                   className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                   title="Stock Catalog & Pricing"
                 >
-                  <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Box size={13} />
                   </div>
                   <span>{t('posCommand.stockList')}</span>
@@ -226,7 +226,7 @@ const POSCommandContent: React.FC = () => {
                 className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 title="Receive Stock"
               >
-                <div className="w-5 h-5 rounded-md bg-teal-500/10 text-teal-500 flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                   <PackageCheck size={13} />
                 </div>
                 <span>{t('posCommand.receiveLabel')}</span>
@@ -238,7 +238,7 @@ const POSCommandContent: React.FC = () => {
                 className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 title="Drop Safe Ledger & Armored Pickups"
               >
-                <div className="w-5 h-5 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                   <Vault size={13} />
                 </div>
                 <span>{t('posCommand.safeLedgerLabel')}</span>
@@ -271,7 +271,7 @@ const POSCommandContent: React.FC = () => {
                   className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                   title="Unified Print Center (Receipts, Barcodes & Shelf Tags)"
                 >
-                  <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                     <Printer size={13} />
                   </div>
                   <span>{t('posCommand.printAction')}</span>
@@ -289,7 +289,7 @@ const POSCommandContent: React.FC = () => {
                       className="w-full min-h-11 px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                       title="Reprint last customer transaction receipt"
                     >
-                      <div className="w-6 h-6 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <ReceiptText size={13} />
                       </div>
                       <div>
@@ -307,7 +307,7 @@ const POSCommandContent: React.FC = () => {
                       className="w-full min-h-11 px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                       title="Generate barcode labels and shelf price tags"
                     >
-                      <div className="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Tags size={13} />
                       </div>
                       <div>
@@ -325,7 +325,7 @@ const POSCommandContent: React.FC = () => {
                 className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                 title="Lock Terminal Screen"
               >
-                <div className="w-5 h-5 rounded-md bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 rounded-md bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
                   <Lock size={13} />
                 </div>
                 <span>{t('posCommand.lockScreen')}</span>

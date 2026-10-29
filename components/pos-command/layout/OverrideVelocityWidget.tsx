@@ -37,8 +37,8 @@ export const OverrideVelocityWidget: React.FC = () => {
                 <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
                         stats.isExcessive 
-                            ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' 
-                            : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' 
+                            : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                     }`}>
                         {stats.isExcessive ? <ShieldAlert size={20} /> : <ShieldCheck size={20} />}
                     </div>
@@ -49,17 +49,17 @@ export const OverrideVelocityWidget: React.FC = () => {
                             </h3>
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-tight ${
                                 stats.isExcessive
-                                    ? 'bg-rose-500/15 text-rose-400 border border-rose-500/20'
-                                    : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                                    ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
+                                    : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                             }`}>
                                 {stats.isExcessive ? (
                                     <>
-                                        <AlertTriangle className="w-3 h-3 text-rose-400 shrink-0" />
+                                        <AlertTriangle className="w-3 h-3 text-[var(--theme-status-danger-text)] shrink-0" />
                                         <span>{t('posCommand.highShrinkageAlert')}</span>
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                                        <CheckCircle2 className="w-3 h-3 text-[var(--theme-status-success-text)] shrink-0" />
                                         <span>{t('posCommand.controlledVelocity')}</span>
                                     </>
                                 )}
@@ -74,7 +74,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                 <div className="text-right">
                     <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">{t('posCommand.todayOverrideVelocity')}</span>
                     <p className={`text-2xl font-mono font-bold tracking-tight ${
-                        stats.isExcessive ? 'text-rose-500' : 'text-[var(--theme-text-primary)]'
+                        stats.isExcessive ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-text-primary)]'
                     }`}>
                         {stats.overrideVelocityRate.toFixed(1)}%
                     </p>
@@ -136,7 +136,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                         </div>
                     ) : (
                         recentOverrides.map((ov) => (
-                            <div key={ov.id} className="p-3.5 flex items-center justify-between text-xs font-mono hover:bg-[var(--theme-bg-card-hover)] transition-colors">
+                            <div key={ov.id} className="p-2.5 flex items-center justify-between text-xs font-mono hover:bg-[var(--theme-bg-card-hover)] transition-colors">
                                 <div className="flex items-center gap-2.5">
                                     <span className="px-2 py-0.5 rounded-lg bg-[var(--theme-bg-card)] text-[10px] font-bold uppercase text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                         {ov.override_type.replace(/_/g, ' ')}

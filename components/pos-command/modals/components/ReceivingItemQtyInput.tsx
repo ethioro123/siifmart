@@ -90,9 +90,9 @@ export const ReceivingItemQtyInput: React.FC<ReceivingItemQtyInputProps> = ({
             onBlur={handleBlur}
             className={`w-16 min-h-[32px] bg-[var(--theme-input-bg)] border rounded-xl text-center font-mono py-1 px-1.5 text-xs focus:outline-none transition-all ${
                 isOverReceived && isCentralHQOnly
-                    ? 'border-amber-500/50 text-amber-500 bg-amber-500/10'
+                    ? 'border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]'
                     : isFullyReceived && isCentralHQOnly
-                        ? 'border-emerald-500/50 text-emerald-500 bg-emerald-500/10'
+                        ? 'border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)]'
                         : 'border-[var(--theme-border)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)]'
             }`}
         />

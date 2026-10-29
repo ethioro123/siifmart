@@ -19,18 +19,18 @@ export const RecentTransactions: React.FC = () => {
     return (
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs isolate">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
+            <div className="px-5 py-3.5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Receipt className="w-3.5 h-3.5" />
                     </div>
-                    <h3 className="font-bold text-[var(--theme-text-primary)] tracking-tight">{t('posCommand.recentTransactions')}</h3>
+                    <h3 className="font-bold text-[var(--theme-text-primary)] tracking-tight text-sm">{t('posCommand.recentTransactions')}</h3>
                 </div>
                 {canAccessSalesHistory && (
                     <button
                         type="button"
                         onClick={() => navigate('/sales')}
-                        className="min-h-11 inline-flex items-center px-3 rounded-lg text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors hover:underline underline-offset-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-border-focus)]"
+                        className="min-h-9 inline-flex items-center px-3 rounded-lg text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors hover:underline underline-offset-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         {t('posCommand.viewAllHistory')}
                     </button>
@@ -42,10 +42,10 @@ export const RecentTransactions: React.FC = () => {
                 <table className="w-full text-left">
                     <thead className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                         <tr>
-                            <th className="px-5 py-3.5 text-left text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('posCommand.receiptId')}</th>
-                            <th className="px-5 py-3.5 text-left text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('posCommand.method')}</th>
-                            <th className="px-5 py-3.5 text-right text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('inventory.price')}</th>
-                            <th className="px-5 py-3.5 text-center text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('common.status')}</th>
+                            <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('posCommand.receiptId')}</th>
+                            <th className="px-4 py-2.5 text-left text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('posCommand.method')}</th>
+                            <th className="px-4 py-2.5 text-right text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('inventory.price')}</th>
+                            <th className="px-4 py-2.5 text-center text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('common.status')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--theme-border)]">
@@ -53,7 +53,7 @@ export const RecentTransactions: React.FC = () => {
                             if (filteredSales.length === 0) {
                                 return (
                                     <tr>
-                                        <td colSpan={4} className="px-5 py-8 text-center text-xs text-[var(--theme-text-muted)] font-medium">
+                                        <td colSpan={4} className="px-4 py-8 text-center text-xs text-[var(--theme-text-muted)] font-medium">
                                             {t('posCommand.noTransactionsFound') || 'No transactions found in this period.'}
                                         </td>
                                     </tr>
@@ -65,28 +65,28 @@ export const RecentTransactions: React.FC = () => {
 
                             return paginatedTx.map((sale) => (
                                 <tr key={sale.id} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors">
-                                    <td className="px-5 py-4 text-sm font-mono font-bold text-[var(--theme-text-primary)]">{sale.id.substring(0, 8).toUpperCase()}</td>
-                                    <td className="px-5 py-4 text-xs text-[var(--theme-text-secondary)]">
+                                    <td className="px-4 py-2.5 text-xs font-mono font-bold text-[var(--theme-text-primary)]">{sale.id.substring(0, 8).toUpperCase()}</td>
+                                    <td className="px-4 py-2.5 text-xs text-[var(--theme-text-secondary)]">
                                         {sale.method === 'Cash' ? t('pos.cashSales') :
                                             sale.method === 'Card' ? t('pos.cardSales') :
                                                 sale.method === 'Mobile Money' ? t('pos.mobileSales') : sale.method}
                                     </td>
-                                    <td className="px-5 py-4 text-sm font-mono font-bold text-[var(--theme-text-primary)] text-right">{CURRENCY_SYMBOL} {sale.total.toLocaleString()}</td>
-                                    <td className="px-5 py-4 text-center">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
+                                    <td className="px-4 py-2.5 text-xs font-mono font-bold text-[var(--theme-text-primary)] text-right tabular-nums">{CURRENCY_SYMBOL} {sale.total.toLocaleString()}</td>
+                                    <td className="px-4 py-2.5 text-center">
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
                                             sale.status === 'Completed'
-                                                ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                                                ? 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]'
                                                 : sale.status === 'Pending'
-                                                    ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20'
-                                                    : 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20'
+                                                    ? 'text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]'
+                                                    : 'text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)]'
                                         }`}>
                                             {sale.status === 'Completed'
                                                 ? t('common.completed')
                                                 : sale.status === 'Pending'
                                                     ? t('common.pending')
                                                     : sale.status === 'Partially Refunded'
-                                                        ? 'Partially refunded'
-                                                        : 'Refunded'}
+                                                        ? t('posCommand.partiallyRefunded') || 'Partially refunded'
+                                                        : t('posCommand.refunded') || 'Refunded'}
                                         </span>
                                     </td>
                                 </tr>

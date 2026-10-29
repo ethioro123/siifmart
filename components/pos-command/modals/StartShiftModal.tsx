@@ -69,18 +69,18 @@ export const StartShiftModal: React.FC = () => {
             title={t('posCommand.startShiftModalTitle')}
             size="md"
         >
-            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Cashier & Sovereign Identity Card */}
-                <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-2.5">
+                <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-2.5">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center border border-blue-500/20 shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
                                 <User size={18} />
                             </div>
                             <div>
                                 <div className="flex items-center gap-2">
                                     <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{user?.name || 'Staff Cashier'}</p>
-                                    <span className="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-600 dark:text-blue-400 font-mono text-[10px] font-black tracking-wider border border-blue-500/20">
+                                    <span className="px-2 py-0.5 rounded-md bg-[var(--theme-accent)]/15 text-[var(--theme-accent)] font-mono text-[10px] font-black tracking-wider border border-[var(--theme-accent)]/20">
                                         {cashierBadge}
                                     </span>
                                 </div>
@@ -89,17 +89,17 @@ export const StartShiftModal: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)] shadow-xs">
-                            <Store size={14} className="text-orange-500" />
+                            <Store size={14} className="text-[var(--theme-status-warning)]" />
                             <span>{activeSite?.name || 'Store Register'}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--theme-text-secondary)] pt-2 border-t border-[var(--theme-border)]">
                         <div className="flex items-center gap-1.5">
-                            <Clock size={12} className="text-teal-500" />
+                            <Clock size={12} className="text-[var(--theme-accent)]" />
                             <span>{t('posCommand.shiftStartingAt')} {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                        <span className="text-[10px] uppercase font-bold text-amber-500">{t('posCommand.oneToOneResponsibility')}</span>
+                        <span className="text-[10px] uppercase font-bold text-[var(--theme-status-warning-text)]">{t('posCommand.oneToOneResponsibility')}</span>
                     </div>
                 </div>
 
@@ -107,7 +107,7 @@ export const StartShiftModal: React.FC = () => {
                 <div className="space-y-2">
                     <div className="flex justify-between items-baseline">
                         <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
-                            <Monitor size={14} className="text-indigo-500" />
+                            <Monitor size={14} className="text-[var(--theme-accent)]" />
                             {t('posCommand.assignRegisterCounter')}
                         </label>
                         <span className="text-[11px] text-[var(--theme-text-secondary)]">{t('posCommand.strictMutualExclusion')}</span>
@@ -125,33 +125,33 @@ export const StartShiftModal: React.FC = () => {
                                     type="button"
                                     disabled={isOccupied}
                                     onClick={() => setSelectedCounter(counter)}
-                                    className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                                    className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                         isOccupied
-                                            ? 'bg-rose-500/5 border-rose-500/20 opacity-60 cursor-not-allowed'
+                                            ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] opacity-60 cursor-not-allowed'
                                             : isSelected
-                                                ? 'bg-blue-500/10 border-blue-500/50 shadow-xs ring-1 ring-blue-500/30 cursor-pointer'
+                                                ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/50 shadow-xs ring-1 ring-[var(--theme-accent)]/30 cursor-pointer'
                                                 : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] cursor-pointer'
                                     }`}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <span className={`text-xs font-bold ${isSelected ? 'text-blue-500' : 'text-[var(--theme-text-primary)]'}`}>
+                                        <span className={`text-xs font-bold ${isSelected ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-primary)]'}`}>
                                             {counter}
                                         </span>
                                         {isOccupied ? (
-                                            <Lock size={12} className="text-rose-500" />
+                                            <Lock size={12} className="text-[var(--theme-status-danger-text)]" />
                                         ) : isSelected ? (
-                                            <CheckCircle2 size={12} className="text-blue-500" />
+                                            <CheckCircle2 size={12} className="text-[var(--theme-accent)]" />
                                         ) : (
-                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success)]" />
                                         )}
                                     </div>
                                     <span className="text-[10px] font-mono mt-1">
                                         {isOccupied ? (
-                                            <span className="text-rose-500 font-semibold truncate block">
+                                            <span className="text-[var(--theme-status-danger-text)] font-semibold truncate block">
                                                 {occ?.cashierCode || t('posCommand.counterOccupied')}
                                             </span>
                                         ) : (
-                                            <span className="text-emerald-500 font-semibold">{t('posCommand.counterAvailable')}</span>
+                                            <span className="text-[var(--theme-status-success-text)] font-semibold">{t('posCommand.counterAvailable')}</span>
                                         )}
                                     </span>
                                 </button>
@@ -164,7 +164,7 @@ export const StartShiftModal: React.FC = () => {
                 <div className="space-y-3">
                     <div className="flex justify-between items-baseline">
                         <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
-                            <DollarSign size={14} className="text-emerald-500" />
+                            <DollarSign size={14} className="text-[var(--theme-status-success)]" />
                             {t('posCommand.openingCashFloat')}
                         </label>
                         <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">{t('posCommand.countPhysicalCashInDrawer')}</span>
@@ -193,7 +193,7 @@ export const StartShiftModal: React.FC = () => {
                                 key={val}
                                 type="button"
                                 onClick={() => setOpeningFloat(String(val))}
-                                className={`py-1.5 px-1 text-xs font-mono font-bold rounded-xl border transition-all cursor-pointer ${
+                                className={`py-1.5 px-1 text-xs font-mono font-bold rounded-xl border transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
                                     floatNum === val
                                         ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-xs'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] hover:text-[var(--theme-text-primary)]'
@@ -206,10 +206,10 @@ export const StartShiftModal: React.FC = () => {
                 </div>
 
                 {/* Audit Notice */}
-                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-2.5">
-                    <ShieldCheck size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-amber-500 leading-relaxed font-medium">
-                        {t('posCommand.openingFloatSyncNotice')} End-of-day drawer count on {selectedCounter} will be reconciled against this amount under badge <strong>{cashierBadge}</strong>.
+                <div className="p-3 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex items-start gap-2.5">
+                    <ShieldCheck size={16} className="text-[var(--theme-status-warning-text)] shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-[var(--theme-status-warning-text)] leading-relaxed font-medium">
+                        {t('posCommand.openingFloatSyncNotice')} {t('posCommand.openingFloatReconcileNotice', { counter: selectedCounter, badge: cashierBadge })}
                     </p>
                 </div>
 
@@ -218,14 +218,14 @@ export const StartShiftModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsStartShiftModalOpen(false)}
-                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider rounded-2xl transition-colors cursor-pointer border border-[var(--theme-border)] shadow-2xs"
+                        className="flex-1 min-h-11 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider rounded-2xl transition-colors cursor-pointer border border-[var(--theme-border)] shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         {t('common.cancel') || 'Cancel'}
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting || floatNum < 0}
-                        className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                        className="flex-2 min-h-11 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <Play size={14} className="fill-current" />
                         <span>{isSubmitting ? t('posCommand.starting') : t('posCommand.openCounterAndStart', { counter: selectedCounter })}</span>

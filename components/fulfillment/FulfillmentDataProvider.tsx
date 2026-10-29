@@ -26,7 +26,6 @@ import { useJobActions } from './useJobActions';
 import { useJobCompletion } from './useJobCompletion';
 import { useJobMaintenance } from './useJobMaintenance';
 import { useTransfers } from './useTransfers';
-import { useGhostJobCleanup } from './hooks/useGhostJobCleanup';
 import { mapWmsJobRow } from '../../services/wms-jobs.mapper';
 import { mapJobAssignmentRow } from '../../services/job-assignments.service';
 import { playBeep } from '../../utils/audioUtils';
@@ -375,7 +374,6 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     }, [activeSiteId, employees, user?.id, user?.email, user?.name, user?.employeeId, queryClient, addNotification]);
 
     // --- AUTO CLEANUP OF GHOST JOBS ---
-    useGhostJobCleanup({ jobs, orders, user, setJobs });
 
 
     // ═══════════════════════════════════════════════════════════════════

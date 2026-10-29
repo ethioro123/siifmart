@@ -89,8 +89,8 @@ export const ReceivingForm: React.FC = () => {
                     </p>
                 </div>
                 <div className="ml-auto">
-                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-xs font-bold flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="px-3 py-1 bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] rounded-full text-xs font-bold flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-[var(--theme-status-success)] animate-pulse" />
                         {t('posCommand.inProgress')}
                     </span>
                 </div>
@@ -100,13 +100,13 @@ export const ReceivingForm: React.FC = () => {
             <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2.5">
                     <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                        <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Scan size={13} />
                         </div>
                         {t('posCommand.scanNextItem')}
                     </label>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[9px] font-semibold uppercase tracking-wider">
-                        Hardware Scanner Active
+                    <span className="px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] text-[9px] font-semibold uppercase tracking-wider">
+                        {t('posCommand.hardwareScannerActive')}
                     </span>
                 </div>
                 <div className="relative">
@@ -117,7 +117,7 @@ export const ReceivingForm: React.FC = () => {
                         onPaste={(e) => e.preventDefault()}
                         onKeyDown={handleKeyDown}
                         onChange={(e) => setTransferScanBarcode(e.target.value)}
-                        placeholder="Scan barcode with hardware scanner (Manual typing & paste disabled)..."
+                        placeholder={t('posCommand.scanHardwareScannerPrompt')}
                         className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] font-mono text-xs outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] shadow-2xs"
                     />
                 </div>
@@ -149,14 +149,14 @@ export const ReceivingForm: React.FC = () => {
                                 const isOverReceived = isManagerOrHQ && item.receivedQty > rawExpected;
 
                                 return (
-                                    <tr key={index} className={`transition-colors ${isFullyReceived ? 'bg-emerald-500/[0.04]' : 'hover:bg-[var(--theme-bg-card-hover)]'}`}>
+                                    <tr key={index} className={`transition-colors ${isFullyReceived ? 'bg-[var(--theme-status-success-bg)]/20' : 'hover:bg-[var(--theme-bg-card-hover)]'}`}>
                                         <td className="p-3">
-                                            <p className="text-sm font-bold text-[var(--theme-text-primary)] mb-0.5">{item.name}</p>
-                                            <p className="text-xs font-mono text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] inline-block">SKU: {item.sku}</p>
+                                            <p className="text-xs font-semibold text-[var(--theme-text-primary)] leading-snug break-words mb-0.5">{item.name}</p>
+                                            <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] inline-block">SKU: {item.sku}</p>
                                         </td>
                                         <td className="p-3 text-center">
                                             {isCentralHQOnly ? (
-                                                <span className="text-sm font-mono text-[var(--theme-text-primary)]">
+                                                <span className="text-xs font-mono text-[var(--theme-text-primary)]">
                                                     {isWeightVol ? (
                                                         `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum}`
                                                     ) : (
@@ -168,7 +168,7 @@ export const ReceivingForm: React.FC = () => {
                                             ) : (
                                                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[10px] font-bold text-[var(--theme-text-secondary)] font-mono" title="Blind audit: Count units accurately">
                                                     <Lock size={10} className="shrink-0" />
-                                                    <span>Blind Count</span>
+                                                    <span>{t('posCommand.blindCount')}</span>
                                                 </span>
                                             )}
                                         </td>
@@ -176,7 +176,7 @@ export const ReceivingForm: React.FC = () => {
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => handleUpdateTransferItem(index, 'receivedQty', Math.max(0, item.receivedQty - (isWeightVol ? sizeNum : 1)))}
-                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-rose-500/10 text-[var(--theme-text-primary)] hover:text-rose-500 rounded-xl flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-rose-500/30 cursor-pointer text-xs font-bold"
+                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] hover:text-[var(--theme-status-danger-text)] rounded-xl flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-[var(--theme-status-danger-border)] cursor-pointer text-xs font-bold"
                                                 >-</button>
                                                 <ReceivingItemQtyInput
                                                     title={t('posCommand.receivedQty') || "Received Quantity"}
@@ -190,7 +190,7 @@ export const ReceivingForm: React.FC = () => {
                                                 />
                                                 <button
                                                     onClick={() => handleUpdateTransferItem(index, 'receivedQty', item.receivedQty + (isWeightVol ? sizeNum : 1))}
-                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-emerald-500/10 text-[var(--theme-text-primary)] hover:text-emerald-500 rounded-xl flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-emerald-500/30 cursor-pointer text-xs font-bold"
+                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] hover:text-[var(--theme-status-success-text)] rounded-xl flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-[var(--theme-status-success-border)] cursor-pointer text-xs font-bold"
                                                 >+</button>
                                                 {isWeightVol ? (
                                                     <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold ml-1">x {sizeNum} {unit}</span>
@@ -199,7 +199,7 @@ export const ReceivingForm: React.FC = () => {
                                                 )}
                                             </div>
                                             {isOverReceived && isCentralHQOnly && (
-                                                <p className="text-[9px] text-amber-500 text-center mt-1 font-bold uppercase tracking-wider">{t('posCommand.overageDetected')}</p>
+                                                <p className="text-[9px] text-[var(--theme-status-warning-text)] text-center mt-1 font-bold uppercase tracking-wider">{t('posCommand.overageDetected')}</p>
                                             )}
                                         </td>
                                         <td className="p-3">
@@ -210,10 +210,10 @@ export const ReceivingForm: React.FC = () => {
                                                 onChange={(e) => handleUpdateTransferItem(index, 'condition', e.target.value)}
                                                 className={`bg-[var(--theme-input-bg)] border rounded-xl text-xs p-2 outline-none w-full cursor-pointer transition-all ${
                                                     item.condition === 'Good'
-                                                        ? 'text-emerald-500 border-emerald-500/30 font-bold'
+                                                        ? 'text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)] font-bold'
                                                         : item.condition === 'Damaged'
-                                                            ? 'text-rose-500 border-rose-500/30 font-bold bg-rose-500/5'
-                                                            : 'text-amber-500 border-amber-500/30 font-bold bg-amber-500/5'
+                                                            ? 'text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] font-bold bg-[var(--theme-status-danger-bg)]'
+                                                            : 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] font-bold bg-[var(--theme-status-warning-bg)]'
                                                 }`}
                                             >
                                                 <option value="Good" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{t('posCommand.conditionGood')}</option>
@@ -257,9 +257,9 @@ export const ReceivingForm: React.FC = () => {
                             </div>
                         ) : (
                             <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-xl text-xs font-bold font-sans">
-                                    <Lock size={12} className="shrink-0 text-amber-500" />
-                                    <span>Zero-Trust Blind Audit Protocol Active (Expected counts hidden)</span>
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] rounded-xl text-xs font-bold font-sans">
+                                    <Lock size={12} className="shrink-0 text-[var(--theme-status-warning-text)]" />
+                                    <span>{t('posCommand.zeroTrustBlindProtocolNotice')}</span>
                                 </span>
                             </div>
                         )}
@@ -271,7 +271,7 @@ export const ReceivingForm: React.FC = () => {
                                     const isWV = (isWeightBased(item.unit || '') || isVolumeBased(item.unit || '')) && sizeNum > 0;
                                     const rawExpected = isWV ? (item.displayExpectedQty || item.expectedQty) * sizeNum : (item.displayExpectedQty || item.expectedQty);
                                     return item.receivedQty >= rawExpected;
-                                }) ? 'text-emerald-500' : 'text-[var(--theme-text-primary)]'
+                                }) ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-text-primary)]'
                             }`}>
                                 {transferReceivingItems.map((item, idx) => {
                                     const unit = item.unit || '';
