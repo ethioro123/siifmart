@@ -1,3 +1,4 @@
+import {fulfillmentRecovery} from './fulfillmentRecovery';
 import { approvalInbox } from '../approvalInbox';
 import { TranslationBlock } from '../types';
 import { core } from './core';
@@ -20,6 +21,7 @@ import { labels } from './labels';
 import { transfer } from './transfer';
 
 export const warehouse: TranslationBlock = {
+    ...fulfillmentRecovery,
     approvals: approvalInbox,
     ...core,
     ...driverHub,

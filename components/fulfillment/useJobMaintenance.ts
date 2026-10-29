@@ -5,25 +5,10 @@ import {
 import {
     wmsJobsService
 } from '../../services/supabase.service';
-import { supabase } from '../../lib/supabase';
+import {fulfillmentMaintenanceService} from '../../services/fulfillment-maintenance.service';
+import {useLanguage} from '../../contexts/LanguageContext';
 import { QueryClient } from '@tanstack/react-query';
 import { logger } from '../../utils/logger';
-
-// Helper for translations
-const getTranslation = (path: string): string => {
-    try {
-        const { TRANSLATIONS } = require('../../utils/translations');
-        const lang = localStorage.getItem('language') || 'en';
-        const keys = path.split('.');
-        let result: any = TRANSLATIONS[lang as keyof typeof TRANSLATIONS] || TRANSLATIONS.en;
-        for (const key of keys) {
-            result = result?.[key];
-        }
-        return typeof result === 'string' ? result : path;
-    } catch { return path; }
-};
-
-// ─── Hook Dependencies ──────────────────────────────────────────────────────
 
 interface UseJobMaintenanceDeps {
     jobs: WMSJob[];
@@ -37,246 +22,18 @@ interface UseJobMaintenanceDeps {
     queryClient: QueryClient;
 }
 
-// ─── Hook ───────────────────────────────────────────────────────────────────
-
 export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
-    const { jobs, orders, products, activeSite, user, setJobs, addNotification, refreshJobs, queryClient } = deps;
-
-    const resetJob = useCallback(async (jobId: string) => {
-        try {
-            logger.debug('useJobMaintenance', `🔄 Resetting job: ${jobId}`);
-            const job = jobs.find(j => j.id === jobId);
-            if (!job) {
-                logger.error('useJobMaintenance', `❌ Job not found for reset: ${jobId}`, new Error(`Job ${jobId} not found`));
-                return;
-            }
-
-            const updatedLineItems = job.lineItems?.map(item => ({
-                ...item,
-                status: 'Pending',
-                pickedQty: 0
-            })) || [];
-
-            const dbUpdates = {
-                status: 'Pending',
-                assigned_to: null,
-                line_items: updatedLineItems,
-                items_count: job.items
-            };
-
-            logger.debug('useJobMaintenance', '💾 Sending reset updates to DB');
-
-            const { data, error } = await supabase
-                .from('wms_jobs')
-                .update(dbUpdates)
-                .eq('id', jobId)
-                .select()
-                .single();
-
-            if (error) {
-                logger.error('useJobMaintenance', '❌ DB Update failed', error as Error);
-                throw error;
-            }
-
-            logger.debug('useJobMaintenance', '✅ DB Update successful');
-
-            const updatedJobLocal = {
-                ...job,
-                status: 'Pending',
-                assignedTo: undefined,
-                lineItems: updatedLineItems
-            };
-
-            setJobs(prev => prev.map(j => j.id === jobId ? updatedJobLocal as WMSJob : j));
-            queryClient.invalidateQueries({ queryKey: ['jobs'] });
-            addNotification('success', getTranslation('warehouse.jobResetSuccess'));
-        } catch (error) {
-            logger.error('useJobMaintenance', 'Failed to reset job', error as Error);
-            addNotification('alert', 'Failed to reset job: ' + (error as any).message);
-        }
-    }, [jobs, setJobs, addNotification, queryClient]);
-
-    const fixBrokenJobs = useCallback(async () => {
-        logger.debug('useJobMaintenance', 'Running Fix Broken Jobs...');
-        let fixedPOs = 0;
-        let fixedNumbers = 0;
-
-        const receivedPOs = orders.filter(o => o.status === 'Received');
-
-        for (const po of receivedPOs) {
-            const poJobs = jobs.filter(j => j.orderRef === po.id);
-            const hasValidJobs = poJobs.some(j => j.lineItems && j.lineItems.length > 0);
-
-            if (!hasValidJobs) {
-                logger.debug('useJobMaintenance', `Fixing PO ${po.id} - No valid jobs found`);
-
-                for (const j of poJobs) {
-                    await wmsJobsService.delete(j.id);
-                }
-                setJobs(prev => prev.filter(j => j.orderRef !== po.id));
-
-                if (po.lineItems) {
-                    const jobPromises = po.lineItems.map(async (item, index) => {
-                        const product = products.find(p => p.id === item.productId);
-                        const newJob: WMSJob = {
-                            id: crypto.randomUUID(),
-                            type: 'PUTAWAY',
-                            jobNumber: po.poNumber || po.po_number || 'UNKNOWN',
-                            siteId: po.siteId || activeSite?.id || 'SITE-001',
-                            site_id: po.siteId || activeSite?.id,
-                            status: 'Pending',
-                            priority: 'Normal',
-                            assignedTo: '',
-                            location: 'Receiving Dock',
-                            items: item.quantity,
-                            orderRef: po.id,
-                            lineItems: [{
-                                productId: item.productId || '',
-                                name: item.productName,
-                                sku: product?.sku || item.productId || 'UNKNOWN',
-                                image: product?.image || '',
-                                expectedQty: item.quantity,
-                                pickedQty: 0,
-                                status: 'Pending'
-                            }]
-                        };
-                        try {
-                            const created = await wmsJobsService.create(newJob);
-                            return created;
-                        } catch (e) { logger.error('useJobMaintenance', 'caught error', e as Error); return newJob; }
-                    });
-
-                    const newJobs = await Promise.all(jobPromises);
-                    setJobs(prev => [...prev, ...newJobs]);
-                    fixedPOs++;
-                }
-            }
-        }
-
-        // 2. Fix Job Number Inheritance (Backfill)
-        const childJobs = jobs.filter(j => ['PICK', 'PACK', 'DISPATCH'].includes(j.type));
-
-        for (const child of childJobs) {
-            if (!child.orderRef) continue;
-
-            const parent = jobs.find(j => (j.id === child.orderRef || j.jobNumber === child.orderRef));
-
-            if (parent && parent.jobNumber && child.jobNumber !== parent.jobNumber) {
-                logger.debug('useJobMaintenance', `🔧 Syncing Job Number: ${child.type} ${child.id.slice(-4)} -> ${parent.jobNumber}`);
-                try {
-                    await wmsJobsService.update(child.id, { jobNumber: parent.jobNumber });
-                    fixedNumbers++;
-                } catch (e) {
-                    logger.error('useJobMaintenance', `Failed to sync job ${child.id}`, e as Error);
-                }
-            }
-        }
-
-        // 3. Fix Orphaned RECEIVE Jobs
-        const orphanedReceiveJobs = jobs.filter(j => 
-            j.type === 'RECEIVE' && 
-            ['Pending', 'In-Progress'].includes(j.status || '')
-        );
-
-        let fixedGhosts = 0;
-        for (const job of orphanedReceiveJobs) {
-            const po = orders.find(o => o.id === job.orderRef);
-            if (!po || po.status !== 'Approved') {
-                logger.debug('useJobMaintenance', `🔧 Syncing Ghost RECEIVE Job: ${job.id}`);
-                try {
-                    await wmsJobsService.update(job.id, { 
-                        status: 'Completed',
-                        completed_at: new Date().toISOString(),
-                        completed_by: user?.id || 'System Manual-Fix'
-                    } as any);
-                    
-                    setJobs(prev => prev.map(j => j.id === job.id ? { 
-                        ...j, 
-                        status: 'Completed', 
-                        completedAt: new Date().toISOString(),
-                        completedBy: user?.id || 'System Manual-Fix'
-                    } as WMSJob : j));
-                    
-                    fixedGhosts++;
-                } catch (e) {
-                    logger.error('useJobMaintenance', `Failed to sync ghost job ${job.id}`, e as Error);
-                }
-            }
-        }
-
-        // 4. Auto-Heal Missing RECEIVE Jobs for Approved / Partially Received POs
-        const eligiblePOs = orders.filter(o => o.status === 'Approved' || o.status === 'Partially Received');
-        let restoredInboundJobs = 0;
-
-        for (const po of eligiblePOs) {
-            const hasInboundJob = jobs.some(j => 
-                j.type === 'RECEIVE' && 
-                ['Pending', 'In-Progress'].includes(j.status || '') &&
-                (j.orderRef === po.id || (po.poNumber && j.jobNumber === po.poNumber) || (po.po_number && j.jobNumber === po.po_number))
-            );
-
-            if (!hasInboundJob && po.lineItems && po.lineItems.length > 0) {
-                const hasPendingItems = po.lineItems.some(li => {
-                    const expected = li.quantity || 0;
-                    const received = li.receivedQty || 0;
-                    return received < expected;
-                });
-
-                if (hasPendingItems) {
-                    logger.debug('useJobMaintenance', `[Auto-Fix] Restoring missing RECEIVE job for PO ${po.poNumber || po.id}`);
-                    const jobItems = po.lineItems.map((item: any) => ({
-                        productId: item.productId || 'UNKNOWN',
-                        name: item.productName || 'Unknown Item',
-                        sku: item.sku || '',
-                        image: item.image || '',
-                        brand: item.brand || '',
-                        size: item.size || '',
-                        unit: item.unit || '',
-                        category: item.category || '',
-                        expectedQty: item.quantity || 0,
-                        pickedQty: 0,
-                        receivedQty: item.receivedQty || 0,
-                        status: (item.receivedQty || 0) >= (item.quantity || 0) ? ('Completed' as const) : ('Pending' as const)
-                    }));
-
-                    let priority: any = po.priority || 'Normal';
-                    if (priority === 'Urgent') priority = 'Critical';
-                    if (priority === 'Low') priority = 'Normal';
-
-                    const targetCountry = po.countryCode || (po as any).country_code || (po.currency === 'KSh' || po.currency === 'KES' ? 'KE' : undefined) || activeSite?.country || 'ET';
-
-                    try {
-                        const created = await wmsJobsService.create({
-                            siteId: po.siteId || activeSite?.id || '',
-                            countryCode: targetCountry,
-                            country_code: targetCountry,
-                            type: 'RECEIVE',
-                            priority,
-                            status: 'Pending',
-                            items: jobItems.length,
-                            lineItems: jobItems,
-                            orderRef: po.id,
-                            jobNumber: po.poNumber || po.po_number || po.id,
-                            location: 'INBOUND_DOCK'
-                        } as any);
-
-                        setJobs(prev => [created, ...prev]);
-                        restoredInboundJobs++;
-                    } catch (e) {
-                        logger.error('useJobMaintenance', `Failed to restore missing RECEIVE job for PO ${po.id}`, e as Error);
-                    }
-                }
-            }
-        }
-
-        if (fixedPOs > 0 || fixedNumbers > 0 || fixedGhosts > 0 || restoredInboundJobs > 0) {
-            addNotification('success', `Maintenance Complete: Fixed ${fixedPOs} POs, synced ${fixedNumbers} job numbers, cleaned ${fixedGhosts} ghost jobs, and restored ${restoredInboundJobs} missing inbound tasks.`);
-            refreshJobs();
-        } else {
-            addNotification('info', 'All jobs look healthy.');
-        }
-    }, [jobs, orders, products, activeSite, setJobs, addNotification, refreshJobs, user]);
-
+ const {activeSite,setJobs,addNotification,refreshJobs}=deps;const {t,country}=useLanguage();
+ const maintain=useCallback(async(action:'reset'|'cancel'|'reconcile',id?:string)=>{
+  try{
+   const count=await fulfillmentMaintenanceService.run(activeSite?.id||'',country,action,id);
+   refreshJobs();
+   addNotification('success',t(action==='reconcile'?'warehouse.maintenanceSaved':action==='reset'?'warehouse.maintenanceResetSaved':'warehouse.maintenanceCancelled',{count}));
+  }catch(error){logger.error('useJobMaintenance','Maintenance failed',error);addNotification('alert',t('warehouse.maintenanceFailed'));throw error;}
+ },[activeSite?.id,country,refreshJobs,addNotification,t]);
+ const resetJob=useCallback((id:string)=>maintain('reset',id),[maintain]);
+ const deleteJob=useCallback((id:string)=>maintain('cancel',id),[maintain]);
+ const fixBrokenJobs=useCallback(()=>maintain('reconcile'),[maintain]);
     const createPutawayJob = useCallback(async (product: Product, quantity: number, user: string, source: string = 'Inventory') => {
         try {
             if (quantity <= 0) {
@@ -287,7 +44,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
             const targetSiteId = product.siteId || product.site_id || activeSite?.id;
             if (!targetSiteId) {
                 logger.error('useJobMaintenance', '❌ Cannot create putaway job - no site ID', new Error('No site ID'));
-                return undefined;
+                throw new Error('Facility required');
             }
 
             const lineItem = {
@@ -314,7 +71,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
                     type: 'PUTAWAY',
                     priority: 'Normal',
                     status: 'Pending',
-                    items: quantity,
+                    items: 1,
                     lineItems: [lineItem],
                     location: product.location || 'Receiving Dock',
                     orderRef: `INV-${product.id}`,
@@ -325,49 +82,15 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
                 setJobs(prev => [createdJob, ...prev]);
                 return createdJob;
             } catch (error) {
-                logger.error('useJobMaintenance', '❌ Failed to create putaway job in DB', error as Error);
-                const fallbackJob: WMSJob = {
-                    id: crypto.randomUUID(),
-                    siteId: targetSiteId,
-                    site_id: targetSiteId,
-                    type: 'PUTAWAY',
-                    priority: 'Normal',
-                    status: 'Pending',
-                    items: quantity,
-                    lineItems: [lineItem],
-                    location: product.location || 'Receiving Dock',
-                    orderRef: `INV-${product.id}`,
-                    jobNumber: (product.sku || 'UNKNOWN').toUpperCase(),
-                    createdAt: new Date().toISOString(),
-                    requestedBy: user
-                };
-                setJobs(prev => [fallbackJob, ...prev]);
-                return fallbackJob;
+                logger.error('useJobMaintenance', 'Putaway creation failed', error);
+                throw error;
             }
         } catch (error) {
-            logger.error('useJobMaintenance', 'Error creating putaway job', error as Error);
-            return undefined;
+            logger.error('useJobMaintenance', 'Putaway creation failed', error);
+            throw error;
         }
     }, [activeSite, setJobs]);
 
-    const deleteJob = useCallback(async (id: string) => {
-        try {
-            // Use 'Cancelled' — the DB has a CHECK constraint (wms_jobs_status_check)
-            // that only allows: Pending, In-Progress, Completed, Cancelled.
-            // 'Deleted' violates this constraint and causes a 400 Bad Request.
-            await wmsJobsService.update(id, {
-                status: 'Cancelled',
-                completedAt: new Date().toISOString(),
-                completedBy: user?.name || 'System'
-            } as any);
-            setJobs(prev => prev.filter(j => j.id !== id));
-            addNotification('success', 'Job deleted');
-            queryClient.invalidateQueries({ queryKey: ['wms_jobs'] });
-        } catch (error) {
-            logger.error('useJobMaintenance', 'caught error', error as Error);
-            addNotification('alert', 'Failed to delete job');
-        }
-    }, [setJobs, addNotification, queryClient, user]);
 
-    return { resetJob, fixBrokenJobs, createPutawayJob, deleteJob };
+ return {resetJob,deleteJob,fixBrokenJobs,createPutawayJob};
 };

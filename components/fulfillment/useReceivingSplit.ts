@@ -362,7 +362,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
             });
 
             const drafts = await Promise.all(jobPromises);
-            const newJobs=await receivingTransactionService.save(retry.current!.id,poId,item.id!,item.receivedQty||0,drafts);
+            const newJobs=await receivingTransactionService.save(retry.current!.id,poId,String(item.id!),item.receivedQty||0,drafts);
             const updatedLineItems=(po.lineItems||[]).map((li,index)=>index===itemIndex ? {...li,receivedQty:(li.receivedQty||0)+newSplitTotal}:li);
             const newPOStatus=po.status;
             // Manifest completion remains the explicit supervised receiving action.

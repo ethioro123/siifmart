@@ -304,17 +304,7 @@ export const FulfillmentContent: React.FC = () => {
             {/* --- RETURNS TAB --- */}
             {
                 activeTab === 'RETURNS' && (
-                    <ReturnsTab
-                        sales={sales}
-                        processReturn={processReturn}
-                        inventoryRequestsService={inventoryRequestsService}
-                        products={products}
-                        user={user}
-                        addNotification={addNotification}
-                        formatJobId={(id: string) => id} // Simple identity or custom formatter since WMS formatJobId expects object
-                        resolveOrderRef={resolveOrderRef}
-                        CURRENCY_SYMBOL={CURRENCY_SYMBOL}
-                    />
+                    <ReturnsTab user={user} addNotification={addNotification} />
                 )
             }
 
