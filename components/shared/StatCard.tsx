@@ -26,7 +26,7 @@ export default function StatCard({
         green: 'text-[var(--theme-status-success-text)]',
         yellow: 'text-[var(--theme-status-warning-text)]',
         red: 'text-[var(--theme-status-danger-text)]',
-        purple: 'text-purple-400',
+        purple: 'text-[var(--theme-accent)]',
         gray: 'text-[var(--theme-text-secondary)]'
     };
 

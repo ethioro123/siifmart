@@ -23,9 +23,9 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
     onDelete
 }) => {
     const usagePercent = zone.capacity > 0 ? (zone.occupied / zone.capacity) * 100 : 0;
-    let progressColorClass = "bg-[#34C759]";
-    if (usagePercent > 90) progressColorClass = "bg-[#FF3B30]";
-    else if (usagePercent > 70) progressColorClass = "bg-[#FF9F0A]";
+    let progressColorClass = "bg-[var(--theme-status-success)]";
+    if (usagePercent > 90) progressColorClass = "bg-[var(--theme-status-danger)]";
+    else if (usagePercent > 70) progressColorClass = "bg-[var(--theme-status-warning)]";
 
     const isLockedState = zone.isLocked;
 
@@ -33,7 +33,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
         <div 
             className={`p-5 sm:p-6 relative overflow-hidden group border transition-all duration-200 rounded-2xl shadow-xs ${
                 isLockedState 
-                    ? 'border-[#FF3B30]/20 bg-[#FF3B30]/5 hover:border-[#FF3B30]/35' 
+                    ? 'border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger)]/5 hover:border-[var(--theme-status-danger-border)]' 
                     : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 hover:shadow-sm'
             }`}
         >
@@ -41,11 +41,11 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                 <div className="flex items-start gap-3.5 text-left">
                     <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${
                         isLockedState
-                            ? 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/25'
+                            ? 'bg-[var(--theme-status-danger)]/10 text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                             : zone.type === 'Cold' 
                                 ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20' 
                                 : zone.type === 'Secure' 
-                                    ? 'bg-[#AF52DE]/10 text-[#AF52DE] border-[#AF52DE]/20' 
+                                    ? 'bg-[var(--theme-chart-4)]/10 text-[var(--theme-chart-4)] border-[var(--theme-chart-4)]/20' 
                                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                     }`}>
                         {isLockedState ? <Lock size={20} /> : zone.type === 'Cold' ? <Thermometer size={20} /> : zone.type === 'Secure' ? <Shield size={20} /> : <Box size={20} />}
@@ -54,7 +54,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                         <h3 className="font-bold text-[var(--theme-text-primary)] text-base flex items-center gap-1.5">
                             {zone.name}
                             {isLockedState && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase bg-[#FF3B30] text-white">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase bg-[var(--theme-status-danger)] text-white">
                                     LOCKED
                                 </span>
                             )}
@@ -65,7 +65,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                     </div>
                 </div>
                 <div className="text-right">
-                    <span className={`text-xl font-bold font-mono tabular-nums ${usagePercent > 90 ? 'text-[#FF3B30]' : 'text-[var(--theme-text-primary)]'}`}>
+                    <span className={`text-xl font-bold font-mono tabular-nums ${usagePercent > 90 ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-text-primary)]'}`}>
                         {usagePercent.toFixed(1)}%
                     </span>
                     <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase mt-0.5">Space Utilized</p>
@@ -80,17 +80,17 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                     </span>
                 )}
                 {zone.allowPicking === false && (
-                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/25">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-status-danger)]/10 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]">
                         No Picking
                     </span>
                 )}
                 {zone.allowPutaway === false && (
-                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/25">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-status-warning)]/10 text-[#FF9F0A] border border-[#FF9F0A]/25">
                         No Putaway
                     </span>
                 )}
                 {zone.assignedProducts.length > 0 && (
-                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/25">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-status-success)]/10 text-[#34C759] border border-[#34C759]/25">
                         {zone.assignedProducts.length} Products
                     </span>
                 )}
@@ -120,7 +120,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
 
             {/* Lock Reason Display */}
             {isLockedState && zone.lockReason && (
-                <div className="mt-3 p-3 bg-[#FF3B30]/10 border border-[#FF3B30]/20 text-[#FF3B30] text-[11px] rounded-xl flex items-start gap-2 relative z-10 text-left">
+                <div className="mt-3 p-3 bg-[var(--theme-status-danger)]/10 border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[11px] rounded-xl flex items-start gap-2 relative z-10 text-left">
                     <ShieldAlert size={14} className="flex-shrink-0 mt-0.5" />
                     <div>
                         <p className="font-semibold uppercase text-[11px] tracking-wider">Lock Reason</p>
@@ -145,7 +145,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                         className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 text-[11px] font-semibold uppercase cursor-pointer active:scale-[0.98] ${
                             zone.assignedProducts.length > 0
                                 ? 'text-[var(--theme-text-muted)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-not-allowed opacity-40'
-                                : 'text-[#FF3B30] bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 border border-[#FF3B30]/20'
+                                : 'text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger)]/10 hover:bg-[var(--theme-status-danger)]/20 border border-[var(--theme-status-danger-border)]'
                         }`}
                         title={zone.assignedProducts.length > 0 ? "Cannot delete zone containing products" : "Delete Zone"}
                     >

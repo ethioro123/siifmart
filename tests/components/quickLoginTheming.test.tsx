@@ -63,15 +63,15 @@ describe('quick login theming and filtering', () => {
       const warehouse = getSiteTheme('Warehouse');
       const dc = getSiteTheme('Distribution Center');
 
-      expect(store.badge).toContain('emerald');
-      expect(warehouse.badge).toContain('amber');
+      expect(store.badge).toMatch(/emerald|theme-status-success/);
+      expect(warehouse.badge).toMatch(/amber|theme-status-warning/);
       expect(dc.badge).toContain('cyan');
 
       // Site themes have unique border and icon colors
       expect(store.iconColor).not.toEqual(warehouse.iconColor);
       expect(warehouse.iconColor).not.toEqual(dc.iconColor);
-      expect(store.countBadge).toContain('emerald');
-      expect(warehouse.countBadge).toContain('amber');
+      expect(store.countBadge).toMatch(/emerald|theme-status-success/);
+      expect(warehouse.countBadge).toMatch(/amber|theme-status-warning/);
     });
   });
 

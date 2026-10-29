@@ -85,7 +85,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
 
     return (
         <div className={`flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 p-3.5 rounded-2xl border transition-colors ${
-            isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]' : 'bg-white border-[var(--theme-border)] shadow-xs'
+            'bg-[var(--theme-bg-panel)] border-[var(--theme-border)] shadow-xs'
         }`}>
             {/* Left: Matrix Branding & Headcount Badges */}
             <div className="flex items-center gap-2.5 flex-wrap">
@@ -111,23 +111,19 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
             <div className="flex flex-wrap items-center gap-2">
                 {/* Search Bar */}
                 <div className="relative flex-1 sm:w-56 min-w-[180px]">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)]" />
                     <input
                         type="text"
                         value={filters.searchTerm}
                         onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
                         placeholder="Search name, role, code..."
-                        className={`w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border outline-none transition-colors ${
-                            isDark
-                                ? 'bg-[#1E2822] border-[#2C4D35] text-white placeholder-stone-500 focus:border-[var(--theme-border)]'
-                                : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)] text-stone-900 placeholder-stone-400 focus:border-[var(--theme-border)]'
-                        }`}
+                        className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-border-focus)] transition-colors"
                     />
                     {filters.searchTerm && (
                         <button
                             type="button"
                             onClick={handleClearSearch}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]"
                             title="Clear search"
                         >
                             <X size={12} />
@@ -140,11 +136,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     value={filters.siteId}
                     onChange={(e) => setFilters(prev => ({ ...prev, siteId: e.target.value }))}
                     title="Filter by facility or operational site"
-                    className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
-                        isDark
-                            ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[var(--theme-border)]'
-                            : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)] text-stone-700 focus:border-[var(--theme-border)]'
-                    }`}
+                    className="px-2.5 py-1.5 text-xs rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-border-focus)] cursor-pointer transition-colors"
                 >
                     <option value="">All Facilities / Sites</option>
                     {sites.map(s => (
@@ -157,11 +149,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     value={filters.department}
                     onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value }))}
                     title="Filter by department swimlane"
-                    className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
-                        isDark
-                            ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[var(--theme-border)]'
-                            : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)] text-stone-700 focus:border-[var(--theme-border)]'
-                    }`}
+                    className="px-2.5 py-1.5 text-xs rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-border-focus)] cursor-pointer transition-colors"
                 >
                     {departments.map(d => (
                         <option key={d.id} value={d.id}>{d.label}</option>
@@ -176,11 +164,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                         hierarchyLevel: e.target.value ? Number(e.target.value) : null
                     }))}
                     title="Filter by command hierarchy level"
-                    className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
-                        isDark
-                            ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[var(--theme-border)]'
-                            : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)] text-stone-700 focus:border-[var(--theme-border)]'
-                    }`}
+                    className="px-2.5 py-1.5 text-xs rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-border-focus)] cursor-pointer transition-colors"
                 >
                     <option value="">All Hierarchy Tiers</option>
                     <option value="1">L1: Global Executive</option>
@@ -200,11 +184,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     value={filters.status}
                     onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
                     title="Filter by employee operational status"
-                    className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
-                        isDark
-                            ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[var(--theme-border)]'
-                            : 'bg-[var(--theme-bg-app)] border-[var(--theme-border)] text-stone-700 focus:border-[var(--theme-border)]'
-                    }`}
+                    className="px-2.5 py-1.5 text-xs rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-border-focus)] cursor-pointer transition-colors"
                 >
                     <option value="">All Statuses</option>
                     <option value="Active">Active</option>

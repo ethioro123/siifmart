@@ -49,10 +49,10 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                             requestForDetails?.changeType === 'edit'
                                 ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20'
                                 : requestForDetails?.changeType === 'delete'
-                                ? 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20'
+                                ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                 : requestForDetails?.changeType === 'stock_adjustment'
                                 ? 'bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/20'
-                                : 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20'
+                                : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                         }`}>
                             {requestForDetails?.changeType === 'edit' && <Edit size={18} />}
                             {requestForDetails?.changeType === 'delete' && <Trash2 size={18} />}
@@ -97,8 +97,8 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                 </div>
 
                 {requestForDetails?.status === 'approved' && (
-                    <div className="p-3.5 rounded-xl bg-[#34C759]/10 border border-[#34C759]/20 flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2 text-[#34C759] font-bold">
+                    <div className="p-3.5 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-[var(--theme-status-success-text)] font-bold">
                             <CheckCircle size={15} />
                             <span>Approved by {requestForDetails.approvedBy || 'Regional Operations Manager'}</span>
                         </div>
@@ -111,9 +111,9 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                 )}
 
                 {requestForDetails?.status === 'rejected' && (
-                    <div className="p-3.5 rounded-xl bg-[#FF3B30]/10 border border-[#FF3B30]/20 flex flex-col gap-1 text-xs">
+                    <div className="p-3.5 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex flex-col gap-1 text-xs">
                         <div className="flex items-center justify-between">
-                            <span className="text-[#FF3B30] font-bold flex items-center gap-1.5">
+                            <span className="text-[var(--theme-status-danger-text)] font-bold flex items-center gap-1.5">
                                 <XCircle size={15} /> Rejected by {requestForDetails.rejectedBy || 'Manager'}
                             </span>
                             {requestForDetails.rejectedAt && (
@@ -147,7 +147,7 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                                             }
                                         }
                                     }}
-                                    className="flex-1 h-10 px-4 rounded-xl font-semibold text-[13px] bg-[#34C759] text-white hover:opacity-95 shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                                    className="flex-1 h-10 px-4 rounded-xl font-semibold text-[13px] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] hover:opacity-95 shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     <CheckCircle size={16} />
                                     <span>Approve Request</span>
@@ -166,7 +166,7 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                                             setIsApprovalModalOpen(true);
                                         }
                                     }}
-                                    className="flex-1 h-10 px-4 rounded-xl font-semibold text-[13px] bg-[#FF3B30]/10 hover:bg-[#FF3B30]/15 text-[#FF3B30] border border-[#FF3B30]/20 shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                                    className="flex-1 h-10 px-4 rounded-xl font-semibold text-[13px] bg-[var(--theme-status-danger-bg)] hover:bg-[#FF3B30]/15 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     <XCircle size={16} />
                                     <span>Reject Request</span>
