@@ -49,7 +49,7 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({ count, detai
                                         <span className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{loc.location}</span>
                                         <span className="text-[11px] text-[var(--theme-text-muted)] truncate">{getSiteName(loc.siteId)}</span>
                                     </div>
-                                    <div className={`text-[11px] font-mono font-bold tabular-nums px-2 py-0.5 rounded-md ${loc.stock > 10 ? 'bg-[#34C759]/10 text-[#34C759]' : loc.stock > 0 ? 'bg-[#FF9F0A]/10 text-[#FF9F0A]' : 'bg-[#FF3B30]/10 text-[#FF3B30]'}`}>
+                                    <div className={`text-[11px] font-mono font-bold tabular-nums px-2 py-0.5 rounded-md ${loc.stock > 10 ? 'bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)]' : loc.stock > 0 ? 'bg-[var(--theme-status-warning-bg)]/10 text-[var(--theme-status-warning-text)]' : 'bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)]'}`}>
                                         {loc.stock}
                                     </div>
                                 </div>

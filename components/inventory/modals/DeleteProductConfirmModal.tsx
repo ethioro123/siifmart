@@ -23,8 +23,8 @@ export const DeleteProductConfirmModal: React.FC<DeleteProductConfirmModalProps>
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Delete Product">
             <div className="space-y-4">
-                <div className="p-4 bg-[#FF3B30]/10 border border-[#FF3B30]/20 rounded-2xl flex items-center gap-3.5 text-[#FF3B30]">
-                    <div className="w-10 h-10 rounded-xl bg-[#FF3B30]/15 flex items-center justify-center shrink-0 text-[#FF3B30]">
+                <div className="p-4 bg-[var(--theme-status-danger-bg)]/10 border border-[var(--theme-status-danger-border)]/20 rounded-2xl flex items-center gap-3.5 text-[var(--theme-status-danger-text)]">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-danger-bg)]/15 flex items-center justify-center shrink-0 text-[var(--theme-status-danger-text)]">
                         <AlertTriangle size={20} />
                     </div>
                     <div>
@@ -35,12 +35,12 @@ export const DeleteProductConfirmModal: React.FC<DeleteProductConfirmModalProps>
                 <p className="text-[13px] text-[var(--theme-text-secondary)] leading-relaxed">
                     To confirm this action, please type <span className="text-[var(--theme-text-primary)] font-mono font-semibold px-1.5 py-0.5 rounded bg-[var(--theme-bg-hover)] border border-[var(--theme-border)]">DELETE</span> below:
                 </p>
-                <input 
-                    type="text" 
-                    value={deleteInput} 
-                    onChange={(e) => setDeleteInput(e.target.value)} 
-                    className="w-full h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[14px] text-[var(--theme-text-primary)] font-mono tracking-wider placeholder:text-[var(--theme-text-secondary)]/50 focus:border-[#FF3B30] focus:ring-2 focus:ring-[#FF3B30]/20 outline-none transition-all shadow-xs" 
-                    placeholder="Type DELETE" 
+                <input
+                    type="text"
+                    value={deleteInput}
+                    onChange={(e) => setDeleteInput(e.target.value)}
+                    className="w-full h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[14px] text-[var(--theme-text-primary)] font-mono tracking-wider placeholder:text-[var(--theme-text-secondary)]/50 focus:border-[var(--theme-status-danger-border)] focus:ring-2 focus:ring-[#FF3B30]/20 outline-none transition-all shadow-xs"
+                    placeholder="Type DELETE"
                     autoFocus
                 />
                 <div className="flex justify-end items-center gap-2.5 pt-2">
@@ -55,7 +55,7 @@ export const DeleteProductConfirmModal: React.FC<DeleteProductConfirmModalProps>
                         type="button"
                         disabled={deleteInput !== 'DELETE' || isSubmitting}
                         onClick={onConfirm}
-                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[#FF3B30] text-white hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-status-danger-bg)] text-white hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
                     >
                         <span>Delete Product</span>
                     </button>

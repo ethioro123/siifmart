@@ -21,21 +21,21 @@ export default function LoadingSpinner({
     };
 
     const colors = {
-        primary: 'border-cyber-primary border-t-transparent',
-        white: 'border-white border-t-transparent',
-        gray: 'border-gray-400 border-t-transparent'
+        primary: 'border-[var(--theme-accent)] border-t-transparent',
+        white: 'border-[var(--theme-text-primary)] border-t-transparent',
+        gray: 'border-[var(--theme-text-secondary)] border-t-transparent'
     };
 
     const spinner = (
         <div className="flex flex-col items-center gap-3">
             <div className={`rounded-full animate-spin ${sizes[size]} ${colors[color]}`} />
-            {text && <p className="text-sm text-gray-400">{text}</p>}
+            {text && <p className="text-sm text-[var(--theme-text-secondary)]">{text}</p>}
         </div>
     );
 
     if (fullScreen) {
         return (
-            <div className="fixed inset-0 bg-cyber-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="fixed inset-0 bg-[var(--theme-overlay-strong)] backdrop-blur-sm flex items-center justify-center z-50">
                 {spinner}
             </div>
         );

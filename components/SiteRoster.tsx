@@ -124,14 +124,14 @@ export default function SiteRoster({
                                         <div className="text-right flex flex-col items-end gap-1">
                                             <div className="flex items-center gap-1">
                                                 {emp.isRostered && (
-                                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#34C759]/10 text-[#34C759] dark:text-[#30D158]">
+                                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] dark:text-[#30D158]">
                                                         On Duty
                                                     </span>
                                                 )}
                                                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                                                     emp.status === 'Active'
-                                                        ? 'bg-[#34C759]/10 text-[#34C759] dark:text-[#30D158]'
-                                                        : 'bg-[#FF9500]/10 text-[#FF9500] dark:text-[#FF9F0A]'
+                                                        ? 'bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] dark:text-[#30D158]'
+                                                        : 'bg-[var(--theme-status-warning-bg)]/10 text-[var(--theme-status-warning-text)] dark:text-[var(--theme-status-warning-text)]'
                                                 }`}>
                                                     {emp.status}
                                                 </span>
@@ -173,7 +173,7 @@ export default function SiteRoster({
                                             )}
                                         </div>
                                         {emp.rank > 0 && emp.rank <= 3 && (
-                                            <div className="flex items-center gap-1 text-[#FF9500] dark:text-[#FF9F0A] font-semibold text-[11px]">
+                                            <div className="flex items-center gap-1 text-[var(--theme-status-warning-text)] dark:text-[var(--theme-status-warning-text)] font-semibold text-[11px]">
                                                 <TrendingUp size={12} />
                                                 Rank #{emp.rank}
                                             </div>
@@ -209,11 +209,11 @@ export default function SiteRoster({
 
                                     <div className="flex items-center gap-1.5 ml-1">
                                         {emp.isRostered && (
-                                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#34C759]/10 text-[#34C759] dark:text-[#30D158]">
+                                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] dark:text-[#30D158]">
                                                 On Duty
                                             </span>
                                         )}
-                                        <span className={`w-2 h-2 rounded-full ${emp.status === 'Active' ? 'bg-[#34C759]' : 'bg-[#FF9500]'}`} />
+                                        <span className={`w-2 h-2 rounded-full ${emp.status === 'Active' ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-status-warning-bg)]'}`} />
                                     </div>
                                 </>
                             )}

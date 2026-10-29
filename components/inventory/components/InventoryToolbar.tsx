@@ -226,7 +226,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         {/* Category Dropdown */}
                         <div className="relative group">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <Package size={14} className="text-[#34C759] opacity-70 group-hover:opacity-100 transition-opacity" />
+                                <Package size={14} className="text-[var(--theme-status-success-text)] opacity-70 group-hover:opacity-100 transition-opacity" />
                             </div>
                             <select
                                 value={filters.category || 'All'}
@@ -245,7 +245,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         {/* Sort Selector Dropdown */}
                         <div className="relative group">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <ArrowUpDown size={14} className="text-[#FF9F0A] opacity-70 group-hover:opacity-100 transition-opacity" />
+                                <ArrowUpDown size={14} className="text-[var(--theme-status-warning-text)] opacity-70 group-hover:opacity-100 transition-opacity" />
                             </div>
                             <select
                                 value={currentSortValue}
@@ -292,7 +292,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         </span>
 
                         {filters.category && filters.category !== 'All' && (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]/20">
                                 <Package size={12} /> {filters.category}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, category: 'All' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />
@@ -301,7 +301,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         )}
 
                         {filters.brand && filters.brand.trim() !== '' && (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[var(--theme-status-warning-bg)]/10 text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]/20">
                                 <Tag size={12} /> Brand: {filters.brand}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, brand: '' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />
@@ -310,7 +310,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         )}
 
                         {(filters.minPrice || filters.maxPrice) && (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]/20">
                                 <DollarSign size={12} /> {filters.minPrice || 0} - {filters.maxPrice || '∞'} {currencySymbol}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, minPrice: '', maxPrice: '' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />
@@ -328,7 +328,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         )}
 
                         {filters.locationStatus && filters.locationStatus !== 'All' && (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[var(--theme-status-warning-bg)]/10 text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]/20">
                                 <MapPin size={12} /> {filters.locationStatus === 'assigned' ? 'Located' : 'No Bay'}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, locationStatus: 'All' }))} className="text-[var(--theme-status-danger-text)] ml-1 cursor-pointer">
                                     <X size={12} />

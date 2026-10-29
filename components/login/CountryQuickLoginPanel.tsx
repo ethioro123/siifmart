@@ -152,11 +152,11 @@ export function CountryQuickLoginPanel({
     switch (level) {
       case 1:
       case 2:
-        return 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30';
+        return 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-border-focus)]';
       case 3:
       case 4:
       case 5:
-        return 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30';
+        return 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]';
       case 6:
       case 7:
       case 8:

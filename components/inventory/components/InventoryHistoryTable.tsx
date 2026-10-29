@@ -146,10 +146,10 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                                             item.changeType === 'edit'
                                                 ? 'text-[var(--theme-accent)] border-[var(--theme-accent)]/20 bg-[var(--theme-accent)]/10'
                                                 : item.changeType === 'delete'
-                                                ? 'text-[#FF3B30] border-[#FF3B30]/20 bg-[#FF3B30]/10'
+                                                ? 'text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]/20 bg-[var(--theme-status-danger-bg)]/10'
                                                 : item.changeType === 'stock_adjustment'
-                                                ? 'text-[#FF9F0A] border-[#FF9F0A]/20 bg-[#FF9F0A]/10'
-                                                : 'text-[#34C759] border-[#34C759]/20 bg-[#34C759]/10'
+                                                ? 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]/20 bg-[var(--theme-status-warning-bg)]/10'
+                                                : 'text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]/20 bg-[var(--theme-status-success-bg)]/10'
                                         }`}>
                                             {item.changeType === 'stock_adjustment' ? 'Stock Adj.' : item.changeType}
                                         </span>
@@ -182,8 +182,8 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                                         {item.changeType === 'stock_adjustment' && (
                                             <div className="space-y-1">
                                                 <div className="flex items-center gap-1.5 font-mono text-[12px] font-semibold">
-                                                    <RefreshCw size={11} className="text-[#FF9F0A]" />
-                                                    <span className={item.adjustmentType === 'IN' ? 'text-[#34C759]' : 'text-[#FF3B30]'}>
+                                                    <RefreshCw size={11} className="text-[var(--theme-status-warning-text)]" />
+                                                    <span className={item.adjustmentType === 'IN' ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}>
                                                         {item.adjustmentType === 'IN' ? '+' : '-'}{item.adjustmentQty} units
                                                     </span>
                                                 </div>
@@ -193,13 +193,13 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                                             </div>
                                         )}
                                         {item.changeType === 'create' && (
-                                            <div className="text-[12px] text-[#34C759] font-medium flex items-center gap-1">
+                                            <div className="text-[12px] text-[var(--theme-status-success-text)] font-medium flex items-center gap-1">
                                                 <Plus size={12} />
                                                 <span>New product created in catalog</span>
                                             </div>
                                         )}
                                         {item.changeType === 'delete' && (
-                                            <div className="text-[12px] text-[#FF3B30] font-medium flex items-center gap-1">
+                                            <div className="text-[12px] text-[var(--theme-status-danger-text)] font-medium flex items-center gap-1">
                                                 <Trash2 size={12} />
                                                 <span>Product removal record</span>
                                             </div>
@@ -223,7 +223,7 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                                     <td className="px-4 py-3 text-[12px] align-top">
                                         {item.status === 'approved' ? (
                                             <div className="space-y-0.5">
-                                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20">
+                                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]/20">
                                                     <CheckCircle2 size={11} />
                                                     <span>Approved</span>
                                                 </div>
@@ -236,7 +236,7 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                                             </div>
                                         ) : (
                                             <div className="space-y-0.5">
-                                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/20">
+                                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20">
                                                     <XCircle size={11} />
                                                     <span>Rejected</span>
                                                 </div>
@@ -244,7 +244,7 @@ export const InventoryHistoryTable: React.FC<InventoryHistoryTableProps> = ({
                                                     {item.rejectedBy || 'Manager'}
                                                 </p>
                                                 {item.rejectionReason && (
-                                                    <p className="text-[11px] text-[#FF3B30]/90 leading-tight">
+                                                    <p className="text-[11px] text-[var(--theme-status-danger-text)]/90 leading-tight">
                                                         {item.rejectionReason}
                                                     </p>
                                                 )}

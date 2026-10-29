@@ -41,7 +41,7 @@ export const InventoryRejectionModal: React.FC<InventoryRejectionModalProps> = (
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     placeholder="Provide detailed reason for rejection..."
-                    className="w-full h-28 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 text-[13px] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/50 focus:outline-none focus:ring-2 focus:ring-[#FF3B30]/20 focus:border-[#FF3B30] shadow-xs transition-all"
+                    className="w-full h-28 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 text-[13px] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/50 focus:outline-none focus:ring-2 focus:ring-[#FF3B30]/20 focus:border-[var(--theme-status-danger-border)] shadow-xs transition-all"
                     autoFocus
                 />
                 <div className="flex gap-2.5 justify-end pt-2">
@@ -63,7 +63,7 @@ export const InventoryRejectionModal: React.FC<InventoryRejectionModalProps> = (
                             }
                             onClose();
                         }}
-                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[#FF3B30] text-white hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-status-danger-bg)] text-white hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
                     >
                         <span>Confirm Rejection</span>
                     </button>

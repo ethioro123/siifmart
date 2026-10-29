@@ -153,10 +153,10 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                     const isOutOfStock = stockVal <= 0;
                     const isLowStock = stockVal < threshold;
                     const stockColor = isOutOfStock
-                        ? 'bg-[#FF3B30]/10 text-[var(--theme-status-error-text)] border-[#FF3B30]/25'
+                        ? 'bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-error-text)] border-[var(--theme-status-danger-border)]/25'
                         : isLowStock
-                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[#FF9F0A]/25'
-                        : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[#34C759]/25';
+                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]/25'
+                        : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]/25';
                     const packDesc = formatPackagingDescription(product, stockVal);
 
                     return (
@@ -259,7 +259,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                                 )}
                                             </div>
                                         ) : (
-                                            <span className="text-[11px] font-medium text-[var(--theme-status-error-text)] bg-[#FF3B30]/10 px-2 py-0.5 rounded border border-[#FF3B30]/20">Not assigned</span>
+                                            <span className="text-[11px] font-medium text-[var(--theme-status-error-text)] bg-[var(--theme-status-danger-bg)]/10 px-2 py-0.5 rounded border border-[var(--theme-status-danger-border)]/20">Not assigned</span>
                                         );
                                     })()
                                 )}
@@ -306,7 +306,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             {/* Class */}
                             <td className="py-4 px-4 text-center">
                                 <div className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold border transition-all ${
-                                    abc === 'A' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[#34C759]/30' :
+                                    abc === 'A' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]/30' :
                                     abc === 'B' ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-border-focus)]/30' :
                                     'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                 }`}>
@@ -358,7 +358,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteProduct(product.id)}
-                                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 hover:bg-[#FF3B30]/10 hover:text-[var(--theme-status-error-text)] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
+                                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 hover:bg-[var(--theme-status-danger-bg)]/10 hover:text-[var(--theme-status-error-text)] text-[var(--theme-text-muted)] rounded-lg transition-colors cursor-pointer"
                                                     aria-label="Delete Product" title="Delete Product"
                                                 >
                                                     <Trash2 size={14} />

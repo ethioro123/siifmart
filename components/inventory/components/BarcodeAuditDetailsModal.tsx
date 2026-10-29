@@ -32,7 +32,7 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
         >
             <div className="space-y-6">
                 <div className="flex gap-4">
-                    <div 
+                    <div
                         onClick={() => {
                             if (record.image_url) {
                                 onOpenFullscreenImage({
@@ -99,7 +99,7 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
                                 onDelete(record);
                                 onClose();
                             }}
-                            className="h-9 px-4 rounded-xl bg-[#FF3B30]/10 hover:bg-[#FF3B30]/15 text-[#FF3B30] border border-[#FF3B30]/20 shadow-xs transition-all text-[13px] font-semibold flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
+                            className="h-9 px-4 rounded-xl bg-[var(--theme-status-danger-bg)]/10 hover:bg-[var(--theme-status-danger-bg)]/15 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20 shadow-xs transition-all text-[13px] font-semibold flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
                         >
                             <Trash2 size={13} />
                             <span>Remove Mapping</span>

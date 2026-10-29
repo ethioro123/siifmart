@@ -103,13 +103,13 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     {/* Status Badge */}
                     <div className="flex items-center gap-2">
                         {region.status === 'active' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]/20">
                                 <CheckCircle2 size={12} />
                                 Active
                             </span>
                         )}
                         {region.status === 'suspended' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/20">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20">
                                 <ShieldAlert size={12} />
                                 Suspended
                             </span>
@@ -149,13 +149,13 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                                 <span className="font-semibold text-[var(--theme-text-primary)]">
                                     Monthly Procurement Budget
                                 </span>
-                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#FF9500] bg-[#FF9500]/10 px-2 py-0.5 rounded border border-[#FF9500]/20">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]/10 px-2 py-0.5 rounded border border-[var(--theme-status-warning-border)]/20">
                                     <AlertTriangle size={12} />
                                     Spend Unverified
                                 </span>
                             </div>
                             <div className="w-full h-2 bg-[var(--theme-border)] rounded-full overflow-hidden">
-                                <div className="h-full bg-[#FF9500]/30 w-full" />
+                                <div className="h-full bg-[var(--theme-status-warning-bg)]/30 w-full" />
                             </div>
                             <div className="mt-2 text-[11px] text-[var(--theme-text-secondary)]">
                                 Budget Cap: {monthlyBudget.toLocaleString()} {currency} (Live purchase order spend could not be verified)
@@ -177,10 +177,10 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                                 <div
                                     className={`h-full transition-all duration-300 ${
                                         isOverBudget
-                                            ? 'bg-[#FF3B30]'
+                                            ? 'bg-[var(--theme-status-danger-bg)]'
                                             : isNearCap
-                                            ? 'bg-[#FF9500]'
-                                            : 'bg-[#34C759]'
+                                            ? 'bg-[var(--theme-status-warning-bg)]'
+                                            : 'bg-[var(--theme-status-success-bg)]'
                                     }`}
                                     style={{ width: `${Math.min(100, Math.max(0, percentUsed))}%` }}
                                 />
@@ -191,13 +191,13 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                                     {percentUsed.toFixed(1)}% utilized this calendar month
                                 </span>
                                 {isOverBudget && (
-                                    <span className="flex items-center gap-1 text-[#FF3B30] font-medium">
+                                    <span className="flex items-center gap-1 text-[var(--theme-status-danger-text)] font-medium">
                                         <AlertTriangle size={12} />
                                         Over Budget Cap
                                     </span>
                                 )}
                                 {!isOverBudget && isNearCap && (
-                                    <span className="flex items-center gap-1 text-[#FF9500] font-medium">
+                                    <span className="flex items-center gap-1 text-[var(--theme-status-warning-text)] font-medium">
                                         <AlertTriangle size={12} />
                                         Near Budget Cap (85%+)
                                     </span>

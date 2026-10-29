@@ -64,7 +64,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                         Advanced Filter Suite
                     </h4>
                     {activeCount > 0 && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20 tabular-nums">
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]/20 tabular-nums">
                             {activeCount} Active
                         </span>
                     )}
@@ -75,7 +75,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                         <button
                             type="button"
                             onClick={onReset}
-                            className="text-[11px] font-semibold uppercase text-[#FF9F0A] hover:opacity-80 flex items-center gap-1.5 cursor-pointer transition-opacity"
+                            className="text-[11px] font-semibold uppercase text-[var(--theme-status-warning-text)] hover:opacity-80 flex items-center gap-1.5 cursor-pointer transition-opacity"
                         >
                             <RotateCcw size={12} /> Reset All
                         </button>
@@ -95,7 +95,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                 {/* 1. Brand / Manufacturer */}
                 <div className="space-y-2">
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                        <Tag size={14} className="text-[#34C759]" /> Brand / Manufacturer
+                        <Tag size={14} className="text-[var(--theme-status-success-text)]" /> Brand / Manufacturer
                     </label>
                     <input
                         type="text"
@@ -109,7 +109,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                 {/* 2. Price Range (Min & Max) + Quick Presets */}
                 <div className="space-y-2">
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                        <DollarSign size={14} className="text-[#34C759]" /> Price Range ({currencySymbol.trim()})
+                        <DollarSign size={14} className="text-[var(--theme-status-success-text)]" /> Price Range ({currencySymbol.trim()})
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                         <input
@@ -175,7 +175,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                 {/* 4. Warehouse & Logistics Statuses */}
                 <div className="space-y-2">
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                        <MapPin size={14} className="text-[#FF9F0A]" /> Bay & Logistics
+                        <MapPin size={14} className="text-[var(--theme-status-warning-text)]" /> Bay & Logistics
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                         <select

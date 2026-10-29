@@ -85,12 +85,12 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                     </span>
                 )}
                 {zone.allowPutaway === false && (
-                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-status-warning)]/10 text-[#FF9F0A] border border-[#FF9F0A]/25">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-status-warning)]/10 text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]/25">
                         No Putaway
                     </span>
                 )}
                 {zone.assignedProducts.length > 0 && (
-                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-status-success)]/10 text-[#34C759] border border-[#34C759]/25">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-status-success)]/10 text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]/25">
                         {zone.assignedProducts.length} Products
                     </span>
                 )}

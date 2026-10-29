@@ -248,7 +248,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                     setBarcodeSiteFilter('All');
                                     setCurrentBarcodePage(1);
                                 }}
-                                className="h-10 px-3 rounded-xl text-[#FF3B30] hover:bg-[#FF3B30]/10 border border-[#FF3B30]/20 text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
+                                className="h-10 px-3 rounded-xl text-[var(--theme-status-danger-text)] hover:bg-[var(--theme-status-danger-bg)]/10 border border-[var(--theme-status-danger-border)]/20 text-[12px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                                 title="Clear all filters"
                             >
                                 <X size={14} />
@@ -284,7 +284,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                                             {/* Product Info & Click-to-Zoom Thumbnail */}
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                <div 
+                                                <div
                                                     onClick={(e) => {
                                                          if (approval.image_url) {
                                                             e.stopPropagation();
@@ -317,7 +317,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                         <span className="text-[11px] font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-hover)] px-2 py-0.5 rounded border border-[var(--theme-border)]">
                                                             {approval.product?.sku || 'NO SKU'}
                                                         </span>
-                                                        <span className="text-[11px] font-mono tabular-nums font-semibold text-[#34C759] bg-[#34C759]/10 px-2 py-0.5 rounded border border-[#34C759]/20">
+                                                        <span className="text-[11px] font-mono tabular-nums font-semibold text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)]/10 px-2 py-0.5 rounded border border-[var(--theme-status-success-border)]/20">
                                                             Barcode: {approval.barcode}
                                                         </span>
                                                         {siteName && (
@@ -349,8 +349,8 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
 
                                                 <div className="flex flex-col">
                                                     <span className="text-[11px] uppercase tracking-wider text-[var(--theme-text-secondary)] font-semibold">Status</span>
-                                                    <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20 mt-0.5">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#34C759]" />
+                                                    <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]/20 mt-0.5">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-success-bg)]" />
                                                         <span className="font-semibold text-[11px]">{approval.status === 'approved' ? 'Approved' : approval.status === 'rejected' ? 'Rejected' : 'Pending review'}</span>
                                                     </div>
                                                 </div>
@@ -373,7 +373,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                     <button
                                                         type="button"
                                                         onClick={() => handleDeleteAuditRecord(approval)}
-                                                        className="w-8 h-8 rounded-lg bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/20 hover:bg-[#FF3B30]/15 transition-all flex items-center justify-center cursor-pointer active:scale-[0.98]"
+                                                        className="w-8 h-8 rounded-lg bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]/20 hover:bg-[var(--theme-status-danger-bg)]/15 transition-all flex items-center justify-center cursor-pointer active:scale-[0.98]"
                                                         title="Delete Mapping"
                                                     >
                                                         <Trash2 size={13} />
@@ -393,7 +393,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                             <div className="text-[12px] font-medium text-[var(--theme-text-secondary)]">
                                 Showing <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{(currentBarcodePage - 1) * BARCODE_PER_PAGE + 1} - {Math.min(currentBarcodePage * BARCODE_PER_PAGE, filteredBarcodes.length)}</span> of <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{filteredBarcodes.length}</span> Records
                             </div>
-                            
+
                             {totalPages > 1 && (
                                 <div className="flex items-center gap-1.5">
                                     <button

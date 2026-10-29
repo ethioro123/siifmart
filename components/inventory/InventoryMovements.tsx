@@ -179,7 +179,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                                 setMovementsTypeFilter('All');
                                 if (isHQView) setMovementsSiteFilter('All');
                             }}
-                            className="h-10 px-3 text-[#FF3B30] hover:bg-[#FF3B30]/10 border border-[#FF3B30]/20 rounded-xl transition-colors shrink-0 flex items-center gap-1.5 text-[12px] font-semibold cursor-pointer active:scale-[0.98]"
+                            className="h-10 px-3 text-[var(--theme-status-danger-text)] hover:bg-[var(--theme-status-danger-bg)]/10 border border-[var(--theme-status-danger-border)]/20 rounded-xl transition-colors shrink-0 flex items-center gap-1.5 text-[12px] font-semibold cursor-pointer active:scale-[0.98]"
                             title="Clear All Filters"
                         >
                             <X size={14} />
@@ -255,12 +255,12 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                                         <td className="px-4 py-3">
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
                                                 move.type === 'IN'
-                                                    ? 'text-[#34C759] border-[#34C759]/20 bg-[#34C759]/10'
+                                                    ? 'text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]/20 bg-[var(--theme-status-success-bg)]/10'
                                                     : move.type === 'OUT'
                                                     ? 'text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-border-focus)]/20 bg-[var(--theme-accent)]/10'
                                                     : move.type === 'TRANSFER'
-                                                    ? 'text-[#AF52DE] border-[#AF52DE]/20 bg-[#AF52DE]/10'
-                                                    : 'text-[#FF9F0A] border-[#FF9F0A]/20 bg-[#FF9F0A]/10'
+                                                    ? 'text-[var(--theme-chart-4)] border-[var(--theme-chart-4)]/20 bg-[var(--theme-chart-4)]/10'
+                                                    : 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]/20 bg-[var(--theme-status-warning-bg)]/10'
                                             }`}>
                                                 {move.type}
                                             </span>
@@ -269,7 +269,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                                             {move.productName}
                                         </td>
                                         <td className={`px-4 py-3 text-[13px] font-mono tabular-nums text-right font-semibold ${
-                                            move.type === 'IN' ? 'text-[#34C759]' : move.type === 'OUT' ? 'text-[#FF3B30]' : 'text-[var(--theme-text-primary)]'
+                                            move.type === 'IN' ? 'text-[var(--theme-status-success-text)]' : move.type === 'OUT' ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-text-primary)]'
                                         }`}>
                                             {prefix}{displayQty.toLocaleString()}
                                             {perUnitLabel ? (

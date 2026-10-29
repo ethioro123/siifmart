@@ -297,7 +297,7 @@ export const OverviewTab: React.FC = () => {
                             <span>Gross Revenue</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-full bg-[#FF3B30]" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-[var(--theme-status-danger-bg)]" />
                             <span>Operational Outlays</span>
                         </div>
                     </div>

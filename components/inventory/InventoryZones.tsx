@@ -38,14 +38,14 @@ export const InventoryZones: React.FC = () => {
         setIsLoading(true);
         try {
             const dbZones = await warehouseZonesService.getAll(activeSite.id);
-            
+
             // Map products to zones
             const enriched = dbZones.map((z: WarehouseZone) => {
-                const assigned = allProducts.filter(p => 
+                const assigned = allProducts.filter(p =>
                     (p.zoneId === z.id || p.zone_id === z.id) &&
                     (p.siteId === activeSite.id || p.site_id === activeSite.id)
                 );
-                
+
                 // Calculate actual occupied space if product stock exists
                 const totalStock = assigned.reduce((sum, p) => sum + (p.stock || 0), 0);
 
@@ -216,7 +216,7 @@ export const InventoryZones: React.FC = () => {
                 </div>
             ) : zones.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center justify-center text-[#FF9F0A]">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--theme-status-warning-bg)]/10 border border-[var(--theme-status-warning-border)]/20 flex items-center justify-center text-[var(--theme-status-warning-text)]">
                         <AlertCircle size={22} />
                     </div>
                     <div>

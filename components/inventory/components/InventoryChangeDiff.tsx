@@ -31,15 +31,15 @@ export const renderChangeDiff = (change: PendingInventoryChange, allProducts: Pr
             diffs.push(
                 <div key={prop as string} className="flex items-center gap-1.5 text-[11px] bg-[var(--theme-bg-hover)] rounded-md px-2 py-0.5 border border-[var(--theme-border)]">
                     <span className="text-[var(--theme-text-secondary)] uppercase font-semibold text-[11px]">{prop as string}:</span>
-                    <span className="text-[#FF3B30] line-through truncate max-w-[70px]">{String(oldValue || 'None')}</span>
+                    <span className="text-[var(--theme-status-danger-text)] line-through truncate max-w-[70px]">{String(oldValue || 'None')}</span>
                     <ArrowRight size={11} className="text-[var(--theme-accent)] shrink-0" />
-                    <span className="text-[#34C759] font-semibold truncate max-w-[90px]">{String(newValue)}</span>
+                    <span className="text-[var(--theme-status-success-text)] font-semibold truncate max-w-[90px]">{String(newValue)}</span>
                 </div>
             );
         }
     });
 
-    if (diffs.length === 0) return <span className="text-[#FF9F0A]/70 italic text-[11px]">No visible differences</span>;
+    if (diffs.length === 0) return <span className="text-[var(--theme-status-warning-text)]/70 italic text-[11px]">No visible differences</span>;
 
     return (
         <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -107,8 +107,8 @@ export const DetailedComparison: React.FC<DetailedComparisonProps> = ({ requestF
                             <h5 className="text-[12px] font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Margin Impact Analysis</h5>
                             <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
                                 isBelowFloor
-                                    ? 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/30'
-                                    : 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/30'
+                                    ? 'bg-[var(--theme-status-danger-bg)]/10 text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]/30'
+                                    : 'bg-[var(--theme-status-success-bg)]/10 text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]/30'
                             }`}>
                                 {isBelowFloor ? `< ${MARGIN_FLOOR_PCT}% Floor (Finance Co-Approval Required)` : `≥ ${MARGIN_FLOOR_PCT}% Floor Compliant`}
                             </span>
@@ -129,7 +129,7 @@ export const DetailedComparison: React.FC<DetailedComparisonProps> = ({ requestF
                                     {proposedSelling !== undefined ? proposedSelling.toLocaleString() : 'N/A'}
                                 </p>
                                 <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
-                                    Margin: <span className={`font-semibold tabular-nums ${isBelowFloor ? 'text-[#FF3B30]' : 'text-[#34C759]'}`}>
+                                    Margin: <span className={`font-semibold tabular-nums ${isBelowFloor ? 'text-[var(--theme-status-danger-text)]' : 'text-[var(--theme-status-success-text)]'}`}>
                                         {proposedMargin !== null ? `${proposedMargin.toFixed(1)}%` : 'N/A'}
                                     </span>
                                 </p>
@@ -145,12 +145,12 @@ export const DetailedComparison: React.FC<DetailedComparisonProps> = ({ requestF
                 <div className="mt-6">
                     <h5 className="text-[12px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider border-b border-[var(--theme-border)] pb-2 mb-3">Comparison</h5>
                     <div className="grid grid-cols-2 gap-3 text-xs font-mono tabular-nums">
-                        <div className="p-3.5 rounded-xl bg-[#FF3B30]/5 border border-[#FF3B30]/15">
-                            <h6 className="text-[#FF3B30] font-semibold mb-2 uppercase text-[11px] tracking-wider">Original</h6>
+                        <div className="p-3.5 rounded-xl bg-[var(--theme-status-danger-bg)]/5 border border-[var(--theme-status-danger-border)]/15">
+                            <h6 className="text-[var(--theme-status-danger-text)] font-semibold mb-2 uppercase text-[11px] tracking-wider">Original</h6>
                             <pre className="whitespace-pre-wrap text-[var(--theme-text-secondary)] text-[11px] overflow-x-auto">{JSON.stringify(original, null, 2)}</pre>
                         </div>
-                        <div className="p-3.5 rounded-xl bg-[#34C759]/5 border border-[#34C759]/15">
-                            <h6 className="text-[#34C759] font-semibold mb-2 uppercase text-[11px] tracking-wider">Proposed</h6>
+                        <div className="p-3.5 rounded-xl bg-[var(--theme-status-success-bg)]/5 border border-[var(--theme-status-success-border)]/15">
+                            <h6 className="text-[var(--theme-status-success-text)] font-semibold mb-2 uppercase text-[11px] tracking-wider">Proposed</h6>
                             <pre className="whitespace-pre-wrap text-[var(--theme-text-secondary)] text-[11px] overflow-x-auto">{JSON.stringify({ ...original, ...requestForDetails.proposedChanges }, null, 2)}</pre>
                         </div>
                     </div>
@@ -163,7 +163,7 @@ export const DetailedComparison: React.FC<DetailedComparisonProps> = ({ requestF
         const currentStock = allProducts.find(p => p.id === requestForDetails.productId)?.stock || 0;
         return (
             <div className="p-6 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs text-center space-y-4">
-                <div className="w-12 h-12 rounded-xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center justify-center text-[#FF9F0A] mx-auto">
+                <div className="w-12 h-12 rounded-xl bg-[var(--theme-status-warning-bg)]/10 border border-[var(--theme-status-warning-border)]/20 flex items-center justify-center text-[var(--theme-status-warning-text)] mx-auto">
                     <RefreshCw size={22} />
                 </div>
                 <div>
@@ -173,7 +173,7 @@ export const DetailedComparison: React.FC<DetailedComparisonProps> = ({ requestF
                 <div className="flex items-center justify-center gap-4 text-xl font-mono tabular-nums py-2">
                     <span className="text-[var(--theme-text-secondary)] text-sm">Current: <span className="font-semibold text-[var(--theme-text-primary)]">{currentStock}</span></span>
                     <ArrowRight size={16} className="text-[var(--theme-text-secondary)]" />
-                    <span className={`font-semibold text-lg ${requestForDetails.adjustmentType === 'IN' ? 'text-[#34C759]' : 'text-[#FF3B30]'}`}>
+                    <span className={`font-semibold text-lg ${requestForDetails.adjustmentType === 'IN' ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'}`}>
                         {requestForDetails.adjustmentType === 'IN' ? '+' : '-'}{requestForDetails.adjustmentQty}
                     </span>
                 </div>

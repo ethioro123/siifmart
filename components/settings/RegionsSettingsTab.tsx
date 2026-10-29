@@ -166,7 +166,7 @@ export default function RegionsSettingsTab() {
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
                         <span>Allocated Monthly Budget</span>
-                        <DollarSign size={15} className="text-[#34C759]" />
+                        <DollarSign size={15} className="text-[var(--theme-status-success-text)]" />
                     </div>
                     <p className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                         {totalRegionalBudget.toLocaleString()}
@@ -192,7 +192,7 @@ export default function RegionsSettingsTab() {
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
                     <div className="flex items-center justify-between text-xs text-[var(--theme-text-secondary)] mb-1">
                         <span>HQ Governance</span>
-                        <Shield size={15} className="text-[#FF9500]" />
+                        <Shield size={15} className="text-[var(--theme-status-warning-text)]" />
                     </div>
                     <p className="text-xs font-medium text-[var(--theme-text-primary)] tracking-tight mt-1">
                         100% Zero-Trust Active
@@ -245,7 +245,7 @@ export default function RegionsSettingsTab() {
                 </div>
             ) : loadError ? (
                 <div className="border border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)] rounded-2xl p-10 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex items-center justify-center text-[#FF3B30] mx-auto mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex items-center justify-center text-[var(--theme-status-danger-text)] mx-auto mb-3">
                         <Shield size={24} />
                     </div>
                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">

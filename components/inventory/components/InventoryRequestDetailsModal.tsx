@@ -51,7 +51,7 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                                 : requestForDetails?.changeType === 'delete'
                                 ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]'
                                 : requestForDetails?.changeType === 'stock_adjustment'
-                                ? 'bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/20'
+                                ? 'bg-[var(--theme-status-warning-bg)]/10 text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]/20'
                                 : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
                         }`}>
                             {requestForDetails?.changeType === 'edit' && <Edit size={18} />}
@@ -166,14 +166,14 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                                             setIsApprovalModalOpen(true);
                                         }
                                     }}
-                                    className="flex-1 h-10 px-4 rounded-xl font-semibold text-[13px] bg-[var(--theme-status-danger-bg)] hover:bg-[#FF3B30]/15 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                                    className="flex-1 h-10 px-4 rounded-xl font-semibold text-[13px] bg-[var(--theme-status-danger-bg)] hover:bg-[var(--theme-status-danger-bg)]/15 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     <XCircle size={16} />
                                     <span>Reject Request</span>
                                 </button>
                             </>
                         ) : (
-                            <div className="flex-1 text-center py-2.5 px-4 rounded-xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 text-[#FF9F0A] text-[12px] font-semibold">
+                            <div className="flex-1 text-center py-2.5 px-4 rounded-xl bg-[var(--theme-status-warning-bg)]/10 border border-[var(--theme-status-warning-border)]/20 text-[var(--theme-status-warning-text)] text-[12px] font-semibold">
                                 {requestForDetails ? getAwaitingLabel(requestForDetails) : 'Awaiting Approval'}
                             </div>
                         )}

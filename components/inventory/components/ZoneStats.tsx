@@ -33,7 +33,7 @@ export const ZoneStats: React.FC<ZoneStatsProps> = ({
                         {totalOccupied.toLocaleString()} <span className="text-xs text-[var(--theme-text-secondary)] font-normal">/ {totalCapacity.toLocaleString()} items</span>
                     </p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/20 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)]/10 text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]/20 flex items-center justify-center shrink-0">
                     <Box size={18} />
                 </div>
             </div>
@@ -44,8 +44,8 @@ export const ZoneStats: React.FC<ZoneStatsProps> = ({
                     <span className="text-sm font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{totalUtilization.toFixed(1)}%</span>
                 </div>
                 <div className="w-full bg-[var(--theme-bg-subtle)] h-2 rounded-full mt-3 overflow-hidden border border-[var(--theme-border)] relative">
-                    <div 
-                        className={`h-full transition-all duration-700 ${totalUtilization > 90 ? 'bg-[#FF3B30]' : totalUtilization > 70 ? 'bg-[#FF9F0A]' : 'bg-[#34C759]'}`}
+                    <div
+                        className={`h-full transition-all duration-700 ${totalUtilization > 90 ? 'bg-[var(--theme-status-danger-bg)]' : totalUtilization > 70 ? 'bg-[var(--theme-status-warning-bg)]' : 'bg-[var(--theme-status-success-bg)]'}`}
                         style={{ width: `${Math.min(100, totalUtilization)}%` }}
                     />
                 </div>
