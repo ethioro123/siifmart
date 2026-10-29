@@ -102,7 +102,8 @@ export function UserMenu({
          <button
             type="button"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            aria-label={`User Profile and Menu${hasApprovalsAlert ? `, ${pendingApprovalsCount} pending approvals` : ''}`}
+            aria-label="User Profile and Menu"
+            title={hasApprovalsAlert ? `User Profile and Menu (${pendingApprovalsCount} pending approvals)` : 'User Profile and Menu'}
             aria-expanded={isUserMenuOpen}
             aria-haspopup="true"
             className={`flex items-center gap-1.5 sm:gap-2 md:gap-3 px-2 sm:px-2 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full border transition-all duration-300 cursor-pointer flex-shrink-0 touch-manipulation min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${isUserMenuOpen
