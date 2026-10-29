@@ -76,6 +76,7 @@ export const salesService = {
                 const term = String(filters.search).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
                 const clauses = [
                     `receipt_number.ilike."%${term}%"`,
+                    `offline_receipt_number.ilike."%${term}%"`,
                     `cashier_name.ilike."%${term}%"`,
                     `customers.name.ilike."%${term}%"`
                 ];

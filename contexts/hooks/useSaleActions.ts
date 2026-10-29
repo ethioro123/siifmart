@@ -78,7 +78,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
 
             const isOfflineSale = !navigator.onLine;
             const offlineReceiptReference = isOfflineSale
-                ? (receiptNumber || `OFF-${(activeSite?.country || settings.country || 'ET').toUpperCase()}-${saleId.slice(0, 8).toUpperCase()}`)
+                ? `OFF-${(activeSite?.country || settings.country || 'ET').toUpperCase()}-${saleId.toUpperCase()}`
                 : undefined;
 
             let saleRecord: SaleRecord & { discountCodeId?: string | null } = {

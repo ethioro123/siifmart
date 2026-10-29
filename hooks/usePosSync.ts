@@ -120,7 +120,9 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
 
                         // 1. Send sale to Supabase
                         const persistedSale = await salesService.create(saleData, items, discountCodeId);
-                        await posDB.updateSale({ ...salePayload, ...persistedSale, items });
+                        if (typeof posDB.updateSale === 'function') {
+                            await posDB.updateSale({ ...salePayload, ...persistedSale, items });
+                        }
 
                         // 3. Customer loyalty points reconciliation
                         if (salePayload.customerId && salePayload.total && enableLoyalty !== false) {
