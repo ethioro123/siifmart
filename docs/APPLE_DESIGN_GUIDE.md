@@ -1,6 +1,6 @@
 # SIIFMART Design Standard
 
-**Edition:** 29 October 2026, Revision B · **Status:** authoritative internal design specification · **Audience:** product, design, engineering and QA.
+**Edition:** 30 October 2026, Revision C · **Status:** authoritative internal design specification · **Audience:** product, design, engineering and QA.
 
 SIIFMART should feel composed, precise and immediate. People should recognize the next action, understand the business consequence, and trust the result. Our design quality comes from the relationships between information, controls and feedback, supported by disciplined visual craft. Every module must work convincingly in daily use, including a country director's large desktop, a store supervisor's phone and a warehouse worker's scanner.
 
@@ -8,9 +8,9 @@ This is SIIFMART's own platform-neutral web standard: modern elegance through si
 
 ## What changed in this edition
 
-The former short guide is replaced by a full handbook with explicit component behavior, interaction states, responsive rules, operational patterns and release evidence. It retains the central token system and device-led appearance preference. It makes compact approval indicators, meaningful site display codes, scoped bulk review, readable tables, progressive disclosure and truthful synchronization first-class requirements.
+The user selected a **Codex-inspired workspace direction**: quiet neutral surfaces, compact navigation, restrained controls, readable typography and progressive disclosure. [Chapter 18](design/18-codex-workspace-direction.md) is the authoritative visual update. It preserves softly rounded cards and panels where useful, while removing mandatory floating-card treatment from full-height workspaces. This is SIIFMART's interpretation, not an official OpenAI specification or a claim of pixel-identical Codex styling.
 
-The verified 2026 Apple direction includes refinement of Liquid Glass, stronger toolbar structure and adjustable transparency. Our interpretation prioritizes legibility and user control while keeping the operational content layer stable. See [Apple's WWDC26 keynote](https://developer.apple.com/videos/play/wwdc2026/101/) and the [research register](design/13-sources-and-decisions.md). No unverified October-specific Apple release is assumed.
+Apple, Material and Fluent remain supporting references for behavior and accessibility. Glass and Apple-like decoration are optional, not the design identity. Existing business controls, accessibility requirements and rule-edit permission stay in force. Documentation does not deploy a runtime redesign.
 
 ## Read the handbook
 
@@ -34,11 +34,13 @@ The verified 2026 Apple direction includes refinement of Liquid Glass, stronger 
 | [16 · Layout and data contracts](design/16-layout-and-data-contracts.md) | Breakpoints, gutters, header, inspector, table and chart composition |
 | [17 · Reference and visual acceptance](design/17-reference-and-visual-acceptance.md) | Runnable component board, reference tests and baseline-review discipline |
 
+| [18 · Codex-inspired workspace direction](design/18-codex-workspace-direction.md) | Current visual authority: shell, surfaces, typography, controls and operational adaptation |
+
 Chapters form one standard. Read the relevant workflow chapter together with accessibility and verification before implementing. Do not treat a visual chapter as permission to weaken a business or security rule.
 
-## Revision B: implementation precision
+## Earlier reference and implementation precision
 
-Chapters 14–17 add exact component defaults and a [runnable visual reference](design/examples/component-reference.html). They define our own restrained visual language without requiring an Apple look. The reference palette is a contrast-checked migration target; it is not silently applied to production styles. Exact defaults refine prior chapter ranges, while content growth, localization, accessibility and security retain precedence. The reference checker and focused browser tests verify the artifact; they do not certify unrelated production screens.
+Chapters 14–17 add exact component defaults and a [runnable visual reference](design/examples/component-reference.html). Their earlier visual defaults are refined by chapter 18. The reference palette is a contrast-checked migration target; it is not silently applied to production styles. Exact defaults refine prior chapter ranges, while content growth, localization, accessibility and security retain precedence. The reference checker and focused browser tests verify the artifact; they do not certify unrelated production screens.
 
 ## The essential rules
 

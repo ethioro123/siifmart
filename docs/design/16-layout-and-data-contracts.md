@@ -2,6 +2,8 @@
 
 [Handbook](../APPLE_DESIGN_GUIDE.md) · Revision B, 29 October 2026
 
+> Revision C visual update: [chapter 18](18-codex-workspace-direction.md) takes precedence for composition, geometry and workspace styling. Earlier reference artifacts are not Revision C acceptance evidence. Accessibility and business controls remain mandatory.
+
 ## Exact defaults with content-led escape rules
 
 These breakpoints are SIIFMART's initial layout contracts, expressed in available CSS width. They are not device categories. A panel in a wide application may still have a narrow container. Use container-aware adaptation where supported, with a working baseline; never make a newer browser capability the only way to reach an essential action.

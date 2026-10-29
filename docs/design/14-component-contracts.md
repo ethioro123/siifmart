@@ -2,6 +2,8 @@
 
 [Handbook](../APPLE_DESIGN_GUIDE.md) · Revision B, 29 October 2026
 
+> Revision C visual update: [chapter 18](18-codex-workspace-direction.md) takes precedence for composition, geometry and workspace styling. Earlier reference artifacts are not Revision C acceptance evidence. Accessibility and business controls remain mandatory.
+
 ## SIIFMART's own design language
 
 Our direction is modern elegance through simplicity: quiet neutral surfaces, strong alignment, a recognizable action hierarchy, readable business data and deliberate detail. Apple, Material and Fluent are useful references, not themes to copy. No platform-specific material, capsule shape, animation or navigation pattern is mandatory merely because a platform uses it.

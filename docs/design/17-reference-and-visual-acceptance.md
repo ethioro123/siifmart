@@ -2,6 +2,8 @@
 
 [Handbook](../APPLE_DESIGN_GUIDE.md) · Revision B, 29 October 2026
 
+> Revision C visual update: [chapter 18](18-codex-workspace-direction.md) takes precedence for composition, geometry and workspace styling. Earlier reference artifacts are not Revision C acceptance evidence. Accessibility and business controls remain mandatory.
+
 ## Reference status
 
 The [component board](examples/component-reference.html) is a runnable, dependency-free visual specification for the target language: neutral surfaces, one action hierarchy, compact status, readable records and explicit states. Open it in a browser or through the project's development server. It contains synthetic, nonproduction examples. It does not fetch business data or grant approval authority.
