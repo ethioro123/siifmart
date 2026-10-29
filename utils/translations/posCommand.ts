@@ -2,6 +2,11 @@ import { TranslationBlock } from './types';
 
 export const posCommand: TranslationBlock = {
     // Store-scoped catalog update notice and review
+    updatesPriceHistory: {"en": "Price history", "am": "የዋጋ ታሪክ", "or": "Seenaa Gatii"},
+    updatesPriceReviews: {"en": "Price changes to review · {count}", "am": "ለመገምገም {count} የዋጋ ለውጦች", "or": "Jijjiirama gatii {count} ilaalamuu qabu"},
+    updatesRecentProducts: {"en": "Recent products · {count}", "am": "{count} የቅርብ ጊዜ ምርቶች", "or": "Oomisha yeroo dhihoo {count}"},
+    updatesCheckingPrices: {"en": "Checking prices…", "am": "ዋጋዎችን በማረጋገጥ ላይ…", "or": "Gatiiwwan sakatta’aa jira…"},
+    updatesPriceUnavailable: {"en": "Price history unavailable", "am": "የዋጋ ታሪክ አይገኝም", "or": "Seenaa gatii argachuun hin danda’amne"},
     catalogCurrentPrice: { en: 'Current selling price', am: 'የአሁኑ መሸጫ ዋጋ', or: 'Gatii Gurgurtaa Ammaa' },
     catalogUpdates: {"en": "Product updates", "am": "የምርት ለውጦች", "or": "Jijjiirama Oomishaa"},
     catalogUpdatesCount: {"en": "Review product updates · {count}", "am": "የ{count} ምርቶችን የቅርብ ጊዜ ለውጦች ይመልከቱ", "or": "Jijjiirama yeroo dhihoo oomisha {count} ilaali"},

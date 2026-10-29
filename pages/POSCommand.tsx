@@ -1,4 +1,4 @@
-import { CatalogUpdatesNotice } from '../components/pos/shared/CatalogUpdatesNotice';
+import { CommandProductUpdatesNotice } from '../components/pos-command/CommandProductUpdatesNotice';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -201,7 +201,7 @@ const POSCommandContent: React.FC = () => {
               </button>
             )}
 
-            <CatalogUpdatesNotice namespace="posCommand" />
+            <CommandProductUpdatesNotice />
 
             {/* Store Inventory Operations */}
             <div className="flex items-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5">

@@ -1,4 +1,4 @@
-import { CatalogUpdatesNotice } from '../shared/CatalogUpdatesNotice';
+import { PriceUpdatesModal } from '../modals/PriceUpdatesModal';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -36,10 +36,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
         setIsUnknownBarcodeModalOpen,
         currentStorePoints,
         storeBonus,
-        userBonusShare,
-        unreviewedPriceUpdateCount,
-        priceHistoryError,
-        setIsPriceUpdatesModalOpen
+        userBonusShare
     } = usePOS();
 
     const { triggerSync, posSyncStatus, posPendingSyncCount, posLatencyMs, settings, activeSite, effectiveCountry } = useData();
@@ -103,23 +100,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center justify-end gap-2 [&:empty]:hidden">
-                <CatalogUpdatesNotice namespace="pos" />
-                {(unreviewedPriceUpdateCount > 0 || priceHistoryError) && (
-                    <div className="flex">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsPriceUpdatesModalOpen(true);
-                                native.haptic();
-                            }}
-                            className="min-h-11 max-w-full px-3 flex items-center gap-2 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-xs font-semibold hover:bg-[var(--theme-bg-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                            aria-label={(priceHistoryError ? t('pos.priceHistoryUnavailable') : t('pos.unreviewedPriceChangesCount', { count: unreviewedPriceUpdateCount }))}
-                        >
-                            <span className="w-2 h-2 rounded-full bg-[var(--theme-status-info)] shrink-0" aria-hidden="true" />
-                            <span className="truncate">{(priceHistoryError ? t('pos.priceHistoryUnavailable') : t('pos.unreviewedPriceChangesCount', { count: unreviewedPriceUpdateCount }))}</span>
-                        </button>
-                    </div>
-                )}
+                <PriceUpdatesModal />
                 </div>
 
                 {/* Unknown Barcode Alert */}

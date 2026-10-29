@@ -19,7 +19,7 @@ export function usePOSPriceHistory(siteId: string | undefined, reviewerId: strin
 
     const refresh = useCallback(async (isCurrent: () => boolean = () => true) => {
         setIsLoadingMore(false);
-        if (!siteId) {
+        if (!siteId || !reviewerId) {
             setEntries([]);
             setLoadedSiteId(undefined);
             setLoadedReviewerId(undefined);
@@ -95,7 +95,10 @@ export function usePOSPriceHistory(siteId: string | undefined, reviewerId: strin
                     setUnreviewedCount(count);
                 }
             } catch {
-                // The review receipt is already saved; a later refresh will repair the badge count.
+                // The receipt is saved, but the count must not look newly verified.
+                if (identityRef.current.siteId === siteId && identityRef.current.reviewerId === reviewerId) {
+                    setError('Price review saved; the updated count could not be loaded.');
+                }
             }
         }
     }, [reviewerId, siteId]);

@@ -51,8 +51,6 @@ export const POSCartPanel: React.FC = () => {
         handleOpenDrawer,
         handleCloseShift,
         handleReprintLast,
-        setIsPriceUpdatesModalOpen,
-        unreviewedPriceUpdateCount,
         staleCartPriceChanges,
         handleInitiatePayment,
         setIsMiscItemModalOpen,
@@ -354,17 +352,12 @@ export const POSCartPanel: React.FC = () => {
                                     <Settings size={15} />
                                 </div>
                                 <span>{t('pos.more')}</span>
-                                {unreviewedPriceUpdateCount > 0 && (
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                                )}
                             </button>
 
                             <POSCartActionsMenu
                                 showActions={showActions}
                                 setShowActions={setShowActions}
-                                unseenPriceUpdatesCount={unreviewedPriceUpdateCount}
                                 heldOrdersCount={heldOrders.length}
-                                onOpenPriceUpdates={() => setIsPriceUpdatesModalOpen(true)}
                                 onOpenRecall={() => setIsRecallModalOpen(true)}
                                 onOpenReturn={() => setIsReturnModalOpen(true)}
                                 onOpenCashDrop={() => setIsCashDropModalOpen(true)}

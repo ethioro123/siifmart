@@ -3,6 +3,15 @@ import { TranslationBlock } from './types';
 
 export const pos: TranslationBlock = {
     // Store-scoped catalog update notice and review
+    updatesPriceHistory: {"en": "Price history", "am": "የዋጋ ታሪክ", "or": "Seenaa Gatii"},
+    updatesPriceReviews: {"en": "Price changes to review · {count}", "am": "ለመገምገም {count} የዋጋ ለውጦች", "or": "Jijjiirama gatii {count} ilaalamuu qabu"},
+    updatesRecentProducts: {"en": "Recent products · {count}", "am": "{count} የቅርብ ጊዜ ምርቶች", "or": "Oomisha yeroo dhihoo {count}"},
+    updatesCheckingPrices: {"en": "Checking prices…", "am": "ዋጋዎችን በማረጋገጥ ላይ…", "or": "Gatiiwwan sakatta’aa jira…"},
+    updatesPriceUnavailable: {"en": "Price history unavailable", "am": "የዋጋ ታሪክ አይገኝም", "or": "Seenaa gatii argachuun hin danda’amne"},
+    priceReviewsSaved: {"en": "Marked {count} price changes as reviewed", "am": "{count} የዋጋ ለውጦች እንደተገመገሙ ተመዝግበዋል", "or": "Jijjiiramni gatii {count} akka ilaalametti galmaa’eera"},
+    priceReviewsFailed: {"en": "Could not save the price review. Try again.", "am": "የዋጋ ግምገማው ሊቀመጥ አልቻለም። እንደገና ይሞክሩ።", "or": "Ilaalcha gatii galmeessuun hin danda’amne. Irra deebi’ii yaali."},
+    retryPriceHistory: {"en": "Retry loading price history", "am": "የዋጋ ታሪክን እንደገና ጫን", "or": "Seenaa gatii irra deebi’ii fidi"},
+    priceActorUnknown: {"en": "Actor not recorded", "am": "ለውጡን ያደረገው አልተመዘገበም", "or": "Namni jijjiire hin galmoofne"},
     catalogCurrentPrice: { en: 'Current selling price', am: 'የአሁኑ መሸጫ ዋጋ', or: 'Gatii Gurgurtaa Ammaa' },
     catalogUpdates: {"en": "Product updates", "am": "የምርት ለውጦች", "or": "Jijjiirama Oomishaa"},
     catalogUpdatesCount: {"en": "Review product updates · {count}", "am": "የ{count} ምርቶችን የቅርብ ጊዜ ለውጦች ይመልከቱ", "or": "Jijjiirama yeroo dhihoo oomisha {count} ilaali"},

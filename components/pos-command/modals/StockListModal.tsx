@@ -12,31 +12,14 @@ import { getSellUnit, formatStockDisplay } from '../../../utils/units';
 import { formatProductDisplayName } from '../../procurement/utils';
 import { resolveSmartProductAttributes } from '../../../utils/groceryAttributes';
 import {
-    Printer, CheckCheck, X, Search
+    Printer, X, Search
 } from 'lucide-react';
 
-type StockFilterMode = 'ALL' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'PRICE_UPDATED' | 'STOCK_UPDATED' | 'ON_SALE' | 'BY_WEIGHT_VOLUME' | 'UNSEEN';
-
-function getUpdateFlags(product: any, lastSeen: number): { priceUpdated: boolean; stockUpdated: boolean; isUnseen: boolean } {
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    const priceTime = product.priceUpdatedAt || product.price_updated_at;
-    const stockTime = product.stockUpdatedAt || product.stock_updated_at;
-    const updatedAt = (product as any).updatedAt || (product as any).updated_at;
-    let priceUpdated = false; let stockUpdated = false; let isUnseen = false;
-    if (priceTime && new Date(priceTime).getTime() > cutoff) { priceUpdated = true; if (new Date(priceTime).getTime() > lastSeen) isUnseen = true; }
-    if (stockTime && new Date(stockTime).getTime() > cutoff) { stockUpdated = true; if (new Date(stockTime).getTime() > lastSeen) isUnseen = true; }
-    if (!priceUpdated && !stockUpdated && updatedAt && new Date(updatedAt).getTime() > cutoff) {
-        const updateType = (product.updateType || product.update_type || '').toLowerCase();
-        priceUpdated = !updateType || updateType.includes('price');
-        stockUpdated = !updateType || updateType.includes('stock');
-        if (new Date(updatedAt).getTime() > lastSeen) isUnseen = true;
-    }
-    return { priceUpdated, stockUpdated, isUnseen };
-}
+type StockFilterMode = 'ALL' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'ON_SALE' | 'BY_WEIGHT_VOLUME';
 
 export const StockListModal: React.FC = () => {
     const { t } = useLanguage();
-    const { isStockListOpen, setIsStockListOpen, stockSearch, setStockSearch, lastSeenUpdates, markUpdatesAsRead } = usePOSCommand();
+    const { isStockListOpen, setIsStockListOpen, stockSearch, setStockSearch } = usePOSCommand();
     const [currentPage, setCurrentPage] = React.useState(1);
     const [activeFilter, setActiveFilter] = React.useState<StockFilterMode>('ALL');
     const [selectedCategory, setSelectedCategory] = React.useState<string>('ALL_CATEGORIES');
@@ -59,19 +42,17 @@ export const StockListModal: React.FC = () => {
     }, [siteProducts]);
 
     const filterCounts = useMemo(() => {
-        let lowStock = 0; let outOfStock = 0; let priceUpdated = 0; let stockUpdated = 0; let onSale = 0; let weighted = 0; let unseen = 0;
+        let lowStock = 0; let outOfStock = 0; let onSale = 0; let weighted = 0;
         siteProducts.forEach((p: any) => {
             const threshold = p.minStock !== undefined && p.minStock !== null && p.minStock > 0 ? p.minStock : 10;
             const stockVal = p.stock || 0;
             if (stockVal <= 0) outOfStock++; else if (stockVal < threshold) lowStock++;
-            const flags = getUpdateFlags(p, lastSeenUpdates);
-            if (flags.priceUpdated) priceUpdated++; if (flags.stockUpdated) stockUpdated++; if (flags.isUnseen) unseen++;
             if (p.isOnSale) onSale++;
             const sellUnit = getSellUnit(p.unit);
             if (sellUnit.allowDecimal || sellUnit.category === 'weight' || sellUnit.category === 'volume') weighted++;
         });
-        return { all: siteProducts.length, lowStock, outOfStock, priceUpdated, stockUpdated, onSale, weighted, unseen };
-    }, [siteProducts, lastSeenUpdates]);
+        return { all: siteProducts.length, lowStock, outOfStock, onSale, weighted };
+    }, [siteProducts]);
 
     const filteredProducts = useMemo(() => {
         return siteProducts.filter((p: any) => {
@@ -91,17 +72,13 @@ export const StockListModal: React.FC = () => {
             }
             const threshold = p.minStock !== undefined && p.minStock !== null && p.minStock > 0 ? p.minStock : 10;
             const stockVal = p.stock || 0;
-            const flags = getUpdateFlags(p, lastSeenUpdates);
             if (activeFilter === 'LOW_STOCK') return stockVal > 0 && stockVal < threshold;
             if (activeFilter === 'OUT_OF_STOCK') return stockVal <= 0;
-            if (activeFilter === 'PRICE_UPDATED') return flags.priceUpdated;
-            if (activeFilter === 'STOCK_UPDATED') return flags.stockUpdated;
             if (activeFilter === 'ON_SALE') return !!p.isOnSale;
             if (activeFilter === 'BY_WEIGHT_VOLUME') { const sellUnit = getSellUnit(p.unit); return sellUnit.allowDecimal || sellUnit.category === 'weight' || sellUnit.category === 'volume'; }
-            if (activeFilter === 'UNSEEN') return flags.isUnseen;
             return true;
         });
-    }, [siteProducts, stockSearch, activeFilter, selectedCategory, lastSeenUpdates]);
+    }, [siteProducts, stockSearch, activeFilter, selectedCategory]);
 
     const totalPages = Math.ceil(filteredProducts.length / pageSize) || 1;
     const paginatedProducts = filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -111,11 +88,8 @@ export const StockListModal: React.FC = () => {
     const filterTabs = useMemo(() => {
         const tabs: Array<{ id: StockFilterMode; label: string; count: number; dotColor?: string; alwaysShow?: boolean }> = [
             { id: 'ALL', label: t('posCommand.filterAll'), count: filterCounts.all, alwaysShow: true },
-            { id: 'UNSEEN', label: t('posCommand.filterUnseenUpdates'), count: filterCounts.unseen, dotColor: 'bg-amber-500' },
             { id: 'LOW_STOCK', label: t('posCommand.filterLowStock'), count: filterCounts.lowStock, dotColor: filterCounts.lowStock > 0 ? 'bg-amber-500' : undefined, alwaysShow: true },
             { id: 'OUT_OF_STOCK', label: t('posCommand.filterOutOfStock'), count: filterCounts.outOfStock, dotColor: filterCounts.outOfStock > 0 ? 'bg-red-500' : undefined, alwaysShow: true },
-            { id: 'PRICE_UPDATED', label: t('posCommand.filterPriceUpdated'), count: filterCounts.priceUpdated },
-            { id: 'STOCK_UPDATED', label: t('posCommand.filterStockUpdated'), count: filterCounts.stockUpdated },
             { id: 'ON_SALE', label: t('posCommand.filterOnSale'), count: filterCounts.onSale },
             { id: 'BY_WEIGHT_VOLUME', label: t('posCommand.filterWeightedVol'), count: filterCounts.weighted },
         ];
@@ -208,18 +182,6 @@ export const StockListModal: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
-                        {filterCounts.unseen > 0 && (
-                            <button
-                                type="button"
-                                onClick={markUpdatesAsRead}
-                                title={t('posCommand.markAllAsRead')}
-                                aria-label={t('posCommand.markAllAsRead')}
-                                className="h-8 px-2.5 rounded-lg text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                            >
-                                <CheckCheck size={13} className="text-emerald-500" />
-                                <span className="hidden sm:inline">{t('posCommand.markAllAsRead')}</span>
-                            </button>
-                        )}
                         {hasActiveFilters && (
                             <button
                                 type="button"
@@ -252,13 +214,11 @@ export const StockListModal: React.FC = () => {
                                 const minimum = product.minStock && product.minStock > 0 ? product.minStock : 10;
                                 const stockLabel = stock <= 0 ? t('posCommand.filterOutOfStock') : stock < minimum ? t('posCommand.filterLowStock') : '';
                                 const isPendingApproval = ((product.approvalStatus || (product as any).approval_status) || 'approved').toLowerCase() === 'pending';
-                                const flags = getUpdateFlags(product, lastSeenUpdates);
                                 return (
                                     <tr key={product.id} onClick={() => setSelectedProduct(product)} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer">
                                         <td className="py-2.5 px-3.5 max-w-[22rem]">
                                             <button type="button" onClick={() => setSelectedProduct(product)} className="text-left rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]" aria-label={`${t('posCommand.productDetails')}: ${product.name}`}>
                                                 <span className="flex items-center gap-1.5 font-medium text-[var(--theme-text-primary)]">
-                                                    {flags.isUnseen && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />}
                                                     <span className="truncate">{formatProductDisplayName(product) || product.name}</span>
                                                     {isPendingApproval && (
                                                         <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-medium shrink-0">

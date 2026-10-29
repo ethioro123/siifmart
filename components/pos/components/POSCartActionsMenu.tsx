@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    Tag, PlayCircle, RotateCcw, Box, Lock, Printer,
+    PlayCircle, RotateCcw, Box, Lock, Printer,
     ArrowDownCircle, ShoppingBag
 } from 'lucide-react';
 import { Protected } from '../../Protected';
@@ -10,9 +10,7 @@ import { native } from '../../../utils/native';
 interface POSCartActionsMenuProps {
     showActions: boolean;
     setShowActions: (show: boolean) => void;
-    unseenPriceUpdatesCount: number;
     heldOrdersCount: number;
-    onOpenPriceUpdates: () => void;
     onOpenRecall: () => void;
     onOpenReturn: () => void;
     onOpenCashDrop: () => void;
@@ -25,9 +23,7 @@ interface POSCartActionsMenuProps {
 export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
     showActions,
     setShowActions,
-    unseenPriceUpdatesCount,
     heldOrdersCount,
-    onOpenPriceUpdates,
     onOpenRecall,
     onOpenReturn,
     onOpenCashDrop,
@@ -60,28 +56,6 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         <span>{t('pos.miscItem')}</span>
                     </button>
                 </Protected>
-
-                <button
-                    type="button"
-                    onClick={() => {
-                        onOpenPriceUpdates();
-                        setShowActions(false);
-                        native.haptic();
-                    }}
-                    className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
-                >
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0">
-                            <Tag size={14} />
-                        </div>
-                        <span>{t('pos.priceUpdates')}</span>
-                    </div>
-                    {unseenPriceUpdatesCount > 0 && (
-                        <span className="px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full">
-                            {unseenPriceUpdatesCount}
-                        </span>
-                    )}
-                </button>
 
                 <button
                     type="button"
