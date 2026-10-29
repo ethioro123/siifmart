@@ -1,6 +1,5 @@
 import '../styles/topbar.css';
 import { useTopBarLayout } from '../hooks/useTopBarLayout';
-import { ThemeSelector } from './ThemeSelector';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Menu, Search, MoreHorizontal, RefreshCw } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
@@ -385,9 +384,6 @@ export default function TopBar() {
             >
                <RefreshCw size={16} />
             </button>
-
-            {/* Dark/Light Toggle */}
-            <ThemeSelector className="topbar-appearance hidden sm:block" />
 
             <ActivityCenter 
                notifRef={notifRef}
