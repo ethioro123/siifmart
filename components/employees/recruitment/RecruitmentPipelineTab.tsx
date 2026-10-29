@@ -11,7 +11,7 @@ import { RequisitionModal } from './RequisitionModal';
 import { CandidateModal } from './CandidateModal';
 import { CandidateApprovalModal } from './CandidateApprovalModal';
 
-export default function RecruitmentPipelineTab() {
+export default function RecruitmentPipelineTab({ reviewOnly = false }: { reviewOnly?: boolean } = {}) {
     const { user, showToast } = useStore();
     const { effectiveCountry, activeSite } = useData();
     const country = effectiveCountry || 'ET';
@@ -20,6 +20,12 @@ export default function RecruitmentPipelineTab() {
     const [candidates, setCandidates] = useState<JobCandidate[]>([]);
     const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [loadError, setLoadError] = useState('');
+    const [reqPage, setReqPage] = useState(1);
+    const [candPage, setCandPage] = useState(1);
+    const [approvalReq, setApprovalReq] = useState<JobRequisition | undefined>();
+    const [evidenceError, setEvidenceError] = useState('');
+    const [evidenceLoading, setEvidenceLoading] = useState(false);
 
     // Modals
     const [isReqModalOpen, setIsReqModalOpen] = useState(false);
@@ -34,14 +40,17 @@ export default function RecruitmentPipelineTab() {
 
     const loadData = async () => {
         setIsLoading(true);
+        setLoadError('');
         try {
             const [reqs, cands] = await Promise.all([
-                recruitmentService.fetchRequisitions(country),
-                recruitmentService.fetchCandidates(country)
+                recruitmentService.fetchRequisitions(country, reqPage, activeSite?.id),
+                recruitmentService.fetchCandidates(country, undefined, candPage, activeSite?.id)
             ]);
             setRequisitions(reqs);
             setCandidates(cands);
         } catch {
+            setLoadError('Recruitment requests could not be loaded. Retry before reviewing.');
+            setRequisitions([]); setCandidates([]);
             // Handled
         } finally {
             setIsLoading(false);
@@ -50,7 +59,15 @@ export default function RecruitmentPipelineTab() {
 
     useEffect(() => {
         loadData();
-    }, [country]);
+    }, [country, activeSite?.id, reqPage, candPage]);
+    useEffect(() => { setReqPage(1); setCandPage(1); setApprovalCandidate(null); setSelectedReqId(null); }, [country, activeSite?.id]);
+    useEffect(() => {
+        let cancelled = false; setApprovalReq(undefined); setEvidenceError('');
+        if (!approvalCandidate?.requisition_id) { setEvidenceLoading(false); return; }
+        setEvidenceLoading(true);
+        recruitmentService.requisitionById(approvalCandidate.requisition_id, country).then(value => { if (!cancelled) setApprovalReq(value); }).catch(() => { if (!cancelled) setEvidenceError('Requisition evidence could not be loaded. Close and retry.'); }).finally(() => { if (!cancelled) setEvidenceLoading(false); });
+        return () => { cancelled = true; };
+    }, [approvalCandidate?.id, country]);
 
     const handleApproveRequisition = async (reqId: string) => {
         try {
@@ -95,6 +112,7 @@ export default function RecruitmentPipelineTab() {
         })
         : candidates;
 
+    if (loadError) return <p role="alert">{loadError}<button type="button" className="min-h-11 px-4 underline" onClick={loadData}>Retry recruitment</button></p>;
     return (
         <div className="space-y-5 sm:space-y-6">
             {/* Apple Section Banner */}
@@ -132,7 +150,7 @@ export default function RecruitmentPipelineTab() {
                     </div>
                 </div>
 
-                {(canManageHiring || canManageCandidates) && (
+                {!reviewOnly && (canManageHiring || canManageCandidates) && (
                     <div className="flex items-center gap-2.5">
                         {canManageCandidates && (
                             <button
@@ -349,6 +367,12 @@ export default function RecruitmentPipelineTab() {
                 </div>
             </div>
 
+            <nav aria-label="Recruitment pages" className="flex flex-wrap items-center gap-3 text-sm">
+                <span>Requisition page {reqPage}</span><button type="button" disabled={reqPage === 1 || isLoading} onClick={() => setReqPage(reqPage - 1)} className="min-h-11 border rounded-[10px] px-3">Previous requisitions</button><button type="button" disabled={requisitions.length < 25 || isLoading} onClick={() => setReqPage(reqPage + 1)} className="min-h-11 border rounded-[10px] px-3">Next requisitions</button>
+                <span>Candidate page {candPage}</span><button type="button" disabled={candPage === 1 || isLoading} onClick={() => setCandPage(candPage - 1)} className="min-h-11 border rounded-[10px] px-3">Previous candidates</button><button type="button" disabled={candidates.length < 25 || isLoading} onClick={() => setCandPage(candPage + 1)} className="min-h-11 border rounded-[10px] px-3">Next candidates</button>
+            </nav>
+            {evidenceLoading && <p role="status">Loading requisition evidence…</p>}
+            {evidenceError && <p role="alert">{evidenceError}<button className="min-h-11 px-3" type="button" onClick={() => setApprovalCandidate(null)}>Close review</button></p>}
             {/* Subcomponent Modals */}
             <RequisitionModal
                 isOpen={isReqModalOpen}
@@ -367,11 +391,11 @@ export default function RecruitmentPipelineTab() {
             />
 
             <CandidateApprovalModal
-                isOpen={Boolean(approvalCandidate)}
+                isOpen={Boolean(approvalCandidate) && !evidenceLoading && !evidenceError}
                 onClose={() => setApprovalCandidate(null)}
                 onSuccess={loadData}
                 candidate={approvalCandidate}
-                requisition={requisitions.find(r => r.id === approvalCandidate?.requisition_id)}
+                requisition={approvalReq}
                 country={country}
             />
         </div>

@@ -24,7 +24,7 @@ export const StartShiftModal: React.FC = () => {
     const [submitError, setSubmitError] = useState<string | null>(null);
 
     // Dynamic Counter / Station Options based on site configuration
-    const counterCount = Math.max(1, activeSite?.terminalCount || (activeSite as any)?.terminal_count || 4);
+    const counterCount = Math.max(0, activeSite?.terminalCount ?? 0);
     const counterList = useMemo(() => {
         return Array.from({ length: counterCount }, (_, i) => `Counter ${i + 1}`);
     }, [counterCount]);
@@ -72,7 +72,7 @@ export const StartShiftModal: React.FC = () => {
 
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (floatNum < 0 || isSubmitting) return;
+        if (!Number.isFinite(floatNum) || floatNum < 0 || !counterCount || isSubmitting) return;
         if (hasOpenShiftForCashier) {
             setSubmitError(t('pos.shiftCashierConflict'));
             return;
@@ -274,7 +274,7 @@ export const StartShiftModal: React.FC = () => {
 
                     <button
                         type="submit"
-                        disabled={floatNum < 0 || isSubmitting || !activeSite?.id || occupiedCounters.has(selectedCounter) || hasOpenShiftForCashier}
+                        disabled={!counterCount || !Number.isFinite(floatNum) || floatNum < 0 || isSubmitting || !activeSite?.id || occupiedCounters.has(selectedCounter) || hasOpenShiftForCashier}
                         className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer border border-transparent tracking-tight"
                     >
                         <DollarSign size={15} />

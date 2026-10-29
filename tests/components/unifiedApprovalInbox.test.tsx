@@ -16,6 +16,9 @@ const { query } = vi.hoisted(() => ({
   }
 }));
 
+vi.mock('../../components/approvals/ApprovalReviewHost', () => ({ ApprovalReviewHost: ({ queueKey }: { queueKey: string }) => <div>Workspace {queueKey}</div> }));
+vi.mock('../../components/approvals/LeaveAndAttestationWorkspace', () => ({ LeaveAndAttestationWorkspace: () => null }));
+vi.mock('../../components/approvals/RemainingReviewWorkspace', () => ({ RemainingReviewWorkspace: () => null }));
 vi.mock('../../components/approvals/ExpenseReviewWorkspace', () => ({ ExpenseReviewWorkspace: () => null }));
 vi.mock('../../components/approvals/PeopleReviewWorkspace', () => ({ PeopleReviewWorkspace: () => null }));
 vi.mock('../../components/approvals/PurchaseOrderReviewWorkspace', () => ({ PurchaseOrderReviewWorkspace: () => null }));
@@ -73,16 +76,15 @@ afterEach(cleanup);
 const show = (element: React.ReactNode) => render(<MemoryRouter>{element}</MemoryRouter>);
 
 describe('cross-department approval inbox', () => {
-  it('shows all four requested areas with working destinations', () => {
+  it('opens central workspaces and retains operational handoffs', () => {
+    Element.prototype.scrollIntoView = vi.fn();
     show(<Approvals />);
-    for (const [name, href] of [
-      ['Purchase orders', '/procurement?tab=orders'],
-      ['Headcount requests', '/employees?approval=headcount'],
-      ['Transfer picking release', '/wms-ops?tab=TRANSFER'],
-      ['Expense approvals', '/finance?tab=expenses']
-    ]) {
-      expect(screen.getByRole('link', { name: 'Review ' + name }).getAttribute('href')).toBe(href);
-    }
+    fireEvent.click(screen.getByRole('button', { name: 'Review Purchase orders' }));
+    expect(screen.getByText('Workspace purchase_orders')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Review Expense approvals' }));
+    expect(screen.getByText('Workspace expenses')).toBeTruthy();
+    expect(screen.queryByText('Workspace purchase_orders')).toBeNull();
+    expect(screen.getByRole('link', { name: 'Review Transfer picking release' }).getAttribute('href')).toBe('/wms-ops?tab=TRANSFER');
     expect(screen.getByText(/7\+ approval tasks/)).toBeTruthy();
   });
 
@@ -97,7 +99,7 @@ describe('cross-department approval inbox', () => {
     query.isError = true;
     show(<Approvals />);
     expect(screen.queryByText(/7\+ approval tasks/)).toBeNull();
-    expect(screen.queryByRole('link', { name: 'Review Purchase orders' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Review Purchase orders' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
     expect(query.refetch).toHaveBeenCalledOnce();
   });
@@ -164,22 +166,22 @@ describe('cross-department approval inbox', () => {
 
   it('labels decision stages and filters their review destinations', () => {
     show(<Approvals />);
-    expect(screen.getByRole('link', { name: 'Review Purchase orders' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Review Purchase orders' })).toBeTruthy();
     fireEvent.change(screen.getByRole('combobox', { name: 'Decision stage' }), { target: { value: 'specialist_clearance' } });
-    expect(screen.getByRole('link', { name: 'Review PO finance clearance' })).toBeTruthy();
-    expect(screen.queryByRole('link', { name: 'Review Purchase orders' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Review PO finance clearance' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Review Purchase orders' })).toBeNull();
     fireEvent.change(screen.getByRole('combobox', { name: 'Decision stage' }), { target: { value: 'final_line_approval' } });
-    expect(screen.getByRole('link', { name: 'Review Purchase orders' })).toBeTruthy();
-    expect(screen.queryByRole('link', { name: 'Review PO finance clearance' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Review Purchase orders' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Review PO finance clearance' })).toBeNull();
   });
   it('searches requests and hides empty queues until requested', () => {
     query.data!.queues.push({ key: 'salary', count: 0, status: 'ready' });
     show(<Approvals />);
-    expect(screen.queryByRole('link', { name: 'Review Salary changes' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Review Salary changes' })).toBeNull();
     fireEvent.click(screen.getByRole('checkbox', { name: 'Include empty queues' }));
-    expect(screen.getByRole('link', { name: 'Review Salary changes' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Review Salary changes' })).toBeTruthy();
     fireEvent.change(screen.getByRole('textbox', { name: 'Search approval types' }), { target: { value: 'salary' } });
-    expect(screen.queryByRole('link', { name: 'Review Purchase orders' })).toBeNull();
-    expect(screen.getByRole('link', { name: 'Review Salary changes' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Review Purchase orders' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Review Salary changes' })).toBeTruthy();
   });
 });

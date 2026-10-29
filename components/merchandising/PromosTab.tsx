@@ -36,6 +36,9 @@ type StatusTab = 'all' | 'pending' | 'approved' | 'rejected';
 
 export const PromosTab: React.FC = () => {
   const { activeCountry, setIsPromoModalOpen, currencySymbol } = useMerchandising();
+  return <CampaignReviewPanel activeCountry={activeCountry} currencySymbol={currencySymbol} onCreate={() => setIsPromoModalOpen(true)} />;
+};
+export function CampaignReviewPanel({ activeCountry, currencySymbol, onCreate }: { activeCountry: string; currencySymbol: string; onCreate?: () => void }) {
   const { user } = useStore();
   const { addNotification, activeRegionCode } = useData();
 
@@ -113,7 +116,7 @@ export const PromosTab: React.FC = () => {
         </div>
         <button
           type="button"
-          onClick={() => setIsPromoModalOpen(true)}
+          disabled={!onCreate} onClick={onCreate}
           className="inline-flex items-center gap-2 rounded-xl bg-[var(--theme-accent)] px-4 py-2 text-xs font-semibold text-[var(--theme-text-primary)] shadow-sm hover:opacity-95 transition-opacity"
         >
           <Plus size={15} /> Propose Campaign

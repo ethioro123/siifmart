@@ -20,27 +20,17 @@ import {
 } from './recruitment-delegation';
 
 export const recruitmentService = {
-    async fetchRequisitions(countryCode: string = 'ET'): Promise<JobRequisition[]> {
-        const country = (countryCode || 'ET').toUpperCase();
-        try {
-            const { data, error } = await supabase
-                .from('job_requisitions')
-                .select('*')
-                .eq('country_code', country)
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                logger.warn('recruitmentService', 'Supabase reqs error, using local', { message: error.message });
-                return getLocalReqs().filter(r => (r.country_code || 'ET').toUpperCase() === country);
-            }
-
-            const mapped = (data || []).map(mapDBToReq);
-            saveLocalReqs(mapped);
-            return mapped;
-        } catch (err) {
-            logger.warn('recruitmentService', 'Exception in fetchRequisitions', { error: String(err) });
-            return getLocalReqs().filter(r => (r.country_code || 'ET').toUpperCase() === country);
-        }
+    async fetchRequisitions(countryCode = 'ET', page = 1, siteId?: string): Promise<JobRequisition[]> {
+        let query = supabase.from('job_requisitions').select('id,country_code,site_id,title,department,role,headcount,target_salary,status,justification,requested_by,requested_by_role,approved_by,approved_at,created_at,updated_at').eq('country_code', countryCode.toUpperCase()).order('created_at', { ascending: false }).order('id').range((page - 1) * 25, page * 25 - 1);
+        if (siteId) query = query.eq('site_id', siteId);
+        const { data, error } = await query;
+        if (error) throw error;
+        const rows = (data || []).map(mapDBToReq); saveLocalReqs(rows); return rows;
+    },
+    async requisitionById(id: string, country: string): Promise<JobRequisition> {
+        const { data, error } = await supabase.from('job_requisitions').select('id,country_code,site_id,title,department,role,headcount,target_salary,status,justification,requested_by,requested_by_role,approved_by,approved_at,created_at,updated_at').eq('id', id).eq('country_code', country).single();
+        if (error) throw error;
+        return mapDBToReq(data);
     },
 
     async createRequisition(data: {
@@ -140,34 +130,13 @@ export const recruitmentService = {
         return true;
     },
 
-    async fetchCandidates(countryCode: string = 'ET', requisitionId?: string): Promise<JobCandidate[]> {
-        const country = (countryCode || 'ET').toUpperCase();
-        try {
-            let query = supabase
-                .from('job_candidates')
-                .select('*')
-                .eq('country_code', country)
-                .order('created_at', { ascending: false });
-
-            if (requisitionId) query = query.eq('requisition_id', requisitionId);
-
-            const { data, error } = await query;
-            if (error) {
-                return getLocalCands().filter(c => 
-                    (c.country_code || 'ET').toUpperCase() === country &&
-                    (!requisitionId || c.requisition_id === requisitionId)
-                );
-            }
-
-            const mapped = (data || []).map(mapDBToCand);
-            saveLocalCands(mapped);
-            return mapped;
-        } catch {
-            return getLocalCands().filter(c => 
-                (c.country_code || 'ET').toUpperCase() === country &&
-                (!requisitionId || c.requisition_id === requisitionId)
-            );
-        }
+    async fetchCandidates(countryCode = 'ET', requisitionId?: string, page = 1, siteId?: string): Promise<JobCandidate[]> {
+        let query = supabase.from('job_candidates').select('id,requisition_id,country_code,site_id,role,name,email,phone,stage,interview_score,technical_score,culture_fit_score,interviewer_notes,offered_salary,resume_url,hr_approved_by,hr_approved_at,hr_notes,finance_approved_by,finance_approved_at,finance_notes,hiring_manager_approved_by,hiring_manager_approved_at,hiring_manager_notes,is_salary_exception,is_quota_exception,cmd_approved_by,cmd_approved_at,cmd_notes,group_approved_by,group_approved_at,group_notes,hired_employee_id,created_at,updated_at').eq('country_code', countryCode.toUpperCase()).order('created_at', { ascending: false }).order('id').range((page - 1) * 25, page * 25 - 1);
+        if (requisitionId) query = query.eq('requisition_id', requisitionId);
+        if (siteId) query = query.eq('site_id', siteId);
+        const { data, error } = await query;
+        if (error) throw error;
+        const rows = (data || []).map(mapDBToCand); saveLocalCands(rows); return rows;
     },
 
     async createCandidate(data: {

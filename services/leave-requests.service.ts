@@ -67,32 +67,18 @@ const mapDBToLeave = (row: any): LeaveRequestRecord => ({
 });
 
 export const leaveRequestsService = {
-    async fetchLeaves(countryCode: string = 'ET', employeeId?: string): Promise<LeaveRequestRecord[]> {
-        const country = (countryCode || 'ET').toUpperCase();
-        try {
-            let query = supabase
-                .from('leave_requests')
-                .select('*')
-                .eq('country_code', country)
-                .order('created_at', { ascending: false });
-
-            if (employeeId) {
-                query = query.eq('employee_id', employeeId);
-            }
-
-            const { data, error } = await query;
-            if (error) throw error;
-
-            const mapped = (data || []).map(mapDBToLeave);
-            inMemoryLeaves = mapped;
-            return mapped;
-        } catch (err) {
-            logger.error('leaveRequestsService', 'Exception fetching leaves from server:', err as Error);
-            return inMemoryLeaves.filter(l => 
-                (l.country_code || 'ET').toUpperCase() === country &&
-                (!employeeId || l.employee_id === employeeId)
-            );
-        }
+    async fetchLeaves(countryCode: string, employeeId?: string): Promise<LeaveRequestRecord[]> {
+        let query = supabase.from('leave_requests').select('id,country_code,site_id,employee_id,employee_name,leave_type,start_date,end_date,days,reason,status,requested_by,requested_at,reviewed_by,reviewed_by_name,reviewed_by_role,reviewed_at,rejection_reason,created_at,updated_at').eq('country_code', countryCode).order('created_at', { ascending: false }).limit(25);
+        if (employeeId) query = query.eq('employee_id', employeeId);
+        const { data, error } = await query;
+        if (error) throw error;
+        return (data || []).map(mapDBToLeave);
+    },
+    async pendingPage(country: string, site: string, page: number): Promise<LeaveRequestRecord[]> {
+        const { data, error } = await supabase.from('leave_requests').select('id,country_code,site_id,employee_id,employee_name,leave_type,start_date,end_date,days,reason,status,requested_by,requested_at,reviewed_by,reviewed_by_name,reviewed_by_role,reviewed_at,rejection_reason,created_at,updated_at')
+            .eq('country_code', country).eq('site_id', site).eq('status', 'Pending').order('requested_at').order('id').range((page - 1) * 25, page * 25 - 1);
+        if (error) throw error;
+        return (data || []).map(mapDBToLeave);
     },
 
     async createLeave(data: {
@@ -107,6 +93,8 @@ export const leaveRequestsService = {
         reason: string;
         requested_by: string;
     }): Promise<LeaveRequestRecord> {
+        const { data: session, error: authError } = await supabase.auth.getUser();
+        if (authError || !session.user) throw new Error('Signed-in employee required');
         const country = (data.country_code || 'ET').toUpperCase();
         const newRecord: LeaveRequestRecord = {
             ...data,
@@ -132,7 +120,7 @@ export const leaveRequestsService = {
                 days: newRecord.days,
                 reason: newRecord.reason,
                 status: 'Pending',
-                requested_by: newRecord.requested_by,
+                requested_by: session.user.id,
                 requested_at: newRecord.requested_at
             }])
             .select()
@@ -203,7 +191,7 @@ export const leaveRequestsService = {
                 rejection_reason: rejectionReason || null,
                 updated_at: now
             })
-            .eq('id', leaveId);
+            .eq('id', leaveId).eq('status', 'Pending').eq('country_code', existing.country_code).select('id,status').single();
 
         if (error) {
             logger.error('leaveRequestsService', 'Supabase review update failed:', error as Error);

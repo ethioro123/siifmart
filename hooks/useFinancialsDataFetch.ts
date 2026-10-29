@@ -78,6 +78,6 @@ export function useFinancialsDataFetch({
             }
         };
 
-        fetchFinancials();
-    }, [dateRange, activeSiteId, isCountryAdmin, activeCountry]);
+        if (['overview', 'budget', 'tax'].includes(activeTab)) fetchFinancials();
+    }, [activeTab, dateRange, activeSiteId, isCountryAdmin, activeCountry]);
 }

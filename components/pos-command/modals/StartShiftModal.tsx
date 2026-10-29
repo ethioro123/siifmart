@@ -20,7 +20,7 @@ export const StartShiftModal: React.FC = () => {
     const [submitError, setSubmitError] = useState<string | null>(null);
 
     // Dynamic Counter / Station Options based on site configuration
-    const counterCount = Math.max(1, activeSite?.terminalCount || (activeSite as any)?.terminal_count || 4);
+    const counterCount = Math.max(0, activeSite?.terminalCount ?? 0);
     const counterList = useMemo(() => {
         return Array.from({ length: counterCount }, (_, i) => `Counter ${i + 1}`);
     }, [counterCount]);
@@ -60,7 +60,7 @@ export const StartShiftModal: React.FC = () => {
 
     const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (floatNum < 0 || isSubmitting) return;
+        if (!Number.isFinite(floatNum) || floatNum < 0 || !counterCount || isSubmitting) return;
         if (hasOpenShiftForCashier) {
             setSubmitError(t('posCommand.shiftCashierConflict'));
             return;

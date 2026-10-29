@@ -84,7 +84,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [cashDenominations, setCashDenominations] = useState<Record<string, number>>(() => (isKenyaPOS ? ({ '1000': 0, '500': 0, '200': 0, '100': 0, '50': 0 } as Record<string, number>) : ({ '200': 0, '100': 0, '50': 0, '10': 0, '5': 0, '1': 0 } as Record<string, number>)));
     const [discrepancyReason, setDiscrepancyReason] = useState(''), [countedCash, setCountedCash] = useState(''), [shiftNotes, setShiftNotes] = useState('');
     const isCentralHQ = ['group_ceo', 'regional_operations_manager', 'country_operations_director', 'inventory_manager', 'store_manager'].includes(user?.role || '');
-    const activeShift = shifts.find((s: ShiftRecord) =>
+    const activeShift = shifts.filter(s => s.siteId === activeSite?.id).find((s: ShiftRecord) =>
         (s.cashierId === user?.id || (user?.code && s.cashierId === user?.code) || ((user as any)?.employeeId && s.cashierId === (user as any)?.employeeId)) && s.status === 'Open'
     ) || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
     const [shiftStartTime, setShiftStartTime] = useState(activeShift?.startTime || new Date().toISOString());

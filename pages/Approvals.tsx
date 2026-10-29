@@ -1,17 +1,17 @@
-import { ExpenseReviewWorkspace } from '../components/approvals/ExpenseReviewWorkspace';
-import { PeopleReviewWorkspace } from '../components/approvals/PeopleReviewWorkspace';
-import { PurchaseOrderReviewWorkspace } from '../components/approvals/PurchaseOrderReviewWorkspace';
-import { RequisitionReviewWorkspace } from '../components/approvals/RequisitionReviewWorkspace';
-import React, { useMemo, useState } from 'react';
+import { ApprovalReviewHost } from '../components/approvals/ApprovalReviewHost';
+import { approvalWorkspaceTarget } from '../utils/approvalWorkspaceTarget';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ClipboardCheck, RefreshCw, Search, ArrowRight } from 'lucide-react';
 import { useApprovalInbox } from '../hooks/useApprovalInbox';
 import { APPROVAL_QUEUES, approvalSummaryLabel } from '../utils/unifiedApprovalInbox';
 import type { ApprovalReviewType } from '../types/unifiedApprovalInbox';
-import { ApprovalWorkspace } from '../components/approvals/ApprovalWorkspace';
 
 export default function Approvals() {
   const query = useApprovalInbox(true);
+  const [selectedQueue, setSelectedQueue] = useState('');
+  const reviewRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (selectedQueue) { reviewRef.current?.focus(); reviewRef.current?.scrollIntoView({ block: 'start' }); } }, [selectedQueue]);
   const [filter, setFilter] = useState<'all' | ApprovalReviewType>('all');
   const [search, setSearch] = useState('');
   const [area, setArea] = useState('all');
@@ -67,20 +67,16 @@ export default function Approvals() {
             <div className="min-w-0 flex-1"><h3 className="text-sm font-semibold">{config.label}</h3>
               <p className="text-sm text-[var(--theme-text-secondary)]">{config.reviewType === 'specialist_clearance' ? 'Specialist clearance' : 'Final approval'}</p></div>
             {q.status === 'unavailable' ? <span role="status" className="text-sm">Count unavailable</span> : <span className="text-sm tabular-nums">{q.count} awaiting review</span>}
-            <Link to={config.href} aria-label={'Review ' + config.label} className="min-h-11 inline-flex items-center gap-2 rounded-[10px] border border-[var(--theme-border)] px-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]">Review<ArrowRight size={18} aria-hidden="true" /></Link>
+            {approvalWorkspaceTarget(q.key) && q.status === 'ready' ? <button type="button" onClick={() => setSelectedQueue(q.key)} aria-label={'Review ' + config.label} className="min-h-11 inline-flex items-center gap-2 rounded-[10px] border border-[var(--theme-border)] px-3 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">Review<ArrowRight size={18} aria-hidden="true" /></button> : <Link to={config.href} aria-label={'Review ' + config.label} className="min-h-11 inline-flex items-center gap-2 rounded-[10px] border border-[var(--theme-border)] px-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]">Review<ArrowRight size={18} aria-hidden="true" /></Link>}
           </li>;
         })}</ul></section>)}</div>
       <p className="text-xs text-[var(--theme-text-secondary)]">{query.isFetching ? 'Updating…' : 'Checked ' + new Date(query.data.checkedAt).toLocaleTimeString()} · Counts represent decision stages. A request can require more than one independent sign-off.</p>
-      <ApprovalWorkspace />
-      <RequisitionReviewWorkspace />
-      <PurchaseOrderReviewWorkspace />
-      <PeopleReviewWorkspace queues={queues} />
-      {queues.some(q => q.key === 'expenses' && q.status === 'ready') && <ExpenseReviewWorkspace />}
+      {selectedQueue && <div id="approval-review" ref={reviewRef} tabIndex={-1} className="space-y-4 scroll-mt-4 focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]"><div className="flex justify-between gap-3 items-center"><h2 className="text-lg font-semibold">{APPROVAL_QUEUES[selectedQueue]?.label || 'Barcode reviews'}</h2><button type="button" className="min-h-11 px-4 border border-[var(--theme-border)] rounded-[10px]" onClick={() => setSelectedQueue('')}>Close review</button></div><ApprovalReviewHost queueKey={selectedQueue} queues={queues} /></div>}
       <section aria-label="Additional review workflows" className="border-t border-[var(--theme-border)] pt-4 space-y-2">
         <h2 className="text-base font-semibold">Additional review workflows</h2>
-        <p className="text-sm text-[var(--theme-text-secondary)]">These workflows are not included in the inbox total. Access is checked by the destination.</p>
-        <div className="flex flex-wrap gap-3"><Link className="min-h-11 inline-flex items-center underline text-sm" to="/inventory?tab=barcode_audit">Barcode requests and evidence</Link>
-          <Link className="min-h-11 inline-flex items-center underline text-sm" to="/employees">Employee photo reviews</Link></div>
+        <p className="text-sm text-[var(--theme-text-secondary)]">These workflows are not included in the inbox total. Access is checked by the destination. Legacy browser-local photo requests are not a verified shared approval queue.</p>
+        <div className="flex flex-wrap gap-3"><button type="button" className="min-h-11 inline-flex items-center underline text-sm" onClick={() => setSelectedQueue('barcode')}>Barcode requests and evidence</button>
+          <Link className="min-h-11 inline-flex items-center underline text-sm" to="/employees">Employee onboarding and profile workflows</Link></div>
       </section>
     </>}
   </main>;

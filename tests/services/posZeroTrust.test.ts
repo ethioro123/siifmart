@@ -9,7 +9,7 @@ vi.mock('../../lib/supabase', () => {
     const mockFrom = vi.fn();
     return {
         supabase: {
-            from: mockFrom
+            from: mockFrom, rpc: vi.fn()
         },
         isSupabaseConfigured: () => true
     };
@@ -49,44 +49,11 @@ describe('Zero-Trust POS & Cash Governance Suite', () => {
             ).rejects.toThrow(/Invalid cash drop amount/i);
         });
 
-        it('successfully records cash drop with distinct cashier and supervisor', async () => {
-            const mockInsert = vi.fn().mockResolvedValue({ error: null });
-            (supabase.from as any).mockReturnValue({
-                insert: mockInsert,
-                select: vi.fn().mockReturnValue({
-                    eq: vi.fn().mockReturnValue({
-                        single: vi.fn().mockResolvedValue({
-                            data: {
-                                id: 'SHIFT-101',
-                                opening_float: 2000,
-                                cash_sales: 15000,
-                                cash_drops: 0
-                            },
-                            error: null
-                        })
-                    })
-                }),
-                update: vi.fn().mockReturnValue({
-                    eq: vi.fn().mockResolvedValue({ error: null })
-                })
-            });
-
-            const drop = await cashDropsService.createCashDrop({
-                country_code: 'ET',
-                site_id: 'SITE-001',
-                shift_id: 'SHIFT-101',
-                amount: 8000,
-                safe_bag_number: 'BAG-9921',
-                denominations: { '200': 40 },
-                cashier: { id: 'EMP-001', name: 'Cashier Staff', code: '1234' },
-                supervisor: { id: 'EMP-002', name: 'Store Manager', role: 'store_manager', code: '9999' }
-            });
-
-            expect(drop.amount).toBe(8000);
-            expect(drop.status).toBe('deposited_in_safe');
-            expect(drop.safe_bag_number).toBe('BAG-9921');
-            expect(drop.supervisor_id).toBe('EMP-002');
-            expect(mockInsert).toHaveBeenCalled();
+        it('records a pending request without accepting the supplied supervisor as approval', async () => {
+            vi.mocked(supabase.rpc).mockResolvedValue({ data: { id:'drop1', amount:8000,status:'pending_supervisor',safe_bag_number:'BAG-9921',supervisor_id:null }, error:null } as never);
+            const drop = await cashDropsService.createCashDrop({ country_code:'ET',site_id:'site1',shift_id:'shift1',amount:8000,safe_bag_number:'BAG-9921',denominations:{},cashier:{id:'cashier',name:'Cashier'},supervisor:{id:'untrusted',name:'Untrusted',role:'store_manager'} });
+            expect(drop.status).toBe('pending_supervisor'); expect(drop.supervisor_id).toBeNull();
+            expect(supabase.rpc).toHaveBeenCalledWith('request_counter_drop',expect.objectContaining({p_shift:'shift1',p_amount:8000}));
         });
 
         it('retrieves drop safe ledger scoped by site and sovereign country', async () => {
@@ -121,22 +88,10 @@ describe('Zero-Trust POS & Cash Governance Suite', () => {
             expect(drops[0].amount).toBe(12000);
         });
 
-        it('authorizes armored transport transit and updates safe drop status', async () => {
-            const mockIn = vi.fn().mockResolvedValue({ error: null });
-            const mockUpdate = vi.fn().mockReturnValue({ in: mockIn });
-            (supabase.from as any).mockReturnValue({ update: mockUpdate });
-
-            await cashDropsService.transferSafeToBank(['drop-1', 'drop-2'], 'ARM-987654', {
-                id: 'MGR-001',
-                name: 'Store Manager Dawit'
-            });
-
-            expect(supabase.from).toHaveBeenCalledWith('pos_cash_drops');
-            expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({
-                status: 'transferred_to_bank',
-                notes: expect.stringContaining('ARM-987654')
-            }));
-            expect(mockIn).toHaveBeenCalledWith('id', ['drop-1', 'drop-2']);
+        it('authorizes bank transit through the scoped custody operation', async () => {
+            vi.mocked(supabase.rpc).mockResolvedValue({data:1,error:null} as never);
+            await cashDropsService.transferSafeToBank(['drop1'],'MANIFEST-1',{id:'spoof',name:'Client name'});
+            expect(supabase.rpc).toHaveBeenCalledWith('transfer_counter_safe_bags',{p_drops:['drop1'],p_manifest:'MANIFEST-1'});
         });
     });
 

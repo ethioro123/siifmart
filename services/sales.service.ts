@@ -13,6 +13,8 @@ function mapSaleRow(s: any): any {
         cashierName: s.cashier_name,
         customerId: s.customer_id,
         receiptNumber: s.receipt_number,
+        offlineReceiptNumber: s.offline_receipt_number || undefined,
+        offline_receipt_number: s.offline_receipt_number || undefined,
         mobilePaymentChannel: s.mobile_payment_channel, mobileTransactionRef: s.mobile_transaction_ref, customerPhone: s.customer_phone,
         customerName: s.customers?.name,
         itemCount: Array.isArray(s.sale_items)
@@ -40,7 +42,7 @@ export const salesService = {
             ? 'id,site_id,sale_date,status,country_code,sale_items(product_id,product_name,quantity,price,products(sku))'
             : filters?.includeItems
             ? '*, sale_items(*, products(category)), customers!left(*)'
-            : 'id, site_id, customer_id, sale_date, subtotal, tax, total, payment_method, status, amount_tendered, change, cashier_name, receipt_number, fulfillment_status, release_status, country_code, currency, created_at, mobile_payment_channel, mobile_transaction_ref, customer_phone, sale_items(count), customers!left(name)';
+            : 'id, site_id, customer_id, sale_date, subtotal, tax, total, payment_method, status, amount_tendered, change, cashier_name, receipt_number, offline_receipt_number, fulfillment_status, release_status, country_code, currency, created_at, mobile_payment_channel, mobile_transaction_ref, customer_phone, sale_items(count), customers!left(name)';
 
         let query = supabase
             .from('sales')
@@ -116,6 +118,7 @@ export const salesService = {
                 total: sale.total,
                 type: sale.type,
                 receipt_number: sale.receiptNumber,
+                offline_receipt_number: sale.offlineReceiptNumber || sale.offline_receipt_number,
                 mobile_payment_channel: sale.mobilePaymentChannel, mobile_transaction_ref: sale.mobileTransactionRef, customer_phone: sale.customerPhone,
                 discount_code_id: discountCodeId || null
             },
@@ -157,6 +160,8 @@ export const salesService = {
             change: result.change,
             cashierName: result.cashier_name,
             receiptNumber: result.receipt_number,
+            offlineReceiptNumber: result.offline_receipt_number || undefined,
+            offline_receipt_number: result.offline_receipt_number || undefined,
             items: itemsWithSaleId
         };
     },

@@ -4,7 +4,6 @@ import { formatDateTime } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { printHtmlContent } from '../../../utils/printHelper';
 import { getEffectiveCountry } from '../../../utils/localization';
-import { generateCountryScopedReceiptNumber } from '../../../utils/receiptNumberGenerator';
 
 interface UsePOSCheckoutActionsProps {
     cart: CartItem[];
@@ -194,8 +193,11 @@ export const usePOSCheckoutActions = ({
             const tendered = selectedPaymentMethod === 'Cash' ? parseFloat(amountTendered) : total;
             const change = selectedPaymentMethod === 'Cash' ? changeDue : 0;
             
-            const receiptNumber = generateCountryScopedReceiptNumber({ activeSite, sales });
-            const { saleId, pointsResult } = await processSale(cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change, selectedCustomer?.id, undefined, 'In-Store', taxBreakdown, receiptNumber, total, appliedDiscountCode, mobileDetails);
+            const { saleId, receiptNumber, offlineReceiptNumber, pointsResult } = await processSale(
+                cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change,
+                selectedCustomer?.id, undefined, 'In-Store', taxBreakdown, undefined,
+                total, appliedDiscountCode, mobileDetails
+            );
 
             const saleObj: SaleRecord = {
                 id: saleId,
@@ -213,6 +215,7 @@ export const usePOSCheckoutActions = ({
                 cashierName: user?.name,
                 customerId: selectedCustomer?.id || undefined,
                 receiptNumber,
+                offlineReceiptNumber,
                 mobilePaymentChannel: mobileDetails?.channel,
                 mobileTransactionRef: mobileDetails?.ref,
                 customerPhone: mobileDetails?.phone

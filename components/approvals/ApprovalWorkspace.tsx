@@ -1,32 +1,36 @@
+import { ProposalReviewModal } from '../merchandising/components/ProposalReviewModal';
+import { ProposalDiffView } from '../merchandising/components/ProposalDiffView';
+import { ScopedPriceTargets } from '../merchandising/components/ScopedPriceTargets';
+import { ProductEditApprovalProgress } from '../inventory/ProductEditApprovalProgress';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApprovalWorkspace, type WorkspaceQueue } from '../../hooks/useApprovalWorkspace';
 import { proposalApprovalBlock } from '../../utils/proposalReviewPolicy';
-import type { PendingInventoryChange } from '../../types';
 
-export function ApprovalWorkspace() {
+export function ApprovalWorkspace({ initialQueue = 'product' }: { initialQueue?: WorkspaceQueue } = {}) {
   const [open, setOpen] = useState(false);
-  const [queue, setQueue] = useState<WorkspaceQueue>('product');
+  const [queue, setQueue] = useState<WorkspaceQueue>(initialQueue);
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState('');
   const [reason, setReason] = useState('');
   const [result, setResult] = useState('');
-  const { records, decision, user, site } = useApprovalWorkspace(queue, page, open);
+  const [scopeReview, setScopeReview] = useState(false);
+  const { records, decision, user, site, country } = useApprovalWorkspace(queue, page, open);
   const selected = records.data?.data.find(row => row.id === selectedId);
   const product = records.data?.kind === 'product' ? records.data.data.find(row => row.id === selectedId) : undefined;
   const barcode = records.data?.kind === 'barcode' ? records.data.data.find(row => row.id === selectedId) : undefined;
   const inventory = records.data?.kind === 'inventory' ? records.data.data.find(row => row.id === selectedId) : undefined;
   const block = product ? proposalApprovalBlock(product, user) : barcode && barcode.createdBy === user?.id ? 'You cannot review your own request.' : undefined;
   const barcodeReviewer = ['group_ceo','country_managing_director','store_manager','warehouse_manager','country_operations_director','regional_operations_manager'].includes(user?.role || '');
-  const canDecide = !!selected && !block && (queue === 'product' ? !product?.layoutRevisionId : queue === 'barcode' && barcodeReviewer);
+  const canDecide = !!selected && !block && (queue === 'product' ? true : queue === 'barcode' && barcodeReviewer);
   const changeQueue = (value: WorkspaceQueue) => { setQueue(value); setPage(1); setSelectedId(''); setReason(''); setResult(''); decision.reset(); };
-  const decide = async (action: 'approve' | 'reject') => {
-    if (!selected || !canDecide || (action === 'reject' && !reason.trim())) return;
+  const decide = async (action: 'approve' | 'reject' | 'finance') => {
+    if (!selected || !(canDecide || (action === 'finance' && product?.priceApprovalRoute?.canFinance)) || (action === 'reject' && !reason.trim())) return;
     setResult('');
     try {
       const saved = await decision.mutateAsync({ id: selected.id, action, reason: reason.trim() });
-      setResult(action === 'reject' ? 'Rejection saved.' : saved?.applied ? 'Approval saved and change applied.' : 'Approval recorded. Additional sign-offs may still be required.');
-      setSelectedId(''); setReason('');
+      setResult(action === 'finance' ? 'Finance clearance recorded.' : action === 'reject' ? 'Rejection saved.' : saved?.applied ? 'Approval saved and change applied.' : 'Approval recorded. Additional sign-offs may still be required.');
+      setSelectedId(''); setReason(''); setScopeReview(false);
     } catch { /* The mutation error remains visible; keep entered evidence. */ }
   };
   return <section aria-labelledby="workspace-title" className="space-y-4 border-t border-[var(--theme-border)] pt-4">
@@ -56,19 +60,16 @@ export function ApprovalWorkspace() {
           {!selected ? <p>Select a request to review its evidence.</p> : <>
             <h3 className="font-semibold">{barcode ? 'Barcode mapping request' : product?.productName || inventory?.productName}</h3>
             {barcode && <><p className="break-all">Barcode: {barcode.barcode}</p><p>Product: {barcode.product?.name || 'Name not recorded'}</p><p>SKU: {barcode.product?.sku || 'Not recorded'}</p>{barcode.image_url && <a href={barcode.image_url} target="_blank" rel="noreferrer" className="min-h-11 inline-flex items-center underline">Open evidence photo</a>}</>}
-            {product && <ChangeEvidence request={product} />}
+            {product && <><p>{product.adjustmentReason || 'Reason not recorded'}</p>{product.priceApprovalRoute?.targetCount ? <ScopedPriceTargets request={product} country={country} currency={country === 'KE' ? 'KES' : 'ETB'} /> : <ProposalDiffView request={product} currentProduct={product.currentProduct} currencySymbol={country === 'KE' ? 'KES' : 'ETB'} />}<ProductEditApprovalProgress request={product} />{(product.layoutRevisionId || product.layout_revision_id) && <button type="button" className="min-h-11 px-4 border rounded-[10px]" onClick={() => setScopeReview(true)}>Review complete shelf revision</button>}{product.priceApprovalRoute?.canFinance && <button type="button" disabled={decision.isPending || records.isFetching} className="min-h-11 px-4 border rounded-[10px]" onClick={() => decide('finance')}>Record Finance clearance</button>}</>}
             {inventory && <><p>{inventory.adjustmentReason || 'Reason not recorded'}</p><p>Requested quantity: {inventory.adjustmentQty ?? 'Not recorded'}</p></>}
             {block && <p role="status">{block}</p>}
             {canDecide ? <><label className="block text-sm">Rejection reason<textarea value={reason} onChange={e => setReason(e.target.value)} disabled={decision.isPending} className="mt-2 w-full min-h-24 border border-[var(--theme-border)] rounded-[10px] bg-[var(--theme-bg-card)] p-3 text-base" /></label>
-              <div className="flex flex-wrap gap-3"><button type="button" disabled={decision.isPending || records.isFetching} onClick={() => decide('approve')} className="min-h-11 px-4 rounded-[10px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)]">{decision.isPending ? 'Saving…' : 'Approve'}</button><button type="button" disabled={decision.isPending || !reason.trim() || records.isFetching} onClick={() => decide('reject')} className="min-h-11 px-4 border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] rounded-[10px]">Reject</button></div></> : <p className="text-sm">Complete the remaining review in the dedicated workflow.</p>}
+              <div className="flex flex-wrap gap-3"><button type="button" disabled={decision.isPending || records.isFetching} onClick={() => product ? setScopeReview(true) : decide('approve')} className="min-h-11 px-4 rounded-[10px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)]">{decision.isPending ? 'Saving…' : 'Approve'}</button><button type="button" disabled={decision.isPending || !reason.trim() || records.isFetching} onClick={() => decide('reject')} className="min-h-11 px-4 border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] rounded-[10px]">Reject</button></div></> : <p className="text-sm">Complete the remaining review in the dedicated workflow.</p>}
             <Link className="min-h-11 inline-flex items-center underline text-sm" to={queue === 'barcode' ? '/inventory?tab=barcode_audit' : queue === 'inventory' ? '/inventory?tab=pending' : '/pricing?tab=reviews&requestId=' + selected.id}>Open full review</Link>
           </>}
         </section>
       </div>}
+      {scopeReview && product && <ProposalReviewModal request={product} currentProduct={product.currentProduct} country={country} currencySymbol={country === 'KE' ? 'KES' : 'ETB'} submitting={decision.isPending} onClose={() => setScopeReview(false)} onApprove={async () => { await decision.mutateAsync({ id: product.id, action: 'approve', reason: '' }); setResult('Approval recorded. Check the updated request for remaining stages.'); setScopeReview(false); setSelectedId(''); }} />}
     </>}
   </section>;
-}
-function ChangeEvidence({ request }: { request: PendingInventoryChange }) {
-  const fields = Object.entries(request.proposedChanges || {}).filter(([, value]) => value !== undefined);
-  return <><p className="text-sm">{request.adjustmentReason || 'Reason not recorded'}</p><dl className="space-y-3">{fields.map(([key, value]) => <div key={key} className="border-b border-[var(--theme-border)] pb-2"><dt className="text-sm font-semibold break-words">{key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}</dt><dd className="text-sm break-words">Before: {String(request.proposalBaseline?.[key as keyof typeof request.proposalBaseline] ?? 'Not recorded')}<br />Proposed: {typeof value === 'object' ? JSON.stringify(value) : String(value)}</dd></div>)}</dl></>;
 }

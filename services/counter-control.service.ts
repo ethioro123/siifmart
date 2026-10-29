@@ -26,13 +26,9 @@ export const counterControlService = {
         return data;
     },
     async queue(site: string, country: string) {
-        const [shifts, drops] = await Promise.all([
-            supabase.from('shifts').select('id,cashier_id,cashier_name,counter_number,status,count_submitted_at,variance,variance_flagged,supervisor_id,reconciliation_status,ledger_version')
-                .eq('site_id', site).eq('country_code', country).eq('status', 'Closed').is('supervisor_id', null).order('end_time').limit(25),
-            supabase.from('pos_cash_drops').select('id,cashier_id,cashier_name,amount,currency,safe_bag_number').eq('site_id', site).eq('country_code', country).eq('status', 'pending_supervisor').order('created_at').limit(25),
-        ]);
-        if (shifts.error) throw shifts.error; if (drops.error) throw drops.error;
-        return { shifts: shifts.data || [], drops: drops.data || [] };
+        const { data, error } = await supabase.rpc('counter_review_queue', { p_site: site, p_country: country });
+        if (error) throw error;
+        return data as { shifts: Array<{ id: string; cashier_id: string; cashier_name: string; counter_number: string; variance: number; ledger_version: number }>; drops: Array<{ id: string; cashier_id: string; cashier_name: string; amount: number; currency: string; safe_bag_number: string }> };
     },
     async approveDrop(id: string) {
         const { data, error } = await supabase.rpc('approve_counter_drop', { p_drop: id });

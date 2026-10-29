@@ -47,6 +47,8 @@ export interface SaleRecord {
   fulfillmentStatus?: 'Pending' | 'Picking' | 'Packing' | 'Shipped' | 'Delivered';
   release_status?: 'AUTOMATIC' | 'PENDING' | 'RELEASED';
   receiptNumber?: string; // Friendly ID (e.g., REC-0001)
+  offlineReceiptNumber?: string;
+  offline_receipt_number?: string;
   mobilePaymentChannel?: string;
   mobileTransactionRef?: string;
   customerPhone?: string;

@@ -27,7 +27,7 @@ import { useFinancialsDataFetch } from './useFinancialsDataFetch';
 
 const EXPENSES_PER_PAGE = 20;
 
-export function useFinancialsState() {
+export function useFinancialsState(initialTab: 'overview' | 'payroll' | 'margin' = 'overview') {
    const { user, theme } = useStore();
    const accentColor = 'var(--theme-accent)';
    const {
@@ -52,7 +52,7 @@ export function useFinancialsState() {
    const currencySymbol = countryProfile.currencySymbol || 'ETB';
    const isCountryAdmin = useMemo(() => isAdminSite(activeSite), [activeSite]);
 
-   const [activeTab, setActiveTab] = useState<any>('overview');
+   const [activeTab, setActiveTab] = useState<any>(initialTab);
    const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
    const [isSubmitting, setIsSubmitting] = useState(false);
 

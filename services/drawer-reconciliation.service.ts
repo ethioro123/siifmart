@@ -53,11 +53,11 @@ export const drawerReconciliationService = {
     /**
      * Get queue of drawer shifts requiring finance sign-off
      */
-    async getQueue(filters?: DrawerAuditFilter, limit: number = 100): Promise<DrawerReconciliationRecord[]> {
+    async getQueue(filters?: DrawerAuditFilter, limit: number = 25): Promise<DrawerReconciliationRecord[]> {
         try {
             let query = supabase
                 .from('shifts')
-                .select('*')
+                .select('id,shift_number,site_id,country_code,cashier_id,cashier_name,start_time,end_time,opening_float,cash_sales,card_sales,mobile_sales,expenses,cash_drops,expected_cash,actual_cash,variance,discrepancy_reason,status,reconciliation_status,supervisor_id,supervisor_name,supervisor_co_sign_notes,supervisor_signed_at,finance_sign_off_by,finance_sign_off_name,finance_sign_off_at,variance_flagged,hq_notes')
                 .order('created_at', { ascending: false })
                 .limit(limit);
 
@@ -78,7 +78,7 @@ export const drawerReconciliationService = {
             }
 
             if (filters?.endDate) {
-                query = query.lte('start_time', filters.endDate);
+                query = query.lte('start_time', `${filters.endDate}T23:59:59.999Z`);
             }
 
             const { data, error } = await query;

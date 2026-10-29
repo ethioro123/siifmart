@@ -4,7 +4,7 @@ DECLARE e public.employees%ROWTYPE; s public.sites%ROWTYPE; r public.shifts%ROWT
 BEGIN
  SELECT * INTO e FROM public.employees WHERE id=(SELECT auth.uid()) AND lower(coalesce(status,'active'))='active';
  SELECT * INTO s FROM public.sites WHERE id=p_site;
- IF e.id IS NULL OR s.id IS NULL OR NOT public.is_site_in_my_authorized_scope(p_site::text,s.country)
+ IF e.id IS NULL OR e.role NOT IN ('cashier','head_cashier','store_manager','assistant_store_manager','shift_supervisor','regional_operations_manager','country_operations_director','group_ceo') OR p_request IS NULL OR s.id IS NULL OR NOT public.is_site_in_my_authorized_scope(p_site::text,s.country)
  OR p_float IS NULL OR p_float<0 OR p_float>10000000 OR p_float::text IN ('NaN','Infinity','-Infinity')
  OR p_counter IS NULL OR p_counter !~ '^Counter [1-9][0-9]*$'
  THEN RAISE EXCEPTION 'Invalid or unauthorized counter opening' USING ERRCODE='42501'; END IF;

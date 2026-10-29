@@ -34,6 +34,8 @@ class CashDropsService {
         device_id?: string;
         gps_coordinates?: string;
     }): Promise<CashDropRecord> {
+        if (params.cashier.id === params.supervisor.id) throw new Error('4-Eyes Violation: a cashier cannot act as supervisor');
+        if (!Number.isFinite(params.amount) || params.amount <= 0) throw new Error('Invalid cash drop amount');
         const { data, error } = await supabase.rpc('request_counter_drop', {
             p_shift: params.shift_id, p_amount: params.amount, p_bag: params.safe_bag_number || '',
             p_reason: params.reason || '', p_request: crypto.randomUUID(),
@@ -106,35 +108,8 @@ class CashDropsService {
      */
     async transferSafeToBank(dropIds: string[], bankManifest: string, manager: { id: string; name: string }): Promise<void> {
         if (!dropIds.length) return;
-        const now = new Date().toISOString();
-        const { error } = await supabase
-            .from('pos_cash_drops')
-            .update({
-                status: 'transferred_to_bank',
-                notes: `Transferred to armored bank carrier. Manifest #${bankManifest} signed by ${manager.name}`,
-                updated_at: now
-            })
-            .in('id', dropIds);
-
-        if (error) {
-            logger.error('cashDropsService', 'Failed to transfer safe drops to bank:', error);
-            throw new Error(error.message || 'Failed to authorize bank transfer');
-        }
-
-        this.localCache = this.localCache.map(d => dropIds.includes(d.id) ? { ...d, status: 'transferred_to_bank', updated_at: now } : d);
-
-        // Tamper-Proof Audit Trail for armored courier transit
-        try {
-            const { systemLogsService } = await import('./supabase.service');
-            await systemLogsService.create({
-                module: 'POS_CASH_GOVERNANCE',
-                action: 'SAFE_BAGS_TRANSFERRED_TO_BANK',
-                user_name: manager.name,
-                details: `${dropIds.length} safe deposit bag(s) released to armored transit. Manifest #${bankManifest}. Drops: [${dropIds.join(', ')}]`
-            });
-        } catch {
-            // Non-blocking log
-        }
+        const { error } = await supabase.rpc('transfer_counter_safe_bags', { p_drops: dropIds, p_manifest: bankManifest });
+        if (error) throw error;
     }
 }
 

@@ -1,5 +1,7 @@
 import type { TranslationBlock } from './types';
 export const counterControl: TranslationBlock = {
+ counterDropNotice: { en: 'Submit a request first. A different signed-in supervisor must confirm safe custody before this money is deducted from the drawer.', am: 'መጀመሪያ ጥያቄ ያስገቡ። ገንዘቡ ከመሳቢያው ከመቀነሱ በፊት ሌላ ተቆጣጣሪ መረጋገጥ አለበት።', or: 'Dura gaaffii galchi. Maallaqni kaawuntarii keessaa hir’achuu isaa dura hogganaan biraa seenee kuufamuu isaa mirkaneessuu qaba.' },
+ counterLegacyReview: { en: 'Historical ledger is incomplete. Finance reconciliation remains blocked pending investigation.', am: 'ታሪካዊ የገንዘብ መዝገቡ ያልተሟላ ነው። የፋይናንስ ማስታረቅ ምርመራ ይጠብቃል።', or: 'Galmeen maallaqaa durii guutuu miti. Araarri Faayinaansii hanga qorannoon godhamutti dhorkameera.' },
  counterCloseTitle: { en: 'Submit blind drawer count', am: 'የገንዘብ ቆጠራ ያስገቡ', or: 'Lakkoofsa maallaqaa dhokataa galchi' },
  counterBlindNotice: { en: 'Expected cash stays hidden. Submitting locks this count and closes sales on this counter. A different signed-in supervisor reviews it before Finance reconciliation.', am: 'የሚጠበቀው ገንዘብ ተደብቋል። ሲላክ ቆጠራው ይቆለፋል። ሌላ ተቆጣጣሪ ከፋይናንስ በፊት ይገመግማል።', or: 'Maallaqni eegamu dhokata. Erguun lakkoofsa kana cufa; gurgurtaas dhaaba. Hogganaan biraa seenee osoo Faayinaansiin hin araarsin dura ilaala.' },
  counterCounted: { en: 'Counted cash', am: 'የተቆጠረ ገንዘብ', or: 'Maallaqa lakkaa’ame' },

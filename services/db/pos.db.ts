@@ -237,6 +237,16 @@ class POSDBService {
         }
     }
 
+    async updateSale(sale: SaleRecord) {
+        if (DISABLE_IDB || this.disabled) return;
+        try {
+            const db = await this.getDB();
+            await db.put('sales', sale);
+        } catch {
+            console.warn('POSDB: Gracefully skipping updateSale due to DB error');
+        }
+    }
+
     async getRecentSales(limit: number = 50): Promise<SaleRecord[]> {
         if (DISABLE_IDB || this.disabled) return [];
         try {

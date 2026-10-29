@@ -61,8 +61,8 @@ export const barcodeApprovalsService = {
                 reviewed_by: userId,
                 reviewed_at: new Date().toISOString()
             })
-            .eq('id', id)
-            .select()
+            .eq('id', id).eq('status', 'pending')
+            .select('id,status')
             .single();
 
         if (error) throw error;
@@ -73,7 +73,7 @@ export const barcodeApprovalsService = {
         // 1. Get the approval record to know which barcode/product to revert
         const { data: approval, error: fetchError } = await supabase
             .from('barcode_approvals')
-            .select('*')
+            .select('id,status,product_id,barcode')
             .eq('id', id)
             .single();
 
@@ -88,7 +88,7 @@ export const barcodeApprovalsService = {
                 reviewed_at: new Date().toISOString(),
                 rejection_reason: reason
             })
-            .eq('id', id);
+            .eq('id', id).eq('status', approval.status).select('id,status').single();
 
         if (updateError) throw updateError;
 

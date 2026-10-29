@@ -69,6 +69,17 @@ const mapDBToPayrollRun = (row: any): PayrollRun => ({
 });
 
 export const payrollRunsService = {
+  async getById(id: string): Promise<PayrollRun | null> {
+    const { data, error } = await supabase.from('payroll_runs').select('id,period,country_code,site_id,employee_count,currency,total_gross_salaries,total_bonuses,total_deductions,total_net_payout,status,initiated_by,initiated_by_role,initiated_at,regional_attested_by,regional_attested_by_id,regional_attested_by_role,regional_attested_at,regional_notes,hr_approved_by,hr_approved_by_role,hr_approved_at,hr_notes,finance_approved_by,finance_approved_by_role,finance_approved_at,finance_notes,disbursed_by,disbursed_at,expense_id,rejection_reason,rejected_by,rejected_by_role,rejected_at,created_at,updated_at').eq('id', id).single();
+    if (error) throw error;
+    return data ? mapDBToPayrollRun(data) : null;
+  },
+  async pendingAttestation(country: string, site: string, page: number): Promise<PayrollRun[]> {
+    const { data, error } = await supabase.from('payroll_runs').select('id,period,country_code,site_id,employee_count,currency,total_gross_salaries,total_bonuses,total_deductions,total_net_payout,status,initiated_by,initiated_by_role,initiated_at,regional_attested_by,regional_attested_by_id,regional_attested_by_role,regional_attested_at,regional_notes,created_at,updated_at')
+      .eq('country_code', country).eq('site_id', site).is('regional_attested_at', null).not('status', 'in', '(draft,rejected,disbursed)').order('created_at').order('id').range((page - 1) * 25, page * 25 - 1);
+    if (error) throw error;
+    return (data || []).map(mapDBToPayrollRun);
+  },
   async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<PayrollRun[]> {
     try {
       // RULE 10: 25-record shelf limit
@@ -169,8 +180,7 @@ export const payrollRunsService = {
     signatoryRole: string,
     notes?: string
   ): Promise<PayrollRun> {
-    const runs = await this.getAll();
-    const target = runs.find(r => r.id === runId);
+    const target = await this.getById(runId);
     if (!target) throw new Error(`Payroll run ${runId} not found`);
 
     // Zero-Trust Anti-Self-Approval
@@ -234,8 +244,7 @@ export const payrollRunsService = {
     runId: string,
     notes?: string
   ): Promise<PayrollRun> {
-    const runs = await this.getAll();
-    const target = runs.find(r => r.id === runId);
+    const target = await this.getById(runId);
     if (!target) throw new Error(`Payroll run ${runId} not found`);
 
     const now = new Date().toISOString();
@@ -272,8 +281,7 @@ export const payrollRunsService = {
     signatoryRole: string,
     notes?: string
   ): Promise<PayrollRun> {
-    const runs = await this.getAll();
-    const target = runs.find(r => r.id === runId);
+    const target = await this.getById(runId);
     if (!target) throw new Error(`Payroll run ${runId} not found`);
 
     // Zero-Trust Anti-Self-Approval
@@ -334,8 +342,7 @@ export const payrollRunsService = {
   },
 
   async disburse(runId: string, disbursedBy: string, expenseId?: string): Promise<PayrollRun> {
-    const runs = await this.getAll();
-    const target = runs.find(r => r.id === runId);
+    const target = await this.getById(runId);
     if (!target) throw new Error(`Payroll run ${runId} not found`);
 
     // Strict zero-trust hard-lock: MUST have dual approval
@@ -393,8 +400,7 @@ export const payrollRunsService = {
     role: string,
     reason: string
   ): Promise<PayrollRun> {
-    const runs = await this.getAll();
-    const target = runs.find(r => r.id === runId);
+    const target = await this.getById(runId);
     if (!target) throw new Error(`Payroll run ${runId} not found`);
 
     const now = new Date().toISOString();

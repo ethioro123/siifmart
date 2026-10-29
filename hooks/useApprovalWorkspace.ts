@@ -19,8 +19,10 @@ export function useApprovalWorkspace(queue: WorkspaceQueue, page: number, enable
       if (queue === 'inventory') return { kind: 'inventory' as const, data: (await inventoryRequestsService.getAll(site, country, 25, undefined, page, true)).filter(row => row.status === 'pending' && row.changeType !== 'edit') };
       return { kind: 'product' as const, ...(await inventoryRequestsService.getMerchandisingRequests(country, { siteId: site, page, limit: 25, status: 'pending' })) };
     }, staleTime: 15_000 });
-  const decision = useMutation({ mutationFn: async (input: { id: string; action: 'approve' | 'reject'; reason: string }) => {
+  const decision = useMutation({ mutationFn: async (input: { id: string; action: 'approve' | 'reject' | 'finance'; reason: string }) => {
     if (!user?.id) throw new Error('Sign in to review requests.');
+    if (!enabled || records.isError || records.isFetching || !records.data?.data.some(row => row.id === input.id)) throw new Error('Refresh current review evidence first.');
+    if (input.action === 'reject' && !input.reason.trim()) throw new Error('A rejection reason is required.');
     if (queue === 'barcode') {
       if (input.action === 'approve') await barcodeApprovalsService.approve(input.id, user.id);
       else await barcodeApprovalsService.reject(input.id, user.id, input.reason);
@@ -28,6 +30,7 @@ export function useApprovalWorkspace(queue: WorkspaceQueue, page: number, enable
     }
     if (queue !== 'product') throw new Error('Use the inventory review workflow.');
     if (input.action === 'approve') return inventoryRequestsService.approveProductEdit(input.id);
+    if (input.action === 'finance') { await inventoryRequestsService.signoffMerchandisingPrice(input.id); return { applied: false }; }
     await inventoryRequestsService.rejectProductEdit(input.id, input.reason);
     return { applied: false };
   }, onSuccess: async () => {

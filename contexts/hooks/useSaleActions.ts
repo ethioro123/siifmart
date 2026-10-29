@@ -9,7 +9,6 @@ import { posDB } from '../../services/db/pos.db';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { logger } from '../../utils/logger';
 import { audioFeedback } from '../../utils/audioFeedback';
-import { generateCountryScopedReceiptNumber } from '../../utils/receiptNumberGenerator';
 
 interface UseSaleActionsDeps {
     activeSite: Site | undefined;
@@ -52,7 +51,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
         roundedTotal?: number,
         discountCodeId?: string | null,
         mobileDetails?: {channel?: string; ref?: string; phone?: string}
-    ): Promise<{ saleId: string; pointsResult?: any }> => {
+    ): Promise<{ saleId: string; receiptNumber: string; offlineReceiptNumber?: string; pointsResult?: any }> => {
         try {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const taxRate = settings.taxRate || 0;
@@ -77,7 +76,12 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 image: ''
             })) as CartItem[];
 
-            const saleRecord: SaleRecord & { discountCodeId?: string | null } = {
+            const isOfflineSale = !navigator.onLine;
+            const offlineReceiptReference = isOfflineSale
+                ? (receiptNumber || `OFF-${(activeSite?.country || settings.country || 'ET').toUpperCase()}-${saleId.slice(0, 8).toUpperCase()}`)
+                : undefined;
+
+            let saleRecord: SaleRecord & { discountCodeId?: string | null } = {
                 id: saleId,
                 siteId: activeSite?.id || '',
                 customerId: customerId,
@@ -96,21 +100,24 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 discountCodeId: discountCodeId || null,
                 mobilePaymentChannel: mobileDetails?.channel, mobileTransactionRef: mobileDetails?.ref, customerPhone: mobileDetails?.phone,
                 fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking',
-                receiptNumber: receiptNumber || generateCountryScopedReceiptNumber({ activeSite })
+                receiptNumber: offlineReceiptReference,
+                offlineReceiptNumber: offlineReceiptReference
             };
 
-            // 1. Offline Save & Queue for Single Authoritative Sync
-            await posDB.saveSale(saleRecord);
-            const queued = await posDB.enqueueOperation('CREATE_SALE', {
-                ...saleRecord,
-                pointsRedeemed: pointsRedeemed || 0,
-                loyaltyRate: settings.loyaltyPointsRate || 0,
-                enableLoyalty: settings.enableLoyalty !== false
-            });
-            if (!queued && !navigator.onLine) throw new Error('Sale could not be queued for synchronization while offline.');
-            if (!queued) {
-                const { items } = saleRecord;
-                await salesService.create(saleRecord, items, discountCodeId);
+            let queued = false;
+            if (isOfflineSale) {
+                await posDB.saveSale(saleRecord);
+                queued = await posDB.enqueueOperation('CREATE_SALE', {
+                    ...saleRecord,
+                    pointsRedeemed: pointsRedeemed || 0,
+                    loyaltyRate: settings.loyaltyPointsRate || 0,
+                    enableLoyalty: settings.enableLoyalty !== false
+                });
+                if (!queued) throw new Error('Sale could not be queued for synchronization while offline.');
+            } else {
+                const persistedSale = await salesService.create(saleRecord, sanitizedItems, discountCodeId);
+                saleRecord = { ...saleRecord, ...persistedSale, items: sanitizedItems };
+                await posDB.saveSale(saleRecord);
             }
             posCheckQueue();
 
@@ -240,7 +247,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
             } else {
                 addNotification('success', 'Sale saved to the server.');
             }
-            return { saleId, pointsResult };
+            return { saleId, receiptNumber: saleRecord.receiptNumber || offlineReceiptReference || '', offlineReceiptNumber: offlineReceiptReference, pointsResult };
 
         } catch (error) {
             logger.error('useSaleActions', "Process Sale Failed:", error);
