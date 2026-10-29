@@ -3,7 +3,11 @@ import React from 'react';
 import {cleanup,render,screen} from '@testing-library/react';
 import {afterEach,describe,expect,it,vi} from 'vitest';
 import {PackScannerStatusView} from '../../components/fulfillment/pack/PackScannerStatusView';
-vi.mock('../../contexts/LanguageContext',()=>({useLanguage:()=>({t:(key:string)=>key})}));
+vi.mock('../../contexts/LanguageContext', () => ({
+  useLanguage: () => ({
+    t: (key: string) => key === 'warehouse.packing.allItemsPacked' ? 'All items packed' : key
+  })
+}));
 afterEach(cleanup);
 describe('packing scanner completion status',()=>{
  it('renders all-packed status without resolving an absent next item',()=>{

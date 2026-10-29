@@ -14,7 +14,7 @@ const products=[{id:'a',sku:'ET001',name:'Milk Small',siteId:'wh'},{id:'b',sku:'
 const setup=()=>render(<AssignLabelHub filteredProducts={products} addNotification={vi.fn()} t={s=>s} zones={[]} onZoneUpdate={vi.fn()} user={null} activeSite={{id:'wh',code:'ET-ADD-DC-01',country:'ET'} as Site}/>);
 describe('labels hub controls',()=>{
  it('blocks ambiguous and foreign labels but accepts exact local identifiers',()=>{
-  setup();const input=screen.getByTitle('Product SKU');const print=screen.getByRole('button',{name:'PRINT PRODUCT BARCODE'}) as HTMLButtonElement;
+  setup();const input=screen.getByTitle('Product SKU');const print=screen.getByRole('button',{name:/PRINT PRODUCT BARCODE/i}) as HTMLButtonElement;
   fireEvent.change(input,{target:{value:'Milk'}});expect(print.disabled).toBe(true);
   fireEvent.change(input,{target:{value:'KE001'}});expect(print.disabled).toBe(true);
   fireEvent.change(input,{target:{value:' ET001 '}});expect(print.disabled).toBe(false);

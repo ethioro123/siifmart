@@ -53,7 +53,7 @@ describe('Zero-Trust Procurement & 4-Eyes Governance Suite', () => {
           approverRole: 'warehouse_manager',
           reasonCode: 'STANDARD_REPLENISHMENT'
         })
-      ).rejects.toThrow(/purchase order approval requires a procurement lead/i);
+      ).rejects.toThrow(/purchase order approval requires an authorized procurement lead/i);
     });
 
     it('mandates structured reason codes on PO approval', async () => {

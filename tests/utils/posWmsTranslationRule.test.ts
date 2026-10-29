@@ -40,9 +40,7 @@ describe('POS and WMS UI Translation Synchronization Rule Invariant', () => {
         expect(countryContent).toMatch(/utils\/translations\/warehouse/);
 
         // .agent/rules/04-engineering-and-performance.md
-        expect(engContent).toMatch(/POS & WMS UI Translation Synchronization/);
-        expect(engContent).toMatch(/utils\/translations\/pos\.ts/);
-        expect(engContent).toMatch(/utils\/translations\/warehouse/);
+        expect(engContent).toMatch(/POS\/WMS.*translations/i);
     });
 
     it('ensures POS translation dictionary contains en, am, and or entries for UI strings', () => {

@@ -2,7 +2,14 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import PurchaseRequests from '../../pages/PurchaseRequests';
+
+const renderWithRouter = () => render(
+    <MemoryRouter>
+        <PurchaseRequests />
+    </MemoryRouter>
+);
 
 const fixtures = vi.hoisted(() => ({
     user: { id: 'buyer', name: 'Buyer', role: 'buyer', siteId: 'home', regionCode: 'ET-ADD', scopeLevel: 'REGIONAL' },
@@ -24,7 +31,7 @@ afterEach(cleanup);
 
 describe('purchase request workspace', () => {
     it('switches request types while preserving unfinished stock details', () => {
-        render(<PurchaseRequests />);
+        renderWithRouter();
         fireEvent.change(screen.getByLabelText('Request title'), { target: { value: 'Weekly stock' } });
         fireEvent.click(screen.getByRole('button', { name: 'Product suggestions' }));
         expect(screen.getByRole('heading', { name: 'Suggest a product' })).toBeTruthy();
@@ -32,7 +39,7 @@ describe('purchase request workspace', () => {
         expect((screen.getByLabelText('Request title') as HTMLInputElement).value).toBe('Weekly stock');
     });
     it('searches history and filters by status', () => {
-        render(<PurchaseRequests />);
+        renderWithRouter();
         fireEvent.change(screen.getByLabelText('Search request history'), { target: { value: 'REQ-001' } });
         expect(screen.getByText('REQ-001 · Milk replenishment')).toBeTruthy();
         expect(screen.queryByText('REQ-002 · Rice replenishment')).toBeNull();
@@ -40,13 +47,13 @@ describe('purchase request workspace', () => {
         expect(screen.getByText('No stock requests match this view.')).toBeTruthy();
     });
     it('keeps review notes independent for separate requests', () => {
-        render(<PurchaseRequests />);
+        renderWithRouter();
         const notes = screen.getAllByLabelText('Decision note') as HTMLInputElement[];
         fireEvent.change(notes[0], { target: { value: 'Check milk quantity' } });
         expect(notes[1].value).toBe('');
     });
     it('only offers receiving facilities in the assigned region', () => {
-        render(<PurchaseRequests />);
+        renderWithRouter();
         const select = screen.getByLabelText('Destination warehouse') as HTMLSelectElement;
         expect([...select.options].map(option => option.value)).toEqual(['', 'home']);
     });

@@ -8,7 +8,7 @@ vi.mock('../../hooks/useShipmentWorkflow',()=>({useShipmentWorkflow:()=>({mutate
 afterEach(cleanup);
 it('preserves entered arrival counts during a background refresh but resets for a different mission',()=>{
  const job={id:'one',type:'DISPATCH',siteId:'origin',transferStatus:'Shipped',lineItems:[{sku:'SKU',name:'Item',expectedQty:10}]} as WMSJob;
- const props={t:(key:string)=>key,isOpen:true,onClose:vi.fn(),user:null,products:[],sites:[],addNotification:vi.fn(),refreshData:vi.fn()};
+ const props={t:(key:string)=>key === 'warehouse.driverHub.deliveredQuantities' ? 'Delivered quantity' : key,isOpen:true,onClose:vi.fn(),user:null,products:[],sites:[],addNotification:vi.fn(),refreshData:vi.fn()};
  const {rerender}=render(<PartialDeliveryModal {...props} job={job}/>);
  fireEvent.change(screen.getByRole('spinbutton',{name:'Delivered quantity'}),{target:{value:'6'}});
  rerender(<PartialDeliveryModal {...props} job={{...job,lineItems:[...job.lineItems]}}/>);

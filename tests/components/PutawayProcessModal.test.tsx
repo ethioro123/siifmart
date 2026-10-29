@@ -7,7 +7,12 @@ import { PutawayJobModal } from '../../components/fulfillment/putaway/PutawayJob
 import type { WMSJob } from '../../types';
 afterEach(cleanup);
 const job = { id:'put-1', siteId:'wh', type:'PUTAWAY', priority:'Normal', status:'In-Progress', items:1, orderRef:'po', location:'Receiving Dock', lineItems:[{productId:'product',sku:'ET001',name:'Diaper',expectedQty:10,pickedQty:0,status:'Pending'}] } as WMSJob;
-const props = { isOpen:true,onClose:vi.fn(),job,user:null,sites:[],products:[],onStartPutaway:vi.fn(),onCompleteJob:vi.fn(),isSubmitting:false,resolveOrderRef:(ref?:string)=>ref||'',t:(key:string)=>key };
+const translationMap: Record<string, string> = {
+  'warehouse.putaway.startScanning': 'Start scanning',
+  'warehouse.putaway.completePutaway': 'Complete Putaway',
+  'warehouse.putaway.awaitingPlacement': 'Awaiting physical placement',
+};
+const props = { isOpen:true,onClose:vi.fn(),job,user:null,sites:[],products:[],onStartPutaway:vi.fn(),onCompleteJob:vi.fn(),isSubmitting:false,resolveOrderRef:(ref?:string)=>ref||'',t:(key:string)=>translationMap[key] || key };
 describe('putaway progression',()=>{
  it('offers only one start scanning action and does not expose a premature completion',()=>{
   render(<PutawayJobModal {...props}/>);
