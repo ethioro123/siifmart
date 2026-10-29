@@ -1,3 +1,4 @@
+import { CounterReviewPanel } from '../components/pos-command/layout/CounterReviewPanel';
 import React, { useState } from 'react';
 import { Lock, ReceiptText, ShieldCheck, Users2, LayoutGrid } from 'lucide-react';
 import Logo from '../components/Logo';
@@ -157,6 +158,7 @@ const POSCommandContent: React.FC = () => {
                 <span>{t('posCommand.tabAuditHeader')}</span>
               </div>
             )}
+            <CounterReviewPanel />
             <ShiftReconciliationTable />
             <OverrideVelocityWidget />
           </div>

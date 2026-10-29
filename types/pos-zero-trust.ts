@@ -58,7 +58,7 @@ export interface CashDropRecord {
     supervisor_role: string;
     device_id?: string;
     gps_coordinates?: string;
-    status: 'deposited_in_safe' | 'transferred_to_bank' | 'audited' | 'variance_flagged';
+    status: 'pending_supervisor' | 'deposited_in_safe' | 'transferred_to_bank' | 'audited' | 'variance_flagged';
     created_at: string;
     updated_at: string;
 }

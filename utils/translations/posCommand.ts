@@ -1,6 +1,8 @@
+import { counterControl } from './counterControl';
 import { TranslationBlock } from './types';
 
 export const posCommand: TranslationBlock = {
+    ...counterControl,
     // Store-scoped catalog update notice and review
     updatesPriceHistory: {"en": "Price history", "am": "የዋጋ ታሪክ", "or": "Seenaa Gatii"},
     updatesPriceReviews: {"en": "Price changes to review · {count}", "am": "ለመገምገም {count} የዋጋ ለውጦች", "or": "Jijjiirama gatii {count} ilaalamuu qabu"},

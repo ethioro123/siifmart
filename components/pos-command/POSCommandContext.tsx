@@ -1,3 +1,4 @@
+import { useCounterSummary } from '../../hooks/useCounterControl';
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
@@ -109,7 +110,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const navigate = useNavigate();
     const { user, logout } = useStore();
     const {
-        sales, addNotification, activeSite, shifts,
+        sales, addNotification, activeSite, effectiveCountry, shifts,
         allProducts, adjustStock, addProduct, refreshData, startShift, closeShift, logSystemEvent
     } = useData();
     const { jobs, transfers, refreshJobs } = useFulfillmentData();
@@ -172,63 +173,12 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     // --- COMPUTED DATA ---
     // Prioritize current cashier's active shift. If user is central manager/admin without an active shift, view site's shift.
-    const activeShift = shifts.find(s =>
+    const activeShift = shifts.filter(s => s.siteId === activeSite?.id).find(s =>
         (s.cashierId === user?.id || (user?.code && (s.cashierId === user?.code || s.cashierCode === user?.code || s.cashier_code === user?.code)) || (user?.employeeId && s.cashierId === user?.employeeId)) && s.status === 'Open'
     ) || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
 
-    const getShiftSummary = () => {
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        const startTime = activeShift ? new Date(activeShift.startTime).getTime() : todayStart.getTime();
-
-        const currentShiftSales = sales.filter(s => {
-            const saleTime = new Date(s.date).getTime();
-            if (saleTime < startTime) return false;
-
-            // Site Scoping: Never aggregate sales from other branches
-            const siteId = activeShift?.siteId || activeSite?.id;
-            if (siteId && s.siteId !== siteId && (s as any).site_id !== siteId) return false;
-
-            // Cashier Scoping: If not central HQ reviewing site, limit to cashier's sales
-            if (activeShift?.cashierId && !isCentralHQ) {
-                const matchesCashier = s.cashierName === activeShift.cashierName || (s as any).cashierId === activeShift.cashierId;
-                if (!matchesCashier) return false;
-            }
-
-            return (s.status as string) !== 'Cancelled';
-        });
-
-        const normalizeMethod = (m?: string) => (m || '').trim().toLowerCase();
-
-        const cash = currentShiftSales
-            .filter(s => {
-                const m = normalizeMethod(s.method);
-                return (m === 'cash' || m.includes('cash')) && s.status !== 'Refunded';
-            })
-            .reduce((sum, s) => sum + (Number(s.total) || 0), 0);
-
-        const card = currentShiftSales
-            .filter(s => {
-                const m = normalizeMethod(s.method);
-                return (m === 'card' || m.includes('card') || m.includes('visa') || m.includes('master')) && s.status !== 'Refunded';
-            })
-            .reduce((sum, s) => sum + (Number(s.total) || 0), 0);
-
-        const mobile = currentShiftSales
-            .filter(s => {
-                const m = normalizeMethod(s.method);
-                return (m.includes('mobile') || m.includes('telebirr') || m.includes('cbe') || m.includes('wallet')) && s.status !== 'Refunded';
-            })
-            .reduce((sum, s) => sum + (Number(s.total) || 0), 0);
-
-        return {
-            cash,
-            card,
-            mobile,
-            total: cash + card + mobile,
-            expected: Math.max(0, (activeShift?.openingFloat || 0) + cash)
-        };
-    };
+    const serverSummary = useCounterSummary(activeShift?.id, activeSite?.id, effectiveCountry, user?.id);
+    const getShiftSummary = () => serverSummary.data || { cash: 0, card: 0, mobile: 0, drops: 0, total: 0, expected: 0, blind: true };
 
     const shiftSummary = getShiftSummary();
     const cashInDrawer = shiftSummary.expected;
@@ -337,7 +287,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             await startShift(user.id, openingFloat, counterNumber);
         } catch (error) {
             logger.error('POSCommandContext', 'Failed to start shift:', error as Error);
-            addNotification('alert', 'Failed to start shift. Please try again.');
+            throw error;
         }
     };
 
@@ -376,21 +326,13 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             };
 
             await closeShift(record);
-            if (Math.abs(record.variance) > 0.01) {
-                logSystemEvent(
-                    'BLIND_SHIFT_CLOSE_VARIANCE',
-                    `Shift closed with blind variance: ${record.variance > 0 ? '+' : ''}${record.variance} ETB. Expected: ${record.expectedCash}, Counted: ${record.actualCash}. Notes: ${discrepancyReason || 'None'}`,
-                    user?.name || 'Cashier',
-                    'POS'
-                );
-            }
-            addNotification('success', t('posCommand.shiftClosedSuccess'));
+            addNotification('success', t('pos.counterSaved'));
             setIsClosingShift(false);
             logout();
             navigate('/');
         } catch (error) {
             logger.error('POSCommandContext', 'Shift closure error:', error);
-            addNotification('alert', t('posCommand.shiftClosedError'));
+            addNotification('alert', t('pos.counterFailed'));
         } finally {
             setIsSubmittingShift(false);
         }

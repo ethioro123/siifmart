@@ -18,6 +18,7 @@ vi.mock('../../services/system-logs.service', () => ({
 
 describe('Zero-Trust Hardened Expenses Service', () => {
     beforeEach(() => {
+        vi.restoreAllMocks();
         vi.clearAllMocks();
         (supabase.rpc as any).mockResolvedValue({ data: null, error: null });
     });
@@ -161,6 +162,9 @@ describe('Zero-Trust Hardened Expenses Service', () => {
 
         (supabase.from as any).mockReturnValue({ update: updateMock });
 
+        const pending = await expensesService.getById('EXP-300');
+        vi.mocked(expensesService.getById).mockResolvedValueOnce(pending).mockResolvedValueOnce({ ...pending!, status: 'Approved', approvedBy: 'Shukri CEO' });
+        vi.mocked(supabase.rpc).mockResolvedValue({ data: { success: true, status: 'Approved' }, error: null } as never);
         const approved = await expensesService.approve('EXP-300', {
             id: 'EMP-CEO-01',
             name: 'Shukri CEO',
@@ -169,6 +173,15 @@ describe('Zero-Trust Hardened Expenses Service', () => {
 
         expect(approved.status).toBe('Approved');
         expect(approved.approvedBy).toBe('Shukri CEO');
+    });
+
+    it('never falls back to a table update when the server does not confirm approval', async () => {
+        vi.spyOn(expensesService, 'getById').mockResolvedValue({ id: 'e1', siteId: 's1', amount: 100, date: '2026-10-30', category: 'Other', description: 'Coffee delivery', status: 'Pending', createdById: 'maker', createdByName: 'Maker' });
+        vi.mocked(supabase.rpc).mockResolvedValue({ data: { success: false }, error: null } as never);
+        const update = vi.fn();
+        vi.mocked(supabase.from).mockReturnValue({ update } as never);
+        await expect(expensesService.approve('e1', { id: 'reviewer', name: 'Reviewer', role: 'group_ceo' })).rejects.toThrow('not confirmed');
+        expect(update).not.toHaveBeenCalled();
     });
 
     it('records zero-trust soft-void with mandatory reason code', async () => {

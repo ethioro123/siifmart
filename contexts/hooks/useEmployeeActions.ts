@@ -1,3 +1,4 @@
+import { counterControlService } from '../../services/counter-control.service';
 import { useCallback } from 'react';
 import type { Employee, ShiftRecord, Site, SystemLog } from '../../types';
 import { employeesService, shiftsService } from '../../services/supabase.service';
@@ -109,10 +110,10 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             };
 
             // 1. Persist directly to Supabase
-            await shiftsService.create(shift);
+            const saved = await counterControlService.open(shift.siteId, resolvedCounter, openingFloat, shiftId);
 
             // 2. State update only after successful persistence
-            setShifts(prev => [shift, ...prev]);
+            setShifts(prev => [saved, ...prev]);
 
             const staffBadge = cashierCode ? `${cashierCode} (${staffName})` : staffName;
             addNotification('success', `Shift started on ${resolvedCounter} for ${staffBadge} with ${openingFloat.toLocaleString()} float`);
@@ -136,13 +137,13 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             };
 
             // 1. Persist directly to Supabase first
-            await shiftsService.update(shift.id, closedShift);
+            const saved = await counterControlService.close(closedShift);
 
             // 2. State update only after successful persistence
-            setShifts(prev => prev.map(s => s.id === shift.id ? closedShift : s));
+            setShifts(prev => prev.map(s => s.id === shift.id ? saved : s));
 
-            addNotification('success', 'Shift closed & submitted for HQ audit');
-            logSystemEvent('Close Shift', `Closed shift for ${staffName}. Variance: ${closedShift.variance || 0}`, staffName, 'HR');
+
+            
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to close shift:', error as Error);
             addNotification('alert', 'Failed to close shift in database');

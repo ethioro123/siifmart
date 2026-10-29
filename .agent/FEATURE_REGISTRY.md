@@ -1,4 +1,5 @@
 - User-authorized design direction (2026-10-30): Revision C adopts a Codex-inspired neutral workspace, compact navigation, restrained controls and soft panels where useful. Chapter 18 explicitly supersedes conflicting visual defaults; existing references remain historical until reviewed. Documentation only; no runtime restyling.
+- 2026-10-30: Expense decisions use signed-in server identity, independent review and atomic audit guards; Approvals includes paginated site-scoped expense decisions with required reasons.
 - 2026-10-30: Approvals offers on-demand salary, headcount and employee-profile review dialogs for available authorized queues; context changes close dialogs and decisions refresh the inbox.
 - 2026-10-30: Approvals opens site-scoped purchase-order reviews and on-demand Finance clearance using the existing PO inspector; review-only mode hides editing/deletion.
 - User-authorized panel/card direction (2026-10-29): Corrected the design specification to prefer softly sculpted major panels and object cards, explicit geometry and padding, tonal separation and subtle depth; updated the reference gallery and regression expectations. Earlier blanket open-section guidance is superseded; runtime POS changes are separate.
@@ -293,7 +294,6 @@
 - Notifications expose optional technical details on demand, use clearer status hierarchy, fit mobile safe areas, and honor reduced-motion preferences. Auto-dismiss pauses while the page is hidden.
 - **Files**: `components/notifications/NotificationCard.tsx`, `components/notifications/NotificationContainer.tsx`
 - **Root Cause**: Generic string heuristics offered unverified recovery promises, while optional diagnostic details were not visible and mobile placement/motion ignored device preferences.
-
 ### Mobile User Menu Refresh (2026-10-18)
 - Expands the mobile account panel to a safe-area-aware, scrollable card with a clearer identity header, visible close control, larger touch targets, and more readable performance and job summaries. Desktop placement remains a compact anchored menu.
 - **Files**: `components/topbar/UserMenu.tsx`

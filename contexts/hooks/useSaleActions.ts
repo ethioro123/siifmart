@@ -9,6 +9,7 @@ import { posDB } from '../../services/db/pos.db';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { logger } from '../../utils/logger';
 import { audioFeedback } from '../../utils/audioFeedback';
+import { generateCountryScopedReceiptNumber } from '../../utils/receiptNumberGenerator';
 
 interface UseSaleActionsDeps {
     activeSite: Site | undefined;
@@ -95,7 +96,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 discountCodeId: discountCodeId || null,
                 mobilePaymentChannel: mobileDetails?.channel, mobileTransactionRef: mobileDetails?.ref, customerPhone: mobileDetails?.phone,
                 fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking',
-                receiptNumber: receiptNumber || `TX-${Date.now()}`
+                receiptNumber: receiptNumber || generateCountryScopedReceiptNumber({ activeSite })
             };
 
             // 1. Offline Save & Queue for Single Authoritative Sync

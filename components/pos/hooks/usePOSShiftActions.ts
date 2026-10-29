@@ -1,3 +1,5 @@
+import { useLanguage } from '../../../contexts/LanguageContext';
+import { useCounterSummary } from '../../../hooks/useCounterControl';
 import React from 'react';
 import { ShiftRecord, SaleRecord, Site, User } from '../../../types';
 
@@ -61,32 +63,9 @@ export const usePOSShiftActions = ({
         setIsShiftModalOpen(true);
     }, [activeSite, setCountedCash, setShiftNotes, setClosingStep, setCashDenominations, setDiscrepancyReason, setIsShiftModalOpen]);
 
-    const getShiftSummary = React.useCallback(() => {
-        if (!activeShift) return { cash: 0, card: 0, mobile: 0, drops: 0, total: 0, expected: 0 };
-        const startTime = new Date(activeShift.startTime).getTime();
-        const siteId = activeShift?.siteId || activeSite?.id;
-        const isCentralHQ = ['group_ceo', 'regional_operations_manager', 'country_operations_director', 'inventory_manager', 'store_manager'].includes(user?.role || '');
-
-        const currentShiftSales = sales.filter(s => {
-            const saleTime = new Date(s.date).getTime();
-            if (saleTime < startTime) return false;
-            // Site Scoping: Never aggregate sales from other branches
-            if (siteId && s.siteId !== siteId && (s as any).site_id !== siteId) return false;
-            // Cashier Scoping: match cashier if set
-            if (activeShift?.cashierId) {
-                const matchCashier = (s as any).cashierId === activeShift.cashierId || (s as any).cashier_id === activeShift.cashierId;
-                if (!matchCashier && !isCentralHQ) return false;
-            }
-            return true;
-        });
-
-        const cash = currentShiftSales.filter(s => s.method === 'Cash').reduce((sum, s) => sum + s.total, 0);
-        const card = currentShiftSales.filter(s => s.method === 'Card').reduce((sum, s) => sum + s.total, 0);
-        const mobile = currentShiftSales.filter(s => s.method === 'Mobile Money' || (s.method as any) === 'Telebirr' || (s.method as any) === 'CBE Birr').reduce((sum, s) => sum + s.total, 0);
-        const drops = Number(activeShift.cashDrops || (activeShift as any).cash_drops || 0);
-        const expected = Math.max(0, (activeShift.openingFloat || 0) + cash - drops);
-        return { cash, card, mobile, drops, total: cash + card + mobile, expected };
-    }, [activeShift, sales, activeSite, user]);
+    const { t } = useLanguage();
+    const serverSummary = useCounterSummary(activeShift?.id, activeSite?.id, activeSite?.country, user?.id);
+    const getShiftSummary = React.useCallback(() => serverSummary.data || { cash: 0, card: 0, mobile: 0, drops: 0, total: 0, expected: 0, blind: true }, [serverSummary.data]);
 
     const handleSubmitShift = React.useCallback(async () => {
         if (!activeShift) return;
@@ -110,26 +89,13 @@ export const usePOSShiftActions = ({
                 status: 'Closed'
             };
             await closeShift(record);
-            if (Math.abs(record.variance) > 0.01) {
-                try {
-                    const { systemLogsService } = await import('../../../services/supabase.service');
-                    await systemLogsService.create({
-                        module: 'POS_CASH_DRAWER',
-                        action: 'SHIFT_VARIANCE_LOGGED',
-                        user_name: activeShift.cashierName || 'Cashier',
-                        details: `Shift closed with variance: ${record.variance > 0 ? '+' : ''}${record.variance}. Counted: ${record.actualCash}, Expected: ${record.expectedCash}. Reason: ${record.discrepancyReason || 'N/A'}`
-                    });
-                } catch {
-                    // Non-blocking audit log
-                }
-            }
             setIsProcessing(false);
             setIsShiftModalOpen(false);
-            addNotification('success', "Shift Closed & Reconciled Successfully.");
+            addNotification('success', t('pos.counterSaved'));
             logout();
             navigate('/');
         } catch (e) {
-            addNotification('alert', 'Failed to close shift.');
+            addNotification('alert', t('pos.counterFailed'));
             setIsProcessing(false);
         }
     }, [activeShift, cashDenominations, discrepancyReason, shiftNotes, closeShift, logout, navigate, addNotification, getShiftSummary, setIsProcessing, setIsShiftModalOpen]);

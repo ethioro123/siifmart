@@ -1,3 +1,4 @@
+import { counterControlService } from './counter-control.service';
 import { supabase } from '../lib/supabase';
 import type { DrawerReconciliationRecord, DrawerAuditFilter } from '../types';
 import { systemLogsService } from './system-logs.service';
@@ -12,7 +13,7 @@ function mapShiftToDrawerRecord(row: any): DrawerReconciliationRecord {
     const cardSales = Number(row.card_sales) || 0;
     const mobileSales = Number(row.mobile_sales) || 0;
     const expenses = Number(row.expenses) || 0;
-    const expectedCash = Number(row.expected_cash ?? (openingFloat + cashSales - expenses)) || 0;
+    const expectedCash = Number(row.expected_cash ?? (openingFloat + cashSales - (Number(row.cash_drops) || 0) - expenses)) || 0;
     const actualCash = Number(row.actual_cash) || 0;
     const variance = Number(row.variance ?? (actualCash - expectedCash)) || 0;
 
@@ -108,52 +109,7 @@ export const drawerReconciliationService = {
             supervisorNotes?: string;
         }
     ): Promise<DrawerReconciliationRecord> {
-        const now = new Date().toISOString();
-        const updates: Record<string, any> = {
-            reconciliation_status: action,
-            finance_sign_off_by: financeUser.id,
-            finance_sign_off_name: financeUser.name,
-            finance_sign_off_at: now
-        };
-
-        if (options?.hqNotes) {
-            updates.hq_notes = options.hqNotes;
-        }
-
-        if (options?.supervisorNotes) {
-            updates.supervisor_co_sign_notes = options.supervisorNotes;
-        }
-
-        if (action === 'Flagged') {
-            updates.variance_flagged = true;
-            updates.status = 'Flagged';
-        } else {
-            updates.reconciled_by = financeUser.name;
-            updates.reconciled_at = now;
-            updates.status = 'Audited';
-        }
-
-        const { data, error } = await supabase
-            .from('shifts')
-            .update(updates)
-            .eq('id', shiftId)
-            .select()
-            .single();
-
-        if (error) {
-            logger.error('drawerReconciliationService', 'signOff failed:', error);
-            throw error;
-        }
-
-        await systemLogsService.create({
-            user_name: financeUser.name,
-            action: action === 'Reconciled' ? 'DRAWER_RECONCILED' : 'DRAWER_VARIANCE_FLAGGED',
-            module: 'Financials',
-            details: `Drawer shift #${shiftId.slice(0, 8)} signed off as ${action} by ${financeUser.name}. ${
-                options?.hqNotes ? `Notes: "${options.hqNotes}"` : ''
-            }`
-        });
-
+        const data = await counterControlService.review(shiftId, 'finance', action, options?.hqNotes || '');
         return mapShiftToDrawerRecord(data);
     },
 
@@ -165,34 +121,7 @@ export const drawerReconciliationService = {
         supervisor: { id: string; name: string },
         notes: string
     ): Promise<DrawerReconciliationRecord> {
-        const now = new Date().toISOString();
-        const updates = {
-            supervisor_id: supervisor.id,
-            supervisor_name: supervisor.name,
-            supervisor_co_sign_notes: notes,
-            supervisor_signed_at: now,
-            updated_at: now
-        };
-
-        const { data, error } = await supabase
-            .from('shifts')
-            .update(updates)
-            .eq('id', shiftId)
-            .select()
-            .single();
-
-        if (error) {
-            logger.error('drawerReconciliationService', 'coSignSupervisor failed:', error);
-            throw error;
-        }
-
-        await systemLogsService.create({
-            user_name: supervisor.name,
-            action: 'SHIFT_SUPERVISOR_COSIGNED',
-            module: 'Financials',
-            details: `Shift #${shiftId.slice(0, 8)} co-signed by supervisor ${supervisor.name}: "${notes}".`
-        });
-
+        const data = await counterControlService.review(shiftId, 'supervisor', 'Flagged', notes);
         return mapShiftToDrawerRecord(data);
     }
 };

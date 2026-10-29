@@ -79,7 +79,7 @@ export const expensesService = {
     ) {
         let query = supabase
             .from('expenses')
-            .select('*', { count: 'exact' })
+            .select('id,site_id,country_code,expense_date,category,description,amount,status,created_by_id,created_by_name,approved_by_id,approved_by,approved_at,escalated_to_ceo,region_code,requires_hq_approval,hq_approved_by,hq_approved_at,void_reason,voided_by_id,voided_by_name,voided_at,payment_ref,escalation_reason,created_at,updated_at', { count: 'exact' })
             .order('expense_date', { ascending: false })
             .range(offset, offset + limit - 1);
 
@@ -126,7 +126,7 @@ export const expensesService = {
     async getById(id: string): Promise<ExpenseRecord | null> {
         const { data, error } = await supabase
             .from('expenses')
-            .select('*')
+            .select('id,site_id,country_code,expense_date,category,description,amount,status,created_by_id,created_by_name,approved_by_id,approved_by,approved_at,escalated_to_ceo,region_code,requires_hq_approval,hq_approved_by,hq_approved_at,void_reason,voided_by_id,voided_by_name,voided_at,payment_ref,escalation_reason,created_at,updated_at')
             .eq('id', id)
             .single();
 
@@ -253,58 +253,12 @@ export const expensesService = {
             }
         }
 
-        // Server-Side Security Definer RPC Execution
-        try {
-            const { data: rpcData, error: rpcError } = await supabase.rpc('approve_expense', {
-                p_expense_id: id,
-                p_approver_id: approver.id,
-                p_approver_name: approver.name,
-                p_approver_role: approver.role,
-                p_notes: approver.notes || '',
-                p_approver_country: approver.countryCode || null
-            });
-
-            if (!rpcError && rpcData?.success) {
-                const fresh = await this.getById(id);
-                if (fresh) return fresh;
-            }
-
-            if (rpcError) {
-                const msg = rpcError.message || '';
-                logger.warn('expensesService', 'RPC approve_expense error:', { error: msg });
-                throw new Error(msg);
-            }
-        } catch (rpcErr: any) {
-            throw rpcErr;
-        }
-
-        const now = new Date().toISOString();
-        const { data, error } = await supabase
-            .from('expenses')
-            .update({
-                status: 'Approved',
-                approved_by_id: approver.id,
-                approved_by: approver.name,
-                approved_at: now,
-                updated_at: now
-            })
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) {
-            logger.error('expensesService', 'approve failed:', error);
-            throw error;
-        }
-
-        await systemLogsService.create({
-            user_name: approver.name,
-            action: 'EXPENSE_APPROVED',
-            module: 'Financials',
-            details: `Approved expense #${id.slice(0, 8)} (${existing.amount} - ${existing.category}) by ${approver.name} (${approver.role}).`
-        });
-
-        return mapExpenseRow(data);
+        const { data, error } = await supabase.rpc('decide_expense', { p_expense_id: id, p_decision: 'Approved', p_reason: approver.notes?.trim() || 'Expense approval' });
+        if (error) throw error;
+        if (!data?.success || data.status !== 'Approved') throw new Error('Expense approval was not confirmed.');
+        const fresh = await this.getById(id);
+        if (!fresh || fresh.status !== 'Approved') throw new Error('Approved expense could not be verified.');
+        return fresh;
     },
 
     async recordPayment(
@@ -376,35 +330,13 @@ export const expensesService = {
         id: string,
         rejector: { id: string; name: string; role: string; reason?: string }
     ) {
-        const existing = await this.getById(id);
-        if (!existing) {
-            throw new Error(`Expense record not found: ${id}`);
-        }
-
-        const now = new Date().toISOString();
-        const { data, error } = await supabase
-            .from('expenses')
-            .update({
-                status: 'Rejected',
-                updated_at: now
-            })
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) {
-            logger.error('expensesService', 'reject failed:', error);
-            throw error;
-        }
-
-        await systemLogsService.create({
-            user_name: rejector.name,
-            action: 'EXPENSE_REJECTED',
-            module: 'Financials',
-            details: `Rejected expense #${id.slice(0, 8)} (${existing.amount}). Reason: ${rejector.reason || 'None specified'}.`
-        });
-
-        return mapExpenseRow(data);
+        if (!rejector.reason?.trim()) throw new Error('A rejection reason is required.');
+        const { data, error } = await supabase.rpc('decide_expense', { p_expense_id: id, p_decision: 'Rejected', p_reason: rejector.reason.trim() });
+        if (error) throw error;
+        if (!data?.success || data.status !== 'Rejected') throw new Error('Expense rejection was not confirmed.');
+        const fresh = await this.getById(id);
+        if (!fresh || fresh.status !== 'Rejected') throw new Error('Rejected expense could not be verified.');
+        return fresh;
     },
 
     /**

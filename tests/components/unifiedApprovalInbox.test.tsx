@@ -16,6 +16,7 @@ const { query } = vi.hoisted(() => ({
   }
 }));
 
+vi.mock('../../components/approvals/ExpenseReviewWorkspace', () => ({ ExpenseReviewWorkspace: () => null }));
 vi.mock('../../components/approvals/PeopleReviewWorkspace', () => ({ PeopleReviewWorkspace: () => null }));
 vi.mock('../../components/approvals/PurchaseOrderReviewWorkspace', () => ({ PurchaseOrderReviewWorkspace: () => null }));
 vi.mock('../../components/approvals/RequisitionReviewWorkspace', () => ({ RequisitionReviewWorkspace: () => null }));

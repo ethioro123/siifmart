@@ -34,115 +34,13 @@ class CashDropsService {
         device_id?: string;
         gps_coordinates?: string;
     }): Promise<CashDropRecord> {
-        // 1. Dual-Control 4-Eyes Validation
-        if (params.cashier.id === params.supervisor.id || 
-            (params.cashier.code && params.cashier.code === params.supervisor.code)) {
-            throw new Error('4-Eyes Violation: Cashier cannot supervise or co-sign their own cash drop.');
-        }
-
-        const dropAmount = Number(params.amount);
-        if (!dropAmount || dropAmount <= 0) {
-            throw new Error('Invalid cash drop amount: must be greater than zero.');
-        }
-
-        const dropNumber = `DROP-${Date.now().toString().slice(-6)}`;
-        const now = new Date().toISOString();
-        const countryCode = (params.country_code || 'ET').toUpperCase();
-
-        const dropRecord: CashDropRecord = {
-            id: crypto.randomUUID(),
-            country_code: countryCode,
-            site_id: params.site_id,
-            shift_id: params.shift_id,
-            drop_number: dropNumber,
-            amount: dropAmount,
-            currency: params.currency || (countryCode === 'KE' ? 'KSh' : 'ETB'),
-            safe_bag_number: params.safe_bag_number,
-            denominations: params.denominations || {},
-            reason: params.reason || 'threshold_exceeded',
-            notes: params.notes,
-            cashier_id: params.cashier.id,
-            cashier_name: params.cashier.name,
-            supervisor_id: params.supervisor.id,
-            supervisor_name: params.supervisor.name,
-            supervisor_role: params.supervisor.role,
-            device_id: params.device_id,
-            gps_coordinates: params.gps_coordinates,
-            status: 'deposited_in_safe',
-            created_at: now,
-            updated_at: now
-        };
-
-        // 2. Persist to Supabase
-        try {
-            const { error } = await supabase
-                .from('pos_cash_drops')
-                .insert({
-                    id: dropRecord.id,
-                    country_code: dropRecord.country_code,
-                    site_id: dropRecord.site_id,
-                    shift_id: dropRecord.shift_id,
-                    drop_number: dropRecord.drop_number,
-                    amount: dropRecord.amount,
-                    currency: dropRecord.currency,
-                    safe_bag_number: dropRecord.safe_bag_number,
-                    denominations: dropRecord.denominations,
-                    reason: dropRecord.reason,
-                    notes: dropRecord.notes,
-                    cashier_id: dropRecord.cashier_id,
-                    cashier_name: dropRecord.cashier_name,
-                    supervisor_id: dropRecord.supervisor_id,
-                    supervisor_name: dropRecord.supervisor_name,
-                    supervisor_role: dropRecord.supervisor_role,
-                    device_id: dropRecord.device_id,
-                    gps_coordinates: dropRecord.gps_coordinates,
-                    status: dropRecord.status,
-                    created_at: dropRecord.created_at,
-                    updated_at: dropRecord.updated_at
-                });
-
-            if (error) {
-                logger.warn('cashDropsService', 'Remote insert failed, using local cache:', { error: error.message });
-                this.localCache.unshift(dropRecord);
-            }
-        } catch (err) {
-            logger.warn('cashDropsService', 'Offline fallback during cash drop insert', { error: String(err) });
-            this.localCache.unshift(dropRecord);
-        }
-
-        // 3. Synaptically Update Shift Totals (subtract cash drop from expected drawer cash)
-        try {
-            const shift = await shiftsService.getById(params.shift_id);
-            if (shift) {
-                const updatedDrops = (shift.cashDrops || shift.cash_drops || 0) + dropAmount;
-                const updatedDropCount = (shift.dropCount || 0) + 1;
-                const newExpectedCash = (shift.openingFloat + shift.cashSales) - updatedDrops;
-
-                await shiftsService.update(params.shift_id, {
-                    cashDrops: updatedDrops,
-                    cash_drops: updatedDrops,
-                    dropCount: updatedDropCount,
-                    expectedCash: Math.max(0, newExpectedCash)
-                });
-            }
-        } catch (shiftErr) {
-            logger.warn('cashDropsService', 'Failed to update shift expected cash:', { error: String(shiftErr) });
-        }
-
-        // 4. Tamper-Proof Audit Trail (system_logs)
-        try {
-            const { systemLogsService } = await import('./supabase.service');
-            await systemLogsService.create({
-                module: 'POS_CASH_GOVERNANCE',
-                action: 'SAFE_CASH_DROP_EXECUTED',
-                user_name: `${params.cashier.name} & ${params.supervisor.name}`,
-                details: `Mid-day cash drop of ${dropRecord.currency} ${dropRecord.amount.toLocaleString()} into Safe Bag #${dropRecord.safe_bag_number || 'N/A'}. Supervisor: ${params.supervisor.name} (${params.supervisor.role}). GPS: ${params.gps_coordinates || 'N/A'}`
-            });
-        } catch {
-            // Non-blocking log
-        }
-
-        return dropRecord;
+        const { data, error } = await supabase.rpc('request_counter_drop', {
+            p_shift: params.shift_id, p_amount: params.amount, p_bag: params.safe_bag_number || '',
+            p_reason: params.reason || '', p_request: crypto.randomUUID(),
+        });
+        if (error) throw error;
+        if (!data?.id) throw new Error('Cash drop request was not confirmed');
+        return data as CashDropRecord;
     }
 
     /**

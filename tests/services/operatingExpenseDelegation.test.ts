@@ -18,8 +18,9 @@ vi.mock('../../services/system-logs.service', () => ({
 
 describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
     beforeEach(() => {
+        vi.restoreAllMocks();
         vi.clearAllMocks();
-        (supabase.rpc as any).mockResolvedValue({ data: { success: true }, error: null });
+        (supabase.rpc as any).mockResolvedValue({ data: { success: true, status: 'Approved' }, error: null });
     });
 
     describe('1. Operating Expense Boundaries (2M Regional / 20M Country)', () => {
@@ -55,9 +56,9 @@ describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
             });
 
             expect(approved.status).toBe('Approved');
-            expect(supabase.rpc).toHaveBeenCalledWith('approve_expense', expect.objectContaining({
+            expect(supabase.rpc).toHaveBeenCalledWith('decide_expense', expect.objectContaining({
                 p_expense_id: 'EXP-REG-001',
-                p_approver_role: 'regional_finance_manager'
+                p_decision: 'Approved'
             }));
         });
 

@@ -1,7 +1,9 @@
+import { counterControl } from './counterControl';
 import { approvalInbox } from './approvalInbox';
 import { TranslationBlock } from './types';
 
 export const pos: TranslationBlock = {
+    ...counterControl,
     barcodeSubmitted: { en: 'Barcode request saved for review. The barcode is not active yet.', am: 'የባርኮድ ጥያቄው ለግምገማ ተቀምጧል። ባርኮዱ ገና ንቁ አይደለም።', or: 'Gaaffiin baarkoodii akka ilaalamuuf galmaa’eera. Baarkoodiin ammatti hin hojjatu.' },
     barcodeSubmitFailed: { en: 'Barcode request was not saved. Try again.', am: 'የባርኮድ ጥያቄው አልተቀመጠም። እንደገና ይሞክሩ።', or: 'Gaaffiin baarkoodii hin galmoofne. Irra deebi’ii yaali.' },
     // Store-scoped catalog update notice and review

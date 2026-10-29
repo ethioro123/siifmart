@@ -6,6 +6,8 @@ import { logger } from '../utils/logger';
 export function mapShiftRow(row: any): ShiftRecord {
     return {
         id: row.id,
+        countSubmittedAt: row.count_submitted_at,
+        ledgerVersion: row.ledger_version,
         shiftNumber: row.shift_number,
         shift_number: row.shift_number,
         siteId: row.site_id,

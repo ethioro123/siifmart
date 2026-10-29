@@ -1,0 +1,23 @@
+import type { TranslationBlock } from './types';
+export const counterControl: TranslationBlock = {
+ counterCloseTitle: { en: 'Submit blind drawer count', am: 'የገንዘብ ቆጠራ ያስገቡ', or: 'Lakkoofsa maallaqaa dhokataa galchi' },
+ counterBlindNotice: { en: 'Expected cash stays hidden. Submitting locks this count and closes sales on this counter. A different signed-in supervisor reviews it before Finance reconciliation.', am: 'የሚጠበቀው ገንዘብ ተደብቋል። ሲላክ ቆጠራው ይቆለፋል። ሌላ ተቆጣጣሪ ከፋይናንስ በፊት ይገመግማል።', or: 'Maallaqni eegamu dhokata. Erguun lakkoofsa kana cufa; gurgurtaas dhaaba. Hogganaan biraa seenee osoo Faayinaansiin hin araarsin dura ilaala.' },
+ counterCounted: { en: 'Counted cash', am: 'የተቆጠረ ገንዘብ', or: 'Maallaqa lakkaa’ame' },
+ counterReason: { en: 'Count notes / discrepancy explanation', am: 'የቆጠራ ማስታወሻ / የልዩነት ማብራሪያ', or: 'Yaadannoo lakkoofsaa / ibsa garaagarummaa' },
+ counterSubmit: { en: 'Lock count and submit for review', am: 'ቆጠራውን ቆልፈው ለግምገማ ይላኩ', or: 'Lakkoofsa cufii ilaalchaaf ergi' },
+ counterSaved: { en: 'Count saved. Supervisor review and Finance reconciliation are pending.', am: 'ቆጠራው ተቀምጧል። የተቆጣጣሪ እና የፋይናንስ ግምገማ ይጠብቃል።', or: 'Lakkoofsi galmaa’eera. Ilaalchi hogganaa fi araarri Faayinaansii eegamaa jira.' },
+ counterFailed: { en: 'The count was not confirmed. Keep this screen open and retry.', am: 'ቆጠራው አልተረጋገጠም። ማያውን ክፍት አድርገው እንደገና ይሞክሩ።', or: 'Lakkoofsi hin mirkanoofne. Fuula kana banaa dhiisii irra deebi’ii yaali.' },
+ counterCancel: { en: 'Cancel', am: 'ሰርዝ', or: 'Dhiisi' },
+ counterSaving: { en: 'Saving…', am: 'በማስቀመጥ ላይ…', or: 'Galmeessaa jira…' },
+ counterReview: { en: 'Counter reviews', am: 'የቆጣሪ ግምገማዎች', or: 'Ilaalcha kaawuntarii' },
+ counterReviewNotes: { en: 'Review notes (at least 5 characters)', am: 'የግምገማ ማስታወሻ (ቢያንስ 5 ፊደላት)', or: 'Yaadannoo ilaalchaa (qubee 5 ol)' },
+ counterReviewSubmit: { en: 'Co-sign as signed-in supervisor', am: 'እንደገባ ተቆጣጣሪ ይፈርሙ', or: 'Akka hogganaa seenee jiruutti mallatteessi' },
+ counterDropApprove: { en: 'Confirm safe deposit as supervisor', am: 'እንደ ተቆጣጣሪ የሳጥን ተቀማጭን ያረጋግጡ', or: 'Akka hogganaatti kuusaa maallaqaa mirkaneessi' },
+ counterRefresh: { en: 'Refresh reviews', am: 'ግምገማዎችን አድስ', or: 'Ilaalcha haaromsi' },
+ counterReviewEmpty: { en: 'No independent reviews in the current queue.', am: 'በወረፋው ግምገማ የለም።', or: 'Tarree kana keessatti ilaalchi walaba ta’e hin jiru.' },
+ counterReviewFailed: { en: 'Review was not confirmed. Refresh and retry.', am: 'ግምገማው አልተረጋገጠም። አድሰው እንደገና ይሞክሩ።', or: 'Ilaalchi hin mirkanoofne. Haaromsiitii irra deebi’ii yaali.' },
+ counterDropRequest: { en: 'Request safe cash drop', am: 'የገንዘብ ማስቀመጫ ይጠይቁ', or: 'Maallaqa saanduqa nageenyaatti galchuuf gaafadhu' },
+ counterDropPending: { en: 'Drop request saved. Cash is not recorded as deposited until a different signed-in supervisor confirms custody.', am: 'ጥያቄው ተቀምጧል። ሌላ ተቆጣጣሪ እስኪያረጋግጥ ድረስ ገንዘቡ እንደተቀመጠ አይመዘገብም።', or: 'Gaaffiin galmaa’eera. Hogganaan biraa seenee fudhachuu isaa hanga mirkaneessutti maallaqni akka kuufametti hin galmaa’u.' },
+ counterAmount: { en: 'Amount', am: 'መጠን', or: 'Hanga' },
+ counterBag: { en: 'Safe bag reference', am: 'የቦርሳ ማጣቀሻ', or: 'Wabii korojoo nageenyaa' },
+};

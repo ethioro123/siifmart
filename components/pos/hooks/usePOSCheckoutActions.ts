@@ -4,6 +4,7 @@ import { formatDateTime } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { printHtmlContent } from '../../../utils/printHelper';
 import { getEffectiveCountry } from '../../../utils/localization';
+import { generateCountryScopedReceiptNumber } from '../../../utils/receiptNumberGenerator';
 
 interface UsePOSCheckoutActionsProps {
     cart: CartItem[];
@@ -193,7 +194,7 @@ export const usePOSCheckoutActions = ({
             const tendered = selectedPaymentMethod === 'Cash' ? parseFloat(amountTendered) : total;
             const change = selectedPaymentMethod === 'Cash' ? changeDue : 0;
             
-            const receiptNumber = `POS-${crypto.randomUUID()}`;
+            const receiptNumber = generateCountryScopedReceiptNumber({ activeSite, sales });
             const { saleId, pointsResult } = await processSale(cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change, selectedCustomer?.id, undefined, 'In-Store', taxBreakdown, receiptNumber, total, appliedDiscountCode, mobileDetails);
 
             const saleObj: SaleRecord = {
