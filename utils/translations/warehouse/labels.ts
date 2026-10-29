@@ -169,9 +169,9 @@ export const labels: any = {
         or: 'Waraqaa Termaalii Qajeeltoo'
     },
     scannableHighContrast: {
-        en: 'Scannable 100% Contrast',
-        am: 'ሊቃኝ የሚችል 100% ንፅፅር',
-        or: 'Iskaanamaa Qulqullina 100%'
+        en: 'High-contrast artwork',
+        am: 'ከፍተኛ ንፅፅር ያለው ምስል',
+        or: 'Suuraa walfaallaa ol-aanaa qabu'
     },
 
     // Modal
@@ -181,9 +181,9 @@ export const labels: any = {
         or: 'Dura-Ilaalcha Baarkoodii fi Mallattoo Termaalii'
     },
     scannabilityCheckSubtitle: {
-        en: 'Live scannability check & 1:1 thermal layout before physical print',
-        am: 'ከህትመት በፊት የቀጥታ የቅኝት ማረጋገጫ እና 1:1 የቴርማል አቀማመጥ',
-        or: 'Maxxansuun dura sakatta\'iinsa iskaanii fi boca termaalii 1:1'
+        en: 'Review the generated label and check its payload before printing',
+        am: 'ከማተምዎ በፊት የተፈጠረውን መለያ ይመልከቱ እና የውሂብ ጭነቱን ያረጋግጡ',
+        or: 'Maxxansuu dura mallattoo uumame ilaalaa fi qabiyyee isaa mirkaneessaa'
     },
     opticalVerificationLabel: {
         en: 'Optical Verification',
@@ -201,9 +201,19 @@ export const labels: any = {
         or: 'Irra Deebi\'ii Ilaali'
     },
     scannerEmittedValueLabel: {
-        en: 'Scanner Emitted Value:',
-        am: 'የቃኚው ውጤት ዋጋ፡',
-        or: 'Gatii Iskaaniin Baafame:'
+        en: 'Business identifier:',
+        am: 'የንግድ መለያ፡',
+        or: 'Adda baastuu daldalaa:'
+    },
+    businessIdentifierLabel: {
+        en: 'Business identifier:',
+        am: 'የንግድ መለያ፡',
+        or: 'Adda baastuu daldalaa:'
+    },
+    copyBusinessIdentifier: {
+        en: 'Copy business identifier',
+        am: 'የንግድ መለያውን ቅዳ',
+        or: 'Adda baastuu daldalaa garagalchi'
     },
     symbologyLabel: {
         en: 'Symbology:',
@@ -244,5 +254,45 @@ export const labels: any = {
         en: '1:1 Thermal Output Simulation',
         am: '1:1 የቴርማል ውጤት ማስመሰል',
         or: 'Walsimsiisa Bu\'aa Termaalii 1:1'
+    },
+    payloadValidationLabel: {
+        en: 'Payload format check',
+        am: 'የውሂብ ጭነት ቅርጸት ማረጋገጫ',
+        or: 'Mirkaneessa bifa qabiyyee'
+    },
+    validPayloadBadge: {
+        en: 'Format valid',
+        am: 'ቅርጸቱ ትክክል ነው',
+        or: 'Bifti sirrii dha'
+    },
+    invalidLabelIdentifier: {
+        en: 'Enter a supported identifier before printing. Code 128 identifiers may contain up to 48 characters.',
+        am: 'ከማተምዎ በፊት የሚደገፍ መለያ ያስገቡ። የCode 128 መለያዎች እስከ 48 ቁምፊ ሊኖራቸው ይችላል።',
+        or: 'Maxxansuu dura adda baastuu deeggarame galchaa. Adda baastuun Code 128 hanga arfama 48 qabaachuu danda\'a.'
+    },
+    renderedLabelOutput: {
+        en: 'Generated print output',
+        am: 'የተፈጠረ የህትመት ውጤት',
+        or: 'Bu\'aa maxxansaa uumame'
+    },
+    labelOutputDimensions: {
+        en: 'Label size: {dimensions}',
+        am: 'የመለያ መጠን፦ {dimensions}',
+        or: 'Hammamtaa mallattoo: {dimensions}'
+    },
+    preparingLabelOutput: {
+        en: 'Preparing generated label…',
+        am: 'የተፈጠረው መለያ እየተዘጋጀ ነው…',
+        or: 'Mallattoon uumame qophaa jira…'
+    },
+    labelOutputUnavailable: {
+        en: 'The label output could not be generated. Review the label details and try again.',
+        am: 'የመለያ ውጤቱ ሊፈጠር አልቻለም። የመለያውን ዝርዝር ይመርምሩና እንደገና ይሞክሩ።',
+        or: 'Bu\'aan mallattoo uumamuu hin dandeenye. Bal\'ina mallattoo ilaalaa, irra deebi\'aa yaalaa.'
+    },
+    labelScaleInstruction: {
+        en: 'Print at 100% scale with page headers and footers disabled. Physical scan quality depends on the printer and scanner.',
+        am: 'የገጽ ራስጌና ግርጌ ተሰናክለው በ100% ልኬት ያትሙ። የአካላዊ ቅኝት ጥራት በማተሚያውና በቃኚው ላይ ይመረኮዛል።',
+        or: 'Hammamtaa 100% irratti maxxansaa, mataa fi miila fuulaa cufaa. Qulqullinni iskaanii maxxansaa fi iskaana irratti hundaa\'a.'
     }
 };

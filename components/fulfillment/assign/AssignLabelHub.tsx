@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Printer, Package, Layers, Layout, Info, CheckCircle, Eye } from 'lucide-react';
 import { generateUnifiedBatchLabelsHTML } from '../../../utils/labels/ProductLabelGenerator';
 import { generateLocationLabelHTML } from '../../../utils/labels/LocationLabelGenerator';
@@ -57,8 +57,8 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     // Location config derived from site settings
     const maxAisles = Math.min(99,Math.max(1,activeSite?.aisleCount || 20));
     const maxBays = Math.min(99,Math.max(1,activeSite?.bayCount || 20));
-    const zoneLetters = [...new Set(zones.filter(zone => (zone.siteId || zone.site_id) === activeSite?.id)
-        .flatMap(zone => zone.name.trim().toUpperCase().match(/^(?:ZONE\s+)?([A-Z])(?:$|[\s-])/)?.[1] || []))];
+    const zoneLetters = useMemo(() => [...new Set(zones.filter(zone => (zone.siteId || zone.site_id) === activeSite?.id)
+        .flatMap(zone => zone.name.trim().toUpperCase().match(/^(?:ZONE\s+)?([A-Z])(?:$|[\s-])/)?.[1] || []))], [zones, activeSite?.id]);
 
     // Bay Config State — single location (zone/aisle/bay)
     const [bayConfig, setBayConfig] = useState({
@@ -79,7 +79,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     const humanLocationLabel = `${bayConfig.zone}-${aislePad}-${bayPad}`;
     const locationBarcode = zoneLetters.includes(bayConfig.zone) ? getBarcode(bayConfig.zone, bayConfig.aisle, bayConfig.bay) : '';
 
-    const buildLocationLabel = async () => {
+    const buildLocationLabel = useCallback(async () => {
         if (!zoneLetters.includes(bayConfig.zone) || !activeSite?.id || !/^[A-Z]$/.test(bayConfig.zone) || !locationBarcode || !/^\d{15}$/.test(locationBarcode)) throw new Error('Select a valid configured storage bay.');
         const labelHTML = await generateLocationLabelHTML([{
             humanLabel: humanLocationLabel,
@@ -95,9 +95,9 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
         });
 
         return labelHTML;
-    };
+    }, [zoneLetters, bayConfig.zone, bayConfig.aisle, bayConfig.bay, activeSite?.id, activeSite?.name, activeSite?.code, labelSize, labelFormat, humanLocationLabel, locationBarcode, aislePad, bayPad]);
 
-    const buildProductLabel = async () => {
+    const buildProductLabel = useCallback(async () => {
         if (!matchedProduct || !activeSite?.id) throw new Error('Select one product at this facility using its SKU or barcode.');
         if (!validLabelCopies(printQty)) throw new Error(`Choose 1–${MAX_LABEL_COPIES} whole label copies.`);
         const canonicalCode = (matchedProduct?.sku || searchSku).trim();
@@ -120,7 +120,12 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
         });
 
         return labelHTML;
-    };
+    }, [matchedProduct, activeSite?.id, printQty, searchSku, labelSize, labelFormat, activeCurrency]);
+
+    const buildPreviewOutput = useCallback(
+        () => labelMode === 'PRODUCT' ? buildProductLabel() : buildLocationLabel(),
+        [labelMode, buildProductLabel, buildLocationLabel]
+    );
 
     const handlePrintLocation = () => print(buildLocationLabel);
     const handlePrintProduct = () => print(buildProductLabel);
@@ -461,7 +466,8 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                 onQuantityChange={labelMode === 'PRODUCT' ? changeCopies : undefined}
                 isPrinting={isPrinting}
                 onFormatChange={setLabelFormat}
-                onPrint={labelMode === 'PRODUCT' ? handlePrintProduct : handlePrintLocation}
+                buildOutput={buildPreviewOutput}
+                onPrint={outputHtml => { void print(async () => outputHtml); }}
             />
         </div>
     );
