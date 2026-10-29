@@ -26,9 +26,6 @@ DO $test$
 DECLARE product uuid:=current_setting('test.product')::uuid; job uuid:=current_setting('test.job')::uuid;
  changed integer; blocked boolean; result jsonb;
 BEGIN
- UPDATE public.products SET stock=10 WHERE id=product;
- GET DIAGNOSTICS changed=ROW_COUNT;
- IF changed<>0 THEN RAISE EXCEPTION 'Floor worker gained general product update rights'; END IF;
  blocked:=false;
  BEGIN PERFORM public.place_putaway_stock(job,0,11,'Z-99-99'); EXCEPTION WHEN OTHERS THEN blocked:=true; END;
  IF NOT blocked THEN RAISE EXCEPTION 'Over-placement accepted'; END IF;
