@@ -53,7 +53,7 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
                             <div className="flex items-center gap-1.5">
                                 <span className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{loc.siteName}</span>
                                 {loc.isCurrentSite && (
-                                    <span className="text-[11px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-[var(--theme-accent)] text-white">This Store</span>
+                                    <span className="text-[11px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-[var(--theme-accent)] text-[var(--theme-text-primary)]">This Store</span>
                                 )}
                             </div>
                             <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5 truncate">{formatLocationIdentity(loc.location,'Location not assigned')}</p>

@@ -272,7 +272,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                                                     <button
                                                         onClick={() => handleApprove(req)}
                                                         disabled={isBusy}
-                                                        className="px-4 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer shadow-xs disabled:opacity-40"
+                                                        className="px-4 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer shadow-xs disabled:opacity-40"
                                                     >
                                                         {isBusy ? (
                                                             <Loader2 size={13} className="animate-spin" />
@@ -318,7 +318,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                                                 <button
                                                     onClick={() => handleReject(req)}
                                                     disabled={!rejectionReason.trim() || isBusy}
-                                                    className="px-3 py-1 rounded-lg bg-[var(--theme-status-danger-bg)] text-white text-xs font-bold"
+                                                    className="px-3 py-1 rounded-lg bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-xs font-bold"
                                                 >
                                                     Confirm Rejection
                                                 </button>

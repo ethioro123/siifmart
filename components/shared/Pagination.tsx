@@ -117,7 +117,7 @@ export default function Pagination({
                                     onClick={() => onPageChange(i)}
                                     className={`w-8 h-8 rounded-xl text-xs font-mono tabular-nums transition-all active:scale-[0.98] cursor-pointer touch-manipulation ${
                                         isActive
-                                            ? 'bg-[var(--theme-accent)] text-white font-semibold shadow-xs'
+                                            ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold shadow-xs'
                                             : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium'
                                     }`}
                                 >

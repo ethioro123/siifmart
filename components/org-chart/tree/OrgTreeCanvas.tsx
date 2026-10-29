@@ -172,27 +172,27 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
                 <button
                     type="button"
                     onClick={handleZoomOut}
-                    className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] transition-colors cursor-pointer"
                     title="Zoom Out"
                 >
                     <ZoomOut size={16} />
                 </button>
-                <span className="text-xs font-mono font-bold px-1.5 text-stone-500 dark:text-stone-400">
+                <span className="text-xs font-mono font-bold px-1.5 text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">
                     {Math.round(scale * 100)}%
                 </span>
                 <button
                     type="button"
                     onClick={handleZoomIn}
-                    className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] transition-colors cursor-pointer"
                     title="Zoom In"
                 >
                     <ZoomIn size={16} />
                 </button>
-                <div className="w-px h-4 bg-stone-300 dark:bg-stone-700 mx-0.5" />
+                <div className="w-px h-4 bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-panel)] mx-0.5" />
                 <button
                     type="button"
                     onClick={fitToScreen}
-                    className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] transition-colors cursor-pointer"
                     title="Fit to Screen"
                 >
                     <Maximize2 size={16} />
@@ -243,14 +243,14 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
                     <h4 className="text-base font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">
                         No matching employees in hierarchy
                     </h4>
-                    <p className="text-xs text-[#4D6E56] dark:text-stone-400 mt-1 max-w-sm">
+                    <p className="text-xs text-[#4D6E56] text-[var(--theme-text-muted)] mt-1 max-w-sm">
                         Adjust your search query or site/department filters to view the tree.
                     </p>
                     {onResetFilters && (
                         <button
                             type="button"
                             onClick={onResetFilters}
-                            className="mt-4 px-4 py-2 text-xs font-bold rounded-lg bg-[var(--theme-primary)] text-white hover:bg-[var(--theme-primary)] transition-colors cursor-pointer"
+                            className="mt-4 px-4 py-2 text-xs font-bold rounded-lg bg-[var(--theme-primary)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-primary)] transition-colors cursor-pointer"
                         >
                             Reset Filters
                         </button>

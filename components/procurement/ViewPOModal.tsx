@@ -383,7 +383,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 Record finance clearance
                             </button>}
                             {canRecommendCountryMd && <button onClick={() => setApprovalModal({ isOpen: true, mode: 'recommend' })}
-                                disabled={isSubmitting} className="h-11 px-5 bg-[var(--theme-status-warning-bg)] text-white font-semibold text-sm rounded-full disabled:opacity-50">
+                                disabled={isSubmitting} className="h-11 px-5 bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] font-semibold text-sm rounded-full disabled:opacity-50">
                                 Recommend PO (Country MD)
                             </button>}
                             {isCEO && !canApprove && !isCreator && <button onClick={handleOpenReject}

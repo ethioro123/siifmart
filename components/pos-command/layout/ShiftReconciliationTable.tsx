@@ -97,7 +97,7 @@ export const ShiftReconciliationTable: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setSearchTerm('')}
-                                className="w-4 h-4 rounded-full bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90"
+                                className="w-4 h-4 rounded-full bg-[color-mix(in_srgb,var(--theme-overlay)_10%,transparent)] bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-overlay)_20%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90"
                                 aria-label="Clear search"
                             >
                                 <X size={10} />

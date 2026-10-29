@@ -50,7 +50,7 @@ export const TelemetrySection: React.FC<TelemetrySectionProps> = ({ systemLogs, 
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center gap-3 shadow-sm">
-                    <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                    <div className="p-2.5 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]">
                         <Database size={18} />
                     </div>
                     <div>

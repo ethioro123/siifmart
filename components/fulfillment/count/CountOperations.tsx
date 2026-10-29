@@ -132,7 +132,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                 <button
                                     type="button" disabled={savingId === item.productId || isLoading}
                                     onClick={() => void saveCount(item)}
-                                    className="min-h-[44px] rounded-xl bg-[var(--theme-accent)] px-3 text-sm font-semibold text-white disabled:opacity-60"
+                                    className="min-h-[44px] rounded-xl bg-[var(--theme-accent)] px-3 text-sm font-semibold text-[var(--theme-text-primary)] disabled:opacity-60"
                                 >
                                     {savingId === item.productId
                                         ? t('warehouse.savingProgress')
@@ -153,7 +153,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
 
             <div className="flex justify-end border-t border-[var(--theme-border)] pt-3">
                 <button type="button" disabled={!canFinish || isFinishing || isLoading} onClick={() => void finish()}
-                    className="flex min-h-[44px] items-center gap-2 rounded-xl bg-[var(--theme-accent)] px-5 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+                    className="flex min-h-[44px] items-center gap-2 rounded-xl bg-[var(--theme-accent)] px-5 font-semibold text-[var(--theme-text-primary)] disabled:cursor-not-allowed disabled:opacity-50">
                     <Send size={16} />{isFinishing ? t('warehouse.submittingProgress') : t('warehouse.completeAndSubmitVariances')}
                 </button>
             </div>

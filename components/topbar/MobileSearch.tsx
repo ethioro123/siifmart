@@ -62,7 +62,7 @@ export function MobileSearch({
                      {(searchResults.navigation?.length > 0 || searchResults.deepLinks?.length > 0) && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-4 py-2.5 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-widest flex items-center gap-1.5">
                                  <Layout size={12} /> Commands &amp; Navigation
                               </p>
                            </div>
@@ -92,7 +92,7 @@ export function MobileSearch({
                                  onClick={() => { handleResultClick('navigation', nav.module, nav.path); setIsMobileSearchVisible(false); }}
                                  className="w-full px-4 py-3.5 hover:bg-[var(--theme-bg-subtle)] active:bg-[var(--theme-bg-card-hover)] flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 transition-colors"
                               >
-                                 <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                                 <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                     <Layout size={18} />
                                  </div>
                                  <div className="flex-1 min-w-0">
@@ -161,7 +161,7 @@ export function MobileSearch({
                      {searchResults.sales?.length > 0 && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-4 py-2.5 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-purple-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-widest flex items-center gap-1.5">
                                  <ShoppingCart size={12} /> Sales History ({searchResults.sales.length})
                               </p>
                            </div>
@@ -171,7 +171,7 @@ export function MobileSearch({
                                  onClick={() => { handleResultClick('sale', s.id); setIsMobileSearchVisible(false); }}
                                  className="w-full px-4 py-3.5 hover:bg-[var(--theme-bg-subtle)] active:bg-[var(--theme-bg-card-hover)] flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 transition-colors"
                               >
-                                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                                 <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                     <ShoppingCart size={18} />
                                  </div>
                                  <div className="flex-1 min-w-0">
@@ -187,7 +187,7 @@ export function MobileSearch({
                      {searchResults.customers?.length > 0 && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-4 py-2.5 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-status-info-text)] uppercase tracking-widest flex items-center gap-1.5">
                                  <Users size={12} /> Customers ({searchResults.customers.length})
                               </p>
                            </div>
@@ -197,7 +197,7 @@ export function MobileSearch({
                                  onClick={() => { handleResultClick('customer', c.id); setIsMobileSearchVisible(false); }}
                                  className="w-full px-4 py-3.5 hover:bg-[var(--theme-bg-subtle)] active:bg-[var(--theme-bg-card-hover)] flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 transition-colors"
                               >
-                                 <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0">
+                                 <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                                     <Users size={18} />
                                  </div>
                                  <div className="flex-1 min-w-0">

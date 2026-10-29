@@ -54,7 +54,7 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
                         onClick={() => setMediaSize(size)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                            mediaSize === size
-                              ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                              ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                               : 'bg-[var(--theme-bg-panel)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                         }`}
                      >
@@ -65,7 +65,7 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
             </div>
 
             {/* Visual Tag Mockup */}
-            <div className="flex flex-col items-center justify-center p-6 bg-stone-100 dark:bg-stone-900 rounded-2xl border border-[var(--theme-border)]">
+            <div className="flex flex-col items-center justify-center p-6 bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)]">
                <div className="flex items-center justify-between w-full max-w-xs mb-2">
                   <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                      Sample Tag Preview ({activeIdx + 1} of {items.length})
@@ -94,38 +94,38 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
                   )}
                </div>
 
-               <div className={`bg-white text-black border-2 border-black rounded-md p-3.5 shadow-md flex flex-col justify-between transition-all ${
+               <div className={`bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border-2 border-[var(--theme-border)] rounded-md p-3.5 shadow-md flex flex-col justify-between transition-all ${
                   mediaSize === 'compact-30x20' ? 'w-64 min-h-[120px]' : mediaSize === 'large-70x40' ? 'w-84 min-h-[170px]' : 'w-72 min-h-[140px]'
                }`}>
-                  <div className="flex items-center justify-between border-b border-black pb-1">
-                     <span className="text-[9px] font-black uppercase tracking-wider text-stone-600 truncate max-w-[140px]">
+                  <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-1">
+                     <span className="text-[9px] font-black uppercase tracking-wider text-[var(--theme-text-secondary)] truncate max-w-[140px]">
                         {previewItem.category || 'SIIFMART RETAIL'}
                      </span>
                      {isHalal ? (
-                        <span className="text-[8px] font-black px-1.5 py-0.5 bg-black text-white rounded">
+                        <span className="text-[8px] font-black px-1.5 py-0.5 bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] rounded">
                            HALAL CERTIFIED
                         </span>
                      ) : (
-                        <span className="text-[8px] font-semibold text-stone-400 uppercase">
+                        <span className="text-[8px] font-semibold text-[var(--theme-text-muted)] uppercase">
                            SHELF TIER
                         </span>
                      )}
                   </div>
 
                   <div className="my-1.5">
-                     <h5 className="font-bold text-xs uppercase leading-snug line-clamp-2 text-black">
+                     <h5 className="font-bold text-xs uppercase leading-snug line-clamp-2 text-[var(--theme-text-primary)]">
                         {previewItem.name}
                      </h5>
                   </div>
 
-                  <div className="flex items-end justify-between border-t border-b border-dashed border-black py-1.5 my-1">
+                  <div className="flex items-end justify-between border-t border-b border-dashed border-[var(--theme-border)] py-1.5 my-1">
                      <div className="text-left">
-                        <span className="text-[7.5px] font-bold text-stone-500 uppercase block">LOC</span>
+                        <span className="text-[7.5px] font-bold text-[var(--theme-text-secondary)] uppercase block">LOC</span>
                         <span className="font-mono text-xs font-black">{previewItem.shelfPosition || 'STD'}</span>
                      </div>
                      <div className="text-right">
                         {hasDiscount && (
-                           <span className="text-[9px] line-through text-stone-500 font-mono block">
+                           <span className="text-[9px] line-through text-[var(--theme-text-secondary)] font-mono block">
                               {currencySymbol} {regularWhole}
                            </span>
                         )}
@@ -137,10 +137,10 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between pt-1">
-                     <div className="h-4 bg-stone-200 border border-stone-300 rounded px-2 flex items-center">
-                        <span className="text-[8px] font-mono tracking-widest text-stone-600">||| |||| || |||</span>
+                     <div className="h-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded px-2 flex items-center">
+                        <span className="text-[8px] font-mono tracking-widest text-[var(--theme-text-secondary)]">||| |||| || |||</span>
                      </div>
-                     <span className="text-[8px] font-mono font-bold text-stone-800">
+                     <span className="text-[8px] font-mono font-bold text-[var(--theme-text-primary)]">
                         SKU: {previewItem.sku}
                      </span>
                   </div>
@@ -164,7 +164,7 @@ export const ShelfTagPreviewModal: React.FC<ShelfTagPreviewModalProps> = ({
                      type="button"
                      onClick={onConfirmPrint}
                      disabled={isPrinting}
-                     className="px-5 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-2 shadow-sm disabled:opacity-50"
+                     className="px-5 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-2 shadow-sm disabled:opacity-50"
                   >
                      <Printer size={15} />
                      <span>Print {items.length} Tags</span>

@@ -172,15 +172,15 @@ export default function AdjustSalaryModal({
         <Modal isOpen={isOpen} onClose={onClose} title="Compensation Adjustment (Dual-Control)" size="md">
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
                 {/* Employee Header */}
-                <div className="flex items-center justify-between p-3.5 bg-stone-100 dark:bg-black/40 rounded-xl border border-stone-200 dark:border-white/10">
+                <div className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] rounded-xl border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                     <div>
-                        <p className="text-xs text-stone-500 uppercase font-bold tracking-wider">Employee</p>
-                        <p className="text-sm font-bold text-stone-900 dark:text-white">{employee.name}</p>
-                        <p className="text-xs text-stone-500">{getEmployeeJobTitle(employee)} • {employee.department}</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">Employee</p>
+                        <p className="text-sm font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-primary)]">{employee.name}</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)]">{getEmployeeJobTitle(employee)} • {employee.department}</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-xs text-stone-500 uppercase font-bold tracking-wider">Current Base</p>
-                        <p className="text-sm font-mono font-bold text-stone-800 dark:text-stone-200">
+                        <p className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">Current Base</p>
+                        <p className="text-sm font-mono font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">
                             {currency} {currentSalary.toLocaleString()}
                         </p>
                     </div>
@@ -188,7 +188,7 @@ export default function AdjustSalaryModal({
 
                 {/* Forbidden Governance Warning */}
                 {isForbidden && (
-                    <div className="p-3.5 bg-[var(--theme-status-danger-bg)] dark:bg-rose-950/30 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-xl border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] text-xs flex items-start gap-2.5">
+                    <div className="p-3.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-xl border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] text-xs flex items-start gap-2.5">
                         <AlertCircle size={16} className="shrink-0 mt-0.5" />
                         <div>
                             <p className="font-bold">Action Prohibited Under Governance Rules</p>
@@ -199,7 +199,7 @@ export default function AdjustSalaryModal({
 
                 {/* Proposed Salary Input */}
                 <div>
-                    <label className="block text-xs text-stone-500 font-bold uppercase tracking-wider mb-2">
+                    <label className="block text-xs text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider mb-2">
                         Proposed Monthly Salary ({currency}) *
                     </label>
                     <div className="relative">
@@ -210,7 +210,7 @@ export default function AdjustSalaryModal({
                             value={proposedSalaryStr}
                             onChange={(e) => handleInputChange(e.target.value)}
                             disabled={isForbidden}
-                            className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl pl-12 pr-4 py-3 text-stone-900 dark:text-white text-lg font-mono border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] outline-none placeholder:text-stone-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl pl-12 pr-4 py-3 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] text-lg font-mono border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] outline-none placeholder:text-[var(--theme-text-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
                             placeholder="0.00"
                             required
                         />
@@ -221,14 +221,14 @@ export default function AdjustSalaryModal({
                 {isValidAmount && diff !== 0 && (
                     <div className={`p-3 rounded-xl flex items-center justify-between text-xs font-bold border ${
                         diff > 0
-                            ? 'bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]'
-                            : 'bg-[var(--theme-status-warning-bg)] dark:bg-amber-950/20 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)]'
+                            ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]'
+                            : 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)]'
                     }`}>
                         <div className="flex items-center gap-1.5">
                             {diff > 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
                             <span>Adjustment: {diff > 0 ? '+' : ''}{currency} {diff.toLocaleString()} ({diff > 0 ? '+' : ''}{pctChange}%)</span>
                         </div>
-                        <span className="uppercase text-[10px] tracking-wider px-2 py-0.5 rounded bg-black/5 dark:bg-white/10">
+                        <span className="uppercase text-[10px] tracking-wider px-2 py-0.5 rounded bg-[color-mix(in_srgb,var(--theme-overlay)_5%,transparent)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)]">
                             {diff > 0 ? 'Merit Increase' : 'Salary Reduction'}
                         </span>
                     </div>
@@ -236,7 +236,7 @@ export default function AdjustSalaryModal({
 
                 {/* Justification Textarea */}
                 <div>
-                    <label className="block text-xs text-stone-500 font-bold uppercase tracking-wider mb-2">
+                    <label className="block text-xs text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider mb-2">
                         Business Justification / Reason *
                     </label>
                     <textarea
@@ -244,7 +244,7 @@ export default function AdjustSalaryModal({
                         onChange={(e) => { setReason(e.target.value); if (errorMessage) setErrorMessage(''); }}
                         disabled={isForbidden}
                         rows={3}
-                        className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl p-3 text-sm text-stone-900 dark:text-white border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] outline-none resize-none placeholder:text-stone-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl p-3 text-sm text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] outline-none resize-none placeholder:text-[var(--theme-text-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="Provide formal rationale (e.g. annual merit review, promotion to lead, market benchmarking)..."
                         required
                     />
@@ -252,18 +252,18 @@ export default function AdjustSalaryModal({
 
                 {/* Executive Mode Toggle */}
                 {isExecutive && !isForbidden && (
-                    <div className="p-3 bg-stone-100 dark:bg-black/30 rounded-xl border border-stone-200 dark:border-white/10 flex items-center justify-between">
+                    <div className="p-3 bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] rounded-xl border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] flex items-center justify-between">
                         <div>
-                            <p className="text-xs font-bold text-stone-800 dark:text-stone-200">Executive Bypass Mode</p>
-                            <p className="text-[11px] text-stone-500">Apply immediate override or route to approval queue</p>
+                            <p className="text-xs font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">Executive Bypass Mode</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)]">Apply immediate override or route to approval queue</p>
                         </div>
                         <button
                             type="button"
                             onClick={() => setDirectOverride(!directOverride)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                                 directOverride
-                                    ? 'bg-[var(--theme-status-warning-bg)] text-white'
-                                    : 'bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-stone-300'
+                                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]'
+                                    : 'bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]'
                             }`}
                         >
                             {directOverride ? 'Direct Override' : 'Route to Queue'}
@@ -272,7 +272,7 @@ export default function AdjustSalaryModal({
                 )}
 
                 {/* Policy Notice */}
-                <div className="p-3 bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/10 rounded-xl border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] flex items-start gap-2.5 text-[11px] text-stone-600 dark:text-stone-400">
+                <div className="p-3 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] rounded-xl border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] flex items-start gap-2.5 text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">
                     <ShieldAlert size={15} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] shrink-0 mt-0.5" />
                     <span>
                         <strong>SOP-GOV-018 4-Eyes Policy:</strong> Salary adjustments cannot be applied unilaterally by HR. All requests require Country Finance Director or CEO co-signature before payroll sync.
@@ -281,7 +281,7 @@ export default function AdjustSalaryModal({
 
                 {/* Error Banner */}
                 {errorMessage && (
-                    <div className="p-3 bg-[var(--theme-status-danger-bg)] dark:bg-rose-950/30 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-xl border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] text-xs flex items-center gap-2">
+                    <div className="p-3 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-xl border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] text-xs flex items-center gap-2">
                         <AlertCircle size={15} />
                         <span>{errorMessage}</span>
                     </div>
@@ -293,14 +293,14 @@ export default function AdjustSalaryModal({
                         type="button"
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="px-4 py-2.5 text-stone-500 dark:text-stone-400 font-bold text-xs uppercase cursor-pointer hover:text-stone-800 dark:hover:text-white transition-colors"
+                        className="px-4 py-2.5 text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] font-bold text-xs uppercase cursor-pointer hover:text-[var(--theme-text-primary)] hover:text-[var(--theme-text-primary)] transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting || isForbidden || !isValidAmount || diff === 0 || reason.trim().length < 5}
-                        className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer flex items-center gap-2 transition-all shadow-sm"
+                        className="px-6 py-2.5 bg-gradient-to-r from-[var(--theme-status-success)] to-[var(--theme-status-success)] hover:from-[var(--theme-status-success)] hover:to-[var(--theme-status-success)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--theme-text-primary)] font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer flex items-center gap-2 transition-all shadow-sm"
                     >
                         {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                         <span>{isExecutive && directOverride ? 'Apply Override' : 'Submit for Approval'}</span>

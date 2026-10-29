@@ -230,7 +230,7 @@ export const InventoryZones: React.FC = () => {
                             type="button"
                             onClick={handleInitializeDefaults}
                             disabled={isLoading}
-                            className="h-9 px-4 rounded-xl text-[13px] font-semibold flex items-center gap-2 cursor-pointer shadow-xs disabled:opacity-50 bg-[var(--theme-accent)] text-white hover:opacity-95 active:scale-[0.98] transition-all"
+                            className="h-9 px-4 rounded-xl text-[13px] font-semibold flex items-center gap-2 cursor-pointer shadow-xs disabled:opacity-50 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-95 active:scale-[0.98] transition-all"
                         >
                             <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
                             <span>Initialize Default Zones</span>

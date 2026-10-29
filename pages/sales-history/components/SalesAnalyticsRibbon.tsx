@@ -45,7 +45,7 @@ export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metr
          {/* Page Transactions Card */}
          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 sm:p-5 rounded-2xl shadow-[var(--shadow-sm)] transition-all flex flex-col justify-between">
             <div className="flex items-center gap-2.5 mb-3">
-               <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center shrink-0">
+               <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                   <Receipt size={16} />
                </div>
                <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
@@ -82,7 +82,7 @@ export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metr
          {/* Total History Size Card */}
          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 sm:p-5 rounded-2xl shadow-[var(--shadow-sm)] transition-all flex flex-col justify-between">
             <div className="flex items-center gap-2.5 mb-3">
-               <div className="w-8 h-8 rounded-xl bg-neutral-500/10 text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0">
+               <div className="w-8 h-8 rounded-xl bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0">
                   <Layers size={16} />
                </div>
                <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">

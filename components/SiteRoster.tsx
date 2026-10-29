@@ -117,7 +117,7 @@ export default function SiteRoster({
                                                     <User size={20} className="text-[var(--theme-text-secondary)]" />
                                                 )}
                                             </div>
-                                            <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded-full bg-[var(--theme-accent)] text-white text-[9px] font-semibold">
+                                            <div className="absolute -bottom-1 -right-1 px-1.5 py-0.2 rounded-full bg-[var(--theme-accent)] text-[var(--theme-text-primary)] text-[9px] font-semibold">
                                                 L{emp.level}
                                             </div>
                                         </div>

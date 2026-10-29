@@ -138,7 +138,7 @@ export const PlanogramListView: React.FC<PlanogramListViewProps> = ({
                           aria-pressed={isSelected}
                           className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer border ${
                             isSelected
-                              ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)]'
+                              ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] border-[var(--theme-accent)]'
                               : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)]/50 text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                           }`}
                         >

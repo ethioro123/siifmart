@@ -137,8 +137,8 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     }, []);
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col sm:items-center sm:justify-center bg-black sm:bg-black/90 sm:backdrop-blur-sm">
-            <div className="relative w-full h-full sm:h-auto sm:max-w-lg flex flex-col sm:block bg-black sm:bg-transparent">
+        <div className="fixed inset-0 z-50 flex flex-col sm:items-center sm:justify-center bg-[var(--theme-bg-app)] sm:bg-[color-mix(in_srgb,var(--theme-overlay)_90%,transparent)] sm:backdrop-blur-sm">
+            <div className="relative w-full h-full sm:h-auto sm:max-w-lg flex flex-col sm:block bg-[var(--theme-bg-app)] sm:bg-transparent">
                 {/* Header */}
                 <div className="bg-[var(--theme-bg-panel)] border-b sm:border border-[var(--theme-border)] sm:rounded-t-2xl p-4 flex items-center justify-between shrink-0 z-10">
                     <div className="flex items-center gap-3">
@@ -161,7 +161,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                 </div>
 
                 {/* Camera View */}
-                <div className="bg-black border-x border-[var(--theme-border)] relative flex-1 sm:flex-none sm:aspect-video overflow-hidden">
+                <div className="bg-[var(--theme-bg-app)] border-x border-[var(--theme-border)] relative flex-1 sm:flex-none sm:aspect-video overflow-hidden">
                     {error ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                             <AlertCircle className="text-[var(--theme-status-danger-text)] mb-4" size={48} />
@@ -183,7 +183,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
 
                             {/* Scanning Frame Overlay */}
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="relative w-64 h-64 sm:w-64 sm:h-64 border border-[var(--theme-border)] rounded-xl bg-black/10 backdrop-blur-[2px]">
+                                <div className="relative w-64 h-64 sm:w-64 sm:h-64 border border-[var(--theme-border)] rounded-xl bg-[color-mix(in_srgb,var(--theme-overlay)_10%,transparent)] backdrop-blur-[2px]">
                                     {/* Corner brackets */}
                                     <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-cyber-primary rounded-tl-xl shadow-[0_0_15px_rgba(0,255,157,0.5)]"></div>
                                     <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-cyber-primary rounded-tr-xl shadow-[0_0_15px_rgba(0,255,157,0.5)]"></div>
@@ -196,16 +196,16 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                                     </div>
 
                                     {/* Crosshair guides */}
-                                    <div className="absolute top-1/2 left-0 w-4 h-[1px] bg-white/30"></div>
-                                    <div className="absolute top-1/2 right-0 w-4 h-[1px] bg-white/30"></div>
-                                    <div className="absolute top-0 left-1/2 w-[1px] h-4 bg-white/30"></div>
-                                    <div className="absolute bottom-0 left-1/2 w-[1px] h-4 bg-white/30"></div>
+                                    <div className="absolute top-1/2 left-0 w-4 h-[1px] bg-[color-mix(in_srgb,var(--theme-bg-card)_30%,transparent)]"></div>
+                                    <div className="absolute top-1/2 right-0 w-4 h-[1px] bg-[color-mix(in_srgb,var(--theme-bg-card)_30%,transparent)]"></div>
+                                    <div className="absolute top-0 left-1/2 w-[1px] h-4 bg-[color-mix(in_srgb,var(--theme-bg-card)_30%,transparent)]"></div>
+                                    <div className="absolute bottom-0 left-1/2 w-[1px] h-4 bg-[color-mix(in_srgb,var(--theme-bg-card)_30%,transparent)]"></div>
                                 </div>
                             </div>
 
                             {/* Status indicator */}
                             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-full px-6 flex justify-center">
-                                <div className="bg-black/70 backdrop-blur-md border border-cyber-primary/30 rounded-full px-6 py-3 flex items-center gap-3 shadow-lg">
+                                <div className="bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] backdrop-blur-md border border-cyber-primary/30 rounded-full px-6 py-3 flex items-center gap-3 shadow-lg">
                                     <div className="w-2.5 h-2.5 rounded-full bg-cyber-primary animate-pulse shadow-[0_0_10px_rgba(0,255,157,0.8)]"></div>
                                     <span className="text-cyber-primary text-sm font-bold tracking-wide uppercase">Searching for code...</span>
                                 </div>

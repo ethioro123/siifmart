@@ -105,13 +105,13 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
 
     if (mappableSites.length === 0) {
         return (
-            <div className="bg-cyber-gray border border-white/5 rounded-2xl p-12 text-center">
-                <MapPin className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">No Location Data</h3>
-                <p className="text-gray-400">
+            <div className="bg-cyber-gray border border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] rounded-2xl p-12 text-center">
+                <MapPin className="w-16 h-16 text-[var(--theme-text-secondary)] mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-[var(--theme-text-primary)] mb-2">No Location Data</h3>
+                <p className="text-[var(--theme-text-muted)]">
                     Sites need latitude and longitude coordinates to be displayed on the map.
                 </p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-[var(--theme-text-secondary)] mt-2">
                     Add coordinates in Settings → Sites to enable map view.
                 </p>
             </div>
@@ -119,7 +119,7 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
     }
 
     return (
-        <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-hidden h-[600px]">
+        <div className="bg-cyber-gray border border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] rounded-2xl overflow-hidden h-[600px]">
             <MapContainer
                 center={center}
                 zoom={6}
@@ -144,7 +144,7 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
                         <Popup className="custom-popup">
                             <div className="p-2 min-w-[250px]">
                                 {/* Header */}
-                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
+                                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[var(--theme-border-subtle)]">
                                     {site.type === 'Warehouse' ? (
                                         <Building className="text-[var(--theme-status-info-text)]" size={20} />
                                     ) : (

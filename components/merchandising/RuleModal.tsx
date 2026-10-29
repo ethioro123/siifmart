@@ -170,7 +170,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleCreateRule}
-                  className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold cursor-pointer shadow-sm transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-text-primary)] text-xs font-semibold cursor-pointer shadow-sm transition-colors flex items-center justify-center gap-2"
                >
                   {isSubmitting && <Loader2 size={15} className="animate-spin" />}
                   <span>{isSubmitting ? 'Saving Rule...' : 'Save & Enable Pricing Rule'}</span>

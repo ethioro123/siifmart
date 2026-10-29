@@ -194,7 +194,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-1 sm:p-2 md:p-4 bg-black/80 overflow-x-hidden">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-1 sm:p-2 md:p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] overflow-x-hidden">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-5xl h-[95dvh] sm:h-[92dvh] md:h-[88vh] rounded-2xl sm:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
                 {/* Header */}
                 <PackJobHeader

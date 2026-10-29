@@ -46,109 +46,109 @@ export default function StepReview({
                     </div>
                 </div>
             ) : null}
-            <p className="text-xs text-stone-500 dark:text-stone-400">
+            <p className="text-xs text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">
                 Please verify all onboarding details, facility assignment, and verification documents before confirming hire.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Personal Information */}
-                <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[var(--theme-border)] dark:border-white/10">
+                <div className="bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_2%,transparent)] rounded-2xl p-4 border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                     <h4 className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] uppercase font-bold mb-3 flex items-center gap-2">
                         <User size={14} /> Personal Information
                     </h4>
                     <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
-                            <span className="text-stone-500">Full Name:</span>
-                            <span className="text-stone-900 dark:text-white font-bold">{newEmpData.firstName} {newEmpData.lastName}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Full Name:</span>
+                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-bold">{newEmpData.firstName} {newEmpData.lastName}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-stone-500">Phone:</span>
-                            <span className="text-stone-900 dark:text-white font-medium">{newEmpData.phone || 'N/A'}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Phone:</span>
+                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-medium">{newEmpData.phone || 'N/A'}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-stone-500">Join Date:</span>
-                            <span className="text-stone-900 dark:text-white font-medium">{newEmpData.joinDate}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Join Date:</span>
+                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-medium">{newEmpData.joinDate}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-stone-500">Address:</span>
-                            <span className="text-stone-900 dark:text-white font-medium truncate max-w-[140px]">{newEmpData.address || 'N/A'}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Address:</span>
+                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-medium truncate max-w-[140px]">{newEmpData.address || 'N/A'}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Role & Location */}
-                <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[var(--theme-border)] dark:border-white/10">
+                <div className="bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_2%,transparent)] rounded-2xl p-4 border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                     <h4 className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] uppercase font-bold mb-3 flex items-center gap-2">
                         <Briefcase size={14} /> Role & Operating Facility
                     </h4>
                     <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
-                            <span className="text-stone-500">Job Title:</span>
+                            <span className="text-[var(--theme-text-secondary)]">Job Title:</span>
                             <span className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-bold">{newEmpData.jobTitle || getJobTitleForRole(newEmpData.role)}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-stone-500">App Access:</span>
-                            <span className="text-stone-900 dark:text-white font-medium">{newEmpData.createAppAccount === false ? 'No login' : 'Login enabled'} · {SYSTEM_ROLES.find(role => role.id === newEmpData.role)?.label || newEmpData.role}</span>
+                            <span className="text-[var(--theme-text-secondary)]">App Access:</span>
+                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-medium">{newEmpData.createAppAccount === false ? 'No login' : 'Login enabled'} · {SYSTEM_ROLES.find(role => role.id === newEmpData.role)?.label || newEmpData.role}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-stone-500">Department:</span>
-                            <span className="text-stone-900 dark:text-white font-medium">{newEmpData.department}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Department:</span>
+                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-medium">{newEmpData.department}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-stone-500">Workplace:</span>
-                            <span className="text-stone-900 dark:text-white font-bold truncate max-w-[140px]">{assignedSite?.name || 'Unassigned'}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Workplace:</span>
+                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-bold truncate max-w-[140px]">{assignedSite?.name || 'Unassigned'}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-stone-500">Site Type:</span>
-                            <span className="text-stone-900 dark:text-white font-medium">{assignedSite?.type || 'Standard'}</span>
+                            <span className="text-[var(--theme-text-secondary)]">Site Type:</span>
+                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-medium">{assignedSite?.type || 'Standard'}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Attached Documents Review */}
-                <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[var(--theme-border)] dark:border-white/10 sm:col-span-2">
+                <div className="bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_2%,transparent)] rounded-2xl p-4 border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] sm:col-span-2">
                     <h4 className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] uppercase font-bold mb-3 flex items-center gap-2">
                         <IdCard size={14} /> Attached Personnel Documents
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {/* National ID */}
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)]/60 border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] flex items-center gap-3">
                             {newEmpData.nationalIdPhoto ? (
-                                <img src={newEmpData.nationalIdPhoto} alt="ID" className="w-10 h-10 rounded-lg object-cover border border-[var(--theme-border)] dark:border-white/10 shrink-0" />
+                                <img src={newEmpData.nationalIdPhoto} alt="ID" className="w-10 h-10 rounded-lg object-cover border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shrink-0" />
                             ) : (
-                                <div className="w-10 h-10 rounded-lg bg-stone-100 dark:bg-white/5 flex items-center justify-center text-stone-400 shrink-0">
+                                <div className="w-10 h-10 rounded-lg bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] flex items-center justify-center text-[var(--theme-text-muted)] shrink-0">
                                     <IdCard size={18} />
                                 </div>
                             )}
                             <div className="min-w-0">
-                                <p className="text-[11px] font-bold text-stone-800 dark:text-stone-200">National ID Photo</p>
-                                <p className="text-[10px] text-stone-400 font-mono">
+                                <p className="text-[11px] font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">National ID Photo</p>
+                                <p className="text-[10px] text-[var(--theme-text-muted)] font-mono">
                                     {newEmpData.nationalIdInfo ? `Compressed: ${newEmpData.nationalIdInfo.compressedSize}` : 'Not uploaded'}
                                 </p>
                             </div>
                         </div>
 
                         {/* Resume */}
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)]/60 border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                                 <FileText size={18} />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-[11px] font-bold text-stone-800 dark:text-stone-200">Resume / CV</p>
-                                <p className="text-[10px] text-stone-400 font-mono truncate">
+                                <p className="text-[11px] font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">Resume / CV</p>
+                                <p className="text-[10px] text-[var(--theme-text-muted)] font-mono truncate">
                                     {newEmpData.resume ? `${newEmpData.resume.name} (${newEmpData.resume.size})` : 'Not attached'}
                                 </p>
                             </div>
                         </div>
 
                         {/* Certificates */}
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)]/60 border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                                 <Award size={18} />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-[11px] font-bold text-stone-800 dark:text-stone-200">Certificates</p>
-                                <p className="text-[10px] text-stone-400 font-mono">
+                                <p className="text-[11px] font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">Certificates</p>
+                                <p className="text-[10px] text-[var(--theme-text-muted)] font-mono">
                                     {(newEmpData.certificates || []).length} Document(s) attached
                                 </p>
                             </div>
@@ -157,8 +157,8 @@ export default function StepReview({
 
                     {/* Itemized Certificates with Category for Approver Sign-off */}
                     {(newEmpData.certificates || []).length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-[var(--theme-border)]/60 dark:border-white/10 space-y-2">
-                            <p className="text-[11px] font-bold text-stone-600 dark:text-stone-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <div className="mt-3 pt-3 border-t border-[var(--theme-border)]/60 border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] space-y-2">
+                            <p className="text-[11px] font-bold text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] uppercase tracking-wider flex items-center gap-1.5">
                                 <Award size={13} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                                 <span>Verified Credentials for Sign-off ({(newEmpData.certificates || []).length})</span>
                             </p>
@@ -166,18 +166,18 @@ export default function StepReview({
                                 {(newEmpData.certificates || []).map((cert: any) => (
                                     <div
                                         key={cert.id}
-                                        className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center justify-between gap-2"
+                                        className="p-2.5 rounded-xl bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)]/60 border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] flex items-center justify-between gap-2"
                                     >
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-1.5 flex-wrap">
                                                 <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary-muted)]/10 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-border)]/20 shrink-0">
                                                     {cert.category || 'Professional Certificate'}
                                                 </span>
-                                                <span className="text-[10px] text-stone-400 font-mono">
+                                                <span className="text-[10px] text-[var(--theme-text-muted)] font-mono">
                                                     {cert.size}
                                                 </span>
                                             </div>
-                                            <p className="text-xs font-semibold text-stone-800 dark:text-stone-200 truncate mt-1">
+                                            <p className="text-xs font-semibold text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] truncate mt-1">
                                                 {cert.name}
                                             </p>
                                         </div>
@@ -190,9 +190,9 @@ export default function StepReview({
 
                 {/* Compensation if provided */}
                 {newEmpData.salary && (
-                    <div className="bg-stone-50 dark:bg-white/[0.02] rounded-2xl p-4 border border-[var(--theme-border)] dark:border-white/10 sm:col-span-2">
+                    <div className="bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_2%,transparent)] rounded-2xl p-4 border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] sm:col-span-2">
                         <div className="flex justify-between items-center text-xs">
-                            <span className="text-stone-500 font-semibold flex items-center gap-1.5">
+                            <span className="text-[var(--theme-text-secondary)] font-semibold flex items-center gap-1.5">
                                 <DollarSign size={14} className="text-[var(--theme-primary)]" />
                                 Base Monthly Compensation:
                             </span>
@@ -205,24 +205,24 @@ export default function StepReview({
             </div>
 
             {/* Profile Ribbon Summary */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-[#2C5E3B]/5 to-transparent border border-[var(--theme-status-success-border)] flex items-center justify-between gap-4">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-[var(--theme-status-success)] via-[#2C5E3B]/5 to-transparent border border-[var(--theme-status-success-border)] flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5 min-w-0">
                     <img
                         src={newEmpData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(newEmpData.firstName + ' ' + newEmpData.lastName)}&background=2C5E3B&color=ffffff`}
                         alt=""
-                        className="w-12 h-12 rounded-xl object-cover border border-[var(--theme-border)] dark:border-white/10 shrink-0"
+                        className="w-12 h-12 rounded-xl object-cover border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shrink-0"
                     />
                     <div className="min-w-0">
                         <h4 className="text-sm font-extrabold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] truncate">
                             {newEmpData.firstName} {newEmpData.lastName}
                         </h4>
-                        <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">
+                        <p className="text-xs text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] font-medium">
                             {newEmpData.jobTitle || getJobTitleForRole(newEmpData.role)} • {assignedSite?.name || 'HQ'}
                         </p>
                     </div>
                 </div>
                 <div className="text-right shrink-0">
-                    <span className="text-[10px] text-stone-400 uppercase font-bold block">ID Number</span>
+                    <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold block">ID Number</span>
                     <span className="text-xs font-mono font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]">Auto-Generated</span>
                 </div>
             </div>

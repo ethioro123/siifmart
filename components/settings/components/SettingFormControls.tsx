@@ -149,7 +149,7 @@ export const ToggleRow: React.FC<ToggleRowProps> = ({
                 className={`w-11 h-6 rounded-full p-0.5 transition-colors relative shrink-0 ${checked ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                     }`}
             >
-                <div className={`w-5 h-5 bg-white rounded-full shadow-xs transition-transform transform ${checked ? 'translate-x-5' : 'translate-x-0'
+                <div className={`w-5 h-5 bg-[var(--theme-bg-card)] rounded-full shadow-xs transition-transform transform ${checked ? 'translate-x-5' : 'translate-x-0'
                     }`} />
             </div>
         </button>

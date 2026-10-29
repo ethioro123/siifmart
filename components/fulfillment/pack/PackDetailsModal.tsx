@@ -111,7 +111,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-0 md:p-4 overflow-x-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] flex items-center justify-center z-[200] p-0 md:p-4 overflow-x-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border-0 md:border border-[var(--theme-border)] w-full max-w-4xl h-[100dvh] md:h-auto md:max-h-[90vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
 
                 {/* Header */}

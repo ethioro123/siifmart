@@ -19,13 +19,13 @@ export const calculateBonus = (
 // Get bonus tier color classes
 export const getBonusTierColor = (tierColor: string) => {
     const colors: Record<string, string> = {
-        gray: 'from-gray-400 to-gray-500',
-        amber: 'from-amber-500 to-amber-600',
-        yellow: 'from-yellow-400 to-yellow-500',
-        cyan: 'from-cyan-400 to-cyan-500',
-        purple: 'from-purple-400 to-purple-600',
+        gray: 'from-[var(--theme-accent)] to-[var(--theme-accent)]',
+        amber: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]',
+        yellow: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]',
+        cyan: 'from-[var(--theme-status-info)] to-[var(--theme-status-info)]',
+        purple: 'from-[var(--theme-accent)] to-[var(--theme-accent)]',
     };
-    return colors[tierColor] || 'from-gray-400 to-gray-500';
+    return colors[tierColor] || 'from-[var(--theme-accent)] to-[var(--theme-accent)]';
 };
 
 // Get level info from points
@@ -52,25 +52,25 @@ export const getLevelInfo = (totalPoints: number) => {
 
 // Get rank medal color
 export const getRankStyle = (rank: number) => {
-    if (rank === 1) return { bg: 'from-yellow-400 to-amber-500', text: 'text-[var(--theme-status-warning-text)]', icon: '🥇' };
-    if (rank === 2) return { bg: 'from-gray-300 to-gray-400', text: 'text-gray-800', icon: '🥈' };
-    if (rank === 3) return { bg: 'from-amber-600 to-amber-700', text: 'text-[var(--theme-status-warning-text)]', icon: '🥉' };
-    return { bg: 'from-white/10 to-white/5', text: 'text-white', icon: `#${rank}` };
+    if (rank === 1) return { bg: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]', text: 'text-[var(--theme-status-warning-text)]', icon: '🥇' };
+    if (rank === 2) return { bg: 'from-[var(--theme-accent)] to-[var(--theme-accent)]', text: 'text-[var(--theme-text-primary)]', icon: '🥈' };
+    if (rank === 3) return { bg: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]', text: 'text-[var(--theme-status-warning-text)]', icon: '🥉' };
+    return { bg: 'from-[var(--theme-accent)] to-[var(--theme-accent)]', text: 'text-[var(--theme-text-primary)]', icon: `#${rank}` };
 };
 
 // Level badge colors
 export const getLevelColor = (level: number) => {
     const colors = [
-        'from-gray-500 to-gray-600', // 1 - Rookie
-        'from-green-500 to-green-600', // 2 - Apprentice
-        'from-blue-500 to-blue-600', // 3 - Worker
-        'from-purple-500 to-purple-600', // 4 - Skilled
-        'from-pink-500 to-pink-600', // 5 - Expert
-        'from-orange-500 to-orange-600', // 6 - Pro
-        'from-red-500 to-red-600', // 7 - Master
-        'from-cyan-400 to-cyan-500', // 8 - Elite
-        'from-amber-400 to-amber-500', // 9 - Champion
-        'from-yellow-300 via-yellow-400 to-amber-500', // 10 - Legend
+        'from-[var(--theme-accent)] to-[var(--theme-accent)]', // 1 - Rookie
+        'from-[var(--theme-status-success)] to-[var(--theme-status-success)]', // 2 - Apprentice
+        'from-[var(--theme-status-info)] to-[var(--theme-status-info)]', // 3 - Worker
+        'from-[var(--theme-accent)] to-[var(--theme-accent)]', // 4 - Skilled
+        'from-[var(--theme-accent)] to-[var(--theme-accent)]', // 5 - Expert
+        'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]', // 6 - Pro
+        'from-[var(--theme-status-danger)] to-[var(--theme-status-danger)]', // 7 - Master
+        'from-[var(--theme-status-info)] to-[var(--theme-status-info)]', // 8 - Elite
+        'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]', // 9 - Champion
+        'from-[var(--theme-status-warning)] via-[var(--theme-status-warning)] to-[var(--theme-status-warning)]', // 10 - Legend
     ];
     return colors[Math.min(level - 1, colors.length - 1)];
 };

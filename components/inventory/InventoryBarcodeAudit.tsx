@@ -301,7 +301,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                     {approval.image_url ? (
                                                         <>
                                                             <img src={approval.image_url} alt="Evidence" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                                            <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-[var(--theme-text-primary)]">
                                                                 <ZoomIn size={14} />
                                                             </div>
                                                         </>
@@ -419,7 +419,7 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
                                                         onClick={() => setCurrentBarcodePage(p)}
                                                         className={`w-7 h-7 rounded-lg text-[12px] font-semibold font-mono tabular-nums transition-all cursor-pointer active:scale-[0.98] ${
                                                             currentBarcodePage === p
-                                                                ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                                                ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                                                 : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] hover:text-[var(--theme-text-primary)]'
                                                         }`}
                                                     >

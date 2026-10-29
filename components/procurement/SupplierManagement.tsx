@@ -217,7 +217,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                     <td className="py-4 px-4">
                                         <div className="flex flex-col gap-1.5">
                                             <div className="flex items-center gap-1.5">
-                                                <Star size={12} className="text-[var(--theme-status-warning-text)] fill-amber-500" />
+                                                <Star size={12} className="text-[var(--theme-status-warning-text)] fill-[var(--theme-status-warning-text)]" />
                                                 <span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{sup.rating ?? 'Unrated'}</span>
                                                 {sup.rating != null && <span className="text-[11px] text-[var(--theme-text-secondary)]">/ 5.0</span>}
                                             </div>
@@ -302,7 +302,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                     <div>
                                         <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Rating</span>
                                         <div className="flex items-center gap-1 mt-0.5">
-                                            <Star size={11} className="text-[var(--theme-status-warning-text)] fill-amber-500" />
+                                            <Star size={11} className="text-[var(--theme-status-warning-text)] fill-[var(--theme-status-warning-text)]" />
                                             <span className="text-xs text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{sup.rating ?? 'Unrated'}</span>
                                             {sup.rating != null && <span className="text-[10px] text-[var(--theme-text-secondary)]">/ 5.0</span>}
                                         </div>

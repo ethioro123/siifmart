@@ -10,7 +10,7 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
   const topbarPath = path.join(rootDir, 'components', 'TopBar.tsx');
   const agentsRulePath = path.join(rootDir, '.agents', 'AGENTS.md');
   const rulesPath = path.join(rootDir, '.agent', 'RULES.md');
-  const designGuidePath = path.join(rootDir, 'docs', 'APPLE_DESIGN_GUIDE.md');
+  const designGuidePath = path.join(rootDir, 'docs', 'SIIFMART_DESIGN_STANDARD.md');
   const engineeringRulesPath = path.join(rootDir, '.agent', 'rules', '04-engineering-and-performance.md');
 
   it('verifies all theme stylesheets and rule docs exist', () => {
@@ -45,8 +45,8 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     const allRulesContent = [agentsContent, rulesContent, designGuideContent, engineeringRulesContent].join('\n');
 
     // UI standards and Apple design guide alignment
-    expect(allRulesContent).toContain('APPLE_DESIGN_GUIDE.md');
-    expect(allRulesContent).toContain('docs/APPLE_DESIGN_GUIDE.md');
+    expect(allRulesContent).toContain('SIIFMART_DESIGN_STANDARD.md');
+    expect(allRulesContent).toContain('docs/SIIFMART_DESIGN_STANDARD.md');
     expect(agentsContent).toContain('Use semantic theme tokens');
     expect(designGuideContent).toMatch(/semantic/i);
 
@@ -343,7 +343,7 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     const allRulesContent = [agentsContent, rulesContent, designGuideContent, engineeringRulesContent].join('\n');
 
     // Design System rules & architecture
-    expect(allRulesContent).toContain('APPLE_DESIGN_GUIDE.md');
+    expect(allRulesContent).toContain('SIIFMART_DESIGN_STANDARD.md');
     expect(engineeringRulesContent).toMatch(/Design standard|Design Tokens/i);
 
     // 3 Liquid Glass Tiers

@@ -58,7 +58,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
     const isFullyReceived = stats.totalReceivedSellable >= stats.totalExpectedSellable;
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-2 sm:p-4 z-[150] overflow-x-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] flex items-center justify-center p-2 sm:p-4 z-[150] overflow-x-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] relative shadow-2xl">
                 {/* Header */}
                 <div className="p-4 md:p-6 border-b border-[var(--theme-border)] flex justify-between items-start bg-[var(--theme-bg-subtle)]">
@@ -105,13 +105,13 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     </div>
 
                     {!isFullyReceived && (
-                        <div className="p-4 md:p-5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex gap-3 shadow-sm border-l-4 border-l-amber-500">
+                        <div className="p-4 md:p-5 bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] rounded-2xl flex gap-3 shadow-sm border-l-4 border-l-[var(--theme-status-warning-border)]">
                             <AlertTriangle className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] shrink-0" size={20} />
                             <div>
                                 <h4 className="text-sm font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] tracking-tight">{t('warehouse.discrepancyDetected')}</h4>
                                 <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 font-medium leading-relaxed">
                                     Finalizing with {stats.totalExpectedSellable - stats.totalReceivedSellable} {t('warehouse.missingItems')}.
-                                    Marked as <span className="font-semibold underline decoration-amber-500/30">{t('warehouse.partialReceipt')}</span>.
+                                    Marked as <span className="font-semibold underline decoration-[color-mix(in_srgb,var(--theme-status-warning-text)_30%,transparent)]">{t('warehouse.partialReceipt')}</span>.
                                 </p>
                             </div>
                         </div>
@@ -185,7 +185,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     <button
                         onClick={onFinalize}
                         disabled={isSubmitting}
-                        className="w-full md:w-auto px-8 py-3 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] active:scale-95 text-white font-semibold text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 transition-all order-1 md:order-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        className="w-full md:w-auto px-8 py-3 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] active:scale-95 text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 transition-all order-1 md:order-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     >
                         {isSubmitting ? (
                             <>

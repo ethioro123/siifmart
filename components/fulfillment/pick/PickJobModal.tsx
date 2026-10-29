@@ -157,7 +157,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 sm:p-4 bg-black/70 overflow-x-hidden">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 sm:p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] overflow-x-hidden">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-4xl h-[92dvh] md:h-[88vh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
                 {/* Header */}
                 <div className="p-3.5 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10 flex justify-between items-start gap-2">
@@ -326,7 +326,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 type="button"
                                 disabled={isSubmitting}
                                 onClick={() => isFullyPicked ? setStep('STAGING') : onStartPick(job)}
-                                className="min-h-[44px] px-4 sm:px-7 rounded-xl font-semibold text-xs md:text-sm flex items-center gap-2 bg-[var(--theme-accent)] text-white disabled:opacity-50"
+                                className="min-h-[44px] px-4 sm:px-7 rounded-xl font-semibold text-xs md:text-sm flex items-center gap-2 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] disabled:opacity-50"
                             >
                                 <span>{isFullyPicked ? (t('warehouse.picking.reviewHandover') || 'Review handover') : (t('warehouse.picking.startScanning') || 'Start scanning')}</span>
                                 <ArrowRight size={16} />
@@ -338,7 +338,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                 type="button"
                                 onClick={() => onCompleteJob(job)}
                                 disabled={isSubmitting}
-                                className="min-h-[44px] px-5 sm:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                                className="min-h-[44px] px-5 sm:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <Loader2 size={16} className="animate-spin" />

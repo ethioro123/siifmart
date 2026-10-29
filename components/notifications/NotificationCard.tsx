@@ -153,7 +153,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
         const nextTarget = event.relatedTarget;
         if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) resume();
       }}
-      className={`pointer-events-auto relative w-full overflow-hidden rounded-2xl border ${theme.border} bg-[var(--theme-bg-card)] shadow-xl shadow-black/20 pl-4 pr-2.5 pt-3.5 pb-4 sm:pl-5 sm:pr-3.5 select-text`}
+      className={`pointer-events-auto relative w-full overflow-hidden rounded-2xl border ${theme.border} bg-[var(--theme-bg-card)] shadow-xl  pl-4 pr-2.5 pt-3.5 pb-4 sm:pl-5 sm:pr-3.5 select-text`}
     >
       {/* Accent rail */}
       <span className={`absolute left-0 top-0 bottom-0 w-1 ${theme.rail}`} aria-hidden="true" />
@@ -184,20 +184,20 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
               <p className={`mb-1 text-[11px] font-bold uppercase tracking-wide ${theme.subtitleColor}`}>
                 {meta.subtitle}
               </p>
-              <p className="text-sm font-medium text-stone-900 dark:text-stone-100 leading-relaxed break-words">
+              <p className="text-sm font-medium text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] leading-relaxed break-words">
                 {item.message}
               </p>
             </div>
           ) : (
-            <p className="mt-1.5 text-sm font-medium text-stone-700 dark:text-stone-200 leading-relaxed break-words">
+            <p className="mt-1.5 text-sm font-medium text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] leading-relaxed break-words">
               {item.message}
             </p>
           )}
 
           {tipText && (
-            <div className="mt-2.5 flex gap-2 rounded-lg bg-stone-100 px-3 py-2 dark:bg-white/5">
-              <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-stone-500 dark:text-stone-400">Next step</span>
-              <p className="text-xs font-medium leading-relaxed text-stone-700 dark:text-stone-300">{tipText}</p>
+            <div className="mt-2.5 flex gap-2 rounded-lg bg-[var(--theme-bg-subtle)] px-3 py-2 bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)]">
+              <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">Next step</span>
+              <p className="text-xs font-medium leading-relaxed text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">{tipText}</p>
             </div>
           )}
 
@@ -207,14 +207,14 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
                 type="button"
                 onClick={() => setDetailsOpen(open => !open)}
                 aria-expanded={detailsOpen}
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-info-border)]"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-xs font-semibold text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-info-border)]"
               >
                 <FileText size={14} aria-hidden="true" />
                 {detailsOpen ? 'Hide technical details' : 'Show technical details'}
                 <ChevronDown size={14} className={`transition-transform ${detailsOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
               </button>
               {detailsOpen && (
-                <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-stone-100 p-2.5 text-xs leading-relaxed text-stone-700 dark:bg-black/30 dark:text-stone-300">
+                <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-[var(--theme-bg-subtle)] p-2.5 text-xs leading-relaxed text-[var(--theme-text-primary)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] text-[var(--theme-text-muted)]">
                   {item.details}
                 </pre>
               )}
@@ -225,7 +225,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
         <button
           type="button"
           onClick={() => dismissRef.current(item.id)}
-          className="-mr-1 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-100 dark:text-stone-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-info-border)]"
+          className="-mr-1 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-info-border)]"
           title="Dismiss notification"
           aria-label="Dismiss notification"
         >
@@ -234,7 +234,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
       </div>
 
       {/* Countdown progress: pauses on hover/focus, resumes where it left off */}
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-stone-200 dark:bg-white/10" aria-hidden="true">
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)]" aria-hidden="true">
         <motion.div
           className={`h-full origin-left will-change-transform ${theme.progress}`}
           initial={{ scaleX: 1 }}

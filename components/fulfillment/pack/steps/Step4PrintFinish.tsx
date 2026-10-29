@@ -131,12 +131,12 @@ export const Step4PrintFinish: React.FC<Step4PrintFinishProps> = ({
                         </span>
                     )}
                     {(hasIcePack || boxSize === 'Thermal Cool Box') && (
-                        <span className="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 text-[11px] font-bold uppercase flex items-center gap-1">
+                        <span className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] text-[11px] font-bold uppercase flex items-center gap-1">
                             <Snowflake size={12} /> {t('warehouse.packing.coldChain') || 'Cold Chain'}
                         </span>
                     )}
                     {packingMaterials.securitySeal && (
-                        <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 text-[11px] font-bold font-mono uppercase flex items-center gap-1">
+                        <span className="px-2.5 py-1 rounded-lg bg-[var(--theme-accent-muted)] border border-[var(--theme-border-accent)] text-[var(--theme-accent)] text-[var(--theme-accent)] text-[11px] font-bold font-mono uppercase flex items-center gap-1">
                             <Lock size={12} /> {t('warehouse.packing.seal') || 'Seal'}: {sealSerialNumber || (t('warehouse.packing.standard') || 'Standard')}
                         </span>
                     )}
@@ -175,7 +175,7 @@ export const Step4PrintFinish: React.FC<Step4PrintFinishProps> = ({
                         <button
                             type="button"
                             onClick={onFlagDiscrepancy}
-                            className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1.5 cursor-pointer touch-manipulation"
+                            className="text-xs font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] hover:underline flex items-center gap-1.5 cursor-pointer touch-manipulation"
                         >
                             <AlertTriangle size={14} />
                             <span>{t('warehouse.packing.flagCountIssue') || 'Flag item discrepancy or damaged cargo'}</span>

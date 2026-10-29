@@ -31,29 +31,29 @@ export interface KnowledgeEntry {
 export const DEPARTMENTS = {
   stores: { label: 'Stores', icon: Store, color: 'bg-[var(--theme-status-success-bg)]', text: 'text-[var(--theme-status-success-text)]', bgLight: 'bg-[var(--theme-status-success-bg)]' },
   warehouses: { label: 'Warehouses', icon: Warehouse, color: 'bg-[var(--theme-status-info-bg)]', text: 'text-[var(--theme-status-info-text)]', bgLight: 'bg-[var(--theme-status-info-bg)]' },
-  admin: { label: 'Administration', icon: Building2, color: 'bg-purple-500', text: 'text-purple-400', bgLight: 'bg-purple-500/20' },
-  pos: { label: 'Point of Sale', icon: ShoppingCart, color: 'bg-orange-500', text: 'text-orange-400', bgLight: 'bg-orange-500/20' },
+  admin: { label: 'Administration', icon: Building2, color: 'bg-[var(--theme-accent-muted)]', text: 'text-[var(--theme-accent)]', bgLight: 'bg-[var(--theme-accent-muted)]' },
+  pos: { label: 'Point of Sale', icon: ShoppingCart, color: 'bg-[var(--theme-status-warning-bg)]', text: 'text-[var(--theme-status-warning-text)]', bgLight: 'bg-[var(--theme-status-warning-bg)]' },
   logistics: { label: 'Logistics', icon: Truck, color: 'bg-[var(--theme-status-danger-bg)]', text: 'text-[var(--theme-status-danger-text)]', bgLight: 'bg-[var(--theme-status-danger-bg)]' },
-  hr: { label: 'Human Resources', icon: Users, color: 'bg-indigo-500', text: 'text-indigo-400', bgLight: 'bg-indigo-500/20' },
+  hr: { label: 'Human Resources', icon: Users, color: 'bg-[var(--theme-accent-muted)]', text: 'text-[var(--theme-accent)]', bgLight: 'bg-[var(--theme-accent-muted)]' },
   finance: { label: 'Finance', icon: BarChart3, color: 'bg-[var(--theme-status-warning-bg)]', text: 'text-[var(--theme-status-warning-text)]', bgLight: 'bg-[var(--theme-status-warning-bg)]' },
-  general: { label: 'General', icon: Lightbulb, color: 'bg-gray-500', text: 'text-gray-400', bgLight: 'bg-gray-500/20' },
-  policy: { label: 'Policy', icon: FileText, color: 'bg-cyan-500', text: 'text-cyan-400', bgLight: 'bg-cyan-500/20' },
-  workflow: { label: 'Workflow', icon: Target, color: 'bg-pink-500', text: 'text-pink-400', bgLight: 'bg-pink-500/20' }
+  general: { label: 'General', icon: Lightbulb, color: 'bg-[var(--theme-bg-card-hover)]', text: 'text-[var(--theme-text-muted)]', bgLight: 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_20%,transparent)]' },
+  policy: { label: 'Policy', icon: FileText, color: 'bg-[var(--theme-status-info-bg)]', text: 'text-[var(--theme-status-info-text)]', bgLight: 'bg-[var(--theme-status-info-bg)]' },
+  workflow: { label: 'Workflow', icon: Target, color: 'bg-[var(--theme-accent-muted)]', text: 'text-[var(--theme-accent)]', bgLight: 'bg-[var(--theme-accent-muted)]' }
 };
 
 export const ENTRY_TYPES = {
   idea: { label: 'Idea', icon: Lightbulb, color: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]' },
-  policy: { label: 'Policy', icon: FileText, color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
-  workflow: { label: 'Workflow', icon: Target, color: 'text-pink-400', bg: 'bg-pink-500/20' },
+  policy: { label: 'Policy', icon: FileText, color: 'text-[var(--theme-status-info-text)]', bg: 'bg-[var(--theme-status-info-bg)]' },
+  workflow: { label: 'Workflow', icon: Target, color: 'text-[var(--theme-accent)]', bg: 'bg-[var(--theme-accent-muted)]' },
   note: { label: 'Note', icon: BookOpen, color: 'text-[var(--theme-status-info-text)]', bg: 'bg-[var(--theme-status-info-bg)]' },
   improvement: { label: 'Improvement', icon: Star, color: 'text-[var(--theme-status-success-text)]', bg: 'bg-[var(--theme-status-success-bg)]' }
 };
 
 export const STATUSES = {
-  draft: { label: 'Draft', color: 'text-gray-400', bg: 'bg-gray-500/20' },
+  draft: { label: 'Draft', color: 'text-[var(--theme-text-muted)]', bg: 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_20%,transparent)]' },
   active: { label: 'Active', color: 'text-[var(--theme-status-success-text)]', bg: 'bg-[var(--theme-status-success-bg)]' },
-  archived: { label: 'Archived', color: 'text-orange-400', bg: 'bg-orange-500/20' },
-  implemented: { label: 'Implemented', color: 'text-cyan-400', bg: 'bg-cyan-500/20' }
+  archived: { label: 'Archived', color: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]' },
+  implemented: { label: 'Implemented', color: 'text-[var(--theme-status-info-text)]', bg: 'bg-[var(--theme-status-info-bg)]' }
 };
 
 // ============================================================================

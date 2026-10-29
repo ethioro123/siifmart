@@ -134,7 +134,7 @@ export const PayrollHrCard: React.FC<PayrollHrCardProps> = ({
                   type="button"
                   onClick={handleSignHR}
                   disabled={isActionLoading}
-                  className="w-full py-2 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-semibold rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+                  className="w-full py-2 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
                 >
                   {isActionLoading ? <Loader2 size={13} className="animate-spin" /> : <UserCheck size={14} />}
                   Certify Roster as HR

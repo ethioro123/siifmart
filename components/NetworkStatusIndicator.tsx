@@ -12,7 +12,7 @@ export default function NetworkStatusIndicator() {
     if (isOnline && !isServerDown) return null;
 
     return (
-        <div className={`fixed top-0 left-0 right-0 z-[100] ${isServerDown ? 'bg-orange-600' : 'bg-[var(--theme-status-danger-bg)]'} text-white px-4 py-2 text-center text-xs font-bold flex items-center justify-center gap-3 backdrop-blur-md shadow-lg border-b border-white/20 animate-pulse`}>
+        <div className={`fixed top-0 left-0 right-0 z-[100] ${isServerDown ? 'bg-[var(--theme-status-warning-bg)]' : 'bg-[var(--theme-status-danger-bg)]'} text-[var(--theme-text-primary)] px-4 py-2 text-center text-xs font-bold flex items-center justify-center gap-3 backdrop-blur-md shadow-lg border-b border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)] animate-pulse`}>
             {isServerDown ? (
                 <>
                     <ServerOff size={14} className="animate-spin-slow" />

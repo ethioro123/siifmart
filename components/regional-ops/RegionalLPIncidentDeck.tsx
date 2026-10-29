@@ -166,7 +166,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
                     Supervisor / Manager: <strong>{breach.managerName}</strong> • {breach.totalOverrides} flagged overrides
                   </p>
                 </div>
-                <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded bg-[var(--theme-status-danger-bg)] text-white shrink-0">
+                <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] shrink-0">
                   Audit Flagged
                 </span>
               </div>
@@ -335,7 +335,7 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
                 <button
                   type="button"
                   onClick={() => handleResolveInvestigation(task.id)}
-                  className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm self-end sm:self-center shrink-0"
+                  className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm self-end sm:self-center shrink-0"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Resolve & Close Task</span>

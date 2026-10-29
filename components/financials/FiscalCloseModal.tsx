@@ -74,7 +74,7 @@ export const FiscalCloseModal: React.FC<FiscalCloseModalProps> = ({
                     <button
                         onClick={handleConfirm}
                         disabled={lockReason.trim().length < 5 || isActionLoading}
-                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {isActionLoading && <Loader2 className="animate-spin" size={14} />}
                         <span>Confirm Period Lock</span>

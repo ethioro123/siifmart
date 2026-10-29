@@ -291,7 +291,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                         <div className="flex flex-col items-center gap-1">
                                             {renderStatusBadge(po.status)}
                                             {(po.requiresHqApproval || (po as any).requires_hq_approval) && po.status === 'Draft' && (
-                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]">
                                                     <ShieldAlert size={10} />
                                                     HQ Escalated
                                                 </span>
@@ -325,7 +325,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                 if (canApprove && policy.isCreator) {
                                                     return (
                                                         <span
-                                                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                                                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]"
                                                             title="Zero-Trust: Cannot self-approve your own PO. Dual sign-off required."
                                                         >
                                                             <Clock size={11} /> Dual-Control

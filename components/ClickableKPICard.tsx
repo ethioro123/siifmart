@@ -48,16 +48,16 @@ export default function ClickableKPICard({
     <div
       onClick={isClickable ? handleClick : undefined}
       className={`
-        bg-cyber-gray border border-white/5 rounded-2xl p-6
+        bg-cyber-gray border border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] rounded-2xl p-6
         flex items-center justify-between
         transition-all group
-        ${isClickable ? 'cursor-pointer hover:border-cyber-primary/50 hover:bg-white/5' : 'hover:border-white/10'}
+        ${isClickable ? 'cursor-pointer hover:border-cyber-primary/50 hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)]' : 'hover:border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]'}
         ${bg || ''}
       `}
     >
       <div className="flex-1">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">{title}</p>
+          <p className="text-[var(--theme-text-muted)] text-xs font-bold uppercase tracking-wider">{title}</p>
           {trend && trendValue && (
             <div className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold ${
               trend === 'up' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)]'
@@ -66,15 +66,15 @@ export default function ClickableKPICard({
             </div>
           )}
         </div>
-        <h3 className="text-2xl font-mono font-bold text-white">{value}</h3>
-        {sub && <p className="text-xs text-gray-500 mt-1">{sub}</p>}
+        <h3 className="text-2xl font-mono font-bold text-[var(--theme-text-primary)]">{value}</h3>
+        {sub && <p className="text-xs text-[var(--theme-text-secondary)] mt-1">{sub}</p>}
         {isClickable && (
           <p className="text-[10px] text-cyber-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
             Click to view details →
           </p>
         )}
       </div>
-      <div className={`p-4 rounded-xl ${bg || 'bg-white/5'} ${color} group-hover:scale-110 transition-transform`}>
+      <div className={`p-4 rounded-xl ${bg || 'bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)]'} ${color} group-hover:scale-110 transition-transform`}>
         <Icon size={24} />
       </div>
     </div>

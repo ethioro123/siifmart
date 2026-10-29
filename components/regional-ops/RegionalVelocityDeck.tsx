@@ -48,7 +48,7 @@ export const RegionalVelocityDeck: React.FC<RegionalVelocityDeckProps> = ({
                   <div className="flex items-center gap-2">
                     <span className={`w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center shrink-0 ${
                       index === 0
-                        ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                        ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                         : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                     }`}>
                       {index + 1}

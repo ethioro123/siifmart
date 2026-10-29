@@ -84,10 +84,10 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
 
     return (
         <>
-            <div className={`p-4 sm:p-4.5 rounded-2xl bg-gradient-to-r from-blue-500/10 via-emerald-500/10 to-transparent border border-[var(--theme-status-info-border)] shadow-xs relative overflow-hidden transition-all ${className}`}>
+            <div className={`p-4 sm:p-4.5 rounded-2xl bg-gradient-to-r from-[var(--theme-status-info)] via-[var(--theme-status-success)] to-transparent border border-[var(--theme-status-info-border)] shadow-xs relative overflow-hidden transition-all ${className}`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                     <div className="flex items-start sm:items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-2xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0 shadow-[0_2px_8px_rgba(0,113,227,0.3)]">
+                        <div className="w-10 h-10 rounded-2xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0 shadow-[0_2px_8px_rgba(0,113,227,0.3)]">
                             <Key size={18} />
                         </div>
                         <div>

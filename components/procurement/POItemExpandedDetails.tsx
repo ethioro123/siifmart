@@ -81,7 +81,7 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
             return {
                 title: 'Garment & Fitment',
                 icon: Shirt,
-                colorClass: 'text-indigo-500',
+                colorClass: 'text-[var(--theme-accent)]',
                 rows: [
                     { label: 'Size / Fitment:', value: physSummary.sizeOrVolume || attrs.categorySpecific?.apparelSize || smart.netContent },
                     { label: 'Colorway:', value: physical.color || physSummary.colorOrFinish || smart.color },
@@ -95,7 +95,7 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
             return {
                 title: 'Liquid & Container',
                 icon: Coffee,
-                colorClass: 'text-cyan-500',
+                colorClass: 'text-[var(--theme-status-info-text)]',
                 rows: [
                     { label: 'Net Volume:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'ml'}` : smart.netContent },
                     { label: 'Container:', value: physSummary.materialOrContainer || smart.packagingMaterial || physical.form },
@@ -212,7 +212,7 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
                 {/* Storage & Cold Chain Protocols */}
                 <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1.5">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                        <Thermometer size={11} className="text-cyan-500" />
+                        <Thermometer size={11} className="text-[var(--theme-status-info-text)]" />
                         <span>Storage & Handling</span>
                     </div>
                     <div className="space-y-1 text-xs">

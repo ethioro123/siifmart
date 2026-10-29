@@ -326,7 +326,7 @@ export const getCategoryProcurementMetrics = (
             metrics.push({
                 label: 'Total Liquid Volume',
                 value: `${totalLitres.toLocaleString(undefined, { maximumFractionDigits: 1 })} Litres`,
-                badgeColor: 'text-cyan-500'
+                badgeColor: 'text-[var(--theme-status-info-text)]'
             });
         }
     } else if (domainId === 'fresh_produce') {
@@ -354,7 +354,7 @@ export const getCategoryProcurementMetrics = (
         metrics.push({
             label: 'Garment Units',
             value: `${totalUnits.toLocaleString()} units (${size})`,
-            badgeColor: 'text-indigo-500'
+            badgeColor: 'text-[var(--theme-accent)]'
         });
     }
 

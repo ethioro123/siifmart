@@ -46,7 +46,7 @@ export default function StepIdentity({
                 {/* Photo Avatar */}
                 <div
                     onClick={handlePhotoClick}
-                    className="w-28 h-28 sm:w-32 sm:h-32 bg-stone-100 dark:bg-black/30 border-2 border-dashed border-[var(--theme-border)] dark:border-white/10 rounded-2xl flex flex-col items-center justify-center text-stone-400 hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] hover:border-[var(--theme-border)] cursor-pointer transition-all group overflow-hidden relative flex-shrink-0"
+                    className="w-28 h-28 sm:w-32 sm:h-32 bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border-2 border-dashed border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl flex flex-col items-center justify-center text-[var(--theme-text-muted)] hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] hover:border-[var(--theme-border)] cursor-pointer transition-all group overflow-hidden relative flex-shrink-0"
                     title="Upload Profile Picture"
                 >
                     {newEmpData.avatar ? (
@@ -58,8 +58,8 @@ export default function StepIdentity({
                         </>
                     )}
                     {newEmpData.avatar && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Camera size={20} className="text-white" />
+                        <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Camera size={20} className="text-[var(--theme-text-primary)]" />
                         </div>
                     )}
                 </div>
@@ -68,7 +68,7 @@ export default function StepIdentity({
                 <div className="flex-1 w-full space-y-3.5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-1 block">
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] uppercase font-bold mb-1 block">
                                 First Name <span className="text-[var(--theme-status-danger-text)]">*</span>
                             </label>
                             <input
@@ -83,7 +83,7 @@ export default function StepIdentity({
                                 data-1p-ignore="true"
                                 data-bwignore="true"
                                 data-form-type="other"
-                                className="w-full bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-medium"
+                                className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl px-3 py-2 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-medium"
                                 value={newEmpData.firstName}
                                 onChange={e => setNewEmpData({ ...newEmpData, firstName: e.target.value })}
                                 placeholder="Given Name"
@@ -91,7 +91,7 @@ export default function StepIdentity({
                             />
                         </div>
                         <div>
-                            <label className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-1 block">
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] uppercase font-bold mb-1 block">
                                 Last Name
                             </label>
                             <input
@@ -106,7 +106,7 @@ export default function StepIdentity({
                                 data-1p-ignore="true"
                                 data-bwignore="true"
                                 data-form-type="other"
-                                className="w-full bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-medium"
+                                className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl px-3 py-2 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-medium"
                                 value={newEmpData.lastName}
                                 onChange={e => setNewEmpData({ ...newEmpData, lastName: e.target.value })}
                                 placeholder="Surname"
@@ -115,15 +115,15 @@ export default function StepIdentity({
                         </div>
                     </div>
 
-                    <div className="bg-stone-50 dark:bg-white/[0.02] rounded-xl px-3 py-2 border border-[var(--theme-border)]/60 dark:border-white/5 flex items-center justify-between">
-                        <span className="text-[11px] text-stone-500 dark:text-stone-400 font-bold uppercase">System Email</span>
+                    <div className="bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_2%,transparent)] rounded-xl px-3 py-2 border border-[var(--theme-border)]/60 border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] flex items-center justify-between">
+                        <span className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] font-bold uppercase">System Email</span>
                         <p className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-semibold flex items-center gap-1.5">
                             <Mail size={13} className="shrink-0" />
                             <span>Auto-assigned from Employee ID</span>
                         </p>
                     </div>
 
-                    <label className="flex items-start gap-2 text-xs text-stone-700 dark:text-stone-300">
+                    <label className="flex items-start gap-2 text-xs text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">
                         <input
                             type="checkbox"
                             checked={newEmpData.createAppAccount !== false}
@@ -132,12 +132,12 @@ export default function StepIdentity({
                         />
                         <span>
                             <span className="block font-semibold">Create app login</span>
-                            <span className="block text-[11px] text-stone-500 dark:text-stone-400">Turn this off for employees who need a workforce record but no SIIFMART account.</span>
+                            <span className="block text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">Turn this off for employees who need a workforce record but no SIIFMART account.</span>
                         </span>
                     </label>
 
                     {newEmpData.createAppAccount !== false && <div>
-                        <label className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-1 block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] uppercase font-bold mb-1 block">
                             Password (For System Login) <span className="text-[var(--theme-status-danger-text)]">*</span>
                         </label>
                         <div className="relative">
@@ -152,7 +152,7 @@ export default function StepIdentity({
                                 data-1p-ignore="true"
                                 data-bwignore="true"
                                 data-form-type="other"
-                                className="w-full bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl px-3 py-2 pr-10 text-stone-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-mono"
+                                className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl px-3 py-2 pr-10 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-mono"
                                 value={newEmpData.password}
                                 onChange={e => setNewEmpData({ ...newEmpData, password: e.target.value })}
                                 placeholder={
@@ -167,13 +167,13 @@ export default function StepIdentity({
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors p-1 cursor-pointer"
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-muted)] transition-colors p-1 cursor-pointer"
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                             >
                                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
-                        <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1 flex items-center gap-1">
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] mt-1 flex items-center gap-1">
                             <ShieldCheck size={11} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                             <span>
                                 Policy: {getActiveRolePolicy(newEmpData.role).password_complexity.toUpperCase()} complexity required for this role
@@ -191,16 +191,16 @@ export default function StepIdentity({
                 {canAssignSites ? (
                     <div>
                         <select
-                            className={`w-full bg-white dark:bg-black/30 border ${
-                                !newEmpData.siteId ? 'border-[var(--theme-status-warning-border)] ring-2 ring-[var(--theme-status-warning-border)]' : 'border-[var(--theme-border)] dark:border-white/10'
-                            } text-stone-900 dark:text-white rounded-xl px-3 py-2.5 outline-none focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] text-sm font-medium`}
+                            className={`w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border ${
+                                !newEmpData.siteId ? 'border-[var(--theme-status-warning-border)] ring-2 ring-[var(--theme-status-warning-border)]' : 'border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]'
+                            } text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] rounded-xl px-3 py-2.5 outline-none focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] text-sm font-medium`}
                             value={newEmpData.siteId || ''}
                             onChange={e => setNewEmpData({ ...newEmpData, siteId: e.target.value })}
                             aria-label="Assign Workplace Facility ID"
                         >
-                            <option value="" disabled className="text-stone-400">-- Select Workplace Facility (Mandatory) --</option>
+                            <option value="" disabled className="text-[var(--theme-text-muted)]">-- Select Workplace Facility (Mandatory) --</option>
                             {selectableSites.map(s => (
-                                <option key={s.id} value={s.id} className="text-black">
+                                <option key={s.id} value={s.id} className="text-[var(--theme-text-primary)]">
                                     {s.name} [{s.code}] ({s.type})
                                 </option>
                             ))}
@@ -213,7 +213,7 @@ export default function StepIdentity({
                         )}
                     </div>
                 ) : (
-                    <div className="w-full bg-stone-50 dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl px-3 py-2.5 text-stone-900 dark:text-white flex items-center justify-between">
+                    <div className="w-full bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl px-3 py-2.5 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] flex items-center justify-between">
                         <span className="font-semibold text-sm">
                             {(() => {
                                 const s = sites.find(st => st.id === newEmpData.siteId) || activeSite;
@@ -230,9 +230,9 @@ export default function StepIdentity({
             {/* Phone & Address */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                    <label className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-1 block">Phone Number</label>
+                    <label className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] uppercase font-bold mb-1 block">Phone Number</label>
                     <input
-                        className="w-full bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-medium"
+                        className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl px-3 py-2 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-medium"
                         value={newEmpData.phone}
                         placeholder={activeSite?.country === 'KE' || sites.find(s => s.id === newEmpData.siteId)?.country === 'KE' ? "e.g. +254 712 345 678" : "e.g. +251 911 000 000"}
                         onChange={e => setNewEmpData({ ...newEmpData, phone: e.target.value })}
@@ -240,9 +240,9 @@ export default function StepIdentity({
                     />
                 </div>
                 <div>
-                    <label className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-1 block">Residential Address</label>
+                    <label className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] uppercase font-bold mb-1 block">Residential Address</label>
                     <input
-                        className="w-full bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-medium"
+                        className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl px-3 py-2 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-medium"
                         value={newEmpData.address}
                         placeholder="City, Subcity / District"
                         onChange={e => setNewEmpData({ ...newEmpData, address: e.target.value })}

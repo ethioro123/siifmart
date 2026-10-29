@@ -146,7 +146,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                         <button
                             onClick={onStartScanning}
                             disabled={isSubmitting}
-                            className="w-full h-12 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
+                            className="w-full h-12 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
                         >
                             <Smartphone size={16} /> {t('warehouse.scanBarcode')}
                         </button>
@@ -217,7 +217,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                             <button
                                 onClick={onCompleteJob}
                                 disabled={isSubmitting}
-                                className="px-5 py-2.5 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white text-xs font-semibold uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                                className="px-5 py-2.5 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
                             >
                                 {isSubmitting ? (
                                     <Loader2 size={18} className="animate-spin" />

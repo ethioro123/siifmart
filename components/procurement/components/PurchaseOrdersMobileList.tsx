@@ -78,7 +78,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                 );
             case 'Ordered':
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]">
                         Ordered
                     </span>
                 );

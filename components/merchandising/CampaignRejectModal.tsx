@@ -77,7 +77,7 @@ export const CampaignRejectModal: React.FC<CampaignRejectModalProps> = ({
                <button
                   type="submit"
                   disabled={!isValid || isSubmitting}
-                  className="px-4 py-2 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-40"
+                  className="px-4 py-2 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-40"
                >
                   {isSubmitting ? (
                      <>

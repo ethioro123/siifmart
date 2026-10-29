@@ -24,7 +24,7 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
             {/* Step 1: Charged at POS by */}
             <div className="space-y-2">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded-full bg-[var(--theme-accent)] text-white text-[11px] flex items-center justify-center font-bold">1</span>
+                    <span className="w-4 h-4 rounded-full bg-[var(--theme-accent)] text-[var(--theme-text-primary)] text-[11px] flex items-center justify-center font-bold">1</span>
                     Charged at POS by…
                 </label>
 
@@ -91,7 +91,7 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
             {/* Step 2: Selling Unit */}
             <div className="space-y-2">
                 <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded-full bg-[var(--theme-accent)] text-white text-[11px] flex items-center justify-center font-bold">2</span>
+                    <span className="w-4 h-4 rounded-full bg-[var(--theme-accent)] text-[var(--theme-text-primary)] text-[11px] flex items-center justify-center font-bold">2</span>
                     Selling unit — what is "1" at checkout?
                 </label>
 

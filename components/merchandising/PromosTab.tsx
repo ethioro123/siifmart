@@ -103,7 +103,7 @@ export const PromosTab: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-[var(--theme-text-primary)]">Campaign Plans & Governance</h3>
-            <span className="rounded-md bg-indigo-500/10 px-2 py-0.5 text-[10px] font-bold text-indigo-500 uppercase tracking-wide">
+            <span className="rounded-md bg-[var(--theme-accent-muted)] px-2 py-0.5 text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-wide">
               {activeCountry} {activeRegionCode ? `· ${activeRegionCode}` : '· National'}
             </span>
           </div>
@@ -114,7 +114,7 @@ export const PromosTab: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsPromoModalOpen(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-[var(--theme-accent)] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-opacity"
+          className="inline-flex items-center gap-2 rounded-xl bg-[var(--theme-accent)] px-4 py-2 text-xs font-semibold text-[var(--theme-text-primary)] shadow-sm hover:opacity-95 transition-opacity"
         >
           <Plus size={15} /> Propose Campaign
         </button>
@@ -133,7 +133,7 @@ export const PromosTab: React.FC = () => {
               }}
               className={`rounded-xl px-3 py-1.5 text-xs font-semibold capitalize transition-all ${
                 statusFilter === tab
-                  ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                  ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                   : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
               }`}
             >
@@ -284,7 +284,7 @@ export const PromosTab: React.FC = () => {
                     type="button"
                     disabled={approve.isPending || reject.isPending}
                     onClick={() => handleApprove(proposal)}
-                    className="flex-1 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white px-3 py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
+                    className="flex-1 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] px-3 py-2 text-xs font-semibold transition-opacity disabled:opacity-50"
                   >
                     Approve Plan
                   </button>

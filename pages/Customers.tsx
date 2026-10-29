@@ -170,10 +170,10 @@ export default function Customers() {
                               <p className="text-xs text-[var(--theme-text-secondary)]">{customer.phone}</p>
                            </div>
                         </div>
-                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${customer.tier === 'Platinum' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
+                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase border ${customer.tier === 'Platinum' ? 'text-[var(--theme-accent)] border-[var(--theme-border-accent)] bg-[var(--theme-accent-muted)]' :
                            customer.tier === 'Gold' ? 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)]' :
-                              customer.tier === 'Silver' ? 'text-gray-300 border-gray-500/30 bg-gray-500/10' :
-                                 'text-orange-400 border-orange-500/30 bg-orange-500/10'
+                              customer.tier === 'Silver' ? 'text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)]' :
+                                 'text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)]'
                            }`}>
                            {customer.tier}
                         </span>
@@ -204,9 +204,9 @@ export default function Customers() {
                      <div className="text-center">
                         <div className="w-24 h-24 rounded-full bg-[var(--theme-bg-subtle)] mx-auto flex items-center justify-center border border-[var(--theme-border)] mb-4">
                            <Crown size={40} className={
-                              selectedCustomer.tier === 'Platinum' ? 'text-purple-400' :
+                              selectedCustomer.tier === 'Platinum' ? 'text-[var(--theme-accent)]' :
                                  selectedCustomer.tier === 'Gold' ? 'text-[var(--theme-status-warning-text)]' :
-                                    selectedCustomer.tier === 'Silver' ? 'text-gray-300' : 'text-orange-400'
+                                    selectedCustomer.tier === 'Silver' ? 'text-[var(--theme-text-muted)]' : 'text-[var(--theme-status-warning-text)]'
                            } />
                         </div>
                         <h3 className="text-2xl font-bold text-[var(--theme-text-primary)]">{selectedCustomer.name}</h3>
@@ -398,7 +398,7 @@ export default function Customers() {
                      onClick={handleConfirmDelete}
                      disabled={deleteInput !== 'DELETE' || isSubmitting}
                      className={`min-h-11 px-6 rounded-lg font-bold transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)] ${deleteInput === 'DELETE' && !isSubmitting
-                        ? 'bg-[var(--theme-status-danger)] hover:opacity-90 text-white'
+                        ? 'bg-[var(--theme-status-danger)] hover:opacity-90 text-[var(--theme-text-primary)]'
                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
                         }`}
                   >

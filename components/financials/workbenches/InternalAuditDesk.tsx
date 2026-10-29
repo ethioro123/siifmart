@@ -34,7 +34,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
             {/* Header Card */}
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-wrap justify-between items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <ShieldCheck size={20} />
                     </div>
                     <div>
@@ -48,16 +48,16 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px] font-semibold font-mono">
+                    <span className="px-2.5 py-1 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] text-[11px] font-semibold font-mono">
                         ZERO-TRUST AUDIT LOGS
                     </span>
                     {isAuditor ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-[11px] font-semibold">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] text-[11px] font-semibold">
                             <Eye size={12} />
                             <span>Independent Auditor • Surveillance</span>
                         </span>
                     ) : isManager ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px] font-semibold">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] text-[11px] font-semibold">
                             <Shield size={12} />
                             <span>Supervisory Review • Audit Target</span>
                         </span>
@@ -88,7 +88,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider block">
                         Voided Expenses This Quarter
                     </span>
-                    <div className="text-xl font-bold font-mono tabular-nums text-purple-600 dark:text-purple-400 mt-1">
+                    <div className="text-xl font-bold font-mono tabular-nums text-[var(--theme-accent)] text-[var(--theme-accent)] mt-1">
                         4 Records
                     </div>
                     <span className="text-[11px] text-[var(--theme-text-secondary)] mt-1 block">
@@ -126,7 +126,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                             <button
                                 type="button"
                                 onClick={handleIssueInquiry}
-                                className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                className="px-3 py-1.5 rounded-xl bg-[var(--theme-accent-muted)] hover:bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                             >
                                 <Eye size={13} />
                                 Issue Audit Inquiry
@@ -159,7 +159,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                         </div>
                         <div className="flex items-center gap-2">
                             {inquiryDispatched && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]">
                                     AUDIT INQUIRY PENDING RESPONSE
                                 </span>
                             )}
@@ -190,7 +190,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
 
                     <div className="p-4 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)] transition-colors">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                 <FileSearch size={16} />
                             </div>
                             <div>
@@ -202,7 +202,7 @@ export const InternalAuditDesk: React.FC<InternalAuditDeskProps> = ({
                                 </span>
                             </div>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]">
                             IMMUTABLE
                         </span>
                     </div>

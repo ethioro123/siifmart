@@ -59,7 +59,7 @@ export const POSDepartments: React.FC = () => {
 
             {selectedDepartment !== 'All' && (
                 <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
-                    <span className="w-4 h-4 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                    <span className="w-4 h-4 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Layers size={10} />
                     </span>
                     <span>{t('pos.deptLabel')} <strong className="font-semibold">{selectedDepartment}</strong></span>
@@ -99,7 +99,7 @@ export const POSDepartments: React.FC = () => {
 
             {selectedBrands.map(brand => (
                 <span key={brand} className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
-                    <span className="w-4 h-4 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                    <span className="w-4 h-4 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Sparkles size={10} />
                     </span>
                     <span>{t('pos.brandLabel')} <strong className="font-semibold">{brand}</strong></span>
@@ -119,7 +119,7 @@ export const POSDepartments: React.FC = () => {
 
             {stockStatusFilter !== 'all' && (
                 <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
-                    <span className="w-4 h-4 rounded-full bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0">
+                    <span className="w-4 h-4 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                         <Package size={10} />
                     </span>
                     <span>{t('pos.stockLabel')} <strong className="font-semibold">{stockStatusFilter === 'in_stock' ? t('pos.inStockOnly') : stockStatusFilter === 'low_stock' ? t('pos.lowStockAlertsOnly') : t('pos.outOfStockOnly')}</strong></span>
@@ -138,12 +138,12 @@ export const POSDepartments: React.FC = () => {
             )}
 
             {competitorMatchedOnly && (
-                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-violet-500/10 text-violet-500 border border-violet-500/20 shadow-xs">
-                    <span className="w-4 h-4 rounded-full bg-violet-500/20 text-violet-500 flex items-center justify-center shrink-0">
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Scale size={10} />
                     </span>
                     <strong className="font-semibold">{t('pos.compPrice')}</strong>
-                    <button type="button" onClick={() => setCompetitorMatchedOnly(false)} title={`${t('common.remove')} ${t('pos.compPrice')}`} aria-label={`${t('common.remove')} ${t('pos.compPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-violet-500/25 hover:text-violet-600 text-violet-500 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
+                    <button type="button" onClick={() => setCompetitorMatchedOnly(false)} title={`${t('common.remove')} ${t('pos.compPrice')}`} aria-label={`${t('common.remove')} ${t('pos.compPrice')}`} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-[var(--theme-accent-muted)] hover:text-[var(--theme-accent)] text-[var(--theme-accent)] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--theme-accent)]"><X size={12} /></button>
                 </span>
             )}
 

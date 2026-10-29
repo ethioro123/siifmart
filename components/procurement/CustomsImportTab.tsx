@@ -100,7 +100,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                 Cross-Border Freight & Customs Clearance ({countryCode})
               </h2>
               {isManager ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px] font-semibold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] text-[11px] font-semibold">
                   <ShieldCheck size={12} />
                   <span>Checker • Release Sign-Off</span>
                 </span>
@@ -194,7 +194,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                     <button
                       type="button"
                       onClick={() => handleAuthorizeRelease(d)}
-                      className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
+                      className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
                     >
                       <Check size={13} /> Authorize Release
                     </button>
@@ -207,7 +207,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
       )}
 
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-6 rounded-3xl max-w-md w-full space-y-5 shadow-2xl">
             <h3 className="text-lg font-bold tracking-tight text-[var(--theme-text-primary)]">Register Customs Declaration</h3>
             <div className="space-y-4">

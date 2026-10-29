@@ -90,9 +90,9 @@ export const PutawayStepIndicator: React.FC<PutawayStepIndicatorProps> = ({
                                     !isAccessible
                                         ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                         : isActive
-                                            ? 'bg-[var(--theme-accent)] text-white'
+                                            ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]'
                                             : st.isComplete && st.id === 'SLOTTING'
-                                                ? 'bg-[var(--theme-status-success-bg)] text-white'
+                                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)]'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                 }`}
                             >

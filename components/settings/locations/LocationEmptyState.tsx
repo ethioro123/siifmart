@@ -22,7 +22,7 @@ export const LocationEmptyState: React.FC<LocationEmptyStateProps> = ({
             <button
                 type="button"
                 onClick={onAddLocation}
-                className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white rounded-xl font-semibold text-xs inline-flex items-center gap-2 hover:opacity-95 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer"
+                className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl font-semibold text-xs inline-flex items-center gap-2 hover:opacity-95 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer"
             >
                 <Plus size={16} /> Add First Location
             </button>

@@ -239,7 +239,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                     <button
                         type="button"
                         onClick={() => onEdit(region)}
-                        className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)] hover:text-white transition-all cursor-pointer border border-[var(--theme-border)]"
+                        className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer border border-[var(--theme-border)]"
                     >
                         <Sliders size={14} />
                         <span>Governance & Limits</span>

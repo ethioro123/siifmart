@@ -56,13 +56,13 @@ export default function GamificationTab({
 
     const getTierColorClass = (color: string) => {
         const colors: Record<string, string> = {
-            gray: 'from-gray-400 to-gray-500',
-            amber: 'from-amber-500 to-amber-600',
-            yellow: 'from-yellow-400 to-yellow-500',
-            cyan: 'from-cyan-400 to-cyan-500',
-            purple: 'from-purple-400 to-purple-600',
+            gray: 'from-[var(--theme-accent)] to-[var(--theme-accent)]',
+            amber: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]',
+            yellow: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]',
+            cyan: 'from-[var(--theme-status-info)] to-[var(--theme-status-info)]',
+            purple: 'from-[var(--theme-accent)] to-[var(--theme-accent)]',
         };
-        return colors[color] || 'from-gray-400 to-gray-500';
+        return colors[color] || 'from-[var(--theme-accent)] to-[var(--theme-accent)]';
     };
 
     return (
@@ -119,7 +119,7 @@ export default function GamificationTab({
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">This Month</p>
                         </div>
                         <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
-                            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3 text-purple-500">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] border border-[var(--theme-border-accent)] flex items-center justify-center mx-auto mb-3 text-[var(--theme-accent)]">
                                 <Zap size={20} />
                             </div>
                             <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">Lv. {empPoints.level}</p>
@@ -150,14 +150,14 @@ export default function GamificationTab({
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Store Total</p>
                         </div>
                         <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
-                            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3 text-purple-500">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] border border-[var(--theme-border-accent)] flex items-center justify-center mx-auto mb-3 text-[var(--theme-accent)]">
                                 <UserCheck size={20} />
                             </div>
                             <p className="text-lg font-bold text-[var(--theme-text-primary)]">{getEmployeeJobTitle(employee)}</p>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Job Title</p>
                         </div>
                         <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
-                            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-3 text-cyan-500">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] flex items-center justify-center mx-auto mb-3 text-[var(--theme-status-info-text)]">
                                 <Target size={20} />
                             </div>
                             <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{storePointsData.totalTransactions}</p>
@@ -209,7 +209,7 @@ export default function GamificationTab({
                         {[
                             { action: 'PICK completed', points: '+15', time: '2 hours ago', icon: Package, color: 'text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)]' },
                             { action: '100% Accuracy Bonus', points: '+50', time: 'Yesterday', icon: CheckCircle, color: 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]' },
-                            { action: 'Shift Finished', points: '+10', time: '2 days ago', icon: Clock, color: 'text-purple-500 bg-purple-500/10 border-purple-500/20' },
+                            { action: 'Shift Finished', points: '+10', time: '2 days ago', icon: Clock, color: 'text-[var(--theme-accent)] bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)]' },
                             { action: 'Team Multiplier', points: 'x2', time: 'Active', icon: Zap, color: 'text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)]' },
                         ].map((log, i) => (
                             <div key={i} className="flex items-center justify-between p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors">

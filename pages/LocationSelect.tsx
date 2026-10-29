@@ -72,12 +72,12 @@ export default function LocationSelect() {
                         <h1 className="text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                             Location Command
                         </h1>
-                        <p className="text-stone-500 dark:text-stone-400 mt-1">Select a facility to switch operational context.</p>
+                        <p className="text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] mt-1">Select a facility to switch operational context.</p>
                     </div>
 
                     <div className="flex items-center gap-4 w-full md:w-auto">
                         <div className="relative flex-1 md:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] w-4 h-4" />
                             <input
                                 type="text"
                                 placeholder="Search locations..."
@@ -119,7 +119,7 @@ export default function LocationSelect() {
                                         className={`group relative rounded-xl border transition-all duration-300 ${
                                             activeSite?.id === site.id
                                                 ? 'bg-[var(--theme-primary)]/10 border-[var(--theme-border)] shadow-sm'
-                                                : 'glass-panel border-white/5 hover:border-[var(--theme-border)]/30 hover:shadow-md'
+                                                : 'glass-panel border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] hover:border-[var(--theme-border)]/30 hover:shadow-md'
                                         }`}
                                     >
                                         <div
@@ -131,12 +131,12 @@ export default function LocationSelect() {
                                                     <span className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]">
                                                         {formatDisplaySiteId(site)}
                                                     </span>
-                                                    <h3 className="text-sm font-semibold text-stone-100 text-[var(--theme-status-success-text)] transition-colors truncate">
+                                                    <h3 className="text-sm font-semibold text-[var(--theme-text-muted)] text-[var(--theme-status-success-text)] transition-colors truncate">
                                                         {site.name}
                                                     </h3>
                                                 </div>
-                                                <p className="text-xs text-stone-400 truncate flex items-center gap-1.5">
-                                                    <MapPin size={12} className="text-stone-500 flex-shrink-0" />
+                                                <p className="text-xs text-[var(--theme-text-muted)] truncate flex items-center gap-1.5">
+                                                    <MapPin size={12} className="text-[var(--theme-text-secondary)] flex-shrink-0" />
                                                     <span>{site.address}</span>
                                                 </p>
                                             </div>
@@ -147,7 +147,7 @@ export default function LocationSelect() {
                                                         e.stopPropagation();
                                                         toggleExpand(site.id);
                                                     }}
-                                                    className="p-1.5 rounded-lg hover:bg-white/5 text-stone-500 hover:text-stone-300 transition-colors"
+                                                    className="p-1.5 rounded-lg hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-muted)] transition-colors"
                                                     title="View details"
                                                 >
                                                     <ChevronDown
@@ -155,7 +155,7 @@ export default function LocationSelect() {
                                                         className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
                                                     />
                                                 </button>
-                                                <div className="p-1.5 text-stone-600 text-[var(--theme-status-success-text)] group-hover:translate-x-0.5 transition-all">
+                                                <div className="p-1.5 text-[var(--theme-text-secondary)] text-[var(--theme-status-success-text)] group-hover:translate-x-0.5 transition-all">
                                                     <ArrowRight size={16} />
                                                 </div>
                                             </div>
@@ -168,16 +168,16 @@ export default function LocationSelect() {
                                                     animate={{ height: 'auto', opacity: 1 }}
                                                     exit={{ height: 0, opacity: 0 }}
                                                     transition={{ duration: 0.2 }}
-                                                    className="overflow-hidden border-t border-white/5 bg-black/10 px-4 pb-4 pt-3 text-xs space-y-2.5 text-stone-400"
+                                                    className="overflow-hidden border-t border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_10%,transparent)] px-4 pb-4 pt-3 text-xs space-y-2.5 text-[var(--theme-text-muted)]"
                                                 >
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div>
-                                                            <span className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">Site ID / Code</span>
-                                                            <div className="font-mono text-stone-300 mt-0.5">{site.code || site.id}</div>
+                                                            <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-widest font-bold">Site ID / Code</span>
+                                                            <div className="font-mono text-[var(--theme-text-muted)] mt-0.5">{site.code || site.id}</div>
                                                         </div>
                                                         <div>
-                                                            <span className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">Facility Type</span>
-                                                            <div className="text-stone-300 mt-0.5">{site.type}</div>
+                                                            <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-widest font-bold">Facility Type</span>
+                                                            <div className="text-[var(--theme-text-muted)] mt-0.5">{site.type}</div>
                                                         </div>
                                                     </div>
 
@@ -196,7 +196,7 @@ export default function LocationSelect() {
                                 );
                             })}
                             {stores.length === 0 && (
-                                <div className="p-8 border border-dashed border-white/10 rounded-2xl text-center text-gray-500">
+                                <div className="p-8 border border-dashed border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl text-center text-[var(--theme-text-secondary)]">
                                     No retail locations found matching "{searchTerm}"
                                 </div>
                             )}
@@ -219,7 +219,7 @@ export default function LocationSelect() {
                                         className={`group relative rounded-xl border transition-all duration-300 ${
                                             activeSite?.id === site.id
                                                 ? 'bg-[var(--theme-primary)]/10 border-[var(--theme-border)] shadow-sm'
-                                                : 'glass-panel border-white/5 hover:border-[var(--theme-border)]/30 hover:shadow-md'
+                                                : 'glass-panel border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] hover:border-[var(--theme-border)]/30 hover:shadow-md'
                                         }`}
                                     >
                                         <div
@@ -231,12 +231,12 @@ export default function LocationSelect() {
                                                     <span className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]">
                                                         {formatDisplaySiteId(site)}
                                                     </span>
-                                                    <h3 className="text-sm font-semibold text-stone-100 text-[var(--theme-status-info-text)] transition-colors truncate">
+                                                    <h3 className="text-sm font-semibold text-[var(--theme-text-muted)] text-[var(--theme-status-info-text)] transition-colors truncate">
                                                         {site.name}
                                                     </h3>
                                                 </div>
-                                                <p className="text-xs text-stone-400 truncate flex items-center gap-1.5">
-                                                    <MapPin size={12} className="text-stone-500 flex-shrink-0" />
+                                                <p className="text-xs text-[var(--theme-text-muted)] truncate flex items-center gap-1.5">
+                                                    <MapPin size={12} className="text-[var(--theme-text-secondary)] flex-shrink-0" />
                                                     <span>{site.address}</span>
                                                 </p>
                                             </div>
@@ -247,7 +247,7 @@ export default function LocationSelect() {
                                                         e.stopPropagation();
                                                         toggleExpand(site.id);
                                                     }}
-                                                    className="p-1.5 rounded-lg hover:bg-white/5 text-stone-500 hover:text-stone-300 transition-colors"
+                                                    className="p-1.5 rounded-lg hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-muted)] transition-colors"
                                                     title="View details"
                                                 >
                                                     <ChevronDown
@@ -255,7 +255,7 @@ export default function LocationSelect() {
                                                         className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
                                                     />
                                                 </button>
-                                                <div className="p-1.5 text-stone-600 text-[var(--theme-status-info-text)] group-hover:translate-x-0.5 transition-all">
+                                                <div className="p-1.5 text-[var(--theme-text-secondary)] text-[var(--theme-status-info-text)] group-hover:translate-x-0.5 transition-all">
                                                     <ArrowRight size={16} />
                                                 </div>
                                             </div>
@@ -268,22 +268,22 @@ export default function LocationSelect() {
                                                     animate={{ height: 'auto', opacity: 1 }}
                                                     exit={{ height: 0, opacity: 0 }}
                                                     transition={{ duration: 0.2 }}
-                                                    className="overflow-hidden border-t border-white/5 bg-black/10 px-4 pb-4 pt-3 text-xs space-y-2.5 text-stone-400"
+                                                    className="overflow-hidden border-t border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_10%,transparent)] px-4 pb-4 pt-3 text-xs space-y-2.5 text-[var(--theme-text-muted)]"
                                                 >
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div>
-                                                            <span className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">Site ID / Code</span>
-                                                            <div className="font-mono text-stone-300 mt-0.5">{site.code || site.id}</div>
+                                                            <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-widest font-bold">Site ID / Code</span>
+                                                            <div className="font-mono text-[var(--theme-text-muted)] mt-0.5">{site.code || site.id}</div>
                                                         </div>
                                                         <div>
-                                                            <span className="text-[10px] text-stone-500 uppercase tracking-widest font-bold">Facility Type</span>
-                                                            <div className="text-stone-300 mt-0.5">{site.type}</div>
+                                                            <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-widest font-bold">Facility Type</span>
+                                                            <div className="text-[var(--theme-text-muted)] mt-0.5">{site.type}</div>
                                                         </div>
                                                     </div>
 
                                                     <div className="flex flex-wrap gap-2 pt-1">
-                                                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-purple-400/90 bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 rounded-full">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" /> WMS NETWORK
+                                                        <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-[color-mix(in_srgb,var(--theme-accent)_90%,transparent)] bg-[var(--theme-accent-muted)] border border-[var(--theme-border-accent)] px-2.5 py-0.5 rounded-full">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent-muted)] animate-pulse" /> WMS NETWORK
                                                         </div>
                                                         <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] px-2.5 py-0.5 rounded-full">
                                                             <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-status-info-bg)]" /> SYNC ACTIVE
@@ -296,7 +296,7 @@ export default function LocationSelect() {
                                 );
                             })}
                             {warehouses.length === 0 && (
-                                <div className="p-8 border border-dashed border-white/10 rounded-2xl text-center text-gray-500">
+                                <div className="p-8 border border-dashed border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl text-center text-[var(--theme-text-secondary)]">
                                     No distribution centers found matching "{searchTerm}"
                                 </div>
                             )}

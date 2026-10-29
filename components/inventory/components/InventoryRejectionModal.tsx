@@ -63,7 +63,7 @@ export const InventoryRejectionModal: React.FC<InventoryRejectionModalProps> = (
                             }
                             onClose();
                         }}
-                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-status-danger-bg)] text-white hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] hover:opacity-95 shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
                     >
                         <span>Confirm Rejection</span>
                     </button>

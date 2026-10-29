@@ -47,7 +47,7 @@ export const WarehouseTab: React.FC = () => {
                             aria-label="Toggle warehouse bonuses"
                             className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${bonusEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                         >
-                            <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${bonusEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                            <div className={`w-5 h-5 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${bonusEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
                     </div>
                 </div>
@@ -136,7 +136,7 @@ export const WarehouseTab: React.FC = () => {
                                             aria-label={`Toggle bonus for ${warehouse.name}`}
                                             className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${isEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                                         >
-                                            <div className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${isEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                                            <div className={`w-4 h-4 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${isEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
                                         </button>
                                     </div>
                                     <div className="mt-2 pt-2 border-t border-[var(--theme-border)]">
@@ -212,7 +212,7 @@ export const WarehouseTab: React.FC = () => {
                                     }}
                                     className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${roleConfig.enabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                                 >
-                                    <div className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${roleConfig.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                                    <div className={`w-4 h-4 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${roleConfig.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
                                 </button>
                             </div>
                         </div>
@@ -253,7 +253,7 @@ export const WarehouseTab: React.FC = () => {
                                 });
                                 setIsWarehouseRuleModalOpen(true);
                             }}
-                            className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                            className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                         >
                             <Plus size={14} /> Add Rule
                         </button>
@@ -313,7 +313,7 @@ export const WarehouseTab: React.FC = () => {
                                         }}
                                         className={`w-9 h-5 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${rule.enabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                                     >
-                                        <div className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${rule.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                                        <div className={`w-4 h-4 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${rule.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
                                     </button>
                                     <button
                                         type="button"
@@ -345,7 +345,7 @@ export const WarehouseTab: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => openAddModal('warehouse')}
-                        className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                        className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 active:scale-[0.98] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                         <Plus size={14} /> Add Tier
                     </button>
@@ -359,7 +359,7 @@ export const WarehouseTab: React.FC = () => {
                         >
                             <div className="flex items-center gap-4">
                                 <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getColorClass(tier.tierColor)} flex items-center justify-center shrink-0`}>
-                                    <Medal size={22} className="text-white" />
+                                    <Medal size={22} className="text-[var(--theme-text-primary)]" />
                                 </div>
 
                                 <div className="flex-1 min-w-0">

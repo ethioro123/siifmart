@@ -155,7 +155,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] flex items-center justify-center z-[300] p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[92dvh] overflow-hidden animate-in zoom-in-95 duration-200 relative">
                 {/* Header */}
                 <div className="p-4 sm:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center shrink-0">
@@ -319,7 +319,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                             <button
                                 disabled={!hasChanges || !reasonNotes.trim()}
                                 onClick={() => setStep('CONFIRM')}
-                                className="px-6 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] disabled:opacity-40 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
+                                className="px-6 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] disabled:opacity-40 text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
                             >
                                 <Edit3 size={14} /> {t('warehouse.picking.reviewChanges')}
                             </button>
@@ -386,7 +386,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                             <button
                                 disabled={isSubmitting}
                                 onClick={handleConfirm}
-                                className="px-6 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
+                                className="px-6 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] disabled:opacity-50 text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
                             >
                                 {isSubmitting
                                     ? <><Loader2 size={14} className="animate-spin" /> {t('warehouse.saving')}</>

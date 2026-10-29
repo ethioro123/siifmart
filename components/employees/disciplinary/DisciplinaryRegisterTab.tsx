@@ -279,7 +279,7 @@ export default function DisciplinaryRegisterTab() {
                                                 rec.severity === 'Critical'
                                                     ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                                                     : rec.severity === 'High'
-                                                    ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30'
+                                                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                                     : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                             }`}>
                                                 {rec.severity} Severity
@@ -304,7 +304,7 @@ export default function DisciplinaryRegisterTab() {
                                             {rec.issued_at ? new Date(rec.issued_at).toLocaleDateString() : 'Recent'}
                                         </span>
                                         {rec.appeal_status === 'Pending Appeal' && (
-                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center gap-1 animate-pulse">
+                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] flex items-center gap-1 animate-pulse">
                                                 <Clock size={11} /> Appeal Pending
                                             </span>
                                         )}
@@ -333,7 +333,7 @@ export default function DisciplinaryRegisterTab() {
                                     </span>
                                     <div className="flex items-center gap-3 text-[11px] text-[var(--theme-text-secondary)]">
                                         {rec.expires_at && (
-                                            <span className={isExpired ? 'text-stone-400 line-through' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'}>
+                                            <span className={isExpired ? 'text-[var(--theme-text-muted)] line-through' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'}>
                                                 {isExpired ? `Expired (${rec.expires_at})` : `Expires: ${rec.expires_at}`}
                                             </span>
                                         )}
@@ -358,7 +358,7 @@ export default function DisciplinaryRegisterTab() {
                                             <button
                                                 type="button"
                                                 onClick={() => handleOpenFileAppeal(rec)}
-                                                className="h-8 px-3 rounded-xl text-xs font-semibold text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 border border-purple-500/30 transition-all cursor-pointer"
+                                                className="h-8 px-3 rounded-xl text-xs font-semibold text-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent-muted)] border border-[var(--theme-border-accent)] transition-all cursor-pointer"
                                             >
                                                 File Appeal
                                             </button>
@@ -383,7 +383,7 @@ export default function DisciplinaryRegisterTab() {
                                                         <button
                                                             type="button"
                                                             onClick={() => handleResolveAppeal(rec.id, 'Upheld')}
-                                                            className="h-8 px-3 rounded-xl text-xs font-semibold text-white bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] shadow-xs transition-all cursor-pointer"
+                                                            className="h-8 px-3 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] shadow-xs transition-all cursor-pointer"
                                                         >
                                                             Uphold Sanction
                                                         </button>

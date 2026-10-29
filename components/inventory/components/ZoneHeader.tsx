@@ -37,7 +37,7 @@ export const ZoneHeader: React.FC<ZoneHeaderProps> = ({
                     <button
                         type="button"
                         onClick={onInitializeDefaults}
-                        className="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-xs bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98] transition-all"
+                        className="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-xs bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 active:scale-[0.98] transition-all"
                     >
                         <RefreshCw size={14} />
                         <span>Initialize Default Zones</span>

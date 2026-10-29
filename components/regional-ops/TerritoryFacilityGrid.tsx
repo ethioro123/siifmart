@@ -214,7 +214,7 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
                   navigate('/pos-dashboard');
                 }
               }}
-              className="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent)] hover:text-white border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all duration-200 cursor-pointer"
+              className="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all duration-200 cursor-pointer"
             >
               <span>{isAdministration ? 'Inspect Regional Hub' : isWarehouse ? 'Inspect WMS Hub' : 'Inspect POS Command'}</span>
               <ArrowUpRight className="w-3.5 h-3.5" />

@@ -112,7 +112,7 @@ export function UserMenu({
             }`}
          >
             <div className="relative">
-               <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center font-black text-xs md:text-sm shadow-md transition-transform overflow-hidden border border-white/20">
+               <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center font-black text-xs md:text-sm shadow-md transition-transform overflow-hidden border border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]">
                   {user.avatar ? (
                      <img
                         src={user.avatar}
@@ -266,7 +266,7 @@ export function UserMenu({
                                        j.type === 'RECEIVE' ? <Truck size={10} /> :
                                           <BoxIcon size={10} />;
                                  const color = j.type === 'PUTAWAY' ? 'text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)]' :
-                                    j.type === 'PICK' ? 'text-purple-500 bg-purple-500/15 border-purple-500/20' :
+                                    j.type === 'PICK' ? 'text-[var(--theme-accent)] bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)]' :
                                        j.type === 'RECEIVE' ? 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)]' :
                                           'text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] border-[var(--theme-border)]';
                                  return (
@@ -309,7 +309,7 @@ export function UserMenu({
                            <div className="flex items-center gap-2 shrink-0">
                               <span className={`px-2 py-0.5 rounded-full text-xs font-bold tabular-nums ${
                                  approvalInbox.isError
-                                    ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                                    ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                                     : pendingApprovalsCount > 0
                                        ? 'bg-[var(--theme-accent)] text-[var(--theme-btn-primary-text)]'
                                        : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'

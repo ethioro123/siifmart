@@ -332,9 +332,9 @@ export default function SettingsTab({
                         disabled={isSaving || !hasChanges || Boolean(governanceResult.blockedReason)}
                         className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs disabled:opacity-40 ${
                             saveSuccess
-                                ? 'bg-[var(--theme-status-success-bg)] text-white'
+                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)]'
                                 : requiresReview && !isCEO
-                                    ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-black'
+                                    ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]'
                                     : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'
                         }`}
                     >

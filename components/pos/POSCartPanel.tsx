@@ -258,7 +258,7 @@ export const POSCartPanel: React.FC = () => {
                                                 onClick={() => setIsDiscountModalOpen(true)}
                                                 className="min-h-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border-subtle)] px-2.5 rounded-lg font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                                             >
-                                                <Tag size={11} className="inline mr-1 text-pink-500" />
+                                                <Tag size={11} className="inline mr-1 text-[var(--theme-accent)]" />
                                                 {appliedDiscountCodeDetails ? appliedDiscountCodeDetails.code : t('pos.applyCode')}
                                             </button>
                                         </Protected>
@@ -293,7 +293,7 @@ export const POSCartPanel: React.FC = () => {
                                             }`}
                                         >
                                             <span
-                                                className={`block w-5 h-5 rounded-full bg-white shadow-xs transition-transform duration-200 ease-out ${
+                                                className={`block w-5 h-5 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform duration-200 ease-out ${
                                                     isRoundingEnabled ? 'translate-x-4' : 'translate-x-0'
                                                 }`}
                                             />
@@ -357,7 +357,7 @@ export const POSCartPanel: React.FC = () => {
                                 aria-expanded={showActions}
                                 className="w-full min-h-11 py-2 px-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border-subtle)] rounded-xl text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)] flex items-center justify-center gap-1.5 transition-all tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] shadow-2xs"
                             >
-                                <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                                <div className="w-5 h-5 rounded-md bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                     <Settings size={15} />
                                 </div>
                                 <span>{t('pos.more')}</span>
@@ -406,7 +406,7 @@ export const POSCartPanel: React.FC = () => {
                         className="w-full min-h-14 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] p-3.5 rounded-2xl shadow-xl border border-transparent flex items-center justify-between font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                     >
                         <div className="flex items-center gap-2.5">
-                            <div className="bg-black/15 dark:bg-black/20 border border-black/10 dark:border-black/25 text-inherit px-2 py-0.5 rounded-lg text-xs font-bold">
+                            <div className="bg-[color-mix(in_srgb,var(--theme-overlay)_15%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_15%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] text-inherit px-2 py-0.5 rounded-lg text-xs font-bold">
                                 {totalItemCount} {totalItemCount === 1 ? t('pos.item') : t('pos.items')}
                             </div>
                             <span className="text-xs font-bold uppercase tracking-wider">{t('pos.viewCart')}</span>

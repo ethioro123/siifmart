@@ -73,7 +73,7 @@ export default function EmployeeRow({
                     })();
                     const isOnlineAndActive = employee.status === 'Active' && loggedInToday;
                     return (
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--theme-bg-card)] ${isOnlineAndActive ? 'bg-[var(--theme-status-success-bg)]' : 'bg-neutral-400'}`} />
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--theme-bg-card)] ${isOnlineAndActive ? 'bg-[var(--theme-status-success-bg)]' : 'bg-[var(--theme-bg-card-hover)]'}`} />
                     );
                 })()}
             </div>
@@ -102,7 +102,7 @@ export default function EmployeeRow({
                         <span className="truncate font-medium flex items-center gap-1.5">
                             <span>{siteInfo.label}</span>
                             {siteInfo.isCEO ? (
-                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shrink-0 font-semibold" title="CEO sovereign authority across all facilities">
+                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] shrink-0 font-semibold" title="CEO sovereign authority across all facilities">
                                     GLOBAL
                                 </span>
                             ) : siteInfo.facilityId ? (

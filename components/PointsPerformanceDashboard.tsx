@@ -68,18 +68,18 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
             {/* SECTION HEADER */}
             <div className="flex items-center justify-between mb-2">
                 <div>
-                    <h2 className="text-2xl font-black text-white flex items-center gap-3">
+                    <h2 className="text-2xl font-black text-[var(--theme-text-primary)] flex items-center gap-3">
                         <div className="p-2 bg-[var(--theme-status-warning-bg)] rounded-xl border border-[var(--theme-status-warning-border)]">
                             <Trophy className="text-[var(--theme-status-warning-text)]" size={24} />
                         </div>
                         OPERATIONAL PERFORMANCE <span className="text-[var(--theme-status-warning-text)]">& GAMIFICATION</span>
                     </h2>
-                    <p className="text-gray-400 text-sm font-medium mt-1">Real-time engagement and productivity metrics across the central network.</p>
+                    <p className="text-[var(--theme-text-muted)] text-sm font-medium mt-1">Real-time engagement and productivity metrics across the central network.</p>
                 </div>
                 <div className="flex gap-2">
-                    <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md flex items-center gap-2">
+                    <div className="px-4 py-2 bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl backdrop-blur-md flex items-center gap-2">
                         <Activity size={14} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] animate-pulse" />
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Global Status: OPTIMAL</span>
+                        <span className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-widest">Global Status: OPTIMAL</span>
                     </div>
                 </div>
             </div>
@@ -120,9 +120,9 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                 {/* 1. NETWORK RADAR (Balanced Scorecard) */}
-                <div className="lg:col-span-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <div className="lg:col-span-4 bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] backdrop-blur-xl border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[var(--theme-status-success)] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <h3 className="text-sm font-bold text-[var(--theme-text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
                         <BarChart3 size={16} className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" />
                         Network Synergy Score
                     </h3>
@@ -144,42 +144,42 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                     </div>
                     <div className="mt-4 grid grid-cols-3 gap-4 w-full text-center">
                         <div>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase">Efficiency</p>
-                            <p className="text-sm font-bold text-white">88/100</p>
+                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase">Efficiency</p>
+                            <p className="text-sm font-bold text-[var(--theme-text-primary)]">88/100</p>
                         </div>
-                        <div className="border-x border-white/10 px-2">
-                            <p className="text-[10px] text-gray-500 font-bold uppercase">Accuracy</p>
-                            <p className="text-sm font-bold text-white">96/100</p>
+                        <div className="border-x border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] px-2">
+                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase">Accuracy</p>
+                            <p className="text-sm font-bold text-[var(--theme-text-primary)]">96/100</p>
                         </div>
                         <div>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase">Morale</p>
-                            <p className="text-sm font-bold text-white">92/100</p>
+                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase">Morale</p>
+                            <p className="text-sm font-bold text-[var(--theme-text-primary)]">92/100</p>
                         </div>
                     </div>
                 </div>
 
                 {/* 2. GLOBAL INDIVIDUAL LEADERBOARD */}
-                <div className="lg:col-span-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col relative overflow-hidden group">
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <div className="lg:col-span-4 bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] backdrop-blur-xl border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-3xl p-6 flex flex-col relative overflow-hidden group">
+                    <h3 className="text-sm font-bold text-[var(--theme-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2">
                         <Crown size={18} className="text-[var(--theme-status-warning-text)]" />
                         Top Individual Performers
                     </h3>
                     <div className="space-y-4">
                         {topIndividual.map((w, i) => (
-                            <div key={w.id} className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all duration-300 group/item hover:-translate-x-1">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-[var(--theme-status-warning-bg)] text-stone-950' :
-                                    i === 1 ? 'bg-stone-300 dark:bg-stone-700 text-stone-900 dark:text-stone-100' :
-                                        i === 2 ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white' : 'bg-white/10 text-[var(--theme-text-muted)]'
+                            <div key={w.id} className="flex items-center gap-3 p-3 bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] rounded-2xl border border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] transition-all duration-300 group/item hover:-translate-x-1">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]' :
+                                    i === 1 ? 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]' :
+                                        i === 2 ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]' : 'bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-muted)]'
                                     }`}>
                                     {i + 1}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-bold text-white text-sm truncate">{w.employeeName}</p>
-                                    <p className="text-[10px] text-gray-500 font-mono uppercase truncate">{w.levelTitle} • LVL {w.level}</p>
+                                    <p className="font-bold text-[var(--theme-text-primary)] text-sm truncate">{w.employeeName}</p>
+                                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono uppercase truncate">{w.levelTitle} • LVL {w.level}</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="font-mono font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">{formatCompactNumber(w.totalPoints)}</p>
-                                    <p className="text-[8px] text-gray-500 uppercase font-bold">Total Pts</p>
+                                    <p className="text-[8px] text-[var(--theme-text-secondary)] uppercase font-bold">Total Pts</p>
                                  </div>
                             </div>
                         ))}
@@ -190,32 +190,32 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                 </div>
 
                 {/* 3. GLOBAL TEAM LEADERBOARD */}
-                <div className="lg:col-span-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col relative overflow-hidden group">
-                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <div className="lg:col-span-4 bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] backdrop-blur-xl border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-3xl p-6 flex flex-col relative overflow-hidden group">
+                    <h3 className="text-sm font-bold text-[var(--theme-text-muted)] uppercase tracking-widest mb-6 flex items-center gap-2">
                         <Users size={18} className="text-[var(--theme-status-info-text)]" />
                         Top Performing Teams
                     </h3>
                     <div className="space-y-4">
                         {topTeams.map((s, i) => (
-                            <div key={s.id} className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all duration-300 group/item hover:-translate-x-1">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-[var(--theme-status-success-bg)] text-stone-950' : 'bg-white/10 text-[var(--theme-text-muted)]'
+                            <div key={s.id} className="flex items-center gap-3 p-3 bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] rounded-2xl border border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] transition-all duration-300 group/item hover:-translate-x-1">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)]' : 'bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-muted)]'
                                     }`}>
-                                    <Shield size={14} className={i === 0 ? 'text-stone-950' : 'text-[var(--theme-text-muted)]'} />
+                                    <Shield size={14} className={i === 0 ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-muted)]'} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-bold text-white text-sm truncate">{s.siteName}</p>
-                                    <p className="text-[10px] text-gray-500 font-mono uppercase truncate">Team Score • {s.monthlyPoints > 1000 ? 'GOLD TIER' : 'SILVER TIER'}</p>
+                                    <p className="font-bold text-[var(--theme-text-primary)] text-sm truncate">{s.siteName}</p>
+                                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono uppercase truncate">Team Score • {s.monthlyPoints > 1000 ? 'GOLD TIER' : 'SILVER TIER'}</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="font-mono font-bold text-[var(--theme-status-info-text)]">{formatCompactNumber(s.totalPoints)}</p>
-                                    <p className="text-[8px] text-gray-500 uppercase font-bold">Team Pts</p>
+                                    <p className="text-[8px] text-[var(--theme-text-secondary)] uppercase font-bold">Team Pts</p>
                                 </div>
                             </div>
                         ))}
                     </div>
                     <div className="mt-auto pt-6 flex items-center justify-between">
-                        <p className="text-[10px] text-gray-500 font-bold uppercase">Performance Pool</p>
-                        <p className="text-sm font-bold text-white">{currencySymbol} 145,000 Dist.</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase">Performance Pool</p>
+                        <p className="text-sm font-bold text-[var(--theme-text-primary)]">{currencySymbol} 145,000 Dist.</p>
                     </div>
                 </div>
 
@@ -227,16 +227,16 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
 // MINI COMPONENTS
 const PerformanceCard = ({ title, value, sub, icon: Icon, color }: any) => {
     const colors: any = {
-        cyan: { text: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/20' },
+        cyan: { text: 'text-[var(--theme-status-info-text)]', bg: 'bg-[var(--theme-status-info-bg)]', border: 'border-[var(--theme-status-info-border)]' },
         emerald: { text: 'text-[var(--theme-status-success-text)]', bg: 'bg-[var(--theme-status-success-bg)]', border: 'border-[var(--theme-status-success-border)]' },
-        purple: { text: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-        orange: { text: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
+        purple: { text: 'text-[var(--theme-accent)]', bg: 'bg-[var(--theme-accent-muted)]', border: 'border-[var(--theme-border-accent)]' },
+        orange: { text: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]', border: 'border-[var(--theme-status-warning-border)]' },
     };
 
     const style = colors[color] || colors.cyan;
 
     return (
-        <div className="relative overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5 group hover:bg-white/10 transition-all duration-500">
+        <div className="relative overflow-hidden bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] backdrop-blur-xl border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-3xl p-5 group hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] transition-all duration-500">
             <div className={`absolute -right-6 -top-6 w-24 h-24 ${style.bg} blur-2xl rounded-full group-hover:scale-150 transition-transform duration-700`} />
 
             <div className="flex justify-between items-start relative z-10">
@@ -246,9 +246,9 @@ const PerformanceCard = ({ title, value, sub, icon: Icon, color }: any) => {
             </div>
 
             <div className="mt-4 relative z-10">
-                <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">{title}</p>
-                <h3 className="text-2xl font-mono font-black text-white mt-1 break-all">{value}</h3>
-                <p className="text-[10px] text-gray-400 font-medium mt-2 flex items-center gap-1">
+                <p className="text-[10px] text-[var(--theme-text-secondary)] font-black uppercase tracking-[0.2em]">{title}</p>
+                <h3 className="text-2xl font-mono font-black text-[var(--theme-text-primary)] mt-1 break-all">{value}</h3>
+                <p className="text-[10px] text-[var(--theme-text-muted)] font-medium mt-2 flex items-center gap-1">
                     <span className="w-1 h-1 rounded-full bg-[var(--theme-status-success-bg)]" />
                     {sub}
                 </p>

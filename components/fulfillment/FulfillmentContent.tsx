@@ -121,7 +121,7 @@ export const FulfillmentContent: React.FC = () => {
     return (
         <div className="h-full flex flex-col gap-1.5 md:gap-6 p-1.5 md:p-0">
             {isScannerMode && (
-                <div className="fixed inset-0 z-[100] bg-black">
+                <div className="fixed inset-0 z-[100] bg-[var(--theme-bg-app)]">
                     <ScannerInterface />
                 </div>
             )}

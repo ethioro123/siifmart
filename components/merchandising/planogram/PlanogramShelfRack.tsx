@@ -59,7 +59,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
               <span className="w-2 h-2 rounded-full bg-[var(--theme-status-warning-bg)]"></span> Med
             </span>
             <span className="flex items-center gap-1.5 text-[var(--theme-text-secondary)] font-medium">
-              <span className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-600"></span> Low
+              <span className="w-2 h-2 rounded-full bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)]"></span> Low
             </span>
           </div>
         )}
@@ -184,7 +184,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
                         )}
 
                         {pendingProposal && (
-                          <div className="absolute inset-0 bg-[var(--theme-status-warning-bg)] flex items-center justify-center text-white text-[9px] font-semibold tracking-wider uppercase gap-0.5">
+                          <div className="absolute inset-0 bg-[var(--theme-status-warning-bg)] flex items-center justify-center text-[var(--theme-text-primary)] text-[9px] font-semibold tracking-wider uppercase gap-0.5">
                             <Clock size={10} />
                             <span>Pending</span>
                           </div>
@@ -219,7 +219,7 @@ export const PlanogramShelfRack: React.FC<PlanogramShelfRackProps> = ({
 
                       {/* Swap Target Indicator */}
                       {isSelected && (
-                        <div className="absolute inset-0 bg-black/75 flex flex-col items-center justify-center text-white backdrop-blur-[2px]">
+                        <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_75%,transparent)] flex flex-col items-center justify-center text-[var(--theme-text-primary)] backdrop-blur-[2px]">
                           <MousePointer2 size={14} className="motion-safe:animate-bounce" />
                           <span className="text-[9px] font-semibold uppercase mt-0.5 tracking-wider">
                             Swap Target

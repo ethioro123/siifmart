@@ -120,7 +120,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[160] flex items-center justify-center p-2 sm:p-4 bg-black/70 overflow-x-hidden">
+        <div className="fixed inset-0 z-[160] flex items-center justify-center p-2 sm:p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] overflow-x-hidden">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-4xl h-[92dvh] md:h-[88vh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10 flex justify-between items-start gap-2">
@@ -298,7 +298,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 type="button"
                                 onClick={() => onCompleteJob(job)}
                                 disabled={isSubmitting || !isFullySlotted || isCompleted}
-                                className="min-h-[44px] w-full sm:w-auto justify-center px-3 sm:px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                                className="min-h-[44px] w-full sm:w-auto justify-center px-3 sm:px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting ? (
                                     <Loader2 size={16} className="animate-spin" />

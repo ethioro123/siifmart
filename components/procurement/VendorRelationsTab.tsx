@@ -113,7 +113,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                 Vendor Relations & Governance ({countryCode})
               </h2>
               {isManager ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px] font-semibold">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] text-[11px] font-semibold">
                   <ShieldCheck size={12} />
                   <span>Checker • Agreement Sign-Off</span>
                 </span>
@@ -269,7 +269,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                         <button
                           type="button"
                           onClick={() => handleAuthorizeContract(c)}
-                          className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm"
+                          className="h-8 px-3 rounded-full bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm"
                         >
                           <Check size={13} /> Sign Off
                         </button>
@@ -317,7 +317,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-6 rounded-3xl max-w-md w-full space-y-5 shadow-2xl">
             <h3 className="text-lg font-bold tracking-tight text-[var(--theme-text-primary)]">New Vendor Scorecard</h3>
             <div className="space-y-4">

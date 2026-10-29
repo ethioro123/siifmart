@@ -58,7 +58,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
     };
 
     const modalContent = (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
 
                 {/* Header */}
@@ -184,7 +184,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         disabled={isSubmitting}
                         className={`min-h-[44px] flex-1 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm touch-manipulation ${!isSubmitting
                             ? hasDiscrepancy
-                                ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white active:scale-[0.99] cursor-pointer'
+                                ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] active:scale-[0.99] cursor-pointer'
                                 : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] active:scale-[0.99] cursor-pointer'
                             : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
                         }`}

@@ -121,7 +121,7 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                         onClick={() => setFilterStatus('CRITICAL')}
                         className={`min-h-[36px] px-3 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all flex items-center gap-1 touch-manipulation ${
                             filterStatus === 'CRITICAL'
-                                ? 'bg-[var(--theme-status-danger-bg)] text-white shadow-xs'
+                                ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] shadow-xs'
                                 : 'text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)]'
                         }`}
                     >
@@ -132,7 +132,7 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                         onClick={() => setFilterStatus('LOW')}
                         className={`min-h-[36px] px-3 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all flex items-center gap-1 touch-manipulation ${
                             filterStatus === 'LOW'
-                                ? 'bg-[var(--theme-status-warning-bg)] text-white shadow-xs'
+                                ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] shadow-xs'
                                 : 'text-[var(--theme-text-secondary)] text-[var(--theme-status-warning-text)]'
                         }`}
                     >

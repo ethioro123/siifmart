@@ -103,8 +103,8 @@ export const PnLWaterfallCard: React.FC<PnLWaterfallCardProps> = ({
             amount: estimatedTaxLiability,
             type: 'subtract' as const,
             icon: Percent,
-            color: 'text-indigo-600 dark:text-indigo-400',
-            bg: 'bg-indigo-500/10'
+            color: 'text-[var(--theme-accent)] text-[var(--theme-accent)]',
+            bg: 'bg-[var(--theme-accent-muted)]'
         }
     ];
 

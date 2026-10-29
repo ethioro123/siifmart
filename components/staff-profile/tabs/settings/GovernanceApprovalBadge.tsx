@@ -108,7 +108,7 @@ export const GovernanceApprovalBadge: React.FC<GovernanceApprovalBadgeProps> = (
                                 {dept.includes('Finance') && <DollarSign size={11} className="text-[var(--theme-status-danger-text)]" />}
                                 {dept.includes('Logistics') && <Building2 size={11} className="text-[var(--theme-status-info-text)]" />}
                                 {dept.includes('Operations') && <Building2 size={11} className="text-[var(--theme-status-warning-text)]" />}
-                                {dept.includes('Compliance') && <ShieldCheck size={11} className="text-purple-500" />}
+                                {dept.includes('Compliance') && <ShieldCheck size={11} className="text-[var(--theme-accent)]" />}
                                 {dept}
                             </span>
                         ))}

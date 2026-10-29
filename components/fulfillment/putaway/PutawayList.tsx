@@ -100,7 +100,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             {formatJobId(job)}
                                         </span>
                                         {isCritical && (
-                                            <span className="bg-[var(--theme-status-danger-bg)] text-white text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
+                                            <span className="bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
                                                 !
                                             </span>
                                         )}
@@ -246,7 +246,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                 <button
                                     onClick={() => onShowDetails(job)}
                                     disabled={isSubmitting}
-                                    className="w-full h-12 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm min-h-[48px]"
+                                    className="w-full h-12 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm min-h-[48px]"
                                 >
                                     {isSubmitting ? (
                                         <Loader2 size={18} className="animate-spin" />

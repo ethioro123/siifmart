@@ -24,7 +24,7 @@ export const POSRoleDistributionList: React.FC<POSRoleDistributionListProps> = (
                 >
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getColorClass(role.color)} flex items-center justify-center shrink-0 shadow-xs`}>
-                            <Percent size={18} className="text-white" />
+                            <Percent size={18} className="text-[var(--theme-text-primary)]" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-xs text-[var(--theme-text-primary)]">{role.role}</h4>

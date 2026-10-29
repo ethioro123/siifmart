@@ -300,7 +300,7 @@ export default function Roadmap() {
       {/* Search & Filters */}
       <div className="flex flex-col md:flex-row gap-3 mb-3">
         <div className="relative flex-1">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" />
           <input
             type="text"
             placeholder="Search entries..."
@@ -366,26 +366,26 @@ export default function Roadmap() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      {entry.isStarred && <Star size={14} className="text-[var(--theme-status-warning-text)] fill-yellow-400" />}
-                      <h3 className="text-white font-bold truncate">{entry.title}</h3>
+                      {entry.isStarred && <Star size={14} className="text-[var(--theme-status-warning-text)] fill-[var(--theme-status-warning-text)]" />}
+                      <h3 className="text-[var(--theme-text-primary)] font-bold truncate">{entry.title}</h3>
                     </div>
-                    <p className="text-gray-400 text-sm line-clamp-2 mb-3">{entry.description || 'No description'}</p>
+                    <p className="text-[var(--theme-text-muted)] text-sm line-clamp-2 mb-3">{entry.description || 'No description'}</p>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${entryType.bg} ${entryType.color}`}>
                         {entryType.label}
                       </span>
-                      <span className="text-gray-600 text-xs">•</span>
-                      <span className="text-gray-500 text-xs flex items-center gap-1">
+                      <span className="text-[var(--theme-text-secondary)] text-xs">•</span>
+                      <span className="text-[var(--theme-text-secondary)] text-xs flex items-center gap-1">
                         <Calendar size={10} />
                         {formatDate(entry.createdAt)}
                       </span>
-                      <span className="text-gray-500 text-xs flex items-center gap-1">
+                      <span className="text-[var(--theme-text-secondary)] text-xs flex items-center gap-1">
                         <Clock size={10} />
                         {formatTime(entry.createdAt)}
                       </span>
                     </div>
                   </div>
-                  <ChevronRight size={20} className="text-gray-600 group-hover:text-cyber-primary transition-colors flex-shrink-0" />
+                  <ChevronRight size={20} className="text-[var(--theme-text-secondary)] group-hover:text-cyber-primary transition-colors flex-shrink-0" />
                 </div>
               </button>
             );

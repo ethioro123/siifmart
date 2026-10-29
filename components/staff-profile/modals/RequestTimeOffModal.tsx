@@ -52,7 +52,7 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
                     <select
                         value={leaveType}
                         onChange={(e) => setLeaveType(e.target.value as any)}
-                        className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                        className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                     >
                         <option value="Annual Leave">Annual Vacation Leave</option>
                         <option value="Sick Leave">Sick / Medical Leave</option>
@@ -71,7 +71,7 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
                             min={today}
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                            className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                             required
                         />
                     </div>
@@ -84,13 +84,13 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
                             min={startDate}
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                            className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                             required
                         />
                     </div>
                 </div>
 
-                <div className="p-3 bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] rounded-xl text-xs font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] flex items-center justify-between">
+                <div className="p-3 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] rounded-xl text-xs font-bold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] flex items-center justify-between">
                     <span>Duration:</span>
                     <span className="font-mono text-sm">{days} {days === 1 ? 'Day' : 'Days'}</span>
                 </div>
@@ -104,15 +104,15 @@ export const RequestTimeOffModal: React.FC<RequestTimeOffModalProps> = ({
                         onChange={(e) => setReason(e.target.value)}
                         placeholder="Briefly state reason for leave..."
                         rows={3}
-                        className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-medium text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20 resize-none"
+                        className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-medium text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20 resize-none"
                     />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)] dark:border-white/10">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] transition-colors cursor-pointer"
                     >
                         Cancel
                     </button>

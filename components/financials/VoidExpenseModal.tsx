@@ -130,7 +130,7 @@ export const VoidExpenseModal: React.FC = () => {
                     <button
                         onClick={handleConfirm}
                         disabled={reason.trim().length < 5 || isSubmitting}
-                        className="px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white dark:text-black disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
+                        className="px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
                     >
                         {isSubmitting && <Loader2 className="animate-spin" size={14} />}
                         <span>{isSubmitting ? 'Recording Void...' : 'Confirm Void'}</span>

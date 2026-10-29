@@ -1,6 +1,6 @@
 # 15 · State and theme specification
 
-[Handbook](../APPLE_DESIGN_GUIDE.md) · Revision C, 30 October 2026
+[Handbook](../SIIFMART_DESIGN_STANDARD.md) · Revision C, 30 October 2026
 
 ## Revision C · Complete workspace palette
 

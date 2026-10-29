@@ -75,7 +75,7 @@ export default function SettingsPage() {
             {/* Sidebar Overlay */}
             {isNavOpen && (
                 <div
-                    className="fixed inset-0 bg-black/40 z-[40] animate-in fade-in duration-200"
+                    className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] z-[40] animate-in fade-in duration-200"
                     onClick={() => setIsNavOpen(false)}
                 />
             )}

@@ -131,7 +131,7 @@ export const OverviewTab: React.FC = () => {
                                 {formatCompactNumber(totalInventoryValue, { currency: currencySymbol })}
                             </h3>
                         </div>
-                        <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Boxes size={16} />
                         </div>
                     </div>

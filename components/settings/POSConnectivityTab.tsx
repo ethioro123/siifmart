@@ -66,7 +66,7 @@ export function POSConnectivityTab({
                       : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-border)]'
                     }`}
                   >
-                    <div className={`p-2.5 rounded-lg transition-transform ${isActive ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}>
+                    <div className={`p-2.5 rounded-lg transition-transform ${isActive ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}>
                       {method === 'Cash' ? <Banknote size={20} /> : method === 'Card' ? <CreditCard size={20} /> : method === 'Mobile Money' ? <Smartphone size={20} /> : <UserCheck size={20} />}
                     </div>
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-center px-2">{method}</span>
@@ -146,9 +146,9 @@ export function POSConnectivityTab({
             type="button"
             onClick={() => handleSaveSection('payments')}
             disabled={isSavingPayments}
-            className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+            className="h-10 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
           >
-            {isSavingPayments ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={15} />}
+            {isSavingPayments ? <span className="w-4 h-4 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" /> : <Save size={15} />}
             Save Payment Settings
           </button>
         </div>

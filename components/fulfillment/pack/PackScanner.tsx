@@ -429,12 +429,12 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                     isProcessing || isSubmitting
                                         ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/60 cursor-not-allowed'
                                         : isFullyPacked
-                                            ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-white'
+                                            ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-text-primary)]'
                                             : step === 'CONFIRM_QTY'
-                                                ? 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white'
+                                                ? 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-[var(--theme-text-primary)]'
                                                 : !inputVal.trim()
                                                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/40 cursor-not-allowed'
-                                                    : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white'
+                                                    : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-[var(--theme-text-primary)]'
                                 }`}
                             >
                                 {isProcessing || isSubmitting ? (

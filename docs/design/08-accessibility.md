@@ -1,6 +1,6 @@
 # 08 · Accessibility and inclusion
 
-[Handbook](../APPLE_DESIGN_GUIDE.md) · Edition 29 October 2026
+[Handbook](../SIIFMART_DESIGN_STANDARD.md) · Edition 29 October 2026
 
 ## Release baseline
 

@@ -14,7 +14,7 @@ export default function GlobalTaskQueue({ tasks, employees, setIsTaskQueueOpen }
 
    return (
       <div className="animate-in slide-in-from-top duration-300">
-         <div className="bg-[var(--theme-bg-card)] border border-white/10 rounded-2xl p-6 space-y-4">
+         <div className="bg-[var(--theme-bg-card)] border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between">
                <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
                   <ClipboardList size={18} className="text-cyber-primary" />
@@ -58,11 +58,11 @@ export default function GlobalTaskQueue({ tasks, employees, setIsTaskQueueOpen }
                               priorityTasks.map(task => (
                                  <div key={task.id} className="bg-[var(--theme-bg-card)] p-3 rounded-lg border border-[var(--theme-border-subtle)] hover:border-[var(--theme-border)] transition-colors group cursor-pointer">
                                     <div className="flex justify-between items-start mb-1">
-                                       <span className="text-sm font-medium text-gray-200 line-clamp-1">{task.title}</span>
+                                       <span className="text-sm font-medium text-[var(--theme-text-muted)] line-clamp-1">{task.title}</span>
                                     </div>
                                     <div className="flex items-center justify-between text-[10px] text-[var(--theme-text-secondary)]">
                                        <span>{employees.find(e => e.id === task.assignedTo)?.name || 'Unassigned'}</span>
-                                       <span className="text-gray-600">{formatDateTime(task.dueDate).split(',')[0]}</span>
+                                       <span className="text-[var(--theme-text-secondary)]">{formatDateTime(task.dueDate).split(',')[0]}</span>
                                     </div>
                                  </div>
                               ))

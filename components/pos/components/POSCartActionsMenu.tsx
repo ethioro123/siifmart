@@ -112,7 +112,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     }}
                     className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <div className="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
                         <Box size={14} />
                     </div>
                     <span>{t('pos.openCashDrawer')}</span>
@@ -128,7 +128,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     }}
                     className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Printer size={14} />
                     </div>
                     <span>{t('pos.reprintReceipt')}</span>
@@ -142,7 +142,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                     }}
                     className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Lock size={14} />
                     </div>
                     <span>{t('pos.shiftSummary')}</span>

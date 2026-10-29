@@ -421,12 +421,12 @@ export const ScannerInterface: React.FC = () => {
 
                 {/* Item Completion Overlay */}
                 {lastCompletedItem && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 animate-in fade-in duration-300">
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] animate-in fade-in duration-300">
                         <div className="text-center animate-in zoom-in-95 duration-300">
                             <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center animate-pulse border border-primary/30">
                                 <CheckCircle size={48} className="text-primary" />
                             </div>
-                            <h3 className="text-2xl font-bold mb-2 text-white">Picked</h3>
+                            <h3 className="text-2xl font-bold mb-2 text-[var(--theme-text-primary)]">Picked</h3>
                             <p className="text-primary font-bold text-lg mb-1">{lastCompletedItem.qty}x {lastCompletedItem.name}</p>
                         </div>
                     </div>

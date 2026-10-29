@@ -150,7 +150,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm z-[100] flex items-center justify-center p-4">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-[var(--theme-border)] flex items-center justify-between">
@@ -399,7 +399,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                         >
                             <Check size={14} />
                             <span>{isSubmitting ? 'Saving...' : 'Save Configuration'}</span>

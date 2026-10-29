@@ -180,17 +180,17 @@ export const suggestNextLocation = (
  */
 export const getZoneColor = (zone: string): string => {
     const zoneColors: Record<string, string> = {
-        'A': 'bg-blue-500/20 text-blue-400 border-blue-500/50',
-        'B': 'bg-green-500/20 text-green-400 border-green-500/50',
-        'C': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50',
-        'D': 'bg-purple-500/20 text-purple-400 border-purple-500/50',
-        'E': 'bg-pink-500/20 text-pink-400 border-pink-500/50',
-        'F': 'bg-orange-500/20 text-orange-400 border-orange-500/50',
-        'G': 'bg-red-500/20 text-red-400 border-red-500/50',
-        'H': 'bg-indigo-500/20 text-indigo-400 border-indigo-500/50',
+        'A': 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
+        'B': 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
+        'C': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
+        'D': 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]',
+        'E': 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]',
+        'F': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
+        'G': 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]',
+        'H': 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]',
     };
 
-    return zoneColors[zone] || 'bg-gray-500/20 text-gray-400 border-gray-500/50';
+    return zoneColors[zone] || 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_20%,transparent)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_50%,transparent)]';
 };
 
 /**

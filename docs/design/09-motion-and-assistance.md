@@ -1,6 +1,6 @@
 # 09 · Motion, feedback and assistance
 
-[Handbook](../APPLE_DESIGN_GUIDE.md) · Edition 29 October 2026
+[Handbook](../SIIFMART_DESIGN_STANDARD.md) · Edition 29 October 2026
 
 ## Motion explains change
 

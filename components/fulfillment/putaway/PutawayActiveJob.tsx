@@ -46,7 +46,7 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
                             <h2 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight font-mono">Job {formatJobId(job)}</h2>
                             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${
                                 job.priority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' :
-                                job.priority === 'High' ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20' :
+                                job.priority === 'High' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]' :
                                 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                             }`}>
                                 {job.priority} Priority
@@ -139,7 +139,7 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
                     <button
                         onClick={onCompleteJob}
                         disabled={isSubmitting}
-                        className="w-full h-12 md:h-14 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase tracking-wider text-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+                        className="w-full h-12 md:h-14 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase tracking-wider text-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
                     >
                         {isSubmitting ? (
                             <Loader2 size={20} className="animate-spin" />
@@ -153,7 +153,7 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
                     <button
                         onClick={onStartScanning}
                         disabled={isSubmitting}
-                        className="w-full h-12 md:h-14 bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase tracking-wider text-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+                        className="w-full h-12 md:h-14 bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)] font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm uppercase tracking-wider text-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
                     >
                         {isSubmitting ? (
                             <Loader2 size={20} className="animate-spin" />

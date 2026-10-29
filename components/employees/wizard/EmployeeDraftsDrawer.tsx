@@ -47,7 +47,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[10005] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-[10005] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm animate-in fade-in">
             <div className="relative w-full max-w-2xl bg-[var(--theme-bg-app)] border border-[var(--theme-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] flex items-center justify-between gap-3 bg-[var(--theme-bg-card)]">
@@ -117,7 +117,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                     key={draft.id}
                                     className={`p-4 rounded-2xl border transition-all ${
                                         isActive
-                                            ? 'bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 border-[var(--theme-border)] shadow-xs'
+                                            ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border-[var(--theme-border)] shadow-xs'
                                             : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-border)]/40'
                                     }`}
                                 >
@@ -129,7 +129,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                                     {draft.title}
                                                 </h4>
                                                 {isActive && (
-                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--theme-primary)] text-white flex items-center gap-1 shrink-0">
+                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--theme-primary)] text-[var(--theme-text-primary)] flex items-center gap-1 shrink-0">
                                                         <CheckCircle2 size={11} />
                                                         Active in Wizard
                                                     </span>

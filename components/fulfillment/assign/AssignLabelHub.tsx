@@ -169,13 +169,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         <div className="flex bg-[var(--theme-bg-subtle)] p-0.5 rounded-lg border border-[var(--theme-border)] shrink-0">
                             <button
                                 onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
-                                className={`px-2.5 py-1 min-h-[44px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
+                                className={`px-2.5 py-1 min-h-[44px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 {t('warehouse.productsMode')}
                             </button>
                             <button
                                 onClick={() => { setLabelMode('BAY'); setLabelSize('MEDIUM'); }}
-                                className={`px-2.5 py-1 min-h-[44px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
+                                className={`px-2.5 py-1 min-h-[44px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 {t('warehouse.baysMode')}
                             </button>
@@ -196,13 +196,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] w-full sm:w-auto">
                             <button
                                 onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
-                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
                                 <Package size={14} className="inline mr-2 shrink-0" /> {t('warehouse.productsMode')}
                             </button>
                             <button
                                 onClick={() => { setLabelMode('BAY'); setLabelSize('MEDIUM'); }}
-                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
                                 <Layout size={14} className="inline mr-2 shrink-0" /> {t('warehouse.baysMode')}
                             </button>
@@ -219,13 +219,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
                                     <button
                                         onClick={() => setLabelFormat('BARCODE')}
-                                        className={`flex-1 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'BARCODE' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                        className={`flex-1 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'BARCODE' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
                                         {t('warehouse.barcodeFormat')}
                                     </button>
                                     <button
                                         onClick={() => setLabelFormat('QR')}
-                                        className={`flex-1 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'QR' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                        className={`flex-1 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'QR' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
                                         {t('warehouse.qrCodeFormat')}
                                     </button>
@@ -305,7 +305,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     <button
                                         disabled={isPrinting || !zoneLetters.length}
                                         onClick={handlePrintLocation}
-                                        className="flex-1 min-h-[44px] py-3.5 bg-[var(--theme-accent)] text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation"
+                                        className="flex-1 min-h-[44px] py-3.5 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation"
                                     >
                                         <Printer size={18} />
                                         <span>{t('warehouse.generateLocationLabelButton')}</span>
@@ -428,7 +428,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                             disabled={!matchedProduct || isPrinting}
                                             onClick={handlePrintProduct}
                                             className={`flex-1 min-h-[44px] py-3.5 font-semibold rounded-2xl transition-all flex items-center justify-center gap-2 text-xs touch-manipulation ${searchSku.trim()
-                                                ? 'bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98]'
+                                                ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 active:scale-[0.98]'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] cursor-not-allowed border border-[var(--theme-border)]'
                                                 }`}
                                         >

@@ -21,7 +21,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
     const lineTotal = effectivePrice * numericValue;
 
     return (
-        <div className="fixed inset-0 z-[999] bg-black/60 flex items-center justify-center p-4" onClick={onCancel}>
+        <div className="fixed inset-0 z-[999] bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] flex items-center justify-center p-4" onClick={onCancel}>
             <div
                 className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl w-full max-w-sm shadow-xl animate-in zoom-in-95 fade-in duration-200"
                 onClick={e => e.stopPropagation()}

@@ -132,7 +132,7 @@ export function KenyaGatewaysPanel({
                                             onClick={() => setForm(p => ({ ...p, mpesaEnvironment: env }))}
                                             className={`py-1.5 px-3 rounded-lg text-xs font-medium uppercase tracking-wider cursor-pointer transition-all ${
                                                 form.mpesaEnvironment === env
-                                                    ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
+                                                    ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                             }`}
                                         >

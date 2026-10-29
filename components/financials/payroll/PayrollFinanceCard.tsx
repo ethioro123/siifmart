@@ -113,7 +113,7 @@ export const PayrollFinanceCard: React.FC<PayrollFinanceCardProps> = ({
                   type="button"
                   onClick={handleSignFinance}
                   disabled={isActionLoading}
-                  className="w-full py-2 bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white font-semibold rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+                  className="w-full py-2 bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
                 >
                   {isActionLoading ? <Loader2 size={13} className="animate-spin" /> : <Building2 size={14} />}
                   Authorize Funds as Finance

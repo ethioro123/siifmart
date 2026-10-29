@@ -138,13 +138,13 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
                 return {
                     title: `${profile.name} Calendar`,
                     dateString: dateStr,
-                    badgeTheme: 'border-stone-400/30 text-stone-700 dark:text-stone-300 bg-stone-500/10'
+                    badgeTheme: 'border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)]'
                 };
             } catch {
                 return {
                     title: `${profile.name} Calendar`,
                     dateString: time.toDateString().toUpperCase(),
-                    badgeTheme: 'border-stone-400/30 text-stone-700 dark:text-stone-300 bg-stone-500/10'
+                    badgeTheme: 'border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)]'
                 };
             }
         }

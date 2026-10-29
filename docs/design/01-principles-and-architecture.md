@@ -1,6 +1,6 @@
 # 01 · Product principles and information architecture
 
-[Handbook](../APPLE_DESIGN_GUIDE.md) · Edition 29 October 2026
+[Handbook](../SIIFMART_DESIGN_STANDARD.md) · Edition 29 October 2026
 
 ## Design quality is observable
 

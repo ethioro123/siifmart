@@ -51,7 +51,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
     };
 
     return (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-3 sm:p-6 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm animate-in fade-in duration-200">
             <div
                 className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
                 role="dialog"
@@ -81,7 +81,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                                 <button
                                     onClick={() => onFormatChange('BARCODE')}
                                     className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${previewData.format === 'BARCODE'
-                                        ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                        ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                 >
@@ -90,7 +90,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                                 <button
                                     onClick={() => onFormatChange('QR')}
                                     className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${previewData.format === 'QR'
-                                        ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                        ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                 >
@@ -117,7 +117,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                             <button
                                 onClick={() => onFormatChange('BARCODE')}
                                 className={`flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${previewData.format === 'BARCODE'
-                                    ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)]'
                                     }`}
                             >
@@ -126,7 +126,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                             <button
                                 onClick={() => onFormatChange('QR')}
                                 className={`flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${previewData.format === 'QR'
-                                    ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)]'
                                     }`}
                             >
@@ -249,7 +249,7 @@ export const BarcodeLabelPreviewModal: React.FC<BarcodeLabelPreviewModalProps> =
                             onPrint();
                         }}
                         disabled={isPrinting || !previewData.code?.trim()}
-                        className="px-6 py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 text-white font-semibold text-xs min-h-[44px] flex items-center gap-2 shadow-xs transition-all disabled:opacity-50 touch-manipulation cursor-pointer"
+                        className="px-6 py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 text-[var(--theme-text-primary)] font-semibold text-xs min-h-[44px] flex items-center gap-2 shadow-xs transition-all disabled:opacity-50 touch-manipulation cursor-pointer"
                     >
                         <Printer size={16} />
                         <span>{quantity > 1 ? t('warehouse.printLabelsNowButton', { count: quantity }) : t('warehouse.printSingleLabelNowButton')}</span>

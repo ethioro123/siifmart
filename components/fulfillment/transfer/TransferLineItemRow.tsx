@@ -95,7 +95,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
                 {hasDiscrepancy && onResolveDiscrepancy && (
                     <button
                         onClick={(e) => { e.stopPropagation(); onResolveDiscrepancy(selectedJob, item, idx); }}
-                        className="px-2.5 py-1.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:text-white border border-[var(--theme-status-danger-border)] text-[11px] uppercase font-semibold tracking-wider rounded-lg transition-colors flex items-center gap-1 min-h-[36px]"
+                        className="px-2.5 py-1.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-status-danger-border)] text-[11px] uppercase font-semibold tracking-wider rounded-lg transition-colors flex items-center gap-1 min-h-[36px]"
                     >
                         <AlertTriangle size={12} />
                         <span>{t('warehouse.resolveDiscrepancy')}</span>

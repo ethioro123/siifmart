@@ -113,7 +113,7 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                                             key={status}
                                             onClick={() => { setPackJobFilter(status as any); setIsPackFilterDropdownOpen(false); }}
                                             className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wider uppercase transition-colors flex items-center justify-between min-h-[38px] cursor-pointer ${
-                                                packJobFilter === status ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
+                                                packJobFilter === status ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                             }`}
                                         >
                                             {status === 'all' ? t('warehouse.allStatus') : status}

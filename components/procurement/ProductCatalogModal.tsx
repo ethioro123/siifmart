@@ -177,7 +177,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                         <img
                                             src={product.image}
                                             alt={product.name}
-                                            className="w-14 h-14 rounded-xl object-cover bg-black/20 shrink-0"
+                                            className="w-14 h-14 rounded-xl object-cover bg-[color-mix(in_srgb,var(--theme-overlay)_20%,transparent)] shrink-0"
                                             onError={(e) => {
                                                 e.currentTarget.style.display = 'none';
                                             }}

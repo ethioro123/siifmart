@@ -174,7 +174,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                 onClick={() => setFilterStatus(status)}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   filterStatus === status
-                    ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                    ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                 }`}
               >
@@ -220,7 +220,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                         {req.siteName || req.siteId}
                       </span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]">
                         Region: {req.regionCode}
                       </span>
                       {exceedsBuffer ? (
@@ -290,7 +290,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                               type="button"
                               onClick={() => handleReject(req)}
                               disabled={isActioning}
-                              className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white font-semibold text-xs transition-colors cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] font-semibold text-xs transition-colors cursor-pointer"
                             >
                               Confirm
                             </button>
@@ -339,7 +339,7 @@ export const HeadcountQuotaApprovalModal: React.FC<HeadcountQuotaApprovalModalPr
                               type="button"
                               onClick={() => handleApprove(req)}
                               disabled={isActioning || !canAuthorizeFinal}
-                              className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                              className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-text-primary)] font-semibold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                             >
                               {isActioning ? (
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />

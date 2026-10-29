@@ -90,7 +90,7 @@ export function IssueNoticeModal({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs animate-in fade-in duration-150"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}
@@ -247,7 +247,7 @@ export function IssueNoticeModal({
                                     }}
                                     className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                                         expirationDays === preset.val && !customExpiry
-                                            ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                            ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
                                     }`}
                                 >

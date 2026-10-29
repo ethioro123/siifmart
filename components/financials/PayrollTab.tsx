@@ -309,7 +309,7 @@ export const PayrollTab: React.FC = () => {
                                             onClick={() => setPayrollPage(page)}
                                             className={`w-6 h-6 rounded-lg text-xs font-semibold transition-all ${
                                                 payrollPage === page
-                                                    ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                                    ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                             }`}
                                         >

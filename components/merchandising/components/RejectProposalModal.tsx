@@ -116,7 +116,7 @@ export const RejectProposalModal: React.FC<RejectProposalModalProps> = ({
           <button
             type="submit"
             disabled={isSubmitting || !reason.trim()}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] px-4 py-2 text-xs font-semibold text-white transition-colors disabled:opacity-50 shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] px-4 py-2 text-xs font-semibold text-[var(--theme-text-primary)] transition-colors disabled:opacity-50 shadow-sm"
           >
             <XCircle size={14} />
             <span>{isSubmitting ? 'Rejecting...' : 'Confirm Rejection'}</span>

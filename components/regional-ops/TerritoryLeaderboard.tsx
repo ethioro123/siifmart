@@ -202,7 +202,7 @@ export const TerritoryLeaderboard: React.FC<TerritoryLeaderboardProps> = ({
 
       {/* Top Performer Spotlight Card */}
       {topPerformer && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[var(--theme-bg-card)] to-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-[var(--theme-status-warning)] via-[var(--theme-bg-card)] to-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-2xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center font-bold text-lg shrink-0 border border-[var(--theme-status-warning-border)]">
               <Trophy className="w-6 h-6" />
@@ -258,7 +258,7 @@ export const TerritoryLeaderboard: React.FC<TerritoryLeaderboardProps> = ({
                   card.rank === 1
                     ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                     : card.rank === 2
-                      ? 'bg-stone-300/20 text-stone-600 dark:text-stone-300 border-stone-300/30'
+                      ? 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_20%,transparent)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)]'
                       : card.rank === 3
                         ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'

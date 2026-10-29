@@ -107,7 +107,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                         >
                             <Icon size={14} /> {subTab.label}
                             {subTab.count ? (
-                                <span className="px-1.5 py-0.5 bg-[var(--theme-status-danger-bg)] text-white rounded-full text-[10px] font-semibold">
+                                <span className="px-1.5 py-0.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] rounded-full text-[10px] font-semibold">
                                     {subTab.count}
                                 </span>
                             ) : null}
@@ -138,7 +138,7 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                                     className="min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer disabled:opacity-40"
                                 >
                                     <div className={`w-11 h-6 rounded-full p-0.5 transition-colors relative shrink-0 ${site.isFulfillmentNode ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}>
-                                        <div className={`w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${site.isFulfillmentNode ? 'translate-x-5' : 'translate-x-0'}`} />
+                                        <div className={`w-5 h-5 bg-[var(--theme-bg-card)] rounded-full shadow-xs transition-transform ${site.isFulfillmentNode ? 'translate-x-5' : 'translate-x-0'}`} />
                                     </div>
                                 </button>
                             </div>
@@ -231,9 +231,9 @@ export const WMSPickControlTab: React.FC<WMSPickControlTabProps> = ({
                                                 type="button"
                                                 onClick={() => handleReleaseClick(sale.id)}
                                                 disabled={isSaving === sale.id}
-                                                className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                                className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs inline-flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                             >
-                                                {isSaving === sale.id ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Play size={12} />}
+                                                {isSaving === sale.id ? <span className="w-3.5 h-3.5 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" /> : <Play size={12} />}
                                                 Release
                                             </button>
                                         </td>

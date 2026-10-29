@@ -26,7 +26,7 @@ export function Protected({ children, permission, fallback = null, showMessage =
     if (!allowed) {
         if (showMessage) {
             return (
-                <div className="text-xs text-gray-500 italic">
+                <div className="text-xs text-[var(--theme-text-secondary)] italic">
                     Access restricted
                 </div>
             );

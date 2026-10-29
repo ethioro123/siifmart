@@ -64,7 +64,7 @@ export const DiscountModal: React.FC = () => {
                 {!appliedDiscountCodeDetails && (
                     <>
                         <div className="text-center">
-                            <div className="w-14 h-14 mx-auto mb-3 bg-pink-500/10 rounded-2xl flex items-center justify-center border border-pink-500/20 text-pink-500 shadow-xs">
+                            <div className="w-14 h-14 mx-auto mb-3 bg-[var(--theme-accent-muted)] rounded-2xl flex items-center justify-center border border-[var(--theme-border-accent)] text-[var(--theme-accent)] shadow-xs">
                                 <Tag className="w-7 h-7" />
                             </div>
                             <p className="text-[var(--theme-text-secondary)] text-xs font-medium">
@@ -121,7 +121,7 @@ export const DiscountModal: React.FC = () => {
                         {/* Anti-Fraud Security Policy Section */}
                         <div className="bg-[var(--theme-bg-subtle)] rounded-2xl p-4 border border-[var(--theme-border)] space-y-1.5">
                             <div className="flex items-center gap-2 text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight">
-                                <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                                <div className="w-5 h-5 rounded-md bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                     <Tag className="w-3 h-3" />
                                 </div>
                                 <span>{t('pos.zeroTrustPromotionPolicy')}</span>

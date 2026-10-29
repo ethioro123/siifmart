@@ -60,17 +60,17 @@ const FiscalYearDeck: React.FC<FiscalYearDeckProps> = ({ year, currentQuarter, m
                             ${isCurrent
                                 ? 'bg-cyber-primary/10 border-cyber-primary shadow-[0_0_20px_rgba(0,255,157,0.2)]'
                                 : isCompleted
-                                    ? 'bg-white/5 border-white/10 hover:bg-white/10'
-                                    : 'bg-black/20 border-white/5 opacity-60'}
+                                    ? 'bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)]'
+                                    : 'bg-[color-mix(in_srgb,var(--theme-overlay)_20%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] opacity-60'}
                         `}
                     >
                         {/* Header */}
                         <div className="flex justify-between items-start mb-3">
                             <div>
-                                <h3 className={`font-bold text-lg font-mono ${isCurrent ? 'text-cyber-primary' : 'text-white'}`}>Q{q}</h3>
-                                <p className="text-[10px] text-gray-400 font-mono uppercase">{getQuarterDates(q)}</p>
+                                <h3 className={`font-bold text-lg font-mono ${isCurrent ? 'text-cyber-primary' : 'text-[var(--theme-text-primary)]'}`}>Q{q}</h3>
+                                <p className="text-[10px] text-[var(--theme-text-muted)] font-mono uppercase">{getQuarterDates(q)}</p>
                             </div>
-                            <div className={`p-2 rounded-lg ${isCurrent ? 'bg-cyber-primary/20 text-cyber-primary' : isCompleted ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]' : 'bg-gray-800 text-gray-600'}`}>
+                            <div className={`p-2 rounded-lg ${isCurrent ? 'bg-cyber-primary/20 text-cyber-primary' : isCompleted ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-bg-panel)] text-[var(--theme-text-secondary)]'}`}>
                                 {isCurrent ? <Clock size={16} className="animate-pulse" /> : isCompleted ? <CheckCircle size={16} /> : <Lock size={16} />}
                             </div>
                         </div>
@@ -78,8 +78,8 @@ const FiscalYearDeck: React.FC<FiscalYearDeckProps> = ({ year, currentQuarter, m
                         {/* Metric (if provided) */}
                         {data ? (
                             <div className="mb-3">
-                                <p className="text-2xl font-bold text-white tracking-tight">{data.value}</p>
-                                <p className="text-[10px] text-gray-500">{data.label}</p>
+                                <p className="text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight">{data.value}</p>
+                                <p className="text-[10px] text-[var(--theme-text-secondary)]">{data.label}</p>
                                 {data.trend && (
                                     <div className="mt-1 text-xs flex items-center gap-1 text-[var(--theme-status-success-text)]">
                                         <TrendingUp size={10} /> {data.trend}
@@ -89,16 +89,16 @@ const FiscalYearDeck: React.FC<FiscalYearDeckProps> = ({ year, currentQuarter, m
                         ) : (
                             <div className="h-12 flex items-center">
                                 {isFuture ? (
-                                    <p className="text-xs text-gray-600 italic">Locked</p>
+                                    <p className="text-xs text-[var(--theme-text-secondary)] italic">Locked</p>
                                 ) : (
-                                    <p className="text-xs text-gray-400 italic">--</p>
+                                    <p className="text-xs text-[var(--theme-text-muted)] italic">--</p>
                                 )}
                             </div>
                         )}
 
                         {/* Progress Bar (Current Only) */}
                         {isCurrent && (
-                            <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden mt-2">
+                            <div className="w-full bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] h-1.5 rounded-full overflow-hidden mt-2">
                                 <div
                                     className="h-full bg-cyber-primary"
                                     ref={(el) => { if (el) el.style.width = `${getProgress()}%`; }}

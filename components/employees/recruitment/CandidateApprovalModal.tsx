@@ -155,7 +155,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
             <div className="bg-[var(--theme-bg-panel)] rounded-3xl border border-[var(--theme-border)] shadow-[var(--shadow-modal)] p-6 max-w-xl w-full space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex items-start justify-between pb-3 border-b border-[var(--theme-border)]">
@@ -276,7 +276,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                             type="button"
                                             onClick={handleApproveHR}
                                             disabled={isProcessing}
-                                            className="h-8 px-3 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                            className="h-8 px-3 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
                                         >
                                             <ShieldCheck size={14} />
                                             <span>Sign Off HR Clearance</span>
@@ -344,7 +344,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                                 type="button"
                                                 onClick={handleConfirmManager}
                                                 disabled={isProcessing || !hasHRApproval}
-                                                className="h-8 px-3 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                                className="h-8 px-3 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
                                             >
                                                 <UserCheck size={14} />
                                                 <span>Confirm Hiring Offer</span>
@@ -416,7 +416,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                                                 type="button"
                                                 onClick={handleApproveFinance}
                                                 disabled={isProcessing}
-                                                className="h-8 px-3 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                                className="h-8 px-3 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
                                             >
                                                 <Banknote size={14} />
                                                 <span>Authorize Salary & Exception</span>

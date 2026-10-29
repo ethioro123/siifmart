@@ -126,7 +126,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
     return (
         <>
             {/* Modal Overlay */}
-            <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
+            <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] backdrop-blur-md z-[9999] flex items-center justify-center p-4">
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
                     {/* Header */}
                     <div className="p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-card)]">
@@ -150,7 +150,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                             key={size}
                                             onClick={() => setLabelSize(size)}
                                             className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${labelSize === size
-                                                ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                                ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                                 }`}
                                         >
@@ -220,7 +220,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                                     <p className="text-[11px] font-mono text-[var(--theme-text-secondary)]">SKU: {product.sku} {product.barcode ? `| ${product.barcode}` : ''}</p>
                                                 </div>
                                             </div>
-                                            <span className="text-xs font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 px-2.5 py-1 rounded-lg group-hover:bg-[var(--theme-accent)] group-hover:text-white transition-all flex items-center gap-1">
+                                            <span className="text-xs font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 px-2.5 py-1 rounded-lg group-hover:bg-[var(--theme-accent)] group-hover:text-[var(--theme-text-primary)] transition-all flex items-center gap-1">
                                                 <Plus size={12} /> Add
                                             </span>
                                         </button>
@@ -265,8 +265,8 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                     </div>
 
                                     {/* Preview of Label Layout */}
-                                    <div className="bg-white p-2.5 rounded-xl w-52 shrink-0 text-slate-900 border border-slate-300 font-sans shadow-xs">
-                                        <div className="bg-slate-100 p-1 border-b border-dashed border-slate-300 text-[11px] font-bold uppercase tracking-wider truncate text-center text-slate-900 rounded-t-sm">
+                                    <div className="bg-[var(--theme-bg-card)] p-2.5 rounded-xl w-52 shrink-0 text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-sans shadow-xs">
+                                        <div className="bg-[var(--theme-bg-subtle)] p-1 border-b border-dashed border-[var(--theme-border)] text-[11px] font-bold uppercase tracking-wider truncate text-center text-[var(--theme-text-primary)] rounded-t-sm">
                                             {labelData.product.name}
                                         </div>
                                         <div className="py-2 flex flex-col items-center justify-center">
@@ -280,18 +280,18 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                                     margin={0}
                                                 />
                                             ) : <span className="text-[var(--theme-status-danger-text)] font-bold text-[11px]">NO DATA</span>}
-                                            <div className="font-mono font-bold text-[11px] mt-1 text-slate-800 tracking-wider">
+                                            <div className="font-mono font-bold text-[11px] mt-1 text-[var(--theme-text-primary)] tracking-wider">
                                                 {labelData.product.sku}
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-1 border-t border-dashed border-slate-300 pt-1.5 text-[11px]">
-                                            <div className="text-center bg-slate-50 p-1 rounded border border-slate-200">
-                                                <span className="block font-bold text-slate-500 text-[11px] uppercase tracking-wider">PRICE</span>
-                                                <span className="block font-extrabold text-slate-900 text-xs">{activeCurrency} {labelData.product.price}</span>
+                                        <div className="grid grid-cols-2 gap-1 border-t border-dashed border-[var(--theme-border)] pt-1.5 text-[11px]">
+                                            <div className="text-center bg-[var(--theme-bg-subtle)] p-1 rounded border border-[var(--theme-border-subtle)]">
+                                                <span className="block font-bold text-[var(--theme-text-secondary)] text-[11px] uppercase tracking-wider">PRICE</span>
+                                                <span className="block font-extrabold text-[var(--theme-text-primary)] text-xs">{activeCurrency} {labelData.product.price}</span>
                                             </div>
-                                            <div className="text-center bg-slate-50 p-1 rounded border border-slate-200">
-                                                <span className="block font-bold text-slate-500 text-[11px] uppercase tracking-wider">CAT</span>
-                                                <span className="block font-extrabold text-slate-900 text-xs truncate">{(labelData.product.category || 'General').toUpperCase()}</span>
+                                            <div className="text-center bg-[var(--theme-bg-subtle)] p-1 rounded border border-[var(--theme-border-subtle)]">
+                                                <span className="block font-bold text-[var(--theme-text-secondary)] text-[11px] uppercase tracking-wider">CAT</span>
+                                                <span className="block font-extrabold text-[var(--theme-text-primary)] text-xs truncate">{(labelData.product.category || 'General').toUpperCase()}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -350,7 +350,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                         <button
                             onClick={handlePrint}
                             disabled={totalLabels === 0}
-                            className="flex-[2] py-2.5 bg-[var(--theme-accent)] hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-[0.98]"
+                            className="flex-[2] py-2.5 bg-[var(--theme-accent)] hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-text-primary)] font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-[0.98]"
                         >
                             <Printer size={16} />
                             <span>Print {totalLabels} Label{totalLabels !== 1 ? 's' : ''} ({labelSize.toUpperCase()})</span>

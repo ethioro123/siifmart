@@ -112,7 +112,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] backdrop-blur-md p-4 overflow-y-auto">
             <div className="relative w-full max-w-2xl bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-2xl p-6 overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between pb-4 border-b border-[var(--theme-border)]">
@@ -374,7 +374,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                         onClick={() => setStatus(s.id as StoreAuditStatus)}
                                         className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all active:scale-[0.98] ${
                                             status === s.id
-                                                ? s.id === 'passed' ? 'bg-[var(--theme-status-success-bg)] text-white' : s.id === 'action_required' ? 'bg-[var(--theme-status-warning-bg)] text-white' : 'bg-[var(--theme-status-danger-bg)] text-white'
+                                                ? s.id === 'passed' ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)]' : s.id === 'action_required' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)]'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                         }`}
                                     >

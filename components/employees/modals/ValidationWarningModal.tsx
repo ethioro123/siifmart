@@ -22,24 +22,24 @@ export default function ValidationWarningModal({
                     <AlertTriangle className="text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]" size={24} />
                     <div>
                         <h4 className="font-bold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">Configuration Mismatch</h4>
-                        <p className="text-xs text-gray-700 dark:text-gray-400 font-medium">A potential issue was identified with the role and location assignment.</p>
+                        <p className="text-xs text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] font-medium">A potential issue was identified with the role and location assignment.</p>
                     </div>
                 </div>
 
-                <div className="p-5 bg-gray-50 dark:bg-black/40 border border-gray-100 dark:border-white/5 rounded-xl text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-sm leading-relaxed italic font-medium">
+                <div className="p-5 bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] rounded-xl text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-sm leading-relaxed italic font-medium">
                     "{validationMessage}"
                 </div>
 
                 <div className="flex gap-3 pt-2">
                     <button
                         onClick={onClose}
-                        className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-400 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"
+                        className="flex-1 py-3 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"
                     >
                         Cancel & Edit
                     </button>
                     <button
                         onClick={handleConfirmValidation}
-                        className="flex-1 py-3 px-4 bg-[var(--theme-status-warning-bg)] text-white dark:text-black bg-[var(--theme-status-warning-bg)] rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+                        className="flex-1 py-3 px-4 bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] bg-[var(--theme-status-warning-bg)] rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 shadow-lg "
                     >
                         Proceed Anyway
                     </button>

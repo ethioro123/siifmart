@@ -391,7 +391,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                 }
                                             }}
                                             disabled={isSubmitting}
-                                            className="flex-1 sm:flex-initial px-6 py-2.5 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold rounded-xl shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] cursor-pointer touch-manipulation"
+                                            className="flex-1 sm:flex-initial px-6 py-2.5 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] cursor-pointer touch-manipulation"
                                         >
                                             {isSubmitting ? (
                                                 <Loader2 size={16} className="animate-spin" />

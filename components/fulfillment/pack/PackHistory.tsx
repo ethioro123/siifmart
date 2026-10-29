@@ -207,7 +207,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                         onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all min-h-[34px] shrink-0 border ${
                             statusFilter === 'all'
-                                ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)]'
+                                ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] border-[var(--theme-accent)]'
                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30'
                         }`}
                     >
@@ -218,7 +218,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                         onClick={() => { setStatusFilter('completed'); setCurrentPage(1); }}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all min-h-[34px] shrink-0 border ${
                             statusFilter === 'completed'
-                                ? 'bg-[var(--theme-status-success-bg)] text-white border-[var(--theme-status-success-border)]'
+                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-success-border)]'
                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-border)] border-[var(--theme-status-success-border)]'
                         }`}
                     >
@@ -230,7 +230,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                             onClick={() => { setStatusFilter('returned'); setCurrentPage(1); }}
                             className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all min-h-[34px] shrink-0 border ${
                                 statusFilter === 'returned'
-                                    ? 'bg-[var(--theme-status-danger-bg)] text-white border-[var(--theme-status-danger-border)]'
+                                    ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-danger-border)]'
                                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-border)] border-[var(--theme-status-danger-border)]'
                             }`}
                         >
@@ -405,7 +405,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
             {/* Mobile-Friendly Label Size Selector Modal */}
             {openPrintJob && (
                 <div
-                    className="fixed inset-0 z-[300] bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150"
+                    className="fixed inset-0 z-[300] bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150"
                     onClick={() => setOpenPrintJob(null)}
                 >
                     <div

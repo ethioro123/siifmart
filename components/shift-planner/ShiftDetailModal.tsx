@@ -89,28 +89,28 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
         >
             <form onSubmit={handleFormSubmit} className="space-y-4">
                 {/* Employee Header */}
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-100/70 dark:bg-white/5 border border-[var(--theme-border)] dark:border-white/10">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-[color-mix(in_srgb,var(--theme-bg-subtle)_70%,transparent)] bg-[color-mix(in_srgb,var(--theme-bg-card)_70%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                     <img
                         src={employee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}`}
                         alt=""
-                        className="w-10 h-10 rounded-xl object-cover border border-white/20"
+                        className="w-10 h-10 rounded-xl object-cover border border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]"
                     />
                     <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] truncate">
                             {employee.name}
                         </p>
-                        <p className="text-xs text-stone-500 capitalize">
+                        <p className="text-xs text-[var(--theme-text-secondary)] capitalize">
                             {employee.department || 'Operations'} • {date}
                         </p>
                     </div>
-                    <div className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] text-xs font-bold font-mono">
+                    <div className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] text-xs font-bold font-mono">
                         {status === 'Cancelled' ? '0h' : `${hours}h`}
                     </div>
                 </div>
 
                 {/* Preset Quick Buttons */}
                 <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+                    <label className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                         Quick Preset
                     </label>
                     <div className="grid grid-cols-4 gap-2">
@@ -125,7 +125,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                         <button
                             type="button"
                             onClick={() => applyPreset('E')}
-                            className="p-2 rounded-xl border border-orange-300 dark:border-orange-700/50 bg-orange-500/10 text-orange-800 dark:text-orange-200 text-xs font-bold flex flex-col items-center gap-1 hover:bg-orange-500/20 cursor-pointer"
+                            className="p-2 rounded-xl border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-xs font-bold flex flex-col items-center gap-1 hover:bg-[var(--theme-status-warning-bg)] cursor-pointer"
                         >
                             <Sunset size={14} />
                             <span>Evening</span>
@@ -133,7 +133,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                         <button
                             type="button"
                             onClick={() => applyPreset('N')}
-                            className="p-2 rounded-xl border border-indigo-300 dark:border-indigo-700/50 bg-indigo-500/10 text-indigo-800 dark:text-indigo-200 text-xs font-bold flex flex-col items-center gap-1 hover:bg-indigo-500/20 cursor-pointer"
+                            className="p-2 rounded-xl border border-[var(--theme-border-accent)] border-[var(--theme-border-accent)] bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] text-xs font-bold flex flex-col items-center gap-1 hover:bg-[var(--theme-accent-muted)] cursor-pointer"
                         >
                             <Moon size={14} />
                             <span>Night</span>
@@ -141,7 +141,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                         <button
                             type="button"
                             onClick={() => applyPreset('O')}
-                            className="p-2 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-white/5 text-stone-500 text-xs font-bold flex flex-col items-center gap-1 hover:bg-stone-200 dark:hover:bg-white/10 cursor-pointer"
+                            className="p-2 rounded-xl border border-[var(--theme-border-subtle)] border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] text-[var(--theme-text-secondary)] text-xs font-bold flex flex-col items-center gap-1 hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] cursor-pointer"
                         >
                             <XCircle size={14} />
                             <span>Day Off</span>
@@ -159,7 +159,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                             type="time"
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                            className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                             required
                         />
                     </div>
@@ -171,7 +171,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                             type="time"
                             value={endTime}
                             onChange={(e) => setEndTime(e.target.value)}
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                            className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-mono font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                             required
                         />
                     </div>
@@ -188,7 +188,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                             value={role}
                             onChange={(e) => setRole(e.target.value)}
                             placeholder="e.g. Cashier, Dispatcher"
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-medium text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                            className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-medium text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                         />
                     </div>
                     <div>
@@ -198,7 +198,7 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value as any)}
-                            className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
+                            className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-bold text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20"
                         >
                             <option value="Scheduled">Scheduled</option>
                             <option value="Confirmed">Confirmed</option>
@@ -217,16 +217,16 @@ export const ShiftDetailModal: React.FC<ShiftDetailModalProps> = ({
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="e.g. Opening register 1, check cold storage temperature..."
                         rows={2}
-                        className="w-full px-3 py-2 bg-white dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-xl text-xs font-medium text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20 resize-none"
+                        className="w-full px-3 py-2 bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl text-xs font-medium text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-border-focus)]/20 resize-none"
                     />
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)] dark:border-white/10">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] transition-colors cursor-pointer"
                     >
                         Cancel
                     </button>

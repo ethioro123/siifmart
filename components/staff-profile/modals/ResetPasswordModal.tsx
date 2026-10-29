@@ -29,33 +29,33 @@ export default function ResetPasswordModal({
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Reset Security Credentials" size="sm">
             <div className="p-6">
-                <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                    Set a new secure password for <span className="text-gray-900 dark:text-white font-bold">{employee.name}</span>. The user will be notified.
+                <p className="text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] mb-4 text-sm">
+                    Set a new secure password for <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-bold">{employee.name}</span>. The user will be notified.
                 </p>
                 <div className="relative mb-6">
-                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                     <input
                         type={showResetPassword ? "text" : "password"}
                         value={passwordInput}
                         onChange={(e) => setPasswordInput(e.target.value)}
                         autoComplete="new-password"
-                        className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-10 py-3 text-gray-900 dark:text-white focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none font-mono placeholder:text-gray-400"
+                        className="w-full bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl pl-10 pr-10 py-3 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none font-mono placeholder:text-[var(--theme-text-muted)]"
                         placeholder="New Password"
                     />
                     <button
                         type="button"
                         onClick={() => setShowResetPassword(!showResetPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-muted)] transition-colors"
                     >
                         {showResetPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                 </div>
                 <div className="flex justify-end gap-3">
-                    <button onClick={onClose} className="px-4 py-2 text-gray-400 font-bold text-xs uppercase">Cancel</button>
+                    <button onClick={onClose} className="px-4 py-2 text-[var(--theme-text-muted)] font-bold text-xs uppercase">Cancel</button>
                     <button
                         onClick={handleConfirmResetPassword}
                         disabled={isResetting}
-                        className="px-6 py-2 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-black font-black rounded-lg text-xs uppercase tracking-widest transition-all"
+                        className="px-6 py-2 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] font-black rounded-lg text-xs uppercase tracking-widest transition-all"
                     >
                         {isResetting ? 'Processing...' : 'Reset Password'}
                     </button>

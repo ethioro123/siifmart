@@ -162,34 +162,34 @@ export default function SalaryApprovalQueueModal({
         <Modal isOpen={isOpen} onClose={onClose} title="Salary Approval Queue" size="lg">
             <div className="p-6 space-y-5">
                 {/* Header Banner */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-stone-200 dark:border-white/10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                     <div>
                         <div className="flex items-center gap-2">
                             <ShieldCheck className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]" size={20} />
-                            <h3 className="font-bold text-base text-stone-900 dark:text-white">
+                            <h3 className="font-bold text-base text-[var(--theme-text-primary)] text-[var(--theme-text-primary)]">
                                 Dual-Control Compensation Governance
                             </h3>
                         </div>
-                        <p className="text-xs text-stone-500 mt-1">
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
                             Market: <strong>{country}</strong> • Requires Country Finance Director or CEO authorization
                         </p>
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex bg-stone-100 dark:bg-black/40 p-1 rounded-xl border border-stone-200 dark:border-white/10 shrink-0">
+                    <div className="flex bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] p-1 rounded-xl border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shrink-0">
                         <button
                             type="button"
                             onClick={() => handleTabChange('pending')}
                             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
                                 activeTab === 'pending'
-                                    ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-xs'
-                                    : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'
+                                    ? 'bg-[var(--theme-bg-card)] bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-xs'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
                             <Clock size={14} />
                             <span>Pending</span>
                             {pendingCount > 0 && (
-                                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[var(--theme-status-warning-bg)] text-white font-mono">
+                                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] font-mono">
                                     {pendingCount}
                                 </span>
                             )}
@@ -199,8 +199,8 @@ export default function SalaryApprovalQueueModal({
                             onClick={() => handleTabChange('history')}
                             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
                                 activeTab === 'history'
-                                    ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-xs'
-                                    : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'
+                                    ? 'bg-[var(--theme-bg-card)] bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-xs'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
                             <History size={14} />
@@ -211,17 +211,17 @@ export default function SalaryApprovalQueueModal({
 
                 {/* Content Area */}
                 {isLoading ? (
-                    <div className="py-12 flex flex-col items-center justify-center text-stone-400">
+                    <div className="py-12 flex flex-col items-center justify-center text-[var(--theme-text-muted)]">
                         <Loader2 className="animate-spin mb-2" size={24} />
                         <p className="text-xs">Loading queue records...</p>
                     </div>
                 ) : displayedRequests.length === 0 ? (
-                    <div className="py-12 text-center text-stone-500">
+                    <div className="py-12 text-center text-[var(--theme-text-secondary)]">
                         <UserCheck size={36} className="mx-auto mb-3 opacity-40 text-[var(--theme-status-success-text)]" />
-                        <p className="font-bold text-sm text-stone-700 dark:text-stone-300">
+                        <p className="font-bold text-sm text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">
                             {activeTab === 'pending' ? 'Zero Pending Salary Requests' : 'No Past Requests Recorded'}
                         </p>
-                        <p className="text-xs mt-1 text-stone-400">
+                        <p className="text-xs mt-1 text-[var(--theme-text-muted)]">
                             {activeTab === 'pending'
                                 ? 'All employee salary adjustments have been reviewed and processed.'
                                 : 'Salary adjustment proposals will appear here once submitted.'}
@@ -242,35 +242,35 @@ export default function SalaryApprovalQueueModal({
                             return (
                                 <div
                                     key={req.id}
-                                    className="p-4 rounded-2xl border border-stone-200 dark:border-white/10 bg-white dark:bg-black/30 border-[var(--theme-status-success-border)] transition-all shadow-xs space-y-3"
+                                    className="p-4 rounded-2xl border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border-[var(--theme-status-success-border)] transition-all shadow-xs space-y-3"
                                 >
                                     {/* Top Row: Employee & Status */}
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <h4 className="font-bold text-sm text-stone-900 dark:text-white">
+                                                <h4 className="font-bold text-sm text-[var(--theme-text-primary)] text-[var(--theme-text-primary)]">
                                                     {req.employeeName}
                                                 </h4>
                                                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                                                     req.status === 'approved'
-                                                        ? 'bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/40 text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
+                                                        ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                                         : req.status === 'rejected'
-                                                        ? 'bg-[var(--theme-status-danger-bg)] dark:bg-rose-950/40 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
-                                                        : 'bg-[var(--theme-status-warning-bg)] dark:bg-amber-950/40 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
+                                                        ? 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
+                                                        : 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                                                 }`}>
                                                     {req.status}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-stone-400 mt-0.5">
-                                                Proposed by <strong className="text-stone-700 dark:text-stone-300">{req.requestedBy}</strong> ({req.requestedByRole.replace(/_/g, ' ')}) • {new Date(req.requestedAt).toLocaleDateString()}
+                                            <p className="text-xs text-[var(--theme-text-muted)] mt-0.5">
+                                                Proposed by <strong className="text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">{req.requestedBy}</strong> ({req.requestedByRole.replace(/_/g, ' ')}) • {new Date(req.requestedAt).toLocaleDateString()}
                                             </p>
                                         </div>
 
                                         {/* Compensation Change Badge */}
-                                        <div className="flex items-center gap-2 bg-stone-50 dark:bg-stone-900/60 p-2 rounded-xl border border-stone-200 dark:border-white/5 font-mono text-xs">
-                                            <span className="text-stone-500">{req.currency} {req.currentSalary.toLocaleString()}</span>
-                                            <ArrowRight size={13} className="text-stone-400" />
-                                            <span className="font-bold text-stone-900 dark:text-white">{req.currency} {req.proposedSalary.toLocaleString()}</span>
+                                        <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-panel)_60%,transparent)] p-2 rounded-xl border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] font-mono text-xs">
+                                            <span className="text-[var(--theme-text-secondary)]">{req.currency} {req.currentSalary.toLocaleString()}</span>
+                                            <ArrowRight size={13} className="text-[var(--theme-text-muted)]" />
+                                            <span className="font-bold text-[var(--theme-text-primary)] text-[var(--theme-text-primary)]">{req.currency} {req.proposedSalary.toLocaleString()}</span>
                                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                                                 diff >= 0 ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'
                                             }`}>
@@ -280,8 +280,8 @@ export default function SalaryApprovalQueueModal({
                                     </div>
 
                                     {/* Reason Quote */}
-                                    <div className="p-3 bg-stone-50 dark:bg-black/40 rounded-xl border border-stone-200/60 dark:border-white/5 text-xs text-stone-700 dark:text-stone-300">
-                                        <span className="font-bold text-stone-500 uppercase tracking-wider text-[10px] block mb-1">
+                                    <div className="p-3 bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] rounded-xl border border-[color-mix(in_srgb,var(--theme-border-subtle)_60%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_60%,transparent)] text-xs text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]">
+                                        <span className="font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider text-[10px] block mb-1">
                                             HR Justification:
                                         </span>
                                         <p className="italic font-sans">"{req.reason}"</p>
@@ -296,7 +296,7 @@ export default function SalaryApprovalQueueModal({
                                     )}
 
                                     {req.status === 'rejected' && (
-                                        <div className="p-2.5 bg-[var(--theme-status-danger-bg)] dark:bg-rose-950/20 rounded-xl border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
+                                        <div className="p-2.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] rounded-xl border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)] text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                                             <p className="font-bold">Rejected by {req.rejectedBy || 'Reviewer'}:</p>
                                             <p className="italic mt-0.5">"{req.rejectionReason}"</p>
                                         </div>
@@ -306,7 +306,7 @@ export default function SalaryApprovalQueueModal({
                                     {isPending && (
                                         <div>
                                             {rejectingId === req.id ? (
-                                                <div className="space-y-2 pt-2 border-t border-stone-200 dark:border-white/10">
+                                                <div className="space-y-2 pt-2 border-t border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                                                     <label className="block text-xs font-bold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
                                                         State Reason for Rejection:
                                                     </label>
@@ -314,7 +314,7 @@ export default function SalaryApprovalQueueModal({
                                                         value={rejectionReason}
                                                         onChange={(e) => setRejectionReason(e.target.value)}
                                                         rows={2}
-                                                        className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl p-2.5 text-xs text-stone-900 dark:text-white outline-none border-[var(--theme-status-danger-border)] resize-none"
+                                                        className="w-full bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl p-2.5 text-xs text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] outline-none border-[var(--theme-status-danger-border)] resize-none"
                                                         placeholder="e.g. Budget ceiling reached, review scheduled next quarter..."
                                                     />
                                                     {rejectError && <p className="text-[11px] text-[var(--theme-status-danger-text)]">{rejectError}</p>}
@@ -322,7 +322,7 @@ export default function SalaryApprovalQueueModal({
                                                         <button
                                                             type="button"
                                                             onClick={() => { setRejectingId(null); setRejectionReason(''); setRejectError(''); }}
-                                                            className="px-3 py-1.5 text-xs text-stone-500 font-bold cursor-pointer"
+                                                            className="px-3 py-1.5 text-xs text-[var(--theme-text-secondary)] font-bold cursor-pointer"
                                                         >
                                                             Cancel
                                                         </button>
@@ -330,7 +330,7 @@ export default function SalaryApprovalQueueModal({
                                                             type="button"
                                                             disabled={processingId === req.id}
                                                             onClick={() => handleConfirmReject(req.id)}
-                                                            className="px-4 py-1.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white rounded-lg text-xs font-bold cursor-pointer flex items-center gap-1.5"
+                                                            className="px-4 py-1.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] rounded-lg text-xs font-bold cursor-pointer flex items-center gap-1.5"
                                                         >
                                                             {processingId === req.id ? <Loader2 size={12} className="animate-spin" /> : <XCircle size={12} />}
                                                             Confirm Rejection
@@ -338,7 +338,7 @@ export default function SalaryApprovalQueueModal({
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center justify-between pt-2 border-t border-stone-200 dark:border-white/10">
+                                                <div className="flex items-center justify-between pt-2 border-t border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                                                     {isActionDisabled && processingId !== req.id && (
                                                         <p className="text-[11px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1">
                                                             <AlertTriangle size={13} />
@@ -353,7 +353,7 @@ export default function SalaryApprovalQueueModal({
                                                             type="button"
                                                             disabled={isActionDisabled || !canApprove}
                                                             onClick={() => { setRejectingId(req.id); setRejectionReason(''); }}
-                                                            className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-lg text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
+                                                            className="px-3 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] rounded-lg text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
                                                         >
                                                             <XCircle size={13} />
                                                             Reject
@@ -362,7 +362,7 @@ export default function SalaryApprovalQueueModal({
                                                             type="button"
                                                             disabled={isActionDisabled || !canApprove}
                                                             onClick={() => handleApprove(req)}
-                                                            className="px-4 py-1.5 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white rounded-lg text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors shadow-xs"
+                                                            className="px-4 py-1.5 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] rounded-lg text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors shadow-xs"
                                                         >
                                                             {processingId === req.id ? (
                                                                 <Loader2 size={13} className="animate-spin" />
@@ -383,9 +383,9 @@ export default function SalaryApprovalQueueModal({
                 )}
 
                 {/* Footer & Pagination */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-stone-200 dark:border-white/10">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                     <div className="flex items-center gap-2">
-                        <span className="text-xs text-stone-500 font-mono">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-mono">
                             Page {page} {requests.length > 0 ? `(${((page - 1) * PAGE_SIZE) + 1}–${((page - 1) * PAGE_SIZE) + requests.length})` : ''}
                         </span>
                         <div className="flex items-center gap-1">
@@ -393,7 +393,7 @@ export default function SalaryApprovalQueueModal({
                                 type="button"
                                 disabled={page <= 1 || isLoading}
                                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                                className="px-2.5 py-1 text-xs rounded-lg border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-stone-100 transition-colors cursor-pointer"
+                                className="px-2.5 py-1 text-xs rounded-lg border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
                             >
                                 Prev
                             </button>
@@ -401,7 +401,7 @@ export default function SalaryApprovalQueueModal({
                                 type="button"
                                 disabled={!hasMore || isLoading}
                                 onClick={() => setPage(p => p + 1)}
-                                className="px-2.5 py-1 text-xs rounded-lg border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-stone-100 transition-colors cursor-pointer"
+                                className="px-2.5 py-1 text-xs rounded-lg border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
                             >
                                 Next
                             </button>
@@ -410,7 +410,7 @@ export default function SalaryApprovalQueueModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-5 py-2 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors"
+                        className="px-5 py-2 text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors"
                     >
                         Close
                     </button>

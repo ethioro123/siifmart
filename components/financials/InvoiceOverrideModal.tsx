@@ -74,7 +74,7 @@ export const InvoiceOverrideModal: React.FC<InvoiceOverrideModalProps> = ({
                     <button
                         onClick={handleConfirm}
                         disabled={overrideReason.trim().length < 10 || isActionLoading}
-                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white dark:text-black flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {isActionLoading && <Loader2 className="animate-spin" size={14} />}
                         <span>Confirm Supervisory Override</span>

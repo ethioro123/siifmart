@@ -86,7 +86,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setIsAuditModalOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--theme-accent)] text-white hover:opacity-90 text-xs font-semibold transition-all shadow-sm active:scale-[0.98] shrink-0 cursor-pointer"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 text-xs font-semibold transition-all shadow-sm active:scale-[0.98] shrink-0 cursor-pointer"
                         >
                             <Plus size={16} />
                             <span>New Walkthrough / Spot Audit</span>
@@ -187,10 +187,10 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                 <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-3">
-                            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] flex items-center justify-center">
                                 <Headphones size={20} />
                             </div>
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]">
                                 cs_desk
                             </span>
                         </div>
@@ -278,7 +278,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                     </div>
                     <button
                         onClick={() => setIsAuditModalOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-accent)] text-white hover:opacity-90 text-xs font-bold transition-all cursor-pointer shadow-xs"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 text-xs font-bold transition-all cursor-pointer shadow-xs"
                     >
                         <Plus size={14} />
                         <span>Perform Walkthrough</span>
@@ -298,7 +298,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                         </p>
                         <button
                             onClick={() => setIsAuditModalOpen(true)}
-                            className="mt-4 px-4 py-2 rounded-xl bg-[var(--theme-accent)] text-white text-xs font-bold cursor-pointer"
+                            className="mt-4 px-4 py-2 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] text-xs font-bold cursor-pointer"
                         >
                             Launch First Walkthrough
                         </button>

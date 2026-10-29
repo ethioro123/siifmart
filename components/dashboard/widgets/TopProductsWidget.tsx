@@ -26,7 +26,7 @@ export const TopProductsWidget = ({ products }: TopProductsWidgetProps) => {
                                 <span className="font-semibold text-[var(--theme-text-primary)] truncate w-2/3 flex items-center gap-2">
                                     <span className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] shrink-0 font-bold ${
                                         i === 0
-                                            ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                            ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                     }`}>
                                         {i + 1}

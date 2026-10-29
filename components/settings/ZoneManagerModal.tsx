@@ -73,7 +73,7 @@ export function ZoneManagerModal({
               settings.enforceRegionalZoning ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
             }`}
           >
-            <div className={`w-5 h-5 bg-white rounded-full shadow-xs transition-transform transform ${
+            <div className={`w-5 h-5 bg-[var(--theme-bg-card)] rounded-full shadow-xs transition-transform transform ${
               settings.enforceRegionalZoning ? 'translate-x-5' : 'translate-x-0'
             }`} />
           </button>
@@ -124,7 +124,7 @@ export function ZoneManagerModal({
               type="button"
               onClick={handleSaveZone}
               disabled={isZoneSaving || !zoneNameInput.trim()}
-              className="h-9 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white rounded-xl text-xs font-semibold hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
+              className="h-9 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
             >
               {isZoneSaving ? <Loader2 size={13} className="animate-spin" /> : editingZone ? <Save size={13} /> : <Plus size={13} />}
               <span>{editingZone ? 'Update Zone' : 'Create Zone'}</span>

@@ -54,7 +54,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                         <h3 className="font-bold text-[var(--theme-text-primary)] text-base flex items-center gap-1.5">
                             {zone.name}
                             {isLockedState && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase bg-[var(--theme-status-danger)] text-white">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase bg-[var(--theme-status-danger)] text-[var(--theme-text-primary)]">
                                     LOCKED
                                 </span>
                             )}

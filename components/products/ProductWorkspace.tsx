@@ -128,7 +128,7 @@ export const ProductWorkspace: React.FC<Props> = ({ product: selectedProduct, is
             aria-labelledby={titleId}
             ref={dialogRef}
         >
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-md" onClick={onClose} />
+            <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] backdrop-blur-md" onClick={onClose} />
             <div
                 className="relative bg-[var(--theme-bg-card)] rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-5xl flex flex-col border border-[var(--theme-border)] overflow-hidden my-auto"
                 style={{

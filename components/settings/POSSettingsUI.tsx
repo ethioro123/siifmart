@@ -19,11 +19,11 @@ export const NavButton = ({ label, icon: Icon, active, onClick }: any) => (
     type="button"
     onClick={onClick}
     className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 outline-none cursor-pointer text-xs font-medium ${active
-      ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
+      ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
       : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
     }`}
   >
-    <div className={`p-1.5 rounded-lg ${active ? 'bg-white/20 text-white' : 'text-[var(--theme-text-secondary)]'}`}>
+    <div className={`p-1.5 rounded-lg ${active ? 'bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-secondary)]'}`}>
       <Icon size={16} />
     </div>
     <span className="tracking-wide">
@@ -77,7 +77,7 @@ export const ToggleRow = ({ label, sub, checked, onChange, warning, icon: Icon, 
     <div
       className={`w-11 h-6 shrink-0 rounded-full p-0.5 transition-colors relative flex items-center ${checked ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
     >
-      <div className={`w-5 h-5 bg-white rounded-full shadow-xs transition-transform ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
+      <div className={`w-5 h-5 bg-[var(--theme-bg-card)] rounded-full shadow-xs transition-transform ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
     </div>
   </div>
 );
@@ -118,7 +118,7 @@ export const RadioCard = ({ options, value, onChange }: any) => (
           </div>
         )}
         <div className="flex items-center gap-2.5 mb-2">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${value === opt.value ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}>
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${value === opt.value ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}>
             {opt.icon && <opt.icon size={16} />}
           </div>
           <div>

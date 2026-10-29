@@ -37,7 +37,7 @@ export function PlanogramRevisionReview({ request, country, submitting, approval
     {error && <p role="alert" className="mt-4 text-sm text-[var(--theme-status-danger-text)]">{error}</p>}
     <div className="mt-4 flex justify-end gap-3">
       <button type="button" disabled={submitting} onClick={onClose} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-4">Cancel</button>
-      <button type="button" disabled={Boolean(approvalBlock) || submitting || query.isFetching || !ready || Boolean(query.error)} onClick={() => void confirm()} className="min-h-11 rounded-xl bg-[var(--theme-accent)] px-4 text-white disabled:opacity-50">{submitting ? 'Recording approval…' : 'Approve complete revision'}</button>
+      <button type="button" disabled={Boolean(approvalBlock) || submitting || query.isFetching || !ready || Boolean(query.error)} onClick={() => void confirm()} className="min-h-11 rounded-xl bg-[var(--theme-accent)] px-4 text-[var(--theme-text-primary)] disabled:opacity-50">{submitting ? 'Recording approval…' : 'Approve complete revision'}</button>
     </div>
   </Modal>;
 }

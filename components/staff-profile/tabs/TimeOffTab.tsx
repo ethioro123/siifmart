@@ -123,7 +123,7 @@ export default function TimeOffTab({
                 {(isOwnProfile || canManageEmployees) && (
                     <button
                         onClick={onRequestTimeOff}
-                        className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                        className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                     >
                         <Plus size={15} />
                         <span>Request Time Off</span>
@@ -198,7 +198,7 @@ export default function TimeOffTab({
                                         </button>
                                         <button
                                             onClick={() => onApproveRequest(req.id)}
-                                            className="px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/90 transition-colors cursor-pointer shadow-xs"
+                                            className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/90 transition-colors cursor-pointer shadow-xs"
                                         >
                                             Approve
                                         </button>

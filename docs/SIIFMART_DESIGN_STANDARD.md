@@ -65,7 +65,7 @@ This handbook and its normative chapters are protected project rules. AI must ob
 
 ## Authority and vocabulary
 
-User instructions, `AGENTS.md`, server-enforced policy and security invariants retain precedence. For visual and interaction decisions this handbook is canonical; root `APPLE_DESIGN_GUIDE.md` is a pointer, not a competing copy. The focused engineering guide must link here rather than restating a contradictory style system.
+User instructions, `AGENTS.md`, server-enforced policy and security invariants retain precedence. For visual and interaction decisions this handbook is canonical; there is one handbook entry point at `docs/SIIFMART_DESIGN_STANDARD.md`, supported by the chapters in `docs/design/`. The focused engineering guide must link here rather than restating a contradictory style system.
 
 **MUST** indicates a release requirement. **SHOULD** indicates the expected approach; a departure needs a concrete workflow reason and verification. **MAY** describes an optional treatment. A documented departure is review evidence, not an automatic request for extra user approval. Do not introduce a new permission step into an already authorized task.
 

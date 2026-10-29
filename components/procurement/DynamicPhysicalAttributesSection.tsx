@@ -44,14 +44,14 @@ export const DynamicPhysicalAttributesSection: React.FC<DynamicPhysicalAttribute
                     title: '3. Physical Specifications (Garment Sizing & Fitment)',
                     subtitle: 'Apparel sizing, fabric composition, and garment net weight',
                     icon: Shirt,
-                    colorClass: 'text-indigo-500'
+                    colorClass: 'text-[var(--theme-accent)]'
                 };
             case 'beverages':
                 return {
                     title: '3. Physical Specifications (Liquid Volume & Container)',
                     subtitle: 'Net liquid volume, container type, and gross bottle weight',
                     icon: Droplets,
-                    colorClass: 'text-cyan-500'
+                    colorClass: 'text-[var(--theme-status-info-text)]'
                 };
             case 'electronics':
                 return {

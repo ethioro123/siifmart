@@ -84,7 +84,7 @@ export const ProfileSecurityCard: React.FC<ProfileSecurityCardProps> = ({
                 <button
                     onClick={handleUpdatePassword}
                     disabled={!canSubmit}
-                    className="w-full mt-2 h-11 flex items-center justify-center gap-2 bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 font-semibold text-xs uppercase tracking-wider rounded-xl transition-colors disabled:opacity-40 cursor-pointer shadow-xs"
+                    className="w-full mt-2 h-11 flex items-center justify-center gap-2 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 font-semibold text-xs uppercase tracking-wider rounded-xl transition-colors disabled:opacity-40 cursor-pointer shadow-xs"
                 >
                     {isChangingPassword ? (
                         <Loader2 size={16} className="animate-spin" />

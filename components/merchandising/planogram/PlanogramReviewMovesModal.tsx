@@ -19,7 +19,7 @@ export function PlanogramReviewMovesModal({ isOpen, onClose, moves, onConfirm, i
   const selectedMoves = moves.filter(move => selected.has(move.productId));
   return <dialog ref={dialog} aria-labelledby="planogram-review-title" onCancel={event => {
     event.preventDefault(); if (!isSubmitting) onClose();
-  }} className="m-auto w-[calc(100%_-_2rem)] max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-5 text-[var(--theme-text-primary)] backdrop:bg-black/60">
+  }} className="m-auto w-[calc(100%_-_2rem)] max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-5 text-[var(--theme-text-primary)] backdrop:bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)]">
     <h2 id="planogram-review-title" className="text-lg font-semibold">Review suggested shelf moves</h2>
     <p className="mt-2 text-sm text-[var(--theme-text-secondary)]">Candidates use recorded sales from loaded completed orders. Check weight, available space, storage requirements and category fit in store before selecting moves.</p>
     <fieldset disabled={isSubmitting} className="my-4 space-y-3">
@@ -35,7 +35,7 @@ export function PlanogramReviewMovesModal({ isOpen, onClose, moves, onConfirm, i
     <p role="status" className="text-sm">{selectedMoves.length} moves selected. Submission creates proposals; placements update after three regional approvals.</p>
     <div className="mt-4 flex flex-wrap justify-end gap-3">
       <button type="button" disabled={isSubmitting} onClick={onClose} className="min-h-11 rounded-xl border border-[var(--theme-border)] px-4">Cancel</button>
-      <button type="button" disabled={isSubmitting || !checkedInStore || selectedMoves.length === 0} onClick={() => onConfirm(selectedMoves)} className="min-h-11 rounded-xl bg-[var(--theme-accent)] px-4 text-white disabled:opacity-50">{isSubmitting ? 'Submitting…' : 'Submit selected moves'}</button>
+      <button type="button" disabled={isSubmitting || !checkedInStore || selectedMoves.length === 0} onClick={() => onConfirm(selectedMoves)} className="min-h-11 rounded-xl bg-[var(--theme-accent)] px-4 text-[var(--theme-text-primary)] disabled:opacity-50">{isSubmitting ? 'Submitting…' : 'Submit selected moves'}</button>
     </div>
   </dialog>;
 }

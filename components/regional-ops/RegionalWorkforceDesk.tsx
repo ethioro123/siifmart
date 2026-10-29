@@ -285,7 +285,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
           type="button"
           onClick={handleRedeploy}
           disabled={!selectedEmployeeId || !targetSiteId || isRedeploying}
-          className="w-full py-2.5 px-4 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-sm"
+          className="w-full py-2.5 px-4 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-text-primary)] text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-sm"
         >
           <ArrowRightLeft className="w-4 h-4" />
           <span>{isRedeploying ? 'Reassigning Workforce...' : 'Execute 1-Click Regional Branch Loan'}</span>
@@ -332,7 +332,7 @@ export const RegionalWorkforceDesk: React.FC<RegionalWorkforceDeskProps> = ({
                     <button
                       type="button"
                       onClick={() => handleReturnToHomeStation(emp)}
-                      className="px-3 py-1.5 rounded-lg bg-[var(--theme-bg-card)] hover:bg-[var(--theme-accent)] hover:text-white border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5 transition-all shadow-sm self-end sm:self-center"
+                      className="px-3 py-1.5 rounded-lg bg-[var(--theme-bg-card)] hover:bg-[var(--theme-accent)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5 transition-all shadow-sm self-end sm:self-center"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       <span>Return to Home Station</span>

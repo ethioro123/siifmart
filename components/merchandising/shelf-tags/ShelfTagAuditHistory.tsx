@@ -76,7 +76,7 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
                                  isVerified
                                     ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
                                     : isPrinted
-                                    ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20'
+                                    ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]'
                                     : isQueued
                                     ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                     : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
@@ -107,7 +107,7 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
                                        <button
                                           type="button"
                                           onClick={() => onUpdateStatus(rec.id, 'verified')}
-                                          className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-[11px] font-semibold flex items-center gap-1 shadow-xs"
+                                          className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] text-[11px] font-semibold flex items-center gap-1 shadow-xs"
                                        >
                                           <Check size={11} /> Mark Verified
                                        </button>

@@ -318,11 +318,11 @@ export default function LocationSettings() {
                             desc={`Manage Warehouses, Distribution Centers, and Retail Stores across ${countryProfile.name}.`}
                         />
                         <div className="flex flex-wrap items-center gap-2 mt-2">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/20">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-accent)] text-[var(--theme-accent)] bg-[var(--theme-accent-muted)] px-2.5 py-1 rounded-full border border-[var(--theme-border-accent)]">
                                 <Building size={14} />
                                 <span>{sites.filter((s: Site) => ['Administration', 'Administrative', 'Central Operations', 'HQ'].includes(s.type)).length} Administration</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] bg-[var(--theme-status-info-bg)] px-2.5 py-1 rounded-full border border-[var(--theme-status-info-border)]">
                                 <Truck size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Distribution Center').length} Distribution</span>
                             </div>
@@ -342,7 +342,7 @@ export default function LocationSettings() {
                                 onClick={() => setLocationViewMode('category')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                     locationViewMode === 'category'
-                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
+                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                 }`}
                             >
@@ -353,7 +353,7 @@ export default function LocationSettings() {
                                 onClick={() => setLocationViewMode('region')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                     locationViewMode === 'region'
-                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
+                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                 }`}
                             >
@@ -364,7 +364,7 @@ export default function LocationSettings() {
                                 onClick={() => setLocationViewMode('zone')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                     locationViewMode === 'zone'
-                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
+                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                 }`}
                             >
@@ -384,7 +384,7 @@ export default function LocationSettings() {
                         <button
                             type="button"
                             onClick={handleOpenAddSite}
-                            className="h-10 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-95 px-5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-[0.98]"
+                            className="h-10 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-95 px-5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-[0.98]"
                         >
                             <Plus size={16} /> Add Location
                         </button>

@@ -68,10 +68,10 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
                         type="button"
                         onClick={() => handleSaveSection('limits')}
                         disabled={isSavingLimits || !isAuthorized}
-                        className="h-8 px-3 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-[11px] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                        className="h-8 px-3 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold text-[11px] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                     >
                         {isSavingLimits ? (
-                            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="w-3 h-3 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
                         ) : (
                             <Save size={12} />
                         )}
@@ -122,10 +122,10 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
                         type="button"
                         onClick={() => handleSaveSection('compliance')}
                         disabled={isSavingCompliance || !isAuthorized}
-                        className="h-8 px-3 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-[11px] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                        className="h-8 px-3 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold text-[11px] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                     >
                         {isSavingCompliance ? (
-                            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="w-3 h-3 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
                         ) : (
                             <Save size={12} />
                         )}
@@ -165,10 +165,10 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
                         type="button"
                         onClick={() => handleSaveSection('currency')}
                         disabled={isSavingRates || !isAuthorized}
-                        className="h-8 px-3 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-[11px] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                        className="h-8 px-3 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold text-[11px] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                     >
                         {isSavingRates ? (
-                            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="w-3 h-3 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
                         ) : (
                             <Save size={12} />
                         )}

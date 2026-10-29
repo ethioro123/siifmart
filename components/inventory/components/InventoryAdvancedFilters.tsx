@@ -137,7 +137,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                                 onClick={() => handlePricePreset(preset.min, preset.max)}
                                 className={`px-2.5 py-1 rounded-lg text-[11px] font-mono tabular-nums transition-all cursor-pointer ${
                                     String(filters.minPrice) === String(preset.min) && String(filters.maxPrice) === String(preset.max)
-                                        ? 'bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
+                                        ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                         : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium'
                                 }`}
                             >

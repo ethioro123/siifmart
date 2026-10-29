@@ -282,7 +282,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                         type="button"
                         onClick={() => approvePOMutation.mutate(po)}
                         disabled={approvePOMutation.isPending}
-                        className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                        className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Approve PO</span>
@@ -317,7 +317,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                     <span className="text-sm font-semibold text-[var(--theme-text-primary)]">
                       {formatPONumber(po)}
                     </span>
-                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]">
                       Escalated to HQ
                     </span>
                   </div>
@@ -378,7 +378,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                       <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md border ${
                         isAutonomous
                           ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
-                          : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
+                          : 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]'
                       }`}>
                         {isAutonomous ? 'Local Sign-Off' : 'Treasury Escalate'}
                       </span>
@@ -417,7 +417,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                         </span>
                       )
                     ) : (
-                      <span className="text-xs text-purple-600 dark:text-purple-400 font-semibold flex items-center gap-1">
+                      <span className="text-xs text-[var(--theme-accent)] text-[var(--theme-accent)] font-semibold flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
                         Exceeds 25K Limit
                       </span>

@@ -15,7 +15,7 @@ const LOCATION_CATEGORIES: CategoryConfig[] = [
         types: ['Administration', 'Administrative', 'Central Operations', 'HQ', 'Headquarters'],
         label: 'Administration',
         desc: 'Central Operations',
-        dotColor: 'bg-purple-500',
+        dotColor: 'bg-[var(--theme-accent-muted)]',
         shadowColor: 'shadow-[0_0_8px_rgba(168,85,247,0.3)]',
     },
     {
@@ -29,7 +29,7 @@ const LOCATION_CATEGORIES: CategoryConfig[] = [
         types: ['Distribution Center'],
         label: 'Distribution Center',
         desc: 'Regional Hub',
-        dotColor: 'bg-cyan-500',
+        dotColor: 'bg-[var(--theme-status-info-bg)]',
         shadowColor: 'shadow-[0_0_8px_rgba(6,182,212,0.3)]',
     },
     {

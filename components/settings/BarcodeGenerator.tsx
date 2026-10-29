@@ -57,14 +57,14 @@ export const BarcodeGenerator: React.FC = () => {
     };
 
     return (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mt-6">
+        <div className="bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl p-6 mt-6">
             <div className="flex items-start justify-between">
                 <div>
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
                         <Barcode size={20} className="text-cyber-primary" />
                         Location Barcode Export
                     </h3>
-                    <p className="text-sm text-gray-400 mt-1 max-w-md">
+                    <p className="text-sm text-[var(--theme-text-muted)] mt-1 max-w-md">
                         Generate a complete master list of 15-digit barcodes for printing.
                         Includes Zone A-J, Aisles 1-20, Bays 1-20 (4,000+ labels).
                     </p>
@@ -75,7 +75,7 @@ export const BarcodeGenerator: React.FC = () => {
                     disabled={isGenerating}
                     className={`px-6 py-3 rounded-xl font-bold text-sm uppercase tracking-wider flex items-center gap-2 transition-all ${isComplete
                         ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]'
-                        : 'bg-cyber-primary text-black hover:bg-cyber-primary/90'
+                        : 'bg-cyber-primary text-[var(--theme-text-primary)] hover:bg-cyber-primary/90'
                         }`}
                 >
                     {isGenerating ? (
@@ -97,10 +97,10 @@ export const BarcodeGenerator: React.FC = () => {
                 </button>
             </div>
 
-            <div className="mt-4 flex gap-4 text-xs font-mono text-gray-500 bg-black/20 p-3 rounded-lg border border-white/5">
+            <div className="mt-4 flex gap-4 text-xs font-mono text-[var(--theme-text-secondary)] bg-[color-mix(in_srgb,var(--theme-overlay)_20%,transparent)] p-3 rounded-lg border border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)]">
                 <div>Format: <span className="text-cyber-primary">PPPP-ZZ-AA-BB-UUUU-C</span></div>
-                <div>Count: <span className="text-white">4,000 Locations</span></div>
-                <div>Example: <span className="text-white">888801050200005</span> (A-05-02)</div>
+                <div>Count: <span className="text-[var(--theme-text-primary)]">4,000 Locations</span></div>
+                <div>Example: <span className="text-[var(--theme-text-primary)]">888801050200005</span> (A-05-02)</div>
             </div>
         </div>
     );

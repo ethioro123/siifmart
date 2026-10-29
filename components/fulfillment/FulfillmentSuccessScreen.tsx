@@ -40,7 +40,7 @@ export const FulfillmentSuccessScreen: React.FC<FulfillmentSuccessScreenProps> =
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] animate-in fade-in duration-200">
             <div className="relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
                 <div className="p-8 md:p-12 flex flex-col items-center text-center">
                     {/* Success Icon */}

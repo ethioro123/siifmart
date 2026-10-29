@@ -70,14 +70,14 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                 }}
                                 checked={selectedIds.size === products.length && products.length > 0}
                             />
-                            <CheckCircle size={12} className="absolute text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                            <CheckCircle size={12} className="absolute text-[var(--theme-text-primary)] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                         </div>
                     </th>
 
                     <th className="py-3 px-3.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('name')}>
                         <div className="flex items-center gap-1.5">
                             Product
-                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'name' ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
+                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'name' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={11} className={sortConfig?.key === 'name' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
@@ -85,7 +85,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                     <th className="py-3 px-3.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('location')}>
                         <div className="flex items-center gap-1.5">
                             Location
-                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'location' ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
+                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'location' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={11} className={sortConfig?.key === 'location' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
@@ -93,7 +93,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                     <th className="py-3 px-3.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('stock')}>
                         <div className="flex items-center justify-center gap-1.5">
                             Stock
-                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'stock' ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
+                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'stock' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={11} className={sortConfig?.key === 'stock' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
@@ -102,7 +102,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                     <th className="py-3 px-3.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('price')}>
                         <div className="flex items-center justify-end gap-1.5">
                             Selling price
-                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'price' ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
+                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'price' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={11} className={sortConfig?.key === 'price' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
@@ -111,7 +111,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                         <th className="py-3 px-3.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('costPrice')}>
                             <div className="flex items-center justify-end gap-1.5">
                                 Cost
-                                <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'costPrice' ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
+                                <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'costPrice' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                     <ArrowUpDown size={11} className={sortConfig?.key === 'costPrice' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                 </div>
                             </div>
@@ -120,7 +120,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                     <th className="py-3 px-3.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('assetValue')}>
                         <div className="flex items-center justify-end gap-1.5">
                             Total Value
-                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'assetValue' ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
+                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'assetValue' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={11} className={sortConfig?.key === 'assetValue' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
@@ -128,7 +128,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                     <th className="py-3 px-3.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('abc')}>
                         <div className="flex items-center justify-center gap-1.5">
                             Class
-                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'abc' ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
+                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'abc' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={11} className={sortConfig?.key === 'abc' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
@@ -136,7 +136,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                     <th className="py-3 px-3.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('createdAt')}>
                         <div className="flex items-center justify-end gap-1.5">
                             Date
-                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'createdAt' ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
+                            <div className={`p-1 rounded-md transition-colors ${sortConfig?.key === 'createdAt' ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={11} className={sortConfig?.key === 'createdAt' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
@@ -175,7 +175,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                         checked={isSelected}
                                         onChange={() => toggleSelection(product.id)}
                                     />
-                                    <CheckCircle size={12} className="absolute text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                                    <CheckCircle size={12} className="absolute text-[var(--theme-text-primary)] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                                 </div>
                             </td>
 

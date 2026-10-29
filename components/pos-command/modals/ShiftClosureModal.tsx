@@ -284,7 +284,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 className="flex-1 min-h-11 py-2.5 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs select-none cursor-pointer text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
                             >
                                 {isSubmittingShift ? (
-                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <span className="w-4 h-4 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
                                 ) : isVariance && !isManagerOrAdmin ? (
                                     <Lock size={14} className="text-[var(--theme-status-warning-text)]" />
                                 ) : null}

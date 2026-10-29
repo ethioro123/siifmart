@@ -41,7 +41,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
             className={`group relative p-3.5 rounded-2xl border flex flex-col justify-between cursor-pointer transition-all duration-200 hover:-translate-y-0.5 ${
                 isDark
                     ? 'bg-[#1E2822] hover:bg-[#25322A] border-[#2C4D35] text-[var(--theme-text-primary)] hover:border-[#3d6b49]'
-                    : 'bg-[var(--theme-bg-app)] hover:bg-white border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:border-[var(--theme-border)]/30 hover:shadow-md'
+                    : 'bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:border-[var(--theme-border)]/30 hover:shadow-md'
             }`}
         >
             {/* Top row: Avatar, Info & Quick Actions */}
@@ -58,10 +58,10 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                         />
                         <div
                             title={isOnline ? 'Online now' : 'Offline'}
-                            className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-[#1E2822] transition-colors duration-500 ${
+                            className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--theme-border)] dark:border-[#1E2822] transition-colors duration-500 ${
                                 isOnline
                                     ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_6px_rgba(52,211,153,0.8)] animate-pulse'
-                                    : 'bg-stone-300 dark:bg-stone-600'
+                                    : 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)]'
                             }`}
                         />
                     </div>
@@ -78,7 +78,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                                     </span>
                                 )}
                                 {employee.code && (
-                                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-black/5 dark:bg-black/30 text-stone-500">
+                                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded font-semibold bg-[color-mix(in_srgb,var(--theme-overlay)_5%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_5%,transparent)] text-[var(--theme-text-secondary)]">
                                         {formatDisplayEmployeeId(employee)}
                                     </span>
                                 )}
@@ -87,7 +87,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
 
                         {/* Role & Hierarchy Tag */}
                         <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                            <span className="text-[11px] font-medium text-stone-700 dark:text-stone-300 truncate">
+                            <span className="text-[11px] font-medium text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] truncate">
                                 {roleTitle}
                             </span>
                             <span
@@ -103,7 +103,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                         </div>
 
                         {/* Location */}
-                        <div className="flex items-center gap-1 text-[10px] text-stone-400 dark:text-stone-500 mt-1 truncate">
+                        <div className="flex items-center gap-1 text-[10px] text-[var(--theme-text-muted)] text-[var(--theme-text-secondary)] mt-1 truncate">
                             <MapPin size={10} className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] shrink-0" />
                             <span className="truncate">{siteName}</span>
                         </div>
@@ -111,11 +111,11 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                 </div>
 
                 {/* Reporting Line Badges */}
-                <div className="mt-3 pt-2.5 border-t border-black/5 dark:border-white/5 space-y-1.5 text-[10px]">
+                <div className="mt-3 pt-2.5 border-t border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] space-y-1.5 text-[10px]">
                     {/* Solid Line Reporting */}
-                    <div className="flex items-center gap-1.5 text-stone-600 dark:text-stone-300">
+                    <div className="flex items-center gap-1.5 text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">
                         <span className="text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-bold shrink-0">↳</span>
-                        <span className="text-stone-400 shrink-0">Reports to:</span>
+                        <span className="text-[var(--theme-text-muted)] shrink-0">Reports to:</span>
                         <span className="font-semibold truncate text-[var(--theme-text-primary)] dark:text-[var(--theme-text-secondary)]">
                             {primaryManager ? primaryManager.name : (employee.reportsToEmployeeId || employee.reports_to_employee_id) ? 'Manager unavailable in current view' : `Unassigned · expected ${meta.reportsToLabel}`}
                         </span>
@@ -125,7 +125,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                     {(functionalManager || employee.functionalManagerEmployeeId || employee.functional_manager_employee_id || meta.dottedLineLabel) && (
                         <div className="flex items-center gap-1.5 text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                             <span className="font-bold shrink-0">⤑</span>
-                            <span className="text-stone-400 shrink-0">Functional:</span>
+                            <span className="text-[var(--theme-text-muted)] shrink-0">Functional:</span>
                             <span className="font-medium truncate">
                                 {functionalManager ? functionalManager.name : (employee.functionalManagerEmployeeId || employee.functional_manager_employee_id) ? 'Manager unavailable in current view' : `Expected role: ${meta.dottedLineLabel}`}
                             </span>
@@ -135,7 +135,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
             </div>
 
             {/* Bottom Footer: Span & Hover Actions */}
-            <div className="mt-3 pt-2 flex items-center justify-between text-[10px] text-stone-400 border-t border-dashed border-black/5 dark:border-white/5">
+            <div className="mt-3 pt-2 flex items-center justify-between text-[10px] text-[var(--theme-text-muted)] border-t border-dashed border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)]">
                 <div className="flex items-center gap-1.5">
                     {meta.isManagerial && meta.managesRoles.length > 0 ? (
                         <span className="flex items-center gap-1 font-semibold text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] bg-[var(--theme-primary)]/10 dark:bg-[var(--theme-primary)]/20 px-1.5 py-0.5 rounded">
@@ -143,7 +143,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                             <span>Span: {meta.managesRoles.length} roles</span>
                         </span>
                     ) : (
-                        <span className="flex items-center gap-1 text-stone-400">
+                        <span className="flex items-center gap-1 text-[var(--theme-text-muted)]">
                             <ShieldCheck size={11} className="text-[var(--theme-status-info-text)]" />
                             <span>Frontline Operator</span>
                         </span>
@@ -160,7 +160,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                                     e.stopPropagation();
                                     onOpenIdCard(employee);
                                 }}
-                                className="p-1 rounded hover:bg-stone-200 dark:hover:bg-white/10 text-stone-500 hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] transition-colors"
+                                className="p-1 rounded hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] transition-colors"
                                 title="View ID Badge"
                             >
                                 <CreditCard size={12} />
@@ -173,14 +173,14 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
                                     e.stopPropagation();
                                     onOpenProfile(employee);
                                 }}
-                                className="p-1 rounded hover:bg-stone-200 dark:hover:bg-white/10 text-stone-500 hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] transition-colors"
+                                className="p-1 rounded hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-text-secondary)] transition-colors"
                                 title="Open Full Profile & Edit"
                             >
                                 <ExternalLink size={12} />
                             </button>
                         )}
                     </div>
-                    <ChevronRight size={13} className="text-stone-400 group-hover:translate-x-0.5 transition-transform" />
+                    <ChevronRight size={13} className="text-[var(--theme-text-muted)] group-hover:translate-x-0.5 transition-transform" />
                 </div>
             </div>
         </div>

@@ -49,32 +49,32 @@ export const OrgMatrixSwimlane: React.FC<OrgMatrixSwimlaneProps> = ({
     return (
         <div
             className={`rounded-2xl border transition-all ${
-                isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]' : 'bg-white border-[var(--theme-border)] shadow-xs'
+                isDark ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-xs'
             }`}
         >
             {/* Swimlane Header */}
             <div
                 onClick={onToggle}
-                className="flex flex-wrap items-center justify-between gap-3 p-4 cursor-pointer select-none border-b border-black/5 dark:border-white/5"
+                className="flex flex-wrap items-center justify-between gap-3 p-4 cursor-pointer select-none border-b border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)]"
             >
                 <div className="flex items-center gap-3">
                     <div className="shrink-0">{icon}</div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-sm text-stone-900 dark:text-white">
+                            <h3 className="font-bold text-sm text-[var(--theme-text-primary)] text-[var(--theme-text-primary)]">
                                 {title}
                             </h3>
                             {badge}
-                            <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-stone-500">
+                            <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[color-mix(in_srgb,var(--theme-overlay)_5%,transparent)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] text-[var(--theme-text-secondary)]">
                                 {count}
                             </span>
                         </div>
                         {subtitle ? (
-                            <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">
                                 {subtitle}
                             </p>
                         ) : activeCount !== undefined ? (
-                            <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">
                                 {activeCount} active on-duty
                             </p>
                         ) : null}
@@ -86,7 +86,7 @@ export const OrgMatrixSwimlane: React.FC<OrgMatrixSwimlaneProps> = ({
                     <button
                         type="button"
                         onClick={onToggle}
-                        className="p-1 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                        className="p-1 rounded-lg text-[var(--theme-text-muted)] hover:text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-muted)]"
                         aria-label={`Toggle ${title} swimlane`}
                     >
                         {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
@@ -114,7 +114,7 @@ export const OrgMatrixSwimlane: React.FC<OrgMatrixSwimlaneProps> = ({
                             ))}
                         </div>
                     ) : (
-                        <p className="text-xs text-stone-400 italic py-2">
+                        <p className="text-xs text-[var(--theme-text-muted)] italic py-2">
                             {emptyMessage}
                         </p>
                     )}

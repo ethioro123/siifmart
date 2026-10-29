@@ -154,14 +154,14 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
     const currentStep = getStatusStep();
 
     return (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-black/60 overflow-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] overflow-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-4xl max-h-[92vh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col isolate overflow-hidden relative">
 
                 {/* --- TOP NAVIGATION BAR --- */}
                 <div className="px-4 sm:px-6 py-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center shrink-0">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0 border ${
-                            job.transferStatus === 'In-Transit' ? 'bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400' :
+                            job.transferStatus === 'In-Transit' ? 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-accent)] text-[var(--theme-accent)]' :
                             job.status === 'Completed' ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]' :
                             'bg-[var(--theme-primary)]/10 border-[var(--theme-primary)]/20 text-[var(--theme-primary)]'
                         }`}>

@@ -37,8 +37,8 @@ export function DisciplinaryKPIs({ records }: DisciplinaryKPIsProps) {
             value: pendingAppeals,
             sub: 'Awaiting independent 4-Eyes review',
             icon: Clock,
-            color: 'text-purple-600 dark:text-purple-400',
-            bg: 'bg-purple-500/10',
+            color: 'text-[var(--theme-accent)] text-[var(--theme-accent)]',
+            bg: 'bg-[var(--theme-accent-muted)]',
             highlight: pendingAppeals > 0
         },
         {
@@ -60,7 +60,7 @@ export function DisciplinaryKPIs({ records }: DisciplinaryKPIsProps) {
                         key={i}
                         className={`p-4 rounded-2xl bg-[var(--theme-bg-card)] border transition-all ${
                             card.highlight
-                                ? 'border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.15)]'
+                                ? 'border-[var(--theme-border-accent)] shadow-[0_0_12px_rgba(168,85,247,0.15)]'
                                 : 'border-[var(--theme-border)] shadow-[var(--shadow-sm)]'
                         }`}
                     >

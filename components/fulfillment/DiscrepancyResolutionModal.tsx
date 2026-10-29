@@ -320,7 +320,7 @@ export function DiscrepancyResolutionModal({
                                             <div className="font-semibold text-[var(--theme-text-primary)] text-xs">{a.label}</div>
                                             <div className="text-[var(--theme-text-secondary)] text-[11px] mt-1 leading-relaxed">{a.desc}</div>
                                         </div>
-                                        {!allowed && <div className="absolute inset-0 bg-black/75 flex items-center justify-center">
+                                        {!allowed && <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_75%,transparent)] flex items-center justify-center">
                                             <span className="bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] px-2 py-1 rounded text-xs font-semibold uppercase flex items-center gap-1">
                                                 <Lock size={12} /> Locked
                                             </span>

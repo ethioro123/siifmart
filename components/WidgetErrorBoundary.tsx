@@ -42,7 +42,7 @@ export default class WidgetErrorBoundary extends React.Component<Props, State> {
                     <div className="p-3 bg-[var(--theme-status-danger-bg)] rounded-full mb-3 text-[var(--theme-status-danger-text)]">
                         <AlertTriangle size={24} />
                     </div>
-                    <h3 className="text-white font-bold mb-1">
+                    <h3 className="text-[var(--theme-text-primary)] font-bold mb-1">
                         {this.props.title || 'Widget Failed'}
                     </h3>
                     <p className="text-[var(--theme-status-danger-text)] text-xs mb-4 max-w-[200px]">
@@ -50,7 +50,7 @@ export default class WidgetErrorBoundary extends React.Component<Props, State> {
                     </p>
                     <button
                         onClick={this.handleRetry}
-                        className="flex items-center space-x-2 px-4 py-2 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white rounded-lg text-xs font-bold transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] rounded-lg text-xs font-bold transition-colors"
                     >
                         <RotateCcw size={12} />
                         <span>Retry</span>

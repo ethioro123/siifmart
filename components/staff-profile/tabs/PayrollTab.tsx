@@ -84,7 +84,7 @@ export default function PayrollTab({
                     {canManageEmployees && (
                         <button
                             onClick={handleEditSalary}
-                            className="h-11 px-5 rounded-xl bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 text-xs font-semibold uppercase tracking-wider cursor-pointer shrink-0 transition-colors shadow-xs flex items-center justify-center"
+                            className="h-11 px-5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 text-xs font-semibold uppercase tracking-wider cursor-pointer shrink-0 transition-colors shadow-xs flex items-center justify-center"
                         >
                             Adjust Compensation
                         </button>

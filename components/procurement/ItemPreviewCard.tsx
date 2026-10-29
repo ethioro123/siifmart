@@ -138,7 +138,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             return {
                 title: 'Garment & Fitment Specs',
                 icon: Shirt,
-                colorClass: 'text-indigo-500',
+                colorClass: 'text-[var(--theme-accent)]',
                 attrs: [
                     { label: 'Size', value: catSpec.apparelSize || ident.variant || smart.netContent || (phys.sizeType && !['g', 'kg', 'ml', 'L'].includes(phys.sizeType) ? phys.sizeType : null) },
                     { label: 'Colorway', value: phys.color || smart.color },
@@ -151,7 +151,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             return {
                 title: 'Liquid & Container Specs',
                 icon: Droplets,
-                colorClass: 'text-cyan-500',
+                colorClass: 'text-[var(--theme-status-info-text)]',
                 attrs: [
                     { label: 'Volume', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'ml'}`.trim() : smart.netContent },
                     { label: 'Container', value: catSpec.containerType || (phys.form && !['Liquid', 'Solid'].includes(phys.form) ? phys.form : smart.packagingMaterial) },
@@ -392,7 +392,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 {commercialAttrs.length > 0 && (
                     <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                            <Tag size={12} className="text-purple-500 shrink-0" />
+                            <Tag size={12} className="text-[var(--theme-accent)] shrink-0" />
                             <span>Commercial & POS</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">

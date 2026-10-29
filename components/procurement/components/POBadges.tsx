@@ -15,7 +15,7 @@ export const renderStatusBadge = (status: string) => {
         Received: { bg: 'bg-[var(--theme-status-success-bg)]', text: 'text-[var(--theme-status-success-text)]', border: 'border-[var(--theme-status-success-border)]' },
         'Partially Received': { bg: 'bg-[var(--theme-status-warning-bg)]', text: 'text-[var(--theme-status-warning-text)]', border: 'border-[var(--theme-status-warning-border)]' },
         Approved: { bg: 'bg-[var(--theme-status-info-bg)]', text: 'text-[var(--theme-status-info-text)]', border: 'border-[var(--theme-status-info-border)]' },
-        Ordered: { bg: 'bg-indigo-500/10', text: 'text-indigo-500', border: 'border-indigo-500/20' },
+        Ordered: { bg: 'bg-[var(--theme-accent-muted)]', text: 'text-[var(--theme-accent)]', border: 'border-[var(--theme-border-accent)]' },
         Draft: { bg: 'bg-[var(--theme-bg-subtle)]', text: 'text-[var(--theme-text-secondary)]', border: 'border-[var(--theme-border)]' },
         Pending: { bg: 'bg-[var(--theme-status-warning-bg)]', text: 'text-[var(--theme-status-warning-text)]', border: 'border-[var(--theme-status-warning-border)]' },
         Cancelled: { bg: 'bg-[var(--theme-status-danger-bg)]', text: 'text-[var(--theme-status-danger-text)]', border: 'border-[var(--theme-status-danger-border)]' },

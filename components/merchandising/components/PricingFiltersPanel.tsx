@@ -184,7 +184,7 @@ export const PricingFiltersPanel: React.FC = () => {
                                 }`}
                             >
                                 <div
-                                    className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white transition-all ${
+                                    className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-[var(--theme-bg-card)] transition-all ${
                                         filters.onSale === true ? 'left-4' : 'left-0.5'
                                     }`}
                                 />

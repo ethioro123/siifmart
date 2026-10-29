@@ -1,10 +1,5 @@
-import { CommandProductUpdatesNotice } from '../components/pos-command/CommandProductUpdatesNotice';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Lock, ArrowLeft, Printer, Box, Power, Play, PackageCheck, Vault, UserPlus,
-  ReceiptText, ShieldCheck, Users2, LayoutGrid, ChevronDown, Tags
-} from 'lucide-react';
+import { Lock, ReceiptText, ShieldCheck, Users2, LayoutGrid } from 'lucide-react';
 import Logo from '../components/Logo';
 import { useLanguage } from '../contexts/LanguageContext';
 import Protected from '../components/Protected';
@@ -17,6 +12,7 @@ import { isManagerialRole } from '../utils/roles';
 // Components & Context
 import { POSCommandProvider, usePOSCommand } from '../components/pos-command/POSCommandContext';
 import { POSCommandModals } from '../components/pos-command/POSCommandModals';
+import { POSCommandHeader } from '../components/pos-command/layout/POSCommandHeader';
 import { DashboardKPIs } from '../components/pos-command/layout/DashboardKPIs';
 import { ShiftReconciliationTable } from '../components/pos-command/layout/ShiftReconciliationTable';
 import { OverrideVelocityWidget } from '../components/pos-command/layout/OverrideVelocityWidget';
@@ -29,44 +25,25 @@ import SiteRoster from '../components/SiteRoster';
 import RosterManager from '../components/RosterManager';
 import { LeaderboardWidget } from '../components/WorkerPointsDisplay';
 import StoreBonusDisplay from '../components/StoreBonusDisplay';
-import DateRangeSelector from '../components/DateRangeSelector';
 
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
-import { formatShiftId } from '../utils/jobIdFormatter';
-import { CyberClock } from '../components/dashboard/widgets/CyberClock';
-import type { Country } from '../utils/localization';
 
 const POSCommandContent: React.FC = () => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
   const { user } = useStore();
-  const { storePoints, activeSite, shifts, effectiveCountry, settings } = useData();
-  const activeCountry = (activeSite?.country || effectiveCountry || settings?.country || 'ET') as Country;
+  const { storePoints, activeSite } = useData();
 
   const {
-    activeShift,
     myPoints,
     siteWorkerPoints,
     isLocked,
     setIsLocked,
     pin,
-    setPin,
-    handleLockScreen,
-    handleReprint,
-    handleStartShift,
-    handleEndShift,
-    isStartShiftModalOpen,
-    setIsStartShiftModalOpen,
-    setIsReceivingModalOpen,
-    setIsStockListOpen,
-    setIsPrintHubOpen,
-    dateRange,
-    setDateRange
+    setPin
   } = usePOSCommand();
 
   const [pinError, setPinError] = useState('');
-  const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
   const [isSafeLedgerOpen, setIsSafeLedgerOpen] = useState(false);
   const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'audit' | 'roster' | 'all'>('overview');
@@ -82,17 +59,6 @@ const POSCommandContent: React.FC = () => {
     setIsLocked(false);
     setPin('');
     setPinError('');
-  };
-
-  const currentShift = activeShift;
-
-  const handleBack = () => {
-    if (window.history.state && typeof window.history.state.idx === 'number' && window.history.state.idx > 0) {
-      navigate(-1);
-    } else {
-      const isExecutive = ['group_ceo', 'regional_operations_manager', 'country_operations_director'].includes(user?.role || '');
-      navigate(isExecutive ? '/admin' : '/pos');
-    }
   };
 
   // Lock Screen — Apple Minimalist Style
@@ -120,222 +86,12 @@ const POSCommandContent: React.FC = () => {
     <div className="min-h-full w-full relative bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-300">
       <div className="relative z-10 max-w-[1600px] mx-auto p-4 lg:p-6 space-y-6">
 
-        {/* ===== HEADER CARD (Seamless Apple Minimalist Top Bar) ===== */}
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-transparent border-0 border-transparent shadow-none px-6 pt-4 pb-4 relative z-10">
-          {/* Left — Back Action + Store & Shift Status */}
-          <div className="relative z-10 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              title={t('common.back') || 'Back'}
-              aria-label={t('common.back') || 'Back'}
-              onClick={handleBack}
-              className="min-h-11 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-2xl transition-colors border border-[var(--theme-border)] shadow-2xs flex items-center gap-2 text-xs font-semibold group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-            >
-              <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0 transition-transform group-hover:-translate-x-0.5">
-                <ArrowLeft size={13} />
-              </div>
-              <span>{t('common.back') || 'Back'}</span>
-            </button>
-
-            <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-[var(--theme-status-warning)]" />
-              <span>{activeSite?.name || t('posCommand.loadingLocation')}</span>
-            </span>
-
-            {currentShift ? (
-              <span
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-xs font-semibold text-[var(--theme-status-success-text)] shadow-2xs"
-                title={`Cashier: ${currentShift.cashierName || user?.name || 'Staff'} • Float: ${(currentShift.openingFloat || 0).toLocaleString()}`}
-              >
-                <span className="w-2 h-2 rounded-full bg-[var(--theme-status-success)]" />
-                <span className="font-mono font-bold">{currentShift.cashierCode || currentShift.cashier_code || user?.code || 'STAFF'}</span>
-                <span className="text-[10px] opacity-60">•</span>
-                <span>{currentShift.counterNumber || currentShift.counter_number || 'Counter 1'}</span>
-                <span className="text-[10px] opacity-75 font-mono">
-                  ({new Date(currentShift.startTime).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone: activeCountry === 'KE' ? 'Africa/Nairobi' : 'Africa/Addis_Ababa'
-                  })})
-                </span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-muted)] shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-stone-400" />
-                <span>{t('posCommand.drawerInactive')}</span>
-              </span>
-            )}
-          </div>
-
-          {/* Center/Right — Sovereign Live Clock & Calendar */}
-          <div className="hidden md:flex items-center relative z-30">
-            <CyberClock country={activeCountry} compact />
-          </div>
-
-          {/* Right — Clean Segmented Action Groups */}
-          <div className="flex flex-wrap items-center gap-3 relative z-50">
-            {/* Primary Shift Action */}
-            {currentShift ? (
-              <button
-                type="button"
-                onClick={handleEndShift}
-                className="min-h-11 px-4 bg-[var(--theme-status-danger-bg)] hover:opacity-90 text-[var(--theme-status-danger-text)] text-xs font-semibold rounded-2xl border border-[var(--theme-status-danger-border)] transition-colors flex items-center gap-2 shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
-                title="End Shift and Reconcile Cash Drawer"
-              >
-                <div className="w-5 h-5 rounded-md bg-[var(--theme-status-danger)]/20 text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
-                  <Power size={13} />
-                </div>
-                <span>{t('posCommand.endShift') || 'End Shift'}</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsStartShiftModalOpen(true)}
-                className="min-h-11 px-4 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-2xl shadow-xs transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                title="Input opening float and start daily cashier shift"
-              >
-                <div className="w-5 h-5 rounded-md bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0">
-                  <Play size={12} className="fill-current" />
-                </div>
-                <span>{t('posCommand.startShift')}</span>
-              </button>
-            )}
-
-            <CommandProductUpdatesNotice />
-
-            {/* Store Inventory Operations */}
-            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsStockListOpen(true)}
-                  className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                  title="Stock Catalog & Pricing"
-                >
-                  <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
-                    <Box size={13} />
-                  </div>
-                  <span>{t('posCommand.stockList')}</span>
-                </button>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsReceivingModalOpen(true)}
-                className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                title="Receive Stock"
-              >
-                <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
-                  <PackageCheck size={13} />
-                </div>
-                <span>{t('posCommand.receiveLabel')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsSafeLedgerOpen(true)}
-                className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                title="Drop Safe Ledger & Armored Pickups"
-              >
-                <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
-                  <Vault size={13} />
-                </div>
-                <span>{t('posCommand.safeLedgerLabel')}</span>
-              </button>
-            </div>
-
-            {/* Store Talent Onboarding */}
-            {canOnboard && (
-              <button
-                type="button"
-                onClick={() => setIsOnboardModalOpen(true)}
-                className="min-h-11 px-3.5 bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold rounded-2xl shadow-xs transition-colors flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                title="Onboard store cashiers, sales staff & stock clerks"
-              >
-                <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center shrink-0">
-                  <UserPlus size={13} />
-                </div>
-                <span>{t('posCommand.onboardTalent')}</span>
-              </button>
-            )}
-
-            {/* Terminal Controls — Consolidated Print Center & Lock */}
-            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5 relative">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsPrintMenuOpen(prev => !prev)}
-                  aria-expanded={isPrintMenuOpen}
-                  aria-controls="pos-command-print-menu"
-                  className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                  title="Unified Print Center (Receipts, Barcodes & Shelf Tags)"
-                >
-                  <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
-                    <Printer size={13} />
-                  </div>
-                  <span>{t('posCommand.printAction')}</span>
-                  <ChevronDown size={11} className={`text-[var(--theme-text-muted)] transition-transform duration-150 ${isPrintMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {isPrintMenuOpen && (
-                  <div id="pos-command-print-menu" role="group" aria-label="Print options" className="absolute right-0 top-full mt-2 w-60 p-1.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsPrintMenuOpen(false);
-                        handleReprint();
-                      }}
-                      className="w-full min-h-11 px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                      title="Reprint last customer transaction receipt"
-                    >
-                      <div className="w-6 h-6 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
-                        <ReceiptText size={13} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{t('posCommand.reprintReceipt')}</p>
-                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">{t('posCommand.customerSaleReceipt')}</p>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsPrintMenuOpen(false);
-                        setIsPrintHubOpen(true);
-                      }}
-                      className="w-full min-h-11 px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                      title="Generate barcode labels and shelf price tags"
-                    >
-                      <div className="w-6 h-6 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
-                        <Tags size={13} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{t('posCommand.printLabels')}</p>
-                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">{t('posCommand.priceTagsAndBarcodes')}</p>
-                      </div>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleLockScreen}
-                className="min-h-11 px-3 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-                title="Lock Terminal Screen"
-              >
-                <div className="w-5 h-5 rounded-md bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
-                  <Lock size={13} />
-                </div>
-                <span>{t('posCommand.lockScreen')}</span>
-              </button>
-            </div>
-
-            {/* Date Filter */}
-            <DateRangeSelector value={dateRange} onChange={setDateRange} />
-          </div>
-        </div>
+        {/* ===== TWO-TIER REORGANIZED HEADER & COMMAND TOOLBAR ===== */}
+        <POSCommandHeader
+          canOnboard={canOnboard}
+          onOpenSafeLedger={() => setIsSafeLedgerOpen(true)}
+          onOpenOnboardTalent={() => setIsOnboardModalOpen(true)}
+        />
 
         {/* ===== NEW RECRUIT CREDENTIAL HANDOVER ALERT ===== */}
         <NewHireHandoverBanner />

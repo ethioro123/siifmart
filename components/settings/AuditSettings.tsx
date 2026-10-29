@@ -137,7 +137,7 @@ export default function AuditSettings() {
             case 'wms':
                 return 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';
             case 'hr':
-                return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
+                return 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]';
             case 'finance':
             case 'pos':
                 return 'bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border-[var(--theme-status-info-border)]';
@@ -227,7 +227,7 @@ export default function AuditSettings() {
                         <button
                             type="button"
                             onClick={handleExport}
-                            className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs shrink-0"
+                            className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs shrink-0"
                         >
                             <Download size={14} /> Export CSV
                         </button>

@@ -14,12 +14,12 @@ const AttrBadge = ({ label, value, color }: { label: string; value?: string | nu
     const colorMap: Record<string, string> = {
         red: 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]',
         blue: 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]',
-        cyan: 'bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-400',
+        cyan: 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]',
         green: 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]',
         yellow: 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
-        orange: 'bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-400',
-        purple: 'bg-purple-500/10 border-purple-500/30 text-purple-700 dark:text-purple-400',
-        pink: 'bg-pink-500/10 border-pink-500/30 text-pink-700 dark:text-pink-400',
+        orange: 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
+        purple: 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-accent)] text-[var(--theme-accent)]',
+        pink: 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-accent)] text-[var(--theme-accent)]',
     };
     const colorClasses = color && colorMap[color] ? colorMap[color] : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]';
 
@@ -145,7 +145,7 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
             {/* 5. Commercial & POS Shelf Rules */}
             <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                    <Tag size={12} className="text-purple-500 shrink-0" />
+                    <Tag size={12} className="text-[var(--theme-accent)] shrink-0" />
                     <span>POS Checkout & Shelf Pricing Rules</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">

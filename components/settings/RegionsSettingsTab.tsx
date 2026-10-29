@@ -139,7 +139,7 @@ export default function RegionsSettingsTab() {
                         <button
                             type="button"
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer shadow-xs"
+                            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer shadow-xs"
                         >
                             <Plus size={15} />
                             <span>Provision Region</span>
@@ -257,7 +257,7 @@ export default function RegionsSettingsTab() {
                     <button
                         type="button"
                         onClick={loadRegions}
-                        className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer shadow-xs"
+                        className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer shadow-xs"
                     >
                         Retry Connection
                     </button>
@@ -279,7 +279,7 @@ export default function RegionsSettingsTab() {
                         <button
                             type="button"
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer shadow-xs"
+                            className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer shadow-xs"
                         >
                             <Plus size={14} />
                             <span>Provision First Region</span>

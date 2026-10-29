@@ -60,7 +60,7 @@ export const LocationRegionView: React.FC<LocationRegionViewProps> = ({
                     className="bg-[var(--theme-bg-card)] border border-dashed border-[var(--theme-border)] rounded-2xl p-4 flex flex-col gap-3 min-h-[300px] shadow-xs"
                 >
                     <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
-                        <span className="w-2 h-2 rounded-full bg-stone-400 shrink-0" />
+                        <span className="w-2 h-2 rounded-full bg-[var(--theme-bg-card-hover)] shrink-0" />
                         <h5 className="text-[var(--theme-text-primary)] font-semibold text-xs tracking-tight">
                             Unassigned Region
                         </h5>

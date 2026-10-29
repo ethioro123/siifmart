@@ -13,10 +13,10 @@ interface OperationalThroughputCardProps {
 const OPERATIONS = [
   { label: 'Putaway', key: 'PUTAWAY', sub: 'Inbound Ingest', icon: Package, color: 'text-[var(--theme-accent)]', bg: 'bg-[var(--theme-accent)]/10/10' },
   { label: 'Picking', key: 'PICK', sub: 'Outbound Flow', icon: Target, color: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]' },
-  { label: 'Packing', key: 'PACK', sub: 'QA Validated', icon: Box, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-500/10' },
+  { label: 'Packing', key: 'PACK', sub: 'QA Validated', icon: Box, color: 'text-[var(--theme-accent)] text-[var(--theme-accent)]', bg: 'bg-[var(--theme-accent-muted)]' },
   { label: 'Dispatch', key: 'DISPATCH', sub: 'Postal Ready', icon: Truck, color: 'text-[var(--theme-status-success-text)]', bg: 'bg-[var(--theme-status-success-bg)]' },
-  { label: 'Internal', key: 'TRANSFER', sub: 'Cross-Network', icon: ArrowRight, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-500/10' },
-  { label: 'Audits', key: 'COUNT', sub: 'Purity Check', icon: ClipboardList, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-500/10' },
+  { label: 'Internal', key: 'TRANSFER', sub: 'Cross-Network', icon: ArrowRight, color: 'text-[var(--theme-accent)] text-[var(--theme-accent)]', bg: 'bg-[var(--theme-accent-muted)]' },
+  { label: 'Audits', key: 'COUNT', sub: 'Purity Check', icon: ClipboardList, color: 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]', bg: 'bg-[var(--theme-status-success-bg)]' },
   { label: 'Compliance', key: 'WASTE', sub: 'Resolution', icon: AlertTriangle, color: 'text-[var(--theme-status-danger-text)]', bg: 'bg-[var(--theme-status-danger-bg)]' },
   { label: 'Returns', key: 'RETURNS', sub: 'Reverse Log', icon: ArrowRight, color: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]' },
   { label: 'Resupply', key: 'REPLENISH', sub: 'Buffer Sync', icon: Activity, color: 'text-[var(--theme-accent)]', bg: 'bg-[var(--theme-accent)]/10' },

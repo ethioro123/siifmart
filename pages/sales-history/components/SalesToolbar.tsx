@@ -84,7 +84,7 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
 
             {/* Date Range Picker */}
             <div className="flex items-center min-h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 gap-2 text-[var(--theme-text-primary)] shrink-0">
-               <div className="w-7 h-7 rounded-lg bg-neutral-500/10 text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0">
+               <div className="w-7 h-7 rounded-lg bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0">
                   <Calendar size={14} />
                </div>
                <input

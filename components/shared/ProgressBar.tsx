@@ -12,7 +12,7 @@ interface ProgressBarProps {
  */
 export const ProgressBar: React.FC<ProgressBarProps> = ({
     progress,
-    containerClassName = "h-2 bg-white/10 rounded-full overflow-hidden",
+    containerClassName = "h-2 bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] rounded-full overflow-hidden",
     fillClassName = "h-full bg-[var(--theme-status-info-bg)] transition-all duration-300"
 }) => {
     const fillRef = useRef<HTMLDivElement>(null);
@@ -38,7 +38,7 @@ interface VerticalBarProps {
 
 export const VerticalBar: React.FC<VerticalBarProps> = ({
     heightPercent,
-    className = "bg-white/5 rounded-t-lg w-full",
+    className = "bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] rounded-t-lg w-full",
 }) => {
     const barRef = useRef<HTMLDivElement>(null);
 

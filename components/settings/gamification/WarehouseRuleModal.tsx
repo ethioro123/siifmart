@@ -90,7 +90,7 @@ export const WarehouseRuleModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={handleSaveWarehouseRule}
-                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs"
+                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs"
                     >
                         Save Changes
                     </button>

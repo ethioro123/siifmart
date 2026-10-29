@@ -48,10 +48,10 @@ export const POSPointRulesList: React.FC<POSPointRulesListProps> = ({
                                 rule.enabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                             }`}
                         >
-                            <div className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${rule.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                            <div className={`w-4 h-4 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${rule.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
                         </button>
 
-                        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${getColorClass(rule.color || 'blue')} flex items-center justify-center shrink-0 shadow-xs text-white`}>
+                        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${getColorClass(rule.color || 'blue')} flex items-center justify-center shrink-0 shadow-xs text-[var(--theme-text-primary)]`}>
                             {getRuleTypeIcon(rule.type)}
                         </div>
 

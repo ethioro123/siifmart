@@ -36,7 +36,7 @@ export default function PhotoApprovalList({ photoRequests, onApprove, onReject }
 
                   <div className="flex-1 min-w-0">
                      <p className="text-[var(--theme-text-primary)] font-bold truncate">{req.userName}</p>
-                     <p className="text-xs text-gray-400">Requested {formatDateTime(req.timestamp)}</p>
+                     <p className="text-xs text-[var(--theme-text-muted)]">Requested {formatDateTime(req.timestamp)}</p>
                   </div>
 
                   <div className="flex gap-2">

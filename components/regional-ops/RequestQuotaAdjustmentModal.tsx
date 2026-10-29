@@ -79,7 +79,7 @@ export const RequestQuotaAdjustmentModal: React.FC<RequestQuotaAdjustmentModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs animate-in fade-in">
       <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
           <div className="flex items-center gap-2.5">
@@ -172,7 +172,7 @@ export const RequestQuotaAdjustmentModal: React.FC<RequestQuotaAdjustmentModalPr
                 onClick={() => setRequestType('PERMANENT_EXPANSION')}
                 className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                   requestType === 'PERMANENT_EXPANSION'
-                    ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30'
+                    ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]'
                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                 }`}
               >
@@ -203,7 +203,7 @@ export const RequestQuotaAdjustmentModal: React.FC<RequestQuotaAdjustmentModalPr
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-[var(--theme-text-primary)] text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : null}
               <span>Submit to Corporate HQ</span>

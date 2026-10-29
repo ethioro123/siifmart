@@ -108,7 +108,7 @@ export default function Modal({
         paddingLeft: isSide ? undefined : 'max(0.75rem, calc(env(safe-area-inset-left, 0px) + 0.75rem))',
         paddingRight: isSide ? undefined : 'max(0.75rem, calc(env(safe-area-inset-right, 0px) + 0.75rem))'
       }}
-      className={`fixed inset-0 ${zIndex} flex ${isSide ? 'justify-end' : 'items-center justify-center'} ${mobileFullScreen ? 'p-0 sm:p-6' : 'p-3 sm:p-6'} overflow-hidden print:static print:block print:p-0 print:bg-white`}
+      className={`fixed inset-0 ${zIndex} flex ${isSide ? 'justify-end' : 'items-center justify-center'} ${mobileFullScreen ? 'p-0 sm:p-6' : 'p-3 sm:p-6'} overflow-hidden print:static print:block print:p-0 print:bg-[var(--theme-bg-card)]`}
     >
       {/* Backdrop with blur and darken */}
       <div
@@ -127,7 +127,7 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`relative w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} ${mobileFullScreen ? 'h-[100dvh] sm:h-auto rounded-none sm:rounded-3xl' : 'rounded-3xl'} animate-in fade-in zoom-in duration-200`} bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-[var(--shadow-modal)] transform transition-all flex flex-col my-auto print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}
+        className={`relative w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} ${mobileFullScreen ? 'h-[100dvh] sm:h-auto rounded-none sm:rounded-3xl' : 'rounded-3xl'} animate-in fade-in zoom-in duration-200`} bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-[var(--shadow-modal)] transform transition-all flex flex-col my-auto print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-[var(--theme-bg-card)]`}
       >
 
         {/* Header */}

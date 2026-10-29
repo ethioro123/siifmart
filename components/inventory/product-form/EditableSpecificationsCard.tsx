@@ -366,7 +366,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                                 <button
                                     type="button"
                                     onClick={handleAddBarcode}
-                                    className="p-1 rounded-lg bg-[var(--theme-accent)] text-white hover:opacity-90 cursor-pointer transition-all"
+                                    className="p-1 rounded-lg bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 cursor-pointer transition-all"
                                 >
                                     <Plus size={11} />
                                 </button>

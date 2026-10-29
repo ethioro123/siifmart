@@ -141,7 +141,7 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
         : 'Reject Purchase Order';
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-6 rounded-3xl max-w-md w-full space-y-5 shadow-2xl">
         <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
           <div className="flex items-center gap-2.5">
@@ -209,7 +209,7 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
                             : 'border-[var(--theme-status-danger-border)] bg-[var(--theme-status-danger-bg)]'
                           : 'border-[var(--theme-border)]'
                       }`}>
-                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-bg-card)]" />}
                       </span>
                     </div>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5 leading-snug">
@@ -259,7 +259,7 @@ export const POApprovalModal: React.FC<POApprovalModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`h-11 px-6 rounded-full text-xs font-semibold text-white shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer ${
+              className={`h-11 px-6 rounded-full text-xs font-semibold text-[var(--theme-text-primary)] shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer ${
                 isApprove || isFinance || isRecommend
                   ? 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)]'
                   : 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)]'

@@ -123,7 +123,7 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 md:p-6 shadow-sm space-y-4 animate-in fade-in">
                     <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-center">
                                 <Lock size={18} />
                             </div>
                             <div>
@@ -150,9 +150,9 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                             placeholder={t('warehouse.packing.scanSealSerialPrompt') || 'Scan or type seal serial (e.g. SEAL-8921)...'}
                             value={sealSerialNumber}
                             onChange={(e) => setSealSerialNumber(e.target.value)}
-                            className="w-full bg-[var(--theme-bg-subtle)] border-2 border-[var(--theme-border)] focus:border-purple-500 rounded-2xl py-3 pl-10 pr-4 font-mono font-bold text-sm md:text-base text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] uppercase outline-none min-h-[50px] transition-colors"
+                            className="w-full bg-[var(--theme-bg-subtle)] border-2 border-[var(--theme-border)] focus:border-[var(--theme-border-accent)] rounded-2xl py-3 pl-10 pr-4 font-mono font-bold text-sm md:text-base text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] uppercase outline-none min-h-[50px] transition-colors"
                         />
-                        <Hash size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-600 dark:text-purple-400" />
+                        <Hash size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-accent)] text-[var(--theme-accent)]" />
                     </div>
                 </div>
             )}

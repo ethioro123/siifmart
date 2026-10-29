@@ -37,7 +37,7 @@ export default function DirectoryList({
                      label: employee.role?.replace(/_/g, ' ') || 'Staff',
                      desc: 'Team Member',
                      level: 4,
-                     styles: { text: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', badge: 'bg-slate-500/20 text-slate-300' }
+                     styles: { text: 'text-[var(--theme-text-muted)]', bg: 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]', badge: 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_20%,transparent)] text-[var(--theme-text-muted)]' }
                   };
                   return (
                      <EmployeeRow

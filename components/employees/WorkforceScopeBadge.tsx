@@ -16,7 +16,7 @@ export default function WorkforceScopeBadge({ employee }: { employee: Employee }
          : 'Operation Site';
 
    const styleClass = isRegionalAdmin
-      ? 'bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20'
+      ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]'
       : scopeLevel === 'HQ'
          ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
          : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]';

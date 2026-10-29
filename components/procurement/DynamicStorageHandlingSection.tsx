@@ -68,7 +68,7 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
         <div className="space-y-3 pt-3 border-t border-[var(--theme-border-subtle)]">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                    <Thermometer size={12} className="text-purple-500" />
+                    <Thermometer size={12} className="text-[var(--theme-accent)]" />
                     <span>5. Storage, Inbound QC & Handling Directives</span>
                 </div>
                 <span className="text-[9px] text-[var(--theme-text-secondary)] font-medium">
@@ -179,7 +179,7 @@ export const DynamicStorageHandlingSection: React.FC<DynamicStorageHandlingSecti
                         <label key={flag.id} className="flex items-center gap-1.5 cursor-pointer group">
                             <input
                                 type="checkbox"
-                                className={`w-3.5 h-3.5 rounded border-[var(--theme-border)] ${flag.isAlert ? 'accent-rose-500' : 'accent-[var(--theme-accent)]'}`}
+                                className={`w-3.5 h-3.5 rounded border-[var(--theme-border)] ${flag.isAlert ? 'accent-[var(--theme-accent)]' : 'accent-[var(--theme-accent)]'}`}
                                 checked={isChecked}
                                 onChange={e => handleFlagChange(flag.id, e.target.checked)}
                             />

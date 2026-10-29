@@ -178,10 +178,10 @@ const DiscountCodesSettings: React.FC = () => {
   const getStatusColor = (status: DiscountCode['status']) => {
     switch (status) {
       case 'Active': return 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20';
-      case 'Expired': return 'bg-neutral-500/10 text-neutral-500 dark:text-neutral-400 border-neutral-500/20';
-      case 'Disabled': return 'bg-neutral-500/10 text-neutral-400 dark:text-neutral-500 border-neutral-500/20';
+      case 'Expired': return 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]';
+      case 'Disabled': return 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-muted)] text-[var(--theme-text-secondary)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]';
       case 'Scheduled': return 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
-      default: return 'bg-neutral-500/10 text-neutral-400 border-neutral-500/20';
+      default: return 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]';
     }
   };
 
@@ -217,7 +217,7 @@ const DiscountCodesSettings: React.FC = () => {
           <button
             onClick={handleOpenCreate}
             disabled={isPending}
-            className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+            className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
           >
             {isPending ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
             Create Code
@@ -262,7 +262,7 @@ const DiscountCodesSettings: React.FC = () => {
         </div>
         <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
           <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Expired</p>
-          <p className="text-2xl font-bold text-neutral-400 dark:text-neutral-500">
+          <p className="text-2xl font-bold text-[var(--theme-text-muted)] text-[var(--theme-text-secondary)]">
             {discountCodes.filter(c => getEffectiveStatus(c) === 'Expired').length}
           </p>
         </div>
@@ -383,7 +383,7 @@ const DiscountCodesSettings: React.FC = () => {
                             <button
                               onClick={() => handleDelete(code.id)}
                               disabled={isPending}
-                              className="px-2 py-0.5 bg-[var(--theme-status-danger-bg)] text-white text-[10px] rounded-lg font-semibold cursor-pointer disabled:opacity-50"
+                              className="px-2 py-0.5 bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-[10px] rounded-lg font-semibold cursor-pointer disabled:opacity-50"
                             >
                               Confirm
                             </button>

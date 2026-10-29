@@ -74,7 +74,7 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                     <div className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${
                         requiresFinanceCoApproval(requestForDetails)
                             ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
-                            : 'bg-indigo-500/10 border-indigo-500/30 text-indigo-500 dark:text-indigo-400'
+                            : 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-accent)] text-[var(--theme-accent)]'
                     }`}>
                         <ShieldAlert size={16} className="shrink-0 mt-0.5" />
                         <div>

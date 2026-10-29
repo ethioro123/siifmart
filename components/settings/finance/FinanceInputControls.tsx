@@ -121,11 +121,11 @@ export const ToggleRow: React.FC<ToggleRowProps> = ({ label, sub, checked = fals
             disabled={disabled}
             onClick={onChange}
             className={`w-11 h-6 shrink-0 rounded-full p-0.5 transition-colors relative cursor-pointer disabled:opacity-50 ${
-                checked ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-neutral-300 dark:bg-neutral-700'
+                checked ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-panel)]'
             }`}
         >
             <div
-                className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 transform ${
+                className={`w-5 h-5 bg-[var(--theme-bg-card)] rounded-full shadow-sm transition-transform duration-200 transform ${
                     checked ? 'translate-x-5' : 'translate-x-0'
                 }`}
             />

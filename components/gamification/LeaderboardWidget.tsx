@@ -58,11 +58,11 @@ export function LeaderboardWidget({ workers, currentUserId }: LeaderboardWidgetP
                                 <div
                                     className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs font-mono shrink-0 ${
                                         rank === 1
-                                            ? 'bg-[var(--theme-status-warning-bg)] text-white shadow-2xs'
+                                            ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] shadow-2xs'
                                             : rank === 2
-                                            ? 'bg-slate-300 dark:bg-slate-600 text-slate-800 dark:text-slate-100'
+                                            ? 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]'
                                             : rank === 3
-                                            ? 'bg-[var(--theme-status-warning-bg)] text-white'
+                                            ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]'
                                             : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
                                     }`}
                                 >

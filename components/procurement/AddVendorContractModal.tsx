@@ -75,7 +75,7 @@ export const AddVendorContractModal: React.FC<AddVendorContractModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-6 rounded-3xl max-w-lg w-full space-y-5 shadow-2xl">
         <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
           <div className="flex items-center gap-2.5">

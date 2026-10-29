@@ -72,7 +72,7 @@ export function FloorDiscrepancyModal({ isOpen, onClose, job, user, initialLine 
         const firstControl = controls[0], lastControl = controls[controls.length - 1];
         if (event.shiftKey && document.activeElement === firstControl) { event.preventDefault(); lastControl?.focus(); }
         else if (!event.shiftKey && document.activeElement === lastControl) { event.preventDefault(); firstControl?.focus(); }
-    }} role="dialog" aria-modal="true" aria-labelledby="floor-discrepancy-title" className="fixed inset-0 z-[400] flex items-center justify-center bg-black/70 p-3">
+    }} role="dialog" aria-modal="true" aria-labelledby="floor-discrepancy-title" className="fixed inset-0 z-[400] flex items-center justify-center bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] p-3">
         <div className="flex max-h-[90dvh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">
             <header className="flex items-center justify-between gap-3 border-b border-[var(--theme-border)] p-4"><h2 id="floor-discrepancy-title" className="font-semibold">{job.type === 'PICK' ? 'Pick' : 'Pack'} counts and reconciliation</h2><button className={button} disabled={busy} onClick={onClose}>Close</button></header>
             <div className="space-y-4 overflow-y-auto p-4">

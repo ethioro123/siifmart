@@ -300,7 +300,7 @@ export const ReceivingForm: React.FC = () => {
                         className="px-6 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-bold flex items-center gap-2 rounded-xl transition-all active:scale-95 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs cursor-pointer text-xs uppercase tracking-wider"
                     >
                         {isConfirmingReceive ? (
-                            <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> {t('common.processing')}...</span>
+                            <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" /> {t('common.processing')}...</span>
                         ) : (
                             <span className="flex items-center gap-2"><CheckCircle size={16} /> {t('posCommand.finalizeReceipt')}</span>
                         )}

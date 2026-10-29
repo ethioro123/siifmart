@@ -27,7 +27,7 @@ export const DockAssignModal: React.FC<DockAssignModalProps> = ({
     if (!isOpen || !targetDock) return null;
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-4 bg-black/60 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl w-full max-w-lg shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">

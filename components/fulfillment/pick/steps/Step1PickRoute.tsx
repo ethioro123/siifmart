@@ -29,7 +29,7 @@ export const Step1PickRoute: React.FC<Step1PickRouteProps> = ({
             {/* Route Intelligence Banner */}
             <div className="p-3.5 sm:p-4 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
                         <Route size={18} />
                     </div>
                     <div className="min-w-0 flex-1">

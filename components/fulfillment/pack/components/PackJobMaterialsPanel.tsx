@@ -83,17 +83,17 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                                 onClick={() => setBoxSize(opt.size)}
                                 className={`min-h-[48px] p-2.5 rounded-xl border text-left transition-colors cursor-pointer flex flex-col justify-between ${
                                     isSelected
-                                        ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)] shadow-sm'
+                                        ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] border-[var(--theme-accent)] shadow-sm'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/40'
                                 }`}
                             >
                                 <div className="flex items-center justify-between">
-                                    <span className={`text-[11px] font-semibold font-mono uppercase ${isSelected ? 'text-white' : 'text-[var(--theme-text-primary)]'}`}>
+                                    <span className={`text-[11px] font-semibold font-mono uppercase ${isSelected ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-primary)]'}`}>
                                         {opt.code} · {opt.label}
                                     </span>
-                                    {isSelected && <Check size={12} className="text-white shrink-0" />}
+                                    {isSelected && <Check size={12} className="text-[var(--theme-text-primary)] shrink-0" />}
                                 </div>
-                                <span className={`text-[11px] mt-0.5 ${isSelected ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>
+                                <span className={`text-[11px] mt-0.5 ${isSelected ? 'text-[color-mix(in_srgb,var(--theme-text-primary)_80%,transparent)]' : 'text-[var(--theme-text-secondary)]'}`}>
                                     {opt.desc}
                                 </span>
                             </button>
@@ -125,7 +125,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     >
                         <div className="flex items-center gap-2.5 min-w-0">
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Tag size={13} />
                             </div>
@@ -135,7 +135,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-white' : 'border-[var(--theme-border)]'
+                            packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {packingMaterials.fragileStickers && <Check size={11} />}
                         </div>
@@ -153,7 +153,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     >
                         <div className="flex items-center gap-2.5 min-w-0">
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Layers size={13} />
                             </div>
@@ -163,7 +163,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-white' : 'border-[var(--theme-border)]'
+                            packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {packingMaterials.bubbleWrap && <Check size={11} />}
                         </div>
@@ -181,7 +181,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     >
                         <div className="flex items-center gap-2.5 min-w-0">
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.thisSideUp ? 'bg-[var(--theme-accent)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                packingMaterials.thisSideUp ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <ArrowUp size={13} />
                             </div>
@@ -191,7 +191,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.thisSideUp ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-white' : 'border-[var(--theme-border)]'
+                            packingMaterials.thisSideUp ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {packingMaterials.thisSideUp && <Check size={11} />}
                         </div>
@@ -206,13 +206,13 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                         disabled={requireSeal}
                         className={`w-full min-h-[48px] p-2.5 rounded-xl border flex items-center justify-between transition-colors cursor-pointer ${
                             (packingMaterials.securitySeal || requireSeal)
-                                ? 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400'
+                                ? 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-accent)] text-[var(--theme-accent)]'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-accent)]/30'
                         }`}
                     >
                         <div className="flex items-center gap-2.5 min-w-0">
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                (packingMaterials.securitySeal || requireSeal) ? 'bg-purple-600 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                (packingMaterials.securitySeal || requireSeal) ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Lock size={13} />
                             </div>
@@ -222,7 +222,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            (packingMaterials.securitySeal || requireSeal) ? 'bg-purple-600 border-purple-600 text-white' : 'border-[var(--theme-border)]'
+                            (packingMaterials.securitySeal || requireSeal) ? 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {(packingMaterials.securitySeal || requireSeal) && <Check size={11} />}
                         </div>
@@ -230,8 +230,8 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
 
                     {/* Security Seal Serial Input */}
                     {(packingMaterials.securitySeal || requireSeal) && (
-                        <div className="p-2.5 bg-purple-500/10 border border-purple-500/20 rounded-xl space-y-1.5">
-                            <label className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 flex items-center justify-between uppercase">
+                        <div className="p-2.5 bg-[var(--theme-accent-muted)] border border-[var(--theme-border-accent)] rounded-xl space-y-1.5">
+                            <label className="text-[11px] font-semibold text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-between uppercase">
                                 <span className="flex items-center gap-1.5"><Lock size={12} /> {t('warehouse.packing.sealSerialNumber') || 'Seal Serial Number'}</span>
                                 {requireSeal && <span className="text-[11px] text-[var(--theme-status-danger-text)] font-mono font-semibold">{t('warehouse.required') || 'Required'}</span>}
                             </label>
@@ -240,7 +240,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                                 placeholder={t('warehouse.packing.scanSealSerialPrompt') || 'Scan or type seal serial (e.g. SEAL-8921)...'}
                                 value={sealSerialNumber || ''}
                                 onChange={(e) => setSealSerialNumber?.(e.target.value)}
-                                className="w-full bg-[var(--theme-bg-card)] border border-purple-300 dark:border-purple-500/30 rounded-xl px-3 py-2 text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none uppercase min-h-[44px]"
+                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border-accent)] border-[var(--theme-border-accent)] rounded-xl px-3 py-2 text-xs font-mono font-semibold text-[var(--theme-text-primary)] outline-none uppercase min-h-[44px]"
                             />
                         </div>
                     )}
@@ -251,13 +251,13 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                         onClick={() => setHasIcePack(!hasIcePack)}
                         className={`w-full min-h-[48px] p-2.5 rounded-xl border flex items-center justify-between transition-colors cursor-pointer ${
                             hasIcePack || boxSize === 'Thermal Cool Box'
-                                ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-300'
+                                ? 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-accent)]/30'
                         }`}
                     >
                         <div className="flex items-center gap-2.5 min-w-0">
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                hasIcePack || boxSize === 'Thermal Cool Box' ? 'bg-cyan-500 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                hasIcePack || boxSize === 'Thermal Cool Box' ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Snowflake size={13} />
                             </div>
@@ -267,7 +267,7 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            hasIcePack || boxSize === 'Thermal Cool Box' ? 'bg-cyan-600 border-cyan-600 text-white' : 'border-[var(--theme-border)]'
+                            hasIcePack || boxSize === 'Thermal Cool Box' ? 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {(hasIcePack || boxSize === 'Thermal Cool Box') && <Check size={11} />}
                         </div>

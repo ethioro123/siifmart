@@ -96,7 +96,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
             zIndex="z-[10000]"
             footer={
                 <div className="flex justify-between items-center w-full">
-                    <div className="text-sm text-gray-400">
+                    <div className="text-sm text-[var(--theme-text-muted)]">
                         {imageLoadError ? (
                             <span className="text-[var(--theme-status-danger-text)]">⚠️ Error occurred</span>
                         ) : imageLoading ? (
@@ -109,7 +109,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
                         <button
                             onClick={onCancel}
                             disabled={loading}
-                            className={`px-4 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`px-4 py-2 rounded-xl text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] transition-colors flex items-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <X size={18} />
                             Cancel
@@ -130,12 +130,12 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
                 </div>
             }
         >
-            <div className="relative w-full h-80 bg-black rounded-xl overflow-hidden">
+            <div className="relative w-full h-80 bg-[var(--theme-bg-app)] rounded-xl overflow-hidden">
                 {imageLoadError ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl p-6 text-center">
                         <AlertTriangle className="w-12 h-12 text-[var(--theme-status-danger-text)] mb-4" />
                         <p className="text-[var(--theme-status-danger-text)] font-medium mb-2">Image Load Failed</p>
-                        <p className="text-gray-400 text-sm max-w-xs">{imageLoadError}</p>
+                        <p className="text-[var(--theme-text-muted)] text-sm max-w-xs">{imageLoadError}</p>
                         <button
                             onClick={onCancel}
                             className="mt-4 px-4 py-2 bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] rounded-lg bg-[var(--theme-status-danger-bg)] flex items-center gap-2"
@@ -147,7 +147,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
                 ) : imageLoading ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyber-primary mb-4" />
-                        <p className="text-gray-400 text-sm">Loading image...</p>
+                        <p className="text-[var(--theme-text-muted)] text-sm">Loading image...</p>
                     </div>
                 ) : (
                     <Cropper
@@ -164,7 +164,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
             </div>
             {!imageLoadError && !imageLoading && (
                 <div className="mt-4 flex flex-col gap-2">
-                    <div className="flex justify-between text-xs text-gray-400 uppercase font-bold tracking-wider">
+                    <div className="flex justify-between text-xs text-[var(--theme-text-muted)] uppercase font-bold tracking-wider">
                         <span>Zoom</span>
                         <span>{Math.round(zoom * 100)}%</span>
                     </div>
@@ -176,7 +176,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageSrc, onCropComplete, o
                         step={0.1}
                         aria-label="Zoom level"
                         onChange={(e) => setZoom(Number(e.target.value))}
-                        className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyber-primary"
+                        className="w-full h-1 bg-[var(--theme-bg-panel)] rounded-lg appearance-none cursor-pointer accent-cyber-primary"
                     />
                 </div>
             )}

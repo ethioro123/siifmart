@@ -60,7 +60,7 @@ const statColorMap: Record<string, string> = {
     yellow: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
     red: 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]',
     purple: 'text-[var(--theme-text-secondary)]',
-    orange: 'text-orange-600 dark:text-orange-400',
+    orange: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]',
 };
 
 export default function MobileScannerToolbar({
@@ -215,7 +215,7 @@ export default function MobileScannerToolbar({
             {isMenuOpen && (
                 <>
                     <div
-                        className="fixed inset-0 bg-black/60 z-40"
+                        className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] z-40"
                         onClick={() => setIsMenuOpen(false)}
                     />
 

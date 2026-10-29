@@ -202,7 +202,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
                         <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                             Cross-Region Velocity
                         </span>
-                        <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                        <div className="p-2 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)]">
                             <ArrowRightLeft size={16} />
                         </div>
                     </div>
@@ -294,7 +294,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
                                         <button
                                             type="button"
                                             onClick={() => navigate(`/regional-ops?regionCode=${region.code}`)}
-                                            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:opacity-90 transition-all flex items-center gap-1.5 shadow-sm"
+                                            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 transition-all flex items-center gap-1.5 shadow-sm"
                                             title={`Inspect ${region.name} Regional Command`}
                                         >
                                             <span>Inspect</span>

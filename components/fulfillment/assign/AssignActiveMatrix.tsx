@@ -19,8 +19,8 @@ const TYPE_STYLES: Record<string, { bg: string; text: string; border: string; do
     PACK:     { bg: 'bg-[var(--theme-status-success-bg)]', text: 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]', border: 'border-[var(--theme-status-success-border)]', dot: 'bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)]' },
     RECEIVE:  { bg: 'bg-[var(--theme-status-warning-bg)]', text: 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]', border: 'border-[var(--theme-status-warning-border)]', dot: 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)]' },
     PUTAWAY:  { bg: 'bg-[var(--theme-status-info-bg)]', text: 'text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]', border: 'border-[var(--theme-status-info-border)]', dot: 'bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)]' },
-    DISPATCH: { bg: 'bg-purple-500/10', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-500/20', dot: 'bg-purple-600 dark:bg-purple-400' },
-    DRIVER:   { bg: 'bg-cyan-500/10', text: 'text-cyan-700 dark:text-cyan-400', border: 'border-cyan-500/20', dot: 'bg-cyan-600 dark:bg-cyan-400' },
+    DISPATCH: { bg: 'bg-[var(--theme-accent-muted)]', text: 'text-[var(--theme-accent)] text-[var(--theme-accent)]', border: 'border-[var(--theme-border-accent)]', dot: 'bg-[var(--theme-accent-muted)] bg-[var(--theme-accent-muted)]' },
+    DRIVER:   { bg: 'bg-[var(--theme-status-info-bg)]', text: 'text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]', border: 'border-[var(--theme-status-info-border)]', dot: 'bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)]' },
     DEFAULT:  { bg: 'bg-[var(--theme-bg-subtle)]', text: 'text-[var(--theme-text-secondary)]', border: 'border-[var(--theme-border)]', dot: 'bg-[var(--theme-text-muted)]' },
 };
 

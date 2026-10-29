@@ -80,7 +80,7 @@ export function DeleteSiteModal({
             type="button"
             onClick={confirmDeleteSite}
             disabled={deleteConfirmText !== "DELETE" || isDeleting}
-            className="flex-1 h-11 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white font-semibold text-xs rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-11 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
           >
             {isDeleting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
             <span>{isDeleting ? 'Deleting...' : 'Delete Permanently'}</span>

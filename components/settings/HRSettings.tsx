@@ -120,7 +120,7 @@ export default function HRSettings() {
                 <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40 self-start sm:self-auto"
+                    className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40 self-start sm:self-auto"
                 >
                     <Save size={14} />
                     <span>{isSaving ? 'Saving...' : 'Save HR Policy'}</span>

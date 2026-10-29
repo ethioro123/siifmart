@@ -62,7 +62,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                         {authorityName}
                     </span>
                     {isManager ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px] font-semibold">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] text-[11px] font-semibold">
                             <ShieldCheck size={12} />
                             <span>Checker • Statutory Sign-Off</span>
                         </span>
@@ -139,7 +139,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                     returnStatus === 'certified'
                                         ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)] opacity-80 cursor-default'
-                                        : 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
+                                        : 'bg-[var(--theme-accent-muted)] hover:bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] cursor-pointer'
                                 }`}
                                 title="Country Finance Director supervisory authority to certify statutory sovereign tax filing"
                             >
@@ -153,7 +153,7 @@ export const TaxComplianceDesk: React.FC<TaxComplianceDeskProps> = ({
                                 disabled={returnStatus !== 'draft'}
                                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm ${
                                     returnStatus === 'draft'
-                                        ? 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-white cursor-pointer'
+                                        ? 'bg-[var(--theme-accent)] hover:bg-[#0077ED] text-[var(--theme-text-primary)] cursor-pointer'
                                         : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)] opacity-80 cursor-default'
                                 }`}
                             >

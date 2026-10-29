@@ -270,7 +270,7 @@ export default function DataSettings() {
                                 type="button"
                                 onClick={handleRetrieveReport}
                                 disabled={isGenerating}
-                                className="w-full h-9 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer text-xs disabled:opacity-50"
+                                className="w-full h-9 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold px-4 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer text-xs disabled:opacity-50"
                             >
                                 {isGenerating ? (
                                     <RefreshCw className="animate-spin" size={14} />
@@ -295,7 +295,7 @@ export default function DataSettings() {
                             <button
                                 type="button"
                                 onClick={handleCreateBackup}
-                                className="h-8 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98] px-3.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                className="h-8 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 active:scale-[0.98] px-3.5 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                             >
                                 <Download size={13} /> Download
                             </button>
@@ -341,7 +341,7 @@ export default function DataSettings() {
             </div>
 
             {/* DANGER ZONE */}
-            <div className="bg-[var(--theme-status-danger-bg)] dark:bg-red-950/20 border border-[var(--theme-status-danger-border)] rounded-2xl p-6 shadow-xs space-y-4">
+            <div className="bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-2xl p-6 shadow-xs space-y-4">
                 <div>
                     <h3 className="text-sm font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] mb-1 flex items-center gap-2">
                         <AlertTriangle size={16} /> Danger Zone: Factory Reset
@@ -359,7 +359,7 @@ export default function DataSettings() {
                     <button
                         type="button"
                         onClick={() => setIsResetModalOpen(true)}
-                        className="h-8 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white px-4 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                        className="h-8 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] px-4 rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
                     >
                         <Trash2 size={13} /> Reset System
                     </button>
@@ -391,7 +391,7 @@ export default function DataSettings() {
                                 type="button"
                                 onClick={handleFactoryResetConfirm}
                                 disabled={confirmText !== 'RESET-SIIFMART'}
-                                className="h-9 px-4 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white rounded-xl text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all"
+                                className="h-9 px-4 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all"
                             >
                                 Confirm System Reset
                             </button>
@@ -402,7 +402,7 @@ export default function DataSettings() {
                         <div className="p-4 bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] rounded-xl flex items-start gap-3">
                             <ShieldAlert className="text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] shrink-0 mt-0.5" size={18} />
                             <div className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] leading-relaxed">
-                                <strong className="font-semibold">Warning:</strong> This action cannot be undone. To prevent accidental resets, type <code className="font-mono font-bold bg-white/60 dark:bg-black/40 px-1.5 py-0.5 rounded border border-[var(--theme-status-danger-border)]">RESET-SIIFMART</code> below.
+                                <strong className="font-semibold">Warning:</strong> This action cannot be undone. To prevent accidental resets, type <code className="font-mono font-bold bg-[color-mix(in_srgb,var(--theme-bg-card)_60%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] px-1.5 py-0.5 rounded border border-[var(--theme-status-danger-border)]">RESET-SIIFMART</code> below.
                             </div>
                         </div>
 

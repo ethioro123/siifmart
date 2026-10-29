@@ -1,6 +1,6 @@
 # SIIFMART AI Agent Rules
 
-> Canonical rule specification for all AI agents. `.agent/RULES.md` is the canonical index; its focused guides hold the details. For UI work, consult `docs/APPLE_DESIGN_GUIDE.md` and `APPLE_DESIGN_GUIDE.md`. If guidance conflicts, honor the user's explicit request and security requirements, then this file and canonical rules. Historical feature notes do not override current policy.
+> Canonical rule specification for all AI agents. `.agent/RULES.md` is the canonical index; its focused guides hold the details. For UI work, consult `docs/SIIFMART_DESIGN_STANDARD.md`. If guidance conflicts, honor the user's explicit request and security requirements, then this file and canonical rules. Historical feature notes do not override current policy.
 
 ## Permission Required Before Editing Rules
 
@@ -56,7 +56,7 @@ Continue authorized implementation that follows the existing rules while a rule-
 - **Factual Alerts**: Alerts and notifications must report observed facts only. Do not infer causes or recovery steps from message keywords, present cached estimates as current balances, or claim success before verified save. Distinguish queued work from server completion; omit unverified notices. Scope history to current user, site, country, and session.
 
 ## 4. UI & Performance Standards
-- **Design Tokens**: Follow `docs/APPLE_DESIGN_GUIDE.md`. Use semantic theme tokens; verify contrast, focus, keyboard/touch access, zoom, and reduced motion as relevant.
+- **Design Tokens**: Follow `docs/SIIFMART_DESIGN_STANDARD.md`. Use semantic theme tokens; verify contrast, focus, keyboard/touch access, zoom, and reduced motion as relevant.
 - **Lucide Icons & Zero Emoji**: Use Lucide consistently; don't rely on color alone or use emoji as interface decoration.
 - **POS & WMS UI Translations**: Any UI information change in POS or WMS must be paired with complete translations in the module translation dictionary (`en`, `am`, `or`).
 - **Performance**: Measure performance before adding memoization or virtualization. Use glass only when it helps floating controls with a solid fallback; keep dense/repainting content simple.

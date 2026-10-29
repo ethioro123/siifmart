@@ -31,7 +31,7 @@ export function ReceivingLabelOutputPreview({ item, type, size, format, showPric
     return <div className="space-y-2">
         <p className="text-xs text-[var(--theme-text-secondary)]">Actual label layout · {dimensions.label}. Set printer scale to 100% and disable page headers and footers.</p>
         {failed ? <p role="alert" className="text-sm text-[var(--theme-text-primary)]">Enter a valid SKU and count to preview the label.</p> : !html ? <p role="status">Preparing preview…</p> :
-            <div className="overflow-auto rounded-xl border border-[var(--theme-border)] bg-white p-3">
+            <div className="overflow-auto rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3">
                 <iframe title="Receiving label print output" sandbox="" srcDoc={html} style={{ width: dimensions.width, height: dimensions.height, border: 0, display: 'block' }} />
             </div>}
     </div>;

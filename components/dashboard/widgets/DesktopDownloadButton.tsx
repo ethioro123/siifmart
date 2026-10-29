@@ -41,7 +41,7 @@ export const DesktopDownloadButton: React.FC = () => {
             >
                 <OSIcon size={16} />
                 <span>Get App</span>
-                <span className="hidden lg:inline text-[11px] font-mono font-medium px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10">
+                <span className="hidden lg:inline text-[11px] font-mono font-medium px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--theme-overlay)_10%,transparent)] bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)]">
                     {osName}
                 </span>
                 <Download size={14} className="opacity-80 ml-0.5" />

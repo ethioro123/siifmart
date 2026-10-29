@@ -122,7 +122,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                         <button
                             type="button"
                             onClick={handleApprove}
-                            className="h-10 px-4 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-semibold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer shadow-xs active:scale-[0.98]"
+                            className="h-10 px-4 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-semibold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer shadow-xs active:scale-[0.98]"
                         >
                             <CheckCircle size={15} />
                             <span>Approve Talent</span>

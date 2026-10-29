@@ -67,14 +67,14 @@ export function SiteCard({
 
             {/* Regional Territory Badge */}
             {(region || site.region_code || site.regionCode) && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-stone-500/10 text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-1" title={region ? `Territory: ${region.name} (${region.city || region.code})` : `Region: ${site.region_code || site.regionCode}`}>
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-1" title={region ? `Territory: ${region.name} (${region.city || region.code})` : `Region: ${site.region_code || site.regionCode}`}>
                 <MapPin size={11} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
                 <span>{region ? (region.city || region.name.replace(/\s+Region$/i, '')) : (site.region_code || site.regionCode)}</span>
               </span>
             )}
 
             {isAdmin && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 flex items-center gap-1">
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] flex items-center gap-1">
                 <Landmark size={11} />
                 <span>Central HQ</span>
               </span>
@@ -175,7 +175,7 @@ export function SiteCard({
             </button>
             {isAdmin ? (
               <span
-                className="h-8 px-3 bg-stone-500/10 border border-stone-500/20 rounded-lg text-[var(--theme-text-muted)] text-[11px] font-semibold flex items-center gap-1.5 cursor-not-allowed select-none"
+                className="h-8 px-3 bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)] rounded-lg text-[var(--theme-text-muted)] text-[11px] font-semibold flex items-center gap-1.5 cursor-not-allowed select-none"
                 title="Administration HQ is protected and cannot be deleted"
               >
                 <Lock size={12} />

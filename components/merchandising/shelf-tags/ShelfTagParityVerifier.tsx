@@ -173,7 +173,7 @@ export const ShelfTagParityVerifier: React.FC<ShelfTagParityVerifierProps> = ({
             <button
                type="submit"
                disabled={isVerifying || !activeSite}
-               className="px-4 py-2 bg-[var(--theme-accent)] text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+               className="px-4 py-2 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-1.5 shrink-0 disabled:opacity-50"
             >
                {isVerifying ? (
                   <>

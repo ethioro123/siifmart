@@ -312,12 +312,12 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                           : transfer.status === 'Approved'
                             ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                             : transfer.status === 'In-Transit' || transfer.status === 'Dispatched'
-                              ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
+                              ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]'
                               : transfer.status === 'Delivered'
-                                ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20'
+                                ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                                 : transfer.status === 'Received' || transfer.status === 'Completed'
                                   ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
-                                  : 'bg-stone-500/10 text-stone-600 dark:text-stone-400 border-stone-500/20'
+                                  : 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]'
                       }`}>
                         {transfer.status}
                       </span>
@@ -389,7 +389,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                             <button
                               type="button"
                               onClick={() => handleDriverDeliver(transfer.id)}
-                              className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-white text-xs font-semibold flex items-center gap-1 transition-all shadow-sm"
+                              className="px-2.5 py-1 rounded-lg bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1 transition-all shadow-sm"
                               title="Internal driver clicks to confirm arrival at store"
                             >
                               <Check className="w-3.5 h-3.5" />
@@ -404,7 +404,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                             <button
                               type="button"
                               onClick={() => handleReceiveHandshake(transfer.id)}
-                              className="px-3 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                              className="px-3 py-1.5 rounded-lg bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                             >
                               <PackageCheck className="w-3.5 h-3.5" />
                               <span>Dual Sign-Off</span>

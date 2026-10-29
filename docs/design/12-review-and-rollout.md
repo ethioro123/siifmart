@@ -1,6 +1,6 @@
 # 12 · Review, acceptance and rollout
 
-[Handbook](../APPLE_DESIGN_GUIDE.md) · Edition 29 October 2026
+[Handbook](../SIIFMART_DESIGN_STANDARD.md) · Edition 29 October 2026
 
 ## Evidence before approval of a design
 
@@ -93,6 +93,6 @@ Exceptions require a specific reason, affected scope, evidence and a revisit con
 
 ## Maintenance
 
-Keep this main handbook and its chapters under the repository's 500-line limit. Root `APPLE_DESIGN_GUIDE.md` remains a pointer. When tokens, components or business workflows change, update the implementation map and relevant chapter rather than copying the same rule into several competing guides.
+Keep this main handbook and its chapters under the repository's 500-line limit. The handbook remains the single authoritative entry point. When tokens, components or business workflows change, update the implementation map and relevant chapter rather than copying the same rule into several competing guides.
 
 Review the source register before claiming a newly current Apple behavior. Record the date and specific source; do not rename an older design convention “Apple 2027” without verification. Reassess this edition when supported platforms, accessibility requirements, shared components or major workflows change, and record substantive decisions with their rationale.

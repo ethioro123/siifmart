@@ -184,7 +184,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                             </span>
                         )}
                         {isCold && (
-                            <span className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/25 bg-cyan-500/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">
+                            <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--theme-status-info-border)] bg-[var(--theme-status-info-bg)] px-2 py-0.5 text-[11px] font-semibold text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]">
                                 <ThermometerSnowflake size={12} />
                                 {t('warehouse.packing.coldChain') || 'Cold Chain'}
                             </span>

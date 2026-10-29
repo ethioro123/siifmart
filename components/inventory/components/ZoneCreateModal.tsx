@@ -61,7 +61,7 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs">
             <form onSubmit={handleSubmit} className="relative w-full max-w-lg rounded-3xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xl p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                     <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
@@ -199,7 +199,7 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="px-4 py-2 bg-[var(--theme-accent)] text-white font-semibold text-xs rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-xs uppercase tracking-wider cursor-pointer disabled:opacity-50"
+                        className="px-4 py-2 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-xs uppercase tracking-wider cursor-pointer disabled:opacity-50"
                     >
                         {isLoading ? 'Creating...' : 'Create Zone'}
                     </button>

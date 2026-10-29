@@ -33,7 +33,7 @@ const ConnectionBadge: React.FC<ConnectionBadgeProps> = ({ type }) => {
             );
         case 'bluetooth':
             return (
-                <span className="flex items-center gap-1 text-[10px] font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                <span className="flex items-center gap-1 text-[10px] font-semibold bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] px-2 py-0.5 rounded-full border border-[var(--theme-border-accent)]">
                     <Bluetooth size={10} /> Bluetooth
                 </span>
             );
@@ -67,7 +67,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onTest, onConfig, isTes
                 className={`absolute top-4 right-4 w-2 h-2 rounded-full ${
                     device.status === 'online'
                         ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_6px_rgba(16,185,129,0.5)]'
-                        : 'bg-neutral-400 dark:bg-neutral-600'
+                        : 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)]'
                 }`}
             />
 
@@ -266,7 +266,7 @@ export default function InfrastructureSettings() {
                             <button
                                 type="button"
                                 onClick={() => setIsAddModalOpen(true)}
-                                className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all self-start sm:self-auto"
+                                className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all self-start sm:self-auto"
                             >
                                 <Plus size={14} /> Add Device
                             </button>
@@ -337,10 +337,10 @@ export default function InfrastructureSettings() {
                                 type="button"
                                 onClick={handleSave}
                                 disabled={mutation.isPending || !isAuthorized}
-                                className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
+                                className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                             >
                                 {mutation.isPending ? (
-                                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <span className="w-3.5 h-3.5 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
                                 ) : (
                                     <Save size={13} />
                                 )}

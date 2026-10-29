@@ -40,11 +40,11 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                 onClick={() => onSelect(layoutNode)}
                 className={`group relative h-full w-full rounded-xl border p-2.5 flex flex-col justify-between cursor-pointer select-none transition-all duration-150 ${
                     isDark
-                        ? 'bg-[#1E2822] hover:bg-[#25322A] border-[#2C4D35] text-[var(--theme-text-primary)] shadow-md shadow-black/40'
-                        : 'bg-white hover:bg-[var(--theme-bg-app)] border-[var(--theme-border)] text-[var(--theme-text-primary)] shadow-sm hover:shadow-md'
+                        ? 'bg-[#1E2822] hover:bg-[#25322A] border-[#2C4D35] text-[var(--theme-text-primary)] shadow-md '
+                        : 'bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-app)] border-[var(--theme-border)] text-[var(--theme-text-primary)] shadow-sm hover:shadow-md'
                 } ${
                     isSearchMatch
-                        ? 'ring-2 ring-[var(--theme-status-warning-border)] ring-offset-2 ring-offset-transparent shadow-lg shadow-amber-500/20'
+                        ? 'ring-2 ring-[var(--theme-status-warning-border)] ring-offset-2 ring-offset-transparent shadow-lg '
                         : ''
                 }`}
             >
@@ -54,17 +54,17 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                         <img
                             src={avatarUrl}
                             alt={node.label}
-                            className="w-10 h-10 rounded-full object-cover border border-[var(--theme-border)]/20 dark:border-white/10"
+                            className="w-10 h-10 rounded-full object-cover border border-[var(--theme-border)]/20 border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]"
                             onError={(e) => {
                                 (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(node.label)}&background=2C5E3B&color=EAE5D9&size=96`;
                             }}
                         />
                         <div
                             title={isOnline ? 'Online now' : 'Offline'}
-                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#1E2822] transition-colors duration-500 ${
+                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--theme-border)] dark:border-[#1E2822] transition-colors duration-500 ${
                                 isOnline
                                     ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_5px_rgba(52,211,153,0.7)] animate-pulse'
-                                    : 'bg-stone-300 dark:bg-stone-600'
+                                    : 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)]'
                             }`}
                         />
                     </div>
@@ -82,7 +82,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                                 )}
                                 {emp?.code && (
                                     <span className={`text-[9px] font-mono px-1 py-0.5 rounded font-semibold ${
-                                        isDark ? 'bg-black/30 text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-bg-subtle)]/70 text-[var(--theme-primary)]'
+                                        isDark ? 'bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-bg-subtle)]/70 text-[var(--theme-primary)]'
                                     }`}>
                                         {formatDisplayEmployeeId(emp)}
                                     </span>
@@ -107,8 +107,8 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                 </div>
 
                 {/* Footer row: Site & Reports Counter */}
-                <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-black/5 dark:border-white/5">
-                    <div className="flex items-center gap-1 text-stone-500 dark:text-stone-400 truncate max-w-[120px]" title={node.siteName || 'All Sites'}>
+                <div className="flex items-center justify-between text-[10px] pt-1.5 border-t border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)]">
+                    <div className="flex items-center gap-1 text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] truncate max-w-[120px]" title={node.siteName || 'All Sites'}>
                         <MapPin size={11} className="shrink-0 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]" />
                         <span className="truncate">{node.siteName || 'All Sites'}</span>
                     </div>

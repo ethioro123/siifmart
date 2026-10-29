@@ -54,7 +54,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
             {/* Smart Carton Recommendation Banner */}
             <div className="p-3.5 md:p-4 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
                         <Sparkles size={20} />
                     </div>
                     <div>
@@ -89,7 +89,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                                 });
                             }
                         }}
-                        className="px-3.5 py-2 rounded-xl bg-[var(--theme-accent)] text-white text-xs font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity active:scale-95 shrink-0 cursor-pointer touch-manipulation"
+                        className="px-3.5 py-2 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider hover:opacity-90 transition-opacity active:scale-95 shrink-0 cursor-pointer touch-manipulation"
                     >
                         {t('warehouse.packing.applySuggested') || 'Apply Suggested'}
                     </button>
@@ -120,26 +120,26 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                                 onClick={() => setBoxSize(opt.size)}
                                 className={`min-h-[64px] p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between relative touch-manipulation ${
                                     isSelected
-                                        ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)] shadow-md'
+                                        ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] border-[var(--theme-accent)] shadow-md'
                                         : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/40'
                                 }`}
                             >
                                 {isRecommended && (
                                     <span className={`absolute -top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase ${
                                         isSelected
-                                            ? 'bg-white text-[var(--theme-accent)] shadow-sm'
-                                            : 'bg-[var(--theme-accent)] text-white'
+                                            ? 'bg-[var(--theme-bg-card)] text-[var(--theme-accent)] shadow-sm'
+                                            : 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]'
                                     }`}>
                                         {t('warehouse.packing.recommended') || 'Recommended'}
                                     </span>
                                 )}
                                 <div className="flex items-center justify-between">
-                                    <span className={`text-xs font-bold font-mono uppercase ${isSelected ? 'text-white' : 'text-[var(--theme-text-primary)]'}`}>
+                                    <span className={`text-xs font-bold font-mono uppercase ${isSelected ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-primary)]'}`}>
                                         {opt.code} · {opt.label}
                                     </span>
-                                    {isSelected && <Check size={14} className="text-white shrink-0" />}
+                                    {isSelected && <Check size={14} className="text-[var(--theme-text-primary)] shrink-0" />}
                                 </div>
-                                <span className={`text-[11px] mt-1 ${isSelected ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>
+                                <span className={`text-[11px] mt-1 ${isSelected ? 'text-[color-mix(in_srgb,var(--theme-text-primary)_80%,transparent)]' : 'text-[var(--theme-text-secondary)]'}`}>
                                     {opt.desc}
                                 </span>
                             </button>
@@ -171,7 +171,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                     >
                         <div className="flex items-center gap-3 min-w-0">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Tag size={15} />
                             </div>
@@ -181,7 +181,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-white' : 'border-[var(--theme-border)]'
+                            packingMaterials.fragileStickers ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {packingMaterials.fragileStickers && <Check size={11} />}
                         </div>
@@ -199,7 +199,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                     >
                         <div className="flex items-center gap-3 min-w-0">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Layers size={15} />
                             </div>
@@ -209,7 +209,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-white' : 'border-[var(--theme-border)]'
+                            packingMaterials.bubbleWrap ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {packingMaterials.bubbleWrap && <Check size={11} />}
                         </div>
@@ -227,7 +227,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                     >
                         <div className="flex items-center gap-3 min-w-0">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.thisSideUp ? 'bg-[var(--theme-accent)] text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                packingMaterials.thisSideUp ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <ArrowUp size={15} />
                             </div>
@@ -237,7 +237,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.thisSideUp ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-white' : 'border-[var(--theme-border)]'
+                            packingMaterials.thisSideUp ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {packingMaterials.thisSideUp && <Check size={11} />}
                         </div>
@@ -249,13 +249,13 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                         onClick={() => setPackingMaterials({ ...packingMaterials, securitySeal: !packingMaterials.securitySeal })}
                         className={`min-h-[52px] p-3 rounded-xl border flex items-center justify-between transition-colors cursor-pointer touch-manipulation ${
                             packingMaterials.securitySeal
-                                ? 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400'
+                                ? 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-accent)] text-[var(--theme-accent)]'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-accent)]/30'
                         }`}
                     >
                         <div className="flex items-center gap-3 min-w-0">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.securitySeal ? 'bg-purple-600 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                packingMaterials.securitySeal ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Lock size={15} />
                             </div>
@@ -265,7 +265,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.securitySeal ? 'bg-purple-600 border-purple-600 text-white' : 'border-[var(--theme-border)]'
+                            packingMaterials.securitySeal ? 'bg-[var(--theme-accent-muted)] border-[var(--theme-border-accent)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {packingMaterials.securitySeal && <Check size={11} />}
                         </div>
@@ -277,13 +277,13 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                         onClick={() => setHasIcePack(!hasIcePack)}
                         className={`min-h-[52px] p-3 rounded-xl border flex items-center justify-between transition-colors cursor-pointer touch-manipulation sm:col-span-2 ${
                             hasIcePack || boxSize === 'Thermal Cool Box'
-                                ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-700 dark:text-cyan-300'
+                                ? 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-accent)]/30'
                         }`}
                     >
                         <div className="flex items-center gap-3 min-w-0">
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                                hasIcePack || boxSize === 'Thermal Cool Box' ? 'bg-cyan-500 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                hasIcePack || boxSize === 'Thermal Cool Box' ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Snowflake size={15} />
                             </div>
@@ -293,7 +293,7 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            hasIcePack || boxSize === 'Thermal Cool Box' ? 'bg-cyan-600 border-cyan-600 text-white' : 'border-[var(--theme-border)]'
+                            hasIcePack || boxSize === 'Thermal Cool Box' ? 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-text-primary)]' : 'border-[var(--theme-border)]'
                         }`}>
                             {(hasIcePack || boxSize === 'Thermal Cool Box') && <Check size={11} />}
                         </div>

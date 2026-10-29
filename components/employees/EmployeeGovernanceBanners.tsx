@@ -60,7 +60,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                <button
                   type="button"
                   onClick={onOpenSalaryQueue}
-                  className="h-9 px-3.5 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
+                  className="h-9 px-3.5 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
                >
                   Review Salary Queue
                </button>
@@ -86,7 +86,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                <button
                   type="button"
                   onClick={onOpenChangeModal}
-                  className="h-9 px-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
+                  className="h-9 px-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
                >
                   Review Approvals Queue
                </button>
@@ -172,7 +172,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                      <button
                         type="button"
                         onClick={onFilterPendingRecruits}
-                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white font-semibold text-xs transition-colors cursor-pointer active:scale-[0.98]"
+                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] font-semibold text-xs transition-colors cursor-pointer active:scale-[0.98]"
                      >
                         Filter Pending ({pendingRecruitsCount})
                      </button>

@@ -34,7 +34,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
             {/* Top Mission Briefing Banner */}
             <div className="p-3 sm:p-4 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 overflow-hidden">
                 <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0 w-full flex-1">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
                         <FileText size={18} className="sm:w-5 sm:h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -121,7 +121,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                     </div>
                     <div className="pt-3 flex flex-wrap gap-1.5">
                         {hasColdItems && (
-                            <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20 flex items-center gap-1.5">
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)] flex items-center gap-1.5">
                                 <ThermometerSnowflake size={13} />
                                 {t('warehouse.packing.coldChainIceThermal') || 'Cold Chain (Ice / Thermal)'}
                             </span>

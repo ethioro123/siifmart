@@ -51,7 +51,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
 
     if (!hasEnabledChannels) {
         return (
-            <div className="p-5 bg-[var(--theme-status-warning-bg)] dark:bg-amber-950/20 border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] rounded-2xl text-center space-y-2">
+            <div className="p-5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)] rounded-2xl text-center space-y-2">
                 <AlertCircle className="mx-auto text-[var(--theme-status-warning-text)]" size={24} />
                 <h4 className="text-xs font-black uppercase text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
                     No Mobile Gateways Configured
@@ -74,7 +74,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                             onClick={() => setChannel('MPESA_TILL')}
                             className={`flex-1 py-2 px-1 text-xs font-bold rounded-xl transition-all cursor-pointer text-center leading-tight ${
                                 channel === 'MPESA_TILL'
-                                    ? 'bg-[var(--theme-status-success-bg)] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] text-[var(--theme-status-success-text)]'
                             }`}
                         >
@@ -87,7 +87,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                             onClick={() => setChannel('MPESA_STK')}
                             className={`flex-1 py-2 px-1 text-xs font-bold rounded-xl transition-all cursor-pointer text-center leading-tight ${
                                 channel === 'MPESA_STK'
-                                    ? 'bg-[var(--theme-status-success-bg)] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] text-[var(--theme-status-success-text)]'
                             }`}
                         >
@@ -100,7 +100,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                             onClick={() => setChannel('AIRTEL_MONEY')}
                             className={`flex-1 py-2 px-1 text-xs font-bold rounded-xl transition-all cursor-pointer text-center leading-tight ${
                                 channel === 'AIRTEL_MONEY'
-                                    ? 'bg-[var(--theme-status-danger-bg)] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)]'
                             }`}
                         >
@@ -113,7 +113,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                             onClick={() => setChannel('MPESA_PAYBILL')}
                             className={`flex-1 py-2 px-1 text-xs font-bold rounded-xl transition-all cursor-pointer text-center leading-tight ${
                                 channel === 'MPESA_PAYBILL'
-                                    ? 'bg-[var(--theme-status-warning-bg)] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] text-[var(--theme-status-warning-text)]'
                             }`}
                         >
@@ -132,7 +132,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                             onClick={() => setChannel('TELEBIRR')}
                             className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer text-center ${
                                 channel === 'TELEBIRR'
-                                    ? 'bg-[var(--theme-status-info-bg)] text-white shadow-xs'
+                                    ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] text-[var(--theme-status-info-text)]'
                             }`}
                         >
@@ -145,8 +145,8 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                             onClick={() => setChannel('CBE_BIRR')}
                             className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer text-center ${
                                 channel === 'CBE_BIRR'
-                                    ? 'bg-purple-600 text-white shadow-xs'
-                                    : 'text-[var(--theme-text-secondary)] hover:text-purple-500'
+                                    ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] shadow-xs'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)]'
                             }`}
                         >
                             CBE Birr
@@ -239,7 +239,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                                 M-Pesa Express (STK Push)
                             </span>
                         </div>
-                        <span className="text-xs font-mono font-bold bg-[var(--theme-status-success-bg)] text-white px-2.5 py-0.5 rounded-full">
+                        <span className="text-xs font-mono font-bold bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] px-2.5 py-0.5 rounded-full">
                             Daraja API
                         </span>
                     </div>
@@ -269,10 +269,10 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                                 type="button"
                                 onClick={triggerStkPush}
                                 disabled={stkStatus === 'sending' || stkStatus === 'pending' || !customerPhone.trim()}
-                                className="px-4 py-2 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:cursor-not-allowed"
+                                className="px-4 py-2 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] disabled:opacity-50 text-[var(--theme-text-primary)] rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:cursor-not-allowed"
                             >
                                 {stkStatus === 'sending' ? (
-                                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <span className="w-3.5 h-3.5 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
                                 ) : (
                                     <Send size={13} />
                                 )}

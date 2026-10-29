@@ -107,7 +107,7 @@ export const FinancialSection = ({
                 <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 flex flex-col overflow-hidden relative shadow-sm">
                     <WidgetErrorBoundary title="Category Performance">
                         <h3 className="font-bold text-[var(--theme-text-primary)] mb-4 flex items-center gap-2 text-sm">
-                            <Layers className="text-indigo-600 dark:text-indigo-400" size={18} />
+                            <Layers className="text-[var(--theme-accent)] text-[var(--theme-accent)]" size={18} />
                             Category Sales
                         </h3>
                         <div className="flex-1 w-full min-h-0">

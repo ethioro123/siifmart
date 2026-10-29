@@ -144,7 +144,7 @@ export const RetailLossPreventionCard: React.FC = () => {
                             }}
                             className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${blindClose ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                         >
-                            <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${blindClose ? 'translate-x-5' : 'translate-x-0'}`} />
+                            <div className={`w-5 h-5 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${blindClose ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
                     </div>
 
@@ -166,7 +166,7 @@ export const RetailLossPreventionCard: React.FC = () => {
                             }}
                             className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${requireRefundPin ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
                         >
-                            <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${requireRefundPin ? 'translate-x-5' : 'translate-x-0'}`} />
+                            <div className={`w-5 h-5 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${requireRefundPin ? 'translate-x-5' : 'translate-x-0'}`} />
                         </button>
                     </div>
                 </div>
@@ -178,9 +178,9 @@ export const RetailLossPreventionCard: React.FC = () => {
                     type="button"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                    {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={15} />}
+                    {isSaving ? <span className="w-4 h-4 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" /> : <Save size={15} />}
                     Save Security Policies
                 </button>
             </div>

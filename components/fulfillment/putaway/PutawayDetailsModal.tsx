@@ -76,7 +76,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] flex items-center justify-center z-[200] p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col h-full max-h-[90vh] overflow-hidden relative">
                 {/* Header */}
                 <div className="p-4 md:p-6 border-b border-[var(--theme-border)] flex justify-between items-start bg-[var(--theme-bg-subtle)] relative z-10">

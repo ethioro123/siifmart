@@ -61,7 +61,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] flex items-center justify-center z-[300] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
             <div className="relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl animate-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="p-4 md:p-6 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)] shrink-0">
@@ -257,7 +257,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     <button
                         disabled={isSubmitting}
                         onClick={handleReprintLabels}
-                        className="w-full py-3.5 px-6 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] active:scale-95 text-white font-semibold text-xs md:text-sm uppercase tracking-wider min-h-[48px] flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
+                        className="w-full py-3.5 px-6 rounded-xl bg-[var(--theme-status-info-bg)] bg-[var(--theme-status-info-bg)] active:scale-95 text-[var(--theme-text-primary)] font-semibold text-xs md:text-sm uppercase tracking-wider min-h-[48px] flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
                     >
                         {isSubmitting ? (
                             <RefreshCw className="animate-spin" size={18} />

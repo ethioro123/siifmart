@@ -247,7 +247,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] flex items-center justify-center z-[200] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
             <div className="w-full max-w-5xl h-[92dvh] md:h-[88vh] rounded-3xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-2xl relative overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10 flex justify-between items-start">
@@ -411,7 +411,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 type="button"
                                 onClick={handleConfirmReceipt}
                                 disabled={isSubmitting || localSubmitting || !countsValid}
-                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting || localSubmitting ? (
                                     <Loader2 size={16} className="animate-spin" />

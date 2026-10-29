@@ -28,7 +28,7 @@ export function PriceBatchPreview({ batch, failures = [], sites, currency, pendi
                             <td className="p-3">{margin === null ? 'Cost unavailable' : `${margin.toFixed(1)}%${margin < 15 ? ' · Finance signoff' : ''}`}</td></tr>;
                     })}</tbody></table>
             </div>
-            <div className="flex justify-end gap-3"><button type="button" disabled={pending} onClick={onClose} className="min-h-[44px] rounded-xl border border-[var(--theme-border)] px-4 disabled:opacity-50">Cancel</button><button type="button" disabled={pending} onClick={onConfirm} className="min-h-[44px] rounded-xl bg-[var(--theme-accent)] px-4 text-white disabled:opacity-50">{pending ? 'Submitting…' : failures.length ? 'Retry remaining proposals' : 'Submit proposals'}</button></div>
+            <div className="flex justify-end gap-3"><button type="button" disabled={pending} onClick={onClose} className="min-h-[44px] rounded-xl border border-[var(--theme-border)] px-4 disabled:opacity-50">Cancel</button><button type="button" disabled={pending} onClick={onConfirm} className="min-h-[44px] rounded-xl bg-[var(--theme-accent)] px-4 text-[var(--theme-text-primary)] disabled:opacity-50">{pending ? 'Submitting…' : failures.length ? 'Retry remaining proposals' : 'Submit proposals'}</button></div>
         </div>
     </Modal>;
 }

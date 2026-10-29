@@ -64,7 +64,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                         CREDIT POLICY ENFORCED
                     </span>
                     {isManager ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px] font-semibold">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] text-[11px] font-semibold">
                             <ShieldAlert size={12} />
                             <span>Checker • Limit Sign-Off Authority</span>
                         </span>
@@ -190,7 +190,7 @@ export const CreditControlDesk: React.FC<CreditControlDeskProps> = ({
                                     <button
                                         type="button"
                                         onClick={handleManagerAuthorizeHoldRelease}
-                                        className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                        className="px-3 py-1.5 rounded-xl bg-[var(--theme-accent-muted)] hover:bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                                         title="Country Finance Director supervisory authority to grant temporary credit release"
                                     >
                                         <Check size={13} />

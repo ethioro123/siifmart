@@ -117,7 +117,7 @@ export default function DirectoryHeader({
                   <span>Tasks</span>
                   {tasksCount > 0 && (
                      <span className={`text-[11px] font-mono tabular-nums px-1.5 py-0.2 rounded-full font-semibold ${
-                        isTaskQueueOpen ? 'bg-white/20 text-white' : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
+                        isTaskQueueOpen ? 'bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                      }`}>
                         {tasksCount}
                      </span>

@@ -8,14 +8,14 @@ import { GROCERY_CATEGORIES } from '../../../constants';
 import type { PointRuleType } from '../../../types';
 
 const TIER_COLORS = [
-    { value: 'gray', label: 'Gray', class: 'from-gray-400 to-gray-500' },
-    { value: 'amber', label: 'Bronze', class: 'from-amber-500 to-amber-600' },
-    { value: 'yellow', label: 'Gold', class: 'from-yellow-400 to-yellow-500' },
-    { value: 'cyan', label: 'Platinum', class: 'from-cyan-400 to-cyan-500' },
-    { value: 'purple', label: 'Diamond', class: 'from-purple-400 to-purple-600' },
-    { value: 'green', label: 'Emerald', class: 'from-emerald-400 to-emerald-600' },
-    { value: 'rose', label: 'Ruby', class: 'from-rose-400 to-rose-600' },
-    { value: 'blue', label: 'Sapphire', class: 'from-blue-400 to-blue-600' },
+    { value: 'gray', label: 'Gray', class: 'from-[var(--theme-accent)] to-[var(--theme-accent)]' },
+    { value: 'amber', label: 'Bronze', class: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]' },
+    { value: 'yellow', label: 'Gold', class: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]' },
+    { value: 'cyan', label: 'Platinum', class: 'from-[var(--theme-status-info)] to-[var(--theme-status-info)]' },
+    { value: 'purple', label: 'Diamond', class: 'from-[var(--theme-accent)] to-[var(--theme-accent)]' },
+    { value: 'green', label: 'Emerald', class: 'from-[var(--theme-status-success)] to-[var(--theme-status-success)]' },
+    { value: 'rose', label: 'Ruby', class: 'from-[var(--theme-status-danger)] to-[var(--theme-status-danger)]' },
+    { value: 'blue', label: 'Sapphire', class: 'from-[var(--theme-status-info)] to-[var(--theme-status-info)]' },
 ];
 
 export const PointRuleModal: React.FC = () => {
@@ -283,7 +283,7 @@ export const PointRuleModal: React.FC = () => {
                                 }`}
                                 title={color.label}
                             >
-                                {editedPointRule.color === color.value && <Sparkles size={14} className="text-white" />}
+                                {editedPointRule.color === color.value && <Sparkles size={14} className="text-[var(--theme-text-primary)]" />}
                             </button>
                         ))}
                     </div>
@@ -305,7 +305,7 @@ export const PointRuleModal: React.FC = () => {
                             (editedPointRule.enabled ?? true) ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                         }`}
                     >
-                        <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${(editedPointRule.enabled ?? true) ? 'translate-x-5' : 'translate-x-0'}`} />
+                        <div className={`w-5 h-5 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${(editedPointRule.enabled ?? true) ? 'translate-x-5' : 'translate-x-0'}`} />
                     </button>
                 </div>
 
@@ -321,7 +321,7 @@ export const PointRuleModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={handleSavePointRule}
-                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                        className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
                         <Save size={14} />
                         {editingPointRule ? 'Update Rule' : 'Add Rule'}

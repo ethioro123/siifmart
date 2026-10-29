@@ -292,7 +292,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                                                     type="button"
                                                     disabled={!rejectReason.trim() || rejectMutation.isPending}
                                                     onClick={() => rejectMutation.mutate({ id: item.id, reason: rejectReason })}
-                                                    className="px-3 py-1 bg-[var(--theme-status-danger-bg)] text-white text-xs font-semibold rounded-lg bg-[var(--theme-status-danger-bg)] disabled:opacity-50 cursor-pointer"
+                                                    className="px-3 py-1 bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-lg bg-[var(--theme-status-danger-bg)] disabled:opacity-50 cursor-pointer"
                                                 >
                                                     Confirm
                                                 </button>
@@ -318,7 +318,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                                                     type="button"
                                                     disabled={approveMutation.isPending}
                                                     onClick={() => approveMutation.mutate({ id: item.id })}
-                                                    className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                                                    className="px-3.5 py-1.5 text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-sm disabled:opacity-50"
                                                 >
                                                     <CheckCircle2 size={14} />
                                                     <span>Approve for POS</span>
@@ -428,7 +428,7 @@ export const CatalogGovernanceSection: React.FC<CatalogGovernanceSectionProps> =
                                             survivingSku: c.skus?.[0] || '',
                                             deprecatedSku: c.skus?.[1] || ''
                                         })}
-                                        className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--theme-accent)] text-white rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
+                                        className="px-3.5 py-1.5 text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"
                                     >
                                         <GitMerge size={14} />
                                         <span>Consolidate into 1 SKU</span>

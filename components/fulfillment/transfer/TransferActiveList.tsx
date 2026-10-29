@@ -97,15 +97,15 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
         })();
 
         const statusBadges: Record<string, string> = {
-            'Draft': 'bg-stone-500/10 text-[var(--theme-text-secondary)] border-stone-500/20',
+            'Draft': 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]',
             'Requested': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
             'Approved': 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
-            'Picking': 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
+            'Picking': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
             'Picked': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
-            'Packed': 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
-            'Shipped': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
-            'In-Transit': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
-            'Delivered': 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+            'Packed': 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]',
+            'Shipped': 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
+            'In-Transit': 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
+            'Delivered': 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]',
             'Received': 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
         };
 

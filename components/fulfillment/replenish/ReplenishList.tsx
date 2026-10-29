@@ -74,7 +74,7 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                     urgencyBadgeClass = 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]';
                 } else if (p.stock < minStock / 2) {
                     urgencyLabel = 'High';
-                    urgencyBadgeClass = 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
+                    urgencyBadgeClass = 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
                 } else if (p.stock < minStock) {
                     urgencyLabel = 'Low';
                     urgencyBadgeClass = 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]';
@@ -106,11 +106,11 @@ export const ReplenishList: React.FC<ReplenishListProps> = ({
                                     <div
                                         className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors min-w-[24px] ${
                                             isChecked
-                                                ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-white'
+                                                ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-[var(--theme-text-primary)]'
                                                 : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]'
                                         }`}
                                     >
-                                        {isChecked && <CheckCircle size={14} className="text-white" />}
+                                        {isChecked && <CheckCircle size={14} className="text-[var(--theme-text-primary)]" />}
                                     </div>
                                 </div>
 

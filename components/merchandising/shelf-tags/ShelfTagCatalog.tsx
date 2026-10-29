@@ -181,7 +181,7 @@ export const ShelfTagCatalog: React.FC<ShelfTagCatalogProps> = ({
                   type="button"
                   onClick={onPrintSelected}
                   disabled={selectedIds.size === 0 || isPrinting}
-                  className="px-4 py-1.5 bg-[var(--theme-accent)] disabled:opacity-40 text-white rounded-xl text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-1.5 shadow-xs"
+                  className="px-4 py-1.5 bg-[var(--theme-accent)] disabled:opacity-40 text-[var(--theme-text-primary)] rounded-xl text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-1.5 shadow-xs"
                >
                   <Printer size={14} /> Print Tags ({selectedIds.size})
                </button>

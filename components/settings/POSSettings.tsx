@@ -205,7 +205,7 @@ export default function POSSettings() {
                 <button
                     onClick={() => setIsPreviewOpen(!isPreviewOpen)}
                     title="Toggle Receipt Preview"
-                    className="fixed bottom-8 right-8 h-10 px-4 rounded-xl z-[60] bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-lg flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer font-semibold text-xs"
+                    className="fixed bottom-8 right-8 h-10 px-4 rounded-xl z-[60] bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-lg flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer font-semibold text-xs"
                 >
                     <Receipt size={16} />
                     <span>{isPreviewOpen ? 'Hide Preview' : 'Live Receipt Preview'}</span>

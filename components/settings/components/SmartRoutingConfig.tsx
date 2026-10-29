@@ -129,9 +129,9 @@ export default function SmartRoutingConfig({ siteId }: Props) {
                         type="button"
                         onClick={handleAddMapping}
                         disabled={isSaving || !newZone || zones.length === 0}
-                        className="h-10 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40 shrink-0"
+                        className="h-10 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40 shrink-0"
                     >
-                        {isSaving ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Plus size={16} />}
+                        {isSaving ? <span className="w-3.5 h-3.5 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" /> : <Plus size={16} />}
                         Add Rule
                     </button>
                 </div>

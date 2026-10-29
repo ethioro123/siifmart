@@ -129,7 +129,7 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                                 onClick={() => setChartMode('revenue')}
                                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer ${
                                     chartMode === 'revenue'
-                                        ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                        ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >
@@ -139,7 +139,7 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                                 onClick={() => setChartMode('transactions')}
                                 className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer ${
                                     chartMode === 'transactions'
-                                        ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                        ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >
@@ -265,11 +265,11 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                             {/* Sovereign Catalog Governance */}
                             <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)] transition-colors">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                    <div className="p-2 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]">
                                         <Layers size={16} />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-bold text-purple-600 dark:text-purple-400">
+                                        <p className="text-xs font-bold text-[var(--theme-accent)] text-[var(--theme-accent)]">
                                             {allProducts.length} Sovereign Master SKUs
                                         </p>
                                         <p className="text-[11px] text-[var(--theme-text-muted)]">
@@ -327,7 +327,7 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                                         <div className="flex justify-between items-center mb-1 text-xs">
                                             <div className="flex items-center gap-2">
                                                 <span className={`w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center ${
-                                                    index === 0 ? 'bg-[var(--theme-accent)] text-white shadow-xs' :
+                                                    index === 0 ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs' :
                                                     'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                                 }`}>
                                                     {index + 1}
@@ -383,7 +383,7 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                                     <div key={i} className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between">
                                         <div className="flex items-center gap-3 min-w-0">
                                             <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                                                i === 0 ? 'bg-[var(--theme-status-success-bg)] text-white shadow-xs' :
+                                                i === 0 ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] shadow-xs' :
                                                 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                             }`}>
                                                 {i + 1}

@@ -62,7 +62,7 @@ def validate_palette(palette, spec):
 def main():
     palette = json.loads(re.search(r'<script id="reference-palette" type="application/json">(.*?)</script>', HTML.read_text(), re.S).group(1))
     failures, checked = validate_palette(palette, (ROOT / 'docs/design/15-states-and-theme-pairs.md').read_text())
-    files = [ROOT / 'APPLE_DESIGN_GUIDE.md', ROOT / 'docs/APPLE_DESIGN_GUIDE.md', *sorted((ROOT / 'docs/design').glob('*.md'))]
+    files = [ROOT / 'docs/SIIFMART_DESIGN_STANDARD.md', *sorted((ROOT / 'docs/design').glob('*.md'))]
     for path in files:
         text = path.read_text()
         if len(text.splitlines()) >= 500:

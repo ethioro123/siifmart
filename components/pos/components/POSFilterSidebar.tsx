@@ -78,7 +78,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
         <div className="fixed inset-0 z-50 overflow-hidden flex justify-end" role="dialog" aria-modal="true" aria-label={t('pos.filtersAndSort')}>
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/60 transition-opacity duration-200 animate-in fade-in"
+                className="absolute inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] transition-opacity duration-200 animate-in fade-in"
                 onClick={onClose}
                 aria-hidden="true"
             />
@@ -88,7 +88,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                 {/* Header */}
                 <div className="p-4 border-b border-[var(--theme-border-subtle)] flex items-center justify-between bg-[var(--theme-bg-card)]">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <SlidersHorizontal size={17} />
                         </div>
                         <div>
@@ -122,7 +122,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                     <div className="space-y-2.5">
                         <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                                <Layers size={13} className="text-indigo-500" />
+                                <Layers size={13} className="text-[var(--theme-accent)]" />
                                 {t('pos.department')}
                             </span>
                             {selectedDepartment !== 'All' && (
@@ -200,7 +200,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                     {/* 2. Stock Availability */}
                     <div className="space-y-2.5">
                         <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                            <Package size={13} className="text-cyan-500" />
+                            <Package size={13} className="text-[var(--theme-status-info-text)]" />
                             {t('pos.stockAvailability')}
                         </span>
                         <div className="grid grid-cols-3 gap-2 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
@@ -267,7 +267,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                 <span className="font-semibold">{t('pos.onlyPromotionalItems')}</span>
                             </span>
                             <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${onSaleOnly ? 'bg-[var(--theme-status-danger-bg)]' : 'bg-[var(--theme-border)]'}`}>
-                                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${onSaleOnly ? 'translate-x-4' : 'translate-x-0'}`} />
+                                <div className={`w-4 h-4 rounded-full bg-[var(--theme-bg-card)] transition-transform ${onSaleOnly ? 'translate-x-4' : 'translate-x-0'}`} />
                             </div>
                         </button>
                     </div>

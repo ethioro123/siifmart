@@ -320,7 +320,7 @@ export const ReturnModal: React.FC = () => {
                                             type="button"
                                             onClick={() => setRefundMethod('M_PESA')}
                                             className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'M_PESA'
-                                                ? 'bg-[var(--theme-status-success-bg)] text-white border-[var(--theme-status-success-border)] shadow-xs'
+                                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-success-border)] shadow-xs'
                                                 : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] border-[var(--theme-status-success-border)]'
                                                 }`}
                                         >
@@ -332,7 +332,7 @@ export const ReturnModal: React.FC = () => {
                                                 type="button"
                                                 onClick={() => setRefundMethod('TELEBIRR')}
                                                 className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'TELEBIRR'
-                                                    ? 'bg-[var(--theme-status-info-bg)] text-white border-[var(--theme-status-info-border)] shadow-xs'
+                                                    ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-info-border)] shadow-xs'
                                                     : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] border-[var(--theme-status-info-border)]'
                                                     }`}
                                             >
@@ -342,8 +342,8 @@ export const ReturnModal: React.FC = () => {
                                                 type="button"
                                                 onClick={() => setRefundMethod('CBE_BIRR')}
                                                 className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'CBE_BIRR'
-                                                    ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
-                                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-purple-500/40'
+                                                    ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] border-[var(--theme-border-accent)] shadow-xs'
+                                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-border-accent)]'
                                                     }`}
                                             >
                                                 CBE Birr
@@ -354,7 +354,7 @@ export const ReturnModal: React.FC = () => {
                                         type="button"
                                         onClick={() => setRefundMethod('CASH')}
                                         className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'CASH'
-                                            ? 'bg-[var(--theme-status-danger-bg)] text-white border-[var(--theme-status-danger-border)] shadow-xs'
+                                            ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-danger-border)] shadow-xs'
                                             : 'bg-[var(--theme-bg-card)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]'
                                             }`}
                                     >
@@ -414,7 +414,7 @@ export const ReturnModal: React.FC = () => {
                                     type="button"
                                     onClick={handleInitiateRefund}
                                     disabled={totalRefundAmount === 0 || isProcessing || (refundMethod !== 'CASH' && !customerPhone.trim())}
-                                    className={`flex-1 py-3 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:shadow-none text-xs uppercase tracking-wider ${refundMethod === 'CASH'
+                                    className={`flex-1 py-3 text-[var(--theme-text-primary)] font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs disabled:shadow-none text-xs uppercase tracking-wider ${refundMethod === 'CASH'
                                         ? 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)]'
                                         : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'
                                         }`}

@@ -79,7 +79,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
 
     return (
         <div
-            className="fixed inset-0 z-[150] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200"
+            className="fixed inset-0 z-[150] flex items-end md:items-center justify-center bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs p-0 md:p-4 animate-in fade-in duration-200"
             onClick={(e) => {
                 if (e.target === e.currentTarget) setIsDetailsOpen(false);
             }}
@@ -196,7 +196,7 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                                     </span>
                                     <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider border ${
                                         selectedJob.priority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]' :
-                                        selectedJob.priority === 'High' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
+                                        selectedJob.priority === 'High' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]' :
                                         'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border-[var(--theme-border)]'
                                     }`}>
                                         {selectedJob.priority}

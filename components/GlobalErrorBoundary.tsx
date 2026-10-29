@@ -10,19 +10,19 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
-                <h2 className="text-2xl font-black text-white tracking-widest uppercase italic mb-4">
+                <h2 className="text-2xl font-black text-[var(--theme-text-primary)] tracking-widest uppercase italic mb-4">
                     Neural Link Distorted
                 </h2>
-                <p className="text-gray-400 font-mono text-sm mb-6 bg-black/40 p-4 rounded-lg border border-white/5 break-words">
+                <p className="text-[var(--theme-text-muted)] font-mono text-sm mb-6 bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] p-4 rounded-lg border border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] break-words">
                     {(error as any).message || 'Unknown system anomaly detected.'}
                 </p>
                 <button
                     onClick={resetErrorBoundary}
-                    className="w-full py-4 bg-cyber-primary text-black font-black uppercase tracking-[0.2em] rounded-xl hover:bg-cyber-accent transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full py-4 bg-cyber-primary text-[var(--theme-text-primary)] font-black uppercase tracking-[0.2em] rounded-xl hover:bg-cyber-accent transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                     Re-initialize System
                 </button>
-                <p className="mt-4 text-[10px] text-gray-500 font-mono uppercase tracking-tighter">
+                <p className="mt-4 text-[10px] text-[var(--theme-text-secondary)] font-mono uppercase tracking-tighter">
                     Error code: CORE_FLICKER_V1
                 </p>
             </div>

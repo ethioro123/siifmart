@@ -205,7 +205,7 @@ export const ShelfTagsTab: React.FC = () => {
             </div>
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs">
                <p className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">Selected For Print</p>
-               <p className="text-2xl font-bold text-indigo-500 mt-1 font-mono">{selectedProductIds.size}</p>
+               <p className="text-2xl font-bold text-[var(--theme-accent)] mt-1 font-mono">{selectedProductIds.size}</p>
                <p className="text-xs text-[var(--theme-text-secondary)] mt-1">Queued for thermal tag printer</p>
             </div>
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs">

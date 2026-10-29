@@ -116,8 +116,8 @@ export default function EmployeeStats({
             title="Avg Score"
             value={avgPerformanceText}
             icon={TrendingUp}
-            iconBg="bg-indigo-500/10"
-            iconColor="text-indigo-500 dark:text-indigo-400"
+            iconBg="bg-[var(--theme-accent-muted)]"
+            iconColor="text-[var(--theme-accent)] text-[var(--theme-accent)]"
          />
       </div>
    );

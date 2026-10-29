@@ -277,7 +277,7 @@ export default function Sidebar() {
       {/* Mobile Overlay - Only visible on small screens to prevent "dark thing" effect on desktop */}
       <div
         aria-hidden="true"
-        className={`fixed inset-0 z-[1000] bg-black/40 transition-opacity duration-200 md:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-[1000] bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] transition-opacity duration-200 md:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       />
 
       <aside className={`

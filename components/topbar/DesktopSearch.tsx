@@ -89,7 +89,7 @@ export function DesktopSearch({
                      {(searchResults.navigation?.length > 0 || searchResults.deepLinks?.length > 0) && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-widest flex items-center gap-1.5">
                                  <Layout size={12} /> Commands &amp; Navigation
                               </p>
                            </div>
@@ -123,11 +123,11 @@ export function DesktopSearch({
                                  onClick={() => handleResultClick('navigation', nav.module, nav.path)}
                                  className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
                               >
-                                 <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                                 <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                     <Layout size={16} />
                                  </div>
                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-indigo-500 transition-colors truncate">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-[var(--theme-accent)] transition-colors truncate">
                                        {nav.title}
                                     </p>
                                     <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider">
@@ -206,7 +206,7 @@ export function DesktopSearch({
                      {searchResults.sales?.length > 0 && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-purple-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-widest flex items-center gap-1.5">
                                  <ShoppingCart size={12} /> Sales History ({searchResults.sales.length})
                               </p>
                            </div>
@@ -216,11 +216,11 @@ export function DesktopSearch({
                                  onClick={() => handleResultClick('sale', s.id)}
                                  className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
                               >
-                                 <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                                 <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                                     <ShoppingCart size={16} />
                                  </div>
                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-purple-500 transition-colors truncate">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-[var(--theme-accent)] transition-colors truncate">
                                        {s.receiptNumber || `SALE-${s.id.substring(0, 8).toUpperCase()}`}
                                     </p>
                                     <p className="text-[10px] text-[var(--theme-text-muted)] font-mono truncate">
@@ -237,7 +237,7 @@ export function DesktopSearch({
                      {searchResults.customers?.length > 0 && (
                         <div className="border-b border-[var(--theme-border-subtle)]">
                            <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
-                              <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-[10px] font-bold text-[var(--theme-status-info-text)] uppercase tracking-widest flex items-center gap-1.5">
                                  <Users size={12} /> Customers ({searchResults.customers.length})
                               </p>
                            </div>
@@ -247,11 +247,11 @@ export function DesktopSearch({
                                  onClick={() => handleResultClick('customer', c.id)}
                                  className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
                               >
-                                 <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0">
+                                 <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] flex items-center justify-center shrink-0">
                                     <Users size={16} />
                                  </div>
                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-cyan-500 transition-colors truncate">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-[var(--theme-status-info-text)] transition-colors truncate">
                                        {c.name}
                                     </p>
                                     <p className="text-[10px] text-[var(--theme-text-muted)] truncate">

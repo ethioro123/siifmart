@@ -118,7 +118,7 @@ export const SubmitChangeRequestModal: React.FC<SubmitChangeRequestModalProps> =
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting || !reason.trim()}
-                        className="px-5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all disabled:opacity-40 cursor-pointer shadow-xs"
+                        className="px-5 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all disabled:opacity-40 cursor-pointer shadow-xs"
                     >
                         {isSubmitting ? (
                             <Loader2 size={15} className="animate-spin" />

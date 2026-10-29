@@ -269,14 +269,14 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                             onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
                             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 border cursor-pointer active:scale-[0.98] ${
                                 isAdvancedOpen || activeFiltersCount > 0
-                                    ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)] shadow-xs'
+                                    ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] border-[var(--theme-accent)] shadow-xs'
                                     : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
                             }`}
                         >
                             <SlidersHorizontal size={14} />
                             <span>Filters</span>
                             {activeFiltersCount > 0 && (
-                                <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-bold ${isAdvancedOpen || activeFiltersCount > 0 ? 'bg-white/20 text-white' : 'bg-[var(--theme-accent)] text-white'}`}>
+                                <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-bold ${isAdvancedOpen || activeFiltersCount > 0 ? 'bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]'}`}>
                                     {activeFiltersCount}
                                 </span>
                             )}
@@ -374,7 +374,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         <span className="text-xs text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider">
                             {selectedIds.size} Selected
                         </span>
-                        <Button onClick={() => handleBulkAction('Print Labels')} size="sm" variant="secondary" className="px-3.5 py-1.5 rounded-xl bg-[var(--theme-accent)] text-white font-semibold text-[11px] uppercase tracking-wider hover:opacity-90">
+                        <Button onClick={() => handleBulkAction('Print Labels')} size="sm" variant="secondary" className="px-3.5 py-1.5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold text-[11px] uppercase tracking-wider hover:opacity-90">
                             Print Labels
                         </Button>
                         <Button onClick={() => setSelectedIds(new Set())} size="sm" variant="ghost" className="px-3 py-1.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]">

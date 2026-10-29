@@ -43,7 +43,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                         )}
                         {isDone && (
                             <div className="absolute inset-0 bg-[var(--theme-status-success-bg)] flex items-center justify-center">
-                                <CheckCircle size={18} className="text-white" />
+                                <CheckCircle size={18} className="text-[var(--theme-text-primary)]" />
                             </div>
                         )}
                     </div>

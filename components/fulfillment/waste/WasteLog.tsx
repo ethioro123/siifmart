@@ -277,7 +277,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                             }}
                             className={`w-full min-h-[44px] py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs touch-manipulation ${isDisposingWaste || wasteBasket.length === 0
                                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
-                                : 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white active:scale-[0.99] cursor-pointer'
+                                : 'bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] active:scale-[0.99] cursor-pointer'
                                 }`}
                         >
                             {isDisposingWaste ? (

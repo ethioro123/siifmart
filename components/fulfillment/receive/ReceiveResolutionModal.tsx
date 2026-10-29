@@ -33,7 +33,7 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
     const [mappingProductId, setMappingProductId] = useState<string | null>(null);
 
     return (
-        <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] z-[100] flex items-center justify-center p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl overflow-hidden relative shadow-2xl">
                 <div className="p-4 md:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center">
                     <h3 className="text-sm md:text-base font-bold text-[var(--theme-text-primary)] leading-tight flex items-center gap-2">

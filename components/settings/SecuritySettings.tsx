@@ -59,7 +59,7 @@ const PolicyToggle: React.FC<PolicyToggleProps> = ({ label, enabled, onChange })
             aria-label={label}
             className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${enabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'}`}
         >
-            <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+            <div className={`w-5 h-5 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
         </button>
     </div>
 );
@@ -231,7 +231,7 @@ export default function SecuritySettings() {
                                 <button
                                     type="button"
                                     onClick={handleAddIp}
-                                    className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white font-semibold rounded-xl text-xs hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+                                    className="h-8 px-3.5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
                                 >
                                     <Plus size={14} /> Add IP Range
                                 </button>

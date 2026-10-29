@@ -130,7 +130,7 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                         type="button"
                         onClick={onConfirm}
                         disabled={!adjustQty || parseFloat(adjustQty) <= 0 || isSubmitting}
-                        className={`h-9 px-4 rounded-xl text-[13px] font-semibold text-white shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                        className={`h-9 px-4 rounded-xl text-[13px] font-semibold text-[var(--theme-text-primary)] shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                             adjustType === 'IN' ? 'bg-[var(--theme-status-success-bg)] hover:opacity-95' : 'bg-[var(--theme-status-danger-bg)] hover:opacity-95'
                         }`}
                     >

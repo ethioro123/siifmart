@@ -20,7 +20,7 @@ export const PutawayScannerQuantityCard: React.FC<PutawayScannerQuantityCardProp
                 <p className="text-xl sm:text-2xl text-[var(--theme-text-primary)] font-bold uppercase tracking-tight leading-snug mb-2 break-words">
                     {currentItem?.name || currentItem?.productName}
                 </p>
-                <div className="inline-block px-3 py-1 bg-[var(--theme-accent)] text-white font-semibold font-mono text-xs rounded-xl mb-3">
+                <div className="inline-block px-3 py-1 bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold font-mono text-xs rounded-xl mb-3">
                     {scannedSku || currentItem?.sku}
                 </div>
                 <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-xs font-medium text-[var(--theme-text-secondary)]">

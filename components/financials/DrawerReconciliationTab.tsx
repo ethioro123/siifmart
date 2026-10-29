@@ -172,7 +172,7 @@ export const DrawerReconciliationTab: React.FC = () => {
                             ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                             : stats.netVariance < 0
                                 ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]'
-                                : 'text-cyan-600 dark:text-cyan-400'
+                                : 'text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]'
                     }`}>
                         {stats.netVariance > 0 ? '+' : ''}{currencySymbol} {stats.netVariance.toLocaleString()}
                     </h4>
@@ -310,7 +310,7 @@ export const DrawerReconciliationTab: React.FC = () => {
                                                     s.variance === 0
                                                         ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
                                                         : s.variance > 0
-                                                            ? 'text-cyan-600 dark:text-cyan-400'
+                                                            ? 'text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)]'
                                                             : isExcessive
                                                                 ? 'text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] px-2 py-0.5 rounded-lg border border-[var(--theme-status-danger-border)]'
                                                                 : 'text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]'

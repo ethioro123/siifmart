@@ -77,7 +77,7 @@ export function SiteModal({
                   } ${!!newSite.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center mb-2.5 ${
-                    isSelected ? 'bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]' : 'bg-stone-500/10 text-[var(--theme-text-secondary)]'
+                    isSelected ? 'bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] dark:text-[var(--theme-accent)]' : 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)]'
                   }`}>
                     <Icon size={16} />
                   </div>
@@ -375,7 +375,7 @@ export function SiteModal({
           <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed flex items-center gap-2">
             {newSite.type === 'Administration' ? (
               <>
-                <Briefcase size={16} className="text-purple-600 dark:text-purple-400 shrink-0" />
+                <Briefcase size={16} className="text-[var(--theme-accent)] text-[var(--theme-accent)] shrink-0" />
                 <span><strong className="text-[var(--theme-text-primary)]">Administrative locations</strong> are central offices for executive leadership, HR, Finance, and non-operational governance.</span>
               </>
             ) : newSite.type === 'Warehouse' || newSite.type === 'Distribution Center' ? (
@@ -404,7 +404,7 @@ export function SiteModal({
             type="button"
             onClick={handleSaveSite}
             disabled={isSavingSite || !newSite.name || !newSite.type}
-            className="flex-1 h-11 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white font-semibold text-xs rounded-xl hover:opacity-95 shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+            className="flex-1 h-11 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl hover:opacity-95 shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
           >
             {isSavingSite ? (
               <>

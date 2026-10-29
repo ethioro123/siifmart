@@ -162,7 +162,7 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                             -{Math.abs(request.marginVariancePct).toFixed(1)}% Under Hurdle
                         </span>
                     </div>
-                    <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden flex">
+                    <div className="h-2 w-full bg-[color-mix(in_srgb,var(--theme-overlay)_10%,transparent)] bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] rounded-full overflow-hidden flex">
                         <div
                             className="h-full bg-[var(--theme-status-danger-bg)] rounded-full transition-all"
                             style={{ width: `${Math.min(100, Math.max(10, (request.proposedMarginPct / (request.targetMarginPct || 1)) * 100))}%` }}
@@ -283,7 +283,7 @@ export const MarginExceptionModal: React.FC<MarginExceptionModalProps> = ({
                                         type="button"
                                         onClick={() => handleAction('Approved')}
                                         disabled={isSubmitting}
-                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[var(--theme-accent)] hover:bg-[#0077ED] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                                        className="px-4 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-accent)] hover:bg-[#0077ED] transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
                                     >
                                         {isSubmitting && actionType === 'Approved' ? (
                                             <Loader2 size={13} className="animate-spin" />

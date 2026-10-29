@@ -37,7 +37,7 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
                     }}
                     className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border min-h-[44px] ${
                         isOverflowMode
-                            ? 'bg-[var(--theme-status-warning-bg)] text-white border-[var(--theme-status-warning-border)] shadow-sm'
+                            ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] border-[var(--theme-status-warning-border)] shadow-sm'
                             : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)]'
                     }`}
                 >
@@ -92,7 +92,7 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
                                                     setSelectingLoc(null);
                                                 }
                                             }}
-                                            className={`px-3 py-1.5 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] text-xs font-mono font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] hover:text-white transition-colors flex items-center gap-1.5 min-h-[38px] ${
+                                            className={`px-3 py-1.5 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-status-warning-border)] text-xs font-mono font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] hover:text-[var(--theme-text-primary)] transition-colors flex items-center gap-1.5 min-h-[38px] ${
                                                 isAnySelecting ? 'opacity-50 cursor-not-allowed' : ''
                                             }`}
                                         >

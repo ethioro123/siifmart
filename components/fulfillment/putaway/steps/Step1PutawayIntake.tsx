@@ -34,7 +34,7 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
             {/* Intake Overview Card */}
             <div className="p-4 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 w-full">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
                         <Package size={20} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -46,7 +46,7 @@ export const Step1PutawayIntake: React.FC<Step1PutawayIntakeProps> = ({
                                 {totalItems} {t('warehouse.putaway.lines') || 'Lines'} · {totalUnits} {t('warehouse.unitsLabel') || 'Units'}
                             </span>
                             {hasColdItems && (
-                                <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[11px] font-bold text-cyan-700 dark:text-cyan-300 flex items-center gap-1 uppercase">
+                                <span className="px-2 py-0.5 rounded-md bg-[var(--theme-status-info-bg)] border border-[var(--theme-status-info-border)] text-[11px] font-bold text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] flex items-center gap-1 uppercase">
                                     <ThermometerSnowflake size={11} /> {t('warehouse.putaway.coldChain') || 'Cold Chain'}
                                 </span>
                             )}

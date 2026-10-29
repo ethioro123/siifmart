@@ -65,7 +65,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                     <button
                         type="button"
                         onClick={handleApply}
-                        className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl bg-[var(--theme-accent)] text-white hover:opacity-95 active:scale-[0.98] shadow-xs transition-all cursor-pointer"
+                        className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-95 active:scale-[0.98] shadow-xs transition-all cursor-pointer"
                     >
                         Apply Photo
                     </button>

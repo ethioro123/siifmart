@@ -51,7 +51,7 @@ export default function StaffProfileHeader({
                             <button
                                 type="button"
                                 onClick={onPhotoRequest}
-                                className="absolute bottom-1 right-1 flex h-11 w-11 items-center justify-center rounded-xl border border-white/40 bg-black/65 text-white transition-opacity cursor-pointer md:inset-0 md:h-auto md:w-auto md:flex-col md:rounded-none md:border-0 md:bg-black/50 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                                className="absolute bottom-1 right-1 flex h-11 w-11 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--theme-border)_40%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_65%,transparent)] text-[var(--theme-text-primary)] transition-opacity cursor-pointer md:inset-0 md:h-auto md:w-auto md:flex-col md:rounded-none md:border-0 md:bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
                                 title="Change Profile Photo"
                                 aria-label="Change profile photo"
                             >
@@ -66,11 +66,11 @@ export default function StaffProfileHeader({
                         title={isOnline ? 'Online now' : 'Offline'}
                         className={`absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full border-2 border-[var(--theme-bg-card)] text-[11px] font-semibold flex items-center gap-1 shadow-xs ${
                             isOnline
-                                ? 'bg-[var(--theme-status-success-bg)] text-white'
-                                : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
+                                ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)]'
+                                : 'bg-[var(--theme-bg-subtle)] bg-[var(--theme-bg-panel)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]'
                         }`}
                     >
-                        <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-white animate-pulse' : 'bg-neutral-400'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-[var(--theme-bg-card)] animate-pulse' : 'bg-[var(--theme-bg-card-hover)]'}`} />
                         <span>{isOnline ? 'Online' : 'Offline'}</span>
                     </div>
 
@@ -133,7 +133,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onApprove}
-                                        className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5 shadow-xs"
+                                        className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-[var(--theme-text-primary)] text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5 shadow-xs"
                                     >
                                         <UserCheck size={14} />
                                         <span>Approve & Activate</span>

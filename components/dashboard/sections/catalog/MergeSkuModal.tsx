@@ -25,7 +25,7 @@ export const MergeSkuModal: React.FC<MergeSkuModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
             <div className="w-full max-w-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-2xl space-y-4">
                 <div className="flex items-center gap-2">
                     <GitMerge size={18} className="text-[var(--theme-accent)]" />
@@ -74,7 +74,7 @@ export const MergeSkuModal: React.FC<MergeSkuModalProps> = ({
                         type="button"
                         disabled={!survivingSku || !deprecatedSku || isPending}
                         onClick={onExecuteMerge}
-                        className="px-4 py-1.5 text-xs font-bold bg-[var(--theme-accent)] text-white rounded-xl hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-sm"
+                        className="px-4 py-1.5 text-xs font-bold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] rounded-xl hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-sm"
                     >
                         {isPending ? 'Merging...' : 'Execute Merge'}
                     </button>

@@ -217,7 +217,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-xl flex flex-col overflow-hidden relative">
                 {/* Header */}
                 <div className="px-5 sm:px-6 py-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10">
@@ -332,7 +332,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             <button
                                 onClick={handleApprove}
                                 disabled={loading !== null}
-                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-white shadow-sm transition-opacity flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] shadow-sm transition-opacity flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 {loading === 'approve' ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                                 <span>{t('warehouse.approveTransfer')}</span>
@@ -342,7 +342,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             <button
                                 onClick={handleReject}
                                 disabled={loading !== null}
-                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:text-white border border-[var(--theme-status-danger-border)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-status-danger-border)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 {loading === 'reject' ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
                                 <span>{t('warehouse.rejectTransfer')}</span>
@@ -352,7 +352,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             <button
                                 onClick={handleDelete}
                                 disabled={loading !== null}
-                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-bg-subtle)] bg-[var(--theme-status-danger-bg)] hover:text-white border border-[var(--theme-border)] text-[var(--theme-text-secondary)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-bg-subtle)] bg-[var(--theme-status-danger-bg)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
                                 {loading === 'delete' ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                                 <span>{t('warehouse.deleteManifest')}</span>

@@ -80,7 +80,7 @@ export const TransferDispatchModal: React.FC<TransferDispatchModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-lg rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-2xl overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="p-4 border-b border-[var(--theme-border)] flex items-center justify-between">
@@ -244,7 +244,7 @@ export const TransferDispatchModal: React.FC<TransferDispatchModalProps> = ({
             <button
               type="submit"
               disabled={submitting || (driverType === 'INTERNAL' && verifiedDrivers.length === 0)}
-              className="px-4 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+              className="px-4 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-text-primary)] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
             >
               <Truck className="w-3.5 h-3.5" />
               <span>{submitting ? 'Dispatching...' : 'Confirm Dispatch'}</span>

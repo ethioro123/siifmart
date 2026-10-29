@@ -190,7 +190,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/60 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-2xl max-h-[90vh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col isolate overflow-hidden">
 
                 {/* Header */}
@@ -390,7 +390,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                             <button
                                 disabled={isSubmitting}
                                 onClick={handleSubmit}
-                                className="min-h-[44px] px-6 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 touch-manipulation active:scale-[0.98] cursor-pointer"
+                                className="min-h-[44px] px-6 py-2.5 rounded-xl bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] font-semibold text-xs transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 touch-manipulation active:scale-[0.98] cursor-pointer"
                             >
                                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Undo2 size={16} />}
                                 {isSubmitting ? t('warehouse.submittingWord') : t('warehouse.submitForApprovalButton')}

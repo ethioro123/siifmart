@@ -1,6 +1,6 @@
 # 19 · Complete UI and UX coverage
 
-[Handbook](../APPLE_DESIGN_GUIDE.md) · Revision D, 30 October 2026
+[Handbook](../SIIFMART_DESIGN_STANDARD.md) · Revision D, 30 October 2026
 
 ## Scope and authority
 

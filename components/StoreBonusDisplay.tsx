@@ -34,20 +34,20 @@ export const calculateStoreBonus = (points: number = 0, tiers: BonusTier[] = DEF
 // Get tier gradient class
 const getTierColor = (tierColor: string) => {
     const colors: Record<string, string> = {
-        gray: 'from-slate-400 to-slate-500',
-        amber: 'from-amber-500 to-amber-600',
-        bronze: 'from-amber-700 to-amber-800',
-        silver: 'from-slate-300 to-slate-400',
-        gold: 'from-amber-400 to-amber-500',
-        platinum: 'from-sky-400 to-blue-500',
-        diamond: 'from-blue-500 to-indigo-600',
-        yellow: 'from-amber-400 to-yellow-500',
-        cyan: 'from-cyan-400 to-blue-500',
-        purple: 'from-purple-500 to-indigo-600',
-        blue: 'from-blue-500 to-blue-600',
-        green: 'from-emerald-500 to-emerald-600',
+        gray: 'from-[var(--theme-accent)] to-[var(--theme-accent)]',
+        amber: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]',
+        bronze: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]',
+        silver: 'from-[var(--theme-accent)] to-[var(--theme-accent)]',
+        gold: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]',
+        platinum: 'from-[var(--theme-status-info)] to-[var(--theme-status-info)]',
+        diamond: 'from-[var(--theme-status-info)] to-[var(--theme-accent)]',
+        yellow: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]',
+        cyan: 'from-[var(--theme-status-info)] to-[var(--theme-status-info)]',
+        purple: 'from-[var(--theme-accent)] to-[var(--theme-accent)]',
+        blue: 'from-[var(--theme-status-info)] to-[var(--theme-status-info)]',
+        green: 'from-[var(--theme-status-success)] to-[var(--theme-status-success)]',
     };
-    return colors[tierColor] || 'from-slate-400 to-slate-500';
+    return colors[tierColor] || 'from-[var(--theme-accent)] to-[var(--theme-accent)]';
 };
 
 // Get level info
@@ -129,12 +129,12 @@ export function StoreBonusWidget({
     return (
         <div className="flex items-center gap-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-3.5 py-1.5 shadow-2xs">
             <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${getTierColor(bonusInfo.tier.tierColor)} flex items-center justify-center shrink-0 shadow-2xs`}>
-                <Store size={15} className="text-white" />
+                <Store size={15} className="text-[var(--theme-text-primary)]" />
             </div>
             <div>
                 <p className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5">
                     <span>{effectiveStore.siteName}</span>
-                    <span className={`px-1.5 py-0.2 rounded text-[9px] font-semibold bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} text-white`}>
+                    <span className={`px-1.5 py-0.2 rounded text-[9px] font-semibold bg-gradient-to-r ${getTierColor(bonusInfo.tier.tierColor)} text-[var(--theme-text-primary)]`}>
                         {bonusInfo.tier.tierName}
                     </span>
                 </p>
@@ -382,7 +382,7 @@ export default function StoreBonusDisplay({
             {userShare ? (
                 <div className="bg-[var(--theme-accent)]/5 dark:bg-[var(--theme-accent)]/10 border border-[var(--theme-border-focus)]/20 dark:border-[var(--theme-border-focus)]/20 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0 shadow-2xs">
                             <DollarSign size={17} />
                         </div>
                         <div>
@@ -459,9 +459,9 @@ export function StoreLeaderboard({
                             }`}
                         >
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs font-mono shrink-0 ${
-                                index === 0 ? 'bg-[var(--theme-status-warning-bg)] text-white shadow-2xs' :
-                                index === 1 ? 'bg-slate-300 dark:bg-slate-600 text-slate-800 dark:text-slate-100' :
-                                index === 2 ? 'bg-[var(--theme-status-warning-bg)] text-white' :
+                                index === 0 ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] shadow-2xs' :
+                                index === 1 ? 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-[var(--theme-text-muted)]' :
+                                index === 2 ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]' :
                                 'bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
                             }`}>
                                 {index + 1}

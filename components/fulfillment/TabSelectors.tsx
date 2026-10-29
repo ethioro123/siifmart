@@ -164,7 +164,7 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
             {/* Mobile Dropdown Grid */}
             {isMobileTabMenuOpen && (
                 <>
-                    <div aria-hidden="true" className="fixed inset-0 bg-black/60 z-[65]" onClick={() => setIsMobileTabMenuOpen(false)} />
+                    <div aria-hidden="true" className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] z-[65]" onClick={() => setIsMobileTabMenuOpen(false)} />
                     <div id="fulfillment-mobile-tab-menu" role="group" aria-label="More fulfillment tabs" className="absolute top-full left-0 right-0 mt-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 grid grid-cols-2 gap-2 sm:gap-3 z-[70] animate-in fade-in zoom-in-95 duration-200 max-h-[70vh] overflow-y-auto custom-scrollbar shadow-2xl">
                         {visibleTabs.map((tab) => {
                             const isActive = activeTab === tab;

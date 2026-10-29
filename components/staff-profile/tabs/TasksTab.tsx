@@ -51,7 +51,7 @@ export default function TasksTab({
                     </select>
                     <button
                         onClick={handleAddTask}
-                        className="h-11 px-5 rounded-xl bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
+                        className="h-11 px-5 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
                     >
                         <Plus size={16} /> Add Task
                     </button>

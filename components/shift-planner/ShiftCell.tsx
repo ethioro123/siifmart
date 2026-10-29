@@ -40,14 +40,14 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
                 };
             case 'E':
                 return {
-                    bg: 'bg-orange-500/15 dark:bg-orange-500/20 text-orange-800 dark:text-orange-200 border-orange-300/80 dark:border-orange-700/40',
+                    bg: 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)]',
                     icon: Sunset,
                     label: 'Evening',
                     timeStr: schedule?.startTime && schedule?.endTime ? `${schedule.startTime}–${schedule.endTime}` : '16:00–00:00'
                 };
             case 'N':
                 return {
-                    bg: 'bg-indigo-500/15 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-200 border-indigo-300/80 dark:border-indigo-700/40',
+                    bg: 'bg-[var(--theme-accent-muted)] bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)] border-[var(--theme-border-accent)]',
                     icon: Moon,
                     label: 'Night',
                     timeStr: schedule?.startTime && schedule?.endTime ? `${schedule.startTime}–${schedule.endTime}` : '00:00–08:00'
@@ -62,7 +62,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
             case 'O':
             default:
                 return {
-                    bg: 'bg-stone-100/70 dark:bg-white/5 text-stone-400 dark:text-stone-500 border-dashed border-stone-200 dark:border-stone-800/80',
+                    bg: 'bg-[color-mix(in_srgb,var(--theme-bg-subtle)_70%,transparent)] bg-[color-mix(in_srgb,var(--theme-bg-card)_70%,transparent)] text-[var(--theme-text-muted)] text-[var(--theme-text-secondary)] border-dashed border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_80%,transparent)]',
                     icon: XCircle,
                     label: 'Off',
                     timeStr: 'Scheduled Off'
@@ -96,7 +96,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
                     <div className="flex items-center gap-1 shrink-0">
                         {hasNotes && (
                             <span title={schedule?.notes || ''}>
-                                <MessageSquare size={10} className="text-stone-400 dark:text-stone-500" />
+                                <MessageSquare size={10} className="text-[var(--theme-text-muted)] text-[var(--theme-text-secondary)]" />
                             </span>
                         )}
                         {isConfirmed && (
@@ -106,7 +106,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
                 </div>
 
                 {/* Bottom Row: Time and Hours */}
-                <div className="w-full flex items-center justify-between text-[10px] font-medium pt-1 border-t border-black/5 dark:border-white/5">
+                <div className="w-full flex items-center justify-between text-[10px] font-medium pt-1 border-t border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)]">
                     <span className="font-mono truncate">{style.timeStr}</span>
                     {hours > 0 && (
                         <span className="font-bold opacity-80 shrink-0 font-mono ml-1">{hours}h</span>
@@ -123,7 +123,7 @@ export const ShiftCell: React.FC<ShiftCellProps> = ({
                         onEdit();
                     }}
                     title="Edit shift details & notes"
-                    className="absolute top-2 right-2 p-1 rounded-md bg-white dark:bg-stone-900 border border-[var(--theme-border)] dark:border-white/10 shadow-xs text-stone-600 dark:text-stone-300 opacity-0 group-hover:opacity-100 hover:text-[var(--theme-primary)] transition-opacity cursor-pointer z-10"
+                    className="absolute top-2 right-2 p-1 rounded-md bg-[var(--theme-bg-card)] bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] shadow-xs text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--theme-primary)] transition-opacity cursor-pointer z-10"
                 >
                     <Edit3 size={12} />
                 </button>

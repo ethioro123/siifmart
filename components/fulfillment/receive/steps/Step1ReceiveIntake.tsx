@@ -31,7 +31,7 @@ export const Step1ReceiveIntake: React.FC<Step1ReceiveIntakeProps> = ({
             {/* Origin & PO Banner */}
             <div className="p-4 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)] text-white flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
                         <Package size={20} />
                     </div>
                     <div className="min-w-0">
@@ -55,7 +55,7 @@ export const Step1ReceiveIntake: React.FC<Step1ReceiveIntakeProps> = ({
             {/* Zero-Trust Blind Policy Alert */}
             {isBlindReceiving && (
                 <div className="p-3.5 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-warning-bg)] text-white flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
                         <EyeOff size={16} />
                     </div>
                     <div>

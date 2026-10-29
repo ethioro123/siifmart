@@ -188,7 +188,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
             type="button"
             disabled={createRequest.isPending}
             onClick={submitProductProposal}
-            className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-[var(--theme-text-primary)] disabled:opacity-50"
           >
             Submit proposal
           </button>
@@ -307,7 +307,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                         </span>
                       )}
                       {(request.layoutRevisionId || request.layout_revision_id) && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20" title="Part of an atomic planogram layout revision; approved and applied together">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)]" title="Part of an atomic planogram layout revision; approved and applied together">
                           <Layers size={11} />
                           Layout Revision
                         </span>
@@ -353,7 +353,7 @@ export const MerchandisingReviewsTab: React.FC = () => {
                           onClick={() => {
                             setSelectedReview(request);
                           }}
-                          className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
+                          className="rounded-xl bg-[var(--theme-accent)] px-3 py-2 text-xs font-semibold text-[var(--theme-text-primary)] disabled:opacity-50 hover:opacity-90 transition-opacity"
                         >
                           {isPrice ? 'Approve price change' : 'Record regional approval'}
                         </button>

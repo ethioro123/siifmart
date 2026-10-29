@@ -145,7 +145,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[400] p-3 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] flex items-center justify-center z-[400] p-3 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90dvh] isolate overflow-hidden relative">
 
                 {/* Header */}
@@ -279,7 +279,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                     }
                                 }}
                                 disabled={isSubmitting}
-                                className={`min-h-[44px] px-6 sm:px-8 py-2.5 ${hasUndelivered ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-white' : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'} font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-2 active:scale-[0.98] touch-manipulation cursor-pointer`}
+                                className={`min-h-[44px] px-6 sm:px-8 py-2.5 ${hasUndelivered ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'} font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-2 active:scale-[0.98] touch-manipulation cursor-pointer`}
                             >
                                 {isSubmitting ? (
                                     <><Loader2 size={14} className="animate-spin" /> {t('warehouse.driverHub.saving')}</>
@@ -338,7 +338,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                             <button
                                 disabled={isSubmitting}
                                 onClick={handleConfirm}
-                                className="min-h-[44px] px-6 sm:px-8 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] disabled:opacity-50 text-white font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-2 active:scale-[0.98] touch-manipulation"
+                                className="min-h-[44px] px-6 sm:px-8 py-2.5 bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] disabled:opacity-50 text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl transition-all shadow-sm flex items-center gap-2 active:scale-[0.98] touch-manipulation"
                             >
                                 {isSubmitting
                                     ? <><Loader2 size={14} className="animate-spin" /> {t('warehouse.driverHub.saving')}</>

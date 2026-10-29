@@ -104,7 +104,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                 </div>
 
                 <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex items-center gap-3 shadow-2xs">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <KeyRound size={15} />
                     </div>
                     <div className="min-w-0">
@@ -114,7 +114,7 @@ export const OverrideVelocityWidget: React.FC = () => {
                 </div>
 
                 <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex items-center gap-3 shadow-2xs">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                         <Tag size={15} />
                     </div>
                     <div className="min-w-0">

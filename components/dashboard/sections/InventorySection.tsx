@@ -107,7 +107,7 @@ export const InventorySection = ({
                         <p className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 font-medium">{metrics.lowStockCount} Low Stock Items</p>
                         <p className="text-xs text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] font-semibold">{metrics.outOfStockCount} Out of Stock</p>
                     </div>
-                    <button onClick={() => navigate(METRIC_ROUTES.lowStock)} className="w-full py-2 bg-[var(--theme-bg-subtle)] bg-[var(--theme-status-danger-bg)] hover:text-white text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] transition-colors active:scale-[0.98] cursor-pointer">
+                    <button onClick={() => navigate(METRIC_ROUTES.lowStock)} className="w-full py-2 bg-[var(--theme-bg-subtle)] bg-[var(--theme-status-danger-bg)] hover:text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] transition-colors active:scale-[0.98] cursor-pointer">
                         View Alerts
                     </button>
                 </div>

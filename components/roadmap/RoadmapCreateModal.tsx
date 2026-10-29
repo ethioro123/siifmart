@@ -26,7 +26,7 @@ export const RoadmapCreateModal: React.FC<RoadmapCreateModalProps> = ({
   }, [isSaving, onClose]);
 
   return (
-    <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-3 sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !isSaving) onClose(); }}>
+    <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_55%,transparent)] z-50 flex items-center justify-center p-3 sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !isSaving) onClose(); }}>
       <div role="dialog" aria-modal="true" aria-labelledby="roadmap-create-title" className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl w-full max-w-lg shadow-xl max-h-[calc(100dvh-24px)] overflow-y-auto">
         <div className="p-4 sm:p-6 border-b border-[var(--theme-border)] flex items-center justify-between sticky top-0 bg-[var(--theme-bg-card)] z-10">
           <h3 id="roadmap-create-title" className="text-xl font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">

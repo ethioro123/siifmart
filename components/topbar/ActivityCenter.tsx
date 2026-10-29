@@ -74,7 +74,7 @@ export function ActivityCenter({
          >
             <Bell size={18} className={isNotifOpen ? 'animate-bounce' : 'group-hover:rotate-12 transition-transform'} />
             {totalAlerts > 0 && (
-               <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--theme-status-danger-bg)] text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-[var(--theme-bg-panel)] shadow-sm animate-pulse">
+               <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-[10px] font-black flex items-center justify-center rounded-full border-2 border-[var(--theme-bg-panel)] shadow-sm animate-pulse">
                   {totalAlerts}
                </span>
             )}
@@ -130,7 +130,7 @@ export function ActivityCenter({
                            <Bell size={12} />
                            Recent events
                            {filteredNotifications.length > 0 && (
-                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'all' ? 'bg-white/20' : 'bg-[var(--theme-status-danger-bg)] text-white'}`}>
+                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'all' ? 'bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)]' : 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)]'}`}>
                                  {filteredNotifications.length}
                               </span>
                            )}
@@ -142,7 +142,7 @@ export function ActivityCenter({
                            <CheckSquare size={12} />
                            Tasks
                            {tasksAssignedToMe.filter(t => t.status === 'Pending').length > 0 && (
-                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'tasks' ? 'bg-white/20' : 'bg-[var(--theme-status-info-bg)] text-white'}`}>
+                              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'tasks' ? 'bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)]' : 'bg-[var(--theme-status-info-bg)] text-[var(--theme-text-primary)]'}`}>
                                  {tasksAssignedToMe.filter(t => t.status === 'Pending').length}
                               </span>
                            )}
@@ -157,9 +157,9 @@ export function ActivityCenter({
                            {/* Log Filters Removed */}
 
                            {displayedNotifications.length > 0 ? (
-                              <div className="divide-y divide-white/5 flex-1">
+                              <div className="divide-y divide-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] flex-1">
                                  {displayedNotifications.map(notif => (
-                                    <div key={notif.id} className={`p-4 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors relative group ${!notif.read ? 'bg-[var(--theme-primary)]/5 dark:bg-[var(--theme-primary-muted)]/5' : ''}`}>
+                                    <div key={notif.id} className={`p-4 hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] transition-colors relative group ${!notif.read ? 'bg-[var(--theme-primary)]/5 dark:bg-[var(--theme-primary-muted)]/5' : ''}`}>
                                        <div className="flex gap-3">
                                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${(notif.type === 'error' || notif.type === 'alert') ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' :
                                              notif.type === 'warning' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]' :
@@ -175,20 +175,20 @@ export function ActivityCenter({
                                           <div className="flex-1 min-w-0">
                                              <div className="flex items-center justify-between gap-2 mb-0.5">
                                                 <p className="text-xs font-bold text-[var(--theme-text-primary)] truncate">{notif.title}</p>
-                                                <span className="text-[10px] text-gray-500 font-mono whitespace-nowrap">
+                                                <span className="text-[10px] text-[var(--theme-text-secondary)] font-mono whitespace-nowrap">
                                                    {formatRelativeTime(getSafeTime(notif))}
                                                 </span>
                                              </div>
                                              <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed break-words">{notif.message}</p>
                                              {formatExactTime(getSafeTime(notif)) && (
-                                                <p className="text-[9px] text-gray-600 font-mono mt-1 flex items-center gap-1.5">
+                                                <p className="text-[9px] text-[var(--theme-text-secondary)] font-mono mt-1 flex items-center gap-1.5">
                                                    <Clock size={8} /> {formatExactTime(getSafeTime(notif))}
                                                 </p>
                                              )}
                                           </div>
                                           <button
                                              onClick={() => handleClearSingle(notif.id)}
-                                             className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-500 text-[var(--theme-status-danger-text)] transition-all border border-transparent border-[var(--theme-status-danger-border)] rounded bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)]"
+                                             className="opacity-0 group-hover:opacity-100 p-1.5 text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] transition-all border border-transparent border-[var(--theme-status-danger-border)] rounded bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)]"
                                              title="Remove notification"
                                              aria-label="Remove"
                                           >
@@ -200,7 +200,7 @@ export function ActivityCenter({
                               </div>
                            ) : (
                               <div className="p-10 text-center flex-1">
-                                 <Bell size={32} className="mx-auto text-gray-700 mb-3" />
+                                 <Bell size={32} className="mx-auto text-[var(--theme-text-primary)] mb-3" />
                                  <p className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-widest">No recent events</p>
                                  <p className="text-[10px] text-[var(--theme-text-secondary)] mt-1">Messages for this session and location appear here.</p>
                               </div>
@@ -212,24 +212,24 @@ export function ActivityCenter({
                            <div className="space-y-1 mt-2">
                               {tasksAssignedToMe.length > 0 ? (
                                  tasksAssignedToMe.map(task => (
-                                    <div key={task.id} className="p-3 bg-white/5 rounded-lg border border-white/5 hover:border-white/10 transition-colors group">
+                                    <div key={task.id} className="p-3 bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] rounded-lg border border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] hover:border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] transition-colors group">
                                        <div className="flex items-start gap-3">
                                           <button
                                              onClick={() => handleTaskStatusChange(task.id, task.status === 'Completed' ? 'Pending' : 'Completed')}
-                                             className={`mt-0.5 w-4 h-4 rounded border transition-all flex items-center justify-center ${task.status === 'Completed' ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-primary-muted)] border-[var(--theme-border)] dark:border-[var(--theme-border)]' : 'border-stone-300 dark:border-gray-600 hover:border-[var(--theme-border)] dark:hover:border-[var(--theme-border)]'}`}
+                                             className={`mt-0.5 w-4 h-4 rounded border transition-all flex items-center justify-center ${task.status === 'Completed' ? 'bg-[var(--theme-primary)] dark:bg-[var(--theme-primary-muted)] border-[var(--theme-border)] dark:border-[var(--theme-border)]' : 'border-[var(--theme-border)] border-[var(--theme-border)] hover:border-[var(--theme-border)] dark:hover:border-[var(--theme-border)]'}`}
                                           >
-                                             {task.status === 'Completed' && <X size={12} className="text-black" />}
+                                             {task.status === 'Completed' && <X size={12} className="text-[var(--theme-text-primary)]" />}
                                           </button>
                                           <div className="flex-1 min-w-0">
-                                             <p className={`text-xs font-bold transition-all ${task.status === 'Completed' ? 'text-gray-500 line-through' : 'text-white'}`}>{task.title}</p>
+                                             <p className={`text-xs font-bold transition-all ${task.status === 'Completed' ? 'text-[var(--theme-text-secondary)] line-through' : 'text-[var(--theme-text-primary)]'}`}>{task.title}</p>
                                              <div className="flex items-center gap-3 mt-1">
                                                 <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-sm ${task.priority === 'Urgent' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' : 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]'}`}>
                                                    {task.priority}
                                                 </span>
-                                                <div className="flex items-center gap-2 text-[10px] text-gray-500 font-mono">
+                                                <div className="flex items-center gap-2 text-[10px] text-[var(--theme-text-secondary)] font-mono">
                                                    <span>{formatRelativeTime(getSafeTime(task))}</span>
                                                    {formatExactTime(getSafeTime(task)) && (
-                                                      <span className="flex items-center gap-1.5 text-gray-600 before:content-['•'] before:mr-0.5 before:opacity-50">
+                                                      <span className="flex items-center gap-1.5 text-[var(--theme-text-secondary)] before:content-['•'] before:mr-0.5 before:opacity-50">
                                                          {formatExactTime(getSafeTime(task))}
                                                       </span>
                                                    )}
@@ -240,10 +240,10 @@ export function ActivityCenter({
                                     </div>
                                  ))
                               ) : (
-                                 <div className="p-8 text-center bg-black/20 rounded-xl border border-white/5 border-dashed">
-                                    <CheckCircle2 size={32} className="mx-auto text-gray-700 mb-3" />
-                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No assigned tasks</p>
-                                    <p className="text-[10px] text-gray-600 mt-1">You're all caught up with your missions</p>
+                                 <div className="p-8 text-center bg-[color-mix(in_srgb,var(--theme-overlay)_20%,transparent)] rounded-xl border border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)] border-dashed">
+                                    <CheckCircle2 size={32} className="mx-auto text-[var(--theme-text-primary)] mb-3" />
+                                    <p className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest">No assigned tasks</p>
+                                    <p className="text-[10px] text-[var(--theme-text-secondary)] mt-1">You're all caught up with your missions</p>
                                  </div>
                               )}
                            </div>

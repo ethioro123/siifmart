@@ -166,7 +166,7 @@ export function getBatchExpiryStatus(expiryDate?: string): BatchExpiryStatus {
             status: 'no_expiry',
             daysRemaining: null,
             label: 'No Expiry Set',
-            badgeColor: 'text-stone-400 bg-stone-100 dark:bg-white/5 border-stone-200 dark:border-white/10',
+            badgeColor: 'text-[var(--theme-text-muted)] bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]',
             fefoPriority: 999999
         };
     }
@@ -177,7 +177,7 @@ export function getBatchExpiryStatus(expiryDate?: string): BatchExpiryStatus {
             status: 'no_expiry',
             daysRemaining: null,
             label: 'Invalid Date',
-            badgeColor: 'text-stone-400 bg-stone-100 dark:bg-white/5 border-stone-200 dark:border-white/10',
+            badgeColor: 'text-[var(--theme-text-muted)] bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]',
             fefoPriority: 999999
         };
     }
@@ -196,7 +196,7 @@ export function getBatchExpiryStatus(expiryDate?: string): BatchExpiryStatus {
             status: 'expired',
             daysRemaining,
             label: `Expired ${Math.abs(daysRemaining)}d ago`,
-            badgeColor: 'text-rose-600 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20',
+            badgeColor: 'text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]',
             fefoPriority: -1000 + daysRemaining
         };
     }
@@ -206,7 +206,7 @@ export function getBatchExpiryStatus(expiryDate?: string): BatchExpiryStatus {
             status: 'critical',
             daysRemaining,
             label: `${daysRemaining}d left (Critical FEFO)`,
-            badgeColor: 'text-red-700 bg-red-100 dark:bg-red-500/20 border-red-300 dark:border-red-500/40',
+            badgeColor: 'text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]',
             fefoPriority: daysRemaining
         };
     }
@@ -216,7 +216,7 @@ export function getBatchExpiryStatus(expiryDate?: string): BatchExpiryStatus {
             status: 'expiring_soon',
             daysRemaining,
             label: `${daysRemaining}d left (Priority)`,
-            badgeColor: 'text-amber-600 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20',
+            badgeColor: 'text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] border-[var(--theme-status-warning-border)]',
             fefoPriority: daysRemaining
         };
     }
@@ -225,7 +225,7 @@ export function getBatchExpiryStatus(expiryDate?: string): BatchExpiryStatus {
         status: 'fresh',
         daysRemaining,
         label: `${daysRemaining}d shelf life (Fresh)`,
-        badgeColor: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20',
+        badgeColor: 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]',
         fefoPriority: daysRemaining
     };
 }

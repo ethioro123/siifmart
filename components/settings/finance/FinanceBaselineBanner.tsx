@@ -96,7 +96,7 @@ export function FinanceBaselineBanner({
                     </div>
                     <p className="text-xs text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] mt-1 leading-relaxed">
                         No confirmed corporate configuration is persisted in the database for <strong>{countryName}</strong> for:{' '}
-                        <span className="font-semibold underline decoration-amber-500/40">{unverifiedSections.join(', ')}</span>.
+                        <span className="font-semibold underline decoration-[color-mix(in_srgb,var(--theme-status-warning-text)_40%,transparent)]">{unverifiedSections.join(', ')}</span>.
                         The values shown below are statutory defaults. Click &ldquo;Confirm &amp; Approve Country Baseline&rdquo; or save individual sections to establish this country&apos;s authoritative ledger baseline.
                     </p>
                 </div>
@@ -107,7 +107,7 @@ export function FinanceBaselineBanner({
                         type="button"
                         onClick={handleConfirmBaseline}
                         disabled={isConfirming}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
                     >
                         {isConfirming ? (
                             <>

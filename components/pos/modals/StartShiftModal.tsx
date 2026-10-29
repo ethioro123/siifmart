@@ -122,7 +122,7 @@ export const StartShiftModal: React.FC = () => {
                 <div className="space-y-2">
                     <div className="flex justify-between items-baseline">
                         <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
-                            <Monitor size={14} className="text-indigo-500" />
+                            <Monitor size={14} className="text-[var(--theme-accent)]" />
                             {t('pos.assignCounter')}
                         </label>
                         <span className="text-[11px] text-[var(--theme-text-secondary)]">{t('pos.strictMutualExclusion')}</span>

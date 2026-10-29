@@ -79,7 +79,7 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
     const stagedCount = state.dbDraftJobs.length;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 sm:p-4 md:p-6 lg:p-8 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] p-3 sm:p-4 md:p-6 lg:p-8 animate-in fade-in duration-200">
             <div className="w-full h-full max-w-[1700px] max-h-[96vh] md:max-h-[92vh] flex flex-col">
                 <div className="flex-1 bg-[var(--theme-bg-card)] rounded-2xl md:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden relative">
                     

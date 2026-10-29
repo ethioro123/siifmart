@@ -57,7 +57,7 @@ export const PricingTab: React.FC = () => {
                         className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${
                            isFilterPanelOpen || activeFilterCount > 0
                               ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]'
-                              : 'bg-[var(--theme-accent)] text-white'
+                              : 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]'
                         }`}
                      >
                         {activeFilterCount}
@@ -99,7 +99,7 @@ export const PricingTab: React.FC = () => {
                      <button
                         type="button"
                         onClick={applyBulkSale}
-                        className="h-10 px-4 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:opacity-90 flex items-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
+                        className="h-10 px-4 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 flex items-center gap-2 cursor-pointer shadow-xs active:scale-[0.98] transition-all"
                      >
                         <Percent size={13} /> Bulk Promo ({selectedIds.size})
                      </button>

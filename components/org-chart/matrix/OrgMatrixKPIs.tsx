@@ -17,26 +17,26 @@ interface OrgMatrixKPIsProps {
 export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark }) => {
     const cardBg = isDark
         ? 'bg-[var(--theme-bg-panel)] border-[#2C4D35]'
-        : 'bg-white border-[var(--theme-border)] shadow-xs';
+        : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-xs';
 
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
             {/* Total Workforce */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">Total Workforce</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)]">Total Workforce</div>
                 <div className="flex items-baseline gap-1.5 mt-1">
-                    <span className="text-lg font-black text-stone-900 dark:text-white">{metrics.total}</span>
+                    <span className="text-lg font-black text-[var(--theme-text-primary)] text-[var(--theme-text-primary)]">{metrics.total}</span>
                     <span className="text-[10px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">{metrics.active} active</span>
                 </div>
             </div>
 
             {/* L1-L2 Executive */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
-                <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-indigo-500">
+                <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-accent)]">
                     <Crown size={12} />
                     <span>L1-L2 Executive</span>
                 </div>
-                <div className="text-lg font-black text-stone-900 dark:text-white mt-1">{metrics.l1}</div>
+                <div className="text-lg font-black text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] mt-1">{metrics.l1}</div>
             </div>
 
             {/* L3-L5 Directors */}
@@ -45,7 +45,7 @@ export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark })
                     <Building2 size={12} />
                     <span>L3-L5 Directors</span>
                 </div>
-                <div className="text-lg font-black text-stone-900 dark:text-white mt-1">{metrics.l2}</div>
+                <div className="text-lg font-black text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] mt-1">{metrics.l2}</div>
             </div>
 
             {/* L6-L8 Supervisors */}
@@ -54,7 +54,7 @@ export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark })
                     <ShieldCheck size={12} />
                     <span>L6-L8 Managers</span>
                 </div>
-                <div className="text-lg font-black text-stone-900 dark:text-white mt-1">{metrics.l3}</div>
+                <div className="text-lg font-black text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] mt-1">{metrics.l3}</div>
             </div>
 
             {/* L9-L10 Frontline */}
@@ -63,13 +63,13 @@ export const OrgMatrixKPIs: React.FC<OrgMatrixKPIsProps> = ({ metrics, isDark })
                     <Zap size={12} />
                     <span>L9-L10 Staff</span>
                 </div>
-                <div className="text-lg font-black text-stone-900 dark:text-white mt-1">{metrics.l4}</div>
+                <div className="text-lg font-black text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] mt-1">{metrics.l4}</div>
             </div>
 
             {/* On Leave */}
             <div className={`p-3 rounded-2xl border ${cardBg}`}>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400">On Leave</div>
-                <div className="text-lg font-black text-stone-900 dark:text-white mt-1">{metrics.onLeave}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)]">On Leave</div>
+                <div className="text-lg font-black text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] mt-1">{metrics.onLeave}</div>
             </div>
         </div>
     );

@@ -23,7 +23,7 @@ export function LocationPriceEditor({ product, onClose }: { product: Product; on
             <label className="space-y-1">Regular price<input aria-label="Location regular price" required type="number" min="1" step="1" value={price} onChange={event => setPrice(event.target.value)} className="block w-32 min-h-11 rounded-lg p-2 border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]" /></label>
             <label className="flex gap-2 items-center min-h-11"><input type="checkbox" checked={onSale} onChange={event => setOnSale(event.target.checked)} />On sale</label>
             {onSale && <label className="space-y-1">Sale price<input aria-label="Location sale price" required type="number" min="1" step="1" value={salePrice} onChange={event => setSalePrice(event.target.value)} className="block w-32 min-h-11 rounded-lg p-2 border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]" /></label>}
-            <button type="submit" className="min-h-11 rounded-lg px-3 bg-[var(--theme-accent)] text-white">Preview price proposal</button>
+            <button type="submit" className="min-h-11 rounded-lg px-3 bg-[var(--theme-accent)] text-[var(--theme-text-primary)]">Preview price proposal</button>
             <button type="button" onClick={onClose} className="min-h-11 px-3">Cancel edit</button>
         </div>
         {error && <p role="alert">{error}</p>}

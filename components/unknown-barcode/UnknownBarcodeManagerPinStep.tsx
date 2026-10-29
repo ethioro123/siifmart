@@ -60,9 +60,9 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
                 </div>
             </div>
 
-            <div className="bg-white/80 dark:bg-black/30 border border-[var(--theme-border)] dark:border-white/10 rounded-2xl p-4 text-center">
-                <span className="text-[10px] font-mono text-stone-500 uppercase tracking-widest block mb-1">Target Product & Barcode</span>
-                <span className="text-sm font-black text-[var(--theme-text-primary)] dark:text-white block truncate">{selectedProduct.name}</span>
+            <div className="bg-[color-mix(in_srgb,var(--theme-bg-card)_80%,transparent)] bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl p-4 text-center">
+                <span className="text-[10px] font-mono text-[var(--theme-text-secondary)] uppercase tracking-widest block mb-1">Target Product & Barcode</span>
+                <span className="text-sm font-black text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] block truncate">{selectedProduct.name}</span>
                 <span className="text-xs font-mono text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-bold block mt-1">Barcode: {scannedBarcode}</span>
             </div>
 
@@ -83,11 +83,11 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
                 />
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-[var(--theme-border)] dark:border-white/5">
+            <div className="flex justify-between items-center pt-4 border-t border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)]">
                 <button
                     type="button"
                     onClick={onBack}
-                    className="px-4 py-2 text-stone-700 hover:text-[var(--theme-primary)] dark:text-gray-300 dark:hover:text-white font-bold text-sm transition-colors cursor-pointer"
+                    className="px-4 py-2 text-[var(--theme-text-primary)] hover:text-[var(--theme-primary)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] font-bold text-sm transition-colors cursor-pointer"
                 >
                     Back to Product
                 </button>
@@ -95,7 +95,7 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
                     type="button"
                     onClick={handleVerifyPin}
                     disabled={managerPin.length < 4}
-                    className="px-6 py-2.5 bg-gradient-to-br from-[var(--theme-primary)] to-[var(--theme-primary)] text-white hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md cursor-pointer text-xs uppercase tracking-wider"
+                    className="px-6 py-2.5 bg-gradient-to-br from-[var(--theme-primary)] to-[var(--theme-primary)] text-[var(--theme-text-primary)] hover:opacity-90 font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md cursor-pointer text-xs uppercase tracking-wider"
                 >
                     <CheckCircle2 size={16} />
                     Authorize & Link

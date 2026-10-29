@@ -228,7 +228,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-md animate-in fade-in duration-200">
             <div
                 className="relative w-full max-w-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl shadow-2xl overflow-hidden text-[var(--theme-text-primary)] flex flex-col"
                 onClick={e => e.stopPropagation()}
@@ -306,7 +306,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                                             <Icon size={20} className={isSelected ? 'text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-secondary)]'} />
                                             {isDetected && (
                                                 <span className={`text-[11px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
-                                                    isSelected ? 'bg-black/20 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
+                                                    isSelected ? 'bg-[color-mix(in_srgb,var(--theme-overlay)_20%,transparent)] text-[var(--theme-text-primary)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
                                                 }`}>
                                                     Detected
                                                 </span>
@@ -439,7 +439,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                                 </div>
                             </div>
                             <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-start gap-2">
-                                <Monitor size={15} className="text-purple-500 mt-0.5 flex-shrink-0" />
+                                <Monitor size={15} className="text-[var(--theme-accent)] mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="font-bold text-[var(--theme-text-primary)]">F11 Kiosk Mode</p>
                                     <p className="text-[11px] text-[var(--theme-text-secondary)]">Fullscreen dedicated POS touch interface.</p>

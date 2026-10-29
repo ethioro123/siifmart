@@ -1,6 +1,6 @@
 # 02 · Visual foundations and materials
 
-[Handbook](../APPLE_DESIGN_GUIDE.md) · Edition 29 October 2026
+[Handbook](../SIIFMART_DESIGN_STANDARD.md) · Edition 29 October 2026
 
 > Revision C visual update: [chapter 18](18-codex-workspace-direction.md) takes precedence for composition, geometry and workspace styling. Earlier reference artifacts are not Revision C acceptance evidence. Accessibility and business controls remain mandatory.
 

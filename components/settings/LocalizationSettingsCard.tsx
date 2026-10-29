@@ -272,7 +272,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                                     onClick={() => setDateFormat(fmt)}
                                     className={`h-8 rounded-lg text-xs font-medium transition-all cursor-pointer disabled:opacity-50 ${
                                         dateFormat === fmt
-                                            ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
+                                            ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                             : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                     }`}
                                 >
@@ -292,7 +292,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                         className="h-10 px-5 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                     >
                         {isSaving ? (
-                            <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="w-3.5 h-3.5 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
                         ) : (
                             <Save size={14} />
                         )}

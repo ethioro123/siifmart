@@ -243,7 +243,7 @@ export const AuditLogViewer: React.FC = () => {
 
             {/* Detail Modal */}
             {selectedLog && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs flex items-center justify-center z-50 p-4">
                     <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-3xl shadow-[var(--shadow-modal)] max-w-2xl w-full p-6 animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-start mb-6">
                             <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2">

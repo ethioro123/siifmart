@@ -38,7 +38,7 @@ export default function DirectoryGrid({
                label: employee.role?.replace(/_/g, ' ') || 'Staff',
                desc: 'Team Member',
                level: 4,
-               styles: { text: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', badge: 'bg-slate-500/20 text-slate-300' }
+               styles: { text: 'text-[var(--theme-text-muted)]', bg: 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]', badge: 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_20%,transparent)] text-[var(--theme-text-muted)]' }
             };
             const isOwn = currentUser?.id === employee.id;
             const canSeeLocation = canViewLocation(currentUser?.role, employee.role, isOwn);
@@ -65,7 +65,7 @@ export default function DirectoryGrid({
                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--theme-bg-card)] transition-colors duration-300 ${
                               isOnline
                                  ? 'bg-[var(--theme-status-success-bg)] shadow-[0_0_6px_rgba(52,211,153,0.6)] animate-pulse'
-                                 : 'bg-neutral-400'
+                                 : 'bg-[var(--theme-bg-card-hover)]'
                            }`}
                         />
                      </div>
@@ -98,7 +98,7 @@ export default function DirectoryGrid({
                                  {siteInfo.label}
                               </p>
                               {siteInfo.isCEO ? (
-                                 <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shrink-0 font-semibold" title="CEO sovereign authority across all facilities">
+                                 <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border border-[var(--theme-border-accent)] shrink-0 font-semibold" title="CEO sovereign authority across all facilities">
                                     GLOBAL
                                  </span>
                               ) : siteInfo.facilityId ? (

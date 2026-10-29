@@ -278,7 +278,7 @@ export default function UnknownBarcodeModal({
                         )}
 
                         {captureMode === 'camera' && (
-                            <div className="relative rounded-3xl overflow-hidden bg-black border border-white/10 aspect-video flex items-center justify-center shadow-2xl">
+                            <div className="relative rounded-3xl overflow-hidden bg-[var(--theme-bg-app)] border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] aspect-video flex items-center justify-center shadow-2xl">
                                 <video
                                     ref={videoRef}
                                     autoPlay
@@ -290,7 +290,7 @@ export default function UnknownBarcodeModal({
 
                                 <div className="absolute inset-0 flex flex-col justify-between p-4 pointer-events-none">
                                     <div className="flex justify-between items-start">
-                                        <div className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full border border-[var(--theme-border)] flex items-center gap-2">
+                                        <div className="px-3 py-1 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-md rounded-full border border-[var(--theme-border)] flex items-center gap-2">
                                             <div className="w-2 h-2 rounded-full bg-[var(--theme-accent)] animate-pulse" />
                                             <span className="text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-widest">Live Audit Camera</span>
                                         </div>
@@ -301,7 +301,7 @@ export default function UnknownBarcodeModal({
                                                 setCaptureMode('idle');
                                             }}
                                             aria-label="Close Camera"
-                                            className="p-2 rounded-full bg-black/60 text-white bg-[var(--theme-status-danger-bg)] transition-colors pointer-events-auto cursor-pointer"
+                                            className="p-2 rounded-full bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] text-[var(--theme-text-primary)] bg-[var(--theme-status-danger-bg)] transition-colors pointer-events-auto cursor-pointer"
                                         >
                                             <X size={18} />
                                         </button>
@@ -312,9 +312,9 @@ export default function UnknownBarcodeModal({
                                             type="button"
                                             onClick={handleTakePhotoSnapshot}
                                             aria-label="Capture Photo"
-                                            className="group w-16 h-16 rounded-full border-4 border-white flex items-center justify-center p-1 pointer-events-auto hover:scale-110 transition-transform active:scale-95 cursor-pointer shadow-lg"
+                                            className="group w-16 h-16 rounded-full border-4 border-[var(--theme-border)] flex items-center justify-center p-1 pointer-events-auto hover:scale-110 transition-transform active:scale-95 cursor-pointer shadow-lg"
                                         >
-                                            <div className="w-full h-full rounded-full bg-white group-hover:bg-[var(--theme-accent)] transition-colors" />
+                                            <div className="w-full h-full rounded-full bg-[var(--theme-bg-card)] group-hover:bg-[var(--theme-accent)] transition-colors" />
                                         </button>
                                     </div>
                                 </div>
@@ -322,7 +322,7 @@ export default function UnknownBarcodeModal({
                         )}
 
                         {imagePreview && (
-                            <div className="relative rounded-3xl overflow-hidden bg-black/40 border border-[var(--theme-border)] aspect-video flex items-center justify-center group">
+                            <div className="relative rounded-3xl overflow-hidden bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] border border-[var(--theme-border)] aspect-video flex items-center justify-center group">
                                 {isCompressing ? (
                                     <div className="flex flex-col items-center gap-4">
                                         <div className="w-12 h-12 border-4 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin" />
@@ -331,7 +331,7 @@ export default function UnknownBarcodeModal({
                                 ) : (
                                     <>
                                         <img src={imagePreview} alt="Evidence" className="w-full h-full object-contain" />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                                        <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -341,7 +341,7 @@ export default function UnknownBarcodeModal({
                                                     startCamera();
                                                 }}
                                                 aria-label="Retake Photo"
-                                                className="p-3.5 rounded-2xl bg-white/20 hover:bg-white text-white hover:text-black transition-all flex items-center gap-2 text-xs font-bold uppercase cursor-pointer"
+                                                className="p-3.5 rounded-2xl bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] hover:text-[var(--theme-text-primary)] transition-all flex items-center gap-2 text-xs font-bold uppercase cursor-pointer"
                                             >
                                                 <Camera size={18} /> Retake
                                             </button>

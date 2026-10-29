@@ -6,8 +6,8 @@ interface EmptyStateProps {
 }
 
 export const EmptyState = ({ message }: EmptyStateProps) => (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-10 rounded-2xl">
-        <Package className="text-gray-600 mb-2" size={32} />
-        <p className="text-gray-400 text-sm font-medium">{message}</p>
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm z-10 rounded-2xl">
+        <Package className="text-[var(--theme-text-secondary)] mb-2" size={32} />
+        <p className="text-[var(--theme-text-muted)] text-sm font-medium">{message}</p>
     </div>
 );

@@ -268,7 +268,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                         <button
                             type="button"
                             onClick={() => handleOpenModal()}
-                            className="mt-4 px-4 py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                            className="mt-4 px-4 py-2 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
                         >
                             {t('common.add')} Shift
                         </button>
@@ -396,7 +396,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 h-10 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                            className="flex-1 h-10 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                         >
                             {isSubmitting ? (
                                 <>

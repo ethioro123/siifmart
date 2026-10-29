@@ -67,7 +67,7 @@ const IntegrationCard: React.FC<IntegrationCardProps> = ({
             className={`w-full h-8 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs flex items-center justify-center ${
                 connected
                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)]'
-                    : 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98]'
+                    : 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:opacity-90 active:scale-[0.98]'
             }`}
         >
             {connected ? 'Manage Configuration' : 'Connect Integration'}
@@ -173,11 +173,11 @@ export default function IntegrationsSettings() {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`w-full text-left px-3.5 py-2.5 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer text-xs font-medium ${
                                     isActive
-                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
+                                        ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
                                 }`}
                             >
-                                <Icon size={16} className={isActive ? 'text-white' : 'text-[var(--theme-text-secondary)]'} />
+                                <Icon size={16} className={isActive ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-secondary)]'} />
                                 <span>{tab.label}</span>
                             </button>
                         );
@@ -333,7 +333,7 @@ export default function IntegrationsSettings() {
                                         type="button"
                                         onClick={generateKey}
                                         disabled={!newKeyName.trim()}
-                                        className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-white font-semibold rounded-xl text-xs hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+                                        className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer shadow-xs"
                                     >
                                         Generate Key
                                     </button>
@@ -407,7 +407,7 @@ export default function IntegrationsSettings() {
                                 <button
                                     type="button"
                                     onClick={() => showToast('Webhook registration modal ready for future setup', 'info')}
-                                    className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+                                    className="h-8 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
                                 >
                                     <Plus size={14} /> Add Webhook Endpoint
                                 </button>

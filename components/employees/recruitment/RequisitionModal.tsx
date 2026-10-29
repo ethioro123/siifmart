@@ -84,7 +84,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
     const activeSiteObj = sites.find(s => s.id === siteId);
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
             <form onSubmit={handleSubmit} className="bg-[var(--theme-bg-panel)] rounded-3xl border border-[var(--theme-border)] shadow-[var(--shadow-modal)] p-6 max-w-lg w-full space-y-4 animate-in fade-in zoom-in-95 duration-150">
                 <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                     <div>

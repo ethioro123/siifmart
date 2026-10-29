@@ -101,20 +101,20 @@ export default function ImageUpload({ value, onChange, onError, placeholder = 'U
             <input ref={cameraInputRef} aria-label="Camera Capture" title="Camera Capture" type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && processFile(e.target.files[0])} className="hidden" disabled={disabled} />
 
             <div onClick={!disabled && !value ? () => fileInputRef.current?.click() : undefined} onDragOver={(e) => { e.preventDefault(); !disabled && setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (!disabled && e.dataTransfer.files?.[0]) processFile(e.dataTransfer.files[0]); }}
-                className={`${sizeClasses[size]} relative rounded-2xl border-2 border-dashed transition-all overflow-hidden ${isDragging ? 'border-cyber-primary bg-cyber-primary/10 scale-105' : 'border-gray-200 dark:border-white/20 hover:border-cyber-primary/40'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${error ? 'border-[var(--theme-status-danger-border)]' : ''} bg-gray-50 dark:bg-black/20 shadow-inner`}>
+                className={`${sizeClasses[size]} relative rounded-2xl border-2 border-dashed transition-all overflow-hidden ${isDragging ? 'border-cyber-primary bg-cyber-primary/10 scale-105' : 'border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)] hover:border-cyber-primary/40'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${error ? 'border-[var(--theme-status-danger-border)]' : ''} bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_20%,transparent)] shadow-inner`}>
                 {value ? (
                     <div className="relative w-full h-full group">
                         <img src={value} alt="Product" className="w-full h-full object-cover" />
                         {!disabled && (
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2.5 bg-white/20 hover:bg-white/30 rounded-xl" title="Change Image" aria-label="Change Image"><RefreshCw size={18} className="text-white" /></button>
-                                <button type="button" onClick={() => onChange('')} className="p-2.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] rounded-xl" title="Remove Image" aria-label="Remove Image"><X size={18} className="text-white" /></button>
+                            <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2.5 bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_30%,transparent)] rounded-xl" title="Change Image" aria-label="Change Image"><RefreshCw size={18} className="text-[var(--theme-text-primary)]" /></button>
+                                <button type="button" onClick={() => onChange('')} className="p-2.5 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] rounded-xl" title="Remove Image" aria-label="Remove Image"><X size={18} className="text-[var(--theme-text-primary)]" /></button>
                             </div>
                         )}
                     </div>
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
-                        {isLoading ? <Loader2 size={24} className="text-cyber-primary animate-spin" /> : <><ImageIcon size={28} className="text-gray-400 dark:text-gray-600 mb-2" /><p className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest">{placeholder}</p></>}
+                        {isLoading ? <Loader2 size={24} className="text-cyber-primary animate-spin" /> : <><ImageIcon size={28} className="text-[var(--theme-text-muted)] text-[var(--theme-text-secondary)] mb-2" /><p className="text-[10px] text-[var(--theme-text-muted)] text-[var(--theme-text-secondary)] font-black uppercase tracking-widest">{placeholder}</p></>}
                     </div>
                 )}
             </div>
@@ -126,7 +126,7 @@ export default function ImageUpload({ value, onChange, onError, placeholder = 'U
                         { icon: Camera, label: 'Camera', onClick: () => cameraInputRef.current?.click() },
                         { icon: Link, label: 'URL', onClick: () => setShowUrlInput(true) }
                     ].map(btn => (
-                        <button key={btn.label} type="button" onClick={btn.onClick} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest transition-all">
+                        <button key={btn.label} type="button" onClick={btn.onClick} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] rounded-xl text-[10px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] font-black uppercase tracking-widest transition-all">
                             <btn.icon size={12} /> {btn.label}
                         </button>
                     ))}
@@ -134,10 +134,10 @@ export default function ImageUpload({ value, onChange, onError, placeholder = 'U
             )}
 
             {showUrlInput && (
-                <div className="absolute top-0 left-0 right-0 z-20 bg-white dark:bg-cyber-dark border border-gray-200 dark:border-white/10 rounded-2xl p-4 shadow-2xl animate-in fade-in slide-in-from-top-2">
-                    <div className="flex items-center justify-between mb-4"><span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white">Image Source URL</span><button type="button" onClick={() => setShowUrlInput(false)} className="text-gray-400 hover:text-gray-900 dark:hover:text-white" title="Close" aria-label="Close"><X size={16} /></button></div>
-                    <input type="url" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} placeholder="https://..." className="w-full bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white text-xs mb-4 focus:border-cyber-primary/50 outline-none" autoFocus />
-                    <button type="button" onClick={handleUrlSubmit} className="w-full py-3 bg-cyber-primary/20 hover:bg-cyber-primary text-cyber-primary hover:text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all">Link Media Asset</button>
+                <div className="absolute top-0 left-0 right-0 z-20 bg-[var(--theme-bg-card)] dark:bg-cyber-dark border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl p-4 shadow-2xl animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center justify-between mb-4"><span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--theme-text-primary)] text-[var(--theme-text-primary)]">Image Source URL</span><button type="button" onClick={() => setShowUrlInput(false)} className="text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:text-[var(--theme-text-primary)]" title="Close" aria-label="Close"><X size={16} /></button></div>
+                    <input type="url" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} placeholder="https://..." className="w-full bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border-subtle)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl px-4 py-3 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] text-xs mb-4 focus:border-cyber-primary/50 outline-none" autoFocus />
+                    <button type="button" onClick={handleUrlSubmit} className="w-full py-3 bg-cyber-primary/20 hover:bg-cyber-primary text-cyber-primary hover:text-[var(--theme-text-primary)] rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all">Link Media Asset</button>
                 </div>
             )}
             {error && <p className="text-[10px] text-[var(--theme-status-danger-text)] mt-2 text-center font-black uppercase tracking-widest">{error}</p>}

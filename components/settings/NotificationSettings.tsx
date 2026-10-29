@@ -120,7 +120,7 @@ export default function NotificationSettings() {
                                         emailEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                                     }`}
                                 >
-                                    <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${emailEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                                    <div className={`w-5 h-5 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${emailEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                                 </button>
                             </div>
                         </div>
@@ -179,13 +179,13 @@ export default function NotificationSettings() {
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-5">
                     <div>
                         <div className="flex justify-between items-start mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center justify-center">
                                 <MessageSquare size={20} />
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full border ${
                                     smsEnabled
-                                        ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
+                                        ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                 }`}>
                                     {smsEnabled ? 'Active' : 'Disabled'}
@@ -203,7 +203,7 @@ export default function NotificationSettings() {
                                         smsEnabled ? 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
                                     }`}
                                 >
-                                    <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${smsEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                                    <div className={`w-5 h-5 rounded-full bg-[var(--theme-bg-card)] shadow-xs transition-transform ${smsEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
                                 </button>
                             </div>
                         </div>
@@ -294,7 +294,7 @@ export default function NotificationSettings() {
                                 <button
                                     type="button"
                                     onClick={() => handleTestNotification(tmpl)}
-                                    className="h-8 px-3 text-xs bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+                                    className="h-8 px-3 text-xs bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] rounded-xl font-semibold transition-all cursor-pointer flex items-center gap-1 shadow-xs"
                                 >
                                     <Send size={12} /> Test
                                 </button>
@@ -322,7 +322,7 @@ export default function NotificationSettings() {
                             <button
                                 type="button"
                                 onClick={handleSaveTemplate}
-                                className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold cursor-pointer shadow-xs transition-all"
+                                className="h-9 px-4 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold cursor-pointer shadow-xs transition-all"
                             >
                                 Save Template
                             </button>

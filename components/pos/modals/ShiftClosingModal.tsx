@@ -69,7 +69,7 @@ export const ShiftClosingModal: React.FC = () => {
                 {/* Step 1: Blind Physical Cash Count */}
                         {closingStep === 1 && (
                             <div className="space-y-6">
-                                <div className="p-4 bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] rounded-2xl flex items-start gap-3">
+                                <div className="p-4 bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)] rounded-2xl flex items-start gap-3">
                                     <EyeOff className="text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] mt-0.5 shrink-0" size={20} />
                                     <div className="space-y-0.5">
                                         <p className="text-xs font-bold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]">

@@ -444,10 +444,10 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 !inputVal.trim() || isProcessing
                                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] cursor-not-allowed opacity-60'
                                     : isPlacementBlocked
-                                        ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-white cursor-not-allowed'
+                                        ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-text-primary)] cursor-not-allowed'
                                         : awaitingOccupancyConfirmation || awaitingMismatchConfirmation
-                                            ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-white font-semibold uppercase tracking-wider'
-                                            : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white font-semibold uppercase tracking-wider'
+                                            ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider'
+                                            : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider'
                             }`}
                         >
                             {isProcessing ? (

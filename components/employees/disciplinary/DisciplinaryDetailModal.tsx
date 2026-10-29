@@ -38,7 +38,7 @@ export function DisciplinaryDetailModal({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs animate-in fade-in duration-150"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}
@@ -63,7 +63,7 @@ export function DisciplinaryDetailModal({
                                     record.severity === 'Critical'
                                         ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]'
                                         : record.severity === 'High'
-                                        ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30'
+                                        ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                         : 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]'
                                 }`}>
                                     {record.severity} Severity
@@ -136,7 +136,7 @@ export function DisciplinaryDetailModal({
                             <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Appeal Status</span>
                             <div className="flex items-center gap-1.5 mt-1">
                                 {record.appeal_status === 'Pending Appeal' && (
-                                    <span className="font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                                    <span className="font-bold text-[var(--theme-accent)] text-[var(--theme-accent)] flex items-center gap-1">
                                         <Clock size={13} /> Pending 4-Eyes Adjudication
                                     </span>
                                 )}
@@ -160,7 +160,7 @@ export function DisciplinaryDetailModal({
                             <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Validity Period</span>
                             <p className="mt-1 font-semibold text-[var(--theme-text-primary)]">
                                 {record.expires_at ? (
-                                    <span className={isExpired ? 'text-stone-400 line-through' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'}>
+                                    <span className={isExpired ? 'text-[var(--theme-text-muted)] line-through' : 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'}>
                                         {isExpired ? `Expired (${record.expires_at})` : `Expires: ${record.expires_at}`}
                                     </span>
                                 ) : (
@@ -198,7 +198,7 @@ export function DisciplinaryDetailModal({
                                     onClose();
                                     onOpenFileAppeal(record);
                                 }}
-                                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 border border-purple-500/30 transition-all cursor-pointer"
+                                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent-muted)] border border-[var(--theme-border-accent)] transition-all cursor-pointer"
                             >
                                 File Formal Appeal
                             </button>
@@ -230,7 +230,7 @@ export function DisciplinaryDetailModal({
                                                 onResolveAppeal(record.id, 'Upheld');
                                                 onClose();
                                             }}
-                                            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] shadow-xs transition-all cursor-pointer"
+                                            className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] shadow-xs transition-all cursor-pointer"
                                         >
                                             Uphold Sanction
                                         </button>

@@ -115,7 +115,7 @@ export const RulesTab: React.FC = () => {
                         }}
                         className={`px-2.5 py-1.5 text-xs font-medium rounded-xl capitalize transition-colors cursor-pointer ${
                            pricingRulesStatus === status
-                              ? 'bg-[var(--theme-accent)] text-white shadow-sm'
+                              ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-sm'
                               : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
                         }`}
                      >
@@ -194,7 +194,7 @@ export const RulesTab: React.FC = () => {
                            type="button"
                            onClick={() => runPricingRule(rule)}
                            disabled={isSubmitting || isSimulating || pricingRulesMutating}
-                           className="px-3 py-2 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)] text-[var(--theme-accent)] hover:text-white rounded-2xl transition-all border border-[var(--theme-accent)]/20 disabled:opacity-50 cursor-pointer shadow-sm text-xs font-medium flex items-center gap-1.5"
+                           className="px-3 py-2 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)] text-[var(--theme-accent)] hover:text-[var(--theme-text-primary)] rounded-2xl transition-all border border-[var(--theme-accent)]/20 disabled:opacity-50 cursor-pointer shadow-sm text-xs font-medium flex items-center gap-1.5"
                            aria-label={`Preview proposals for rule ${rule.name}`}
                            title={rule.isActive ? 'Generate & preview price proposals' : 'Preview proposals (test paused rule)'}
                         >

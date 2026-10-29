@@ -64,13 +64,13 @@ export default function PromptModal({
         <div className="flex gap-3 justify-end">
           <button
             onClick={handleClose}
-            className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 font-bold transition-colors"
+            className="px-4 py-2 rounded-lg bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-muted)] font-bold transition-colors"
           >
             {cancelText}
           </button>
           <button
             onClick={handleConfirm}
-            className="px-4 py-2 rounded-lg bg-cyber-primary hover:bg-cyber-accent text-black font-bold transition-colors"
+            className="px-4 py-2 rounded-lg bg-cyber-primary hover:bg-cyber-accent text-[var(--theme-text-primary)] font-bold transition-colors"
           >
             {confirmText}
           </button>
@@ -79,7 +79,7 @@ export default function PromptModal({
     >
       <div className="space-y-4">
         {message && (
-          <p className="text-gray-300 text-sm whitespace-pre-line">{message}</p>
+          <p className="text-[var(--theme-text-muted)] text-sm whitespace-pre-line">{message}</p>
         )}
         <div>
           <input
@@ -97,7 +97,7 @@ export default function PromptModal({
               }
             }}
             placeholder={placeholder}
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary outline-none"
+            className="w-full bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-lg px-3 py-2 text-[var(--theme-text-primary)] text-sm focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary outline-none"
             autoFocus
           />
           {error && (

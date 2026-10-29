@@ -203,7 +203,7 @@ export default function GeneralSettings() {
                             className="h-10 px-5 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                         >
                             {isSaving ? (
-                                <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span className="w-3.5 h-3.5 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
                             ) : (
                                 <Save size={14} />
                             )}
@@ -219,7 +219,7 @@ export default function GeneralSettings() {
                 <div className={cardBase}>
                     <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-4 mb-5">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-xl bg-stone-500/10 text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-xl bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
                                 <Building size={16} />
                             </div>
                             <div>
@@ -304,7 +304,7 @@ export default function GeneralSettings() {
                             className="h-10 px-5 bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-95 font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                         >
                             {isSaving ? (
-                                <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span className="w-3.5 h-3.5 border-2 border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)] border-t-[var(--theme-border)] rounded-full animate-spin" />
                             ) : (
                                 <Save size={14} />
                             )}

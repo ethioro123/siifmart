@@ -67,11 +67,11 @@ export default function EmployeeModals({
 
          {/* Image Processing Overlay */}
          {isProcessingImage && (
-            <div className="fixed inset-0 bg-black/80 z-[10001] flex items-center justify-center">
-               <div className="bg-cyber-gray border border-white/10 rounded-2xl p-8 max-w-sm text-center">
+            <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] z-[10001] flex items-center justify-center">
+               <div className="bg-cyber-gray border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-2xl p-8 max-w-sm text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyber-primary border-t-transparent mx-auto mb-4"></div>
-                  <p className="text-white font-bold mb-2">Processing Image</p>
-                  <p className="text-gray-400 text-sm">{processingStatus || 'Please wait...'}</p>
+                  <p className="text-[var(--theme-text-primary)] font-bold mb-2">Processing Image</p>
+                  <p className="text-[var(--theme-text-muted)] text-sm">{processingStatus || 'Please wait...'}</p>
                </div>
             </div>
          )}

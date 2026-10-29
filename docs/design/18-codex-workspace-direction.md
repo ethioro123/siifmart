@@ -1,6 +1,6 @@
 # 18 · Codex-inspired workspace direction
 
-[Handbook](../APPLE_DESIGN_GUIDE.md) · Revision C, 30 October 2026
+[Handbook](../SIIFMART_DESIGN_STANDARD.md) · Revision C, 30 October 2026
 
 ## Authority and intent
 

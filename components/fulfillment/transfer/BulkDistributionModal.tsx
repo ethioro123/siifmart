@@ -285,7 +285,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     if (!isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 sm:p-4 md:p-6 lg:p-8 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] p-3 sm:p-4 md:p-6 lg:p-8 animate-in fade-in duration-200">
             <div className="w-full h-full max-w-[1700px] max-h-[96vh] md:max-h-[92vh] flex flex-col">
                 <div role="dialog" aria-modal="true" aria-labelledby="bulk-distribution-title" aria-busy={isSubmitting} className="flex-1 min-h-0 bg-[var(--theme-bg-card)] rounded-2xl md:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden relative">
                     <div className="p-3.5 sm:p-4 md:p-5 border-b border-[var(--theme-border)] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[var(--theme-bg-subtle)] shrink-0">

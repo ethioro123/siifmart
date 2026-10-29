@@ -22,10 +22,10 @@ export default function WizardStepper({ currentStep, steps }: WizardStepperProps
                             <div
                                 className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 ${
                                     isCurrent
-                                        ? 'bg-[var(--theme-primary)] text-white ring-4 ring-[var(--theme-status-success-border)] shadow-md scale-110'
+                                        ? 'bg-[var(--theme-primary)] text-[var(--theme-text-primary)] ring-4 ring-[var(--theme-status-success-border)] shadow-md scale-110'
                                         : isCompleted
-                                            ? 'bg-[var(--theme-status-success-bg)] text-white'
-                                            : 'bg-stone-200 dark:bg-white/10 text-stone-500 dark:text-stone-400'
+                                            ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)]'
+                                            : 'bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]'
                                 }`}
                             >
                                 {isCompleted ? <CheckCircle size={15} /> : stepNum}
@@ -36,7 +36,7 @@ export default function WizardStepper({ currentStep, steps }: WizardStepperProps
                                         ? 'text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)]'
                                         : isCompleted
                                             ? 'text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)]'
-                                            : 'text-stone-400'
+                                            : 'text-[var(--theme-text-muted)]'
                                 }`}
                             >
                                 {label}
@@ -47,9 +47,9 @@ export default function WizardStepper({ currentStep, steps }: WizardStepperProps
             </div>
 
             {/* Connecting Progress Track */}
-            <div className="absolute top-4 left-6 right-6 sm:left-10 sm:right-10 h-0.5 bg-stone-200 dark:bg-white/10 -z-0">
+            <div className="absolute top-4 left-6 right-6 sm:left-10 sm:right-10 h-0.5 bg-[var(--theme-bg-subtle)] bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] -z-0">
                 <div
-                    className="h-full bg-gradient-to-r from-emerald-600 to-[var(--theme-primary)] transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-[var(--theme-status-success)] to-[var(--theme-primary)] transition-all duration-300"
                     style={{ width: `${progressPercent}%` }}
                 />
             </div>

@@ -46,7 +46,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
         <div className="bg-[var(--theme-bg-card)] p-6 rounded-2xl border border-[var(--theme-border)] space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                 <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500">
+                    <div className="p-2 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)]">
                         <User size={18} />
                     </div>
                     <div>
@@ -150,7 +150,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
             </div>
 
             {!isCEO && isIdentityModified && (
-                <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2.5 text-xs text-purple-400">
+                <div className="p-3 rounded-xl bg-[var(--theme-accent-muted)] border border-[var(--theme-border-accent)] flex items-center gap-2.5 text-xs text-[var(--theme-accent)]">
                     <ShieldAlert size={15} className="shrink-0" />
                     <span>
                         Altering legal name, age, or national ID requires Executive & Compliance sign-off before applying to payroll.

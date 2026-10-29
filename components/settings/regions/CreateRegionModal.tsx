@@ -235,7 +235,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-sm z-[100] flex items-center justify-center p-4">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-[var(--theme-border)] flex items-center justify-between">
@@ -319,7 +319,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                         <button
                                             type="button"
                                             onClick={() => handleApplySuggestion(codeValidation.suggestedCode!)}
-                                            className="shrink-0 px-2 py-0.5 rounded font-semibold bg-[var(--theme-status-warning-bg)] text-white bg-[var(--theme-status-warning-bg)] transition-colors cursor-pointer text-[10px]"
+                                            className="shrink-0 px-2 py-0.5 rounded font-semibold bg-[var(--theme-status-warning-bg)] text-[var(--theme-text-primary)] bg-[var(--theme-status-warning-bg)] transition-colors cursor-pointer text-[10px]"
                                         >
                                             Use {codeValidation.suggestedCode}
                                         </button>
@@ -426,7 +426,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-accent)]/90 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                         >
                             <Check size={14} />
                             <span>{isSubmitting ? 'Provisioning...' : 'Provision Region'}</span>

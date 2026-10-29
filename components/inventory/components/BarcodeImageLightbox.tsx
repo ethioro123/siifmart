@@ -14,7 +14,7 @@ export const BarcodeImageLightbox: React.FC<BarcodeImageLightboxProps> = ({
 
     return (
         <div 
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_80%,transparent)] backdrop-blur-md animate-in fade-in duration-200"
             onClick={onClose}
         >
             <div 
@@ -32,7 +32,7 @@ export const BarcodeImageLightbox: React.FC<BarcodeImageLightboxProps> = ({
                     </button>
                 </div>
                 
-                <div className="w-full flex items-center justify-center overflow-hidden rounded-xl max-h-[75vh] bg-black/40 p-2">
+                <div className="w-full flex items-center justify-center overflow-hidden rounded-xl max-h-[75vh] bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] p-2">
                     <img 
                         src={image.url} 
                         alt={image.title} 

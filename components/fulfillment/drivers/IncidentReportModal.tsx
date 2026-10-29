@@ -39,7 +39,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
 
     const issueTypes = [
         { id: 'Traffic / Delay', label: t('warehouse.driverHub.trafficDelay'), icon: Clock, color: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]' },
-        { id: 'Vehicle Issue', label: t('warehouse.driverHub.vehicleIssue'), icon: Truck, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+        { id: 'Vehicle Issue', label: t('warehouse.driverHub.vehicleIssue'), icon: Truck, color: 'text-[var(--theme-status-warning-text)]', bg: 'bg-[var(--theme-status-warning-bg)]' },
         { id: 'Customer Not Found', label: t('warehouse.driverHub.customerNotFound'), icon: Navigation, color: 'text-[var(--theme-primary)]', bg: 'bg-[var(--theme-primary)]/10' },
         { id: 'Security / Access', label: t('warehouse.driverHub.securityAccess'), icon: ShieldAlert, color: 'text-[var(--theme-status-danger-text)]', bg: 'bg-[var(--theme-status-danger-bg)]' },
         { id: 'Package Damage', label: t('warehouse.driverHub.packageDamage'), icon: AlertTriangle, color: 'text-[var(--theme-status-danger-text)]', bg: 'bg-[var(--theme-status-danger-bg)]' },
@@ -74,7 +74,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-4 bg-black/60 overflow-x-hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] overflow-x-hidden animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] w-full max-w-md rounded-3xl border border-[var(--theme-border)] shadow-xl flex flex-col isolate overflow-hidden max-h-[90vh] relative">
 
                 {/* Header */}
@@ -157,7 +157,7 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
                         <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting || !description.trim()}
-                                className="w-full min-h-[44px] py-3 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] disabled:opacity-50 text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] touch-manipulation shrink-0"
+                                className="w-full min-h-[44px] py-3 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] disabled:opacity-50 text-[var(--theme-text-primary)] rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98] touch-manipulation shrink-0"
                             >
                                 <Send size={14} />
                                 {isSubmitting ? t('warehouse.driverHub.sending') : t('warehouse.driverHub.transmitReport')}

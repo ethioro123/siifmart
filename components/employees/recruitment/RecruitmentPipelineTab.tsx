@@ -287,13 +287,13 @@ export default function RecruitmentPipelineTab() {
                                                     {/* Dual 4-Eyes Compliance Badges */}
                                                     <div className="flex items-center gap-1.5 pt-1 border-t border-[var(--theme-border-subtle)] text-[10px]">
                                                         <span className={`px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${
-                                                            hasHR ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
+                                                            hasHR ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' : 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]'
                                                         }`}>
                                                             <ShieldCheck size={10} />
                                                             <span>HR {hasHR ? 'Verified' : 'Pending'}</span>
                                                         </span>
                                                         <span className={`px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${
-                                                            hasFin ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
+                                                            hasFin ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]' : 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]'
                                                         }`}>
                                                             <Banknote size={10} />
                                                             <span>Fin {hasFin ? 'Approved' : 'Pending'}</span>

@@ -108,7 +108,7 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
                     <div>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1">{t('warehouse.priority')}</p>
                         <span className={`text-xs px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider ${transferPriority === 'Critical' ? 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]' :
-                            transferPriority === 'High' ? 'bg-orange-500/20 text-orange-500 border border-orange-500/30' :
+                            transferPriority === 'High' ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]' :
                                 'bg-primary/20 text-primary border border-primary/30'
                             }`}>{transferPriority}</span>
                     </div>

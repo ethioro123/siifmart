@@ -44,7 +44,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                 size="sm"
             >
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
                         <Copy size={24} className="shrink-0" />
                         <p className="text-xs">
                             This will replicate all shifts from the preceding week into <strong>{weekLabel}</strong>. Any existing draft shifts will be updated.
@@ -55,7 +55,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                         <button
                             type="button"
                             onClick={onCloseCopyModal}
-                            className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] transition-colors cursor-pointer"
                         >
                             Cancel
                         </button>
@@ -80,7 +80,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                 size="sm"
             >
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] dark:bg-emerald-950/20 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] border border-[var(--theme-status-success-border)] border-[var(--theme-status-success-border)]">
                         <Send size={24} className="shrink-0" />
                         <p className="text-xs">
                             Publishing will confirm and finalize the schedule for <strong>{weekLabel}</strong>. Shifts will be visible to all staff profiles and POS/WMS terminals.
@@ -91,7 +91,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                         <button
                             type="button"
                             onClick={onClosePublishModal}
-                            className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] transition-colors cursor-pointer"
                         >
                             Cancel
                         </button>
@@ -116,7 +116,7 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                 size="sm"
             >
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-danger-bg)] dark:bg-red-950/20 text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] border-[var(--theme-status-danger-border)]">
                         <AlertTriangle size={24} className="shrink-0 text-[var(--theme-status-danger-text)]" />
                         <p className="text-xs">
                             Are you sure you want to clear all shifts for <strong>{weekLabel}</strong>? Shifts will be set to Off (Day Off). Remember to click <strong>Save Changes</strong> to persist.
@@ -127,14 +127,14 @@ export const ShiftConfirmModals: React.FC<ShiftConfirmModalsProps> = ({
                         <button
                             type="button"
                             onClick={onCloseClearModal}
-                            className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-subtle)] hover:bg-[color-mix(in_srgb,var(--theme-bg-card)_10%,transparent)] transition-colors cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button
                             type="button"
                             onClick={onConfirmClear}
-                            className="px-4 py-2 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                            className="px-4 py-2 bg-[var(--theme-status-danger-bg)] bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
                         >
                             <Trash2 size={14} />
                             <span>Clear Shifts</span>

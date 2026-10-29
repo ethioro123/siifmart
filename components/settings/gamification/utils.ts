@@ -1,18 +1,18 @@
 import { BonusTier } from '../../../types';
 
 export const TIER_COLORS = [
-    { value: 'gray', label: 'Gray', class: 'from-gray-400 to-gray-500' },
-    { value: 'amber', label: 'Bronze', class: 'from-amber-500 to-amber-600' },
-    { value: 'yellow', label: 'Gold', class: 'from-yellow-400 to-yellow-500' },
-    { value: 'cyan', label: 'Platinum', class: 'from-cyan-400 to-cyan-500' },
-    { value: 'purple', label: 'Diamond', class: 'from-purple-400 to-purple-600' },
-    { value: 'green', label: 'Emerald', class: 'from-green-400 to-green-600' },
-    { value: 'rose', label: 'Ruby', class: 'from-rose-400 to-rose-600' },
-    { value: 'blue', label: 'Sapphire', class: 'from-blue-400 to-blue-600' },
+    { value: 'gray', label: 'Gray', class: 'from-[var(--theme-accent)] to-[var(--theme-accent)]' },
+    { value: 'amber', label: 'Bronze', class: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]' },
+    { value: 'yellow', label: 'Gold', class: 'from-[var(--theme-status-warning)] to-[var(--theme-status-warning)]' },
+    { value: 'cyan', label: 'Platinum', class: 'from-[var(--theme-status-info)] to-[var(--theme-status-info)]' },
+    { value: 'purple', label: 'Diamond', class: 'from-[var(--theme-accent)] to-[var(--theme-accent)]' },
+    { value: 'green', label: 'Emerald', class: 'from-[var(--theme-status-success)] to-[var(--theme-status-success)]' },
+    { value: 'rose', label: 'Ruby', class: 'from-[var(--theme-status-danger)] to-[var(--theme-status-danger)]' },
+    { value: 'blue', label: 'Sapphire', class: 'from-[var(--theme-status-info)] to-[var(--theme-status-info)]' },
 ];
 
 export const getColorClass = (colorValue: string) => {
-    return TIER_COLORS.find(c => c.value === colorValue)?.class || 'from-gray-400 to-gray-500';
+    return TIER_COLORS.find(c => c.value === colorValue)?.class || 'from-[var(--theme-accent)] to-[var(--theme-accent)]';
 };
 
 export const calculateExampleBonus = (points: number, bonusTiers: BonusTier[]) => {

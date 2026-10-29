@@ -157,7 +157,7 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                                                     }}
                                                     className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center justify-between uppercase tracking-wider min-h-[38px] ${
                                                         replenishFilter === filter
-                                                            ? 'bg-[var(--theme-accent)] text-white'
+                                                            ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]'
                                                             : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                                     }`}
                                                 >

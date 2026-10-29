@@ -42,11 +42,11 @@ const PermissionToggle: React.FC<PermissionToggleProps> = ({
         } ${
             enabled
                 ? danger ? 'bg-[var(--theme-status-danger-bg)]' : 'bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)]'
-                : 'bg-neutral-300 dark:bg-neutral-700'
+                : 'bg-[var(--theme-bg-card-hover)] bg-[var(--theme-bg-panel)]'
         }`}
     >
         <div
-            className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 transform ${
+            className={`w-5 h-5 rounded-full bg-[var(--theme-bg-card)] shadow-sm transition-transform duration-200 transform ${
                 enabled ? 'translate-x-5' : 'translate-x-0'
             }`}
         />
@@ -170,7 +170,7 @@ export default function RoleSettings() {
             { id: 'admin', name: 'Assistant CEO / Admin', users: counts.admin, badge: 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] dark:bg-[var(--theme-accent)]/15 dark:text-[var(--theme-accent)] border-[var(--theme-accent)]/20', description: 'HQ executive administration with complete audit visibility' },
             { id: 'store_manager', name: 'Store Manager', users: counts.store_manager, badge: 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]', description: 'Branch retail oversight constrained by Zero-Trust approval rules' },
             { id: 'cashier', name: 'Retail Staff (Cashier)', users: counts.cashier, badge: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]', description: 'POS checkout operators locked to local terminal registers' },
-            { id: 'warehouse', name: 'Warehouse Ops', users: counts.warehouse, badge: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20', description: 'Fulfillment and putaway personnel governed by blind scanning' },
+            { id: 'warehouse', name: 'Warehouse Ops', users: counts.warehouse, badge: 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]', description: 'Fulfillment and putaway personnel governed by blind scanning' },
         ];
     }, [employees]);
 
@@ -449,7 +449,7 @@ export default function RoleSettings() {
 
                                     <div className="flex items-center justify-between p-3 border border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-card)]">
                                         <div className="flex items-center gap-2.5 pr-2">
-                                            <Clock size={15} className="text-purple-600 dark:text-purple-400" />
+                                            <Clock size={15} className="text-[var(--theme-accent)] text-[var(--theme-accent)]" />
                                             <div>
                                                 <div className="text-xs font-semibold text-[var(--theme-text-primary)]">Shift Hours Only</div>
                                                 <div className="text-[11px] text-[var(--theme-text-secondary)]">Block staff access outside operational shift hours (08:00 - 22:00)</div>

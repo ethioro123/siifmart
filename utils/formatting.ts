@@ -201,10 +201,10 @@ export const formatRole = (role: string | undefined): string => {
  * Returns an object with color classes and a label.
  */
 export const getExpiryStatus = (dateString?: string): { color: string; label: string } => {
-    if (!dateString) return { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', label: 'No Date' };
+    if (!dateString) return { color: 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_20%,transparent)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)]', label: 'No Date' };
 
     const expiryDate = new Date(dateString);
-    if (isNaN(expiryDate.getTime())) return { color: 'bg-gray-500/20 text-gray-400 border-gray-500/30', label: 'Invalid Date' };
+    if (isNaN(expiryDate.getTime())) return { color: 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_20%,transparent)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_30%,transparent)]', label: 'Invalid Date' };
 
     const today = new Date();
     // Reset time part for accurate day calculation
@@ -214,11 +214,11 @@ export const getExpiryStatus = (dateString?: string): { color: string; label: st
     const diffTime = expiryDate.getTime() - today.getTime();
     const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (days < 0) return { color: 'bg-red-500/20 text-red-400 border-red-500/30', label: 'Expired' };
-    if (days <= 7) return { color: 'bg-orange-500/20 text-orange-400 border-orange-500/30', label: 'Expiring Soon' };
-    if (days <= 30) return { color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', label: 'Expiring < 30d' };
+    if (days < 0) return { color: 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]', label: 'Expired' };
+    if (days <= 7) return { color: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]', label: 'Expiring Soon' };
+    if (days <= 30) return { color: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]', label: 'Expiring < 30d' };
 
-    return { color: 'bg-green-500/20 text-green-400 border-green-500/30', label: 'Good' };
+    return { color: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]', label: 'Good' };
 };
 
 /**

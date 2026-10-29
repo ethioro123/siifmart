@@ -137,7 +137,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                         {formatJobId(job)}
                                                     </span>
                                                     {job.priority === 'Critical' && (
-                                                        <span className="bg-[var(--theme-status-danger-bg)] text-white text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
+                                                        <span className="bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
                                                             !
                                                         </span>
                                                     )}

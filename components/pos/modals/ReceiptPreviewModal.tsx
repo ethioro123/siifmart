@@ -17,11 +17,11 @@ export const ReceiptPreviewModal: React.FC = () => {
         <Modal isOpen={isReceiptPreviewOpen} onClose={() => setIsReceiptPreviewOpen(false)} title={t('pos.receiptPreview')} size="md">
             <div className="space-y-4">
                 <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-4 rounded-2xl shadow-xs">
-                    <div className="bg-white p-4 rounded-xl shadow-md h-96 overflow-y-auto max-w-sm mx-auto border border-black/10">
+                    <div className="bg-[var(--theme-bg-card)] p-4 rounded-xl shadow-md h-96 overflow-y-auto max-w-sm mx-auto border border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)]">
                         <iframe
                             srcDoc={receiptPreviewHTML}
                             title={t('pos.receiptPreview')}
-                            className="w-full h-full border-none bg-white"
+                            className="w-full h-full border-none bg-[var(--theme-bg-card)]"
                         />
                     </div>
                 </div>

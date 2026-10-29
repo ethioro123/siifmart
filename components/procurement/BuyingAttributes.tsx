@@ -283,7 +283,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                         className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-left transition-all cursor-pointer"
                     >
                         <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">
-                            <Thermometer size={12} className="text-purple-500" />
+                            <Thermometer size={12} className="text-[var(--theme-accent)]" />
                             <span>5. Storage, Inbound QC & Handling Directives</span>
                             {storageDefaults.defaultPerishable && (
                                 <span className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)] font-semibold">

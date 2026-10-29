@@ -280,7 +280,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
           <button
             type="button"
             onClick={handleSave}
-            className="h-9 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all"
+            className="h-9 px-5 bg-[var(--theme-accent)] dark:bg-[var(--theme-accent)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all"
           >
             <CheckCircle size={15} />
             {editingCode ? 'Save Changes' : 'Create Code'}

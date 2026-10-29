@@ -147,7 +147,7 @@ export default function MigrationPanel() {
                         <p>✅ Updates Purchase Orders: UUID → <span className="font-mono text-cyber-primary">PO00123</span></p>
                         <p>✅ Updates Sales Records: UUID → <span className="font-mono text-cyber-primary">S00090</span></p>
                         <p>✅ Updates Warehouse Jobs: UUID → <span className="font-mono text-cyber-primary">P00045</span></p>
-                        <p className="text-xs text-gray-500 mt-3">
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-3">
                             Note: Only records without friendly IDs will be updated. This is safe to run multiple times.
                         </p>
                     </div>
