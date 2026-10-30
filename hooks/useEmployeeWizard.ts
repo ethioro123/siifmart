@@ -9,9 +9,7 @@ import { getSiteCountryId } from '../utils/siteIdGenerator';
 import { isDirectOnboardingAuthorized, persistCandidateDocuments } from '../utils/employeeOnboardingGovernance';
 import { useEmployeeDrafts } from './useEmployeeDrafts';
 import { systemLogsService } from '../services/system-logs.service';
-import { createAuthAccountForNewHire } from '../utils/employeeAuthHelper';
 import { headcountQuotaService, QuotaEvaluationResult } from '../services/headcountQuota.service';
-import { getActiveRolePolicy, validatePasswordAgainstPolicy } from '../services/zeroTrustPolicies.service';
 
 export interface NewEmployeeFormData {
    firstName: string;
@@ -241,10 +239,6 @@ export function useEmployeeWizard({
             addNotification('alert', 'First Name is required.');
             return;
          }
-         if (newEmpData.createAppAccount !== false && (!newEmpData.password || newEmpData.password.length < 6)) {
-            addNotification('alert', 'A valid password (minimum 6 characters) is required.');
-            return;
-         }
          if (!newEmpData.siteId || !newEmpData.siteId.trim()) {
             addNotification('alert', 'Work location is mandatory. Please select a valid workplace location.');
             return;
@@ -350,13 +344,6 @@ export function useEmployeeWizard({
          : (quotaResult ? 'EXCEEDED_QUOTA' : 'WITHIN_QUOTA');
 
       try {
-         if (newEmpData.createAppAccount !== false) {
-            const rolePolicy = getActiveRolePolicy(newEmpData.role);
-            const pwdValidation = validatePasswordAgainstPolicy(newEmpData.password, rolePolicy.password_complexity);
-            if (!pwdValidation.valid) {
-               throw new Error(pwdValidation.reason || "Password does not meet Zero-Trust role security requirements.");
-            }
-         }
          if (!newEmpData.siteId || !newEmpData.siteId.trim()) {
             throw new Error("Workplace location is mandatory. Every employee must be assigned to an operating location.");
          }
@@ -372,25 +359,7 @@ export function useEmployeeWizard({
          let signupEmail = generateEmployeeEmail(employeeCode);
          let employeeId: string = crypto.randomUUID();
 
-         // Direct authorized executives or quota-approved frontline hires register live credentials
-         if (isAutoApproved && newEmpData.createAppAccount !== false) {
-            const authRes = await createAuthAccountForNewHire({
-               signupEmail,
-               password: newEmpData.password,
-               firstName: newEmpData.firstName,
-               lastName: newEmpData.lastName,
-               role: newEmpData.role,
-               siteId: validatedSiteId,
-               employeeCode,
-               fallbackEmployeeId: employeeId
-            });
-            employeeId = authRes.employeeId;
-            signupEmail = authRes.finalEmail;
-            if (authRes.error && !authRes.accountCreated) {
-               addNotification('alert', `Staff created, but login credentials had an alert: ${authRes.error}`);
-            }
-         }
-
+         // Account provisioning is performed once, after activation, in verified handover.
          const newEmp: Employee = {
             id: employeeId,
             code: employeeCode,
@@ -413,7 +382,7 @@ export function useEmployeeWizard({
             specialization: newEmpData.specialization || 'Generalist',
             salary: parseFloat(newEmpData.salary) || 0,
             attendanceRate: 100,
-            badges: isAutoApproved ? ['New Recruit'] : ['Pending HR Review'],
+            badges: [...(isAutoApproved ? ['New Recruit'] : ['Pending HR Review']), ...(newEmpData.createAppAccount === false ? ['No App Account'] : [])],
             address: newEmpData.address,
             emergencyContact: newEmpData.emergencyContact,
             nationalIdNumber: newEmpData.nationalIdNumber || undefined,
@@ -427,12 +396,6 @@ export function useEmployeeWizard({
          const result = addEmployee(newEmp);
          if (result instanceof Promise) await result;
          draftManager.handleFinalSubmitSuccess();
-
-         if (typeof window !== 'undefined' && newEmpData.createAppAccount !== false && newEmpData.password) {
-            localStorage.setItem(`siifmart_temp_pwd_${employeeId}`, newEmpData.password);
-            localStorage.setItem(`siifmart_temp_pwd_by_code_${employeeCode.toLowerCase()}`, newEmpData.password);
-            localStorage.setItem(`siifmart_temp_pwd_by_name_${newEmp.name.toLowerCase()}`, newEmpData.password);
-         }
 
          if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('employee:created', { detail: { employee: newEmp } }));

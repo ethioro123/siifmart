@@ -1,4 +1,3 @@
-vi.mock('../../utils/employeeAuthHelper', () => ({ createAuthAccountForNewHire: vi.fn().mockResolvedValue({ employeeId: 'auth-test-employee' }) }));
 vi.mock('../../services/system-logs.service', () => ({ systemLogsService: { create: vi.fn().mockResolvedValue({ id: 'audit' }) } }));
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { recruitmentService } from '../../services/recruitment.service';

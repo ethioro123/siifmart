@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Upload, MapPin, Eye, EyeOff, Camera, Mail, AlertTriangle, ShieldCheck } from 'lucide-react';
+import React from 'react';
+import { Upload, MapPin, Camera, Mail, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Site } from '../../../types';
-import { getActiveRolePolicy } from '../../../services/zeroTrustPolicies.service';
 
 interface StepIdentityProps {
     newEmpData: any;
@@ -20,7 +19,6 @@ export default function StepIdentity({
     sites,
     activeSite
 }: StepIdentityProps) {
-    const [showPassword, setShowPassword] = useState(false);
     const effectiveRegion = user?.regionCode || (user as any)?.region_code || activeSite?.regionCode || (activeSite as any)?.region_code;
     const isRegional = Boolean(
         user?.scopeLevel === 'REGIONAL' ||
@@ -131,55 +129,12 @@ export default function StepIdentity({
                             className="mt-0.5 accent-[var(--theme-accent)]"
                         />
                         <span>
-                            <span className="block font-semibold">Create app login</span>
+                            <span className="block font-semibold">Request app login</span>
                             <span className="block text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)]">Turn this off for employees who need a workforce record but no SIIFMART account.</span>
                         </span>
                     </label>
 
-                    {newEmpData.createAppAccount !== false && <div>
-                        <label className="text-[11px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] uppercase font-bold mb-1 block">
-                            Password (For System Login) <span className="text-[var(--theme-status-danger-text)]">*</span>
-                        </label>
-                        <div className="relative">
-                            <input
-                                id="candidate_temp_password"
-                                name="candidate_temp_password"
-                                type={showPassword ? 'text' : 'password'}
-                                autoComplete="new-password"
-                                autoCorrect="off"
-                                spellCheck={false}
-                                data-lpignore="true"
-                                data-1p-ignore="true"
-                                data-bwignore="true"
-                                data-form-type="other"
-                                className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_30%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl px-3 py-2 pr-10 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] border-[var(--theme-status-success-border)] outline-none text-sm font-mono"
-                                value={newEmpData.password}
-                                onChange={e => setNewEmpData({ ...newEmpData, password: e.target.value })}
-                                placeholder={
-                                    getActiveRolePolicy(newEmpData.role).password_complexity === 'high'
-                                        ? 'Min 12 chars (Upper, lower, num, symbol)'
-                                        : getActiveRolePolicy(newEmpData.role).password_complexity === 'medium'
-                                        ? 'Min 8 chars (letters and numbers)'
-                                        : 'Minimum 6 characters'
-                                }
-                                aria-label="Password"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-muted)] transition-colors p-1 cursor-pointer"
-                                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                            >
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                            </button>
-                        </div>
-                        <p className="text-[10px] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] mt-1 flex items-center gap-1">
-                            <ShieldCheck size={11} className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
-                            <span>
-                                Policy: {getActiveRolePolicy(newEmpData.role).password_complexity.toUpperCase()} complexity required for this role
-                            </span>
-                        </p>
-                    </div>}
+                    {newEmpData.createAppAccount !== false && <p className="text-xs text-[var(--theme-text-secondary)]">Login access is prepared by an authorized manager during handover after approval. No password is saved with this candidate.</p>}
                 </div>
             </div>
 

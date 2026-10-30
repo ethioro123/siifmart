@@ -1,3 +1,4 @@
+import { purgeLegacyEmployeeCredentials } from '../utils/credentialStorageCleanup';
 import { useEffect } from 'react';
 import type { SystemConfig } from '../types';
 import { setActiveRolePolicies, setActiveRolePermissions } from '../services/zeroTrustPolicies.service';
@@ -7,6 +8,7 @@ import { setActiveRolePolicies, setActiveRolePermissions } from '../services/zer
  * with the active country partition whenever settings change.
  */
 export function useZeroTrustSync(settings?: SystemConfig, effectiveCountry?: string) {
+    useEffect(() => purgeLegacyEmployeeCredentials(), []);
     useEffect(() => {
         if (!settings) return;
         const country = effectiveCountry || settings.country || 'ET';

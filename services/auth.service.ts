@@ -46,46 +46,6 @@ export interface UserProfile {
 
 export const authService = {
     /**
-     * Sign up a new user (admin only)
-     */
-    async signUp(email: string, password: string, role: UserRole, name: string, siteId: string) {
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: { role, name, siteId }
-            }
-        });
-
-        if (error) throw error;
-
-        if (data.user) {
-            await employeesService.create({
-                id: data.user.id,
-                name,
-                email,
-                role,
-                siteId,
-                code: `EMP-${Math.floor(Math.random() * 10000)}`,
-                status: 'Active',
-                joinDate: new Date().toISOString(),
-                phone: '',
-                department: role,
-                avatar: '',
-                performanceScore: 0
-            });
-
-            systemLogsService.logSecurity('ACCOUNT_CREATED', `Created account for ${name} (${role})`, {
-                id: data.user.id,
-                name,
-                role
-            });
-        }
-
-        return data;
-    },
-
-    /**
      * Sign in with email/username and password
      */
     async signIn(identifier: string, password: string) {

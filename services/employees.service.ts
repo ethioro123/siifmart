@@ -157,17 +157,6 @@ export const employeesService = {
         return (data as RawDbEmployee[]).map(mapDbEmployeeToEmployee);
     },
 
-    async markCredentialsHandedOver(employeeId: string, handedOverBy: string): Promise<void> {
-        const timestamp = new Date().toISOString();
-        await supabase
-            .from('employees')
-            .update({
-                credentials_handed_over_at: timestamp,
-                credentials_handed_over_by: handedOverBy
-            })
-            .eq('id', employeeId);
-    },
-
     async getPaginated(
         siteId?: string,
         page: number = 1,

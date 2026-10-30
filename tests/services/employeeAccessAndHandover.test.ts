@@ -43,25 +43,4 @@ describe('Employee Regional Boundaries & Handover Security Tests', () => {
         });
     });
 
-    describe('Credential Handover Key Resolution', () => {
-        it('resolves password across ID, employee code, and name keys', () => {
-            const empId = 'emp-uuid-123';
-            const empCode = 'ET-SIIF0099';
-            const empName = 'Abebe Bikila';
-
-            const mockStorage: Record<string, string> = {};
-
-            // Store under code key
-            mockStorage[`siifmart_temp_pwd_by_code_${empCode.toLowerCase()}`] = 'SecretPass#2026';
-
-            // Resolve
-            const codeKey = empCode.toLowerCase();
-            const nameKey = empName.toLowerCase();
-            const resolved = mockStorage[`siifmart_temp_pwd_${empId}`] ||
-                             mockStorage[`siifmart_temp_pwd_by_code_${codeKey}`] ||
-                             mockStorage[`siifmart_temp_pwd_by_name_${nameKey}`];
-
-            expect(resolved).toBe('SecretPass#2026');
-        });
-    });
 });

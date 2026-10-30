@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Key, Sparkles, ChevronRight, X, ChevronLeft } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
@@ -21,23 +21,16 @@ interface NewHireHandoverBannerProps {
  */
 export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerProps) {
     const { user } = useStore();
-    const { employees, activeSite } = useData();
+    const { employees, activeSite, effectiveCountry } = useData();
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-    const [dismissedIds, setDismissedIds] = useState<string[]>(() => {
-        if (typeof window === 'undefined') return [];
-        try {
-            const raw = localStorage.getItem('siifmart_dismissed_handover_ids');
-            return raw ? JSON.parse(raw) : [];
-        } catch {
-            return [];
-        }
-    });
+    const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+    useEffect(() => { setDismissedIds([]); setSelectedEmployee(null); setCurrentIndex(0); }, [user?.id, activeSite?.id, effectiveCountry]);
 
     // Zero-Trust gate: Level 4 staff (cashiers, pickers, drivers) cannot see this banner
     const isManager = isManagerialRole(user?.role);
-    if (!isManager) return null;
+
 
     // Filter newly approved employees for this active site
     const pendingHandovers = useMemo(() => {
@@ -53,9 +46,7 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
             // Check if already handed over or dismissed
             if (dismissedIds.includes(emp.id)) return false;
             if (emp.credentialsHandedOverAt || (emp as any).credentials_handed_over_at) return false;
-            if (typeof window !== 'undefined' && localStorage.getItem(`siifmart_credentials_handed_over_${emp.id}`)) {
-                return false;
-            }
+            if (emp.badges?.includes('No App Account')) return false;
 
             // Must be a recent recruit or have new hire badge
             const hasNewBadge = Array.isArray(emp.badges) && (emp.badges.includes('New Hire') || emp.badges.includes('New Recruit'));
@@ -66,20 +57,14 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
         });
     }, [employees, activeSite?.id, dismissedIds]);
 
-    if (pendingHandovers.length === 0) return null;
+    if (!isManager || pendingHandovers.length === 0) return null;
 
     const currentEmployee = pendingHandovers[Math.min(currentIndex, pendingHandovers.length - 1)];
 
     const handleDismiss = (empId: string) => {
         const next = [...dismissedIds, empId];
         setDismissedIds(next);
-        if (typeof window !== 'undefined') {
-            try {
-                localStorage.setItem('siifmart_dismissed_handover_ids', JSON.stringify(next));
-            } catch {
-                // ignore
-            }
-        }
+
     };
 
     return (
@@ -94,7 +79,7 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
                             <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-accent)] dark:text-[var(--theme-accent)] flex items-center gap-1">
                                     <Sparkles size={13} />
-                                    New Staff Approved & Ready for Duty
+                                    Staff access handover pending
                                 </span>
                                 {pendingHandovers.length > 1 && (
                                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--theme-status-info-bg)] text-[var(--theme-accent)] dark:text-[var(--theme-accent)] border border-[var(--theme-status-info-border)]">
@@ -103,7 +88,7 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
                                 )}
                             </div>
                             <p className="text-xs text-[var(--theme-text-primary)] font-medium mt-0.5">
-                                <span className="font-bold">{currentEmployee.name}</span> ({formatRole(currentEmployee.role)}) has been approved by HR & Finance. Hand over their system credentials to start shift.
+                                <span className="font-bold">{currentEmployee.name}</span> ({formatRole(currentEmployee.role)}) has an active employee profile. Verify and hand over login access before starting work.
                             </p>
                         </div>
                     </div>

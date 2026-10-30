@@ -1,7 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { logger } from '../utils/logger';
 import { employeesService } from './employees.service';
-import { createAuthAccountForNewHire } from '../utils/employeeAuthHelper';
 import type { JobCandidate } from '../types/hr-advanced';
 
 export interface CandidateHiringRoute {
@@ -162,27 +161,8 @@ export const provisionActivatedEmployee = async (
     const now = new Date().toISOString();
     const joinDate = now.split('T')[0];
     const assignedCode = await employeesService.getNextCode(candidate.country_code);
-    const numericPin = assignedCode.replace(/\D/g, '').slice(-4) || '1234';
-    const defaultPwd = `SiifMart@${numericPin}`;
-    let employeeId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `emp-${Date.now()}`;
-
-    try {
-        const nameParts = candidate.name.trim().split(' ');
-        const authRes = await createAuthAccountForNewHire({
-            signupEmail: candidate.email.toLowerCase(),
-            password: defaultPwd,
-            firstName: nameParts[0] || 'Staff',
-            lastName: nameParts.slice(1).join(' ') || 'Member',
-            role: finalRole,
-            siteId: targetSiteId,
-            employeeCode: assignedCode,
-            fallbackEmployeeId: employeeId
-        });
-        employeeId = authRes.employeeId;
-    } catch (e) {
-        logger.warn('recruitmentDelegation', 'Failed to provision auth user during hire activation', { error: String(e) });
-    }
-
+    const employeeId = crypto.randomUUID();
+    // Approved employee creation and login handover are separate confirmed outcomes.
     return employeesService.create({
         id: employeeId,
         code: assignedCode,

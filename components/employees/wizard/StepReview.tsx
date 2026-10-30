@@ -88,7 +88,7 @@ export default function StepReview({
                         </div>
                         <div className="flex justify-between">
                             <span className="text-[var(--theme-text-secondary)]">App Access:</span>
-                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-medium">{newEmpData.createAppAccount === false ? 'No login' : 'Login enabled'} · {SYSTEM_ROLES.find(role => role.id === newEmpData.role)?.label || newEmpData.role}</span>
+                            <span className="text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] font-medium">{newEmpData.createAppAccount === false ? 'No login' : 'Login requested'} · {SYSTEM_ROLES.find(role => role.id === newEmpData.role)?.label || newEmpData.role}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-[var(--theme-text-secondary)]">Department:</span>
