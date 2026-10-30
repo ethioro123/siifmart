@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { HistorySearch } from './shared/HistorySearch';
 import {
     Shield,
     AlertTriangle,
@@ -112,7 +113,7 @@ export const AuditLogViewer: React.FC = () => {
                 <div>
                     <h2 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
                         <Shield className="text-[var(--theme-accent)] dark:text-[var(--theme-accent)]" />
-                        Security Audit Logs
+                        Device Log History
                     </h2>
                     <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm mt-1">
                         Monitoring system access, security events, and policy violations.
@@ -129,16 +130,7 @@ export const AuditLogViewer: React.FC = () => {
 
             {/* Filters */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)]">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
-                    <input
-                        type="text"
-                        placeholder="Search logs..."
-                        className="w-full pl-9 pr-3.5 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] dark:focus:border-[var(--theme-border-focus)] outline-none transition-colors"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
+                <HistorySearch value={searchTerm} onChange={setSearchTerm} label="Search device log history" />
 
                 <div className="relative">
                     <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />

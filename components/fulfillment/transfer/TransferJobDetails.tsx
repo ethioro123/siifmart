@@ -1,3 +1,4 @@
+import { TransferEvidenceTimeline } from '../../shared/TransferEvidenceTimeline';
 import { useApproveTransferPicking } from '../../../hooks/useApproveTransferPicking';
 import { canInspectTransferArrival } from '../../../utils/shipmentWorkflow';
 import React, { useState } from 'react';
@@ -264,6 +265,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                         {new Date(selectedJob.createdAt || (selectedJob as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                                     </span>
                                 </div>
+                                <TransferEvidenceTimeline record={selectedJob} />
                             </div>
                         </div>
                         <button

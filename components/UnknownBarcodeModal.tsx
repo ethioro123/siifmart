@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useBarcodeResolutionMutation } from '../hooks/useBarcodeResolutionMutation';
 import Modal from './Modal';
 import { Camera, AlertTriangle, Trash2, ChevronRight, X, ShieldCheck, ShieldAlert, Sparkles } from 'lucide-react';
 import { Product } from '../types';
-import { productsService, barcodeApprovalsService } from '../services/supabase.service';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -28,25 +27,24 @@ export default function UnknownBarcodeModal({
     onMapProduct,
     products
 }: UnknownBarcodeModalProps) {
-    const queryClient = useQueryClient();
+    const resolution = useBarcodeResolutionMutation();
     const [step, setStep] = useState<'evidence' | 'search' | 'manager-pin'>('evidence');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [isUploading, setIsUploading] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
-    const { user, showToast } = useStore();
-    const { settings, updateProduct, addNotification, sites, activeSite, employees } = useData();
+    const { user } = useStore();
+    const { settings, addNotification, activeSite, employees } = useData();
     const { t } = useLanguage();
 
     const [isCompressing, setIsCompressing] = useState(false);
     const [captureMode, setCaptureMode] = useState<'idle' | 'camera'>('idle');
-    const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+    const cameraStream = useRef<MediaStream | null>(null);
+    const cameraGeneration = useRef(0);
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [startTime] = useState(Date.now());
 
     // Validate barcode format
     const barcodeValidation = React.useMemo(() => validateBarcodeFormat(barcode), [barcode]);
@@ -55,15 +53,17 @@ export default function UnknownBarcodeModal({
     const isManagerOrAdmin = ['group_ceo', 'country_managing_director', 'store_manager', 'warehouse_manager', 'country_operations_director', 'regional_operations_manager'].includes(user?.role?.toLowerCase() || '');
 
     const stopCamera = () => {
-        if (cameraStream) {
-            cameraStream.getTracks().forEach(track => track.stop());
-            setCameraStream(null);
+        cameraGeneration.current += 1;
+        if (cameraStream.current) {
+            cameraStream.current.getTracks().forEach(track => track.stop());
+            cameraStream.current = null;
         }
     };
 
     const startCamera = async () => {
+        stopCamera();
+        const generation = cameraGeneration.current;
         try {
-            stopCamera();
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     facingMode: 'environment',
@@ -71,31 +71,42 @@ export default function UnknownBarcodeModal({
                     height: { ideal: 1080 }
                 }
             });
-            setCameraStream(stream);
+            if (generation !== cameraGeneration.current) {
+                stream.getTracks().forEach(track => track.stop());
+                return;
+            }
+            cameraStream.current = stream;
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
             }
         } catch (err) {
+            if (generation !== cameraGeneration.current) return;
             logger.error('UnknownBarcodeModal', 'Camera access failed:', err);
-            alert('Could not access live camera. Please check browser permissions.');
+            addNotification('alert', t('pos.barcodeCameraFailed'));
             setCaptureMode('idle');
         }
     };
 
-    // Auto-open live camera on mount when opened
     useEffect(() => {
-        if (isOpen && step === 'evidence' && !imagePreview) {
+        stopCamera();
+        setStep('evidence');
+        setImageFile(null);
+        setImagePreview(null);
+        setSelectedProduct(null);
+        setSearchTerm('');
+        if (isOpen) {
             setCaptureMode('camera');
             startCamera();
         }
-        return () => {
-            stopCamera();
-        };
-    }, [isOpen]);
+        return stopCamera;
+    }, [isOpen, barcode]);
+
+    useEffect(() => () => { if (imagePreview) URL.revokeObjectURL(imagePreview); }, [imagePreview]);
 
     const handleTakePhotoSnapshot = async () => {
         if (!videoRef.current || !canvasRef.current) return;
 
+        const generation = cameraGeneration.current;
         const video = videoRef.current;
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -127,18 +138,18 @@ export default function UnknownBarcodeModal({
         const timestampStr = new Date().toLocaleString([], { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
         // Resolve human-readable staff and location names (eliminate raw UUIDs)
-        const staffName = user?.name || (employees || []).find((e: any) => e.id === user?.id)?.name || 'Authorized Staff';
-        const currentSite = (sites || []).find((s: any) => s.id === user?.siteId || s.id === activeSite?.id) || activeSite;
-        const siteName = currentSite?.name || 'Active Location';
+        const staffName = user?.name || (employees || []).find((e) => e.id === user?.id)?.name || t('pos.barcodeStaff');
+        const currentSite = activeSite;
+        const siteName = currentSite?.name || t('pos.barcodeSite');
 
-        ctx.fillText(`🔒 SIIFMART AUDIT PROOF • BARCODE: ${barcode} • ${barcodeValidation.format}`, 16, canvas.height - bannerHeight + fontSize + 6);
+        ctx.fillText(t('pos.barcodeWatermark', { barcode, format: barcodeValidation.format }), 16, canvas.height - bannerHeight + fontSize + 6);
 
         ctx.fillStyle = themeColor('--theme-text-secondary');
         ctx.font = `${Math.max(11, Math.floor(fontSize * 0.82))}px monospace`;
-        ctx.fillText(`OPERATOR: ${staffName} • LOCATION: ${siteName} • TIME: ${timestampStr}`, 16, canvas.height - 12);
+        ctx.fillText(t('pos.barcodeCaptureDetails', { staff: staffName, site: siteName, time: timestampStr }), 16, canvas.height - 12);
 
         canvas.toBlob(async (blob) => {
-            if (blob) {
+            if (blob && generation === cameraGeneration.current) {
                 try {
                     setIsCompressing(true);
                     const file = await compressImage(blob, `evidence_${barcode}_${Date.now()}.jpg`, {
@@ -146,6 +157,7 @@ export default function UnknownBarcodeModal({
                         maxDimension: 1280,
                         initialQuality: 0.82
                     });
+                    if (generation !== cameraGeneration.current) return;
                     setImageFile(file);
                     setImagePreview(URL.createObjectURL(file));
                     stopCamera();
@@ -160,6 +172,7 @@ export default function UnknownBarcodeModal({
     };
 
     const filteredProducts = products.filter(p =>
+        (p.siteId || p.site_id) === activeSite?.id &&
         searchTerm.length >= 2 && (
             p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.sku.toLowerCase().includes(searchTerm.toLowerCase())
@@ -167,22 +180,15 @@ export default function UnknownBarcodeModal({
     ).slice(0, 8);
 
     const executeMapping = async () => {
-        if (!selectedProduct) return;
+        if (!selectedProduct || isUploading || resolution.isPending) return;
         setIsUploading(true);
 
         try {
-            if (!user?.id || !activeSite?.id || !activeSite.country) throw new Error('Missing scope');
-            const evidenceUrl = imageFile ? await barcodeApprovalsService.uploadEvidence(imageFile) : undefined;
-            await barcodeApprovalsService.create({
-                product_id: selectedProduct.id, barcode,
-                image_url: evidenceUrl, site_id: activeSite.id,
-                country_code: activeSite.country, created_by: user.id
-            });
-            await queryClient.invalidateQueries({ queryKey: ['barcode_approvals'] });
+            await resolution.mutateAsync({ product: selectedProduct, barcode, imageFile });
             addNotification('success', t('pos.barcodeSubmitted'));
 
             onClose();
-        } catch (error: any) {
+        } catch (error) {
             logger.error('UnknownBarcodeModal', 'Mapping failed:', error);
             addNotification('alert', t('pos.barcodeSubmitFailed'));
         } finally {
@@ -191,7 +197,7 @@ export default function UnknownBarcodeModal({
     };
 
     const handleInitiateMap = () => {
-        if (!selectedProduct) return;
+        if (!selectedProduct || isUploading || resolution.isPending) return;
 
         const lockThreshold = settings?.highValueBarcodeLockThreshold ?? 3000;
         const isHighValue = (selectedProduct.price || 0) >= lockThreshold ||
@@ -239,7 +245,7 @@ export default function UnknownBarcodeModal({
 
                     {!barcodeValidation.isValid && barcodeValidation.error && (
                         <div className="mt-2 text-[11px] font-bold text-[var(--theme-status-danger-text)] flex items-center gap-1">
-                            <ShieldAlert size={14} /> {barcodeValidation.error}
+                            <ShieldAlert size={14} /> {t('pos.barcodeInvalid')}
                         </div>
                     )}
                 </div>
@@ -249,10 +255,10 @@ export default function UnknownBarcodeModal({
                         <div className="space-y-1">
                             <h4 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                                 <ShieldCheck size={16} className="text-[var(--theme-accent)]" />
-                                Live Security Photo Capture (Mandatory)
+                                {t('pos.barcodePhotoTitle')}
                             </h4>
                             <p className="text-[var(--theme-text-secondary)] text-xs leading-relaxed">
-                                Point the camera at the product label. An immutable audit seal with your user ID and timestamp will be burned into the evidence.
+                                {t('pos.barcodePhotoHelp')}
                             </p>
                         </div>
 
@@ -270,8 +276,8 @@ export default function UnknownBarcodeModal({
                                         <Camera size={32} className="text-[var(--theme-accent)]" />
                                     </div>
                                     <div className="text-center">
-                                        <span className="block text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider mb-1">Open Live Camera Viewfinder</span>
-                                        <span className="block text-[10px] text-[var(--theme-accent)] font-bold uppercase opacity-80">Live Hardware Capture Only</span>
+                                        <span className="block text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider mb-1">{t('pos.barcodeOpenCamera')}</span>
+                                        <span className="block text-[10px] text-[var(--theme-accent)] font-bold uppercase opacity-80">{t('pos.barcodeLiveOnly')}</span>
                                     </div>
                                 </button>
                             </div>
@@ -292,7 +298,7 @@ export default function UnknownBarcodeModal({
                                     <div className="flex justify-between items-start">
                                         <div className="px-3 py-1 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-md rounded-full border border-[var(--theme-border)] flex items-center gap-2">
                                             <div className="w-2 h-2 rounded-full bg-[var(--theme-accent)] animate-pulse" />
-                                            <span className="text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-widest">Live Audit Camera</span>
+                                            <span className="text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-widest">{t('pos.barcodeCamera')}</span>
                                         </div>
                                         <button
                                             type="button"
@@ -300,7 +306,7 @@ export default function UnknownBarcodeModal({
                                                 stopCamera();
                                                 setCaptureMode('idle');
                                             }}
-                                            aria-label="Close Camera"
+                                            aria-label={t('pos.barcodeCloseCamera')}
                                             className="p-2 rounded-full bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] text-[var(--theme-text-primary)] bg-[var(--theme-status-danger-bg)] transition-colors pointer-events-auto cursor-pointer"
                                         >
                                             <X size={18} />
@@ -311,7 +317,7 @@ export default function UnknownBarcodeModal({
                                         <button
                                             type="button"
                                             onClick={handleTakePhotoSnapshot}
-                                            aria-label="Capture Photo"
+                                            aria-label={t('pos.barcodeCapture')}
                                             className="group w-16 h-16 rounded-full border-4 border-[var(--theme-border)] flex items-center justify-center p-1 pointer-events-auto hover:scale-110 transition-transform active:scale-95 cursor-pointer shadow-lg"
                                         >
                                             <div className="w-full h-full rounded-full bg-[var(--theme-bg-card)] group-hover:bg-[var(--theme-accent)] transition-colors" />
@@ -326,11 +332,11 @@ export default function UnknownBarcodeModal({
                                 {isCompressing ? (
                                     <div className="flex flex-col items-center gap-4">
                                         <div className="w-12 h-12 border-4 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin" />
-                                        <span className="text-[var(--theme-accent)] font-bold text-[10px] uppercase tracking-[0.2em] animate-pulse">BURNING AUDIT SEAL...</span>
+                                        <span className="text-[var(--theme-accent)] font-bold text-[10px] uppercase tracking-[0.2em] animate-pulse">{t('pos.barcodePreparingPhoto')}</span>
                                     </div>
                                 ) : (
                                     <>
-                                        <img src={imagePreview} alt="Evidence" className="w-full h-full object-contain" />
+                                        <img src={imagePreview} alt={t('pos.barcodeEvidence')} className="w-full h-full object-contain" />
                                         <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_40%,transparent)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                                             <button
                                                 type="button"
@@ -340,10 +346,10 @@ export default function UnknownBarcodeModal({
                                                     setCaptureMode('camera');
                                                     startCamera();
                                                 }}
-                                                aria-label="Retake Photo"
+                                                aria-label={t('pos.barcodeRetake')}
                                                 className="p-3.5 rounded-2xl bg-[color-mix(in_srgb,var(--theme-bg-card)_20%,transparent)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] hover:text-[var(--theme-text-primary)] transition-all flex items-center gap-2 text-xs font-bold uppercase cursor-pointer"
                                             >
-                                                <Camera size={18} /> Retake
+                                                <Camera size={18} /> {t('pos.barcodeRetake')}
                                             </button>
                                         </div>
                                     </>
@@ -353,7 +359,7 @@ export default function UnknownBarcodeModal({
 
                         <div className="flex items-center justify-between pt-4 border-t border-[var(--theme-border-subtle)]">
                             <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest">
-                                {imageFile ? 'Live Proof Attached' : 'Capture Required'}
+                                {imageFile ? t('pos.barcodePhotoAttached') : t('pos.barcodePhotoRequired')}
                             </span>
                             <button
                                 type="button"
@@ -361,7 +367,7 @@ export default function UnknownBarcodeModal({
                                 disabled={!imageFile || isCompressing || captureMode === 'camera'}
                                 className="group px-6 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2 text-xs uppercase tracking-wider shadow-sm cursor-pointer"
                             >
-                                Continue To Mapping
+                                {t('pos.barcodeContinue')}
                                 <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                             </button>
                         </div>

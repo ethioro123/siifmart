@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { TransferEvidenceTimeline } from '../shared/TransferEvidenceTimeline';
+import { TransferStatusBadge } from '../shared/TransferStatusBadge';
 import {
   ArrowRightLeft, CheckCircle2, Clock, Truck, ShieldCheck,
   AlertTriangle, Plus, ChevronRight, PackageCheck, Send, ShieldAlert,
@@ -306,21 +308,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                       <span className="text-sm font-semibold text-[var(--theme-text-primary)]">
                         {transfer.orderRef || transfer.id.slice(0, 8)}
                       </span>
-                      <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md border ${
-                        transfer.status === 'Requested'
-                          ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
-                          : transfer.status === 'Approved'
-                            ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
-                            : transfer.status === 'In-Transit' || transfer.status === 'Dispatched'
-                              ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]'
-                              : transfer.status === 'Delivered'
-                                ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
-                                : transfer.status === 'Received' || transfer.status === 'Completed'
-                                  ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
-                                  : 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] text-[var(--theme-text-muted)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]'
-                      }`}>
-                        {transfer.status}
-                      </span>
+                      <TransferStatusBadge status={transfer.status} />
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--theme-text-secondary)] mt-1">
@@ -342,6 +330,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                         </>
                       )}
                     </div>
+                    <TransferEvidenceTimeline record={transfer} />
                   </div>
                 </div>
 

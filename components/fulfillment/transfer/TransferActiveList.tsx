@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Truck, Clock, AlertTriangle, MapPin, List, FileText, ChevronRight } from 'lucide-react';
 import { WMSJob, Site } from '../../../types';
+import { TransferStatusBadge } from '../../shared/TransferStatusBadge';
+import { effectiveTransferStatus } from '../../../utils/transferPresentation';
 import Pagination from '../../shared/Pagination';
 import { SortDropdown } from '../FulfillmentShared';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -34,11 +36,10 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
         return filteredJobs
             .filter(j => j.type === 'TRANSFER' && j.status !== 'Cancelled' && (j.status as string) !== 'Rejected' && j.transferStatus !== 'Received' && j.transferStatus !== 'Rejected' && j.transferStatus !== 'Cancelled' && (j.status !== 'Completed' || j.transferStatus === 'Delivered' || j.transferStatus === 'Partially Delivered'))
             .filter(j => {
-                let effStatus = j.transferStatus || 'Requested';
+                let effStatus: string = j.transferStatus || 'Requested';
                 const child = filteredJobs.find(d => d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled');
                 if (child) {
-                    const RANK: Record<string, number> = { 'Requested': 0, 'Approved': 1, 'Picking': 2, 'Picked': 3, 'Packed': 4, 'Shipped': 5, 'In-Transit': 6, 'Delivered': 7, 'Received': 8 };
-                    if ((RANK[child.transferStatus || ''] || 0) > (RANK[effStatus] || 0)) effStatus = child.transferStatus!;
+                    effStatus = effectiveTransferStatus(effStatus, child.transferStatus);
                 }
 
                 if (effStatus === 'Received') return false;
@@ -85,45 +86,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
             (j.orderRef === transfer.id || j.orderRef === transfer.jobNumber) &&
             j.status !== 'Cancelled'
         );
-        const effectiveStatus = (() => {
-            const parentStatus = transfer.transferStatus || 'Requested';
-            if (!childDispatch) return parentStatus;
-            const childStatus = childDispatch.transferStatus || '';
-            const STATUS_RANK: Record<string, number> = {
-                'Requested': 0, 'Approved': 1, 'Picking': 2, 'Picked': 3,
-                'Packed': 4, 'Shipped': 5, 'In-Transit': 6, 'Delivered': 7, 'Received': 8
-            };
-            return (STATUS_RANK[childStatus] || 0) > (STATUS_RANK[parentStatus] || 0) ? childStatus : parentStatus;
-        })();
-
-        const statusBadges: Record<string, string> = {
-            'Draft': 'bg-[color-mix(in_srgb,var(--theme-bg-card-hover)_10%,transparent)] text-[var(--theme-text-secondary)] border-[color-mix(in_srgb,var(--theme-border)_20%,transparent)]',
-            'Requested': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
-            'Approved': 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
-            'Picking': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
-            'Picked': 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
-            'Packed': 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]',
-            'Shipped': 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
-            'In-Transit': 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
-            'Delivered': 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]',
-            'Received': 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
-        };
-
-        const getLocalizedStatus = (status: string) => {
-            switch (status) {
-                case 'Draft': return t('warehouse.draft');
-                case 'Requested': return t('warehouse.requested');
-                case 'Approved': return t('warehouse.approved');
-                case 'Picking': return t('warehouse.picking');
-                case 'Picked': return t('warehouse.picked');
-                case 'Packed': return t('warehouse.packed');
-                case 'Shipped': return t('warehouse.shipped');
-                case 'In-Transit': return t('warehouse.inTransit');
-                case 'Delivered': return t('warehouse.delivered');
-                case 'Received': return t('warehouse.received');
-                default: return status;
-            }
-        };
+        const effectiveStatus = effectiveTransferStatus(transfer.transferStatus || 'Requested', childDispatch?.transferStatus);
 
         return (
             <div
@@ -152,9 +115,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                 </div>
                 {/* Right: Status badge + Chevron */}
                 <div className="flex items-center gap-3 shrink-0">
-                    <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold uppercase border ${statusBadges[effectiveStatus] || statusBadges['Draft']}`}>
-                        {getLocalizedStatus(effectiveStatus)}
-                    </span>
+                    <TransferStatusBadge status={effectiveStatus} />
                     <ChevronRight size={16} className="text-[var(--theme-text-secondary)]" />
                 </div>
             </div>

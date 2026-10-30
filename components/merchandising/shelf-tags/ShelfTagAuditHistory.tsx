@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { HistorySearch } from '../../shared/HistorySearch';
 import { ShieldCheck, AlertCircle, CheckCircle2, Clock, Printer, Check } from 'lucide-react';
 import type { ShelfTagAuditRecord } from '../../../services/shelf-tags.service';
 
@@ -15,6 +16,8 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
    onUpdateStatus,
    onQueueTag
 }) => {
+   const [search, setSearch] = useState('');
+   const matches = records.filter(record => `${record.productName} ${record.sku} ${record.status}`.toLowerCase().includes(search.trim().toLowerCase()));
    if (records.length === 0) return null;
 
    return (
@@ -28,6 +31,8 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
                {records.filter(r => r.status !== 'verified').length} Open Discrepancies
             </span>
          </div>
+         <HistorySearch value={search} onChange={setSearch} label="Search shelf label audit history" placeholder="Search product, SKU, or status" />
+         {!matches.length && <p role="status" className="text-sm text-[var(--theme-text-secondary)]">No matching audit records.</p>}
 
          <div className="overflow-x-auto max-h-80 overflow-y-auto rounded-xl border border-[var(--theme-border)]">
             <table className="w-full text-left text-xs">
@@ -43,7 +48,7 @@ export const ShelfTagAuditHistory: React.FC<ShelfTagAuditHistoryProps> = ({
                   </tr>
                </thead>
                <tbody className="divide-y divide-[var(--theme-border)]">
-                  {records.map((rec) => {
+                  {matches.map((rec) => {
                      const isVerified = rec.status === 'verified';
                      const isPrinted = rec.status === 'printed';
                      const isQueued = rec.status === 'tag_queued';

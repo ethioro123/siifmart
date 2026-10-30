@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { X, Printer, Package, Settings, Search, Plus, Minus, Trash2 } from 'lucide-react';
 import Barcode from 'react-barcode';
 import { Product } from '../types';
-import { printHtmlContent } from '../utils/printHelper';
+import { useLabelPrintJob } from '../hooks/useLabelPrintJob';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useData } from '../contexts/DataContext';
 import { generateUnifiedBatchLabelsHTML } from '../utils/labels/ProductLabelGenerator';
 
@@ -32,7 +33,9 @@ const LABEL_SIZES = {
 };
 
 export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: LabelPrintModalProps) {
-    const { products, activeSite, effectiveCountry, settings, allProducts } = useData();
+    const { products, activeSite, effectiveCountry, settings, allProducts, addNotification } = useData();
+    const { t } = useLanguage();
+    const printJob = useLabelPrintJob((type, message) => addNotification(type === 'alert' ? 'alert' : 'info', message));
     const activeCurrency = (activeSite as any)?.currency || (effectiveCountry === 'KE' || settings?.country === 'KE' ? 'KSh' : 'ETB');
     const [labelSize, setLabelSize] = useState<LabelSize>('medium');
     const [activeLabels, setActiveLabels] = useState<LabelData[]>(labels || []);
@@ -40,14 +43,14 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
 
     useEffect(() => {
         if (isOpen) {
-            setActiveLabels(labels || []);
+            setActiveLabels((labels || []).filter(label => (label.product.siteId || label.product.site_id) === activeSite?.id));
             setSearchQuery('');
         }
-    }, [labels, isOpen]);
+    }, [labels, isOpen, activeSite?.id]);
 
     if (!isOpen) return null;
 
-    const availableProducts: Product[] = (products && products.length > 0) ? products : (allProducts || []);
+    const availableProducts: Product[] = ((products && products.length > 0) ? products : (allProducts || [])).filter(product => (product.siteId || product.site_id) === activeSite?.id);
     const searchResults = searchQuery.trim()
         ? availableProducts.filter((p: Product) =>
             p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -112,11 +115,8 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
             showName: true
         };
 
-        const html = await generateUnifiedBatchLabelsHTML(items, printOptions);
-        const res = await printHtmlContent(html);
-        if (res && !res.success && res.error) {
-            console.error('Print direct failed:', res.error);
-        } else {
+        const handedOff = await printJob.print(() => generateUnifiedBatchLabelsHTML(items, printOptions));
+        if (handedOff) {
             onPrint();
             onClose();
         }
@@ -349,11 +349,11 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                         </button>
                         <button
                             onClick={handlePrint}
-                            disabled={totalLabels === 0}
+                            disabled={totalLabels === 0 || printJob.isPrinting}
                             className="flex-[2] py-2.5 bg-[var(--theme-accent)] hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-text-primary)] font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-[0.98]"
                         >
                             <Printer size={16} />
-                            <span>Print {totalLabels} Label{totalLabels !== 1 ? 's' : ''} ({labelSize.toUpperCase()})</span>
+                            <span>{printJob.isPrinting ? t('pos.printPreparing') : t('pos.printLabelCount', { count: totalLabels })} ({labelSize.toUpperCase()})</span>
                         </button>
                     </div>
                 </div>

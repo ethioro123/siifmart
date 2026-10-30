@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import {
-    LucideIcon, Globe, ShoppingCart, Box, Shield, Bell, Database, Printer,
-    FileText, Tag, Users, DollarSign, MapPin, List, Trophy, CloudLightning, X, Network
-} from 'lucide-react';
+import { List, X } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { Protected } from '../components/Protected';
 import { canSwitchCountry } from '../utils/permissions';
@@ -24,16 +21,8 @@ import LocationSettings from '../components/settings/LocationSettings';
 import RegionsSettingsTab from '../components/settings/RegionsSettingsTab';
 import HRSettings from '../components/settings/HRSettings';
 
-type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | 'hr' | 'roles' | 'locations' | 'regions' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'data' | 'audit' | 'gamification';
-
-const SETTINGS_TAB_LABELS: Record<SettingsTab, string> = {
-    general: 'General & Slogan', inventory: 'WMS & Inbound Rules', pos: 'POS & Retail Station',
-    discounts: 'Discount & Promo Codes', finance: 'Financial & Tax Policy', hr: 'HR & Workforce Policy',
-    roles: 'Roles & Zero-Trust', locations: 'Locations & Sites', regions: 'Regional Administration',
-    infrastructure: 'Infrastructure & Devices', integrations: 'API & Integrations', security: 'Loss Prevention & PIN',
-    notifications: 'Alert Notifications', data: 'Data Management', audit: 'System Audit Log',
-    gamification: 'Warehouse Gamification'
-};
+import { SETTINGS_TAB_LABELS, type SettingsTab } from '../utils/settingsNavigation';
+import { SettingsNavigation } from '../components/settings/SettingsNavigation';
 
 export default function SettingsPage() {
     const { user } = useStore();
@@ -51,24 +40,6 @@ export default function SettingsPage() {
 
     const [activeTab, setActiveTab] = useState<SettingsTab>(() => getDefaultSettingsTab());
     const [isNavOpen, setIsNavOpen] = useState(false);
-
-    const TabButton = ({ id, icon: Icon, label }: { id: SettingsTab, icon: LucideIcon, label: string }) => (
-        <button
-            type="button"
-            onClick={() => {
-                setActiveTab(id);
-                setIsNavOpen(false);
-            }}
-            aria-current={activeTab === id ? 'page' : undefined}
-            className={`w-full min-h-11 flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors text-sm font-medium mb-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${activeTab === id
-                ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-text-primary)] border border-[var(--theme-accent)] font-semibold'
-                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
-                }`}
-        >
-            <Icon size={16} className={activeTab === id ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'} />
-            <span>{label}</span>
-        </button>
-    );
 
     return (
         <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)]">
@@ -98,93 +69,12 @@ export default function SettingsPage() {
                         </button>
                     </div>
 
-                    {isRegionalStaff ? (
-                        <>
-                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 px-2">Regional Operational Config</p>
-                            <Protected permission="ACCESS_REGIONAL_OPS">
-                                <TabButton id="regions" icon={Network} label="Regional Administration" />
-                            </Protected>
-                            <Protected permission="MANAGE_WAREHOUSE">
-                                <TabButton id="locations" icon={MapPin} label="Locations & Sites" />
-                            </Protected>
-                            <Protected permission="EDIT_OPERATIONAL_SETTINGS">
-                                <TabButton id="pos" icon={ShoppingCart} label="POS & Retail Station" />
-                            </Protected>
-                            <Protected permission="EDIT_OPERATIONAL_SETTINGS">
-                                <TabButton id="discounts" icon={Tag} label="Discount & Promo Codes" />
-                            </Protected>
-                            <Protected permission="EDIT_SYSTEM_SETTINGS">
-                                <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
-                            </Protected>
-                            <Protected permission="EDIT_SYSTEM_SETTINGS">
-                                <TabButton id="integrations" icon={CloudLightning} label="API & Integrations" />
-                            </Protected>
-                            <Protected permission="VIEW_AUDIT_LOGS">
-                                <TabButton id="audit" icon={FileText} label="System Audit Log" />
-                            </Protected>
-                            <Protected permission="ACCESS_SETTINGS">
-                                <TabButton id="notifications" icon={Bell} label="Alert Notifications" />
-                            </Protected>
-                        </>
-                    ) : (
-                        <>
-                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 px-2">Operational Rules</p>
-                            <Protected permission="ACCESS_SETTINGS">
-                                <TabButton id="general" icon={Globe} label="General & Slogan" />
-                            </Protected>
-                            <Protected permission="MANAGE_WAREHOUSE">
-                                <TabButton id="locations" icon={MapPin} label="Locations & Sites" />
-                            </Protected>
-                            <Protected permission="ACCESS_REGIONAL_OPS">
-                                <TabButton id="regions" icon={Network} label="Regional Administration" />
-                            </Protected>
-                            <Protected permission="MANAGE_WAREHOUSE">
-                                <TabButton id="inventory" icon={Box} label="WMS & Inbound Rules" />
-                            </Protected>
-                            <Protected permission="EDIT_OPERATIONAL_SETTINGS">
-                                <TabButton id="pos" icon={ShoppingCart} label="POS & Retail Station" />
-                            </Protected>
-                            <Protected permission="EDIT_OPERATIONAL_SETTINGS">
-                                <TabButton id="discounts" icon={Tag} label="Discount & Promo Codes" />
-                            </Protected>
-                            <Protected permission="ACCESS_FINANCE">
-                                <TabButton id="finance" icon={DollarSign} label="Financial & Tax Policy" />
-                            </Protected>
-                            <Protected permission="EDIT_EMPLOYEE">
-                                <TabButton id="hr" icon={Users} label="HR & Workforce Policy" />
-                            </Protected>
-                            <Protected permission="EDIT_SYSTEM_SETTINGS">
-                                <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
-                            </Protected>
-
-                            {(['group_ceo', 'country_managing_director', 'country_technology_director', 'it_support', 'country_compliance_manager', 'auditor', 'regional_security_manager', 'country_operations_director'].includes(user?.role || '') || canSwitchCountry(user)) && (
-                                <>
-                                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mt-4 mb-2 px-2">Enterprise Security</p>
-                                    <Protected permission="MANAGE_ROLES">
-                                        <TabButton id="roles" icon={Users} label="Roles & Zero-Trust" />
-                                    </Protected>
-                                    <Protected permission="EDIT_SYSTEM_SETTINGS">
-                                        <TabButton id="security" icon={Shield} label="Loss Prevention & PIN" />
-                                    </Protected>
-                                    <Protected permission="EDIT_SYSTEM_SETTINGS">
-                                        <TabButton id="integrations" icon={CloudLightning} label="API & Integrations" />
-                                    </Protected>
-                                    <Protected permission="VIEW_AUDIT_LOGS">
-                                        <TabButton id="audit" icon={FileText} label="System Audit Log" />
-                                    </Protected>
-                                    <Protected permission="ACCESS_SETTINGS">
-                                        <TabButton id="notifications" icon={Bell} label="Alert Notifications" />
-                                    </Protected>
-                                    <Protected permission="EDIT_SYSTEM_SETTINGS">
-                                        <TabButton id="data" icon={Database} label="Data Management" />
-                                    </Protected>
-                                    <Protected permission="MANAGE_WAREHOUSE">
-                                        <TabButton id="gamification" icon={Trophy} label="Warehouse Gamification" />
-                                    </Protected>
-                                </>
-                            )}
-                        </>
-                    )}
+                    <SettingsNavigation
+                        activeTab={activeTab}
+                        regional={isRegionalStaff}
+                        enterprise={['group_ceo', 'country_managing_director', 'country_technology_director', 'it_support', 'country_compliance_manager', 'auditor', 'regional_security_manager', 'country_operations_director'].includes(user?.role || '') || canSwitchCountry(user)}
+                        onSelect={tab => { setActiveTab(tab); setIsNavOpen(false); }}
+                    />
                 </div>
             </nav>
 

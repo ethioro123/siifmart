@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Search, Loader2, Link as LinkIcon } from 'lucide-react';
 import { Product, User } from '../../types';
 
@@ -29,19 +30,20 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
     onBack,
     onConfirmMap
 }) => {
+    const { t } = useLanguage();
     return (
         <div className="space-y-4">
             <p className="text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] text-sm">
-                Search for the existing product name or SKU to link this barcode to.
+                {t('pos.barcodeSearchHelp')}
             </p>
 
             <div className="relative">
                 <Search className="absolute left-3 top-3 text-[#4D6E56] text-[var(--theme-text-secondary)]" size={18} />
                 <input
-                    ref={searchInputRef as any}
+                    ref={searchInputRef}
                     type="text"
-                    placeholder="Search product name or SKU..."
-                    aria-label="Search products"
+                    placeholder={t('pos.barcodeSearch')}
+                    aria-label={t('pos.barcodeSearch')}
                     className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl pl-10 pr-4 py-3 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] dark:focus:border-[var(--theme-border)] focus:outline-none transition-colors"
                     value={searchTerm || ''}
                     onChange={e => setSearchTerm(e.target.value)}
@@ -68,9 +70,9 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                                 <span className="font-mono">{product.sku}</span>
                                 <div className="flex items-center gap-2">
                                     {isLocalStock ? (
-                                        <span className="px-2 py-0.5 bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] rounded text-[10px] font-bold">Store: {product.stock}</span>
+                                        <span className="px-2 py-0.5 bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] rounded text-[10px] font-bold">{t('pos.barcodeStock', { count: product.stock })}</span>
                                     ) : (
-                                        <span className="px-2 py-0.5 bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] rounded text-[10px] font-bold">Global: {product.stock}</span>
+                                        <span className="px-2 py-0.5 bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] rounded text-[10px] font-bold">{t('pos.barcodeStock', { count: product.stock })}</span>
                                     )}
                                 </div>
                             </div>
@@ -78,14 +80,14 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                     );
                 })}
                 {searchTerm && filteredProducts.length === 0 && (
-                    <div className="text-center text-[#4D6E56] text-[var(--theme-text-muted)] font-medium py-4">No products found</div>
+                    <div className="text-center text-[#4D6E56] text-[var(--theme-text-muted)] font-medium py-4">{t('pos.barcodeNoProducts')}</div>
                 )}
             </div>
 
             <div className="flex justify-between items-center pt-4 border-t border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_5%,transparent)]">
                 {selectedProduct ? (
                     <div className="text-xs text-[var(--theme-primary)] dark:text-[var(--theme-text-secondary)] font-semibold truncate max-w-[200px]">
-                        Linking to: <b>{selectedProduct.name}</b>
+                        {t('pos.barcodeSelected')} <b>{selectedProduct.name}</b>
                     </div>
                 ) : <div />}
 
@@ -95,7 +97,7 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                         onClick={onBack}
                         className="px-4 py-2 text-[var(--theme-text-primary)] hover:text-[var(--theme-primary)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] font-bold text-sm transition-colors cursor-pointer"
                     >
-                        Back
+                        {t('pos.barcodeBack')}
                     </button>
                     <button
                         type="button"
@@ -104,7 +106,7 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                         className="px-6 py-2.5 bg-gradient-to-br from-[var(--theme-primary)] to-[var(--theme-primary)] text-[var(--theme-text-primary)] hover:opacity-90 font-bold rounded-xl disabled:bg-[var(--theme-bg-subtle)] disabled:bg-[color-mix(in_srgb,var(--theme-bg-card)_5%,transparent)] disabled:text-[var(--theme-text-muted)] disabled:text-[var(--theme-text-secondary)] border border-transparent disabled:border-[var(--theme-border)] disabled:border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-md disabled:shadow-none cursor-pointer text-xs uppercase tracking-wider"
                     >
                         {isUploading ? <Loader2 className="animate-spin" size={16} /> : <LinkIcon size={16} />}
-                        Map Barcode
+                        {t('pos.barcodeSubmit')}
                     </button>
                 </div>
             </div>

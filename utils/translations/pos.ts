@@ -1,8 +1,14 @@
+import { barcodeResolution } from './barcodeResolution';
 import { counterControl } from './counterControl';
 import { approvalInbox } from './approvalInbox';
 import { TranslationBlock } from './types';
 
 export const pos: TranslationBlock = {
+    ...barcodeResolution,
+    printPreparing: { en: 'Preparing print…', am: 'ህትመት በማዘጋጀት ላይ…', or: 'Maxxansa qopheessaa jira…' },
+    printLabelCount: { en: 'Print {count} labels', am: '{count} መለያዎችን አትም', or: 'Asxaawwan {count} maxxansi' },
+    printHandedOff: { en: 'Labels sent to the print dialog. Confirm the printer output before using them.', am: 'መለያዎቹ ወደ ህትመት መስኮት ተልከዋል። ከመጠቀምዎ በፊት ህትመቱን ያረጋግጡ።', or: 'Asxaawwan gara foddaa maxxansaatti ergamaniiru. Fayyadamuu dura maxxansa mirkaneessi.' },
+    printFailed: { en: 'Could not prepare or hand off labels. Try again.', am: 'መለያዎቹን ማዘጋጀት ወይም ለህትመት መላክ አልተቻለም። እንደገና ይሞክሩ።', or: 'Asxaawwan qopheessuun yookaan maxxansaaf erguun hin danda’amne. Irra deebi’ii yaali.' },
     ...counterControl,
     barcodeSubmitted: { en: 'Barcode request saved for review. The barcode is not active yet.', am: 'የባርኮድ ጥያቄው ለግምገማ ተቀምጧል። ባርኮዱ ገና ንቁ አይደለም።', or: 'Gaaffiin baarkoodii akka ilaalamuuf galmaa’eera. Baarkoodiin ammatti hin hojjatu.' },
     barcodeSubmitFailed: { en: 'Barcode request was not saved. Try again.', am: 'የባርኮድ ጥያቄው አልተቀመጠም። እንደገና ይሞክሩ።', or: 'Gaaffiin baarkoodii hin galmoofne. Irra deebi’ii yaali.' },
