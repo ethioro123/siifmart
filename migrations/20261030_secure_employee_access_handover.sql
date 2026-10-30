@@ -55,29 +55,22 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.record_employee_access_handover(uuid,uuid,text,text,text,uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.record_employee_access_handover(uuid,uuid,text,text,text,uuid) TO service_role;
--- Staff identities do not create commerce wallets or inherit a foreign default currency.
+-- Customer/self-service registration is disabled. Only pre-approved staff identities may be created.
 CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
-DECLARE default_currency text := 'KES'; new_user_id uuid; wallet_exists boolean;
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public, pg_temp AS $$
 BEGIN
-  IF NEW.raw_app_meta_data ? 'staff_employee_id' THEN
-    IF NEW.raw_app_meta_data->>'staff_employee_id' <> NEW.id::text OR NOT EXISTS (
-      SELECT 1 FROM public.employees e JOIN public.sites s ON s.id=e.site_id
-      WHERE e.id=NEW.id AND lower(e.email)=lower(NEW.email) AND e.status='Active'
-        AND e.site_id::text=NEW.raw_app_meta_data->>'site_id'
-        AND upper(s.country)=upper(NEW.raw_app_meta_data->>'country_code')
-    ) THEN RAISE EXCEPTION 'Approved staff identity required'; END IF;
-    RETURN NEW;
+  IF NOT EXISTS (
+    SELECT 1 FROM public.employees e JOIN public.sites s ON s.id=e.site_id
+    WHERE e.id=NEW.id AND lower(e.email)=lower(NEW.email) AND e.status='Active'
+      AND NEW.raw_app_meta_data->>'staff_employee_id'=NEW.id::text
+      AND NEW.raw_app_meta_data->>'site_id'=e.site_id::text
+      AND NEW.raw_app_meta_data->>'role'=e.role
+      AND upper(NEW.raw_app_meta_data->>'country_code')=upper(s.country)
+      AND NOT coalesce(e.badges,'[]'::jsonb) @> '["No App Account"]'::jsonb
+  ) THEN
+    RAISE EXCEPTION 'Self-service registration is disabled. Approved staff access is required';
   END IF;
-  INSERT INTO public.users(auth_id,email,phone,full_name,default_language,created_at,updated_at)
-  VALUES(NEW.id,NEW.email,NEW.phone,coalesce(NEW.raw_user_meta_data->>'full_name',NEW.email),'en',now(),now())
-  ON CONFLICT(auth_id) DO UPDATE SET email=excluded.email,phone=excluded.phone,full_name=excluded.full_name,updated_at=now()
-  RETURNING id INTO new_user_id;
-  IF new_user_id IS NULL THEN SELECT id INTO new_user_id FROM public.users WHERE auth_id=NEW.id; END IF;
-  SELECT EXISTS(SELECT 1 FROM public.wallets WHERE user_id=new_user_id) INTO wallet_exists;
-  IF NOT wallet_exists THEN
-    INSERT INTO public.wallets(user_id,currency_code,balance_cents) VALUES(new_user_id,default_currency,0);
-  END IF;
+  -- Staff access never creates a commerce profile or wallet.
   RETURN NEW;
 END;
 $$;
