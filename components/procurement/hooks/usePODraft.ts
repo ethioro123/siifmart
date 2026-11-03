@@ -1,43 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { POItem } from '../../../types';
-import type { POItemFormDraft } from '../POItemForm';
-import { logger } from '../../../utils/logger';
+import {
+    listStoredPODrafts,
+    getStoredPODraft,
+    saveStoredPODraft,
+    deleteStoredPODraft,
+    type PODraftPayload,
+    type PODraftMeta,
+    type StoredPODraft
+} from '../../../utils/procurementDraftStorage';
 
-export interface PODraftPayload {
-    itemForm?: POItemFormDraft | null;
-    editingItemIndex?: number | null;
-    isManualVendor: boolean;
-    manualVendorName: string;
-    newPOSupplier: string;
-    destinationSiteIds: string[];
-    expectedDate: string;
-    tempReq: 'Ambient' | 'Chilled' | 'Frozen';
-    shelfLife: string;
-    dockSlot: string;
-    poPriority: 'Normal' | 'High' | 'Urgent' | 'Low';
-    quantityDistribution: string;
-    newPOItems: POItem[];
-    poNotes: string;
-    paymentTerms: string;
-    incoterms: string;
-    shippingCost: number;
-    discountRate: number;
-    taxRate: number;
-}
-
-export interface PODraftMeta {
-    savedAt: string;
-    itemCount: number;
-    itemInProgress?: boolean;
-    supplierDisplay: string;
-}
-
-export interface StoredPODraft {
-    data: PODraftPayload;
-    meta: PODraftMeta;
-    countryCode: string;
-    userId: string;
-}
+export type { PODraftPayload, PODraftMeta, StoredPODraft };
 
 interface UsePODraftOptions {
     countryCode: string;
@@ -45,6 +17,7 @@ interface UsePODraftOptions {
     enabled?: boolean;
     isEditMode?: boolean;
     isOpen: boolean;
+    activeDraftId?: string | null;
 }
 
 export function usePODraft({
@@ -52,107 +25,95 @@ export function usePODraft({
     userId,
     enabled = true,
     isEditMode = false,
-    isOpen
+    isOpen,
+    activeDraftId = null
 }: UsePODraftOptions) {
     const [hasDraft, setHasDraft] = useState(false);
     const [draftMeta, setDraftMeta] = useState<PODraftMeta | null>(null);
     const [isRestoredBannerVisible, setIsRestoredBannerVisible] = useState(false);
+    const currentDraftIdRef = useRef<string | null>(activeDraftId || null);
 
-    const storageKey = `siifmart_po_draft_${(countryCode || 'ET').toUpperCase()}_${userId || 'default'}`;
+    useEffect(() => {
+        if (activeDraftId) {
+            currentDraftIdRef.current = activeDraftId;
+        } else if (!currentDraftIdRef.current) {
+            currentDraftIdRef.current = crypto.randomUUID();
+        }
+    }, [activeDraftId]);
 
     const readStoredDraft = useCallback((): StoredPODraft | null => {
         if (typeof window === 'undefined' || isEditMode) return null;
-        try {
-            const raw = localStorage.getItem(storageKey);
-            if (!raw) return null;
-            const parsed = JSON.parse(raw) as StoredPODraft;
-            if (!parsed?.data || parsed.countryCode !== (countryCode || 'ET').toUpperCase()) {
-                return null;
-            }
-            return parsed;
-        } catch (err) {
-            logger.warn('usePODraft', 'Failed reading PO draft from localStorage', { error: String(err) });
-            return null;
+        if (currentDraftIdRef.current) {
+            const draft = getStoredPODraft(currentDraftIdRef.current, countryCode, userId);
+            if (draft) return draft;
         }
-    }, [storageKey, isEditMode, countryCode]);
+        // If resuming a draft or finding newest draft
+        const drafts = listStoredPODrafts(countryCode, userId);
+        return drafts[0] || null;
+    }, [isEditMode, countryCode, userId]);
 
-    const discardDraft = useCallback(() => {
+    const discardDraft = useCallback((specificId?: string) => {
         if (typeof window === 'undefined') return;
-        try {
-            localStorage.removeItem(storageKey);
-            setHasDraft(false);
-            setDraftMeta(null);
-            setIsRestoredBannerVisible(false);
-            logger.info('usePODraft', `Draft purged for key ${storageKey}`);
-        } catch (err) {
-            logger.warn('usePODraft', 'Failed removing PO draft from localStorage', { error: String(err) });
+        const targetId = specificId || currentDraftIdRef.current;
+        if (targetId) {
+            deleteStoredPODraft(targetId, countryCode, userId);
         }
-    }, [storageKey]);
+        setHasDraft(false);
+        setDraftMeta(null);
+        setIsRestoredBannerVisible(false);
+        currentDraftIdRef.current = crypto.randomUUID();
+    }, [countryCode, userId]);
 
-    const saveDraft = useCallback((payload: PODraftPayload, supplierNameOverride?: string, force = false): 'saved' | 'empty' | 'failed' => {
+    const saveDraft = useCallback((
+        payload: PODraftPayload,
+        supplierNameOverride?: string,
+        force = false
+    ): 'saved' | 'empty' | 'failed' => {
         if (typeof window === 'undefined' || isEditMode) return 'failed';
         if (!enabled && !force) return 'empty';
 
-        const hasContent = force || Boolean(payload.itemForm) ||
-            (payload.newPOItems && payload.newPOItems.length > 0) ||
-            Boolean(payload.newPOSupplier) ||
-            Boolean(payload.manualVendorName?.trim()) ||
-            Boolean(payload.poNotes?.trim()) ||
-            Boolean(payload.expectedDate);
+        const targetId = currentDraftIdRef.current || crypto.randomUUID();
+        currentDraftIdRef.current = targetId;
 
-        if (!hasContent) {
-            discardDraft();
-            return 'empty';
-        }
+        const saved = saveStoredPODraft({
+            id: targetId,
+            data: payload,
+            supplierNameOverride,
+            countryCode,
+            userId,
+            force
+        });
 
-        try {
-            const supplierDisplay =
-                supplierNameOverride ||
-                (payload.isManualVendor
-                    ? (payload.manualVendorName || 'Manual Supplier')
-                    : (payload.newPOSupplier ? 'Registered Supplier' : 'Unspecified'));
-
-            const meta: PODraftMeta = {
-                savedAt: new Date().toISOString(),
-                itemCount: payload.newPOItems?.length || 0,
-                itemInProgress: Boolean(payload.itemForm),
-                supplierDisplay
-            };
-
-            const draftToStore: StoredPODraft = {
-                data: payload,
-                meta,
-                countryCode: (countryCode || 'ET').toUpperCase(),
-                userId: userId || 'default'
-            };
-
-            localStorage.setItem(storageKey, JSON.stringify(draftToStore));
+        if (saved) {
             setHasDraft(true);
-            setDraftMeta(meta);
+            setDraftMeta(saved.meta);
             return 'saved';
-        } catch (err) {
-            logger.warn('usePODraft', 'Failed saving PO draft to localStorage', { error: String(err) });
-            return 'failed';
         }
-    }, [storageKey, enabled, isEditMode, countryCode, userId, discardDraft]);
+
+        setHasDraft(false);
+        setDraftMeta(null);
+        return 'empty';
+    }, [enabled, isEditMode, countryCode, userId]);
 
     // Check for draft when modal opens
     useEffect(() => {
         if (isOpen && !isEditMode) {
             const stored = readStoredDraft();
-            if (stored) {
+            if (stored && activeDraftId) {
+                // If explicitly resumed
                 setHasDraft(true);
                 setDraftMeta(stored.meta);
                 setIsRestoredBannerVisible(true);
             } else {
-                setHasDraft(false);
-                setDraftMeta(null);
                 setIsRestoredBannerVisible(false);
             }
         } else if (!isOpen) {
             setIsRestoredBannerVisible(false);
+            if (!activeDraftId) {
+                currentDraftIdRef.current = null;
+            }
         }
-    }, [isOpen, isEditMode, readStoredDraft]);
+    }, [isOpen, isEditMode, activeDraftId, readStoredDraft]);
 
     const dismissBanner = useCallback(() => {
         setIsRestoredBannerVisible(false);
@@ -165,6 +126,7 @@ export function usePODraft({
         dismissBanner,
         saveDraft,
         readStoredDraft,
-        discardDraft
+        discardDraft,
+        currentDraftId: currentDraftIdRef.current
     };
 }

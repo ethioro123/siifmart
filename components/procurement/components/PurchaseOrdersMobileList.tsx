@@ -85,7 +85,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
             case 'Draft':
                 return (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
-                        Draft
+                        Draft (Completed)
                     </span>
                 );
             case 'Pending':

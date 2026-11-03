@@ -208,6 +208,38 @@ export function buildPurchaseOrders(params: BuildPurchaseOrdersParams): Generate
     return results;
 }
 
+export function mergeOrAddPOItem(
+    prev: POItem[],
+    item: POItem
+): { items: POItem[]; merged: boolean; mergedQty?: number } {
+    if (item.identityType === 'known' && item.productId) {
+        const dupIdx = prev.findIndex(existing =>
+            existing.identityType === 'known' &&
+            (existing.productId === item.productId || (existing.sku && existing.sku === item.sku)) &&
+            (existing.packQuantity || 1) === (item.packQuantity || 1) &&
+            (existing.caseSize || 0) === (item.caseSize || 0)
+        );
+        if (dupIdx !== -1) {
+            const existing = prev[dupIdx];
+            const mergedQty = existing.quantity + item.quantity;
+            const mergedItem: POItem = {
+                ...existing, ...item,
+                quantity: mergedQty,
+                totalCost: purchaseAmount(mergedQty * item.unitCost)
+            };
+            return {
+                items: prev.map((row, idx) => idx === dupIdx ? mergedItem : row),
+                merged: true,
+                mergedQty
+            };
+        }
+    }
+    return {
+        items: [...prev, item],
+        merged: false
+    };
+}
+
 export interface ResolvePOVendorParams {
     isManualVendor: boolean;
     manualVendorName: string;

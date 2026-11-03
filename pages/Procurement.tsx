@@ -21,6 +21,8 @@ import { CustomsImportTab } from '../components/procurement/CustomsImportTab';
 import { InboundQCTab } from '../components/procurement/InboundQCTab';
 import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBanner';
 import { useSupplierMutations } from '../hooks/useSupplierMutations';
+import { usePausedPODrafts } from '../components/procurement/hooks/usePausedPODrafts';
+import type { StoredPODraft } from '../utils/procurementDraftStorage';
 
 export default function Procurement() {
     const { user } = useStore();
@@ -84,6 +86,13 @@ export default function Procurement() {
     const [editingPO, setEditingPO] = useState<PurchaseOrder | null>(null);
     const [initialSupplierId, setInitialSupplierId] = useState<string | undefined>(undefined);
     const [initialProduct, setInitialProduct] = useState<Product | null>(null);
+    const [resumingDraft, setResumingDraft] = useState<StoredPODraft | null>(null);
+
+    // Multi-Draft Paused Sessions
+    const { drafts: pausedDrafts, deleteDraft: handleDeletePausedDraft } = usePausedPODrafts({
+        countryCode: activeCountry,
+        userId: user?.id
+    });
 
     // Fetch Data
     const fetchData = useCallback(async () => {
@@ -205,13 +214,23 @@ export default function Procurement() {
 
     const handleCreatePOOpen = (product?: Product, supplierId?: string) => {
         setEditingPO(null);
+        setResumingDraft(null);
         setInitialProduct(product || null);
         setInitialSupplierId(supplierId || product?.preferredSupplierId || (product as any)?.supplier_id || undefined);
         setIsCreatePOOpen(true);
     };
 
+    const handleResumeDraft = (draft: StoredPODraft) => {
+        setEditingPO(null);
+        setInitialProduct(null);
+        setInitialSupplierId(draft.data.newPOSupplier || undefined);
+        setResumingDraft(draft);
+        setIsCreatePOOpen(true);
+    };
+
     const handleEditPO = (po: PurchaseOrder) => {
         setEditingPO(po);
+        setResumingDraft(null);
         setInitialProduct(null);
         setInitialSupplierId(undefined);
         setIsCreatePOOpen(true);
@@ -346,6 +365,9 @@ export default function Procurement() {
                         suppliers={allSuppliers}
                         sites={sites}
                         currencySymbol={currencySymbol}
+                        pausedDrafts={pausedDrafts}
+                        onResumeDraft={handleResumeDraft}
+                        onDeleteDraft={handleDeletePausedDraft}
                         onEdit={handleEditPO}
                         onRefresh={fetchData}
                     />
@@ -398,14 +420,17 @@ export default function Procurement() {
                 onClose={() => {
                     setIsCreatePOOpen(false);
                     setInitialProduct(null);
+                    setResumingDraft(null);
                 }}
                 editingPO={editingPO}
                 initialSupplierId={initialSupplierId}
                 initialProduct={initialProduct}
+                resumingDraft={resumingDraft}
                 onSuccess={() => {
                     fetchData();
                     setIsCreatePOOpen(false);
                     setInitialProduct(null);
+                    setResumingDraft(null);
                 }}
             />
             </div>

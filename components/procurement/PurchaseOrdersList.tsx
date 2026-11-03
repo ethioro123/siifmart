@@ -12,6 +12,8 @@ import { purchaseOrdersService } from '../../services/purchase-orders.service';
 import { PurchaseOrdersMobileList } from './components/PurchaseOrdersMobileList';
 import { renderPriorityBadge, renderStatusBadge } from './components/POBadges';
 import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
+import { PausedPODraftsSection } from './components/PausedPODraftsSection';
+import type { StoredPODraft } from '../../utils/procurementDraftStorage';
 
 interface PurchaseOrdersListProps {
     orders: PurchaseOrder[];
@@ -33,6 +35,11 @@ interface PurchaseOrdersListProps {
     sites: any[];
     currencySymbol?: string;
 
+    // Paused Session Drafts
+    pausedDrafts?: StoredPODraft[];
+    onResumeDraft?: (draft: StoredPODraft) => void;
+    onDeleteDraft?: (draftId: string) => void;
+
     // Actions
     onEdit: (po: PurchaseOrder) => void;
     onRefresh: () => void;
@@ -42,7 +49,9 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     orders, loading, totalCount, currentPage, onPageChange,
     searchTerm, onSearchChange, supplierFilter, onSupplierFilterChange,
     statusFilter, onStatusFilterChange, sort, onSortChange,
-    suppliers, sites, currencySymbol = 'ETB', onEdit, onRefresh
+    suppliers, sites, currencySymbol = 'ETB',
+    pausedDrafts = [], onResumeDraft, onDeleteDraft,
+    onEdit, onRefresh
 }) => {
     const { user, showToast } = useStore();
     const { regions } = useData();
@@ -161,6 +170,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                 <div className="flex flex-wrap gap-2 pt-1">
                     {['All', 'Draft', 'Pending', 'Approved', 'Partially Received', 'Received', 'Cancelled', 'Rejected'].map(status => {
                         const isChipActive = statusFilter === status;
+                        const label = status === 'Draft' ? 'Draft (Completed)' : status;
                         return (
                             <button
                                 key={status}
@@ -171,12 +181,24 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-[var(--theme-border-subtle)]'
                                 }`}
                             >
-                                {status}
+                                {label}
                             </button>
                         );
                     })}
                 </div>
             </div>
+
+            {/* Paused Drafts (Work-in-Progress) */}
+            {(statusFilter === 'All' || statusFilter === 'Draft') && pausedDrafts.length > 0 && (
+                <div className="p-5 pb-0">
+                    <PausedPODraftsSection
+                        drafts={pausedDrafts}
+                        onResumeDraft={onResumeDraft || (() => {})}
+                        onDeleteDraft={onDeleteDraft || (() => {})}
+                        currencySymbol={currencySymbol}
+                    />
+                </div>
+            )}
 
             {/* Bulk Actions Bar (CEO Only) */}
             {user?.role === 'group_ceo' && selectedPOIds.length > 0 && (

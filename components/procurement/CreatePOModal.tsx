@@ -18,12 +18,13 @@ import { POTotalsSummary } from './POTotalsSummary';
 import { usePODraft } from './hooks/usePODraft';
 import { useCreatePOData } from './hooks/useCreatePOData';
 import { PODraftBanner } from './PODraftBanner';
-import { buildPurchaseOrders, resolvePOVendor } from './createPOHelpers';
+import { buildPurchaseOrders, resolvePOVendor, mergeOrAddPOItem } from './createPOHelpers';
 import { CreatePOFooter } from './CreatePOFooter';
 import { logger } from '../../utils/logger';
 import { hasPermission } from '../../utils/permissions';
 import { getProcurementScope } from '../../utils/procurementScope';
 import { resolvePOReceivingSelection } from '../../utils/poReceivingSelection';
+import type { StoredPODraft } from '../../utils/procurementDraftStorage';
 
 interface CreatePOModalProps {
     isOpen: boolean;
@@ -32,11 +33,12 @@ interface CreatePOModalProps {
     initialSupplierId?: string;
     initialProduct?: Product | null;
     initialDraft?: Partial<PurchaseOrder> | null;
+    resumingDraft?: StoredPODraft | null;
     onSuccess: () => void;
 }
 
 export const CreatePOModal: React.FC<CreatePOModalProps> = ({
-    isOpen, onClose, editingPO, initialSupplierId, initialProduct = null, initialDraft = null, onSuccess
+    isOpen, onClose, editingPO, initialSupplierId, initialProduct = null, initialDraft = null, resumingDraft = null, onSuccess
 }) => {
     const { user, showToast } = useStore();
     const { createPOMutation, updatePOMutation } = usePurchaseOrderMutations();
@@ -87,7 +89,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     });
 
     const { draftMeta, isRestoredBannerVisible, dismissBanner, saveDraft, readStoredDraft, discardDraft } = usePODraft({
-        countryCode: activeCountry, userId: user?.id, enabled: enableAutoSave, isEditMode, isOpen
+        countryCode: activeCountry, userId: user?.id, enabled: enableAutoSave, isEditMode, isOpen,
+        activeDraftId: resumingDraft?.id || null
     });
 
     // Computed purchase totals retain cents and account for multi-hub per-store multiplication
@@ -129,12 +132,12 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             showToast('Could not save the PO draft. Keep this window open and try again.', 'error');
             return;
         }
-        showToast('PO draft saved. You can resume it later.', 'success');
+        showToast('PO draft paused and saved in session. You can resume it anytime.', 'success');
         onClose();
     };
 
     const handleDiscardDraft = () => {
-        discardDraft();
+        discardDraft(resumingDraft?.id);
         resetPOForm();
         setItemFormKey(key => key + 1);
         setDestinationSiteIds(resolvePOReceivingSelection(countryWarehouses, user?.siteId));
@@ -149,7 +152,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             return;
         }
 
-        const sessionKey = `${editingPO?.id || 'create'}-${initialSupplierId || ''}-${initialProduct?.id || ''}-${Boolean(initialDraft)}-${activeCountry}-${user?.id || ''}`;
+        const sessionKey = `${editingPO?.id || 'create'}-${resumingDraft?.id || 'fresh'}-${initialSupplierId || ''}-${initialProduct?.id || ''}-${Boolean(initialDraft)}-${activeCountry}-${user?.id || ''}`;
         if (hydratedKeyRef.current === sessionKey) {
             if (countryWarehouses.length > 0 && pendingDestinationSiteIdsRef.current.length > 0) {
                 const restoredSites = resolvePOReceivingSelection(countryWarehouses, user?.siteId, pendingDestinationSiteIdsRef.current);
@@ -204,36 +207,33 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             }
         } else if (initialDraft) {
             applyPOState(initialDraft);
+        } else if (resumingDraft?.data) {
+            const d = resumingDraft.data;
+            pendingDestinationSiteIdsRef.current = countryWarehouses.length ? [] : (d.destinationSiteIds || []);
+            setIsManualVendor(Boolean(d.isManualVendor));
+            setManualVendorName(d.manualVendorName || '');
+            setNewPOSupplier(initialSupplierId || d.newPOSupplier || '');
+            setDestinationSiteIds(resolvePOReceivingSelection(countryWarehouses, user?.siteId, d.destinationSiteIds));
+            setExpectedDate(d.expectedDate || '');
+            setPoDelivery({ tempReq: d.tempReq || 'Ambient', shelfLife: d.shelfLife || '', dockSlot: d.dockSlot || '' });
+            setPoPriority(d.poPriority || 'Normal');
+            setQuantityDistribution(d.quantityDistribution || 'per-store');
+            setNewPOItems(d.newPOItems || []);
+            setFullEditingIndex(typeof d.editingItemIndex === 'number' && d.editingItemIndex >= 0 && d.editingItemIndex < (d.newPOItems || []).length ? d.editingItemIndex : null);
+            setRestoredItemFormDraft(d.itemForm || null);
+            setPoNotes(d.poNotes || '');
+            setPaymentTerms(d.paymentTerms || '');
+            setIncoterms(d.incoterms || '');
+            setShippingCost(d.shippingCost || 0);
+            setDiscountRate(d.discountRate || 0);
+            setTaxRate(d.taxRate !== undefined ? d.taxRate : defaultTaxRate);
         } else {
-            const storedDraft = readStoredDraft();
-            if (storedDraft?.data) {
-                const d = storedDraft.data;
-                pendingDestinationSiteIdsRef.current = countryWarehouses.length ? [] : (d.destinationSiteIds || []);
-                setIsManualVendor(Boolean(d.isManualVendor));
-                setManualVendorName(d.manualVendorName || '');
-                setNewPOSupplier(initialSupplierId || d.newPOSupplier || '');
-                setDestinationSiteIds(resolvePOReceivingSelection(countryWarehouses, user?.siteId, d.destinationSiteIds));
-                setExpectedDate(d.expectedDate || '');
-                setPoDelivery({ tempReq: d.tempReq || 'Ambient', shelfLife: d.shelfLife || '', dockSlot: d.dockSlot || '' });
-                setPoPriority(d.poPriority || 'Normal');
-                setQuantityDistribution(d.quantityDistribution || 'per-store');
-                setNewPOItems(d.newPOItems || []);
-                setFullEditingIndex(typeof d.editingItemIndex === 'number' && d.editingItemIndex >= 0 && d.editingItemIndex < (d.newPOItems || []).length ? d.editingItemIndex : null);
-                setRestoredItemFormDraft(d.itemForm || null);
-                setPoNotes(d.poNotes || '');
-                setPaymentTerms(d.paymentTerms || '');
-                setIncoterms(d.incoterms || '');
-                setShippingCost(d.shippingCost || 0);
-                setDiscountRate(d.discountRate || 0);
-                setTaxRate(d.taxRate !== undefined ? d.taxRate : defaultTaxRate);
-            } else {
-                setDestinationSiteIds(resolvePOReceivingSelection(countryWarehouses, user?.siteId));
-                setTaxRate(defaultTaxRate);
-                setDiscountRate(0);
-                if (initialSupplierId) setNewPOSupplier(initialSupplierId);
-            }
+            setDestinationSiteIds(resolvePOReceivingSelection(countryWarehouses, user?.siteId));
+            setTaxRate(defaultTaxRate);
+            setDiscountRate(0);
+            if (initialSupplierId) setNewPOSupplier(initialSupplierId);
         }
-    }, [isOpen, editingPO, initialDraft, initialSupplierId, initialProduct?.id, user, countryWarehouses, activeCountry, defaultTaxRate, readStoredDraft, allSuppliers]);
+    }, [isOpen, editingPO, initialDraft, initialSupplierId, initialProduct?.id, resumingDraft, user, countryWarehouses, activeCountry, defaultTaxRate, allSuppliers]);
 
     useEffect(() => {
         if (!isOpen || allSuppliers.length === 0) return;
@@ -266,27 +266,13 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
     const handleAddItem = (item: POItem) => {
         setNewPOItems(prev => {
-            if (item.identityType === 'known' && item.productId) {
-                const dupIdx = prev.findIndex(existing =>
-                    existing.identityType === 'known' &&
-                    (existing.productId === item.productId || (existing.sku && existing.sku === item.sku)) &&
-                    (existing.packQuantity || 1) === (item.packQuantity || 1) &&
-                    (existing.caseSize || 0) === (item.caseSize || 0)
-                );
-                if (dupIdx !== -1) {
-                    const existing = prev[dupIdx];
-                    const mergedQty = existing.quantity + item.quantity;
-                    const mergedItem: POItem = {
-                        ...existing, ...item,
-                        quantity: mergedQty,
-                        totalCost: purchaseAmount(mergedQty * item.unitCost)
-                    };
-                    showToast(`Merged quantity for ${item.productName} (${mergedQty})`, 'info');
-                    return prev.map((row, idx) => idx === dupIdx ? mergedItem : row);
-                }
+            const { items, merged, mergedQty } = mergeOrAddPOItem(prev, item);
+            if (merged && mergedQty) {
+                showToast(`Merged quantity for ${item.productName} (${mergedQty})`, 'info');
+            } else {
+                showToast(`Added: ${item.productName}`, 'success');
             }
-            showToast(`Added: ${item.productName}`, 'success');
-            return [...prev, item];
+            return items;
         });
     };
 
@@ -360,7 +346,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 successCount++;
             }
 
-            discardDraft();
+            discardDraft(resumingDraft?.id);
             showToast(isEditMode ? 'PO Updated' : `Created ${successCount} PO(s)`, 'success');
             onSuccess();
             onClose();

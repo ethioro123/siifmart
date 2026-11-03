@@ -24,7 +24,7 @@ export const renderStatusBadge = (status: string) => {
     const c = config[status] || config.Draft;
     return (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${c.bg} ${c.text} border ${c.border}`}>
-            {status}
+            {status === 'Draft' ? 'Draft (Completed)' : status}
         </span>
     );
 };
