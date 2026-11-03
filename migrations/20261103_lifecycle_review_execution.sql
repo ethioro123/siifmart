@@ -12,7 +12,7 @@ BEGIN
  IF actor.id IN (r.requested_by,coalesce(r.operations_reviewer,r.requested_by),coalesce(r.finance_reviewer,r.requested_by))
    OR (r.kind='employee' AND actor.id=r.target_id) THEN RAISE EXCEPTION 'An independent reviewer is required'; END IF;
  target:=private.lifecycle_target(r.kind,r.target_id);
- IF target->'state' IS DISTINCT FROM r.original_state OR (target->>'site_id')::uuid<>r.site_id THEN
+ IF p_approve AND (target->'state' IS DISTINCT FROM r.original_state OR (target->>'site_id')::uuid<>r.site_id) THEN
    RAISE EXCEPTION 'The record changed; reject the old request and submit a fresh review'; END IF;
  IF r.kind='employee' THEN
    allowed:=actor.role IN ('regional_hr_manager','country_hr_director','group_chro')
@@ -106,7 +106,7 @@ BEGIN
  WHEN 'site' THEN NEW.status='Closed' AND OLD.status IS DISTINCT FROM NEW.status
  WHEN 'purchase_order' THEN NEW.status='Cancelled' AND OLD.status IS DISTINCT FROM NEW.status
  ELSE (NEW.status='Rejected' AND OLD.status IS DISTINCT FROM NEW.status)
-   OR (NEW.transfer_status='Cancelled' AND OLD.transfer_status IS DISTINCT FROM NEW.transfer_status) END;
+   OR (to_jsonb(NEW)->>'transfer_status'='Cancelled' AND to_jsonb(OLD)->>'transfer_status' IS DISTINCT FROM to_jsonb(NEW)->>'transfer_status') END;
  IF needs_review AND NOT EXISTS(SELECT 1 FROM public.record_lifecycle_requests r
    WHERE r.id::text=current_setting('siifmart.lifecycle_request',true) AND r.kind=kind AND r.target_id=NEW.id
      AND r.status='Applied' AND r.reviewed_by=auth.uid() AND r.applied_at=transaction_timestamp()) THEN

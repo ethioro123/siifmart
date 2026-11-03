@@ -7,7 +7,7 @@ CREATE TABLE public.record_lifecycle_requests (
  reason text NOT NULL CHECK(length(btrim(reason)) BETWEEN 10 AND 1200),
  evidence jsonb NOT NULL DEFAULT '{}'::jsonb,
  original_state jsonb NOT NULL,
- status text NOT NULL DEFAULT 'Pending' CHECK(status IN ('Pending','Operations cleared','Finance cleared','Applied','Rejected')),
+ status text NOT NULL DEFAULT 'Pending' CHECK(status IN ('Pending','Operations cleared','Finance cleared','Applied','Rejected','Withdrawn')),
  requested_by uuid NOT NULL REFERENCES public.employees(id), requester_name text NOT NULL, requester_role text NOT NULL,
  requested_at timestamptz NOT NULL DEFAULT now(),
  operations_reviewer uuid REFERENCES public.employees(id), finance_reviewer uuid REFERENCES public.employees(id),

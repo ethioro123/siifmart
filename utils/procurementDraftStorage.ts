@@ -26,13 +26,13 @@ export interface PODraftPayload {
 }
 
 export interface PODraftMeta {
-    id: string;
+    id?: string;
     savedAt: string;
     itemCount: number;
     itemInProgress?: boolean;
     supplierDisplay: string;
     destinationDisplay?: string;
-    totalEstimatedAmount: number;
+    totalEstimatedAmount?: number;
     currency?: string;
 }
 

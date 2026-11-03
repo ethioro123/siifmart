@@ -109,6 +109,32 @@ describe('Category-Driven Product Attributes System', () => {
         });
     });
 
+    describe('Everyday household purchasing categories', () => {
+        it.each([
+            'Dishes, Plates & Bowls', 'Cups, Mugs & Glassware',
+            'Cutlery & Serving Utensils', 'Cookware, Pots & Pans',
+            'Kitchen Tools & Utensils', 'Food Storage & Containers',
+            'Water Bottles & Flasks', 'Kitchen Textiles & Table Linen'
+        ])('offers %s with kitchen specifications and count-based handling', category => {
+            expect(Object.values(PRODUCT_CATEGORIES).flat()).toContain(category);
+            expect(getCategorySpecGroup(category).id).toBe('homewares_kitchen');
+            expect(isDiscreteGeneralMerch(category)).toBe(true);
+            expect(isConsumableCategory(category)).toBe(false);
+        });
+
+        it('offers household essentials without introducing pet or animal supplies', () => {
+            const categories = Object.values(PRODUCT_CATEGORIES).flat();
+            expect(categories).toEqual(expect.arrayContaining([
+                'Bedding, Pillows & Blankets', 'Towels & Bath Linen',
+                'Bathroom Accessories', 'Storage & Organization',
+                'Lighting & Light Bulbs', 'Small Household Appliances'
+            ]));
+            expect(categories.join(' ')).not.toMatch(/pet|animal|dog|cat food/i);
+            expect(categories).toContain('Meat & Poultry');
+            expect(categories).toContain('Dairy, Eggs & Fridge');
+        });
+    });
+
     describe('SIIFMART Non-Alcoholic Catalog & Halal Compliance', () => {
         it('guarantees ZERO alcoholic beverages (beer, wine, liquor) across all category definitions and options', () => {
             const allCategoriesStr = JSON.stringify(PRODUCT_CATEGORIES).toLowerCase();

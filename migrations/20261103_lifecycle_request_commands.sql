@@ -41,7 +41,7 @@ DECLARE actor public.employees%ROWTYPE; target jsonb; result uuid; target_rank i
 BEGIN
  SELECT * INTO actor FROM public.employees WHERE id=auth.uid() AND lower(coalesce(status,''))='active' FOR SHARE;
  IF actor.id IS NULL OR length(btrim(coalesce(p_reason,''))) NOT BETWEEN 10 AND 1200
-   OR jsonb_typeof(p_evidence)<>'object' OR octet_length(p_evidence::text)>6000 THEN
+   OR coalesce(jsonb_typeof(p_evidence),'null')<>'object' OR octet_length(p_evidence::text)>6000 THEN
    RAISE EXCEPTION 'Active employee and a reason of 10–1200 characters required';
  END IF;
  target:=private.lifecycle_target(p_kind,p_target_id);
@@ -65,7 +65,7 @@ BEGIN
    IF target->'state'->>'status' NOT IN ('Requested','Rejected') OR target->'state'->>'shipped_at' IS NOT NULL
      OR target->'state'->>'dispatched_at' IS NOT NULL OR target->'state'->>'received_at' IS NOT NULL
      OR target->'state'->>'approved_at' IS NOT NULL THEN RAISE EXCEPTION 'Dispatched or approved transfers require a return or reconciliation'; END IF;
-   IF private.lifecycle_rank(actor.role)=0 AND target->'state'->>'requested_by' NOT IN (actor.name,actor.id::text) THEN
+   IF private.lifecycle_rank(actor.role)=0 AND coalesce(target->'state'->>'requested_by','') NOT IN (actor.name,actor.id::text) THEN
      RAISE EXCEPTION 'Only the requester or an authorized manager may request cancellation'; END IF;
  END IF;
  INSERT INTO public.record_lifecycle_requests(kind,target_id,target_label,site_id,country_code,region_code,reason,evidence,original_state,

@@ -43,6 +43,28 @@ export const GROCERY_CATEGORIES: Record<string, string[]> = {
     'Tissues, Paper & Foils',
     'Pest Control & Garden Care'
   ],
+  'Homewares, Kitchen & Dining': [
+    'Dishes, Plates & Bowls',
+    'Cups, Mugs & Glassware',
+    'Cutlery & Serving Utensils',
+    'Cookware, Pots & Pans',
+    'Kitchen Tools & Utensils',
+    'Food Storage & Containers',
+    'Water Bottles & Flasks',
+    'Kitchen Textiles & Table Linen'
+  ],
+  'Home & Everyday Essentials': [
+    'Bedding, Pillows & Blankets',
+    'Towels & Bath Linen',
+    'Bathroom Accessories',
+    'Storage & Organization',
+    'Bins, Buckets & Baskets',
+    'Home Decor & Clocks',
+    'Lighting & Light Bulbs',
+    'Small Household Appliances',
+    'Hardware & Hand Tools',
+    'Garden Tools & Supplies'
+  ],
   'General Merchandise & Apparel': [
     'Stationery, Office & Books',
     'Electronics & Batteries',

@@ -1,3 +1,4 @@
+import { GROCERY_CATEGORIES } from '../../constants/categories';
 import {
     CategoryAttributeField,
     CategorySpecGroup,
@@ -99,6 +100,13 @@ const SUBCATEGORY_TO_GROUP: Record<string, string> = {
     'displays, tvs & monitors': 'electronics',
     'displays & tvs': 'electronics',
     'tvs & displays': 'electronics',
+
+    ...Object.fromEntries(GROCERY_CATEGORIES['Homewares, Kitchen & Dining'].map(category => [category.toLowerCase(), 'homewares_kitchen'])),
+    ...Object.fromEntries(GROCERY_CATEGORIES['Home & Everyday Essentials'].map(category => [category.toLowerCase(), 'general_merchandise'])),
+    'small household appliances': 'electronics',
+    'lighting & light bulbs': 'electronics',
+    'hardware & hand tools': 'automotive_industrial',
+    'garden tools & supplies': 'automotive_industrial',
 
     // Homewares & Kitchen Dining
     'homewares, kitchen & dining': 'homewares_kitchen',
@@ -283,53 +291,7 @@ export const PRODUCT_CATEGORIES = {
         "Audio, Headphones & Speakers",
         "Batteries, Chargers & Power Banks"
     ],
-    "Fresh Food & Deli": [
-        "Fruit & Vegetables",
-        "Dairy, Eggs & Fridge",
-        "Meat & Poultry",
-        "Seafood",
-        "Bakery & Bread",
-        "Deli & Prepared Meals"
-    ],
-    "Pantry & Groceries": [
-        "Snacks & Confectionery",
-        "Baking & Dessert Needs",
-        "Grains, Pasta & Rice",
-        "Sauces, Oils & Condiments",
-        "Canned Food & Soups",
-        "Breakfast & Cereals",
-        "Tea, Coffee & Cocoa",
-        "Drinks & Beverages"
-    ],
-    "Frozen Food": [
-        "Frozen Meals & Sides",
-        "Frozen Vegetables & Fruit",
-        "Ice Cream & Desserts"
-    ],
-    "Baby & Toddler": [
-        "Baby Food & Formula",
-        "Nappies, Wipes & Toiletries"
-    ],
-    "Health & Beauty": [
-        "Dental & Oral Care",
-        "Hair & Body Care",
-        "Cosmetics & Skin Care",
-        "Vitamins & Supplements",
-        "Pharmacy & First Aid"
-    ],
-    "Household & Cleaning": [
-        "Laundry & Dishwashing",
-        "Cleaning Products & Tools",
-        "Tissues, Paper & Foils",
-        "Pest Control & Garden Care"
-    ],
-    "General Merchandise & Apparel": [
-        "Stationery, Office & Books",
-        "Electronics & Batteries",
-        "Homewares, Kitchen & Dining",
-        "Clothing & Accessories",
-        "Toys & Recreation"
-    ]
+    ...GROCERY_CATEGORIES
 };
 
 export const isConsumableCategory = (category?: string): boolean => {
@@ -368,6 +330,9 @@ export const isDiscreteGeneralMerch = (category?: string): boolean => {
     if (!category) return false;
     const cat = category.toLowerCase();
     const discreteKeywords = [
+        'home & everyday essentials',
+        ...GROCERY_CATEGORIES['Homewares, Kitchen & Dining'].map(category => category.toLowerCase()),
+        ...GROCERY_CATEGORIES['Home & Everyday Essentials'].map(category => category.toLowerCase()),
         'consumer electronics & tech',
         'consumer electronics',
         'general merchandise & apparel',
