@@ -63,7 +63,7 @@ describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
         });
 
         it('blocks Regional Manager from approving expense > 2,000,000 ETB', async () => {
-            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, error: new Error('Country sign-off required') });
+            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, count: null, status: 403, statusText: 'Forbidden', error: { message: 'Country sign-off required', details: '', hint: '', code: '42501', name: 'PostgrestError' } });
             vi.spyOn(expensesService, 'getById').mockResolvedValue({
                 id: 'EXP-MID-001',
                 siteId: 'ST-ADDIS-01',
@@ -122,7 +122,7 @@ describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
         });
 
         it('blocks Country Managing Director from approving expense > 20,000,000 ETB', async () => {
-            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, error: new Error('Group Finance or CEO required') });
+            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, count: null, status: 403, statusText: 'Forbidden', error: { message: 'Group Finance or CEO required', details: '', hint: '', code: '42501', name: 'PostgrestError' } });
             vi.spyOn(expensesService, 'getById').mockResolvedValue({
                 id: 'EXP-MEGA-001',
                 siteId: 'ST-ADDIS-01',

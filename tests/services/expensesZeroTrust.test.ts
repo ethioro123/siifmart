@@ -100,7 +100,7 @@ describe('Zero-Trust Hardened Expenses Service', () => {
     });
 
     it('blocks regular finance manager from approving CEO-escalated expense', async () => {
-        vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, error: new Error('Group Finance or CEO required') });
+        vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, count: null, status: 403, statusText: 'Forbidden', error: { message: 'Group Finance or CEO required', details: '', hint: '', code: '42501', name: 'PostgrestError' } });
         vi.spyOn(expensesService, 'getById').mockResolvedValue({
             id: 'EXP-300',
             siteId: 'ST-001',
