@@ -185,7 +185,10 @@ export const canEmployRole = (
         return candidateRank < 90;
     }
     if (manager === 'area_operations_manager') {
-        return candidateRank < 88;
+        return ['store_manager', 'assistant_store_manager', 'shift_supervisor',
+            'pos_supervisor', 'stock_control_supervisor', 'cashier',
+            'sales_associate', 'store_associate', 'customer_service',
+            'merchandiser', 'stock_clerk', 'loss_prevention'].includes(candidate);
     }
     if (manager === 'regional_hr_manager') {
         return candidateRank < 81;

@@ -58,9 +58,12 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     regional_operations_manager: HEAD_OF_OPERATIONS_PERMISSIONS.filter(
         permission => !['pos.create_sale', 'pos.hold_order', 'pos.void_sale', 'sales.create', 'procurement.delete_po'].includes(permission)
     ),
-    area_operations_manager: HEAD_OF_OPERATIONS_PERMISSIONS.filter(
-        permission => !['pos.create_sale', 'pos.hold_order', 'pos.void_sale', 'sales.create', 'procurement.create_po', 'procurement.delete_po'].includes(permission)
-    ),
+    area_operations_manager: [
+        'dashboard.view', 'pos.view', 'inventory.view', 'inventory.transfer',
+        'sales.view', 'sales.view_reports', 'procurement.view', 'pricing.view',
+        'employees.view', 'employees.create', 'employees.edit',
+        'employees.approve', 'employees.manage_attendance'
+    ],
 
     // ═══ LEVEL 5: REGIONAL DEPARTMENT MANAGERS ═══
     regional_supply_chain_manager: [

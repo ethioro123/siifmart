@@ -83,7 +83,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     area_operations_manager: [
-        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+        'dashboard', 'regional-ops', 'pos', 'inventory', 'sales', 'employees', 'pricing', 'procurement', 'profile'
     ],
 
     // ═══ LEVEL 5 - REGIONAL DEPARTMENT MANAGERS ═══
