@@ -101,20 +101,20 @@ GRANT EXECUTE ON FUNCTION public.decide_record_lifecycle(uuid,boolean,text) TO a
 
 CREATE FUNCTION private.guard_reviewed_lifecycle_transition() RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE kind text; needs_review boolean:=false;
+DECLARE v_kind text; needs_review boolean:=false;
 BEGIN
- kind:=CASE TG_TABLE_NAME WHEN 'employees' THEN 'employee' WHEN 'sites' THEN 'site'
+ v_kind:=CASE TG_TABLE_NAME WHEN 'employees' THEN 'employee' WHEN 'sites' THEN 'site'
    WHEN 'purchase_orders' THEN 'purchase_order' ELSE 'transfer' END;
- IF (kind='employee' AND OLD.status='Terminated' AND NEW.status IS DISTINCT FROM OLD.status)
-   OR (kind='site' AND OLD.status='Closed' AND NEW.status IS DISTINCT FROM OLD.status) THEN
+ IF (v_kind='employee' AND OLD.status='Terminated' AND NEW.status IS DISTINCT FROM OLD.status)
+   OR (v_kind='site' AND OLD.status='Closed' AND NEW.status IS DISTINCT FROM OLD.status) THEN
    RAISE EXCEPTION 'Reinstatement or reopening requires a separate reviewed workflow' USING ERRCODE='42501'; END IF;
- needs_review:=CASE kind WHEN 'employee' THEN NEW.status='Terminated' AND OLD.status IS DISTINCT FROM NEW.status
+ needs_review:=CASE v_kind WHEN 'employee' THEN NEW.status='Terminated' AND OLD.status IS DISTINCT FROM NEW.status
  WHEN 'site' THEN NEW.status='Closed' AND OLD.status IS DISTINCT FROM NEW.status
  WHEN 'purchase_order' THEN NEW.status='Cancelled' AND OLD.status IS DISTINCT FROM NEW.status
  ELSE (NEW.status='Rejected' AND OLD.status IS DISTINCT FROM NEW.status)
    OR (to_jsonb(NEW)->>'transfer_status'='Cancelled' AND to_jsonb(OLD)->>'transfer_status' IS DISTINCT FROM to_jsonb(NEW)->>'transfer_status') END;
  IF needs_review AND NOT EXISTS(SELECT 1 FROM public.record_lifecycle_requests r
-   WHERE r.id::text=current_setting('siifmart.lifecycle_request',true) AND r.kind=kind AND r.target_id=NEW.id
+   WHERE r.id::text=current_setting('siifmart.lifecycle_request',true) AND r.kind=v_kind AND r.target_id=NEW.id
      AND r.status='Applied' AND r.reviewed_by=auth.uid() AND r.applied_at=transaction_timestamp()) THEN
    RAISE EXCEPTION 'Use an independent lifecycle review for this transition' USING ERRCODE='42501'; END IF;
  RETURN NEW;

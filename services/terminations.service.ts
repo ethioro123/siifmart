@@ -2,6 +2,12 @@ import { recordLifecycleService } from './record-lifecycle.service';
 import type { TerminationRequestRecord, TerminationReasonCode } from '../types/hr-zero-trust';
 import type { LifecycleRequest } from '../types/recordLifecycle';
 import { supabase } from '../lib/supabase';
+function clearLegacyOffboardingCache() {
+  if (typeof localStorage !== 'undefined') {
+    try { localStorage.removeItem('siifmart_terminations_backup'); } catch { /* Storage may be unavailable. */ }
+  }
+}
+clearLegacyOffboardingCache();
 const columns = 'id,kind,target_id,target_label,site_id,country_code,region_code,reason,evidence,original_state,status,requested_by,requester_name,requester_role,requested_at,operations_reviewer,finance_reviewer,reviewed_by,reviewed_at,decision_reason,applied_at';
 function mapRequest(row: LifecycleRequest): TerminationRequestRecord {
   return {
@@ -27,7 +33,7 @@ export interface OffboardingProposal {
   proposed_by: string; proposed_by_name: string; proposed_by_role: string; reconciliation_notes?: string;
 }
 export const terminationsService = {
-  _clearCache(): void { /* Offboarding evidence is never cached in browser storage. */ },
+  _clearCache(): void { clearLegacyOffboardingCache(); },
   async fetchTerminations(countryCode: string = 'ET', page = 1): Promise<TerminationRequestRecord[]> {
     const { data, error } = await supabase.from('record_lifecycle_requests').select(columns)
       .eq('kind', 'employee').eq('country_code', countryCode.toUpperCase())

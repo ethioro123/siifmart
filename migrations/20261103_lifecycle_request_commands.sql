@@ -63,7 +63,7 @@ BEGIN
  ELSIF p_kind='purchase_order' THEN
    IF target->'state'->>'status' NOT IN ('Draft','Pending') THEN RAISE EXCEPTION 'Orders with approval or execution require a reversal workflow'; END IF;
    IF private.lifecycle_rank(actor.role)=0 AND NOT(actor.role IN ('buyer','demand_planner','replenishment_planner')
-      AND (target->'state'->>'created_by' IN (actor.name,actor.id::text) OR target->'state'->>'requested_by' IN (actor.name,actor.id::text))) THEN
+      AND (coalesce(target->'state'->>'created_by','') IN (actor.name,actor.id::text) OR coalesce(target->'state'->>'requested_by','') IN (actor.name,actor.id::text))) THEN
      RAISE EXCEPTION 'Only the preparer or an authorized manager may request cancellation'; END IF;
  ELSIF p_kind='transfer' THEN
    IF target->'state'->>'status' NOT IN ('Requested','Rejected') OR target->'state'->>'shipped_at' IS NOT NULL

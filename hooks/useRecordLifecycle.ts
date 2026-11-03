@@ -19,3 +19,12 @@ export function useLifecycleTargets(actor: string, country: string, kind: Lifecy
 export function useLifecycleEvents(actor: string, requestId: string, page: number, enabled: boolean) {
   return useQuery({ queryKey: ['lifecycle-events', actor, requestId, page], queryFn: () => recordLifecycleService.events(requestId, page), enabled: enabled && Boolean(actor && requestId), staleTime: 60_000 });
 }
+
+export function useLifecycleHolds(actor: string, country: string, kind: LifecycleKind, targetId: string, page: number) {
+  const cache = useQueryClient();
+  const key = ['lifecycle-holds', actor, country, kind, targetId];
+  const list = useQuery({ queryKey: [...key, page], queryFn: () => recordLifecycleService.holds(kind, targetId, country, page), staleTime: 15_000 });
+  const decide = useMutation({ mutationFn: (input: { reason: string; release: boolean }) => recordLifecycleService.setHold(kind, targetId, input.reason, input.release),
+    onSuccess: () => cache.invalidateQueries({ queryKey: key }) });
+  return { list, decide };
+}

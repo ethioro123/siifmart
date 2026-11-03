@@ -1,4 +1,4 @@
-export type LifecycleKind = 'employee' | 'site' | 'purchase_order' | 'transfer';
+export type LifecycleKind = 'employee' | 'site' | 'purchase_order' | 'transfer' | 'warehouse_job';
 export interface LifecycleRequest {
   id: string; kind: LifecycleKind; target_id: string; target_label: string;
   site_id: string; country_code: string; region_code: string | null;
@@ -14,5 +14,11 @@ export interface LifecycleEvent {
 }
 export interface LifecycleTarget { id: string; label: string; state: string }
 export const lifecycleLabels: Record<LifecycleKind, string> = {
-  employee: 'Employee offboarding', site: 'Facility closure', purchase_order: 'PO cancellation', transfer: 'Transfer cancellation'
+  warehouse_job: 'Warehouse draft cancellation', employee: 'Employee offboarding', site: 'Facility closure', purchase_order: 'PO cancellation', transfer: 'Transfer cancellation'
 };
+export interface LifecycleHold {
+  id: string; kind: LifecycleKind; target_id: string; site_id: string; country_code: string;
+  reason: string; placed_by: string; placed_by_name: string; placed_by_role: string; placed_at: string;
+  released_by: string | null; released_by_name: string | null; released_by_role: string | null;
+  released_at: string | null; release_reason: string | null;
+}
