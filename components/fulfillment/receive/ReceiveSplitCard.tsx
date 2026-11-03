@@ -1,7 +1,8 @@
 import React from 'react';
-import { Trash2, Plus, ScanBarcode, ChevronRight, X, Sparkles, Layers } from 'lucide-react';
+import { Trash2, Plus, ScanBarcode, ChevronRight, X, Sparkles, Layers, CheckCircle2, AlertTriangle, Info, Loader2 } from 'lucide-react';
 import Badge from '../../shared/Badge';
 import { generateBatchNumber, getBatchExpiryStatus } from '../../../utils/batchNumber';
+import type { BarcodeFeedback } from './hooks/useReceiveBarcodeCheck';
 
 export interface SplitVariant {
     id: string;
@@ -22,11 +23,13 @@ interface ReceiveSplitCardProps {
     index: number;
     totalSplits: number;
     barcodeInput: string;
+    barcodeFeedback?: BarcodeFeedback | null;
     onUpdateVariant: (updated: Partial<SplitVariant>) => void;
     onRemoveVariant: () => void;
     onBarcodeInput: (val: string) => void;
     onAddBarcode: () => void;
     onRemoveBarcode: (code: string) => void;
+    onDismissFeedback?: () => void;
     onFocusScan: () => void;
     scanOnlyHandlers: {
         onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -40,11 +43,13 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
     index,
     totalSplits,
     barcodeInput,
+    barcodeFeedback,
     onUpdateVariant,
     onRemoveVariant,
     onBarcodeInput,
     onAddBarcode,
     onRemoveBarcode,
+    onDismissFeedback,
     onFocusScan,
     scanOnlyHandlers,
     t
@@ -225,12 +230,84 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                         <button
                             type="button"
                             onClick={onAddBarcode}
-                            className="px-4 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+                            className="px-4 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer"
                             aria-label={t('warehouse.receivingAddBarcode')}
                         >
                             <Plus size={16} />
                         </button>
                     </div>
+
+                    {/* Barcode Check Status & Database Information Banner */}
+                    {barcodeFeedback && (
+                        <div
+                            className={`flex items-start justify-between gap-2.5 p-3 rounded-xl border text-xs transition-all ${
+                                barcodeFeedback.status === 'checking'
+                                    ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
+                                    : barcodeFeedback.status === 'registered_this'
+                                    ? 'bg-[var(--theme-status-success-bg)] border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)]'
+                                    : barcodeFeedback.status === 'registered_other'
+                                    ? 'bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)]'
+                                    : barcodeFeedback.status === 'available'
+                                    ? 'bg-[var(--theme-status-info-bg)] border-[var(--theme-status-info-border)] text-[var(--theme-status-info-text)]'
+                                    : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
+                            }`}
+                            role="status"
+                            aria-live="polite"
+                        >
+                            <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                                {barcodeFeedback.status === 'checking' && (
+                                    <Loader2 size={16} className="animate-spin shrink-0 mt-0.5 text-[var(--theme-text-muted)]" />
+                                )}
+                                {(barcodeFeedback.status === 'registered_this' || barcodeFeedback.status === 'available') && (
+                                    <CheckCircle2 size={16} className="shrink-0 mt-0.5 text-current" />
+                                )}
+                                {barcodeFeedback.status === 'registered_other' && (
+                                    <AlertTriangle size={16} className="shrink-0 mt-0.5 text-[var(--theme-status-warning)]" />
+                                )}
+                                {barcodeFeedback.status === 'duplicate' && (
+                                    <Info size={16} className="shrink-0 mt-0.5 text-[var(--theme-text-muted)]" />
+                                )}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                                            barcodeFeedback.status === 'registered_this'
+                                                ? 'bg-[var(--theme-status-success)] text-[var(--theme-primary-text)]'
+                                                : barcodeFeedback.status === 'registered_other'
+                                                ? 'bg-[var(--theme-status-warning)] text-[var(--theme-primary-text)]'
+                                                : barcodeFeedback.status === 'available'
+                                                ? 'bg-[var(--theme-status-info)] text-[var(--theme-primary-text)]'
+                                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]'
+                                        }`}>
+                                            {barcodeFeedback.status === 'checking'
+                                                ? (t('warehouse.barcodeStatusChecking') || 'Checking…')
+                                                : barcodeFeedback.status === 'registered_this'
+                                                ? (t('warehouse.barcodeStatusRegistered') || 'Registered')
+                                                : barcodeFeedback.status === 'registered_other'
+                                                ? (t('warehouse.barcodeStatusConflict') || 'Conflict')
+                                                : barcodeFeedback.status === 'available'
+                                                ? (t('warehouse.barcodeStatusOk') || 'OK to Add')
+                                                : (t('warehouse.variantLabel') || 'Notice')}
+                                        </span>
+                                        <span className="font-mono font-bold text-xs">{barcodeFeedback.barcode}</span>
+                                    </div>
+                                    <p className="mt-1 text-xs leading-relaxed font-medium">
+                                        {barcodeFeedback.message}
+                                    </p>
+                                </div>
+                            </div>
+                            {onDismissFeedback && (
+                                <button
+                                    type="button"
+                                    onClick={onDismissFeedback}
+                                    className="p-1 rounded-lg opacity-60 hover:opacity-100 hover:bg-black/10 transition-opacity text-current shrink-0 min-h-[28px] min-w-[28px] flex items-center justify-center cursor-pointer"
+                                    aria-label={t('warehouse.dismiss') || 'Dismiss'}
+                                    title={t('warehouse.dismiss') || 'Dismiss'}
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                     <div className="flex flex-wrap gap-2 min-h-[28px]">
                         {variant.barcode && (

@@ -114,29 +114,7 @@ export const employeeDocumentsService = {
         return newDoc;
     },
 
-    async deleteDocument(id: string, employeeId: string, actorName: string): Promise<boolean> {
-        const { error } = await supabase
-            .from('employee_documents')
-            .delete()
-            .eq('id', id);
-
-        if (error) {
-            logger.warn('employeeDocumentsService', 'Supabase delete rejected', { message: error.message });
-            throw new Error(`Employee documents are permanent records and cannot be deleted (${error.message})`);
-        }
-
-        // Synaptic Neural Mesh: Audit log only on verified database success
-        try {
-            await systemLogsService.create({
-                user_name: actorName,
-                action: 'EMPLOYEE_DOCUMENT_DELETED',
-                module: 'Human Resources',
-                details: JSON.stringify({ docId: id, employeeId })
-            });
-        } catch (logErr) {
-            logger.warn('employeeDocumentsService', 'Audit log failed', { error: String(logErr) });
-        }
-
-        return true;
+    async deleteDocument(_id: string, _employeeId: string, _actorName: string): Promise<never> {
+        throw new Error('Employee documents are retained employment evidence and cannot be permanently deleted.');
     }
 };

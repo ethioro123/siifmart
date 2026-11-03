@@ -5,6 +5,7 @@ import { _mapProduct, _calculateStatus } from './products-helpers';
 import { handleAutoReplenish } from './products-replenish';
 import { logger } from '../../utils/logger';
 import { ensureMaster } from './product-master.service';
+import { cascadeDeleteProduct } from './products-cleanup';
 
 /**
  * Check if a barcode is registered under a different SKU.
@@ -373,12 +374,7 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
 }
 
 export async function deleteProduct(id: string) {
-    const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-
-    if (error) throw error;
+    return cascadeDeleteProduct(id);
 }
 
 export {

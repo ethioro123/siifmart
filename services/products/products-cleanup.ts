@@ -13,7 +13,7 @@ export async function deleteGhostPlaceholders(sku: string, siteId: string): Prom
             .from('products')
             .select('id, stock, location')
             .eq('site_id', siteId)
-            .or(`sku.eq.${sku},sku.eq.${cleanSku}`);
+            .in('sku', [sku, cleanSku]).limit(25);
 
         if (fetchError || !records) {
             logger.warn('products-cleanup', `Failed to check ghost placeholders for SKU ${sku}`, { error: fetchError?.message });
@@ -27,14 +27,16 @@ export async function deleteGhostPlaceholders(sku: string, siteId: string): Prom
                 .map(r => r.id);
 
             if (ghostIds.length > 0) {
-                const { error: delError } = await supabase
+                const { data: deleted, error: delError } = await supabase
                     .from('products')
                     .delete()
-                    .in('id', ghostIds);
+                    .in('id', ghostIds).select('id');
 
                 if (delError) {
-                    logger.warn('products-cleanup', `Failed to delete ghost product IDs ${ghostIds.join(',')}`, { error: delError?.message });
+                    logger.warn('products-cleanup', 'Placeholder deletion rejected', { error: delError.message });
+                    return false;
                 } else {
+                    if (deleted?.length !== ghostIds.length) return false;
                     logger.info('products-cleanup', `Deleted ${ghostIds.length} ghost placeholder(s) for SKU ${sku} at site ${siteId}`);
                 }
             }
@@ -69,68 +71,10 @@ export async function clearLocationForEmptyProducts(location?: string, siteId?: 
     }
 }
 
-/**
- * Safe delete product: verifies no audit evidence exists (movements, sales, approval requests, or PO items)
- * before deleting the product. Refuses to delete if audit records reference this product, preserving evidence.
- */
+/** Delete only a product which passes the server's stock and evidence guards. */
 export async function cascadeDeleteProduct(id: string): Promise<void> {
     if (!id) throw new Error('Product ID is required');
-
-    // 1. Verify no existing stock movements
-    const { count: movementsCount, error: movementsError } = await supabase
-        .from('stock_movements')
-        .select('*', { count: 'exact', head: true })
-        .eq('product_id', id);
-
-    if (movementsError) {
-        logger.warn('products-cleanup', 'Failed to check stock movements for product delete', { error: movementsError.message });
-    }
-    if (movementsCount && movementsCount > 0) {
-        throw new Error('Cannot delete product with existing stock movements; preserve product for audit trail.');
-    }
-
-    // 2. Verify no existing sale items
-    try {
-        const { count: saleCount, error: saleItemsError } = await supabase
-            .from('sale_items')
-            .select('*', { count: 'exact', head: true })
-            .eq('product_id', id);
-
-        if (!saleItemsError && saleCount && saleCount > 0) {
-            throw new Error('Cannot delete product with existing sales history; preserve product for audit trail.');
-        }
-    } catch {
-        // Safe check fallback
-    }
-
-    // 3. Verify no existing approval requests (inventory_requests)
-    const { count: requestsCount, error: requestsError } = await supabase
-        .from('inventory_requests')
-        .select('*', { count: 'exact', head: true })
-        .eq('product_id', id);
-
-    if (!requestsError && requestsCount && requestsCount > 0) {
-        throw new Error('Cannot delete product with existing inventory approval requests; preserve requests for audit trail.');
-    }
-
-    // 4. Verify no existing purchase order references
-    const { count: poItemsCount, error: poItemsError } = await supabase
-        .from('po_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('product_id', id);
-
-    if (!poItemsError && poItemsCount && poItemsCount > 0) {
-        throw new Error('Cannot delete product referenced in purchase orders; preserve product for audit trail.');
-    }
-
-    // 5. Cleanly delete unreferenced product without altering historical evidence
-    const { error: productError } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-
-    if (productError) {
-        logger.error('products-cleanup', 'Failed to delete unreferenced product', { error: productError.message });
-        throw productError;
-    }
+    const { data, error } = await supabase.from('products').delete().eq('id', id).select('id').single();
+    if (error) throw error;
+    if (data?.id !== id) throw new Error('Product deletion was not confirmed.');
 }

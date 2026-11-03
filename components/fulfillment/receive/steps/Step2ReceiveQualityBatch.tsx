@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { ReceiveSplitCard, SplitVariant } from '../ReceiveSplitCard';
+import type { BarcodeFeedback } from '../hooks/useReceiveBarcodeCheck';
 
 interface Step2ReceiveQualityBatchProps {
     splitVariants: SplitVariant[];
@@ -12,6 +13,7 @@ interface Step2ReceiveQualityBatchProps {
     remaining: number;
     progress: number;
     barcodeInput: { [variantId: string]: string };
+    barcodeFeedback?: { [variantId: string]: BarcodeFeedback | null };
     setBarcodeInput: React.Dispatch<React.SetStateAction<{ [variantId: string]: string }>>;
     setActiveVariantForScan: (val: string | null) => void;
     scanOnlyHandlers: {
@@ -23,6 +25,7 @@ interface Step2ReceiveQualityBatchProps {
     handleUpdateVariant: (id: string, updated: Partial<SplitVariant>) => void;
     handleAddBarcode: (variantId: string) => void;
     handleRemoveBarcode: (variantId: string, code: string) => void;
+    onDismissFeedback?: (variantId: string) => void;
     t: (key: string) => string;
 }
 
@@ -35,6 +38,7 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
     remaining,
     progress,
     barcodeInput,
+    barcodeFeedback,
     setBarcodeInput,
     setActiveVariantForScan,
     scanOnlyHandlers,
@@ -43,6 +47,7 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
     handleUpdateVariant,
     handleAddBarcode,
     handleRemoveBarcode,
+    onDismissFeedback,
     t,
 }) => {
     return (
@@ -68,11 +73,13 @@ export const Step2ReceiveQualityBatch: React.FC<Step2ReceiveQualityBatchProps> =
                         index={index}
                         totalSplits={splitVariants.length}
                         barcodeInput={barcodeInput[variant.id] || ''}
+                        barcodeFeedback={barcodeFeedback?.[variant.id]}
                         onUpdateVariant={(updated) => handleUpdateVariant(variant.id, updated)}
                         onRemoveVariant={() => handleRemoveSplit(variant.id)}
                         onBarcodeInput={(val) => setBarcodeInput(prev => ({ ...prev, [variant.id]: val }))}
                         onAddBarcode={() => handleAddBarcode(variant.id)}
                         onRemoveBarcode={(code) => handleRemoveBarcode(variant.id, code)}
+                        onDismissFeedback={() => onDismissFeedback?.(variant.id)}
                         onFocusScan={() => setActiveVariantForScan(variant.id)}
                         scanOnlyHandlers={scanOnlyHandlers}
                         t={t}

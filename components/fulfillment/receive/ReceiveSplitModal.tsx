@@ -17,6 +17,7 @@ import { Step1ReceiveIntake } from './steps/Step1ReceiveIntake';
 import { Step2ReceiveQualityBatch } from './steps/Step2ReceiveQualityBatch';
 import { Step3ReceiveHandover } from './steps/Step3ReceiveHandover';
 import { SplitVariant } from './ReceiveSplitCard';
+import { useReceiveBarcodeCheck } from './hooks/useReceiveBarcodeCheck';
 
 interface ReceiveSplitModalProps {
     splitReceivingItem: any;
@@ -97,29 +98,15 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     const remaining = Math.max(0, expectedSellable - previouslyReceived - totalScanned);
     const progress = Math.min(100, expectedSellable > 0 ? ((previouslyReceived + totalScanned) / expectedSellable) * 100 : 0);
 
-    const handleAddBarcode = (variantId: string) => {
-        const code = barcodeInput[variantId];
-        if (!code) return;
-
-        const matchedProduct = allProducts?.find(p =>
-            (p.siteId || p.site_id) === splitReceivingPO.siteId && (p.barcode === code || (Array.isArray(p.barcodes) && p.barcodes.includes(code)))
-        );
-
-        setSplitVariants(prev => prev.map(v => {
-            if (v.id === variantId) {
-                const current = v.barcodes || [];
-                if (current.includes(code)) return v;
-                return {
-                    ...v,
-                    barcodes: [...current, code],
-                    sku: (v.sku && v.sku !== 'UNKNOWN') ? v.sku : (matchedProduct?.sku || v.sku),
-                    productId: v.productId || matchedProduct?.id
-                };
-            }
-            return v;
-        }));
-        setBarcodeInput(prev => ({ ...prev, [variantId]: '' }));
-    };
+    const { barcodeFeedback, handleAddBarcode, clearBarcodeFeedback } = useReceiveBarcodeCheck({
+        splitReceivingItem,
+        siteId: splitReceivingPO?.siteId,
+        countryCode: splitReceivingPO?.countryCode || effectiveCountry,
+        allProducts,
+        setSplitVariants,
+        setBarcodeInput,
+        t
+    });
 
     const handleRemoveBarcode = (variantId: string, code: string) => {
         setSplitVariants(prev => prev.map(v => {
@@ -128,6 +115,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
             }
             return v;
         }));
+        clearBarcodeFeedback(variantId);
     };
 
     const handleAddSplit = () => {
@@ -299,6 +287,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             remaining={remaining}
                             progress={progress}
                             barcodeInput={barcodeInput}
+                            barcodeFeedback={barcodeFeedback}
                             setBarcodeInput={setBarcodeInput}
                             setActiveVariantForScan={setActiveVariantForScan}
                             scanOnlyHandlers={scanOnlyHandlers}
@@ -307,6 +296,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             handleUpdateVariant={handleUpdateVariant}
                             handleAddBarcode={handleAddBarcode}
                             handleRemoveBarcode={handleRemoveBarcode}
+                            onDismissFeedback={clearBarcodeFeedback}
                             t={t}
                         />
                     )}

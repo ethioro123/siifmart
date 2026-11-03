@@ -2,10 +2,12 @@
  * Image Storage Service
  * 
  * Handles uploading and deleting profile photos using Supabase Storage.
- * Ensures old photos are permanently deleted when new ones are uploaded.
+ * Preserves earlier identity images when a new photo is uploaded.
  */
 
 import { supabase } from '../lib/supabase';
+import { employeeAvatarSchema } from '../schemas/employee-avatar.schema';
+import { logger } from '../utils/logger';
 
 const BUCKET_NAME = 'avatars';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -78,54 +80,21 @@ function generateFileName(employeeId: string, extension: string = 'jpg'): string
 /**
  * Delete a profile photo from Supabase Storage
  */
-export async function deleteProfilePhoto(imageUrl: string): Promise<DeleteResult> {
-  try {
-    // Only attempt to delete if it's a Supabase storage URL
-    if (!isSupabaseStorageUrl(imageUrl)) {
-      return { success: true }; // Not a storage URL, nothing to delete
-    }
-
-    const path = extractPathFromUrl(imageUrl);
-    if (!path) {
-      return { success: true }; // Couldn't extract path, treat as success
-    }
-
-
-    const { error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .remove([path]);
-
-    if (error) {
-      console.error('Error deleting profile photo:', error);
-      // Don't fail the whole operation if delete fails
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error('Exception deleting profile photo:', error);
-    return { success: false, error: (error as Error).message };
-  }
+export async function deleteProfilePhoto(_imageUrl: string): Promise<DeleteResult> {
+  return { success: false, error: 'Profile photos are retained identity evidence and cannot be permanently deleted.' };
 }
 
 /**
  * Upload a new profile photo to Supabase Storage
- * Automatically deletes the old photo if provided
+ * Retains earlier versions and uploads a new uniquely named photo
  */
 export async function uploadProfilePhoto(
   employeeId: string,
   imageData: string, // base64 or blob URL
-  oldImageUrl?: string
+  _oldImageUrl?: string
 ): Promise<UploadResult> {
   try {
-    // First, delete the old photo if it exists and is in storage
-    if (oldImageUrl) {
-      const deleteResult = await deleteProfilePhoto(oldImageUrl);
-      if (!deleteResult.success) {
-        console.warn('Failed to delete old photo, continuing with upload:', deleteResult.error);
-      }
-    }
-
+    if (!employeeAvatarSchema.safeParse({ employeeId, imageData }).success) return { success: false, error: 'A valid employee and an image within the upload size limit are required.' };
     // Convert base64 to blob if necessary
     let imageBlob: Blob;
     let mimeType = 'image/jpeg';
@@ -167,7 +136,7 @@ export async function uploadProfilePhoto(
 
     // Validate MIME type
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif'];
-    if (!allowedMimeTypes.some(type => mimeType.startsWith(type.split('/')[0]))) {
+    if (!allowedMimeTypes.includes(mimeType)) {
       return {
         success: false,
         error: `Unsupported image format: ${mimeType}. Please use JPG, PNG, GIF, or WebP.`
@@ -188,7 +157,7 @@ export async function uploadProfilePhoto(
       });
 
     if (error) {
-      console.error('Error uploading profile photo:', error);
+      logger.error('imageStorage', 'Error uploading profile photo:', error);
 
       // Parse specific Supabase errors for better feedback
       const errorMessage = error.message.toLowerCase();
@@ -220,7 +189,7 @@ export async function uploadProfilePhoto(
       path: data.path
     };
   } catch (error) {
-    console.error('Exception uploading profile photo:', error);
+    logger.error('imageStorage', 'Exception uploading profile photo:', error);
     return { success: false, error: (error as Error).message };
   }
 }
@@ -228,40 +197,8 @@ export async function uploadProfilePhoto(
 /**
  * Clean up all profile photos for an employee (used when deleting employee)
  */
-export async function deleteAllEmployeePhotos(employeeId: string): Promise<DeleteResult> {
-  try {
-    const folderPath = `profile-photos/${employeeId}`;
-
-    // List all files in the employee's folder
-    const { data: files, error: listError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .list(folderPath);
-
-    if (listError) {
-      console.error('Error listing employee photos:', listError);
-      return { success: false, error: listError.message };
-    }
-
-    if (!files || files.length === 0) {
-      return { success: true }; // No files to delete
-    }
-
-    // Delete all files
-    const filePaths = files.map(file => `${folderPath}/${file.name}`);
-    const { error: deleteError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .remove(filePaths);
-
-    if (deleteError) {
-      console.error('Error deleting employee photos:', deleteError);
-      return { success: false, error: deleteError.message };
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error('Exception deleting employee photos:', error);
-    return { success: false, error: (error as Error).message };
-  }
+export async function deleteAllEmployeePhotos(_employeeId: string): Promise<DeleteResult> {
+  return { success: false, error: 'Employee photo history is retained and cannot be permanently deleted.' };
 }
 
 /**
@@ -269,32 +206,7 @@ export async function deleteAllEmployeePhotos(employeeId: string): Promise<Delet
  * This should be called once during app initialization
  */
 export async function initializeAvatarsBucket(): Promise<void> {
-  try {
-    // Check if bucket exists
-    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-
-    if (listError) {
-      // If we can't list buckets, it's usually an RLS restriction on the buckets table.
-      // This is expected for standard users. We'll assume the bucket exists 
-      // if we've run the SQL migrations.
-      return;
-    }
-
-    const bucketExists = buckets?.some(b => b.name === BUCKET_NAME);
-
-    if (!bucketExists) {
-      const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
-        public: true,
-        fileSizeLimit: MAX_FILE_SIZE
-      });
-
-      if (createError) {
-        // Silently fail - if they can't create it here, it must be created via SQL
-      }
-    }
-  } catch (error) {
-    console.warn('[Storage] Error initializing avatars bucket:', error);
-  }
+  // Buckets and their permissions are provisioned by trusted migrations.
 }
 
 export const imageStorageService = {
