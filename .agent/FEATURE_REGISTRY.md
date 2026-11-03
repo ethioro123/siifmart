@@ -491,3 +491,4 @@
 - Delegated Governance Framework (2026-10-28): Calibrated PO limits (10M Regional / 100M Country), operating expense limits (2M Regional / 20M Country, >20M Group CFO/CEO escalation), HR fast-path hiring within quota/band, CMD +10 buffer escalation, zero self-approval, and POS cash refund 6-digit OTP dual control. Migrations `20261028_calibrate_operating_expense_limits.sql` and `20261028_sync_unified_approval_inbox_limits.sql`.
 
 Additional historical entries: [30 October feature history](FEATURE_HISTORY_20261030.md).
+- 2026-11-03: Area operations now uses explicit store assignments, scoped server metrics, a dedicated store overview, narrow read and transfer-request permissions, and database guards against region-wide or sensitive writes. Four migrations applied to staging and production.
