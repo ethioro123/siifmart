@@ -7,6 +7,7 @@ import type { Region, Site, Employee, SaleRecord, PurchaseOrder, TransferRecord,
 import { Country, getCountryProfile } from '../utils/localization';
 import { normalizeCountryCode } from '../utils/siteIdGenerator';
 import { useRegionalDataQueries } from './useRegionalDataQueries';
+import { useAreaStoreMetrics } from './useAreaStoreMetrics';
 
 export interface OverrideVelocityBreach {
   siteId: string;
@@ -33,6 +34,8 @@ export interface RegionalOperationsData {
   currentRegion: Region | null;
   sovereignRegions: Region[];
   isAuditInspection: boolean;
+  isAreaManager: boolean;
+  areaMetricsUnavailable: boolean;
   activeCountry: Country;
   currencySymbol: string;
   regionalSites: Site[];
@@ -140,6 +143,10 @@ export function useRegionalOperationsData(): RegionalOperationsData {
   }, [lockedUserRegion, isHQExecutive, urlRegionParam, activeRegionCode, sovereignRegions, activeCountry]);
 
   const isAuditInspection = Boolean(isHQExecutive && !lockedUserRegion);
+  const isAreaManager = user?.role === 'area_operations_manager';
+  const { data: areaStoreMetrics = [], isPending: areaMetricsPending, isError: areaMetricsError } =
+    useAreaStoreMetrics(user?.id, activeCountry, isAreaManager);
+  const areaMetricsUnavailable = isAreaManager && (areaMetricsPending || areaMetricsError);
 
   const currentRegion = useMemo(() => {
     return sovereignRegions.find(r => r.code === effectiveRegionCode) || null;
@@ -149,9 +156,10 @@ export function useRegionalOperationsData(): RegionalOperationsData {
   const regionalSites = useMemo(() => {
     return sites.filter(s => {
       const siteRegion = s.regionCode || (s as any).region_code;
-      return siteRegion === effectiveRegionCode;
+      return siteRegion === effectiveRegionCode && normalizeCountryCode(s.country) === normalizeCountryCode(activeCountry)
+        && (!isAreaManager || (s.type === 'Store' && s.areaManagerId === user?.id));
     });
-  }, [sites, effectiveRegionCode]);
+  }, [sites, effectiveRegionCode, activeCountry, isAreaManager, user?.id]);
 
   const regionalSiteIds = useMemo(() => {
     return new Set(regionalSites.map(s => s.id));
@@ -192,6 +200,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
 
   // Filter Regional Workforce (prioritizing direct territorial query)
   const regionalEmployees = useMemo(() => {
+    if (isAreaManager) return queriedEmployees.filter(e => e.siteId && regionalSiteIds.has(e.siteId));
     if (queriedEmployees.length > 0) return queriedEmployees;
     return employees.filter(e => {
       const empRegion = e.regionCode || (e as any).region_code;
@@ -199,16 +208,18 @@ export function useRegionalOperationsData(): RegionalOperationsData {
       if (e.siteId && regionalSiteIds.has(e.siteId)) return true;
       return false;
     });
-  }, [queriedEmployees, employees, effectiveRegionCode, regionalSiteIds]);
+  }, [queriedEmployees, employees, effectiveRegionCode, regionalSiteIds, isAreaManager]);
 
   // Filter Regional Sales (prioritizing direct territorial query)
   const regionalSales = useMemo(() => {
+    if (isAreaManager) return queriedSales.filter(s => regionalSiteIds.has(s.siteId));
     if (queriedSales.length > 0) return queriedSales;
     return allSales.filter(s => regionalSiteIds.has(s.siteId));
-  }, [queriedSales, allSales, regionalSiteIds]);
+  }, [queriedSales, allSales, regionalSiteIds, isAreaManager]);
 
   // Filter Regional Purchase Orders (prioritizing direct territorial query)
   const regionalOrders = useMemo(() => {
+    if (isAreaManager) return queriedOrders.filter(o => o.siteId && regionalSiteIds.has(o.siteId));
     if (queriedOrders.length > 0) return queriedOrders;
     return allOrders.filter(o => {
       const poRegion = o.regionCode || (o as any).region_code;
@@ -216,16 +227,16 @@ export function useRegionalOperationsData(): RegionalOperationsData {
       if (o.siteId && regionalSiteIds.has(o.siteId)) return true;
       return false;
     });
-  }, [queriedOrders, allOrders, effectiveRegionCode, regionalSiteIds]);
+  }, [queriedOrders, allOrders, effectiveRegionCode, regionalSiteIds, isAreaManager]);
 
   // Filter Regional Transfers (originating or terminating in region)
   const regionalTransfers = useMemo(() => {
     return queriedTransfers.filter(t => {
       const srcMatch = t.sourceRegionCode === effectiveRegionCode || regionalSiteIds.has(t.sourceSiteId);
       const dstMatch = t.destRegionCode === effectiveRegionCode || regionalSiteIds.has(t.destSiteId);
-      return srcMatch || dstMatch;
+      return isAreaManager ? (regionalSiteIds.has(t.sourceSiteId) || regionalSiteIds.has(t.destSiteId)) : (srcMatch || dstMatch);
     });
-  }, [queriedTransfers, effectiveRegionCode, regionalSiteIds]);
+  }, [queriedTransfers, effectiveRegionCode, regionalSiteIds, isAreaManager]);
 
   const intraRegionalTransfers = useMemo(() => {
     return regionalTransfers.filter(t => {
@@ -241,9 +252,10 @@ export function useRegionalOperationsData(): RegionalOperationsData {
 
   // Filter Regional Shifts (prioritizing direct territorial query)
   const regionalShifts = useMemo(() => {
+    if (isAreaManager) return queriedShifts.filter(s => regionalSiteIds.has(s.siteId));
     if (queriedShifts.length > 0) return queriedShifts;
     return shifts.filter(s => regionalSiteIds.has(s.siteId));
-  }, [queriedShifts, shifts, regionalSiteIds]);
+  }, [queriedShifts, shifts, regionalSiteIds, isAreaManager]);
 
   // Real-time Metrics Aggregation
   const todayPrefix = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -356,9 +368,10 @@ export function useRegionalOperationsData(): RegionalOperationsData {
 
   // Regional Catalog & Stock Valuation (prioritizing direct territorial query)
   const regionalProducts = useMemo(() => {
+    if (isAreaManager) return queriedProducts.filter(p => p.siteId && regionalSiteIds.has(p.siteId));
     if (queriedProducts.length > 0) return queriedProducts;
     return allProducts.filter(p => !p.siteId || regionalSiteIds.has(p.siteId));
-  }, [queriedProducts, allProducts, regionalSiteIds]);
+  }, [queriedProducts, allProducts, regionalSiteIds, isAreaManager]);
 
   const inventoryMetrics = useMemo(() => {
     const totalValue = regionalProducts.reduce((sum, p) => sum + ((p.price || 0) * (p.stock || 0)), 0);
@@ -381,20 +394,20 @@ export function useRegionalOperationsData(): RegionalOperationsData {
   }, [regionalOrders]);
 
   const fulfillmentMetrics = useMemo(() => {
-    const processingSales = regionalSales.filter(s => s.status === 'Pending');
     return {
-      pendingPicks: processingSales.length * 2,
-      inProgressPacks: Math.max(processingSales.length > 0 ? 1 : 0, Math.floor(processingSales.length * 1.2)),
+      pendingPicks: 0,
+      inProgressPacks: 0,
       pendingInboundShipments
     };
-  }, [regionalSales, pendingInboundShipments]);
+  }, [pendingInboundShipments]);
 
   // Regional Site Performance Ranking
   const sitePerformance: RegionalSitePerformance[] = useMemo(() => {
     return regionalSites.map(site => {
       const siteSales = regionalSales.filter(s => s.siteId === site.id);
-      const revenue = siteSales.reduce((acc, curr) => acc + (curr.total || 0), 0);
-      const staffCount = regionalEmployees.filter(e => e.siteId === site.id).length;
+      const exact = isAreaManager ? areaStoreMetrics.find(m => m.site_id === site.id) : undefined;
+      const revenue = exact?.monthly_sales_total ?? siteSales.reduce((acc, curr) => acc + (curr.total || 0), 0);
+      const staffCount = exact?.staff_count ?? regionalEmployees.filter(e => e.siteId === site.id).length;
       const lowStock = regionalProducts.filter(p => p.siteId === site.id && ((p.stock < 10 && p.stock > 0) || p.status === 'low_stock')).length;
 
       return {
@@ -402,12 +415,12 @@ export function useRegionalOperationsData(): RegionalOperationsData {
         name: site.name,
         type: site.type || 'Store',
         revenue,
-        transactionCount: siteSales.length,
+        transactionCount: exact?.today_sales_count ?? siteSales.length,
         staffCount,
         lowStockCount: lowStock
       };
     }).sort((a, b) => b.revenue - a.revenue);
-  }, [regionalSites, regionalSales, regionalEmployees, regionalProducts]);
+  }, [regionalSites, regionalSales, regionalEmployees, regionalProducts, isAreaManager, areaStoreMetrics]);
 
   // Top Selling Products in Territory
   const topProducts = useMemo(() => {
@@ -431,6 +444,8 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     currentRegion,
     sovereignRegions,
     isAuditInspection,
+    isAreaManager,
+    areaMetricsUnavailable,
     activeCountry,
     currencySymbol,
     regionalSites,
@@ -447,19 +462,19 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     sitePerformance,
     topProducts,
     metrics: {
-      openRegistersCount,
+      openRegistersCount: isAreaManager ? areaStoreMetrics.reduce((sum, m) => sum + m.open_register_count, 0) : openRegistersCount,
       activeShiftsCount,
-      todaySalesTotal,
-      todaySalesCount: todaySales.length,
-      monthlySalesTotal,
-      monthlySpent,
+      todaySalesTotal: isAreaManager ? areaStoreMetrics.reduce((sum, m) => sum + m.today_sales_total, 0) : todaySalesTotal,
+      todaySalesCount: isAreaManager ? areaStoreMetrics.reduce((sum, m) => sum + m.today_sales_count, 0) : todaySales.length,
+      monthlySalesTotal: isAreaManager ? areaStoreMetrics.reduce((sum, m) => sum + m.monthly_sales_total, 0) : monthlySalesTotal,
+      monthlySpent: isAreaManager ? areaStoreMetrics.reduce((sum, m) => sum + m.monthly_po_spend, 0) : monthlySpent,
       monthlyBudget,
       budgetPercent,
       isOverBudget,
       isNearCap,
       autonomousLimit,
-      pendingAutonomousPOCount: pendingAutonomousPOs.length,
-      pendingEscalatedPOCount: pendingEscalatedPOs.length,
+      pendingAutonomousPOCount: isAreaManager ? 0 : pendingAutonomousPOs.length,
+      pendingEscalatedPOCount: isAreaManager ? areaStoreMetrics.reduce((sum, m) => sum + m.escalated_po_count, 0) : pendingEscalatedPOs.length,
       pendingCandidateCount: pendingCandidateTalent.length,
       varianceShiftCount: varianceShifts.length,
       discrepancyTransferCount: discrepancyTransfers.length,

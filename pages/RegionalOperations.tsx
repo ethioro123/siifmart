@@ -20,6 +20,7 @@ import { RegionalLPIncidentDeck } from '../components/regional-ops/RegionalLPInc
 import { RegionalOperationalDigest } from '../components/regional-ops/RegionalOperationalDigest';
 import { RegionalInventoryHealthDeck } from '../components/regional-ops/RegionalInventoryHealthDeck';
 import { RegionalVelocityDeck } from '../components/regional-ops/RegionalVelocityDeck';
+import AreaOperations from './AreaOperations';
 
 type RegionalDeskTab = 'facilities' | 'leaderboard' | 'transfers' | 'procurement' | 'workforce' | 'loss_prevention';
 
@@ -50,6 +51,7 @@ export default function RegionalOperations() {
   const navigate = useNavigate();
   const { user } = useStore();
   const [activeTab, setActiveTab] = useState<RegionalDeskTab>(() => getDefaultRegionalDeskTab(user?.role));
+  const areaData = useRegionalOperationsData();
 
   const {
     regionCode,
@@ -76,7 +78,9 @@ export default function RegionalOperations() {
     varianceShifts,
     discrepancyTransfers,
     overrideVelocityBreaches
-  } = useRegionalOperationsData();
+  } = areaData;
+
+  if (areaData.isAreaManager) return <AreaOperations data={areaData} />;
 
   const regionName = currentRegion?.name || regionCode || 'Territory';
   const countryName = getCountryProfile(activeCountry).name.split(' (')[0];
