@@ -127,12 +127,13 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             expectedDate, ...poDelivery, poPriority, quantityDistribution,
             newPOItems, poNotes, paymentTerms, incoterms, shippingCost, discountRate, taxRate,
             itemForm: itemFormRef.current?.getDraft() || null, editingItemIndex: fullEditingIndex
-        }, supplierName, true);
-        if (result !== 'saved') {
+        }, supplierName, false);
+        if (result === 'saved') {
+            showToast('PO draft paused and saved in session. You can resume it anytime.', 'success');
+        } else if (result === 'failed') {
             showToast('Could not save the PO draft. Keep this window open and try again.', 'error');
             return;
         }
-        showToast('PO draft paused and saved in session. You can resume it anytime.', 'success');
         onClose();
     };
 
@@ -359,6 +360,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     };
 
     const isPendingAction = isSubmitting || createPOMutation.isPending || updatePOMutation.isPending;
+    const hasDraftContent = Boolean(newPOItems.length > 0 || newPOSupplier || manualVendorName.trim() || poNotes.trim() || hasUnsavedItemDraft);
 
     return (
         <Modal
@@ -377,6 +379,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     isEditMode={isEditMode}
                     itemsCount={newPOItems.length}
                     hasUnsavedItemDraft={hasUnsavedItemDraft}
+                    hasDraftContent={hasDraftContent}
                 />
             }
         >

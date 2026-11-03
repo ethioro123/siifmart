@@ -11,6 +11,7 @@ interface CreatePOFooterProps {
     isEditMode: boolean;
     itemsCount: number;
     hasUnsavedItemDraft?: boolean;
+    hasDraftContent?: boolean;
 }
 
 export const CreatePOFooter: React.FC<CreatePOFooterProps> = ({
@@ -21,7 +22,8 @@ export const CreatePOFooter: React.FC<CreatePOFooterProps> = ({
     isPendingAction,
     isEditMode,
     itemsCount,
-    hasUnsavedItemDraft = false
+    hasUnsavedItemDraft = false,
+    hasDraftContent = false
 }) => {
     return (
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center w-full min-w-0">
@@ -45,7 +47,7 @@ export const CreatePOFooter: React.FC<CreatePOFooterProps> = ({
                     onClick={onClose}
                     className="min-h-11 flex-1 sm:flex-none whitespace-nowrap px-4 py-2.5 rounded-full text-xs font-semibold transition-colors text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-pointer active:scale-[0.98]"
                 >
-                    {isEditMode ? 'Cancel' : 'Pause & Save'}
+                    {isEditMode ? 'Cancel' : (hasDraftContent || itemsCount > 0 ? 'Pause & Save' : 'Cancel')}
                 </button>
                 <button
                     onClick={onCreatePO}

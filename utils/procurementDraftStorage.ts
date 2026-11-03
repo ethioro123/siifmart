@@ -166,7 +166,7 @@ export function saveStoredPODraft({
 }: SaveStoredPODraftParams): StoredPODraft | null {
     if (typeof window === 'undefined') return null;
 
-    const hasContent = force ||
+    const hasContent =
         Boolean(data.itemForm) ||
         (data.newPOItems && data.newPOItems.length > 0) ||
         Boolean(data.newPOSupplier) ||

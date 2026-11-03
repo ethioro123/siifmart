@@ -188,4 +188,35 @@ describe('Multi-Purchase-Order Paused Drafts Storage', () => {
         expect(drafts[0].id).toBe('legacy-draft-1');
         expect(drafts[0].meta.supplierDisplay).toBe('Legacy Grain Suppliers');
     });
+
+    it('does not save a draft when the payload is completely empty', () => {
+        const emptyPayload: PODraftPayload = {
+            isManualVendor: false,
+            manualVendorName: '',
+            newPOSupplier: '',
+            destinationSiteIds: ['wh-1'],
+            expectedDate: '',
+            tempReq: 'Ambient',
+            shelfLife: '',
+            dockSlot: '',
+            poPriority: 'Normal',
+            quantityDistribution: 'per-store',
+            newPOItems: [],
+            poNotes: '',
+            paymentTerms: '',
+            incoterms: '',
+            shippingCost: 0,
+            discountRate: 0,
+            taxRate: 0
+        };
+
+        const result = saveStoredPODraft({
+            data: emptyPayload,
+            countryCode: 'ET',
+            userId: 'buyer-01'
+        });
+
+        expect(result).toBeNull();
+        expect(listStoredPODrafts('ET', 'buyer-01').length).toBe(0);
+    });
 });
