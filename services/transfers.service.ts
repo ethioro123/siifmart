@@ -359,12 +359,7 @@ export const transfersService = {
         return mapTransferRow(data);
     },
 
-    async delete(id: string): Promise<void> {
-        const { error } = await supabase
-            .from('transfers')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
+    async delete(_id: string): Promise<never> {
+        throw new Error('Transfer records are retained. Use cancellation before dispatch or a return after dispatch.');
     }
 };

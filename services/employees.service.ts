@@ -451,12 +451,7 @@ export const employeesService = {
         }
     },
 
-    async delete(id: string) {
-        const { error } = await supabase
-            .from('employees')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
+    async delete(_id: string): Promise<never> {
+        throw new Error('Employee records are retained. Submit an independent offboarding review.');
     }
 };

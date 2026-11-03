@@ -370,33 +370,8 @@ export const sitesService = {
         }
     },
 
-    async delete(id: string) {
-        // Zero-trust check: Cannot delete the primary Administration site for a country
-        const { data: targetSite } = await supabase
-            .from('sites')
-            .select('*')
-            .eq('id', id)
-            .maybeSingle();
-
-        if (targetSite && ['Administration', 'Administrative', 'HQ', 'Headquarters', 'Central Operations'].includes(targetSite.type)) {
-            const siteCountry = targetSite.country || 'ET';
-            const { data: adminSites } = await supabase
-                .from('sites')
-                .select('id')
-                .eq('country', siteCountry)
-                .in('type', ['Administration', 'Administrative', 'HQ', 'Headquarters', 'Central Operations']);
-
-            if (!adminSites || adminSites.length <= 1) {
-                throw new Error(`Cannot delete primary Administration HQ for country ${siteCountry}. Every country must retain an Administration central site.`);
-            }
-        }
-
-        const { error } = await supabase
-            .from('sites')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
+    async delete(_id: string): Promise<never> {
+        throw new Error('Facility records are retained. Use a reviewed facility closure.');
     },
 
     async getAllActiveFulfillmentNodes() {

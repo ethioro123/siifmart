@@ -186,37 +186,8 @@ export function useEmployeeActions({
    };
 
    const handleConfirmDelete = async () => {
-      if (!employeeToDelete) return;
-      if (deleteInput !== "DELETE") {
-         addNotification('alert', 'Please type "DELETE" to confirm.');
-         return;
-      }
-
-      try {
-         await imageStorageService.deleteAllEmployeePhotos(employeeToDelete.id);
-         if (employeeToDelete.avatar) {
-            await imageStorageService.deleteProfilePhoto(employeeToDelete.avatar);
-         }
-
-         const result = deleteEmployee(employeeToDelete.id, user?.name || 'System');
-         if (result instanceof Promise) await result;
-
-         systemLogsService.logHR(
-            'EMPLOYEE_DELETED',
-            `Permanently deleted employee ${employeeToDelete.name} (${employeeToDelete.code || employeeToDelete.id})`,
-            { id: user?.id, role: user?.role, name: user?.name },
-            'CRITICAL',
-            { employeeId: employeeToDelete.id, role: employeeToDelete.role }
-         );
-
-         addNotification('success', `Employee ${employeeToDelete.name} has been permanently deleted.`);
-         setIsDeleteModalOpen(false);
-         setEmployeeToDelete(null);
-         setDeleteInput('');
-      } catch (error) {
-         logger.error('useEmployeeActions', 'Error deleting employee:', error);
-         addNotification('alert', 'Failed to delete employee');
-      }
+      addNotification('alert', 'Employee history is protected. Use an independent offboarding review.');
+      setIsDeleteModalOpen(false);
    };
 
    const handleTerminateEmployee = async (
@@ -266,19 +237,7 @@ export function useEmployeeActions({
             reconciliation_notes: terminationDetails?.reconciliationNotes
          });
 
-         // 2. If Super Admin, execute immediate sign-off under supervisory executive authority
-         if (user?.role === 'group_ceo') {
-            await terminationsService.approveTermination(proposed.id, {
-               id: user.id || 'group_ceo',
-               name: user.name || 'Super Admin',
-               role: 'group_ceo'
-            });
-            const result = updateEmployee({ ...employee, status: 'Terminated' }, user?.name || 'System');
-            if (result instanceof Promise) await result;
-            addNotification('success', `Employee ${employee.name} offboarded and terminated.`);
-         } else {
-            addNotification('info', `Termination proposal for ${employee.name} submitted for 4-Eyes dual approval.`);
-         }
+         addNotification('info', `Termination proposal for ${employee.name} submitted for independent review.`);
 
          return true;
       } catch (error: any) {
