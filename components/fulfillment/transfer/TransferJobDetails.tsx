@@ -1,17 +1,14 @@
+import { useNavigate } from 'react-router-dom';
 import { TransferEvidenceTimeline } from '../../shared/TransferEvidenceTimeline';
 import { useApproveTransferPicking } from '../../../hooks/useApproveTransferPicking';
 import { canInspectTransferArrival } from '../../../utils/shipmentWorkflow';
 import React, { useState } from 'react';
-import { X, Package, CheckCircle, XCircle, Trash2, Truck, Clock, ArrowRight, Loader2 } from 'lucide-react';
+import { X, Package, CheckCircle, XCircle, ClipboardCheck, Truck, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { WMSJob, Product, User, Site, ReceivingItem } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { supabase } from '../../../lib/supabase';
-import { productsService } from '../../../services/products.service';
-import { systemLogsService } from '../../../services/system-logs.service';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
-import { logger } from '../../../utils/logger';
 import { canDeleteTransferManifest, isTransferManager } from '../../../utils/transferGovernance';
 import { TransferLineItemRow } from './TransferLineItemRow';
 
@@ -50,6 +47,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     onResolveDiscrepancy
 }) => {
     const { t } = useLanguage();
+    const navigate = useNavigate();
     const { settings, effectiveCountry } = useData();
     const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
     const approval = useApproveTransferPicking();
@@ -92,95 +90,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
         }
     };
 
-    const handleDelete = async () => {
-        if (!window.confirm('Delete this transfer manifest?')) return;
-        setLoading('delete');
-        try {
-            const perm = canDeleteTransferManifest(selectedJob, user);
-            if (!perm.canDelete) {
-                addNotification('alert', perm.reason || 'Manifest cannot be deleted.');
-                setLoading(null);
-                return;
-            }
-
-            const { data: childPickJobs, error: checkError } = await supabase
-                .from('wms_jobs')
-                .select('status')
-                .eq('type', 'PICK')
-                .or(`order_ref.eq.${selectedJob.id},order_ref.eq.${selectedJob.jobNumber}`);
-
-            if (checkError) {
-                logger.error('TransferJobDetails', 'Failed to check child pick jobs:', checkError);
-            }
-
-            const isPickActiveOrDone = childPickJobs?.some((j: any) =>
-                ['Completed', 'Picking', 'In-Progress'].includes(j.status)
-            );
-            if (isPickActiveOrDone) {
-                addNotification('alert', 'Cannot delete manifest: picking is already in progress or completed.');
-                setLoading(null);
-                return;
-            }
-
-            const { error: deleteChildrenError } = await supabase
-                .from('wms_jobs')
-                .delete()
-                .or(`order_ref.eq.${selectedJob.id},order_ref.eq.${selectedJob.jobNumber}`);
-
-            if (deleteChildrenError) {
-                logger.error('TransferJobDetails', 'Failed to delete child jobs:', deleteChildrenError);
-            }
-
-            // Clean up mirrored transfer row if present
-            await supabase
-                .from('transfers')
-                .delete()
-                .or(`id.eq.${selectedJob.id},order_ref.eq.${selectedJob.id},order_ref.eq.${selectedJob.jobNumber}`);
-
-            await wmsJobsService.delete(selectedJob.id);
-
-            // Audit log high-risk deletion under Zero-Trust Rule 5
-            await systemLogsService.create({
-                action: 'TRANSFER_MANIFEST_DELETED',
-                module: 'Fulfillment',
-                site_id: selectedJob.sourceSiteId || selectedJob.siteId || activeSite?.id,
-                country_code: (selectedJob as any).country_code || (selectedJob as any).countryCode || activeSite?.country || 'ET',
-                user_name: user?.name || 'Unknown',
-                employee_id: user?.id,
-                details: {
-                    manifestId: selectedJob.id,
-                    jobNumber: selectedJob.jobNumber,
-                    transferStatus: selectedJob.transferStatus,
-                    requestedBy: selectedJob.requestedBy,
-                    sourceSiteId: selectedJob.sourceSiteId,
-                    destSiteId: selectedJob.destSiteId,
-                    itemsCount: resolvedLineItems.length
-                }
-            }).catch(err => {
-                logger.error('TransferJobDetails', 'Failed to record audit log:', err);
-            });
-
-            addNotification('success', 'Manifest deleted successfully');
-
-            const lineItems = selectedJob.lineItems || (selectedJob as any).line_items || [];
-            for (const item of lineItems) {
-                const product = products.find(p => p.id === item.productId || p.sku === item.sku);
-                if (product) {
-                    productsService.handleAutoReplenish(product).catch(err => {
-                        logger.error('TransferJobDetails', 'Failed to restart auto-replenish for', product.sku, err);
-                    });
-                }
-            }
-
-            await refreshData();
-            setSelectedJob(null);
-        } catch (e: any) {
-            addNotification('alert', 'Failed to delete manifest');
-            logger.error('TransferJobDetails', e, new Error(String(e)));
-        } finally {
-            setLoading(null);
-        }
-    };
+    const handleDelete = () => navigate('/approvals');
 
     const resolvedLineItems = (selectedJob.lineItems && selectedJob.lineItems.length > 0)
         ? selectedJob.lineItems
@@ -356,7 +266,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 disabled={loading !== null}
                                 className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-bg-subtle)] bg-[var(--theme-status-danger-bg)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
-                                {loading === 'delete' ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                                <ClipboardCheck size={14} />
                                 <span>{t('warehouse.deleteManifest')}</span>
                             </button>
                         )}

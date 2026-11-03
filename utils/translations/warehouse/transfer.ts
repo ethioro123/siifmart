@@ -194,9 +194,9 @@ export const transfer: any = {
         or: 'Kuffisi / Didi'
     },
     deleteManifest: {
-        en: 'Delete Manifest',
-        am: 'ማኒፌስቱን ሰርዝ',
-        or: 'Galmee Dabarsaa Haqi'
+        en: 'Open cancellation reviews',
+        am: 'የስረዛ ግምገማዎችን ክፈት',
+        or: 'Sakatta’iinsa haqinsaa bani'
     },
     resolveDiscrepancy: {
         en: 'Resolve',

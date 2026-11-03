@@ -136,29 +136,13 @@ export const purchaseOrdersLifecycleService = {
     },
 
     async cancel(id: string, reason?: string): Promise<PurchaseOrder> {
-        const currentPO = await getById(id);
-        if (currentPO && currentPO.status !== 'Draft') {
-            throw new Error('Submit a PO cancellation request in Approvals → Record lifecycle. Approved or executed orders require a reversal.');
-        }
-
-        const currentNotes = currentPO?.notes || '';
-        const cancelTag = reason ? `\n[CANCELLED: ${reason}]` : '\n[CANCELLED]';
-
-        const { error } = await supabase
-            .from('purchase_orders')
-            .update({ 
-                status: 'Cancelled',
-                notes: currentNotes + cancelTag,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', id);
-
-        if (error) {
-            logger.error('PurchaseOrdersLifecycleService', 'Failed to cancel PO', error as Error);
-            throw error;
-        }
+        const { data, error } = await supabase.rpc('discard_own_purchase_order_draft', {
+            p_po_id: id, p_reason: reason?.trim() || 'Unsubmitted draft no longer required by its preparer'
+        });
+        if (error) throw error;
+        if (data?.po_id !== id || data.status !== 'Cancelled') throw new Error('The server did not confirm draft cancellation.');
         const updated = await getById(id);
-        if (!updated) throw new Error('Purchase Order not found after update');
+        if (!updated || updated.status !== 'Cancelled') throw new Error('Cancelled draft could not be verified.');
         return updated;
     }
 };

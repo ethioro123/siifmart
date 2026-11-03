@@ -9,7 +9,24 @@ export function useRecordLifecycle(actor: string, country: string, open: boolean
     recordLifecycleService.request(input.kind, input.targetId, input.reason, input.evidence), onSuccess: () => cache.invalidateQueries({ queryKey: key }) });
   const decide = useMutation({ mutationFn: (input: { id: string; decision: 'approve' | 'reject' | 'withdraw'; reason: string }) => recordLifecycleService.decide(input.id, input.decision, input.reason),
     onSuccess: async (result) => {
+      const record = list.data?.rows.find(row => row.id === result.request_id);
       await Promise.all([cache.invalidateQueries({ queryKey: key }), cache.invalidateQueries({ queryKey: ['lifecycle-events', actor, result.request_id] })]);
+      if (result.status === 'Applied' && record) {
+        await cache.invalidateQueries({ queryKey: ['lifecycle-targets', actor, country, record.kind] });
+        await cache.invalidateQueries({ predicate: query => {
+          const k = query.queryKey;
+          if (k[0] === 'regional-operating-summary') return k[1] === actor && k[2] === record.region_code && k[3] === country;
+          if (record.kind === 'site' && k[0] === 'sites') return k[1] === actor && k[2] === country;
+          if (record.kind === 'employee') return (k[0] === 'employees' && k[1] === record.site_id)
+            || (k[0] === 'regional-employees' && k[1] === record.region_code);
+          if (record.kind === 'purchase_order') return (k[0] === 'orders' && k[1] === record.site_id)
+            || (k[0] === 'regional-orders' && k[1] === record.region_code)
+            || (k[0] === 'purchase_orders' && k[1] === country && (k[2] === '' || String(k[2]).split(',').includes(record.site_id)));
+          if (record.kind === 'transfer') return (k[0] === 'transfers' && k[1] === record.site_id)
+            || (k[0] === 'regional-transfers' && k[1] === record.region_code);
+          return record.kind === 'warehouse_job' && k[0] === 'jobs' && k[1] === record.site_id;
+        } });
+      }
     } });
   return { list, request, decide };
 }

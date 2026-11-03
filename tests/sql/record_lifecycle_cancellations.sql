@@ -1,7 +1,7 @@
 BEGIN;
 CREATE TEMP TABLE lifecycle_cancellation_results(test text);
 DO $$
-DECLARE requester public.employees%ROWTYPE; proc public.employees%ROWTYPE; logistics public.employees%ROWTYPE;
+DECLARE buyer public.employees%ROWTYPE; requester public.employees%ROWTYPE; proc public.employees%ROWTYPE; logistics public.employees%ROWTYPE;
  compliance_a public.employees%ROWTYPE; compliance_b public.employees%ROWTYPE;
  source uuid; destination uuid; po uuid:=gen_random_uuid(); po_with_receipt uuid:=gen_random_uuid(); transfer_id uuid:=gen_random_uuid(); job uuid:=gen_random_uuid();
  req uuid; held uuid; result jsonb;
@@ -92,6 +92,26 @@ BEGIN
  result:=public.decide_record_lifecycle(req,true,'Logistics reviewed the unassigned warehouse draft');
  IF result->>'status'<>'Applied' OR (SELECT status FROM public.wms_jobs WHERE id=job)<>'Cancelled' THEN RAISE EXCEPTION 'Warehouse draft cancellation not applied'; END IF;
  INSERT INTO lifecycle_cancellation_results VALUES('warehouse draft retained as cancelled after review');
+ SELECT e.* INTO buyer FROM public.employees e JOIN public.sites home ON home.id=e.site_id
+ WHERE e.role='buyer' AND e.status='Active' AND home.country='ET' AND e.region_code=requester.region_code LIMIT 1;
+ IF buyer.id IS NULL THEN RAISE EXCEPTION 'Staging buyer fixture missing'; END IF;
+ PERFORM set_config('request.jwt.claim.sub','',true);
+ INSERT INTO public.purchase_orders(supplier_name,total_amount,items_count,status,site_id,country_code,region_code,created_by,requested_by)
+ VALUES('Lifecycle own-draft fixture',100,0,'Draft',source,'ET',requester.region_code,buyer.id::text,buyer.name) RETURNING id INTO po;
+ PERFORM set_config('request.jwt.claim.sub',proc.id::text,true);
+ BEGIN
+   PERFORM public.discard_own_purchase_order_draft(po,'Another manager must not discard the buyer draft');
+   RAISE EXCEPTION 'Unexpected other-preparer discard';
+ EXCEPTION WHEN OTHERS THEN IF SQLERRM NOT LIKE '%Only the preparer%' THEN RAISE; END IF; END;
+ INSERT INTO lifecycle_cancellation_results VALUES('another manager cannot discard the preparer draft');
+ PERFORM set_config('request.jwt.claim.sub',buyer.id::text,true);
+ result:=public.discard_own_purchase_order_draft(po,'Buyer no longer requires this unsubmitted draft');
+ IF result->>'status'<>'Cancelled' OR (SELECT status FROM public.purchase_orders WHERE id=po)<>'Cancelled' THEN
+   RAISE EXCEPTION 'Own draft discard failed'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.record_lifecycle_events WHERE request_id=(result->>'request_id')::uuid AND action='Draft discarded') THEN
+   RAISE EXCEPTION 'Draft discard missing audit event'; END IF;
+ INSERT INTO lifecycle_cancellation_results VALUES('buyer discards own draft with retained record and audit evidence');
+
 END;
 $$;
 SELECT * FROM lifecycle_cancellation_results;
