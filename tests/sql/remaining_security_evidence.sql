@@ -2,7 +2,7 @@
 BEGIN;
 CREATE TEMP TABLE remaining_security_results(test text);
 DO $$
-DECLARE person public.employees%ROWTYPE; hr public.employees%ROWTYPE; foreign_employee uuid; inactive uuid;
+DECLARE person public.employees%ROWTYPE; hr public.employees%ROWTYPE; foreign_employee uuid; inactive uuid; deleter uuid;
  ops public.employees%ROWTYPE; worker public.employees%ROWTYPE; site uuid; object_name text; affected integer;
  product_stock uuid:=gen_random_uuid(); product_history uuid:=gen_random_uuid(); unused uuid:=gen_random_uuid();
  po uuid:=gen_random_uuid(); line uuid:=gen_random_uuid(); doc uuid:=gen_random_uuid(); job uuid:=gen_random_uuid(); assignment uuid:=gen_random_uuid();
@@ -11,6 +11,7 @@ BEGIN
  SELECT e.* INTO hr FROM public.employees e JOIN public.sites s ON s.id=e.site_id WHERE e.role='regional_hr_manager' AND e.status='Active' AND s.country='ET' AND e.region_code='ADD' LIMIT 1;
  SELECT e.* INTO ops FROM public.employees e JOIN public.sites s ON s.id=e.site_id WHERE e.role='regional_operations_manager' AND e.status='Active' AND s.country='ET' AND e.region_code='ADD' LIMIT 1;
  SELECT e.id INTO foreign_employee FROM public.employees e JOIN public.sites s ON s.id=e.site_id WHERE e.status='Active' AND s.country='KE' LIMIT 1;
+ SELECT e.id INTO deleter FROM public.employees e JOIN public.sites s ON s.id=e.site_id WHERE e.role='country_managing_director' AND e.status='Active' AND s.country='ET' LIMIT 1;
  SELECT id INTO inactive FROM public.employees WHERE status='Terminated' LIMIT 1;
  SELECT s.id INTO site FROM public.sites s WHERE s.country='ET' AND s.region_code='ADD' AND s.type IN ('Warehouse','Distribution Center') AND s.status='Active' ORDER BY s.id LIMIT 1;
  SELECT * INTO worker FROM public.employees WHERE site_id=site AND role IN ('picker','packer','receiver','stock_clerk','inventory_specialist') AND status='Active' LIMIT 1;
@@ -75,9 +76,11 @@ BEGIN
  BEGIN UPDATE public.po_items SET product_id=NULL WHERE id=line; RAISE EXCEPTION 'Receipt product detached';
  EXCEPTION WHEN OTHERS THEN IF SQLERRM NOT LIKE '%reviewed reversal%' THEN RAISE; END IF; END;
  INSERT INTO remaining_security_results VALUES('receipt deletion, zeroing and product detachment denied');
+ PERFORM set_config('request.jwt.claim.sub',deleter::text,true);
  DELETE FROM public.products WHERE id=unused;
  IF EXISTS(SELECT 1 FROM public.products WHERE id=unused) THEN RAISE EXCEPTION 'Unused zero-stock product cleanup failed'; END IF;
- INSERT INTO remaining_security_results VALUES('unused zero-stock product cleanup remains possible');
+ IF NOT EXISTS(SELECT 1 FROM public.system_logs WHERE action='UNUSED_PRODUCT_REMOVED' AND details::jsonb->>'product_id'=unused::text AND performed_by=deleter::text) THEN RAISE EXCEPTION 'Product cleanup audit missing'; END IF;
+ INSERT INTO remaining_security_results VALUES('unused zero-stock cleanup remains possible and records a trusted audit event');
  PERFORM set_config('request.jwt.claim.sub',hr.id::text,true);
  INSERT INTO public.employee_documents(id,country_code,employee_id,name,doc_type,file_url,uploaded_by)
  VALUES(doc,'ET',person.id,'Rollback employment evidence','Employment Contract','https://example.invalid/rollback-evidence',person.id::text);

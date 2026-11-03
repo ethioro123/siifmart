@@ -121,13 +121,11 @@ export function useReceiveBarcodeCheck({
             try {
                 let query = supabase
                     .from('products')
-                    .select('id, name, sku, barcode, barcodes, site_id, country_code')
+                    .select('id, name, sku, barcode, barcodes, site_id')
                     .or(`barcode.eq.${code},barcodes.cs.{${code}}`);
 
                 if (siteId) {
                     query = query.eq('site_id', siteId);
-                } else if (countryCode) {
-                    query = query.eq('country_code', countryCode);
                 }
 
                 const { data, error } = await query.limit(5);

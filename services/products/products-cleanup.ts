@@ -66,7 +66,7 @@ export async function clearLocationForEmptyProducts(location?: string, siteId?: 
         if (error) throw error;
         return true;
     } catch (error) {
-        console.error('Error clearing empty product locations:', error);
+        logger.error('products-cleanup', 'Empty location update failed', error instanceof Error ? error : new Error(String(error)));
         return false;
     }
 }

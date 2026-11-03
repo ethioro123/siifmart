@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabase';
 import type { Product } from '../../types';
 import { getSellUnit } from '../../utils/units';
+import { logger } from '../../utils/logger';
 
 export async function handleAutoReplenish(product: Product) {
     // Only run if stock < minStock and minStock is configured > 0
@@ -149,13 +150,15 @@ export async function handleAutoReplenish(product: Product) {
             .eq('id', draft.id);
 
         if (updateError) {
-            console.error('Failed to update existing draft WMS job:', updateError);
+            logger.warn('products-replenish', 'Failed to update existing draft WMS job', { error: updateError.message });
         }
     } else {
         // Create a new draft manifest
         const orderRef = `AUTO-REPL-${product.sku}-${Date.now().toString().slice(-4)}`;
+        const inferredCountry = (product as any).countryCode || (product.sku?.startsWith('KE-') ? 'KE' : 'ET');
 
         const newDraftJob = {
+            country_code: inferredCountry,
             site_id: sourceSiteId, // Warehouse fulfills it
             type: 'TRANSFER',
             priority: 'Normal',
@@ -189,7 +192,7 @@ export async function handleAutoReplenish(product: Product) {
             .insert(newDraftJob);
 
         if (createError) {
-            console.error('Failed to create new draft WMS job:', createError);
+            logger.warn('products-replenish', 'Failed to create new draft WMS job', { error: createError.message });
         }
     }
 }
