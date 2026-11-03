@@ -1,3 +1,4 @@
+import { BlindReceiptReview } from './receive/BlindReceiptReview';
 import { useReceivingLabelPrinting } from '../../hooks/useReceivingLabelPrinting';
 import type { ReceivingPrintItem } from '../../utils/receivingLabelData';
 import { useReceivingManifestDetails } from '../../hooks/useReceivingManifestDetails';
@@ -22,10 +23,10 @@ export const ReceiveTab: React.FC = () => {
     const {
         t, jobs, orders: orderSummaries, products, allProducts, employees,
         isSubmitting, setIsSubmitting, receivePOSplit, addNotification,
-        refreshData, historicalJobs, selectedJob, setSelectedJob, isDetailsOpen, setIsDetailsOpen,
+        refreshData, refreshJobs, historicalJobs, selectedJob, setSelectedJob, isDetailsOpen, setIsDetailsOpen,
         resolveOrderRef, activeTab, finalizePO, user, wmsJobsService, sites, loadHistoricalJobs
     } = useFulfillment();
-    const { settings, effectiveCountry, activeSite } = useData();
+    const { settings, effectiveCountry, activeSite, refreshData: refreshReceivingData } = useData();
     const { orders, loadManifest, isLoadingManifest, manifestError } = useReceivingManifestDetails(orderSummaries);
     const receivingPolicy = useMemo(() => resolveReceivingPolicy(settings, effectiveCountry), [settings, effectiveCountry]);
 
@@ -222,6 +223,7 @@ export const ReceiveTab: React.FC = () => {
                 receiveStats={receiveStats}
             />
 
+            {activeSite?.id && effectiveCountry && user?.id && <BlindReceiptReview site={activeSite.id} country={effectiveCountry} actor={user.id} role={user.role} t={t} onSaved={async () => { refreshJobs(); await refreshReceivingData(['orders']); }} />}
             {/* CONTENT AREA */}
             {viewMode === 'Process' ? (
                 <ReceiveList
