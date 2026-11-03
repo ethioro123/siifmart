@@ -53,6 +53,7 @@ export interface Site {
   contact?: string;
   status: 'Active' | 'Maintenance' | 'Closed';
   manager?: string;
+  areaManagerId?: string | null; // Assigned Area Manager for a retail store
   capacity?: number; // For Warehouses (%)
   terminalCount?: number; // For Stores
   language?: 'en' | 'am' | 'or'; // Site-specific language preference

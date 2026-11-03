@@ -94,7 +94,8 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
       if (searchTerms.length > 0) {
         const roleIdText = acc.roleId.toLowerCase().replace(/_/g, ' ');
         const emailText = acc.email.toLowerCase().replace(/[.@]/g, ' ');
-        const haystack = `${acc.name} ${acc.role} ${acc.roleId} ${roleIdText} ${acc.siteName} ${acc.siteCode} ${acc.siteType} ${acc.code} ${acc.email} ${emailText}`.toLowerCase();
+        const regionText = `${acc.regionCode || ''} ${acc.regionName || ''}`.toLowerCase();
+        const haystack = `${acc.name} ${acc.role} ${acc.roleId} ${roleIdText} ${acc.siteName} ${acc.siteCode} ${acc.siteType} ${acc.code} ${acc.email} ${emailText} ${regionText}`.toLowerCase();
         const matchesAll = searchTerms.every(term => haystack.includes(term));
         if (!matchesAll) return false;
       }
@@ -295,6 +296,11 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                         </span>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
+                        {site.accounts[0]?.regionCode && (
+                          <span className="text-[8px] font-bold font-mono px-1 py-0.2 rounded border bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]">
+                            [{site.accounts[0].regionCode}]
+                          </span>
+                        )}
                         <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded border ${siteTheme.badge}`}>
                           {siteTheme.shortLabel}
                         </span>

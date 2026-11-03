@@ -21,6 +21,7 @@ import { logger } from '../../utils/logger';
 import { getCountryProfile, Country } from '../../utils/localization';
 import { isAdminSite } from '../../utils/countryAdmin';
 import { generateNextSiteCode, generatePlaceSpecificSiteCode } from '../../utils/siteIdGenerator';
+import { useAreaManagerCandidates } from '../../hooks/useAreaManagerCandidates';
 
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
     <div className="mb-6 pb-4 border-b border-[var(--theme-border)]">
@@ -42,6 +43,13 @@ export default function LocationSettings() {
     // Site Modal State
     const [isSiteModalOpen, setIsSiteModalOpen] = useState(false);
     const [newSite, setNewSite] = useState<Partial<Site>>({});
+    const canAssignAreaManager = ['group_ceo', 'country_managing_director', 'country_operations_director', 'regional_operations_manager'].includes(user?.role || '');
+    const { data: areaManagerCandidates = [] } = useAreaManagerCandidates(
+        newSite.regionCode || newSite.region_code,
+        newSite.country || activeCountry,
+        sites,
+        isSiteModalOpen && newSite.type === 'Store' && canAssignAreaManager
+    );
     const [isSavingSite, setIsSavingSite] = useState(false);
     const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
     const [locationViewMode, setLocationViewMode] = useState<'category' | 'region' | 'zone'>('category');
@@ -118,6 +126,7 @@ export default function LocationSettings() {
                 address: newSite.address || '',
                 status: newSite.status || 'Active',
                 manager: newSite.manager,
+                areaManagerId: newSite.type === 'Store' ? newSite.areaManagerId ?? null : null,
                 capacity: newSite.capacity,
                 terminalCount: newSite.terminalCount,
                 zoneCount: newSite.zoneCount,
@@ -429,6 +438,8 @@ export default function LocationSettings() {
                     handleSaveSite={handleSaveSite}
                     existingSites={sites}
                     regions={regions}
+                    areaManagerCandidates={areaManagerCandidates}
+                    canAssignAreaManager={canAssignAreaManager}
                 />
 
                 <DeleteSiteModal

@@ -74,4 +74,32 @@ describe('live staging roster mapping', () => {
         expect(selected.some(acc => acc.id === 'cmc-manager')).toBe(true);
         expect(selected.some(acc => acc.id === 'cmc-cashier')).toBe(true);
     });
+    it('preserves complete 4-tier chain within the same region for easy transfer testing', () => {
+        const makeAccount = (id: string, country: 'ET' | 'KE', code: string, type: string, regionCode: string, name = type) =>
+            mapStagingEmployee({ ...row, id, site: { code, name, type, country, region_code: regionCode } })!;
+        const roster = [
+            // Adama Region (ADA) - complete 4 tiers in same region
+            makeAccount('ada-reg-mgr', 'ET', 'ADA', 'Administration', 'ADA', 'Adama Regional Administration'),
+            makeAccount('ada-dc-picker', 'ET', 'ADA-DC-01', 'Distribution Center', 'ADA', 'Adama Central Distribution Center'),
+            makeAccount('ada-wh-mgr', 'ET', 'ADA-WH-01', 'Warehouse', 'ADA', 'Adama Industrial Warehouse'),
+            makeAccount('ada-str-cashier', 'ET', 'ADA-STR-01', 'Store', 'ADA', 'Adama Central Supermarket'),
+            // Mombasa Region (MBA) - complete 4 tiers in same region
+            makeAccount('mba-reg-mgr', 'KE', 'MBA', 'Administration', 'MBA', 'Mombasa Region Administration'),
+            makeAccount('mba-dc-lead', 'KE', 'MBA-DC-01', 'Distribution Center', 'MBA', 'Mombasa Coastal Distribution Center'),
+            makeAccount('mba-wh-rec', 'KE', 'MBA-WH-01', 'Warehouse', 'MBA', 'Changamwe Port Warehouse'),
+            makeAccount('mba-str-cashier', 'KE', 'MBA-STR-01', 'Store', 'MBA', 'Nyali Cinemax Supermarket'),
+        ];
+        const selected = selectRepresentativeStagingAccounts(roster);
+        const selectedIds = new Set(selected.map(a => a.id));
+        // Verify all 4 tiers in Adama are selected
+        expect(selectedIds.has('ada-reg-mgr')).toBe(true);
+        expect(selectedIds.has('ada-dc-picker')).toBe(true);
+        expect(selectedIds.has('ada-wh-mgr')).toBe(true);
+        expect(selectedIds.has('ada-str-cashier')).toBe(true);
+        // Verify all 4 tiers in Mombasa are selected
+        expect(selectedIds.has('mba-reg-mgr')).toBe(true);
+        expect(selectedIds.has('mba-dc-lead')).toBe(true);
+        expect(selectedIds.has('mba-wh-rec')).toBe(true);
+        expect(selectedIds.has('mba-str-cashier')).toBe(true);
+    });
 });

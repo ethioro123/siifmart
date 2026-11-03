@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Building2, Landmark, Warehouse, Store, Truck, UserCheck, Search, ShieldCheck, X } from 'lucide-react';
+import { Building2, Landmark, Warehouse, Store, Truck, Search, ShieldCheck, X, MapPin } from 'lucide-react';
 import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
 import { isStagingQuickLoginAvailable, type FacilityTierType, type StagingSiteType, type StagingQuickAccount } from '../../utils/stagingQuickLogin';
-import { getSiteTheme, POPULAR_ROLE_CHIPS, WORK_LOCATION_ORDER } from './quickLoginTheme';
+import { POPULAR_ROLE_CHIPS, WORK_LOCATION_ORDER, getSiteTheme } from './quickLoginTheme';
+import { QuickLoginSiteCard, type QuickLoginSiteGroup } from './QuickLoginSiteCard';
 export type { StagingQuickAccount } from '../../utils/stagingQuickLogin';
 
 interface CountryQuickLoginPanelProps {
@@ -22,6 +23,7 @@ export function CountryQuickLoginPanel({
   disabled = false,
 }: CountryQuickLoginPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [regionFilter, setRegionFilter] = useState<string>('ALL');
   const [tierFilter, setTierFilter] = useState<TierFilter>('ALL');
   const [opsSiteFilter, setOpsSiteFilter] = useState<OpsSiteFilter>('ALL_OPS');
   const [levelFilter, setLevelFilter] = useState<'ALL' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10>('ALL');
@@ -33,13 +35,32 @@ export function CountryQuickLoginPanel({
     return roster.filter(acc => acc.country === country);
   }, [country, roster]);
 
+  // Compute available operational regions in this country for quick transfer pairing
+  const availableRegions = useMemo(() => {
+    const map = new Map<string, { code: string; name: string; count: number }>();
+    for (const acc of accounts) {
+      if (acc.regionCode) {
+        const existing = map.get(acc.regionCode);
+        if (existing) {
+          existing.count += 1;
+        } else {
+          map.set(acc.regionCode, {
+            code: acc.regionCode,
+            name: acc.regionName || acc.regionCode,
+            count: 1,
+          });
+        }
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [accounts]);
+
   // Compute available popular roles in this country for quick chips
   const roleCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const acc of accounts) {
       const id = acc.roleId.toLowerCase();
-      const key = id;
-      counts[key] = (counts[key] || 0) + 1;
+      counts[id] = (counts[id] || 0) + 1;
     }
     return counts;
   }, [accounts]);
@@ -49,7 +70,12 @@ export function CountryQuickLoginPanel({
     const searchTerms = q ? q.split(/\s+/).filter(Boolean) : [];
 
     const matches = accounts.filter(acc => {
-      // 1. Facility Tier Filter
+      // 1. Region Filter (Adama, Addis Ababa, Nairobi, Mombasa, etc.)
+      if (regionFilter !== 'ALL') {
+        if (acc.regionCode !== regionFilter) return false;
+      }
+
+      // 2. Facility Tier Filter
       if (tierFilter === 'HQ' && acc.facilityTier !== 'HQ') return false;
       if (tierFilter === 'REGIONAL' && acc.facilityTier !== 'Regional Administration') return false;
       if (tierFilter === 'OPS') {
@@ -57,22 +83,22 @@ export function CountryQuickLoginPanel({
         if (opsSiteFilter !== 'ALL_OPS' && acc.siteType !== opsSiteFilter) return false;
       }
 
-      // 2. Hierarchy Level Filter
+      // 3. Hierarchy Level Filter
       if (levelFilter !== 'ALL' && acc.level !== levelFilter) return false;
 
-      // 3. Quick Role Filter (canonical role IDs only)
+      // 4. Quick Role Filter (canonical role IDs only)
       if (roleFilter !== 'ALL') {
         const normRole = acc.roleId.toLowerCase();
         const target = roleFilter.toLowerCase();
-        const isMatch = normRole === target;
-        if (!isMatch) return false;
+        if (normRole !== target) return false;
       }
 
-      // 4. Search Query (multi-word role ID and account details)
+      // 5. Search Query (multi-word role ID and account details)
       if (searchTerms.length > 0) {
         const roleIdText = acc.roleId.toLowerCase().replace(/_/g, ' ');
         const emailText = acc.email.toLowerCase().replace(/[.@]/g, ' ');
-        const haystack = `${acc.name} ${acc.role} ${acc.roleId} ${roleIdText} ${acc.siteName} ${acc.siteCode} ${acc.siteType} ${acc.code} ${acc.email} ${emailText}`.toLowerCase();
+        const regionText = `${acc.regionCode || ''} ${acc.regionName || ''}`.toLowerCase();
+        const haystack = `${acc.name} ${acc.role} ${acc.roleId} ${roleIdText} ${acc.siteName} ${acc.siteCode} ${acc.siteType} ${acc.code} ${acc.email} ${emailText} ${regionText}`.toLowerCase();
         const matchesAll = searchTerms.every(term => haystack.includes(term));
         if (!matchesAll) return false;
       }
@@ -80,16 +106,7 @@ export function CountryQuickLoginPanel({
       return true;
     });
 
-    const groups: Record<
-      string,
-      {
-        siteCode: string;
-        siteName: string;
-        siteType: StagingSiteType;
-        facilityTier: FacilityTierType;
-        accounts: StagingQuickAccount[];
-      }
-    > = {};
+    const groups: Record<string, QuickLoginSiteGroup> = {};
 
     for (const acc of matches) {
       if (!groups[acc.siteCode]) {
@@ -98,14 +115,20 @@ export function CountryQuickLoginPanel({
           siteName: acc.siteName,
           siteType: acc.siteType,
           facilityTier: acc.facilityTier,
+          regionCode: acc.regionCode,
+          regionName: acc.regionName,
           accounts: [],
         };
       }
       groups[acc.siteCode].accounts.push(acc);
     }
 
-    // 1. Organize work locations by facility hierarchy & location name
+    // 1. Organize work locations: Keep same region facilities together, then order by supply chain hierarchy:
+    // Regional Admin (approvals) -> Distribution Center (origin) -> Warehouse (hub) -> Store (retail receiver)
     const sortedGroups = Object.values(groups).sort((a, b) => {
+      if (regionFilter === 'ALL' && a.regionCode && b.regionCode && a.regionCode !== b.regionCode) {
+        return a.regionCode.localeCompare(b.regionCode);
+      }
       const orderA = WORK_LOCATION_ORDER[a.siteType] ?? 99;
       const orderB = WORK_LOCATION_ORDER[b.siteType] ?? 99;
       if (orderA !== orderB) return orderA - orderB;
@@ -121,7 +144,7 @@ export function CountryQuickLoginPanel({
     }
 
     return sortedGroups;
-  }, [accounts, searchQuery, tierFilter, opsSiteFilter, levelFilter, roleFilter]);
+  }, [accounts, searchQuery, regionFilter, tierFilter, opsSiteFilter, levelFilter, roleFilter]);
 
   const totalFilteredAccounts = useMemo(() => {
     return filteredGroups.reduce((sum, g) => sum + g.accounts.length, 0);
@@ -198,7 +221,7 @@ export function CountryQuickLoginPanel({
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles, titles, or sites...`}
+          placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles, titles, sites, or regions...`}
           className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:outline-none focus:border-[var(--theme-border-focus)] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)]"
         />
         {searchQuery && (
@@ -212,6 +235,48 @@ export function CountryQuickLoginPanel({
           </button>
         )}
       </div>
+
+      {/* Region Filter Bar (Same-region transfer hubs: Adama, Addis Ababa, Nairobi, Mombasa) */}
+      {availableRegions.length > 0 && (
+        <div className="mb-2">
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 custom-scrollbar">
+            <div className="flex items-center gap-1 text-[9px] font-bold text-[var(--theme-text-muted)] uppercase tracking-wider shrink-0 mr-0.5">
+              <MapPin size={11} className="text-[var(--theme-accent)]" />
+              <span>Region:</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setRegionFilter('ALL')}
+              className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-all cursor-pointer shrink-0 border ${
+                regionFilter === 'ALL'
+                  ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent font-bold shadow-xs'
+                  : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+              }`}
+            >
+              All Regions
+            </button>
+            {availableRegions.map(reg => {
+              const active = regionFilter === reg.code;
+              return (
+                <button
+                  key={reg.code}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setRegionFilter(active ? 'ALL' : reg.code)}
+                  className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-all cursor-pointer shrink-0 flex items-center gap-1 border ${
+                    active
+                      ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent font-bold shadow-xs'
+                      : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+                  }`}
+                >
+                  <span>{reg.name}</span>
+                  <span className="text-[8px] font-mono opacity-80">({reg.code})</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Quick Role Filter Chips (Clean, Uncluttered) */}
       <div className="mb-2">
@@ -241,7 +306,7 @@ export function CountryQuickLoginPanel({
                 className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-all cursor-pointer shrink-0 flex items-center gap-1 border ${
                   active
                     ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-transparent font-bold shadow-xs'
-                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] border-[var(--theme-border-subtle)] hover:bg-[var(--theme-bg-card-hover)]'
+                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
                 }`}
               >
                 <span>{chip.label}</span>
@@ -273,7 +338,7 @@ export function CountryQuickLoginPanel({
               }}
               className={`py-1 px-1 text-[10px] font-semibold rounded-lg transition-colors cursor-pointer text-center truncate ${
                 active
-                  ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)]'
+                  ? 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] font-bold'
                   : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card-hover)]'
               }`}
             >
@@ -331,7 +396,7 @@ export function CountryQuickLoginPanel({
               onClick={() => setLevelFilter(lvl)}
               className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-colors cursor-pointer text-center shrink-0 border ${
                 active
-                  ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent'
+                  ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent font-bold'
                   : 'bg-transparent text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
               }`}
             >
@@ -342,7 +407,7 @@ export function CountryQuickLoginPanel({
       </div>
 
       {/* Active Filter Counter */}
-      {(roleFilter !== 'ALL' || tierFilter !== 'ALL' || levelFilter !== 'ALL' || searchQuery) && (
+      {(roleFilter !== 'ALL' || tierFilter !== 'ALL' || levelFilter !== 'ALL' || regionFilter !== 'ALL' || searchQuery) && (
         <div className="flex items-center justify-between text-[10px] text-[var(--theme-text-secondary)] px-1 mb-1.5">
           <span>
             Showing <strong className="text-[var(--theme-text-primary)]">{totalFilteredAccounts}</strong> roles
@@ -351,6 +416,7 @@ export function CountryQuickLoginPanel({
             type="button"
             onClick={() => {
               setSearchQuery('');
+              setRegionFilter('ALL');
               setRoleFilter('ALL');
               setTierFilter('ALL');
               setOpsSiteFilter('ALL_OPS');
@@ -381,78 +447,19 @@ export function CountryQuickLoginPanel({
         ) : filteredGroups.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-xs text-[var(--theme-text-muted)]">No matching roles found.</p>
-            <p className="text-[10px] text-[var(--theme-text-secondary)] mt-1">Try adjusting the role chip or search text.</p>
+            <p className="text-[10px] text-[var(--theme-text-secondary)] mt-1">Try adjusting the region, role chip, or search text.</p>
           </div>
         ) : (
-          filteredGroups.map(site => {
-            const siteTheme = getSiteTheme(site.siteType);
-            return (
-              <div
-                key={site.siteCode}
-                className={`rounded-2xl border border-[var(--theme-border)] ${siteTheme.borderLeft} ${siteTheme.bgLight} p-2.5 space-y-2 transition-all`}
-              >
-                {/* Site Header: Color on site name, site type badge, and prominent worker count */}
-                <div className="flex items-center justify-between pb-1.5 border-b border-[var(--theme-border-subtle)]">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="p-1 rounded-md bg-[var(--theme-bg-subtle)] shadow-xs">
-                      {getSiteIcon(site.siteType, siteTheme.iconColor)}
-                    </span>
-                    <span className={`text-[11.5px] font-bold ${siteTheme.nameColor} truncate`}>
-                      {site.siteName}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span className={`text-[8.5px] font-bold px-1.5 py-0.2 rounded-md border ${siteTheme.badge}`}>
-                      {siteTheme.shortLabel}
-                    </span>
-                    <span className={`text-[9px] font-bold px-2 py-0.2 rounded-full border ${siteTheme.countBadge}`}>
-                      {site.accounts.length} {site.accounts.length === 1 ? 'Worker' : 'Workers'}
-                    </span>
-                    <span className="text-[9px] font-mono tabular-nums font-semibold text-[var(--theme-text-muted)]">
-                      {site.siteCode}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Worker Cards: Clean, readable titles without rainbow title pills */}
-                <div className="space-y-1.5">
-                  {site.accounts.map(acc => (
-                    <button
-                      key={acc.email}
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => onSelectAccount(acc.email)}
-                      className={`w-full p-2.5 text-left bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] ${siteTheme.borderCard} rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs`}
-                    >
-                      <div className="flex flex-col min-w-0 pr-2">
-                        <div className="flex items-center gap-1.5">
-                          {/* Clean Worker Role Title without rainbow color pills */}
-                          <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] group-hover:text-[var(--theme-accent)] transition-colors truncate">
-                            {acc.role}
-                          </span>
-                          <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
-                            Rank L{acc.level}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[11px] font-bold text-[var(--theme-text-primary)] truncate">
-                            {acc.name}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[8.5px] font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)]">
-                          {acc.code}
-                        </span>
-                        <UserCheck size={11} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-primary)] transition-colors" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })
+          filteredGroups.map(site => (
+            <QuickLoginSiteCard
+              key={site.siteCode}
+              site={site}
+              disabled={disabled}
+              onSelectAccount={onSelectAccount}
+              getSiteIcon={getSiteIcon}
+              getLevelBadgeStyle={getLevelBadgeStyle}
+            />
+          ))
         )}
       </div>
 

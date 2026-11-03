@@ -22,6 +22,8 @@ interface SiteModalProps {
   handleSaveSite: () => void;
   existingSites?: Site[];
   regions?: Region[];
+  areaManagerCandidates?: Array<{ id: string; name: string }>;
+  canAssignAreaManager?: boolean;
 }
 
 export function SiteModal({
@@ -37,7 +39,9 @@ export function SiteModal({
   generateBarcodes,
   handleSaveSite,
   existingSites = [],
-  regions = []
+  regions = [],
+  areaManagerCandidates = [],
+  canAssignAreaManager = false
 }: SiteModalProps) {
   const selectedCountry = (newSite.country || 'ET') as Country;
   const selectedCountryProfile = getCountryProfile(selectedCountry);
@@ -68,7 +72,7 @@ export function SiteModal({
                 <button
                   key={type}
                   type="button"
-                  onClick={() => !newSite.id && setNewSite({ ...newSite, type: type as SiteType, manager: type === 'Administration' ? undefined : newSite.manager })}
+                  onClick={() => !newSite.id && setNewSite({ ...newSite, type: type as SiteType, manager: type === 'Administration' ? undefined : newSite.manager, areaManagerId: type === 'Store' ? newSite.areaManagerId : null })}
                   disabled={!!newSite.id}
                   className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
                     isSelected
@@ -118,7 +122,10 @@ export function SiteModal({
                           ...newSite,
                           country: prof.code,
                           currency: prof.currencySymbol,
-                          language: prof.supportedLanguages[0]?.code || 'en'
+                          language: prof.supportedLanguages[0]?.code || 'en',
+                          regionCode: undefined,
+                          region_code: undefined,
+                          areaManagerId: null
                         });
                       }}
                       className={`p-3.5 rounded-2xl border text-left transition-all ${
@@ -228,7 +235,7 @@ export function SiteModal({
               <select
                 className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all"
                 value={newSite.region_code || newSite.regionCode || ''}
-                onChange={(e) => setNewSite({ ...newSite, region_code: e.target.value || undefined, regionCode: e.target.value || undefined })}
+                onChange={(e) => setNewSite({ ...newSite, region_code: e.target.value || undefined, regionCode: e.target.value || undefined, areaManagerId: null })}
                 aria-label="Operational Region"
               >
                 <option value="">Select Region...</option>
@@ -345,6 +352,27 @@ export function SiteModal({
                     aria-label="Store Manager"
                   />
                 </div>
+                {canAssignAreaManager && (
+                  <div>
+                    <label htmlFor="store-area-manager" className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">
+                      Area Manager
+                    </label>
+                    <select
+                      id="store-area-manager"
+                      className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
+                      value={newSite.areaManagerId || ''}
+                      onChange={(e) => setNewSite({ ...newSite, areaManagerId: e.target.value || null })}
+                    >
+                      <option value="">Unassigned</option>
+                      {areaManagerCandidates.map(manager => (
+                        <option key={manager.id} value={manager.id}>{manager.name}</option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-[var(--theme-text-muted)] mt-1">
+                      Area Managers see only their assigned stores.
+                    </p>
+                  </div>
+                )}
                 {newSite.id && (
                   <div>
                     <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Site Code (ID)</label>
