@@ -43,6 +43,7 @@ const samplePO: PurchaseOrder = {
     status: 'Approved',
     priority: 'Normal',
     date: '2026-10-20',
+    expectedDelivery: null,
     itemsCount: 1,
     supplierId: 'sup-1',
     requestedBy: 'Bontu Megersa',
