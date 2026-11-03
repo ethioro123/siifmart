@@ -245,6 +245,23 @@ describe('Procurement Packaging & Sellable Units', () => {
             };
             expect(formatPOItemDescription(flour)).toBe('Juma Ugali Flour 1kg');
         });
+
+        it('does not duplicate size or bottle type when already present in product name', () => {
+            const oil = {
+                brand: 'SunGold',
+                productName: 'SunGold Pure Sunflower Cooking Oil 3L',
+                category: 'Cooking Oils & Culinary Fats',
+                size: '3L',
+                unit: 'bottle',
+                customAttributes: {
+                    physical: {
+                        netWeight: '3L',
+                        sizeType: 'bottle'
+                    }
+                }
+            };
+            expect(formatPOItemDescription(oil)).toBe('SunGold Pure Sunflower Cooking Oil 3L');
+        });
     });
 
     describe('isConsumableCategory & isDiscreteGeneralMerch', () => {
