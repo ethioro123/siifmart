@@ -139,7 +139,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="" size="xl">
+        <Modal isOpen={isOpen} onClose={onClose} title="" size="3xl">
             {/* === SCREEN UI (Hidden in print) === */}
             <div className="space-y-6 print:hidden">
                 <div className="flex items-start justify-between">
@@ -246,7 +246,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             );
                         })()}
                     </div>
-                    <div className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] overflow-hidden shadow-sm">
+                    <div className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] overflow-x-auto shadow-sm">
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
@@ -274,7 +274,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                 <td className="p-4 text-[var(--theme-text-secondary)] text-[10px] font-bold">{(i + 1).toString().padStart(2, '0')}</td>
                                                 <td className="p-4 text-[var(--theme-text-secondary)] text-xs font-mono font-semibold">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
                                                 <td className="p-4">
-                                                    <div className="text-[var(--theme-text-primary)] font-semibold tracking-tight text-sm break-words leading-tight max-w-[360px]">
+                                                    <div className="text-[var(--theme-text-primary)] font-semibold tracking-tight text-sm break-words leading-tight max-w-[500px]">
                                                         {formatPOItemDescription(item)}
                                                     </div>
                                                     <span className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5 block group-hover:text-[var(--theme-accent)] transition-colors">

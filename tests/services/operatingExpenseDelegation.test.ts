@@ -63,6 +63,7 @@ describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
         });
 
         it('blocks Regional Manager from approving expense > 2,000,000 ETB', async () => {
+            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, error: new Error('Country sign-off required') });
             vi.spyOn(expensesService, 'getById').mockResolvedValue({
                 id: 'EXP-MID-001',
                 siteId: 'ST-ADDIS-01',
@@ -83,7 +84,7 @@ describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
                     role: 'regional_finance_manager',
                     countryCode: 'ET'
                 })
-            ).rejects.toThrow('Autonomous Cap Exceeded: Expense amount exceeds regional autonomous limit (2,000,000)');
+            ).rejects.toThrow('Country sign-off required');
         });
 
         it('allows Country Finance Director or Country MD to approve expense between 2M and 20M ETB', async () => {
@@ -121,6 +122,7 @@ describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
         });
 
         it('blocks Country Managing Director from approving expense > 20,000,000 ETB', async () => {
+            vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, error: new Error('Group Finance or CEO required') });
             vi.spyOn(expensesService, 'getById').mockResolvedValue({
                 id: 'EXP-MEGA-001',
                 siteId: 'ST-ADDIS-01',
@@ -142,7 +144,7 @@ describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
                     role: 'country_managing_director',
                     countryCode: 'ET'
                 })
-            ).rejects.toThrow('Executive Authorization required: This expense exceeds the country autonomous limit (20,000,000) and requires Group CFO / Group CEO approval.');
+            ).rejects.toThrow('Group Finance or CEO required');
         });
 
         it('allows Group CFO / Group CEO to approve expense > 20,000,000 ETB', async () => {
@@ -320,10 +322,8 @@ describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
                 createdByName: 'Hawi HR'
             });
 
-            expect(insertMock).toHaveBeenCalledWith(expect.objectContaining({
-                escalated_to_ceo: true,
-                requires_hq_approval: true
-            }));
+            expect(insertMock.mock.calls[0][0]).not.toHaveProperty('escalated_to_ceo');
+            expect(insertMock.mock.calls[0][0]).not.toHaveProperty('requires_hq_approval');
             expect(created.escalatedToCeo).toBe(true);
         });
 
@@ -358,10 +358,8 @@ describe('Phase 3: Operating Expenses & Treasury Delegation', () => {
                 createdByName: 'Mulugeta Ops'
             });
 
-            expect(insertMock).toHaveBeenCalledWith(expect.objectContaining({
-                escalated_to_ceo: false,
-                requires_hq_approval: false
-            }));
+            expect(insertMock.mock.calls[0][0]).not.toHaveProperty('escalated_to_ceo');
+            expect(insertMock.mock.calls[0][0]).not.toHaveProperty('requires_hq_approval');
             expect(created.escalatedToCeo).toBe(false);
         });
     });

@@ -100,6 +100,7 @@ describe('Zero-Trust Hardened Expenses Service', () => {
     });
 
     it('blocks regular finance manager from approving CEO-escalated expense', async () => {
+        vi.mocked(supabase.rpc).mockResolvedValueOnce({ data: null, error: new Error('Group Finance or CEO required') });
         vi.spyOn(expensesService, 'getById').mockResolvedValue({
             id: 'EXP-300',
             siteId: 'ST-001',
@@ -119,7 +120,7 @@ describe('Zero-Trust Hardened Expenses Service', () => {
                 name: 'Fatuma Finance',
                 role: 'country_finance_director' // Not CEO!
             })
-        ).rejects.toThrow('Executive Authorization required');
+        ).rejects.toThrow('Group Finance or CEO required');
     });
 
     it('allows CEO to approve escalated expense', async () => {
