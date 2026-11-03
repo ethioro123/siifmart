@@ -16,6 +16,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
   const { user } = useStore();
   const {
     sites = [],
+    employees = [],
     regions = [],
     activeRegionCode,
     effectiveCountry,

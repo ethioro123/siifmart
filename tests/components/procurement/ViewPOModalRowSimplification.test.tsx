@@ -62,12 +62,12 @@ const samplePO: PurchaseOrder = {
             customAttributes: {
                 identity: {
                     brand: 'SunGold',
-                    category: 'Cooking Oils & Culinary Fats'
+                    subcategory: 'Cooking Oils & Culinary Fats'
                 },
                 packaging: {
                     packageType: 'Carton',
-                    unitsPerCase: 6,
-                    sellUnit: 'bottle'
+                    caseSize: '6',
+                    packQty: '6'
                 },
                 physical: {
                     netWeight: '3L',
