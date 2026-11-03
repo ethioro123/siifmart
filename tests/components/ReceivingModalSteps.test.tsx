@@ -2,6 +2,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ReceiveSplitCard } from '../../components/fulfillment/receive/ReceiveSplitCard';
 import { ReceiveStepIndicator } from '../../components/fulfillment/receive/steps/ReceiveStepIndicator';
 import { Step1ReceiveIntake } from '../../components/fulfillment/receive/steps/Step1ReceiveIntake';
 import { Step3ReceiveHandover } from '../../components/fulfillment/receive/steps/Step3ReceiveHandover';
@@ -33,6 +34,15 @@ describe('receiving modal steps', () => {
   expect(screen.getAllByRole('button')).toHaveLength(1);
   expect(screen.getByRole('button', { name: /printPalletAndIntakeLabels/ })).toBeTruthy();
   expect(screen.getByText('warehouse.countedNotSaved')).toBeTruthy();
+ });
+ it('keeps physical count and condition visible while secondary lot tools are collapsed', () => {
+  const update = vi.fn();
+  const { container } = render(<ReceiveSplitCard variant={{ id: 'lot', sku: 'ETBB002', skuType: 'existing', quantity: 0, batchNumber: 'LOT-20261103-ETBB002-01' }} index={0} totalSplits={1} barcodeInput="" onUpdateVariant={update} onRemoveVariant={vi.fn()} onBarcodeInput={vi.fn()} onAddBarcode={vi.fn()} onRemoveBarcode={vi.fn()} onFocusScan={vi.fn()} scanOnlyHandlers={{ onKeyDown: vi.fn(), onPaste: vi.fn() }} t={t} />);
+  expect(container.querySelector('details')?.open).toBe(false);
+  fireEvent.change(screen.getByRole('spinbutton', { name: 'warehouse.quantityToReceive' }), { target: { value: '12' } });
+  expect(update).toHaveBeenCalledWith({ quantity: 12 });
+  expect(screen.getByRole('combobox', { name: 'warehouse.condition' })).toBeTruthy();
+  expect(screen.getByLabelText('warehouse.expiryDate')).toBeTruthy();
  });
  it('requires valid counts on every retained split without using expected quantities', () => {
   for (const splits of [[], [{ quantity: 0 }], [{ quantity: 2 }, { quantity: 0 }], [{ quantity: -1 }], [{ quantity: NaN }], [{ quantity: Infinity }]]) expect(hasValidReceivingCounts(splits)).toBe(false);

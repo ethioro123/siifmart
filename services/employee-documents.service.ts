@@ -115,21 +115,17 @@ export const employeeDocumentsService = {
     },
 
     async deleteDocument(id: string, employeeId: string, actorName: string): Promise<boolean> {
-        try {
-            const { error } = await supabase
-                .from('employee_documents')
-                .delete()
-                .eq('id', id);
+        const { error } = await supabase
+            .from('employee_documents')
+            .delete()
+            .eq('id', id);
 
-            if (error) {
-                logger.warn('employeeDocumentsService', 'Supabase delete error', { message: error.message });
-            }
-        } catch (err) {
-            logger.warn('employeeDocumentsService', 'Exception deleting doc', { error: String(err) });
+        if (error) {
+            logger.warn('employeeDocumentsService', 'Supabase delete rejected', { message: error.message });
+            throw new Error(`Employee documents are permanent records and cannot be deleted (${error.message})`);
         }
 
-
-        // Synaptic Neural Mesh: Audit log
+        // Synaptic Neural Mesh: Audit log only on verified database success
         try {
             await systemLogsService.create({
                 user_name: actorName,

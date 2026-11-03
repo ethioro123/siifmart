@@ -207,6 +207,17 @@ export const authService = {
 
             const employee = await employeesService.getByEmail(user.email!);
 
+            if (employee?.status && employee.status.toLowerCase() !== 'active') {
+                console.warn('AuthService: Account is deactivated or terminated:', user.email, employee.status);
+                try {
+                    localStorage.removeItem('siifmart_offline_profile');
+                } catch {
+                    // Safe ignore
+                }
+                await supabase.auth.signOut().catch(() => {});
+                return null;
+            }
+
             const profile: UserProfile = {
                 id: user.id,
                 email: user.email!,

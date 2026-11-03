@@ -191,14 +191,14 @@ export function useStaffProfile({
     };
 
     const handleDeleteDocument = async (docId: string) => {
-        removeEmployeeDocument(employee.id, docId);
-        setDocuments(prev => prev.filter(d => d.id !== docId));
         try {
             await employeeDocumentsService.deleteDocument(docId, employee.id, user?.name || 'Authorized Staff');
-        } catch {
-            // Handled
+            removeEmployeeDocument(employee.id, docId);
+            setDocuments(prev => prev.filter(d => d.id !== docId));
+            addNotification('info', 'Document removed');
+        } catch (err: any) {
+            addNotification('alert', err?.message || 'Employee documents are permanent records and cannot be deleted.');
         }
-        addNotification('info', 'Document removed');
     };
 
     const handleRequestTimeOff = async (request: { type: string; startDate: string; endDate: string; reason?: string }) => {

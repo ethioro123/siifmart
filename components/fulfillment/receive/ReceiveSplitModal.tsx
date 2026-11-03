@@ -166,7 +166,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     const handleConfirmReceipt = async () => {
         if (isSubmitting || localSubmitting || receiptLock.current) return;
         if (!countsValid) {
-            alert('Enter a valid positive physical count for every split, or remove unused splits.');
+            alert(t('warehouse.enterPositiveCountAlert'));
             return;
         }
 
@@ -215,7 +215,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
             setSplitVariants([]);
         } catch (error: any) {
             logger.error('ReceiveSplitModal', 'Split error:', error);
-            alert(error.message || 'Failed to receive split: an unexpected error occurred.');
+            alert(error.message || t('warehouse.receivingSaveFailed'));
         } finally {
             receiptLock.current = false;
             setIsSubmitting(false);
@@ -248,45 +248,19 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--theme-overlay)_70%,transparent)] flex items-center justify-center z-[200] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
-            <div className="w-full max-w-5xl h-[92dvh] md:h-[88vh] rounded-3xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-2xl relative overflow-hidden flex flex-col">
+            <div role="dialog" aria-modal="true" aria-labelledby="receive-item-title" className="w-full max-w-3xl h-[92dvh] md:h-[88vh] rounded-3xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-2xl relative overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10 flex justify-between items-start">
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                        <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
-                            <Box size={22} />
-                        </div>
-                        <div className="min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <h2 className="text-base sm:text-xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase truncate">
-                                    {formatPOItemDescription(splitReceivingItem) || splitReceivingItem.productName}
-                                </h2>
-                                <Badge variant="neutral" className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-mono text-[11px] rounded-full px-2.5 py-0.5">
-                                    PO #{splitReceivingPO.poNumber || splitReceivingPO.id}
-                                </Badge>
-                                {(() => {
-                                    const badge = formatPackBadge(splitReceivingItem);
-                                    return badge ? (
-                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-semibold">
-                                            <Package size={12} className="shrink-0" /> {badge}
-                                        </span>
-                                    ) : null;
-                                })()}
-                            </div>
-                            <div className="flex items-center gap-2 sm:gap-3 text-xs text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider flex-wrap">
-                                <span className="font-mono text-[11px]">
-                                    SKU: <strong className="text-[var(--theme-text-primary)]">{splitReceivingItem.sku}</strong>
-                                </span>
-                                <span>·</span>
-                                <span>Supplier: {splitReceivingPO.supplierName}</span>
-                            </div>
-                        </div>
+                    <div className="min-w-0 pr-3">
+                        <h2 id="receive-item-title" className="text-lg sm:text-xl font-semibold text-[var(--theme-text-primary)] break-words">{t('warehouse.receiveAction')} · {splitReceivingItem.name || splitReceivingItem.productName}</h2>
+                        <p className="mt-1 text-sm text-[var(--theme-text-secondary)] break-words">{t('warehouse.poNumber')}: {splitReceivingPO.poNumber || splitReceivingPO.id} · {splitReceivingPO.supplierName}</p>
                     </div>
 
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0"
-                        aria-label="Close"
+                        className="min-w-[44px] min-h-[44px] rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0"
+                        aria-label={t('warehouse.dismiss')}
                     >
                         <X size={18} />
                     </button>
@@ -358,7 +332,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             <button
                                 type="button"
                                 onClick={handleClose}
-                                className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider transition-colors active:scale-95 cursor-pointer touch-manipulation"
+                                className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs  transition-colors active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 {t('warehouse.dismiss') || 'Dismiss'}
                             </button>
@@ -369,7 +343,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                     if (step === 'HANDOVER') setStep('QUALITY');
                                     else if (step === 'QUALITY') setStep('INTAKE');
                                 }}
-                                className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider flex items-center gap-2 hover:border-[var(--theme-accent)]/30 transition-colors active:scale-95 cursor-pointer touch-manipulation"
+                                className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs  flex items-center gap-2 hover:border-[var(--theme-accent)]/30 transition-colors active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 <ArrowLeft size={16} />
                                 <span>{t('warehouse.back') || 'Back'}</span>
@@ -382,7 +356,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                             <button
                                 type="button"
                                 onClick={() => setStep('QUALITY')}
-                                className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
+                                className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 font-semibold text-xs md:text-sm  flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                             >
                                 <span>{t('warehouse.startQualityAndCount') || 'Start Quality & Count'}</span>
                                 <ArrowRight size={16} />
@@ -394,7 +368,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 type="button"
                                 disabled={!countsValid}
                                 onClick={() => setStep('HANDOVER')}
-                                className={`min-h-[44px] px-5 md:px-7 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
+                                className={`min-h-[44px] px-5 md:px-7 rounded-xl font-semibold text-xs md:text-sm  flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
                                     countsValid
                                         ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 cursor-pointer active:scale-95'
                                         : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
@@ -411,7 +385,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 type="button"
                                 onClick={handleConfirmReceipt}
                                 disabled={isSubmitting || localSubmitting || !countsValid}
-                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-[var(--theme-status-success-bg)] bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)] font-bold text-xs md:text-sm  flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
                             >
                                 {isSubmitting || localSubmitting ? (
                                     <Loader2 size={16} className="animate-spin" />

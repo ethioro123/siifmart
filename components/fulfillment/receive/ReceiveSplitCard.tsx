@@ -1,7 +1,7 @@
 import React from 'react';
-import { Trash2, Plus, ScanBarcode, ChevronRight, X, Sparkles, Calendar, Layers } from 'lucide-react';
+import { Trash2, Plus, ScanBarcode, ChevronRight, X, Sparkles, Layers } from 'lucide-react';
 import Badge from '../../shared/Badge';
-import { generateBatchNumber, parseBatchNumber, getBatchExpiryStatus } from '../../../utils/batchNumber';
+import { generateBatchNumber, getBatchExpiryStatus } from '../../../utils/batchNumber';
 
 export interface SplitVariant {
     id: string;
@@ -49,7 +49,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
     scanOnlyHandlers,
     t
 }) => {
-    const parsedBatch = parseBatchNumber(variant.batchNumber);
+
     const expiryStatus = getBatchExpiryStatus(variant.expiryDate);
 
     const handleAutoGenerateLot = () => {
@@ -69,18 +69,13 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                         <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] font-mono border border-[var(--theme-border)]">
                             {t('warehouse.splitNum', { num: index + 1 }) || `Split #${index + 1}`}
                         </span>
-                        {parsedBatch.isStandard && (
-                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono flex items-center gap-1">
-                                <Calendar size={13} className="text-[var(--theme-text-secondary)]" />
-                                {t('warehouse.dateReceived') || 'Date Rcvd:'} {parsedBatch.formattedDate || (t('warehouse.today') || 'Today')}
-                            </span>
-                        )}
+
                     </div>
                     {totalSplits > 1 && (
                         <button
                             type="button"
                             onClick={onRemoveVariant}
-                            className="p-2 text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] rounded-xl transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            className="p-2 text-[var(--theme-text-secondary)] text-[var(--theme-status-danger-text)] bg-[var(--theme-status-danger-bg)] rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                             title={t('warehouse.removeScan')}
                             aria-label={t('warehouse.removeScan') || 'Remove split'}
                         >
@@ -92,50 +87,50 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                 {/* Grid: Qty & Condition */}
                 <div className="grid grid-cols-2 gap-3 md:gap-4 w-full">
                     <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5">{t('warehouse.quantityToReceive')}</label>
+                        <label className="text-sm font-medium text-[var(--theme-text-secondary)] pl-0.5">{t('warehouse.quantityToReceive')}</label>
                         <input
                             type="number"
-                            inputMode="decimal"
+                            inputMode="numeric"
                             pattern="[0-9]*"
                             min="0"
                             value={variant.quantity === 0 ? '' : variant.quantity}
                             onChange={(e) => onUpdateVariant({ quantity: Math.max(0, parseInt(e.target.value) || 0) })}
                             className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-lg md:text-xl font-bold font-mono text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)] tabular-nums min-h-[44px]"
-                            aria-label="Quantity"
+                            aria-label={t('warehouse.quantityToReceive')}
                             placeholder="0"
                         />
                         <div className="flex items-center gap-1.5 pt-1">
                             <button
                                 type="button"
                                 onClick={() => onUpdateVariant({ quantity: (variant.quantity || 0) + 1 })}
-                                className="flex-1 py-1 px-2 rounded-lg bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[32px]"
+                                className="flex-1 py-1 px-2 rounded-lg bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[44px]"
                             >
                                 +1
                             </button>
                             <button
                                 type="button"
                                 onClick={() => onUpdateVariant({ quantity: (variant.quantity || 0) + 5 })}
-                                className="flex-1 py-1 px-2 rounded-lg bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[32px]"
+                                className="flex-1 py-1 px-2 rounded-lg bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[44px]"
                             >
                                 +5
                             </button>
                             <button
                                 type="button"
                                 onClick={() => onUpdateVariant({ quantity: (variant.quantity || 0) + 10 })}
-                                className="flex-1 py-1 px-2 rounded-lg bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[32px]"
+                                className="flex-1 py-1 px-2 rounded-lg bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[44px]"
                             >
                                 +10
                             </button>
                         </div>
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5">{t('warehouse.condition')}</label>
+                        <label className="text-sm font-medium text-[var(--theme-text-secondary)] pl-0.5">{t('warehouse.condition')}</label>
                         <div className="relative">
                             <select
                                 value={variant.condition || 'Good'}
                                 onChange={(e) => onUpdateVariant({ condition: e.target.value })}
                                 className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)] min-h-[44px] cursor-pointer appearance-none pr-9"
-                                aria-label="Condition"
+                                aria-label={t('warehouse.condition')}
                             >
                                 <option value="Good">{t('warehouse.conditionGood')}</option>
                                 <option value="Damaged">{t('warehouse.conditionDamaged')}</option>
@@ -154,7 +149,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                     {/* Expiry Date */}
                     <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                            <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5">{t('warehouse.expiryDate')}</label>
+                            <label className="text-sm font-medium text-[var(--theme-text-secondary)] pl-0.5">{t('warehouse.expiryDate')}</label>
                             {variant.expiryDate && (
                                 <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${expiryStatus.badgeColor}`}>
                                     {expiryStatus.label}
@@ -166,14 +161,15 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             value={variant.expiryDate || ''}
                             onChange={(e) => onUpdateVariant({ expiryDate: e.target.value })}
                             className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)]"
-                            aria-label="Expiry Date"
+                            aria-label={t('warehouse.expiryDate')}
                         />
                     </div>
 
                     {/* Batch / Lot Number */}
-                    <div className="space-y-1.5">
+                    <details className="space-y-2 min-w-0">
+                        <summary className="min-h-[44px] flex items-center cursor-pointer text-sm font-medium text-[var(--theme-text-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]">{t('warehouse.receivingLotDetails')}</summary>
                         <div className="flex items-center justify-between">
-                            <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5 flex items-center gap-1.5">
+                            <label className="text-sm font-medium text-[var(--theme-text-secondary)] pl-0.5 flex items-center gap-1.5">
                                 <Layers size={13} className="text-[var(--theme-text-secondary)]" /> {t('warehouse.batchLotNo') || 'Batch / Lot No'}
                             </label>
                             <button
@@ -189,19 +185,19 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             type="text"
                             value={variant.batchNumber || ''}
                             onChange={(e) => onUpdateVariant({ batchNumber: e.target.value })}
-                            placeholder="e.g. LOT-20261003-KEGR001-01"
+                            placeholder={t('warehouse.batchLotNo')}
                             className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono tracking-wide text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)]"
                             aria-label={t('warehouse.batchLotNo') || 'Batch Number'}
                         />
                         <p className="text-[11px] text-[var(--theme-text-secondary)] pl-0.5 font-mono">
-                            Format: LOT-YYYYMMDD-[SKU]-[SEQ] or Supplier Lot
+                            {t('warehouse.receivingLotHint')}
                         </p>
-                    </div>
+                    </details>
                 </div>
 
                 {/* Barcodes Scanning & Chips */}
                 <div className="space-y-2 w-full">
-                    <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5 flex items-center gap-2">
+                    <label className="text-sm font-medium text-[var(--theme-text-secondary)] pl-0.5 flex items-center gap-2">
                         <ScanBarcode size={13} className="text-[var(--theme-text-secondary)]" /> {t('warehouse.barcodes')}
                     </label>
 
@@ -222,7 +218,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                                 onPaste={scanOnlyHandlers.onPaste}
                                 placeholder={t('warehouse.scanBarcodePlaceholder')}
                                 className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)]"
-                                aria-label="New Barcode Input"
+                                aria-label={t('warehouse.scanBarcodePlaceholder')}
                             />
                             <ScanBarcode className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                         </div>
@@ -230,7 +226,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             type="button"
                             onClick={onAddBarcode}
                             className="px-4 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
-                            aria-label="Add barcode"
+                            aria-label={t('warehouse.receivingAddBarcode')}
                         >
                             <Plus size={16} />
                         </button>
@@ -253,7 +249,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                                     type="button"
                                     onClick={() => onRemoveBarcode(code)}
                                     className="opacity-50 hover:opacity-100 text-[var(--theme-status-danger-text)] transition-opacity ml-0.5"
-                                    aria-label="Remove barcode"
+                                    aria-label={t('warehouse.receivingRemoveBarcode')}
                                 >
                                     <X size={12} />
                                 </button>

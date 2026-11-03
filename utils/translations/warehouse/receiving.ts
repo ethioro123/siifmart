@@ -1,6 +1,15 @@
 import { TranslationBlock } from '../types';
 
 export const receiving: TranslationBlock = {
+    receivingCheckInstruction: { en: 'Check the product and packaging before counting.', am: 'ከመቁጠርዎ በፊት ዕቃውን እና ማሸጊያውን ያረጋግጡ።', or: 'Osoo hin lakkaaʼin meeshaa fi paakeejii mirkaneessi.' },
+    receivingBlindInstruction: { en: 'Count the units physically in front of you.', am: 'በፊትዎ ያሉትን ክፍሎች ይቁጠሩ።', or: 'Kutaa fuula kee dura jiru lakkaaʼi.' },
+    receivingHandlingDetails: { en: 'Handling requirements', am: 'የአያያዝ መስፈርቶች', or: 'Ulaagaalee qabannaa' },
+    receivingCurrentCount: { en: 'Counted this receipt', am: 'በዚህ ቅበላ የተቆጠረ', or: 'Fudhannaa kanaaf lakkaaʼame' },
+    receivingLotDetails: { en: 'Lot details', am: 'የሎት ዝርዝሮች', or: 'Balʼina lootii' },
+    receivingLotHint: { en: 'Keep the generated lot or enter the supplier lot.', am: 'የተፈጠረውን ሎት ያቆዩ ወይም የአቅራቢውን ሎት ያስገቡ።', or: 'Lootii uumame tursiisi ykn lootii dhiyeessaa galchi.' },
+    receivingAddBarcode: { en: 'Add barcode', am: 'ባርኮድ ጨምር', or: 'Baarkoodii dabali' },
+    receivingRemoveBarcode: { en: 'Remove barcode', am: 'ባርኮድ አስወግድ', or: 'Baarkoodii haqi' },
+    receivingSaveFailed: { en: 'Receipt could not be saved.', am: 'ቅበላው ሊቀመጥ አልቻለም።', or: 'Fudhannaan kuufamuu hin dandeenye.' },
     // Receiving
     poNumber: { en: 'PO Number', am: 'የግዢ ትዕዛዝ ቁጥር', or: 'Lakkoofsa Ajaja Bittaa' },
     supplier: { en: 'Supplier', am: 'አቅራቢ', or: 'Dhiyeessaa' },

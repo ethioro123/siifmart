@@ -3,6 +3,7 @@
 @import "./styles/legacy-remapping.css";
 @import "./styles/theme-data-viz.css";
 @import "./styles/theme-compatibility.css";
+@import "./styles/theme-typography-oromo.css";
 
 @variant dark (&:where(.dark, .dark *));
 

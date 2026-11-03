@@ -74,8 +74,10 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
                             onClick={() => {
                                 if (isAccessible) setStep(st.id);
                             }}
+                            aria-current={isActive ? 'step' : undefined}
+                            aria-label={st.label}
                             title={!isAccessible ? label('warehouse.stepInspectionRequired', 'Items must be counted and inspected before dock handover.') : undefined}
-                            className={`min-h-[44px] py-1.5 px-2 md:py-2 md:px-3 rounded-xl border flex items-center gap-2 md:gap-3 transition-colors text-left touch-manipulation ${
+                            className={`min-h-[44px] py-2 px-2 md:px-3 rounded-xl border flex items-center gap-2 md:gap-3 transition-colors text-left touch-manipulation ${
                                 !isAccessible
                                     ? 'opacity-40 cursor-not-allowed bg-[var(--theme-bg-card)]/20 border-dashed border-[var(--theme-border)]'
                                     : isActive
@@ -90,7 +92,7 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
                                     !isAccessible
                                         ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                         : isActive
-                                            ? 'bg-[var(--theme-accent)] text-[var(--theme-text-primary)]'
+                                            ? 'bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)]'
                                             : st.isComplete && st.id === 'QUALITY'
                                                 ? 'bg-[var(--theme-status-success-bg)] text-[var(--theme-text-primary)]'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
@@ -105,37 +107,8 @@ export const ReceiveStepIndicator: React.FC<ReceiveStepIndicatorProps> = ({
                                 )}
                             </div>
 
-                            <div className="min-w-0 hidden sm:block flex-1">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] font-mono font-semibold text-[var(--theme-text-secondary)]">
-                                        0{st.stepNum}
-                                    </span>
-                                    <p
-                                        className={`text-xs font-semibold uppercase tracking-tight truncate ${
-                                            isActive
-                                                ? 'text-[var(--theme-text-primary)]'
-                                                : 'text-[var(--theme-text-secondary)]'
-                                        }`}
-                                    >
-                                        {st.label}
-                                    </p>
-                                </div>
-                                <span className="text-[10px] text-[var(--theme-text-secondary)] truncate block">
-                                    {st.sublabel}
-                                </span>
-                            </div>
+                            <span className="text-sm font-medium text-[var(--theme-text-primary)] break-words">{st.label}</span>
 
-                            <div className="sm:hidden min-w-0 flex-1">
-                                <span
-                                    className={`text-[11px] font-bold uppercase truncate block ${
-                                        isActive
-                                            ? 'text-[var(--theme-text-primary)]'
-                                            : 'text-[var(--theme-text-secondary)]'
-                                    }`}
-                                >
-                                    {st.label.split(' ')[0]}
-                                </span>
-                            </div>
                         </button>
                     );
                 })}

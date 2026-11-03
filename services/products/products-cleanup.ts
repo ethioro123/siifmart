@@ -70,56 +70,67 @@ export async function clearLocationForEmptyProducts(location?: string, siteId?: 
 }
 
 /**
- * Cascade delete product references across movements, requests, and PO items before deleting product.
+ * Safe delete product: verifies no audit evidence exists (movements, sales, approval requests, or PO items)
+ * before deleting the product. Refuses to delete if audit records reference this product, preserving evidence.
  */
 export async function cascadeDeleteProduct(id: string): Promise<void> {
-    const { error: movementsError } = await supabase
+    if (!id) throw new Error('Product ID is required');
+
+    // 1. Verify no existing stock movements
+    const { count: movementsCount, error: movementsError } = await supabase
         .from('stock_movements')
-        .update({ product_id: null })
+        .select('*', { count: 'exact', head: true })
         .eq('product_id', id);
 
     if (movementsError) {
-        console.warn('⚠️ Failed to update stock movements:', movementsError);
+        logger.warn('products-cleanup', 'Failed to check stock movements for product delete', { error: movementsError.message });
+    }
+    if (movementsCount && movementsCount > 0) {
+        throw new Error('Cannot delete product with existing stock movements; preserve product for audit trail.');
     }
 
+    // 2. Verify no existing sale items
     try {
-        const { error: saleItemsError } = await supabase
+        const { count: saleCount, error: saleItemsError } = await supabase
             .from('sale_items')
-            .update({ product_id: null })
+            .select('*', { count: 'exact', head: true })
             .eq('product_id', id);
 
-        if (saleItemsError) {
-            console.warn('⚠️ Failed to update sale_items:', saleItemsError);
+        if (!saleItemsError && saleCount && saleCount > 0) {
+            throw new Error('Cannot delete product with existing sales history; preserve product for audit trail.');
         }
-    } catch (e) {
-        console.warn('⚠️ sale_items table may not exist:', e);
+    } catch {
+        // Safe check fallback
     }
 
-    const { error: requestsError } = await supabase
+    // 3. Verify no existing approval requests (inventory_requests)
+    const { count: requestsCount, error: requestsError } = await supabase
         .from('inventory_requests')
-        .delete()
+        .select('*', { count: 'exact', head: true })
         .eq('product_id', id);
 
-    if (requestsError) {
-        console.warn('⚠️ Failed to delete inventory_requests:', requestsError);
+    if (!requestsError && requestsCount && requestsCount > 0) {
+        throw new Error('Cannot delete product with existing inventory approval requests; preserve requests for audit trail.');
     }
 
-    const { error: poItemsError } = await supabase
+    // 4. Verify no existing purchase order references
+    const { count: poItemsCount, error: poItemsError } = await supabase
         .from('po_items')
-        .update({ product_id: null })
+        .select('*', { count: 'exact', head: true })
         .eq('product_id', id);
 
-    if (poItemsError) {
-        console.warn('⚠️ Failed to update po_items:', poItemsError);
+    if (!poItemsError && poItemsCount && poItemsCount > 0) {
+        throw new Error('Cannot delete product referenced in purchase orders; preserve product for audit trail.');
     }
 
+    // 5. Cleanly delete unreferenced product without altering historical evidence
     const { error: productError } = await supabase
         .from('products')
         .delete()
         .eq('id', id);
 
     if (productError) {
-        console.error('❌ Failed to delete product:', productError);
+        logger.error('products-cleanup', 'Failed to delete unreferenced product', { error: productError.message });
         throw productError;
     }
 }

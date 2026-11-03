@@ -28,10 +28,12 @@ interface LanguageContextType {
     countryProfile: CountryProfile;
     isKenya: boolean;
     isEthiopia: boolean;
+    isOromo: boolean;
     availableLanguages: LanguageOption[];
     currency: string;
     currencySymbol: string;
     formatCurrency: (amount: number | undefined | null) => string;
+    getAdaptiveClass: (baseClass?: string, oromoClass?: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -107,6 +109,27 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         setLocalLanguage(sanitized);
     };
 
+    const isOromo = language === 'or';
+
+    // Synchronize HTML lang attribute, dataset, and Oromo dynamic typography class
+    useEffect(() => {
+        if (typeof document !== 'undefined') {
+            document.documentElement.lang = language;
+            document.documentElement.setAttribute('data-language', language);
+            document.documentElement.classList.toggle('lang-or', isOromo);
+            if (document.body) {
+                document.body.classList.toggle('lang-or', isOromo);
+            }
+        }
+    }, [language, isOromo]);
+
+    const getAdaptiveClass = (baseClass: string = '', oromoClass: string = ''): string => {
+        if (isOromo) {
+            return oromoClass ? `${baseClass} ${oromoClass}`.trim() : `${baseClass} lang-or-adaptive`.trim();
+        }
+        return baseClass;
+    };
+
     const formatCurrency = (amount: number | undefined | null): string => {
         return formatLocalizedPrice(amount, currency);
     };
@@ -147,10 +170,12 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
             countryProfile,
             isKenya,
             isEthiopia,
+            isOromo,
             availableLanguages,
             currency,
             currencySymbol,
-            formatCurrency
+            formatCurrency,
+            getAdaptiveClass
         }}>
             {children}
         </LanguageContext.Provider>
@@ -184,10 +209,12 @@ const fallbackLanguageContext: LanguageContextType = {
     countryProfile: getCountryProfile('ET'),
     isKenya: false,
     isEthiopia: true,
+    isOromo: false,
     availableLanguages: getAllowedLanguages('ET'),
     currency: 'ETB',
     currencySymbol: 'ETB',
-    formatCurrency: (amount) => formatLocalizedPrice(amount || 0, 'ET')
+    formatCurrency: (amount) => formatLocalizedPrice(amount || 0, 'ET'),
+    getAdaptiveClass: (baseClass = '', _oromoClass = '') => baseClass
 };
 
 export const useLanguage = () => {
