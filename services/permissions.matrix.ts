@@ -61,8 +61,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     area_operations_manager: [
         'dashboard.view', 'pos.view', 'inventory.view', 'inventory.transfer',
         'sales.view', 'sales.view_reports', 'procurement.view', 'pricing.view',
-        'employees.view', 'employees.create', 'employees.edit',
-        'employees.approve', 'employees.manage_attendance'
+        'employees.view'
     ],
 
     // ═══ LEVEL 5: REGIONAL DEPARTMENT MANAGERS ═══

@@ -36,7 +36,8 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [dispatchModalTransfer, setDispatchModalTransfer] = useState<TransferRecord | null>(null);
   const isHQUser = Boolean(user?.role && ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'regional_supply_chain_manager'].includes(user.role));
-  const canManageTransfers = Boolean(user?.role && ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'regional_operations_manager', 'area_operations_manager', 'regional_supply_chain_manager', 'regional_logistics_manager', 'warehouse_manager', 'inventory_manager', 'dispatch_supervisor'].includes(user.role));
+  const isAreaManager = user?.role === 'area_operations_manager';
+  const canManageTransfers = Boolean(user?.role && ['group_ceo', 'country_managing_director', 'country_operations_director', 'country_supply_chain_director', 'regional_operations_manager', 'regional_supply_chain_manager', 'regional_logistics_manager', 'warehouse_manager', 'inventory_manager', 'dispatch_supervisor'].includes(user.role));
 
   // Load regional transfers on mount
   React.useEffect(() => {
@@ -45,7 +46,8 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
       setLoading(true);
       try {
         const data = await transfersService.getAll(undefined, 50, regionCode, effectiveCountry);
-        if (isMounted) setTransfers(data || []);
+        if (isMounted) setTransfers(isAreaManager ? (data || []).filter(t =>
+          regionalSites.some(site => site.id === t.sourceSiteId || site.id === t.destSiteId)) : (data || []));
       } catch (err) {
         logger.error('RegionalTransferDesk', 'Failed to load regional transfers', err);
       } finally {
@@ -54,7 +56,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
     };
     fetchTransfers();
     return () => { isMounted = false; };
-  }, [regionCode, effectiveCountry]);
+  }, [regionCode, effectiveCountry, isAreaManager, regionalSites]);
 
   const activeTransfers = transfers.filter(t => !['Received', 'Completed', 'Cancelled'].includes(t.status));
   const completedTransfers = transfers.filter(t => ['Received', 'Completed'].includes(t.status));
@@ -285,7 +287,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
             No {activeTab === 'active' ? 'Active' : 'Completed'} Transfers
           </h3>
           <p className="text-sm text-[var(--theme-text-secondary)] mt-1">
-            All regional facility inventories are currently in equilibrium.
+            {isAreaManager ? 'No transfers for assigned stores.' : 'No regional transfers to show.'}
           </p>
         </div>
       ) : (
@@ -369,7 +371,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                     return (
                       <div className="flex items-center gap-1.5">
                         {/* Internal driver transit: button to confirm delivery */}
-                        {!isExternal && transfer.status === 'In-Transit' && (
+                        {!isAreaManager && !isExternal && transfer.status === 'In-Transit' && (
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] font-mono bg-[var(--theme-status-warning-bg)] px-2 py-1 rounded-md border border-[var(--theme-status-warning-border)] flex items-center gap-1">
                               <Lock className="w-3 h-3" />
@@ -388,7 +390,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
                         )}
 
                         {/* Destination store receiving sign-off */}
-                        {canStoreReceive ? (
+                        {canStoreReceive && !isAreaManager ? (
                           <>
                             <button
                               type="button"
