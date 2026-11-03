@@ -46,12 +46,12 @@ GRANT EXECUTE ON FUNCTION public.withdraw_record_lifecycle(uuid,text) TO authent
 
 CREATE FUNCTION private.guard_closed_operational_facility() RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE payload jsonb:=to_jsonb(NEW); target uuid; assigned public.employees%ROWTYPE;
+DECLARE payload jsonb:=to_jsonb(NEW); target uuid; facility_status text; assigned public.employees%ROWTYPE;
 BEGIN
  FOR target IN SELECT DISTINCT value::uuid FROM jsonb_each_text(payload)
    WHERE key IN ('site_id','source_site_id','dest_site_id') AND value IS NOT NULL LOOP
-   PERFORM 1 FROM public.sites WHERE id=target AND status='Closed' FOR SHARE;
-   IF FOUND THEN RAISE EXCEPTION 'This facility is closed to new operational changes'; END IF;
+   SELECT status INTO facility_status FROM public.sites WHERE id=target FOR KEY SHARE;
+   IF facility_status='Closed' THEN RAISE EXCEPTION 'This facility is closed to new operational changes'; END IF;
  END LOOP;
  IF TG_TABLE_NAME='wms_jobs' AND nullif(payload->>'assigned_to','') IS NOT NULL THEN
    SELECT * INTO assigned FROM public.employees WHERE id::text=payload->>'assigned_to' OR name=payload->>'assigned_to' LIMIT 1 FOR SHARE;

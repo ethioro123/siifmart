@@ -44,12 +44,16 @@ BEGIN
    OR coalesce(jsonb_typeof(p_evidence),'null')<>'object' OR octet_length(p_evidence::text)>6000 THEN
    RAISE EXCEPTION 'Active employee and a reason of 10–1200 characters required';
  END IF;
+ IF p_kind<>'employee' AND p_evidence<>'{}'::jsonb THEN RAISE EXCEPTION 'This lifecycle action does not accept additional evidence fields'; END IF;
  target:=private.lifecycle_target(p_kind,p_target_id);
  IF p_kind='employee' THEN
    target_rank:=private.lifecycle_rank(target->'state'->>'role');
    IF actor.id=p_target_id OR private.lifecycle_rank(actor.role)<=target_rank THEN
      RAISE EXCEPTION 'Offboarding requests require a more senior independent manager'; END IF;
    IF target->'state'->>'status'='Terminated' THEN RAISE EXCEPTION 'Employee is already terminated'; END IF;
+   IF EXISTS(SELECT 1 FROM jsonb_object_keys(p_evidence) key WHERE key NOT IN ('reason_code','effective_date','assets_returned','pos_access_revoked','wms_badge_deactivated','keys_surrendered','cash_drawer_reconciled','reconciliation_notes')) THEN
+     RAISE EXCEPTION 'Unexpected offboarding evidence field'; END IF;
+   PERFORM (p_evidence->>'effective_date')::date;
    IF coalesce(p_evidence->>'reason_code','') NOT IN ('gross_misconduct','job_abandonment','voluntary_resignation','performance_incompetence','contract_expiration','redundancy_downsizing','medical_incapacity')
      OR nullif(p_evidence->>'effective_date','') IS NULL THEN RAISE EXCEPTION 'Offboarding reason and effective date required'; END IF;
  ELSIF p_kind='site' THEN

@@ -27,7 +27,7 @@ CREATE TABLE public.record_lifecycle_events (
 CREATE INDEX lifecycle_event_request ON public.record_lifecycle_events(request_id,id);
 ALTER TABLE public.record_lifecycle_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.record_lifecycle_events ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON public.record_lifecycle_requests,public.record_lifecycle_events FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON public.record_lifecycle_requests,public.record_lifecycle_events FROM PUBLIC,anon,authenticated,service_role;
 GRANT SELECT ON public.record_lifecycle_requests,public.record_lifecycle_events TO authenticated;
 
 CREATE FUNCTION private.lifecycle_rank(role_name text) RETURNS integer

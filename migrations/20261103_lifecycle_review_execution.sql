@@ -58,10 +58,13 @@ BEGIN
        OR EXISTS(SELECT 1 FROM public.wms_jobs WHERE (site_id=r.target_id OR source_site_id=r.target_id OR dest_site_id=r.target_id) AND status NOT IN ('Completed','Cancelled'))
        OR EXISTS(SELECT 1 FROM public.purchase_orders WHERE site_id=r.target_id AND status NOT IN ('Received','Cancelled','Rejected'))
        OR EXISTS(SELECT 1 FROM public.transfers WHERE (source_site_id=r.target_id OR dest_site_id=r.target_id) AND status NOT IN ('Completed','Rejected'))
-       OR EXISTS(SELECT 1 FROM public.expenses WHERE site_id=r.target_id AND status IN ('Pending','Approved')) THEN
+       OR EXISTS(SELECT 1 FROM public.expenses WHERE site_id=r.target_id AND status IN ('Pending','Approved'))
+       OR EXISTS(SELECT 1 FROM public.vendor_invoices WHERE site_id=r.target_id::text AND status NOT IN ('Paid','Voided'))
+       OR EXISTS(SELECT 1 FROM public.ar_invoices WHERE site_id=r.target_id::text AND (coalesce(balance_due,0)<>0 OR status NOT IN ('Paid','Voided'))) THEN
        RAISE EXCEPTION 'Resolve facility stock, staff, tills, jobs, orders, transfers and unpaid expenses before closure'; END IF;
    ELSIF r.kind='purchase_order' THEN
-     IF EXISTS(SELECT 1 FROM public.po_items WHERE po_id=r.target_id AND coalesce(received_qty,0)<>0)
+     IF EXISTS(SELECT 1 FROM public.vendor_invoices WHERE po_id=r.target_id AND status<>'Voided')
+       OR EXISTS(SELECT 1 FROM public.po_items WHERE po_id=r.target_id AND coalesce(received_qty,0)<>0)
        OR EXISTS(SELECT 1 FROM public.wms_jobs WHERE order_ref=r.target_id::text AND status<>'Cancelled') THEN
        RAISE EXCEPTION 'An order with receiving or warehouse evidence requires a reversal'; END IF;
    ELSE
@@ -102,6 +105,9 @@ DECLARE kind text; needs_review boolean:=false;
 BEGIN
  kind:=CASE TG_TABLE_NAME WHEN 'employees' THEN 'employee' WHEN 'sites' THEN 'site'
    WHEN 'purchase_orders' THEN 'purchase_order' ELSE 'transfer' END;
+ IF (kind='employee' AND OLD.status='Terminated' AND NEW.status IS DISTINCT FROM OLD.status)
+   OR (kind='site' AND OLD.status='Closed' AND NEW.status IS DISTINCT FROM OLD.status) THEN
+   RAISE EXCEPTION 'Reinstatement or reopening requires a separate reviewed workflow' USING ERRCODE='42501'; END IF;
  needs_review:=CASE kind WHEN 'employee' THEN NEW.status='Terminated' AND OLD.status IS DISTINCT FROM NEW.status
  WHEN 'site' THEN NEW.status='Closed' AND OLD.status IS DISTINCT FROM NEW.status
  WHEN 'purchase_order' THEN NEW.status='Cancelled' AND OLD.status IS DISTINCT FROM NEW.status

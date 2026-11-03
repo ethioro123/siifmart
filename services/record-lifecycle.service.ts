@@ -1,3 +1,4 @@
+import { lifecycleRequestSchema, lifecycleDecisionSchema } from '../schemas/record-lifecycle.schema';
 import { supabase } from '../lib/supabase';
 import type { LifecycleKind, LifecycleRequest, LifecycleEvent, LifecycleTarget } from '../types/recordLifecycle';
 const columns = 'id,kind,target_id,target_label,site_id,country_code,region_code,reason,evidence,original_state,status,requested_by,requester_name,requester_role,requested_at,operations_reviewer,finance_reviewer,reviewed_by,reviewed_at,decision_reason,applied_at';
@@ -16,13 +17,14 @@ export const recordLifecycleService = {
     return data || [];
   },
   async request(kind: LifecycleKind, targetId: string, reason: string, evidence: Record<string, string | boolean> = {}): Promise<string> {
-    if (reason.trim().length < 10 || reason.trim().length > 1200) throw new Error('Enter a reason of 10–1200 characters.');
+    lifecycleRequestSchema.parse({ kind, targetId, reason, evidence });
     const { data, error } = await supabase.rpc('request_record_lifecycle', { p_kind: kind, p_target_id: targetId, p_reason: reason.trim(), p_evidence: evidence });
     if (error) throw error;
     if (typeof data !== 'string') throw new Error('The server did not confirm the saved request.');
     return data;
   },
   async decide(id: string, decision: 'approve' | 'reject' | 'withdraw', reason: string): Promise<{ request_id: string; status: LifecycleRequest['status'] }> {
+    lifecycleDecisionSchema.parse({ id, decision, reason });
     const { data, error } = decision === 'withdraw'
       ? await supabase.rpc('withdraw_record_lifecycle', { p_request_id: id, p_reason: reason.trim() })
       : await supabase.rpc('decide_record_lifecycle', { p_request_id: id, p_approve: decision === 'approve', p_reason: reason.trim() });
