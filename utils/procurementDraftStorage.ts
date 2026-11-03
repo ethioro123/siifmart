@@ -37,12 +37,12 @@ export interface PODraftMeta {
 }
 
 export interface StoredPODraft {
-    id: string;
+    id?: string;
     data: PODraftPayload;
     meta: PODraftMeta;
     countryCode: string;
     userId: string;
-    updatedAt: string;
+    updatedAt?: string;
 }
 
 export const PO_DRAFTS_UPDATED_EVENT = 'siifmart:po_drafts_updated';
