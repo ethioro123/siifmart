@@ -18,6 +18,7 @@ interface RegionalLPIncidentDeckProps {
   discrepancyTransfers: TransferRecord[];
   currencySymbol: string;
   overrideVelocityBreaches?: OverrideVelocityBreach[];
+  onAuditBreach?: (breach: OverrideVelocityBreach) => void;
 }
 
 export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
@@ -26,7 +27,8 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
   varianceShifts,
   discrepancyTransfers,
   currencySymbol,
-  overrideVelocityBreaches
+  overrideVelocityBreaches,
+  onAuditBreach
 }) => {
   const { addNotification } = useData();
   const [investigationTasks, setInvestigationTasks] = useState<EmployeeTask[]>([]);
@@ -166,9 +168,14 @@ export const RegionalLPIncidentDeck: React.FC<RegionalLPIncidentDeckProps> = ({
                     Supervisor / Manager: <strong>{breach.managerName}</strong> • {breach.totalOverrides} flagged overrides
                   </p>
                 </div>
-                <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded bg-[var(--theme-status-danger-bg)] text-[var(--theme-text-primary)] shrink-0">
-                  Audit Flagged
-                </span>
+                <button
+                  type="button"
+                  onClick={() => onAuditBreach?.(breach)}
+                  className="min-h-9 px-3 rounded-lg bg-[var(--theme-status-danger-bg)] hover:bg-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-xs font-semibold flex items-center gap-1.5 transition-colors border border-[var(--theme-status-danger-border)] shadow-xs shrink-0 cursor-pointer"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>Audit Incident</span>
+                </button>
               </div>
             ))}
           </div>

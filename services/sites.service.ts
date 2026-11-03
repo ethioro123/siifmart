@@ -64,6 +64,7 @@ function mapSiteRow(s: any, replenishmentSourceIds: string[]): any {
         regionCode: s.region_code,
         region_code: s.region_code,
         areaManagerId: s.area_manager_id ?? null,
+        warehouseManagerId: s.warehouse_manager_id ?? null,
         // Legacy single-source field kept for backward compatibility
         replenishmentSourceId: ids[0] ?? s.replenishment_source_id ?? undefined,
         // New many-to-many field
@@ -72,6 +73,14 @@ function mapSiteRow(s: any, replenishmentSourceIds: string[]): any {
 }
 
 export const sitesService = {
+    async getWarehouseManagerCandidates(siteId: string) {
+        if (!siteId) return [];
+        const { data, error } = await supabase.from('employees')
+            .select('id, name').eq('site_id', siteId)
+            .eq('role', 'warehouse_manager').eq('status', 'Active').limit(25);
+        if (error) throw error;
+        return data ?? [];
+    },
     async getAreaManagerCandidates(regionCode: string) {
         if (!regionCode) return [];
         const { data, error } = await supabase
@@ -194,6 +203,8 @@ export const sitesService = {
             status: site.status,
             manager: site.manager,
             area_manager_id: site.type === 'Store' ? site.areaManagerId ?? null : null,
+            warehouse_manager_id: site.type === 'Warehouse' || site.type === 'Distribution Center'
+                ? site.warehouseManagerId ?? null : null,
             capacity: site.capacity,
             terminal_count: site.terminalCount,
             bonus_enabled: site.bonusEnabled,
@@ -260,6 +271,7 @@ export const sitesService = {
         // Fields requiring camelCase → snake_case mapping:
         const fieldMap: [keyof Site, string][] = [
             ['areaManagerId', 'area_manager_id'],
+            ['warehouseManagerId', 'warehouse_manager_id'],
             ['terminalCount', 'terminal_count'],
             ['bonusEnabled', 'bonus_enabled'],
             ['warehouseBonusEnabled', 'warehouse_bonus_enabled'],

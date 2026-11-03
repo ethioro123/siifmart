@@ -266,10 +266,11 @@ export const formatPOItemDescription = (item: any) => {
     // Only append physical weight for food/beverages/consumables where size distinguishes SKU,
     // and ONLY if not already in the name and not discrete general merchandise (like Kindle, Phones, Electronics)
     if (physicalWeight && !isDiscrete) {
-        const sizeUnit = `${physicalWeight}${physicalType}`;
-        const normalizedName = rawName.replace(/\s+/g, '').toLowerCase();
-        const normalizedSizeUnit = sizeUnit.replace(/\s+/g, '').toLowerCase();
-        if (!normalizedName.includes(normalizedSizeUnit)) {
+        const sizeUnit = `${physicalWeight}${physicalType ? (physicalType.length > 2 && !/^(g|kg|ml|l|oz|lb)$/i.test(physicalType) ? ` ${physicalType}` : physicalType) : ''}`.trim();
+        const normalizedName = rawName.replace(/[\s_-]+/g, '').toLowerCase();
+        const normalizedWeight = String(physicalWeight).replace(/[\s_-]+/g, '').toLowerCase();
+        const normalizedSizeUnit = sizeUnit.replace(/[\s_-]+/g, '').toLowerCase();
+        if (!normalizedName.includes(normalizedWeight) && !normalizedName.includes(normalizedSizeUnit)) {
             parts.push(sizeUnit);
         }
     }

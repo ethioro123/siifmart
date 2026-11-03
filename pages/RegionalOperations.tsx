@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Store, ArrowRightLeft, Truck, Users, ShieldAlert,
-  Building2, ArrowLeft, Activity, DollarSign, CreditCard, Trophy
+  Building2, ArrowLeft, Activity, DollarSign, CreditCard
 } from 'lucide-react';
 import { useRegionalOperationsData } from '../hooks/useRegionalOperationsData';
 import { useStore } from '../contexts/CentralStore';
@@ -12,7 +12,6 @@ import { getCountryProfile } from '../utils/localization';
 
 // 5 Purpose-Built Regional Desks + Leaderboard + Strategic Decks
 import { TerritoryFacilityGrid } from '../components/regional-ops/TerritoryFacilityGrid';
-import { TerritoryLeaderboard } from '../components/regional-ops/TerritoryLeaderboard';
 import { RegionalTransferDesk } from '../components/regional-ops/RegionalTransferDesk';
 import { RegionalProcurementDesk } from '../components/regional-ops/RegionalProcurementDesk';
 import { RegionalWorkforceDesk } from '../components/regional-ops/RegionalWorkforceDesk';
@@ -20,9 +19,13 @@ import { RegionalLPIncidentDeck } from '../components/regional-ops/RegionalLPInc
 import { RegionalOperationalDigest } from '../components/regional-ops/RegionalOperationalDigest';
 import { RegionalInventoryHealthDeck } from '../components/regional-ops/RegionalInventoryHealthDeck';
 import { RegionalVelocityDeck } from '../components/regional-ops/RegionalVelocityDeck';
+import { RegionalAuditLensBanner } from '../components/regional-ops/RegionalAuditLensBanner';
+import { RegionalOperationsAlertBanners } from '../components/regional-ops/RegionalOperationsAlertBanners';
+import { AuditLPIncidentModal } from '../components/regional-ops/AuditLPIncidentModal';
+import type { OverrideVelocityBreach } from '../hooks/useRegionalOperationsData';
 import AreaOperations from './AreaOperations';
 
-type RegionalDeskTab = 'facilities' | 'leaderboard' | 'transfers' | 'procurement' | 'workforce' | 'loss_prevention';
+type RegionalDeskTab = 'facilities' | 'transfers' | 'procurement' | 'workforce' | 'loss_prevention';
 
 function getDefaultRegionalDeskTab(role?: string): RegionalDeskTab {
   switch (role) {
@@ -51,6 +54,8 @@ export default function RegionalOperations() {
   const navigate = useNavigate();
   const { user } = useStore();
   const [activeTab, setActiveTab] = useState<RegionalDeskTab>(() => getDefaultRegionalDeskTab(user?.role));
+  const [selectedBreach, setSelectedBreach] = useState<OverrideVelocityBreach | null>(null);
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const areaData = useRegionalOperationsData();
 
   const {
@@ -63,24 +68,43 @@ export default function RegionalOperations() {
     regionalSites,
     siteCounts,
     regionalEmployees,
-    regionalSales,
     regionalOrders,
     regionalTransfers,
-    regionalShifts,
     inventoryMetrics,
     fulfillmentMetrics,
     sitePerformance,
-    topProducts,
     metrics,
     pendingAutonomousPOs,
     pendingEscalatedPOs,
     pendingCandidateTalent,
     varianceShifts,
     discrepancyTransfers,
-    overrideVelocityBreaches
+    overrideVelocityBreaches,
+    summaryRows,
+    summaryUnavailable
   } = areaData;
 
+  const handleAuditLPIncidents = () => {
+    if (overrideVelocityBreaches.length > 0) {
+      setSelectedBreach(overrideVelocityBreaches[0]);
+      setIsAuditModalOpen(true);
+    }
+    setActiveTab('loss_prevention');
+    document.getElementById('regional-desk-panel')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleOpenProcurement = () => {
+    setActiveTab('procurement');
+    document.getElementById('regional-desk-panel')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleAuditBreach = (breach: OverrideVelocityBreach) => {
+    setSelectedBreach(breach);
+    setIsAuditModalOpen(true);
+  };
+
   if (areaData.isAreaManager) return <AreaOperations data={areaData} />;
+  if (summaryUnavailable) return <div role="status" className="p-6 text-[var(--theme-text-primary)]">Regional operating totals are unavailable. Refresh to try again.</div>;
 
   const regionName = currentRegion?.name || regionCode || 'Territory';
   const countryName = getCountryProfile(activeCountry).name.split(' (')[0];
@@ -88,40 +112,13 @@ export default function RegionalOperations() {
   return (
     <div className="space-y-6 w-full max-w-full p-2 sm:p-4 md:p-6 pb-24 animate-in fade-in duration-300">
       {/* Executive Inspection Banner (for CEO / Country Operations Director auditing the region) */}
-      {isAuditInspection && (
-        <div className="p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-[var(--theme-status-warning)] shrink-0" />
-            <span className="text-xs text-[var(--theme-text-primary)] font-medium">
-              Corporate HQ Audit Lens:
-            </span>
-            {sovereignRegions.length > 1 ? (
-              <select
-                value={regionCode}
-                onChange={(e) => navigate(`/regional-ops?regionCode=${e.target.value}`)}
-                aria-label="Select Region to Audit"
-                className="min-h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-              >
-                {sovereignRegions.map(r => (
-                  <option key={r.code} value={r.code}>
-                    {r.name} ({r.code})
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <strong className="text-xs text-[var(--theme-text-primary)]">{regionName}</strong>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => navigate('/admin')}
-            className="min-h-11 flex items-center gap-1.5 px-3 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)] transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Return to Central Operations</span>
-          </button>
-        </div>
-      )}
+      <RegionalAuditLensBanner
+        isAuditInspection={isAuditInspection}
+        sovereignRegions={sovereignRegions}
+        regionCode={regionCode}
+        regionName={regionName}
+        navigate={navigate}
+      />
 
       {/* Regional Command Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -160,69 +157,15 @@ export default function RegionalOperations() {
         </div>
       </div>
 
-      {/* Autonomous Purchase Order Alert Banner */}
-      {metrics.pendingAutonomousPOCount > 0 && (
-        <div className="p-4 rounded-2xl bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] flex items-center justify-center shrink-0">
-              <Truck className="w-5 h-5" aria-hidden="true" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-[var(--theme-status-warning-text)] uppercase tracking-wide">
-                  Autonomous Purchase Order Authorization
-                </span>
-                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)]">
-                  SOP-MGT-020
-                </span>
-              </div>
-              <p className="text-xs text-[var(--theme-text-primary)] font-medium mt-0.5">
-                {metrics.pendingAutonomousPOCount} purchase order{metrics.pendingAutonomousPOCount > 1 ? 's' : ''} (&le; {formatCompactNumber(metrics.autonomousLimit, { currency: currencySymbol })}) submitted by territorial facilities await{metrics.pendingAutonomousPOCount === 1 ? 's' : ''} your autonomous sign-off.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setActiveTab('procurement')}
-            className="min-h-11 px-4 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm shrink-0 self-end sm:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]"
-          >
-            <Truck className="w-3.5 h-3.5" />
-            <span>Review & Authorize ({metrics.pendingAutonomousPOCount})</span>
-          </button>
-        </div>
-      )}
-
-      {/* 24-Hour Managerial Override Velocity Breach Warning Banner (SOP-MGT-020) */}
-      {overrideVelocityBreaches.length > 0 && (
-        <div className="p-4 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] flex items-center justify-center shrink-0">
-              <ShieldAlert className="w-5 h-5" aria-hidden="true" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-[var(--theme-status-danger-text)] uppercase tracking-wide">
-                  Managerial Override Velocity Breach (24h Window)
-                </span>
-                <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)]">
-                  SOP-MGT-020
-                </span>
-              </div>
-              <p className="text-xs text-[var(--theme-text-primary)] font-medium mt-0.5">
-                {overrideVelocityBreaches.map(b => `${b.siteName} (${b.managerName}) at ${b.velocityRate}%`).join(', ')} exceeded the 3.0% supervisory override limit. Immediate Loss Prevention audit required.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setActiveTab('loss_prevention')}
-            className="min-h-11 px-4 rounded-xl bg-[var(--theme-primary)] hover:bg-[var(--theme-primary-hover)] text-[var(--theme-primary-text)] text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm shrink-0 self-end sm:self-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-status-danger)]"
-          >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>Audit LP Incidents ({overrideVelocityBreaches.length})</span>
-          </button>
-        </div>
-      )}
+      {/* Autonomous Purchase Order Alert Banner & Override Velocity Breach Warning Banner */}
+      <RegionalOperationsAlertBanners
+        pendingAutonomousPOCount={metrics.pendingAutonomousPOCount}
+        autonomousLimit={metrics.autonomousLimit}
+        currencySymbol={currencySymbol}
+        onOpenProcurement={handleOpenProcurement}
+        overrideVelocityBreaches={overrideVelocityBreaches}
+        onAuditLPIncidents={handleAuditLPIncidents}
+      />
 
       {/* Macro Regional Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -290,7 +233,7 @@ export default function RegionalOperations() {
         pendingInboundShipments={fulfillmentMetrics.pendingInboundShipments}
         pendingPicks={fulfillmentMetrics.pendingPicks}
         inProgressPacks={fulfillmentMetrics.inProgressPacks}
-        activeStaffCount={regionalEmployees.length}
+        activeStaffCount={summaryRows.reduce((sum, row) => sum + row.staff_count, 0)}
         onSelectTab={(tab: RegionalDeskTab) => setActiveTab(tab)}
       />
 
@@ -309,21 +252,6 @@ export default function RegionalOperations() {
         >
           <Store className="w-4 h-4" />
           <span>Facility Grid ({siteCounts.total})</span>
-        </button>
-
-        <button
-          type="button"
-          aria-pressed={activeTab === 'leaderboard'}
-          aria-controls="regional-desk-panel"
-          onClick={() => setActiveTab('leaderboard')}
-          className={`min-h-11 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
-            activeTab === 'leaderboard'
-              ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
-              : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
-          }`}
-        >
-          <Trophy className="w-4 h-4 text-[var(--theme-status-warning-text)]" />
-          <span>Leaderboard</span>
         </button>
 
         <button
@@ -403,26 +331,14 @@ export default function RegionalOperations() {
             />
             <RegionalVelocityDeck
               sitePerformance={sitePerformance}
-              topProducts={topProducts}
               currencySymbol={currencySymbol}
             />
             <TerritoryFacilityGrid
               sites={regionalSites}
-              shifts={regionalShifts}
-              sales={regionalSales}
+              summaryRows={summaryRows}
               currencySymbol={currencySymbol}
             />
           </div>
-        )}
-
-        {activeTab === 'leaderboard' && (
-          <TerritoryLeaderboard
-            regionCode={regionCode}
-            sites={regionalSites}
-            sales={regionalSales}
-            shifts={regionalShifts}
-            currencySymbol={currencySymbol}
-          />
         )}
 
         {activeTab === 'transfers' && (
@@ -466,9 +382,21 @@ export default function RegionalOperations() {
             discrepancyTransfers={discrepancyTransfers}
             currencySymbol={currencySymbol}
             overrideVelocityBreaches={overrideVelocityBreaches}
+            onAuditBreach={handleAuditBreach}
           />
         )}
       </div>
+
+      {/* Audit LP Incident Modal */}
+      <AuditLPIncidentModal
+        isOpen={isAuditModalOpen}
+        onClose={() => setIsAuditModalOpen(false)}
+        breach={selectedBreach}
+        regionCode={regionCode}
+        regionalShifts={areaData.regionalShifts || []}
+        regionalEmployees={regionalEmployees}
+        currencySymbol={currencySymbol}
+      />
     </div>
   );
 }

@@ -114,8 +114,9 @@ export function SiteCard({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Manager</span>
-              <span className="text-[var(--theme-text-primary)] font-semibold truncate block mt-0.5" title={site.manager || 'Unassigned'}>
-                {site.manager || 'Unassigned'}
+              <span className="text-[var(--theme-text-primary)] font-semibold truncate block mt-0.5" title={['Warehouse', 'Distribution Center'].includes(site.type) && !site.warehouseManagerId ? 'Unassigned account' : site.manager || 'Unassigned'}>
+                {['Warehouse', 'Distribution Center'].includes(site.type) && !site.warehouseManagerId
+                  ? 'Unassigned account' : site.manager || 'Unassigned'}
               </span>
             </div>
             <div>

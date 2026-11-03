@@ -1,227 +1,64 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Store, Warehouse, ShieldAlert, CheckCircle2, Clock,
-  ArrowUpRight, Users, CreditCard, CalendarCheck2, AlertTriangle, Building2
-} from 'lucide-react';
-import type { Site, ShiftRecord, SaleRecord } from '../../types';
+import { Store, Warehouse, Building2, ArrowUpRight } from 'lucide-react';
+import type { Site } from '../../types';
+import type { RegionalOperatingSummaryRow } from '../../hooks/useRegionalOperatingSummary';
 import { formatCompactNumber } from '../../utils/formatting';
 import { useData } from '../../contexts/DataContext';
 
 interface TerritoryFacilityGridProps {
   sites: Site[];
-  shifts: ShiftRecord[];
-  sales: SaleRecord[];
+  summaryRows: RegionalOperatingSummaryRow[];
   currencySymbol: string;
 }
 
-export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
-  sites,
-  shifts,
-  sales,
-  currencySymbol
-}) => {
+export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({ sites, summaryRows, currencySymbol }) => {
   const navigate = useNavigate();
   const { setActiveSite } = useData();
-
-  // Aggregate metrics per facility
-  const todayPrefix = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const dayOfWeek = useMemo(() => new Date().getDay(), []); // 2 = Tuesday
-
-  const facilityStats = useMemo(() => {
-    return sites.map(site => {
-      const siteShifts = shifts.filter(s => s.siteId === site.id);
-      const openRegisters = siteShifts.filter(s => s.status === 'Open').length;
-
-      const siteSales = sales.filter(s => s.siteId === site.id && (s.date || '').startsWith(todayPrefix));
-      const todayRevenue = siteSales.reduce((acc, curr) => acc + (curr.total || 0), 0);
-      const todayOrderCount = siteSales.length;
-
-      const type = (site.type || '').toLowerCase();
-      const isWarehouse = type.includes('warehouse') || type.includes('distribution') || type.includes('wms');
-      const isAdministration = type.includes('admin');
-
-      // Tuesday weekly cycle count status check (SOP-INV-012 Enforcement)
-      const isTuesday = dayOfWeek === 2;
-      const isWednesday = dayOfWeek === 3;
-      const isPastFivePM = new Date().getHours() >= 17;
-
-      let cycleCountStatus: 'COMPLIANT' | 'DUE_TODAY' | 'OVERDUE_BREACH' | 'MISSED_PRIOR' = 'COMPLIANT';
-      if (isTuesday) {
-        cycleCountStatus = isPastFivePM ? 'OVERDUE_BREACH' : 'DUE_TODAY';
-      } else if (isWednesday) {
-        cycleCountStatus = 'MISSED_PRIOR';
-      }
-
-      return {
-        site,
-        isWarehouse,
-        isAdministration,
-        openRegisters,
-        todayRevenue,
-        todayOrderCount,
-        cycleCountStatus
-      };
-    });
-  }, [sites, shifts, sales, todayPrefix, dayOfWeek]);
-
-  if (sites.length === 0) {
-    return (
-      <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
-        <Store className="w-10 h-10 mx-auto text-[var(--theme-text-secondary)] opacity-40 mb-3" />
-        <h3 className="text-base font-semibold text-[var(--theme-text-primary)]">No Territorial Facilities Found</h3>
-        <p className="text-sm text-[var(--theme-text-secondary)] mt-1">
-          No stores or distribution centers are currently registered in this operational region.
-        </p>
-      </div>
-    );
-  }
-
-  const overdueFacilities = facilityStats.filter(f => f.cycleCountStatus === 'OVERDUE_BREACH' || f.cycleCountStatus === 'MISSED_PRIOR');
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-base font-semibold text-[var(--theme-text-primary)]">
-            Territorial Facility Grid
-          </h3>
-          <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
-            Real-time branch operational pulse, active registers, and Tuesday cycle audit tracking
-          </p>
-        </div>
-        <span className="text-xs px-2.5 py-1 rounded-full font-mono bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
-          {sites.length} Active Nodes
-        </span>
-      </div>
-
-      {/* Tuesday Cycle Count SLA Enforcement Banner */}
-      {overdueFacilities.length > 0 && (
-        <div className="p-3.5 rounded-2xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2.5">
-            <ShieldAlert className="w-4 h-4 text-[var(--theme-status-danger-text)] shrink-0" />
-            <span className="text-[var(--theme-text-primary)] font-medium">
-              <strong>Tuesday Audit Enforcement:</strong> {overdueFacilities.length} facility node(s) have missed the 5:00 PM Tuesday blind cycle count deadline (SOP-INV-012).
-            </span>
-          </div>
-          <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] shrink-0 self-end sm:self-auto">
-            Operational SLA Breached
-          </span>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4">
-        {facilityStats.map(({ site, isWarehouse, isAdministration, openRegisters, todayRevenue, todayOrderCount, cycleCountStatus }) => (
-          <div
-            key={site.id}
-            className="p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)] transition-all duration-200 flex flex-col justify-between"
-          >
-            <div>
-              {/* Header: Name & Type Badge */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)]">
-                    {isAdministration ? <Building2 className="w-5 h-5" /> : isWarehouse ? <Warehouse className="w-5 h-5" /> : <Store className="w-5 h-5" />}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] line-clamp-1">
-                      {site.name}
-                    </h4>
-                    <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">
-                      {site.code || site.id.slice(0, 8)}
-                    </span>
-                  </div>
-                </div>
-
-                <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
-                  isAdministration
-                    ? 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]'
-                    : isWarehouse
-                        ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
-                        : 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]'
-                }`}>
-                  {isAdministration ? 'Administration' : isWarehouse ? site.type : 'Retail Store'}
-                </span>
-              </div>
-
-              {/* Metrics Grid */}
-              <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-[var(--theme-border)]/60 text-xs">
-                <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]/50">
-                  <div className="flex items-center gap-1.5 text-[var(--theme-text-secondary)] text-[11px]">
-                    <CreditCard className="w-3.5 h-3.5" />
-                    <span>Open Tills</span>
-                  </div>
-                  <div className="text-sm font-bold font-mono text-[var(--theme-text-primary)] mt-1">
-                    {isAdministration ? 'N/A (HQ)' : `${openRegisters} Active`}
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]/50">
-                  <div className="flex items-center gap-1.5 text-[var(--theme-text-secondary)] text-[11px]">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>Today Sales</span>
-                  </div>
-                  <div className="text-sm font-bold font-mono text-[var(--theme-text-primary)] mt-1 truncate">
-                    {isAdministration ? 'N/A' : formatCompactNumber(todayRevenue, { currency: currencySymbol })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Tuesday Cycle Count Status */}
-              <div className="mt-3 flex items-center justify-between text-xs px-2.5 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]/50">
-                <div className="flex items-center gap-1.5 text-[var(--theme-text-secondary)] text-[11px]">
-                  <CalendarCheck2 className="w-3.5 h-3.5" />
-                  <span>Tuesday Audit</span>
-                </div>
-                {cycleCountStatus === 'COMPLIANT' && (
-                  <span className="text-[11px] font-semibold text-[var(--theme-status-success-text)] text-[var(--theme-status-success-text)] flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Audit Compliant
-                  </span>
-                )}
-                {cycleCountStatus === 'DUE_TODAY' && (
-                  <span className="text-[11px] font-semibold text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    Due Today (Before 5PM)
-                  </span>
-                )}
-                {cycleCountStatus === 'OVERDUE_BREACH' && (
-                  <span className="text-[11px] font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-1">
-                    <ShieldAlert className="w-3 h-3" />
-                    Overdue (Past 5PM)
-                  </span>
-                )}
-                {cycleCountStatus === 'MISSED_PRIOR' && (
-                  <span className="text-[11px] font-semibold text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" />
-                    Prior Tuesday Missed
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Launchpad Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveSite?.(site.id);
-                if (isAdministration) {
-                  const isRegionalHub = Boolean(site.regionCode || (site as any).region_code);
-                  navigate(isRegionalHub ? '/regional-ops' : '/admin');
-                } else if (isWarehouse) {
-                  navigate('/wms-dashboard');
-                } else {
-                  navigate('/pos-dashboard');
-                }
-              }}
-              className="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all duration-200 cursor-pointer"
-            >
-              <span>{isAdministration ? 'Inspect Regional Hub' : isWarehouse ? 'Inspect WMS Hub' : 'Inspect POS Command'}</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        ))}
-      </div>
+  if (sites.length === 0) return (
+    <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
+      <Store className="w-10 h-10 mx-auto text-[var(--theme-text-secondary)] mb-3" />
+      <h3 className="text-base font-semibold text-[var(--theme-text-primary)]">No territorial facilities found</h3>
     </div>
   );
+
+  return <section className="space-y-4">
+    <div>
+      <h3 className="text-base font-semibold text-[var(--theme-text-primary)]">Territorial Facility Grid</h3>
+      <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Current country day sales, open tills, and active staff by facility</p>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      {sites.map(site => {
+        const row = summaryRows.find(item => item.site_id === site.id);
+        const type = (site.type || '').toLowerCase();
+        const isWarehouse = type.includes('warehouse') || type.includes('distribution');
+        const isAdministration = type.includes('admin');
+        return <div key={site.id} className="p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] flex items-center justify-center text-[var(--theme-accent)]">
+                {isAdministration ? <Building2 size={20} /> : isWarehouse ? <Warehouse size={20} /> : <Store size={20} />}
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] truncate">{site.name}</h4>
+                <span className="text-[11px] text-[var(--theme-text-secondary)]">{site.type}</span>
+              </div>
+            </div>
+            <dl className="grid grid-cols-2 gap-2 mt-4 text-xs">
+              <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)]"><dt className="text-[var(--theme-text-secondary)]">Today sales</dt><dd className="font-semibold text-[var(--theme-text-primary)]">{formatCompactNumber(row?.today_sales_total ?? 0, { currency: currencySymbol })}</dd></div>
+              <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)]"><dt className="text-[var(--theme-text-secondary)]">Transactions</dt><dd className="font-semibold text-[var(--theme-text-primary)]">{row?.today_sales_count ?? 0}</dd></div>
+              <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)]"><dt className="text-[var(--theme-text-secondary)]">Open tills</dt><dd className="font-semibold text-[var(--theme-text-primary)]">{row?.open_register_count ?? 0}</dd></div>
+              <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)]"><dt className="text-[var(--theme-text-secondary)]">Active staff</dt><dd className="font-semibold text-[var(--theme-text-primary)]">{row?.staff_count ?? 0}</dd></div>
+            </dl>
+          </div>
+          <button type="button" onClick={() => {
+            setActiveSite?.(site.id);
+            navigate(isAdministration ? '/regional-ops' : isWarehouse ? '/wms-dashboard' : '/pos-dashboard');
+          }} className="mt-4 w-full min-h-11 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)]">
+            Inspect facility <ArrowUpRight size={14} />
+          </button>
+        </div>;
+      })}
+    </div>
+  </section>;
 };

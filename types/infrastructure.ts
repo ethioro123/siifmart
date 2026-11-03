@@ -54,6 +54,7 @@ export interface Site {
   status: 'Active' | 'Maintenance' | 'Closed';
   manager?: string;
   areaManagerId?: string | null; // Assigned Area Manager for a retail store
+  warehouseManagerId?: string | null; // Verified manager account at a warehouse or DC
   capacity?: number; // For Warehouses (%)
   terminalCount?: number; // For Stores
   language?: 'en' | 'am' | 'or'; // Site-specific language preference

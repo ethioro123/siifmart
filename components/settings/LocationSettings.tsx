@@ -22,6 +22,7 @@ import { getCountryProfile, Country } from '../../utils/localization';
 import { isAdminSite } from '../../utils/countryAdmin';
 import { generateNextSiteCode, generatePlaceSpecificSiteCode } from '../../utils/siteIdGenerator';
 import { useAreaManagerCandidates } from '../../hooks/useAreaManagerCandidates';
+import { useWarehouseManagerCandidates } from '../../hooks/useWarehouseManagerCandidates';
 
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
     <div className="mb-6 pb-4 border-b border-[var(--theme-border)]">
@@ -49,6 +50,10 @@ export default function LocationSettings() {
         newSite.country || activeCountry,
         sites,
         isSiteModalOpen && newSite.type === 'Store' && canAssignAreaManager
+    );
+    const { data: warehouseManagerCandidates = [] } = useWarehouseManagerCandidates(
+        newSite.id,
+        isSiteModalOpen && ['Warehouse', 'Distribution Center'].includes(newSite.type || '') && canAssignAreaManager
     );
     const [isSavingSite, setIsSavingSite] = useState(false);
     const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
@@ -127,6 +132,8 @@ export default function LocationSettings() {
                 status: newSite.status || 'Active',
                 manager: newSite.manager,
                 areaManagerId: newSite.type === 'Store' ? newSite.areaManagerId ?? null : null,
+                warehouseManagerId: ['Warehouse', 'Distribution Center'].includes(newSite.type)
+                    ? newSite.warehouseManagerId ?? null : null,
                 capacity: newSite.capacity,
                 terminalCount: newSite.terminalCount,
                 zoneCount: newSite.zoneCount,
@@ -440,6 +447,7 @@ export default function LocationSettings() {
                     regions={regions}
                     areaManagerCandidates={areaManagerCandidates}
                     canAssignAreaManager={canAssignAreaManager}
+                    warehouseManagerCandidates={warehouseManagerCandidates}
                 />
 
                 <DeleteSiteModal

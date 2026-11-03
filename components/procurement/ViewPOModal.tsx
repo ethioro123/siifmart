@@ -263,39 +263,36 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             <tbody className="divide-y divide-[var(--theme-border)]">
                                 {po.lineItems?.map((item, i) => {
                                     const pkg = getPOItemPackagingSummary(item, allProducts);
+                                    const isExpanded = Boolean(expandedItems[i]);
                                     return (
                                         <React.Fragment key={i}>
                                             <tr
-                                                className={`hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer ${expandedItems[i] ? 'bg-[var(--theme-bg-subtle)]' : ''}`}
+                                                className={`hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer group ${isExpanded ? 'bg-[var(--theme-bg-subtle)]' : ''}`}
                                                 onClick={() => toggleItem(i)}
+                                                title={isExpanded ? 'Click to collapse product details' : 'Click to view product details'}
                                             >
                                                 <td className="p-4 text-[var(--theme-text-secondary)] text-[10px] font-bold">{(i + 1).toString().padStart(2, '0')}</td>
                                                 <td className="p-4 text-[var(--theme-text-secondary)] text-xs font-mono font-semibold">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
                                                 <td className="p-4">
-                                                    <div className="text-[var(--theme-text-primary)] font-bold tracking-tight text-sm break-words leading-tight max-w-[360px]">{formatPOItemDescription(item)}</div>
-                                                    <SmartProductAttributeStrip item={item} catalogProducts={allProducts} currencySymbol={currencySymbol} maxPills={5} showDomainSpecs={true} showUnitPrice={false} className="mt-1" />
+                                                    <div className="text-[var(--theme-text-primary)] font-semibold tracking-tight text-sm break-words leading-tight max-w-[360px]">
+                                                        {formatPOItemDescription(item)}
+                                                    </div>
+                                                    <span className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5 block group-hover:text-[var(--theme-accent)] transition-colors">
+                                                        {isExpanded ? 'Hide details' : 'View details'}
+                                                    </span>
                                                 </td>
                                                 <td className="p-4">
-                                                    <div className="text-xs font-bold text-[var(--theme-text-primary)] flex items-center gap-1">
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--theme-status-warning-bg)] border border-[var(--theme-status-warning-border)] text-[var(--theme-status-warning-text)] text-[var(--theme-status-warning-text)] text-[11px] font-semibold uppercase">
-                                                            <Package size={11} className="shrink-0" /> {pkg.packBadge || pkg.manifestUnitName}
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-1">
-                                                        {pkg.packDetail}
-                                                    </div>
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] text-[11px] font-semibold uppercase">
+                                                        <Package size={11} className="shrink-0 text-[var(--theme-text-secondary)]" /> {pkg.packBadge || pkg.manifestUnitName}
+                                                    </span>
                                                 </td>
                                                 <td className="p-4 text-right">
                                                     <div className="text-[var(--theme-text-primary)] font-bold tabular-nums text-sm">
                                                         {pkg.sellableQty.toLocaleString()} <span className="text-[11px] font-medium text-[var(--theme-text-secondary)]">{pkg.sellUnitLabel}</span>
                                                     </div>
-                                                    {pkg.hasMultiplier ? (
-                                                        <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium whitespace-nowrap mt-0.5">
-                                                            {item.quantity} {pkg.manifestUnitName.toLowerCase()} ({pkg.unitsPerOrderUnit} {pkg.sellUnitLabel}/{pkg.manifestUnitName.replace(/s$/, '').toLowerCase()})
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium">
-                                                            (individual units)
+                                                    {pkg.hasMultiplier && (
+                                                        <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium tabular-nums mt-0.5">
+                                                            {item.quantity.toLocaleString()} {pkg.manifestUnitName.toLowerCase()}
                                                         </div>
                                                     )}
                                                 </td>
@@ -304,19 +301,43 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                         {formatCompactNumber(item.unitCost, { currency: currencySymbol })}{pkg.hasMultiplier ? ` /${pkg.manifestUnitName.replace(/s$/, '').toLowerCase()}` : ''}
                                                     </div>
                                                     {pkg.hasMultiplier && (
-                                                        <div className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
+                                                        <div className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums">
                                                             ~{formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/{pkg.sellUnitLabel}
                                                         </div>
                                                     )}
                                                 </td>
                                                 <td className="p-4 text-[var(--theme-text-primary)] text-right font-bold font-mono tabular-nums">{formatCompactNumber(item.totalCost, { currency: currencySymbol })}</td>
                                                 <td className="p-4 text-[var(--theme-text-secondary)]">
-                                                    {expandedItems[i] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                                 </td>
                                             </tr>
-                                            {expandedItems[i] && (
-                                                <tr className="bg-[var(--theme-bg-subtle)]">
-                                                    <td colSpan={8} className="p-4 pl-12">
+                                            {isExpanded && (
+                                                <tr className="bg-[var(--theme-bg-subtle)]/70 border-b border-[var(--theme-border)]">
+                                                    <td colSpan={8} className="p-4 pl-8 md:pl-12 space-y-3">
+                                                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--theme-border-subtle)] pb-2.5">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
+                                                                    Product Specifications & Attributes
+                                                                </span>
+                                                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded border border-[var(--theme-border)]">
+                                                                    SKU: {item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}
+                                                                </span>
+                                                            </div>
+                                                            {pkg.packDetail && (
+                                                                <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                                                                    Packaging: <span className="font-semibold text-[var(--theme-text-primary)]">{pkg.packDetail}</span>
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <SmartProductAttributeStrip
+                                                            item={item}
+                                                            catalogProducts={allProducts}
+                                                            currencySymbol={currencySymbol}
+                                                            maxPills={8}
+                                                            showDomainSpecs={true}
+                                                            showUnitPrice={true}
+                                                            className="py-1"
+                                                        />
                                                         <POItemExpandedDetails item={item} allProducts={allProducts} currencySymbol={currencySymbol} />
                                                     </td>
                                                 </tr>

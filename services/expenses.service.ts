@@ -3,10 +3,7 @@ import type { ExpenseRecord, ExpenseStatus } from '../types';
 import { systemLogsService } from './system-logs.service';
 import { logger } from '../utils/logger';
 
-// Sovereign operating expense boundaries:
-// Level 1: Regional Autonomous Limit <= 2,000,000 ETB / KES (Regional Operations/Finance Manager)
-// Level 2/3: Country Autonomous Limit <= 20,000,000 ETB / KES (Country Finance Director / Managing Director)
-// Level 4/5: Sovereign Escalation > 20,000,000 ETB / KES (Group CFO / Group CEO)
+// Defaults are used when creating governance settings, never for live approval decisions.
 export const DEFAULT_REGIONAL_EXPENSE_LIMIT = 2000000;
 export const DEFAULT_COUNTRY_EXPENSE_LIMIT = 20000000;
 export const DEFAULT_CEO_APPROVAL_THRESHOLD = 20000000;
@@ -75,6 +72,7 @@ export const expensesService = {
             status?: string;
             search?: string;
             countryCode?: string;
+            siteIds?: string[];
         }
     ) {
         let query = supabase
@@ -89,6 +87,10 @@ export const expensesService = {
 
         if (filters?.countryCode) {
             query = query.eq('country_code', filters.countryCode);
+        }
+        if (filters?.siteIds) {
+            if (filters.siteIds.length === 0) return { data: [], count: 0 };
+            query = query.in('site_id', filters.siteIds);
         }
 
         if (filters?.startDate) {
@@ -144,11 +146,6 @@ export const expensesService = {
             regionalLimit?: number;
         }
     ) {
-        const regionalLimit = expense.regionalLimit || DEFAULT_REGIONAL_EXPENSE_LIMIT;
-        const countryLimit = expense.thresholdLimit || DEFAULT_COUNTRY_EXPENSE_LIMIT;
-        const isEscalatedToCeo = expense.amount > countryLimit;
-        const requiresHqApproval = expense.amount > regionalLimit;
-
         const dbExpense = {
             site_id: expense.siteId || expense.site_id,
             region_code: expense.regionCode || expense.region_code || null,
@@ -159,14 +156,7 @@ export const expensesService = {
             amount: expense.amount,
             status: 'Pending', // Zero-trust: Creators can never log directly as Paid/Approved
             created_by_id: expense.createdById || expense.creatorUser?.id || null,
-            created_by_name: expense.createdByName || expense.creatorUser?.name || 'Staff Member',
-            requires_hq_approval: requiresHqApproval,
-            escalated_to_ceo: isEscalatedToCeo,
-            escalation_reason: isEscalatedToCeo
-                ? `Amount exceeds country autonomous limit (${countryLimit.toLocaleString()}). Requires Group CFO / Group CEO executive authorization.`
-                : requiresHqApproval
-                    ? `Amount exceeds regional autonomous limit (${regionalLimit.toLocaleString()}). Requires Country Finance Director sign-off.`
-                    : null
+            created_by_name: expense.createdByName || expense.creatorUser?.name || 'Staff Member'
         };
 
         const { data, error } = await supabase
@@ -183,11 +173,9 @@ export const expensesService = {
         // Rule 5: Tamper-proof audit logging
         await systemLogsService.create({
             user_name: dbExpense.created_by_name,
-            action: isEscalatedToCeo ? 'EXPENSE_CREATED_ESCALATED' : 'EXPENSE_CREATED',
+            action: data.escalated_to_ceo ? 'EXPENSE_CREATED_ESCALATED' : 'EXPENSE_CREATED',
             module: 'Financials',
-            details: `Logged expense of ${expense.amount} (${expense.category}): "${expense.description}". Status: Pending.${
-                isEscalatedToCeo ? ' Auto-escalated to Group CEO / CFO.' : requiresHqApproval ? ' Flagged for Country Finance Director.' : ''
-            }`
+            details: `Logged expense of ${expense.amount} (${expense.category}): "${expense.description}". Status: Pending.`
         });
 
         return mapExpenseRow(data);
@@ -217,7 +205,7 @@ export const expensesService = {
         const expenseCountry = (existing.countryCode || existing.country_code || 'ET').toUpperCase();
 
         // Multi-Country Sovereignty & Isolation: Non-group approvers cannot approve cross-border
-        const isGroupExec = ['group_ceo', 'group_cfo', 'cfo', 'super_admin'].includes(approverRole);
+        const isGroupExec = ['group_ceo', 'group_cfo'].includes(approverRole);
         if (!isGroupExec && approver.countryCode && approver.countryCode.toUpperCase() !== expenseCountry) {
             throw new Error(`Country Isolation Violation: Approver from ${approver.countryCode.toUpperCase()} cannot approve expenses in ${expenseCountry}. Cross-border approvals are strictly prohibited.`);
         }
@@ -226,31 +214,16 @@ export const expensesService = {
         const isCountryLead = isGroupExec || [
             'country_finance_director',
             'country_managing_director',
-            'country_operations_director',
-            'finance_manager',
-            'managing_director'
+            'country_operations_director'
         ].includes(approverRole);
 
         const isRegionalMgr = isCountryLead || [
             'regional_operations_manager',
-            'regional_finance_manager',
-            'regional_manager'
+            'regional_finance_manager'
         ].includes(approverRole);
 
         if (!isRegionalMgr) {
             throw new Error(`Role "${approver.role}" is not authorized to approve operating expenses.`);
-        }
-
-        // Tier 3: > 20M ETB / KES or escalated_to_ceo requires Group CFO / Group CEO
-        if (existing.amount > DEFAULT_COUNTRY_EXPENSE_LIMIT || existing.escalatedToCeo) {
-            if (!isGroupExec) {
-                throw new Error('Executive Authorization required: This expense exceeds the country autonomous limit (20,000,000) and requires Group CFO / Group CEO approval.');
-            }
-        } else if (existing.amount > DEFAULT_REGIONAL_EXPENSE_LIMIT) {
-            // Tier 2: 2M - 20M ETB / KES requires Country Leadership
-            if (!isCountryLead) {
-                throw new Error('Autonomous Cap Exceeded: Expense amount exceeds regional autonomous limit (2,000,000). Requires Country Finance Director or Country Managing Director approval.');
-            }
         }
 
         const { data, error } = await supabase.rpc('decide_expense', { p_expense_id: id, p_decision: 'Approved', p_reason: approver.notes?.trim() || 'Expense approval' });

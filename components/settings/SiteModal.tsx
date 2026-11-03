@@ -24,6 +24,7 @@ interface SiteModalProps {
   regions?: Region[];
   areaManagerCandidates?: Array<{ id: string; name: string }>;
   canAssignAreaManager?: boolean;
+  warehouseManagerCandidates?: Array<{ id: string; name: string }>;
 }
 
 export function SiteModal({
@@ -41,7 +42,8 @@ export function SiteModal({
   existingSites = [],
   regions = [],
   areaManagerCandidates = [],
-  canAssignAreaManager = false
+  canAssignAreaManager = false,
+  warehouseManagerCandidates = []
 }: SiteModalProps) {
   const selectedCountry = (newSite.country || 'ET') as Country;
   const selectedCountryProfile = getCountryProfile(selectedCountry);
@@ -72,7 +74,7 @@ export function SiteModal({
                 <button
                   key={type}
                   type="button"
-                  onClick={() => !newSite.id && setNewSite({ ...newSite, type: type as SiteType, manager: type === 'Administration' ? undefined : newSite.manager, areaManagerId: type === 'Store' ? newSite.areaManagerId : null })}
+                  onClick={() => !newSite.id && setNewSite({ ...newSite, type: type as SiteType, manager: type === 'Administration' ? undefined : newSite.manager, areaManagerId: type === 'Store' ? newSite.areaManagerId : null, warehouseManagerId: ['Warehouse', 'Distribution Center'].includes(type) ? newSite.warehouseManagerId : null })}
                   disabled={!!newSite.id}
                   className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
                     isSelected
@@ -289,14 +291,14 @@ export function SiteModal({
             ) : newSite.type === 'Warehouse' || newSite.type === 'Distribution Center' ? (
               <>
                 <div>
-                  <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Warehouse Manager</label>
-                  <input
-                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--theme-accent)]/40 dark:focus:ring-[var(--theme-accent)]/40 focus:border-[var(--theme-accent)] dark:focus:border-[var(--theme-accent)] transition-all placeholder:text-[var(--theme-text-muted)]"
-                    placeholder="Manager name..."
-                    value={newSite.manager || ''}
-                    onChange={(e) => setNewSite({ ...newSite, manager: e.target.value })}
-                    aria-label="Warehouse Manager"
-                  />
+                  <label htmlFor="warehouse-manager-account" className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Warehouse Manager account</label>
+                  {newSite.id && canAssignAreaManager ? <select id="warehouse-manager-account"
+                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)]"
+                    value={newSite.warehouseManagerId || ''}
+                    onChange={e => setNewSite({ ...newSite, warehouseManagerId: e.target.value || null })}>
+                    <option value="">Unassigned</option>
+                    {warehouseManagerCandidates.map(manager => <option key={manager.id} value={manager.id}>{manager.name}</option>)}
+                  </select> : <p className="text-xs text-[var(--theme-text-secondary)]">Create this facility, assign a Warehouse Manager employee to it, then return here to link the account.</p>}
                 </div>
                 {newSite.id && (
                   <div>

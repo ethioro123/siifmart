@@ -44,8 +44,9 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
   const [activeTab, setActiveTab] = useState<'autonomous' | 'escalated' | 'expenses'>('autonomous');
   const [pendingExpenses, setPendingExpenses] = useState<ExpenseRecord[]>([]);
   const [loadingExpenses, setLoadingExpenses] = useState(false);
+  const [expenseError, setExpenseError] = useState(false);
 
-  const AUTONOMOUS_EXPENSE_LIMIT = 25_000;
+  const autonomousExpenseLimit = Number(currentRegion?.autonomous_expense_limit ?? 0);
   const canApprovePettyCash = Boolean(
     user?.role && [
       'group_ceo',
@@ -60,23 +61,23 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
     let isMounted = true;
     const fetchExpenses = async () => {
       setLoadingExpenses(true);
+      setExpenseError(false);
       try {
         const countryCode = currentRegion?.country === 'Ethiopia' || currentRegion?.country === 'ET' ? 'ET' : 'KE';
-        const res = await expensesService.getAll(undefined, 50, 0, {
+        const regionalSiteIds = sites.filter(s => s.region_code === currentRegion?.code || s.regionCode === currentRegion?.code)
+          .filter(s => s.country === countryCode || s.country === (countryCode === 'ET' ? 'Ethiopia' : 'Kenya'))
+          .map(s => s.id);
+        const res = await expensesService.getAll(undefined, 25, 0, {
           countryCode,
-          status: 'Pending'
+          status: 'Pending',
+          siteIds: regionalSiteIds
         });
         if (isMounted) {
-          const regionalSiteIds = new Set(
-            sites
-              .filter(s => s.region_code === currentRegion?.code || (s as any).regionCode === currentRegion?.code)
-              .map(s => s.id)
-          );
-          const filtered = (res.data || []).filter(e => regionalSiteIds.has(e.siteId));
-          setPendingExpenses(filtered);
+          setPendingExpenses(res.data);
         }
       } catch (err) {
         logger.error('RegionalProcurementDesk', 'Failed to load regional expenses', err);
+        if (isMounted) setExpenseError(true);
       } finally {
         if (isMounted) setLoadingExpenses(false);
       }
@@ -95,7 +96,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
         countryCode: (user as any).countryCode || (user as any).country || 'ET'
       });
       setPendingExpenses(prev => prev.filter(e => e.id !== expense.id));
-      addNotification?.('success', `Petty cash request of ${formatCompactNumber(expense.amount, { currency: currencySymbol })} approved autonomously.`);
+      addNotification?.('success', `Expense of ${formatCompactNumber(expense.amount, { currency: currencySymbol })} approved.`);
     } catch (err: any) {
       logger.error('RegionalProcurementDesk', 'Failed to approve expense', err);
       addNotification?.('alert', err.message || 'Approval failed');
@@ -196,7 +197,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
           <div className="p-3 rounded-xl bg-[var(--theme-status-danger-bg)] border border-[var(--theme-status-danger-border)] text-[var(--theme-status-danger-text)] text-[var(--theme-status-danger-text)] text-xs flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 shrink-0" />
             <span>
-              <strong>Budget Exceeded:</strong> Regional monthly procurement ceiling has been surpassed. All new purchase orders are automatically routed to HQ Central Operations.
+              <strong>Budget Exceeded:</strong> Regional monthly procurement ceiling has been surpassed. Review new purchase orders against the configured approval policy.
             </span>
           </div>
         )}
@@ -220,7 +221,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
               No Pending Autonomous POs
             </h4>
             <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
-              All purchase orders within the autonomous limit of {formatCompactNumber(autonomousLimit, { currency: currencySymbol })} are fully approved.
+              No pending purchase orders within the loaded list. Regional limit: {formatCompactNumber(autonomousLimit, { currency: currencySymbol })}.
             </p>
           </div>
         ) : (
@@ -302,7 +303,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
               No Escalated POs
             </h4>
             <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
-              No purchase orders currently require corporate HQ sign-off.
+              No escalated purchase orders in the loaded list.
             </p>
           </div>
         ) : (
@@ -349,6 +350,8 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
           <div className="p-8 text-center text-xs text-[var(--theme-text-secondary)] animate-pulse">
             Loading store petty cash requests...
           </div>
+        ) : expenseError ? (
+          <div role="alert" className="p-8 text-center text-xs text-[var(--theme-status-danger-text)]">Regional expenses could not be loaded. Refresh to try again.</div>
         ) : pendingExpenses.length === 0 ? (
           <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
             <CheckCircle2 className="w-10 h-10 mx-auto text-[var(--theme-status-success-text)] opacity-60 mb-3" />
@@ -356,14 +359,14 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
               No Pending Petty Cash Requests
             </h4>
             <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
-              All regional store maintenance and emergency expense drafts have been settled.
+              No pending requests in this region.
             </p>
           </div>
         ) : (
           <div className="space-y-2.5">
             {pendingExpenses.map(expense => {
               const site = sites.find(s => s.id === expense.siteId);
-              const isAutonomous = expense.amount <= AUTONOMOUS_EXPENSE_LIMIT;
+              const isAutonomous = autonomousExpenseLimit > 0 && !expense.requiresHqApproval;
 
               return (
                 <div
@@ -380,7 +383,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                           ? 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]'
                           : 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] text-[var(--theme-accent)] border-[var(--theme-border-accent)]'
                       }`}>
-                        {isAutonomous ? 'Local Sign-Off' : 'Treasury Escalate'}
+                        {isAutonomous ? 'Regional Sign-Off' : 'Escalated Approval'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)] mt-1">
@@ -419,7 +422,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                     ) : (
                       <span className="text-xs text-[var(--theme-accent)] text-[var(--theme-accent)] font-semibold flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
-                        Exceeds 25K Limit
+                        Exceeds regional limit ({formatCompactNumber(autonomousExpenseLimit, { currency: currencySymbol })})
                       </span>
                     )}
                   </div>
