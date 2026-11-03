@@ -34,7 +34,7 @@ const mockRoster = [
         email: 'girma.bekele@staging.siifmart.com',
         site: { code: 'ET-ADD-STR-01', name: 'Bole Flagship Store', type: 'Store', country: 'ET', region_code: 'ET-ADD' }
     })!,
-    // Regional Administration in Ethiopia: Regional Ops Manager
+    // Regional Administration in Ethiopia: Regional Ops Manager & Regional Finance Manager
     mapStagingEmployee({
         id: 'emp-reg-mgr',
         code: 'ET-SIIF004',
@@ -42,6 +42,15 @@ const mockRoster = [
         role: 'regional_operations_manager', // Level 4
         job_title: 'Regional Operations Manager',
         email: 'henok.tadesse@staging.siifmart.com',
+        site: { code: 'ET-ADD-REG-01', name: 'Addis Ababa Regional HQ', type: 'Regional Administration', country: 'ET', region_code: 'ET-ADD' }
+    })!,
+    mapStagingEmployee({
+        id: 'emp-reg-fin-mgr',
+        code: 'ET-SIIF005',
+        name: 'Almaz Ayana',
+        role: 'regional_finance_manager', // Level 5
+        job_title: 'Regional Finance Manager',
+        email: 'almaz.ayana@staging.siifmart.com',
         site: { code: 'ET-ADD-REG-01', name: 'Addis Ababa Regional HQ', type: 'Regional Administration', country: 'ET', region_code: 'ET-ADD' }
     })!,
     // Distribution Center in Ethiopia
@@ -82,11 +91,12 @@ describe('CountryQuickLoginPanel reorganization by location of work & ranking', 
         const select = vi.fn();
         render(<CountryQuickLoginPanel country="ET" title="Ethiopia Staging Roles" onSelectAccount={select} />);
 
-        expect(screen.getByText('5 Employees')).toBeTruthy();
+        expect(screen.getByText('6 Employees')).toBeTruthy();
         expect(screen.queryByText('Faith Kipyegon')).toBeNull(); // Kenya staff excluded
 
         // Real names are visible
         expect(screen.getByText('Henok Tadesse')).toBeTruthy();
+        expect(screen.getByText('Almaz Ayana')).toBeTruthy();
         expect(screen.getByText('Tewodros Assefa')).toBeTruthy();
         expect(screen.getByText('Girma Bekele')).toBeTruthy();
         expect(screen.getByText('Eden Haile')).toBeTruthy();
@@ -94,9 +104,20 @@ describe('CountryQuickLoginPanel reorganization by location of work & ranking', 
 
         // Rank badges are displayed
         expect(screen.getByText('Rank L4')).toBeTruthy();
+        expect(screen.getByText('Rank L5')).toBeTruthy();
         expect(screen.getByText('Rank L6')).toBeTruthy();
         expect(screen.getByText('Rank L8')).toBeTruthy();
         expect(screen.getAllByText('Rank L10').length).toBe(2); // Cashier and Picker are Level 10
+    });
+
+    it('organizes Regional Administration with Regional Ops Manager (L4) before Regional Finance Manager (L5)', () => {
+        render(<CountryQuickLoginPanel country="ET" title="Ethiopia Staging Roles" onSelectAccount={vi.fn()} />);
+
+        const regEmployees = screen.getAllByText(/Henok Tadesse|Almaz Ayana/).map(el => el.textContent);
+        expect(regEmployees).toEqual([
+            'Henok Tadesse', // Regional Ops Manager (L4)
+            'Almaz Ayana'    // Regional Finance Manager (L5)
+        ]);
     });
 
     it('organizes work locations hierarchically (Regional HQ before DC before Retail Store)', () => {

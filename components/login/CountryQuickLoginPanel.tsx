@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Building2, Landmark, Warehouse, Store, Truck, Search, ShieldCheck, X, MapPin } from 'lucide-react';
 import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
 import { isStagingQuickLoginAvailable, type FacilityTierType, type StagingSiteType, type StagingQuickAccount } from '../../utils/stagingQuickLogin';
-import { POPULAR_ROLE_CHIPS, WORK_LOCATION_ORDER, getSiteTheme } from './quickLoginTheme';
+import { POPULAR_ROLE_CHIPS, WORK_LOCATION_ORDER, compareStagingAccounts, getSiteTheme } from './quickLoginTheme';
 import { QuickLoginSiteCard, type QuickLoginSiteGroup } from './QuickLoginSiteCard';
 export type { StagingQuickAccount } from '../../utils/stagingQuickLogin';
 
@@ -126,8 +126,14 @@ export function CountryQuickLoginPanel({
     // 1. Organize work locations: Keep same region facilities together, then order by supply chain hierarchy:
     // Regional Admin (approvals) -> Distribution Center (origin) -> Warehouse (hub) -> Store (retail receiver)
     const sortedGroups = Object.values(groups).sort((a, b) => {
-      if (regionFilter === 'ALL' && a.regionCode && b.regionCode && a.regionCode !== b.regionCode) {
-        return a.regionCode.localeCompare(b.regionCode);
+      if (regionFilter === 'ALL') {
+        const regA = a.regionCode;
+        const regB = b.regionCode;
+        if (regA && regB && regA !== regB) {
+          return regA.localeCompare(regB);
+        }
+        if (!regA && regB) return -1;
+        if (regA && !regB) return 1;
       }
       const orderA = WORK_LOCATION_ORDER[a.siteType] ?? 99;
       const orderB = WORK_LOCATION_ORDER[b.siteType] ?? 99;
@@ -135,12 +141,9 @@ export function CountryQuickLoginPanel({
       return a.siteName.localeCompare(b.siteName);
     });
 
-    // 2. Inside each work location, organize accounts by ranking (Level 1..10)
+    // 2. Inside each work location, organize accounts by ranking & role priority (Regional Ops, Regional Finance, Supply Chain first)
     for (const group of sortedGroups) {
-      group.accounts.sort((a, b) => {
-        if (a.level !== b.level) return a.level - b.level;
-        return a.name.localeCompare(b.name);
-      });
+      group.accounts.sort(compareStagingAccounts);
     }
 
     return sortedGroups;

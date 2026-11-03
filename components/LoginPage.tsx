@@ -32,6 +32,12 @@ export default function LoginPage() {
   const stagingEtRegionalMgr = stagingAccounts.find(
     account => account.country === 'ET' && account.roleId === 'regional_operations_manager'
   );
+  const stagingKeRegionalFinMgr = stagingAccounts.find(
+    account => account.country === 'KE' && account.roleId === 'regional_finance_manager'
+  );
+  const stagingEtRegionalFinMgr = stagingAccounts.find(
+    account => account.country === 'ET' && account.roleId === 'regional_finance_manager'
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,6 +185,47 @@ export default function LoginPage() {
                         <span className="text-[9.5px] text-[var(--theme-text-secondary)] truncate">Regional Ops Manager • L4</span>
                       </div>
                       <span className="text-[9px] font-mono opacity-70 shrink-0">Addis</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {(stagingKeRegionalFinMgr || stagingEtRegionalFinMgr) && (
+                <div className="grid grid-cols-2 gap-1.5">
+                  {stagingKeRegionalFinMgr && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => handleQuickLogin(stagingKeRegionalFinMgr.email)}
+                      className="py-1.5 px-2.5 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      title={`Quick Login: ${stagingKeRegionalFinMgr.name} (${stagingKeRegionalFinMgr.role})`}
+                    >
+                      <div className="flex flex-col items-start min-w-0 pr-1 text-left">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs">🇰🇪</span>
+                          <span className="font-bold truncate text-[var(--theme-text-primary)]">{stagingKeRegionalFinMgr.name || 'Timothy Cheruiyot'}</span>
+                        </div>
+                        <span className="text-[9.5px] text-[var(--theme-text-secondary)] truncate">Regional Finance Mgr • L5</span>
+                      </div>
+                      <span className="text-[9px] font-mono opacity-70 shrink-0">{stagingKeRegionalFinMgr.regionCode || 'Nairobi'}</span>
+                    </button>
+                  )}
+                  {stagingEtRegionalFinMgr && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => handleQuickLogin(stagingEtRegionalFinMgr.email)}
+                      className="py-1.5 px-2.5 rounded-xl bg-[var(--theme-status-success-bg)] border border-[var(--theme-status-success-border)] text-[var(--theme-status-success-text)] text-[11px] font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+                      title={`Quick Login: ${stagingEtRegionalFinMgr.name} (${stagingEtRegionalFinMgr.role})`}
+                    >
+                      <div className="flex flex-col items-start min-w-0 pr-1 text-left">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs">🇪🇹</span>
+                          <span className="font-bold truncate text-[var(--theme-text-primary)]">{stagingEtRegionalFinMgr.name || 'Almaz Ayana'}</span>
+                        </div>
+                        <span className="text-[9.5px] text-[var(--theme-text-secondary)] truncate">Regional Finance Mgr • L5</span>
+                      </div>
+                      <span className="text-[9px] font-mono opacity-70 shrink-0">{stagingEtRegionalFinMgr.regionCode || 'Addis'}</span>
                     </button>
                   )}
                 </div>

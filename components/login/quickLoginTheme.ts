@@ -64,15 +64,64 @@ export const WORK_LOCATION_ORDER: Record<StagingSiteType, number> = {
   'Store': 5,
 };
 
-const MANAGER_AND_DIRECTOR_ROLE_CHIPS = SYSTEM_ROLES
-  .filter(role => /\b(manager|director)\b/i.test(role.label))
-  .map(({ id, label }) => ({ id, label }));
+export const ROLE_PRIORITY_ORDER: Record<string, number> = {
+  // Level 1-3 Corporate Leadership
+  group_ceo: 1, country_managing_director: 2, country_finance_director: 3,
+  country_operations_director: 4, country_supply_chain_director: 5,
+  // Level 4-5 Regional Administration Leadership (Finance & Operations paramount for transfers & approvals)
+  regional_operations_manager: 10,
+  regional_finance_manager: 11,
+  regional_supply_chain_manager: 12,
+  regional_procurement_manager: 13,
+  area_operations_manager: 14,
+  regional_merchandising_manager: 15,
+  regional_logistics_manager: 16,
+  regional_security_manager: 17,
+  regional_hr_manager: 18,
+  regional_compliance_manager: 19,
+  regional_it_manager: 20,
+  // Facility Leadership
+  store_manager: 30, warehouse_manager: 31, dispatch_supervisor: 32, inventory_manager: 33,
+  assistant_store_manager: 34, shift_supervisor: 35,
+  // Accounting & Procurement
+  accountant: 40, buyer: 41,
+  // Floor Operations
+  cashier: 50, receiver: 51, picker: 52, packer: 53, driver: 54, inventory_specialist: 55, forklift_operator: 56, stock_clerk: 57,
+};
+
+export function compareStagingAccounts(
+  a: { level: number; roleId: string; name: string },
+  b: { level: number; roleId: string; name: string }
+): number {
+  if (a.level !== b.level) return a.level - b.level;
+  const prioA = ROLE_PRIORITY_ORDER[a.roleId] ?? 99;
+  const prioB = ROLE_PRIORITY_ORDER[b.roleId] ?? 99;
+  if (prioA !== prioB) return prioA - prioB;
+  return a.name.localeCompare(b.name);
+}
 
 export const POPULAR_ROLE_CHIPS = [
-  ...MANAGER_AND_DIRECTOR_ROLE_CHIPS,
+  // 1. Regional Administration Leadership (Approvals, Transfers, Finance)
+  { id: 'regional_finance_manager', label: 'Regional Finance Mgr' },
+  { id: 'regional_operations_manager', label: 'Regional Ops Mgr' },
+  { id: 'area_operations_manager', label: 'Area Ops Mgr' },
+  { id: 'regional_supply_chain_manager', label: 'Regional Supply Chain' },
+  { id: 'regional_procurement_manager', label: 'Regional Procurement' },
+  // 2. Operational Facility Management
+  { id: 'store_manager', label: 'Store Manager' },
+  { id: 'warehouse_manager', label: 'Warehouse Manager' },
+  { id: 'dispatch_supervisor', label: 'Dispatch Supervisor' },
+  { id: 'inventory_manager', label: 'Inventory Manager' },
+  // 3. Accounting & Store / Floor Staff
+  { id: 'accountant', label: 'Accountant' },
   { id: 'cashier', label: 'Cashier' },
   { id: 'picker', label: 'Picker' },
   { id: 'packer', label: 'Packer' },
   { id: 'driver', label: 'Driver' },
   { id: 'receiver', label: 'Receiver' },
+  { id: 'forklift_operator', label: 'Forklift' },
+  // 4. Country Directorate
+  { id: 'country_managing_director', label: 'Country Director' },
+  { id: 'country_finance_director', label: 'Country Finance Dir' },
+  { id: 'country_operations_director', label: 'Country Ops Dir' },
 ] as const;

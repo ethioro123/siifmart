@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Building2, Warehouse, Store, Truck, ChevronDown, ChevronUp, ShieldCheck, UserCheck, Search, X } from 'lucide-react';
 import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
 import { isStagingQuickLoginAvailable, type StagingQuickAccount, type StagingSiteType } from '../../utils/stagingQuickLogin';
-import { getSiteTheme, POPULAR_ROLE_CHIPS, WORK_LOCATION_ORDER } from './quickLoginTheme';
+import { getSiteTheme, POPULAR_ROLE_CHIPS, WORK_LOCATION_ORDER, compareStagingAccounts } from './quickLoginTheme';
 export { checkIsLocalhost } from '../../utils/stagingQuickLogin';
 
 interface StagingSiteGroup {
@@ -124,12 +124,9 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
       return a.siteName.localeCompare(b.siteName);
     });
 
-    // 2. Inside each work location, organize accounts by ranking (Level 1..10)
+    // 2. Inside each work location, organize accounts by ranking & role priority (Regional Ops, Regional Finance first)
     for (const group of sortedGroups) {
-      group.accounts.sort((a, b) => {
-        if (a.level !== b.level) return a.level - b.level;
-        return a.name.localeCompare(b.name);
-      });
+      group.accounts.sort(compareStagingAccounts);
     }
 
     return sortedGroups;
