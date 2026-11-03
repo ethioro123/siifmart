@@ -492,3 +492,4 @@
 
 Additional historical entries: [30 October feature history](FEATURE_HISTORY_20261030.md).
 - 2026-11-03: Area operations now uses explicit store assignments, scoped server metrics, a dedicated store overview, narrow read and transfer-request permissions, and database guards against region-wide or sensitive writes. Four migrations applied to staging and production.
+- 2026-11-03: Regional governance transitions now check signed-in roles in database triggers; expense approvals use configured limits and a guarded decision RPC; warehouse leadership uses verified employee assignments; regional totals use exact country-local server aggregates. Five migrations applied to staging and production.

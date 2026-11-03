@@ -30,6 +30,7 @@ export interface RegionalOperationsData {
   isAreaManager: boolean;
   areaMetricsUnavailable: boolean;
   summaryUnavailable: boolean;
+  regionalListsUnavailable: boolean;
   summaryRows: RegionalOperatingSummaryRow[];
   activeCountry: Country;
   currencySymbol: string;

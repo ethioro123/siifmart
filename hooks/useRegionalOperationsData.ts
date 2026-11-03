@@ -16,15 +16,10 @@ export function useRegionalOperationsData(): RegionalOperationsData {
   const { user } = useStore();
   const {
     sites = [],
-    employees = [],
-    allSales = [],
-    allOrders = [],
-    shifts = [],
     regions = [],
     activeRegionCode,
     effectiveCountry,
-    settings,
-    allProducts = []
+    settings
   } = useData();
 
   const [searchParams] = useSearchParams();
@@ -116,40 +111,18 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     regionalShifts: queriedShifts,
     regionalOrders: queriedOrders,
     regionalSales: queriedSales,
-    regionalTransfers: queriedTransfers = []
+    regionalTransfers: queriedTransfers = [],
+    isLoading: listsLoading,
+    isError: listsError
   } = useRegionalDataQueries({
     regionCode: effectiveRegionCode,
     siteIds: siteIdsArray,
     enabled: siteIdsArray.length > 0
   });
 
-  // Filter Regional Workforce (prioritizing direct territorial query)
-  const regionalEmployees = useMemo(() => {
-    if (isAreaManager) return queriedEmployees.filter(e => e.siteId && regionalSiteIds.has(e.siteId));
-    if (queriedEmployees.length > 0) return queriedEmployees;
-    return employees.filter(e => {
-      const empRegion = e.regionCode || (e as any).region_code;
-      if (empRegion && empRegion === effectiveRegionCode) return true;
-      if (e.siteId && regionalSiteIds.has(e.siteId)) return true;
-      return false;
-    });
-  }, [queriedEmployees, employees, effectiveRegionCode, regionalSiteIds, isAreaManager]);
-
-  // Filter Regional Sales (prioritizing direct territorial query)
-  const regionalSales = useMemo(() => {
-    if (isAreaManager) return queriedSales.filter(s => regionalSiteIds.has(s.siteId));
-    if (queriedSales.length > 0) return queriedSales;
-    return allSales.filter(s => regionalSiteIds.has(s.siteId));
-  }, [queriedSales, allSales, regionalSiteIds, isAreaManager]);
-
-  // Filter Regional Purchase Orders (prioritizing direct territorial query)
-  const regionalOrders = useMemo(() => {
-    if (isAreaManager) return queriedOrders.filter(o => o.siteId && regionalSiteIds.has(o.siteId));
-    if (queriedOrders.length > 0) return queriedOrders;
-    return allOrders.filter(o => {
-      return Boolean(o.siteId && regionalSiteIds.has(o.siteId));
-    });
-  }, [queriedOrders, allOrders, effectiveRegionCode, regionalSiteIds, isAreaManager]);
+  const regionalEmployees = queriedEmployees.filter(e => e.siteId && regionalSiteIds.has(e.siteId));
+  const regionalSales = queriedSales.filter(s => regionalSiteIds.has(s.siteId));
+  const regionalOrders = queriedOrders.filter(o => o.siteId && regionalSiteIds.has(o.siteId));
 
   // Filter Regional Transfers (originating or terminating in region)
   const regionalTransfers = useMemo(() => {
@@ -172,12 +145,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     return regionalTransfers.filter(t => Boolean(t.hasDiscrepancy));
   }, [regionalTransfers]);
 
-  // Filter Regional Shifts (prioritizing direct territorial query)
-  const regionalShifts = useMemo(() => {
-    if (isAreaManager) return queriedShifts.filter(s => regionalSiteIds.has(s.siteId));
-    if (queriedShifts.length > 0) return queriedShifts;
-    return shifts.filter(s => regionalSiteIds.has(s.siteId));
-  }, [queriedShifts, shifts, regionalSiteIds, isAreaManager]);
+  const regionalShifts = queriedShifts.filter(s => regionalSiteIds.has(s.siteId));
 
   // Autonomous Procurement (SOP-MGT-020)
   const autonomousLimit = Number(currentRegion?.autonomous_po_limit ?? 0);
@@ -214,12 +182,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     }] : [];
   }), [summaryRows, regionalSites]);
 
-  // Regional Catalog & Stock Valuation (prioritizing direct territorial query)
-  const regionalProducts = useMemo(() => {
-    if (isAreaManager) return queriedProducts.filter(p => p.siteId && regionalSiteIds.has(p.siteId));
-    if (queriedProducts.length > 0) return queriedProducts;
-    return allProducts.filter(p => !p.siteId || regionalSiteIds.has(p.siteId));
-  }, [queriedProducts, allProducts, regionalSiteIds, isAreaManager]);
+  const regionalProducts = queriedProducts.filter(p => p.siteId && regionalSiteIds.has(p.siteId));
 
   const inventoryMetrics = {
     totalValue: sumSummary('inventory_value'), lowStockCount: sumSummary('low_stock_count'),
@@ -245,6 +208,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     isAreaManager,
     areaMetricsUnavailable,
     summaryUnavailable,
+    regionalListsUnavailable: listsLoading || listsError,
     summaryRows,
     activeCountry,
     currencySymbol,

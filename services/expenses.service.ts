@@ -7,6 +7,7 @@ import { logger } from '../utils/logger';
 export const DEFAULT_REGIONAL_EXPENSE_LIMIT = 2000000;
 export const DEFAULT_COUNTRY_EXPENSE_LIMIT = 20000000;
 export const DEFAULT_CEO_APPROVAL_THRESHOLD = 20000000;
+const EXPENSE_COLUMNS = 'id,site_id,country_code,expense_date,category,description,amount,status,created_by_id,created_by_name,approved_by_id,approved_by,approved_at,escalated_to_ceo,region_code,requires_hq_approval,hq_approved_by,hq_approved_at,void_reason,voided_by_id,voided_by_name,voided_at,payment_ref,escalation_reason,created_at,updated_at';
 
 function mapExpenseRow(e: any): ExpenseRecord {
     return {
@@ -77,7 +78,7 @@ export const expensesService = {
     ) {
         let query = supabase
             .from('expenses')
-            .select('id,site_id,country_code,expense_date,category,description,amount,status,created_by_id,created_by_name,approved_by_id,approved_by,approved_at,escalated_to_ceo,region_code,requires_hq_approval,hq_approved_by,hq_approved_at,void_reason,voided_by_id,voided_by_name,voided_at,payment_ref,escalation_reason,created_at,updated_at', { count: 'exact' })
+            .select(EXPENSE_COLUMNS, { count: 'exact' })
             .order('expense_date', { ascending: false })
             .range(offset, offset + limit - 1);
 
@@ -128,7 +129,7 @@ export const expensesService = {
     async getById(id: string): Promise<ExpenseRecord | null> {
         const { data, error } = await supabase
             .from('expenses')
-            .select('id,site_id,country_code,expense_date,category,description,amount,status,created_by_id,created_by_name,approved_by_id,approved_by,approved_at,escalated_to_ceo,region_code,requires_hq_approval,hq_approved_by,hq_approved_at,void_reason,voided_by_id,voided_by_name,voided_at,payment_ref,escalation_reason,created_at,updated_at')
+            .select(EXPENSE_COLUMNS)
             .eq('id', id)
             .single();
 
@@ -162,7 +163,7 @@ export const expensesService = {
         const { data, error } = await supabase
             .from('expenses')
             .insert(dbExpense)
-            .select()
+            .select(EXPENSE_COLUMNS)
             .single();
 
         if (error) {
@@ -252,7 +253,7 @@ export const expensesService = {
                 updated_at: now
             })
             .eq('id', id)
-            .select()
+            .select(EXPENSE_COLUMNS)
             .single();
 
         if (error) {
@@ -288,7 +289,7 @@ export const expensesService = {
             .from('expenses')
             .update(dbUpdates)
             .eq('id', id)
-            .select()
+            .select(EXPENSE_COLUMNS)
             .single();
 
         if (error) {
@@ -340,7 +341,7 @@ export const expensesService = {
                 updated_at: now
             })
             .eq('id', id)
-            .select()
+            .select(EXPENSE_COLUMNS)
             .single();
 
         if (error) {

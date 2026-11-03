@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   FileText, CheckCircle2, AlertTriangle, ShieldAlert,
   ArrowUpRight, Clock, ShieldCheck, DollarSign, Receipt
@@ -7,7 +7,8 @@ import type { PurchaseOrder, Region, ExpenseRecord } from '../../types';
 import { formatCompactNumber } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
 import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations';
-import { expensesService } from '../../services/expenses.service';
+import { useRegionalExpenseRequests } from '../../hooks/useRegionalExpenseRequests';
+import { normalizeCountryCode } from '../../utils/siteIdGenerator';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { getPoApprovalPolicy } from '../../utils/poApprovalPolicy';
@@ -42,9 +43,17 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
   const { addNotification, sites, regions } = useData();
   const { approvePOMutation } = usePurchaseOrderMutations();
   const [activeTab, setActiveTab] = useState<'autonomous' | 'escalated' | 'expenses'>('autonomous');
-  const [pendingExpenses, setPendingExpenses] = useState<ExpenseRecord[]>([]);
-  const [loadingExpenses, setLoadingExpenses] = useState(false);
-  const [expenseError, setExpenseError] = useState(false);
+  const [expensePage, setExpensePage] = useState(1);
+  const countryCode = normalizeCountryCode(currentRegion?.country || 'ET');
+  const regionalSiteIds = useMemo(() => sites
+    .filter(site => (site.region_code || site.regionCode) === currentRegion?.code && normalizeCountryCode(site.country) === countryCode)
+    .map(site => site.id), [sites, currentRegion?.code, countryCode]);
+  const { list: expenseList, approve: approveExpense } = useRegionalExpenseRequests({
+    actorId: user?.id || '', actorName: user?.name || '', role: user?.role || '',
+    countryCode, regionCode: currentRegion?.code || '', siteIds: regionalSiteIds
+  }, expensePage, Boolean(currentRegion));
+  const pendingExpenses = expenseList.data?.data || [];
+  const expenseCount = expenseList.data?.count || 0;
 
   const autonomousExpenseLimit = Number(currentRegion?.autonomous_expense_limit ?? 0);
   const canApprovePettyCash = Boolean(
@@ -57,49 +66,13 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
     ].includes(user.role)
   );
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchExpenses = async () => {
-      setLoadingExpenses(true);
-      setExpenseError(false);
-      try {
-        const countryCode = currentRegion?.country === 'Ethiopia' || currentRegion?.country === 'ET' ? 'ET' : 'KE';
-        const regionalSiteIds = sites.filter(s => s.region_code === currentRegion?.code || s.regionCode === currentRegion?.code)
-          .filter(s => s.country === countryCode || s.country === (countryCode === 'ET' ? 'Ethiopia' : 'Kenya'))
-          .map(s => s.id);
-        const res = await expensesService.getAll(undefined, 25, 0, {
-          countryCode,
-          status: 'Pending',
-          siteIds: regionalSiteIds
-        });
-        if (isMounted) {
-          setPendingExpenses(res.data);
-        }
-      } catch (err) {
-        logger.error('RegionalProcurementDesk', 'Failed to load regional expenses', err);
-        if (isMounted) setExpenseError(true);
-      } finally {
-        if (isMounted) setLoadingExpenses(false);
-      }
-    };
-    fetchExpenses();
-    return () => { isMounted = false; };
-  }, [currentRegion, sites]);
-
   const handleApproveExpense = async (expense: ExpenseRecord) => {
-    if (!user) return;
     try {
-      await expensesService.approve(expense.id, {
-        id: user.id,
-        name: user.name || 'Regional Finance Manager',
-        role: user.role || 'regional_finance_manager',
-        countryCode: (user as any).countryCode || (user as any).country || 'ET'
-      });
-      setPendingExpenses(prev => prev.filter(e => e.id !== expense.id));
+      await approveExpense.mutateAsync(expense.id);
       addNotification?.('success', `Expense of ${formatCompactNumber(expense.amount, { currency: currencySymbol })} approved.`);
-    } catch (err: any) {
+    } catch (err) {
       logger.error('RegionalProcurementDesk', 'Failed to approve expense', err);
-      addNotification?.('alert', err.message || 'Approval failed');
+      addNotification?.('alert', err instanceof Error ? err.message : 'Approval failed');
     }
   };
 
@@ -149,7 +122,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
             }`}
           >
-            Store Petty Cash ({pendingExpenses.length})
+            Store Petty Cash ({expenseCount})
           </button>
         </div>
       </div>
@@ -346,11 +319,11 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
         )
       ) : (
         /* Store Petty Cash & Expenses Tab */
-        loadingExpenses ? (
+        expenseList.isPending ? (
           <div className="p-8 text-center text-xs text-[var(--theme-text-secondary)] animate-pulse">
             Loading store petty cash requests...
           </div>
-        ) : expenseError ? (
+        ) : expenseList.isError ? (
           <div role="alert" className="p-8 text-center text-xs text-[var(--theme-status-danger-text)]">Regional expenses could not be loaded. Refresh to try again.</div>
         ) : pendingExpenses.length === 0 ? (
           <div className="p-8 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)]">
@@ -364,6 +337,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
           </div>
         ) : (
           <div className="space-y-2.5">
+            <p className="text-xs text-[var(--theme-text-secondary)]">Showing page {expensePage} of {Math.max(1, Math.ceil(expenseCount / 25))} pending requests</p>
             {pendingExpenses.map(expense => {
               const site = sites.find(s => s.id === expense.siteId);
               const isAutonomous = autonomousExpenseLimit > 0 && !expense.requiresHqApproval;
@@ -408,6 +382,7 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                         <button
                           type="button"
                           onClick={() => handleApproveExpense(expense)}
+                          disabled={approveExpense.isPending}
                           className="px-3.5 py-1.5 rounded-lg bg-[var(--theme-accent)] text-[var(--theme-accent-contrast)] hover:opacity-90 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
@@ -429,6 +404,10 @@ export const RegionalProcurementDesk: React.FC<RegionalProcurementDeskProps> = (
                 </div>
               );
             })}
+            {expenseCount > 25 && <div className="flex gap-2 justify-end">
+              <button type="button" disabled={expensePage === 1} onClick={() => setExpensePage(page => page - 1)} className="min-h-11 px-3 rounded-lg border border-[var(--theme-border)] disabled:opacity-50">Previous</button>
+              <button type="button" disabled={expensePage * 25 >= expenseCount} onClick={() => setExpensePage(page => page + 1)} className="min-h-11 px-3 rounded-lg border border-[var(--theme-border)] disabled:opacity-50">Next</button>
+            </div>}
           </div>
         )
       )}

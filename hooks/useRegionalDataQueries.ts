@@ -7,7 +7,6 @@ import { purchaseOrdersService } from '../services/purchase-orders.service';
 import { salesService } from '../services/sales.service';
 import { transfersService } from '../services/transfers.service';
 import type { Product, Employee, ShiftRecord, PurchaseOrder, SaleRecord, TransferRecord } from '../types';
-import { logger } from '../utils/logger';
 
 interface UseRegionalDataQueriesProps {
   regionCode: string;
@@ -23,117 +22,47 @@ export interface UseRegionalDataQueriesResult {
   regionalSales: SaleRecord[];
   regionalTransfers: TransferRecord[];
   isLoading: boolean;
+  isError: boolean;
 }
 
-export function useRegionalDataQueries({
-  regionCode,
-  siteIds,
-  enabled = true
-}: UseRegionalDataQueriesProps): UseRegionalDataQueriesResult {
+export function useRegionalDataQueries({ regionCode, siteIds, enabled = true }: UseRegionalDataQueriesProps): UseRegionalDataQueriesResult {
   const sortedSiteIds = useMemo(() => [...siteIds].sort(), [siteIds]);
-  const hasSites = sortedSiteIds.length > 0;
-  const isQueryEnabled = enabled && hasSites;
-
-  // 1. Regional Products across all facilities in region
-  const { data: regionalProducts = [], isLoading: isProductsLoading } = useQuery({
+  const active = enabled && sortedSiteIds.length > 0;
+  const products = useQuery({
     queryKey: ['regional-products', regionCode, sortedSiteIds],
-    queryFn: async () => {
-      try {
-        const res = await productsService.getAll(undefined, 1000, 0, { siteIds: sortedSiteIds }, undefined, false);
-        return res.data || [];
-      } catch (err) {
-        logger.error('useRegionalDataQueries', 'Failed to fetch regional products', err);
-        return [];
-      }
-    },
-    enabled: isQueryEnabled,
-    staleTime: 1000 * 60 * 5,
+    queryFn: async () => (await productsService.getAll(undefined, 25, 0, { siteIds: sortedSiteIds }, undefined, false)).data || [],
+    enabled: active, staleTime: 300_000
   });
-
-  // 2. Regional Employees across all facilities in region
-  const { data: regionalEmployees = [], isLoading: isEmployeesLoading } = useQuery({
+  const employees = useQuery({
     queryKey: ['regional-employees', regionCode, sortedSiteIds],
-    queryFn: async () => {
-      try {
-        return await employeesService.getAll(sortedSiteIds);
-      } catch (err) {
-        logger.error('useRegionalDataQueries', 'Failed to fetch regional employees', err);
-        return [];
-      }
-    },
-    enabled: isQueryEnabled,
-    staleTime: 1000 * 60 * 15,
+    queryFn: () => employeesService.getAll(sortedSiteIds),
+    enabled: active, staleTime: 900_000
   });
-
-  // 3. Regional Shifts across all facilities in region
-  const { data: regionalShifts = [], isLoading: isShiftsLoading } = useQuery({
+  const shifts = useQuery({
     queryKey: ['regional-shifts', regionCode, sortedSiteIds],
-    queryFn: async () => {
-      try {
-        return await shiftsService.getAll(sortedSiteIds, 100);
-      } catch (err) {
-        logger.error('useRegionalDataQueries', 'Failed to fetch regional shifts', err);
-        return [];
-      }
-    },
-    enabled: isQueryEnabled,
-    staleTime: 1000 * 60 * 5,
+    queryFn: () => shiftsService.getAll(sortedSiteIds, 25),
+    enabled: active, staleTime: 300_000
   });
-
-  // 4. Regional Purchase Orders across all facilities in region
-  const { data: regionalOrders = [], isLoading: isOrdersLoading } = useQuery({
+  const orders = useQuery({
     queryKey: ['regional-orders', regionCode, sortedSiteIds],
-    queryFn: async () => {
-      try {
-        const res = await purchaseOrdersService.getAll(undefined, 100, 0, { siteIds: sortedSiteIds });
-        return res.data || [];
-      } catch (err) {
-        logger.error('useRegionalDataQueries', 'Failed to fetch regional orders', err);
-        return [];
-      }
-    },
-    enabled: isQueryEnabled,
-    staleTime: 1000 * 60 * 5,
+    queryFn: async () => (await purchaseOrdersService.getAll(undefined, 25, 0, { siteIds: sortedSiteIds })).data || [],
+    enabled: active, staleTime: 300_000
   });
-
-  // 5. Regional Sales across all facilities in region
-  const { data: regionalSales = [], isLoading: isSalesLoading } = useQuery({
+  const sales = useQuery({
     queryKey: ['regional-sales', regionCode, sortedSiteIds],
-    queryFn: async () => {
-      try {
-        const res = await salesService.getAll(undefined, 100, 0, { siteIds: sortedSiteIds, includeItems: true });
-        return res.data || [];
-      } catch (err) {
-        logger.error('useRegionalDataQueries', 'Failed to fetch regional sales', err);
-        return [];
-      }
-    },
-    enabled: isQueryEnabled,
-    staleTime: 1000 * 60 * 5,
+    queryFn: async () => (await salesService.getAll(undefined, 25, 0, { siteIds: sortedSiteIds, includeItems: false })).data || [],
+    enabled: active, staleTime: 300_000
   });
-
-  // 6. Regional Transfers across all facilities in region
-  const { data: regionalTransfers = [], isLoading: isTransfersLoading } = useQuery({
+  const transfers = useQuery({
     queryKey: ['regional-transfers', regionCode],
-    queryFn: async () => {
-      try {
-        return await transfersService.getAll(undefined, 50, regionCode);
-      } catch (err) {
-        logger.error('useRegionalDataQueries', 'Failed to fetch regional transfers', err);
-        return [];
-      }
-    },
-    enabled: Boolean(enabled && regionCode),
-    staleTime: 1000 * 60 * 2,
+    queryFn: () => transfersService.getAll(undefined, 25, regionCode),
+    enabled: active, staleTime: 120_000
   });
-
   return {
-    regionalProducts,
-    regionalEmployees,
-    regionalShifts,
-    regionalOrders,
-    regionalSales,
-    regionalTransfers,
-    isLoading: isProductsLoading || isEmployeesLoading || isShiftsLoading || isOrdersLoading || isSalesLoading || isTransfersLoading
+    regionalProducts: products.data || [], regionalEmployees: employees.data || [],
+    regionalShifts: shifts.data || [], regionalOrders: orders.data || [],
+    regionalSales: sales.data || [], regionalTransfers: transfers.data || [],
+    isLoading: [products, employees, shifts, orders, sales, transfers].some(query => query.isLoading),
+    isError: [products, employees, shifts, orders, sales, transfers].some(query => query.isError)
   };
 }

@@ -81,7 +81,8 @@ export default function RegionalOperations() {
     discrepancyTransfers,
     overrideVelocityBreaches,
     summaryRows,
-    summaryUnavailable
+    summaryUnavailable,
+    regionalListsUnavailable
   } = areaData;
 
   const handleAuditLPIncidents = () => {
@@ -104,7 +105,7 @@ export default function RegionalOperations() {
   };
 
   if (areaData.isAreaManager) return <AreaOperations data={areaData} />;
-  if (summaryUnavailable) return <div role="status" className="p-6 text-[var(--theme-text-primary)]">Regional operating totals are unavailable. Refresh to try again.</div>;
+  if (summaryUnavailable || regionalListsUnavailable) return <div role="status" className="p-6 text-[var(--theme-text-primary)]">Regional operating data is loading or unavailable. Refresh to try again if it does not appear.</div>;
 
   const regionName = currentRegion?.name || regionCode || 'Territory';
   const countryName = getCountryProfile(activeCountry).name.split(' (')[0];
