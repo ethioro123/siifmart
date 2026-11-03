@@ -135,26 +135,7 @@ export const purchaseOrdersLifecycleService = {
         return await this.cancel(id, 'Deleted by manager');
     },
 
-    async cancel(id: string, reason?: string): Promise<PurchaseOrder> {
-        const currentPO = await getById(id);
-        const currentNotes = currentPO?.notes || '';
-        const cancelTag = reason ? `\n[CANCELLED: ${reason}]` : '\n[CANCELLED]';
-
-        const { error } = await supabase
-            .from('purchase_orders')
-            .update({ 
-                status: 'Cancelled',
-                notes: currentNotes + cancelTag,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', id);
-
-        if (error) {
-            logger.error('PurchaseOrdersLifecycleService', 'Failed to cancel PO', error as Error);
-            throw error;
-        }
-        const updated = await getById(id);
-        if (!updated) throw new Error('Purchase Order not found after update');
-        return updated;
+    async cancel(_id: string, _reason?: string): Promise<PurchaseOrder> {
+        throw new Error('Submit a PO cancellation request in Approvals → Record lifecycle. Approved or executed orders require a reversal.');
     }
 };

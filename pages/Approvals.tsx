@@ -1,3 +1,4 @@
+import { RecordLifecycleWorkspace } from '../components/approvals/RecordLifecycleWorkspace';
 import { ApprovalReviewHost } from '../components/approvals/ApprovalReviewHost';
 import { approvalWorkspaceTarget } from '../utils/approvalWorkspaceTarget';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
@@ -42,6 +43,7 @@ export default function Approvals() {
         className="min-h-11 inline-flex items-center gap-2 rounded-[10px] border border-[var(--theme-border)] px-4 text-sm focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]">
         <RefreshCw size={18} aria-hidden="true" className={query.isFetching ? 'animate-spin motion-reduce:animate-none' : ''} />Refresh</button>
     </header>
+    <RecordLifecycleWorkspace />
     {!query.enabled && <p>No approval queues are assigned to your role.</p>}
     {query.isLoading && query.enabled && <p role="status">Checking your approval queues…</p>}
     {query.isError && <p role="alert" className="text-[var(--theme-status-danger-text)]">Approval queues could not be loaded. Refresh to retry; pending totals are unavailable.</p>}

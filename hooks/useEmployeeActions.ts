@@ -211,8 +211,12 @@ export function useEmployeeActions({
          return false;
       }
 
-      const reasonCode: TerminationReasonCode = terminationDetails?.reasonCode || 'gross_misconduct';
-      const reasonDetails = terminationDetails?.reasonDetails || 'Structured offboarding under Zero-Trust dual control.';
+      if (!terminationDetails?.reasonCode || !terminationDetails.reasonDetails || terminationDetails.reasonDetails.trim().length < 10) {
+         addNotification('alert', 'Select the offboarding reason and enter at least 10 characters of supporting detail.');
+         return false;
+      }
+      const reasonCode: TerminationReasonCode = terminationDetails.reasonCode;
+      const reasonDetails = terminationDetails.reasonDetails.trim();
       const effectiveDate = terminationDetails?.effectiveDate || new Date().toISOString().split('T')[0];
 
       try {

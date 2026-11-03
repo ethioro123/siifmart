@@ -81,6 +81,7 @@ describe('Purchase Order Draft Auto-Save & Recovery', () => {
         };
 
         const storedDraft: StoredPODraft = {
+            id: 'draft-test-1',
             data: draftPayload,
             meta: {
                 savedAt: new Date().toISOString(),
@@ -88,7 +89,8 @@ describe('Purchase Order Draft Auto-Save & Recovery', () => {
                 supplierDisplay: 'Habesha Grains PLC'
             },
             countryCode: 'ET',
-            userId: 'usr-001'
+            userId: 'usr-001',
+            updatedAt: new Date().toISOString()
         };
 
         localStorage.setItem(key, JSON.stringify(storedDraft));
@@ -111,6 +113,7 @@ describe('Purchase Order Draft Auto-Save & Recovery', () => {
         // Save Ethiopian draft
         const etKey = 'siifmart_po_draft_ET_usr-001';
         const etDraft: StoredPODraft = {
+            id: 'draft-test-et',
             data: {
                 isManualVendor: true,
                 manualVendorName: 'Addis Millers',
@@ -136,7 +139,8 @@ describe('Purchase Order Draft Auto-Save & Recovery', () => {
                 supplierDisplay: 'Addis Millers'
             },
             countryCode: 'ET',
-            userId: 'usr-001'
+            userId: 'usr-001',
+            updatedAt: new Date().toISOString()
         };
         localStorage.setItem(etKey, JSON.stringify(etDraft));
 
