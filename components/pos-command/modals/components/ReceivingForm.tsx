@@ -1,8 +1,9 @@
 import React, { useRef, useEffect } from 'react';
-import { Clock, Scan, CheckCircle, Lock } from 'lucide-react';
+import { Clock, Scan, CheckCircle, Lock, MapPin } from 'lucide-react';
 import { usePOSCommand } from '../../POSCommandContext';
 import { useFulfillmentData } from '../../../fulfillment/FulfillmentDataProvider';
 import { useStore } from '../../../../contexts/CentralStore';
+import { useData } from '../../../../contexts/DataContext';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { formatJobId } from '../../../../utils/jobIdFormatter';
 import { isWeightBased, isVolumeBased } from '../../../../utils/units';
@@ -11,6 +12,7 @@ import { ReceivingItemQtyInput } from './ReceivingItemQtyInput';
 export const ReceivingForm: React.FC = () => {
     const { t } = useLanguage();
     const { user } = useStore();
+    const { activeSite } = useData();
     const { jobs } = useFulfillmentData();
 
     // Zero-Trust Rule 4: Branch store managers and supervisors must receive blindly to prevent rubber-stamping
@@ -96,9 +98,25 @@ export const ReceivingForm: React.FC = () => {
                 </div>
             </div>
 
-            {/* Quick Hardware Scanner Only Input */}
-            <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-2.5">
+            {/* Quick Hardware Scanner Only Input - Sticky on mobile so it is never hidden */}
+            <div className="sticky top-0 z-20 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 shadow-xs">
+                {/* Pinned Store Receiving Location */}
+                <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-xs mb-2.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <MapPin size={13} className="text-[var(--theme-accent)] shrink-0" />
+                        <span className="font-semibold text-[var(--theme-text-secondary)] uppercase text-[10px] tracking-wider shrink-0">
+                            {t('posCommand.receivingAt') || 'Receiving At'}:
+                        </span>
+                        <span className="font-bold text-[var(--theme-text-primary)] truncate font-mono text-xs">
+                            {activeSite?.name || 'Store'}
+                        </span>
+                    </div>
+                    <span className="font-mono text-[10px] text-[var(--theme-text-secondary)] shrink-0 px-1.5 py-0.5 rounded bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
+                        {activeSite?.code || 'STORE'}
+                    </span>
+                </div>
+
+                <div className="flex items-center justify-between mb-2">
                     <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                         <div className="w-5 h-5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
                             <Scan size={13} />
@@ -117,8 +135,14 @@ export const ReceivingForm: React.FC = () => {
                         onPaste={(e) => e.preventDefault()}
                         onKeyDown={handleKeyDown}
                         onChange={(e) => setTransferScanBarcode(e.target.value)}
+                        onFocus={(e) => {
+                            const target = e.currentTarget;
+                            setTimeout(() => {
+                                target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                            }, 150);
+                        }}
                         placeholder={t('posCommand.scanHardwareScannerPrompt')}
-                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] font-mono text-xs outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] shadow-2xs"
+                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] font-mono text-xs outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] shadow-2xs scroll-mt-20 scroll-mb-20 min-h-[44px]"
                     />
                 </div>
             </div>

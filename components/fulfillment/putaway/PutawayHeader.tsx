@@ -62,7 +62,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
 }) => {
     const isMobile = useIsMobile();
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl md:rounded-2xl p-2.5 md:p-6 mb-2 md:mb-4 relative overflow-hidden shadow-[var(--shadow-sm)]">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl md:rounded-2xl p-2.5 md:p-6 mb-2 md:mb-4 relative overflow-hidden shadow-[var(--shadow-sm)] sticky top-0 z-20">
             {/* DESKTOP: Full header with title + stats */}
             <div className="hidden md:flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
                 <div className="flex items-center gap-4">
@@ -138,7 +138,13 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                             title={t('warehouse.putaway.search')}
                             value={putawaySearch}
                             onChange={(e) => setPutawaySearch(e.target.value)}
-                            className="w-full pl-9 pr-4 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono text-[var(--theme-text-primary)] min-h-[38px] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all"
+                            onFocus={(e) => {
+                                const target = e.currentTarget;
+                                setTimeout(() => {
+                                    target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                }, 150);
+                            }}
+                            className="w-full pl-9 pr-4 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono text-[var(--theme-text-primary)] min-h-[38px] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all scroll-mt-20 scroll-mb-20"
                         />
                     </div>
 

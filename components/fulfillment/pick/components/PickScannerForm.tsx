@@ -5,6 +5,7 @@ import { extractLocationBarcodeFromScan, decodeLocation } from '../../../../util
 import { getTransferQuantityConfig } from '../../transfer/transferQuantity';
 import { remainingPickQuantity } from '../../../../utils/pickProgress';
 import { PickScannerSubmitButton } from './PickScannerSubmitButton';
+import { MobileScannerLocationBadge } from '../../components/MobileScannerLocationBadge';
 
 interface PickScannerFormProps {
     step: 'LOCATION' | 'ITEM' | 'QUANTITY';
@@ -60,9 +61,17 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
     t,
 }) => {
     return (
-        <form onSubmit={handleScan} className="w-full max-w-2xl relative z-20 space-y-2.5">
+        <form onSubmit={handleScan} className="w-full max-w-2xl relative z-20 space-y-2">
             {currentItem && (
                 <>
+                    {/* Pinned Location & Target Badge */}
+                    <MobileScannerLocationBadge
+                        label={step === 'LOCATION' ? (t('warehouse.targetLocation') || 'Target Location') : (t('warehouse.pickLocation') || 'Pick Location')}
+                        location={currentItem.location || currentProduct?.location || t('warehouse.nA') || 'N/A'}
+                        sku={currentItem.sku}
+                        className="mb-1.5"
+                    />
+
                     {step === 'QUANTITY' ? (
                         <div className="space-y-2">
                             <div className="flex gap-2 items-center w-full">
@@ -77,10 +86,16 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                     onChange={(e) => setQtyVal(e.target.value)}
                                     disabled={isProcessing}
                                     step="any"
-                                    className="flex-1 min-w-0 w-0 min-h-[68px] bg-[var(--theme-bg-card)] border-2 rounded-2xl py-3 px-3 text-center text-4xl sm:text-5xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-[var(--theme-accent)] border-[var(--theme-border)] shadow-xs"
+                                    className="flex-1 min-w-0 w-0 min-h-[58px] sm:min-h-[68px] bg-[var(--theme-bg-card)] border-2 rounded-2xl py-2 sm:py-3 px-3 text-center text-3xl sm:text-5xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-[var(--theme-accent)] border-[var(--theme-border)] shadow-xs scroll-mt-20 scroll-mb-20"
                                     placeholder="QTY"
                                     autoFocus
-                                    onFocus={(e) => e.target.select()}
+                                    onFocus={(e) => {
+                                        const target = e.currentTarget;
+                                        target.select();
+                                        setTimeout(() => {
+                                            target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                        }, 150);
+                                    }}
                                 />
                                 <select
                                     value={selectedUnit}
@@ -146,9 +161,15 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                             spellCheck={false}
                             value={inputVal}
                             onChange={(e) => setInputVal(e.target.value)}
+                            onFocus={(e) => {
+                                const target = e.currentTarget;
+                                setTimeout(() => {
+                                    target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                }, 150);
+                            }}
                             onKeyDown={scanOnlyHandlers.onKeyDown}
                             onPaste={scanOnlyHandlers.onPaste}
-                            className="w-full min-h-[68px] bg-[var(--theme-bg-card)] border-2 rounded-2xl py-4 px-3 text-center text-2xl sm:text-3xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none border-[var(--theme-border)] focus:border-[var(--theme-accent)] transition-colors shadow-xs"
+                            className="w-full min-h-[58px] sm:min-h-[68px] bg-[var(--theme-bg-card)] border-2 rounded-2xl py-3 sm:py-4 px-3 text-center text-xl sm:text-3xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none border-[var(--theme-border)] focus:border-[var(--theme-accent)] transition-colors shadow-xs scroll-mt-20 scroll-mb-20"
                             placeholder={step === 'LOCATION' ? t('warehouse.picking.scan15DigitBarcode') : t('warehouse.picking.scanSkuBarcode')}
                             autoFocus
                             disabled={isProcessing}

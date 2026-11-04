@@ -34,7 +34,7 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
     filteredJobsCount, isScanning, scanSuccess, scanError, onGlobalScan
 }) => {
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-5 mb-1.5 sm:mb-4 shadow-xs">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-5 mb-1.5 sm:mb-4 shadow-xs sticky top-0 z-20">
             {/* Title row — hidden on mobile to maximize screen real estate */}
             <div className="hidden sm:flex items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-4">
@@ -163,6 +163,12 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                             title={t('warehouse.scanPrompt') || 'Scan barcode or search product, SKU, order'}
                             value={packSearch}
                             onChange={(e) => setPackSearch(e.target.value)}
+                            onFocus={(e) => {
+                                const target = e.currentTarget;
+                                setTimeout(() => {
+                                    target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                }, 150);
+                            }}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     const val = packSearch.trim();
@@ -172,7 +178,7 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                                 }
                             }}
                             autoComplete="off"
-                            className={`w-full pl-9 sm:pl-10 text-xs font-medium text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 border rounded-xl outline-none transition-all min-h-[36px] sm:min-h-[42px] py-2 ${
+                            className={`w-full pl-9 sm:pl-10 text-xs font-medium text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 border rounded-xl outline-none transition-all min-h-[36px] sm:min-h-[42px] py-2 scroll-mt-20 scroll-mb-20 ${
                                 packSearch && onGlobalScan ? 'pr-20 sm:pr-24' : packSearch ? 'pr-8 sm:pr-9' : 'pr-3'
                             } ${
                                 scanSuccess

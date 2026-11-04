@@ -1,7 +1,8 @@
 import React from 'react';
-import { Scan, X, Truck, Loader2 } from 'lucide-react';
+import { Scan, X, Truck, Loader2, MapPin } from 'lucide-react';
 import { PurchaseOrder } from '../../../types';
 import { FulfillmentHeaderMetrics } from '../FulfillmentHeaderMetrics';
+import { useData } from '../../../contexts/DataContext';
 
 interface ReceiveHeaderProps {
     scanInputRef: React.RefObject<HTMLInputElement | null>;
@@ -40,6 +41,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
     isSubmitting,
     receiveStats
 }) => {
+    const { activeSite } = useData();
+
     const handleSubmit = () => {
         if (isSubmitting) return;
         const val = receiveSearch.trim();
@@ -50,8 +53,24 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
 
     return (
         <div className="space-y-1.5 sm:space-y-4 shrink-0 mb-1.5 sm:mb-2">
-            {/* UNIFIED RECEIVE HEADER CARD */}
-            <div className="p-2.5 sm:p-4 md:p-5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl shadow-xs shrink-0 relative">
+            {/* UNIFIED RECEIVE HEADER CARD - Sticky on mobile */}
+            <div className="p-2.5 sm:p-4 md:p-5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl shadow-xs shrink-0 relative sticky top-0 z-20">
+                {/* Mobile Active Receiving Location Indicator */}
+                <div className="flex items-center justify-between gap-2 px-2.5 py-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs mb-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <MapPin size={13} className="text-[var(--theme-accent)] shrink-0" />
+                        <span className="font-semibold text-[var(--theme-text-secondary)] uppercase text-[10px] tracking-wider shrink-0">
+                            {t('warehouse.receivingAt') || 'Receiving Location'}:
+                        </span>
+                        <span className="font-bold text-[var(--theme-text-primary)] truncate font-mono text-xs">
+                            {activeSite?.name || 'Inbound Dock'}
+                        </span>
+                    </div>
+                    <span className="font-mono text-[10px] text-[var(--theme-text-secondary)] shrink-0 px-1.5 py-0.5 rounded bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
+                        {activeSite?.code || 'DOCK-1'}
+                    </span>
+                </div>
+
                 {/* Unified Smart Scan & Search Bar */}
                 <div className="flex gap-1.5 sm:gap-3 mb-2 sm:mb-3">
                     <div className="flex-1 relative group">
@@ -64,6 +83,12 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             type="text"
                             value={receiveSearch}
                             onChange={(e) => setReceiveSearch(e.target.value)}
+                            onFocus={(e) => {
+                                const target = e.currentTarget;
+                                setTimeout(() => {
+                                    target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                }, 150);
+                            }}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     handleSubmit();
@@ -73,7 +98,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             title={t('warehouse.scanBarcodeOrSku')}
                             placeholder={t('warehouse.searchReceivePlaceholder') || 'Scan barcode / SKU, or search PO, supplier...'}
                             autoComplete="off"
-                            className="w-full h-9 sm:h-12 pl-9 sm:pl-12 pr-8 sm:pr-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-lg sm:rounded-xl text-[var(--theme-text-primary)] font-medium text-xs sm:text-sm focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] focus:outline-none transition-colors placeholder:text-[var(--theme-text-secondary)]/60"
+                            className="w-full h-9 sm:h-12 pl-9 sm:pl-12 pr-8 sm:pr-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-lg sm:rounded-xl text-[var(--theme-text-primary)] font-medium text-xs sm:text-sm focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] focus:outline-none transition-colors placeholder:text-[var(--theme-text-secondary)]/60 scroll-mt-20 scroll-mb-20"
                         />
                         {receiveSearch && (
                             <button

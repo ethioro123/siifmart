@@ -40,7 +40,12 @@ export const TransferReceiveItemCard: React.FC<TransferReceiveItemCardProps> = (
                 <div className="flex justify-between items-start mb-2 gap-2">
                     <div className="min-w-0 flex-1">
                         <h4 className="font-bold text-[var(--theme-text-primary)] truncate text-xs sm:text-sm">{product?.name || item.productName || 'Unknown Item'}</h4>
-                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{product?.sku || (item as any).sku}</p>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
+                            {product?.location ? (
+                                <span className="text-[var(--theme-accent)] font-semibold mr-1">📍 {product.location} ·</span>
+                            ) : null}
+                            {product?.sku || (item as any).sku}
+                        </p>
                     </div>
                     <div className="text-right shrink-0">
                         <span className="text-[10px] sm:text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">
@@ -75,13 +80,19 @@ export const TransferReceiveItemCard: React.FC<TransferReceiveItemCardProps> = (
                             placeholder="0"
                             step={unitDef.allowDecimal ? '0.01' : '1'}
                             value={item.receivedQty === 0 ? '' : item.receivedQty}
-                            onFocus={(e) => e.target.select()}
+                            onFocus={(e) => {
+                                const target = e.currentTarget;
+                                target.select();
+                                setTimeout(() => {
+                                    target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                }, 150);
+                            }}
                             onChange={(e) => {
                                 const rawVal = e.target.value;
                                 const newQty = rawVal.trim() === '' ? 0 : (unitDef.allowDecimal ? parseFloat(rawVal) || 0 : parseInt(rawVal, 10) || 0);
                                 onUpdateItem(idx, { receivedQty: newQty });
                             }}
-                            className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] focus:outline-none touch-manipulation font-mono tabular-nums"
+                            className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] focus:outline-none touch-manipulation font-mono tabular-nums scroll-mt-24 scroll-mb-24"
                             aria-label={`Received quantity for ${product?.name || 'item'}`}
                         />
 

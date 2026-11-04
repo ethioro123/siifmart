@@ -4,7 +4,7 @@ import type {ReturnInput,ReturnSale} from '../../../services/fulfillment-returns
 interface Props{sale:ReturnSale|null;pending:boolean;lookupPending:boolean;onLookup:(ref:string)=>Promise<void>;onClear:()=>void;onSubmit:(lines:ReturnInput[])=>Promise<void>}
 export function ReturnsIntakeForm({sale,pending,lookupPending,onLookup,onClear,onSubmit}:Props){
  const {t}=useLanguage();const [reference,setReference]=useState('');const [lines,setLines]=useState<ReturnInput[]>([]);const [page,setPage]=useState(0);
- const field='min-h-11 min-w-0 w-full rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] p-2 text-sm';
+ const field='min-h-11 min-w-0 w-full rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] p-2 text-sm scroll-mt-20 scroll-mb-20';
  const update=(id:string,patch:Partial<ReturnInput>)=>setLines(prev=>prev.map(l=>l.saleItemId===id?{...l,...patch}:l));
  if(!sale)return <form className="flex flex-wrap gap-2 max-w-xl" onSubmit={e=>{e.preventDefault();if(reference.trim()){setLines([]);setPage(0);void onLookup(reference);}}}>
   <label className="flex-1 min-w-0">{t('warehouse.returnExactReceipt')}<input className={field} value={reference} onChange={e=>setReference(e.target.value)} required autoComplete="off"/></label><button className="min-h-11 self-end rounded-lg px-4 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] disabled:opacity-50" disabled={lookupPending||!reference.trim()}>{t('warehouse.findButton')}</button>

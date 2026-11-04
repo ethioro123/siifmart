@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
     ChevronDown, SlidersHorizontal, X, Search,
-    BarChart3
+    BarChart3, MapPin
 } from 'lucide-react';
 
 // --- TYPES ---
@@ -51,6 +51,7 @@ interface MobileScannerToolbarProps {
     activeSubView?: string;
     onSubViewChange?: (id: string) => void;
     extraActions?: React.ReactNode;
+    locationName?: string;
 }
 
 const statColorMap: Record<string, string> = {
@@ -82,6 +83,7 @@ export default function MobileScannerToolbar({
     activeSubView,
     onSubViewChange,
     extraActions,
+    locationName,
 }: MobileScannerToolbarProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const internalRef = useRef<HTMLInputElement>(null);
@@ -104,16 +106,24 @@ export default function MobileScannerToolbar({
     const activeFilterCount = filters?.filter(f => f.isActive && f.value !== 'All' && f.value !== 'all').length || 0;
 
     return (
-        <div className="md:hidden flex flex-col gap-2 relative z-30">
+        <div className="md:hidden flex flex-col gap-1.5 sticky top-0 z-30 bg-[var(--theme-bg-app)] py-1">
             {/* ROW 1: Compact Header Bar */}
             <div className="flex items-center justify-between bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl px-3 py-2 shadow-sm overflow-hidden">
-                {/* Left: Icon + Name */}
+                {/* Left: Icon + Name + Location */}
                 <div className="flex items-center gap-2.5 min-w-0 flex-shrink">
                     <div className="w-8 h-8 min-w-[32px] rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                         {tabIcon}
                     </div>
-                    <div>
-                        <p className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-tight leading-none truncate">{tabName}</p>
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                            <p className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-tight leading-none truncate">{tabName}</p>
+                            {locationName && (
+                                <span className="flex items-center gap-0.5 text-[10px] font-mono font-bold text-[var(--theme-accent)] bg-[var(--theme-bg-subtle)] px-1.5 py-0.5 rounded-md border border-[var(--theme-border)] truncate max-w-[140px]">
+                                    <MapPin size={10} className="shrink-0" />
+                                    <span className="truncate">{locationName}</span>
+                                </span>
+                            )}
+                        </div>
                         {jobCount !== undefined && (
                             <p className="text-[11px] text-[var(--theme-text-muted)] font-mono tabular-nums font-semibold uppercase tracking-wider mt-0.5">
                                 {jobCount} {jobCount === 1 ? 'item' : 'items'}
@@ -196,7 +206,13 @@ export default function MobileScannerToolbar({
                             }
                         }}
                         placeholder={searchPlaceholder}
-                        className="w-full pl-10 pr-10 py-2.5 min-h-[44px] text-xs font-mono tabular-nums rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] outline-none"
+                        onFocus={(e) => {
+                            const target = e.currentTarget;
+                            setTimeout(() => {
+                                target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                            }, 150);
+                        }}
+                        className="w-full pl-10 pr-10 py-2.5 min-h-[44px] text-xs font-mono tabular-nums rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] outline-none scroll-mt-20 scroll-mb-20"
                     />
                     <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)]" />
                     {searchValue && (

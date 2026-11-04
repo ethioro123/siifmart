@@ -395,7 +395,7 @@ export const ScannerInterface: React.FC = () => {
     }
 
     return (
-        <div className="fixed inset-0 z-[150] bg-[var(--theme-bg-app)] flex flex-col">
+        <div className="fixed inset-0 z-[150] bg-[var(--theme-bg-app)] flex flex-col h-[100dvh] max-h-[100dvh]">
             {/* Header */}
             <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-[var(--theme-bg-subtle)] flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-[var(--theme-border)]">
                 <div className="text-[var(--theme-text-primary)] w-full md:w-auto">
@@ -417,7 +417,7 @@ export const ScannerInterface: React.FC = () => {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 p-4 md:p-6 flex flex-col items-center justify-center overflow-hidden relative">
+            <div className="flex-1 p-3 sm:p-4 md:p-6 flex flex-col items-center justify-start sm:justify-center overflow-y-auto custom-scrollbar relative">
 
                 {/* Item Completion Overlay */}
                 {lastCompletedItem && (

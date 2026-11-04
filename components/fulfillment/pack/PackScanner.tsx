@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { X, CheckCircle, RotateCcw, Maximize2, ArrowLeft } from 'lucide-react';
+import { X, CheckCircle, RotateCcw, Maximize2, ArrowLeft, Box } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
 import { playBeep } from '../../../utils/audioUtils';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -231,7 +231,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
     }, [selectedUnit, matchedProduct, matchedItem]);
 
     return (
-        <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col overflow-hidden max-w-full">
+        <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col overflow-hidden max-w-full h-[100dvh] max-h-[100dvh]">
             {/* Mobile-First Top Bar */}
             <div className="px-3 py-2.5 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] text-[var(--theme-text-primary)] shrink-0">
                 <div className="flex justify-between items-center gap-2">
@@ -329,6 +329,22 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 {/* Pinned Mobile Thumb-Zone Bottom Dock */}
                 <div className="shrink-0 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 pt-2.5 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-6 sm:py-4">
                     <form onSubmit={handleScan} className="mx-auto w-full max-w-2xl relative z-20 space-y-2">
+                        {/* Pinned Pack Station & Location Indicator */}
+                        <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                                <Box size={14} className="text-[var(--theme-accent)] shrink-0" />
+                                <span className="font-semibold text-[var(--theme-text-secondary)] uppercase text-[10px] tracking-wider shrink-0">
+                                    {t('warehouse.packStation') || 'Pack Station'}:
+                                </span>
+                                <span className="font-mono font-bold text-[var(--theme-text-primary)] truncate text-xs">
+                                    {(job as any).station || (job as any).stagingLocation || (job as any).destinationSite || 'Pack Station 1'}
+                                </span>
+                            </div>
+                            <span className="font-mono text-[10px] text-[var(--theme-text-secondary)] shrink-0 px-1.5 py-0.5 rounded bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
+                                {formatJobId(job)}
+                            </span>
+                        </div>
+
                         {!isFullyPacked && (
                             <>
                                 {step === 'CONFIRM_QTY' ? (
@@ -343,7 +359,13 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                                 title={t('warehouse.confirmQty') || 'Confirm quantity'}
                                                 value={qtyVal}
                                                 onChange={(e) => setQtyVal(e.target.value)}
-                                                className="flex-1 min-w-0 bg-transparent py-2.5 px-3 text-center text-3xl sm:text-4xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 outline-none min-h-[58px]"
+                                                onFocus={(e) => {
+                                                    const target = e.currentTarget;
+                                                    setTimeout(() => {
+                                                        target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                                    }, 150);
+                                                }}
+                                                className="flex-1 min-w-0 bg-transparent py-2.5 px-3 text-center text-3xl sm:text-4xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 outline-none min-h-[58px] scroll-mt-20 scroll-mb-20"
                                                 placeholder={t('warehouse.qty') || 'QTY'}
                                                 autoFocus
                                             />
@@ -386,13 +408,19 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                         title={t('warehouse.scanBarcode') || 'Scan barcode'}
                                         value={inputVal}
                                         onChange={(e) => setInputVal(e.target.value)}
+                                        onFocus={(e) => {
+                                            const target = e.currentTarget;
+                                            setTimeout(() => {
+                                                target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                            }, 150);
+                                        }}
                                         onKeyDown={scanOnlyHandlers.onKeyDown}
                                         onPaste={scanOnlyHandlers.onPaste}
                                         inputMode="none"
                                         autoComplete="off"
                                         autoCorrect="off"
                                         spellCheck={false}
-                                        className="w-full bg-[var(--theme-bg-app)] border-2 rounded-2xl py-3 px-4 text-center text-xl sm:text-2xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/40 focus:outline-none relative z-10 shadow-xs transition-colors border-[var(--theme-border)] focus:border-[var(--theme-accent)] min-h-[58px] sm:min-h-[64px]"
+                                        className="w-full bg-[var(--theme-bg-app)] border-2 rounded-2xl py-3 px-4 text-center text-xl sm:text-2xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/40 focus:outline-none relative z-10 shadow-xs transition-colors border-[var(--theme-border)] focus:border-[var(--theme-accent)] min-h-[58px] sm:min-h-[64px] scroll-mt-20 scroll-mb-20"
                                         placeholder={t('warehouse.packing.scanRequiredSkuOrBarcode') || 'SCAN REQUIRED SKU OR BARCODE'}
                                         autoFocus
                                         disabled={isProcessing || isSubmitting || showSuccess}

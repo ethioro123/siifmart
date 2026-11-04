@@ -137,7 +137,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     }, []);
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col sm:items-center sm:justify-center bg-[var(--theme-bg-app)] sm:bg-[color-mix(in_srgb,var(--theme-overlay)_90%,transparent)] sm:backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex flex-col sm:items-center sm:justify-center bg-[var(--theme-bg-app)] sm:bg-[color-mix(in_srgb,var(--theme-overlay)_90%,transparent)] sm:backdrop-blur-sm h-[100dvh] max-h-[100dvh]">
             <div className="relative w-full h-full sm:h-auto sm:max-w-lg flex flex-col sm:block bg-[var(--theme-bg-app)] sm:bg-transparent">
                 {/* Header */}
                 <div className="bg-[var(--theme-bg-panel)] border-b sm:border border-[var(--theme-border)] sm:rounded-t-2xl p-4 flex items-center justify-between shrink-0 z-10">

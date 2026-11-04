@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Search, ArrowRight, X, Link,
-    RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, SlidersHorizontal, ScanBarcode
+    RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, SlidersHorizontal, ScanBarcode, Store
 } from 'lucide-react';
 import { usePOS } from '../POSContext';
 import { useData } from '../../../contexts/DataContext';
@@ -58,7 +58,23 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                     <ArrowLeft size={16} />
                 </div>
             </button>
-            <div className="flex-1 relative">
+            <div className="flex-1 flex flex-col gap-1.5 min-w-0 relative">
+                {/* Mobile & Desktop Location Header */}
+                <div className="flex items-center justify-between gap-2 px-2.5 py-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] text-[11px] leading-tight">
+                    <div className="flex items-center gap-1.5 min-w-0 truncate">
+                        <Store size={13} className="text-[var(--theme-accent)] shrink-0" />
+                        <span className="font-semibold text-[var(--theme-text-secondary)] uppercase text-[10px] tracking-wider shrink-0">
+                            {t('pos.storeLocation') || 'Store'}:
+                        </span>
+                        <span className="font-bold text-[var(--theme-text-primary)] truncate font-mono">
+                            {activeSite?.name || 'Central Store'}
+                        </span>
+                    </div>
+                    <span className="font-mono text-[10px] text-[var(--theme-text-secondary)] shrink-0 px-1.5 py-0.5 rounded bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
+                        {activeSite?.code || 'REG-01'}
+                    </span>
+                </div>
+
                 <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-3.5 py-2 focus-within:border-[var(--theme-border-focus)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 focus-within:bg-[var(--theme-bg-card)] transition-all group shadow-2xs">
                     <div className="w-5 h-5 text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0 group-focus-within:text-[var(--theme-accent)] transition-colors">
                         <Search size={16} />
@@ -68,7 +84,13 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                         type="text"
                         aria-label={t('pos.searchProducts') || 'Search or scan products'}
                         placeholder={t('pos.searchProducts') || 'Search products or scan barcode...'}
-                        className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] font-medium text-sm min-w-0 tracking-tight"
+                        onFocus={(e) => {
+                            const target = e.currentTarget;
+                            setTimeout(() => {
+                                target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                            }, 150);
+                        }}
+                        className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] font-medium text-sm min-w-0 tracking-tight scroll-mt-20 scroll-mb-20"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={handleSearchKeyDown}

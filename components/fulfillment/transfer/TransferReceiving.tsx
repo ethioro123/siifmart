@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowDown, Box, ShieldCheck } from 'lucide-react';
+import { ArrowDown, Box, ShieldCheck, MapPin } from 'lucide-react';
 import { WMSJob, Site, ReceivingItem, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getTransferQuantityConfig, toTransferStockQuantity } from './transferQuantity';
@@ -354,8 +354,8 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 
     return (
         <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 mb-5 shadow-xs">
+            {/* Header - Sticky on mobile */}
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 mb-3 sm:mb-5 shadow-xs sticky top-0 z-20">
                 <div className="flex items-center justify-between gap-4">
                     <div>
                         <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-lg tracking-tight">
@@ -363,8 +363,13 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                             {t('warehouse.shipmentReceiving')}
                         </h3>
                         {activeTransferJob && (
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
                                 <span className="text-primary font-mono text-xs font-semibold">{formatJobId(activeTransferJob)}</span>
+                                <span className="text-[var(--theme-text-secondary)] text-xs">•</span>
+                                <span className="flex items-center gap-1 text-xs font-mono font-bold text-[var(--theme-accent)]">
+                                    <MapPin size={11} className="shrink-0" />
+                                    <span>{activeSite?.name || 'Destination Site'}</span>
+                                </span>
                                 <span className="text-[var(--theme-text-secondary)] text-xs">•</span>
                                 <span className="text-[var(--theme-text-secondary)] text-xs font-medium">{activeTransferJob.items} {t('warehouse.itemPlural')}</span>
                             </div>

@@ -44,7 +44,13 @@ export const UnknownBarcodeSearchStep: React.FC<UnknownBarcodeSearchStepProps> =
                     type="text"
                     placeholder={t('pos.barcodeSearch')}
                     aria-label={t('pos.barcodeSearch')}
-                    className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl pl-10 pr-4 py-3 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] dark:focus:border-[var(--theme-border)] focus:outline-none transition-colors"
+                    onFocus={(e) => {
+                        const target = e.currentTarget;
+                        setTimeout(() => {
+                            target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                        }, 150);
+                    }}
+                    className="w-full bg-[var(--theme-bg-card)] bg-[color-mix(in_srgb,var(--theme-overlay)_50%,transparent)] border border-[var(--theme-border)] border-[color-mix(in_srgb,var(--theme-border)_10%,transparent)] rounded-xl pl-10 pr-4 py-3 text-[var(--theme-text-primary)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border)] dark:focus:border-[var(--theme-border)] focus:outline-none transition-colors scroll-mt-20 scroll-mb-20 min-h-[44px]"
                     value={searchTerm || ''}
                     onChange={e => setSearchTerm(e.target.value)}
                     onKeyDown={onKeyDown}

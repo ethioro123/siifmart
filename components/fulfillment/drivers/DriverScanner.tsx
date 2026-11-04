@@ -16,7 +16,7 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({ jobs, onClose, onS
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
     return <div role="dialog" aria-modal="true" aria-labelledby="driver-scan-title"
-        className="fixed inset-0 z-[110] flex items-center justify-center bg-[var(--theme-bg-app)] p-4">
+        className="fixed inset-0 z-[110] flex items-start pt-6 sm:items-center sm:pt-0 justify-center bg-[var(--theme-bg-app)] p-4 overflow-y-auto h-[100dvh] max-h-[100dvh]">
         <div className="w-full max-w-md space-y-4">
             <div className="flex items-center justify-between gap-3">
                 <h2 id="driver-scan-title" className="flex items-center gap-2 text-base font-semibold text-[var(--theme-text-primary)]"><ScanLine size={20} /> {t('warehouse.driverHub.findShipment')}</h2>
@@ -33,7 +33,13 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({ jobs, onClose, onS
             }}>
                 <label className="block text-xs font-medium text-[var(--theme-text-primary)]" htmlFor="shipment-scan-code">{t('warehouse.driverHub.shipmentOrTrackingCode')}</label>
                 <input id="shipment-scan-code" autoFocus autoComplete="off" value={code} onChange={event => { setCode(event.target.value); setError(''); }}
-                    className="min-h-11 w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 font-mono text-sm text-[var(--theme-text-primary)] focus:outline-2 focus:outline-[var(--theme-primary)]" />
+                    onFocus={(e) => {
+                        const target = e.currentTarget;
+                        setTimeout(() => {
+                            target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                        }, 150);
+                    }}
+                    className="min-h-11 w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 font-mono text-sm text-[var(--theme-text-primary)] focus:outline-2 focus:outline-[var(--theme-primary)] scroll-mt-16 scroll-mb-16" />
                 {error && <p role="alert" className="text-xs text-[var(--theme-text-secondary)]">{error}</p>}
                 <button type="submit" className="min-h-11 w-full rounded-xl bg-[var(--theme-primary)] px-4 text-sm font-semibold text-[var(--theme-primary-text)]">{t('warehouse.driverHub.openManifest')}</button>
             </form>

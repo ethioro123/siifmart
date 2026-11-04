@@ -24,7 +24,7 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
     setPickSearch
 }) => {
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-6 mb-2 sm:mb-4 shadow-sm">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-6 mb-2 sm:mb-4 shadow-sm sticky top-0 z-20">
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-2 sm:gap-6">
                 {/* Title Section — hidden on mobile to maximize active job screen real estate */}
                 <div className="hidden sm:flex items-center gap-3.5 sm:gap-4 min-w-0 w-full sm:w-auto">
@@ -89,7 +89,13 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                             title={t('warehouse.searchByIdOrOrder')}
                             value={pickSearch}
                             onChange={(e) => setPickSearch(e.target.value)}
-                            className="w-full pl-9 sm:pl-10 pr-4 py-1.5 sm:py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] text-xs font-medium focus:outline-none focus:border-[var(--theme-accent)] transition-colors min-h-[38px] sm:min-h-[44px]"
+                            onFocus={(e) => {
+                                const target = e.currentTarget;
+                                setTimeout(() => {
+                                    target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                }, 150);
+                            }}
+                            className="w-full pl-9 sm:pl-10 pr-4 py-1.5 sm:py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] text-xs font-medium focus:outline-none focus:border-[var(--theme-accent)] transition-colors min-h-[38px] sm:min-h-[44px] scroll-mt-20 scroll-mb-20"
                         />
                     </div>
 

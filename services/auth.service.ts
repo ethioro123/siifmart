@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '../lib/supabase';
+import { logger } from '../utils/logger';
 import type { User, Session } from '@supabase/supabase-js';
 import { employeesService } from './supabase.service';
 import { systemLogsService } from './local-logs.service';
@@ -247,20 +248,24 @@ export const authService = {
         try {
             const user = await this.getCurrentUser();
             if (!user) {
-                return !navigator.onLine ? this.getCachedAuthProfile() : null;
+                return null; // Cached profiles never establish an authenticated identity.
             }
 
             if (!navigator.onLine) {
                 const cached = this.getCachedAuthProfile();
-                if (cached && (!user.id || cached.id === user.id)) {
+                if (cached && cached.id === user.id && (!cached.employeeId || cached.employeeId === user.id)) {
                     return cached;
                 }
             }
 
             const employee = await employeesService.getByEmail(user.email!);
+            if (!employee || employee.id !== user.id) {
+                logger.warn('AuthService', 'Employee profile does not match the authenticated identity');
+                return null;
+            }
 
-            if (employee?.status && employee.status.toLowerCase() !== 'active') {
-                console.warn('AuthService: Account is deactivated or terminated:', user.email, employee.status);
+            if (String(employee.status || '').toLowerCase() !== 'active') {
+                logger.warn('AuthService', 'The authenticated employee is not active');
                 try {
                     localStorage.removeItem('siifmart_offline_profile');
                 } catch {
@@ -295,8 +300,8 @@ export const authService = {
 
             return profile;
         } catch (error) {
-            console.warn('AuthService: Error getting auth user, falling back to cached offline profile', error);
-            return this.getCachedAuthProfile();
+            logger.warn('AuthService', 'Authenticated employee profile could not be verified');
+            return null;
         }
     },
 

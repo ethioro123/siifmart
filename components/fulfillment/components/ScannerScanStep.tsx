@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Scan, CheckCircle, RefreshCw, AlertTriangle, ArrowLeft, Plus, Minus } from 'lucide-react';
+import { Package, Scan, CheckCircle, RefreshCw, AlertTriangle, ArrowLeft, Plus, Minus, MapPin } from 'lucide-react';
 import { JobItem, Product } from '../../../types';
+import { MobileScannerLocationBadge } from './MobileScannerLocationBadge';
 
 const MetricBadge = ({ label, value, color }: { label: string; value: string | number; color: string }) => (
     <div className={`px-3 py-1.5 rounded-xl border flex flex-col items-center ${color}`}>
@@ -90,31 +91,42 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
     };
 
     return (
-        <div className="w-full max-w-md mx-auto space-y-6 pb-24 md:pb-0 px-4 md:px-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col items-center justify-center space-y-4">
-                <div className="relative inline-block shrink-0 w-32 h-32 md:w-48 md:h-48 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] overflow-hidden flex items-center justify-center">
+        <div className="w-full max-w-md mx-auto space-y-3 sm:space-y-6 pb-8 md:pb-0 px-3 md:px-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Pinned Mobile Target Location Badge */}
+            <MobileScannerLocationBadge
+                label={t('warehouse.pickLocation') || 'Pick Location'}
+                location={currentProduct?.location || (currentItem as any)?.location || t('warehouse.nA') || 'N/A'}
+                sku={currentItem.sku}
+                icon={<MapPin size={14} />}
+            />
+
+            <div className="flex items-center sm:flex-col sm:justify-center gap-3 sm:space-y-4">
+                <div className="relative inline-block shrink-0 w-16 h-16 sm:w-28 sm:h-28 md:w-48 md:h-48 rounded-xl sm:rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] overflow-hidden flex items-center justify-center">
                     {currentItem.image && !currentItem.image.includes('placeholder') ? (
                         <img src={currentItem.image} className="w-full h-full object-cover" alt={currentItem.name} />
                     ) : (
-                        <Package size={48} className="text-[var(--theme-text-muted)]" />
+                        <Package size={28} className="text-[var(--theme-text-muted)] sm:hidden" />
+                    )}
+                    {(!currentItem.image || currentItem.image.includes('placeholder')) && (
+                        <Package size={48} className="text-[var(--theme-text-muted)] hidden sm:block" />
                     )}
                 </div>
-                <div>
-                    <h2 className="text-xl md:text-2xl font-bold text-[var(--theme-text-primary)] text-center">{currentItem.name}</h2>
-                    <p className="text-center text-[var(--theme-text-muted)] font-mono tabular-nums text-xs mt-1">{currentItem.sku}</p>
+                <div className="min-w-0 flex-1 sm:flex-none">
+                    <h2 className="text-base sm:text-xl md:text-2xl font-bold text-[var(--theme-text-primary)] sm:text-center truncate sm:whitespace-normal">{currentItem.name}</h2>
+                    <p className="sm:text-center text-[var(--theme-text-muted)] font-mono tabular-nums text-xs mt-0.5 sm:mt-1 truncate">{currentItem.sku}</p>
                 </div>
             </div>
 
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-3 sm:gap-4">
                 <MetricBadge label="Qty" value={currentItem.expectedQty} color="border-primary/20 text-primary bg-primary/10" />
                 <MetricBadge label="Stock" value={currentProduct?.stock || 0} color="border-[var(--theme-border)] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]" />
             </div>
 
             {!isVerifyingQty ? (
                 /* Scanner Input */
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 shadow-xs">
                     <div className="flex items-center gap-2 mb-2">
-                        <Scan className="text-primary" size={18} />
+                        <Scan className="text-primary" size={16} />
                         <p className="text-xs text-primary uppercase font-semibold">{t('warehouse.scanProductBarcode')}</p>
                     </div>
                     <input
@@ -123,18 +135,24 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                         type="text"
                         value={scannedItem}
                         onChange={(e) => setScannedItem(e.target.value)}
+                        onFocus={(e) => {
+                            const target = e.currentTarget;
+                            setTimeout(() => {
+                                target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                            }, 150);
+                        }}
                         onKeyDown={(e) => {
                             scanOnlyItemHandlers.onKeyDown(e);
                             if (e.key === 'Enter') handleInitialBarcodeSubmit();
                         }}
                         onPaste={scanOnlyItemHandlers.onPaste}
-                        className="woody-input font-mono text-base text-center min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] w-full"
+                        className="woody-input font-mono text-base text-center min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] w-full scroll-mt-20 scroll-mb-20"
                         autoFocus
                     />
                     <button
                         disabled={isProcessingScan || !scannedItem.trim()}
                         onClick={handleInitialBarcodeSubmit}
-                        className="w-full mt-4 min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold py-3.5 text-base rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer"
+                        className="w-full mt-3 sm:mt-4 min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold py-3 sm:py-3.5 text-base rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer"
                     >
                         {isProcessingScan ? <RefreshCw className="animate-spin" size={18} /> : <CheckCircle size={18} />}
                         {t('warehouse.confirm')}
@@ -178,10 +196,16 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                                 max={currentItem.expectedQty}
                                 value={enteredQty}
                                 onChange={(e) => setEnteredQty(parseInt(e.target.value, 10) || 0)}
+                                onFocus={(e) => {
+                                    const target = e.currentTarget;
+                                    setTimeout(() => {
+                                        target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                    }, 150);
+                                }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') handleConfirmQuantity();
                                 }}
-                                className="w-24 h-12 text-center text-xl font-mono tabular-nums font-bold rounded-xl bg-[var(--theme-bg-app)] border border-primary text-[var(--theme-text-primary)] focus:outline-none"
+                                className="w-24 h-12 text-center text-xl font-mono tabular-nums font-bold rounded-xl bg-[var(--theme-bg-app)] border border-primary text-[var(--theme-text-primary)] focus:outline-none scroll-mt-20 scroll-mb-20"
                                 autoFocus
                             />
                             <button

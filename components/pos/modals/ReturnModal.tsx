@@ -205,8 +205,14 @@ export const ReturnModal: React.FC = () => {
                             <input
                                 type="text"
                                 placeholder={t('pos.scanReceiptOrEnter') || "Scan receipt barcode or enter e.g. TX-9981"}
-                                className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-border-focus)] transition-colors font-mono text-sm"
+                                className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-border-focus)] transition-colors font-mono text-sm scroll-mt-20 scroll-mb-20 min-h-[44px]"
                                 value={returnSearchId}
+                                onFocus={(e) => {
+                                    const target = e.currentTarget;
+                                    setTimeout(() => {
+                                        target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                    }, 150);
+                                }}
                                 onChange={(e) => setReturnSearchId(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearchForReturn()}
                             />

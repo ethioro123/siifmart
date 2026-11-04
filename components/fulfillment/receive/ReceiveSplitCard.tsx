@@ -99,8 +99,14 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             pattern="[0-9]*"
                             min="0"
                             value={variant.quantity === 0 ? '' : variant.quantity}
+                            onFocus={(e) => {
+                                const target = e.currentTarget;
+                                setTimeout(() => {
+                                    target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                }, 150);
+                            }}
                             onChange={(e) => onUpdateVariant({ quantity: Math.max(0, parseInt(e.target.value) || 0) })}
-                            className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-lg md:text-xl font-bold font-mono text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)] tabular-nums min-h-[44px]"
+                            className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-lg md:text-xl font-bold font-mono text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)] tabular-nums min-h-[44px] scroll-mt-20 scroll-mb-20"
                             aria-label={t('warehouse.quantityToReceive')}
                             placeholder="0"
                         />
@@ -211,7 +217,13 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             <input
                                 type="text"
                                 value={barcodeInput || ''}
-                                onFocus={onFocusScan}
+                                onFocus={(e) => {
+                                    const target = e.currentTarget;
+                                    onFocusScan();
+                                    setTimeout(() => {
+                                        target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                    }, 150);
+                                }}
                                 onChange={(e) => onBarcodeInput(e.target.value)}
                                 onKeyDown={(e) => {
                                     scanOnlyHandlers.onKeyDown(e);
@@ -222,7 +234,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                                 }}
                                 onPaste={scanOnlyHandlers.onPaste}
                                 placeholder={t('warehouse.scanBarcodePlaceholder')}
-                                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)]"
+                                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 ring-[var(--theme-status-info-border)] scroll-mt-20 scroll-mb-20"
                                 aria-label={t('warehouse.scanBarcodePlaceholder')}
                             />
                             <ScanBarcode className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />

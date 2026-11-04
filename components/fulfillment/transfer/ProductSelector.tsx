@@ -53,8 +53,14 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     autoFocus
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    onFocus={(e) => {
+                        const target = e.currentTarget;
+                        setTimeout(() => {
+                            target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                        }, 150);
+                    }}
                     placeholder={`${t('warehouse.misc.scanBarcodeOrEnterSKU')}`}
-                    className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-10 pr-4 py-2 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-primary touch-manipulation"
+                    className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-10 pr-4 py-2 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-primary touch-manipulation scroll-mt-20 scroll-mb-20"
                     aria-label="Search for products"
                 />
             </div>

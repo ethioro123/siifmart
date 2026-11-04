@@ -14,6 +14,7 @@ import { PutawayScannerItemCard } from './components/PutawayScannerItemCard';
 import { PutawayScannerQuantityCard } from './components/PutawayScannerQuantityCard';
 import { PutawayScannerStatusOrb } from './components/PutawayScannerStatusOrb';
 import { PutawayScannerWarnings } from './components/PutawayScannerWarnings';
+import { PutawayScannerInputForm } from './components/PutawayScannerInputForm';
 import { resolveFulfillmentScanningPolicy } from '../../../utils/receivingPolicy';
 
 import { PutawayRoutingSuggestions, PutawayRoutingState } from './components/PutawayRoutingSuggestions';
@@ -311,8 +312,11 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
         }
     };
 
+    const targetLocation = recommendation?.location || currentProduct?.location || lastCheckedLocation || '';
+    const targetLocationLabel = recommendation?.label || (step === 'LOCATION' ? (t('warehouse.putaway.assignedLocation') || 'Target Location') : (t('warehouse.putawayTarget') || 'Putaway Bay'));
+
     return (
-        <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col transition-colors overflow-hidden">
+        <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col transition-colors overflow-hidden h-[100dvh] max-h-[100dvh]">
             {/* Top Navigation Bar */}
             <div className="p-3.5 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center gap-2 shrink-0">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -341,7 +345,32 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
 
             {/* Main View Area */}
             <div className="flex-1 min-h-0 relative w-full overflow-x-hidden overflow-y-auto custom-scrollbar">
-                <div className="relative w-full min-w-0 min-h-full flex flex-col items-center justify-start p-4 sm:p-6 pb-32 max-w-lg mx-auto">
+                <div className="relative w-full min-w-0 min-h-full flex flex-col items-center justify-start p-3 sm:p-6 pb-32 max-w-lg mx-auto">
+                    {/* Mobile Pinned Scanner Bar: Always visible above keyboard and content on mobile */}
+                    <div className="md:hidden sticky top-0 z-30 w-full mb-3 bg-[var(--theme-bg-app)] pt-1 pb-1">
+                        <PutawayScannerInputForm
+                            step={step}
+                            inputVal={inputVal}
+                            setInputVal={setInputVal}
+                            currentItem={currentItem}
+                            inputRef={inputRef}
+                            scanOnlyHandlers={scanOnlyHandlers}
+                            awaitingOccupancyConfirmation={awaitingOccupancyConfirmation}
+                            awaitingMismatchConfirmation={awaitingMismatchConfirmation}
+                            isPlacementBlocked={isPlacementBlocked}
+                            conflictingOccupants={conflictingOccupants}
+                            isProcessing={isProcessing}
+                            showSuccess={showSuccess}
+                            isStrictlyValid={isStrictlyValid}
+                            handleScan={handleScan}
+                            targetLocation={targetLocation}
+                            targetLocationLabel={targetLocationLabel}
+                            sku={currentItem?.sku}
+                            t={t}
+                            isMobilePinned={true}
+                        />
+                    </div>
+
                     {/* Status Orb */}
                     <PutawayScannerStatusOrb
                         showSuccess={showSuccess}
@@ -388,78 +417,30 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         />
                     )}
 
-                    {/* Input Area */}
-                    <form onSubmit={handleScan} className="w-full max-w-md relative z-20 space-y-4">
-                        <div className="relative">
-                            <input
-                                ref={inputRef}
-                                type={step === 'QUANTITY' ? 'number' : 'text'}
-                                min={step === 'QUANTITY' ? '0' : undefined}
-                                step={step === 'QUANTITY' ? 'any' : undefined}
-                                max={step === 'QUANTITY' ? (currentItem?.expectedQty || 1) : undefined}
-                                aria-label="Scan location or SKU barcode"
-                                title="Scan location or SKU barcode"
-                                value={inputVal}
-                                onChange={(e) => setInputVal(e.target.value)}
-                                onKeyDown={step !== 'QUANTITY' ? scanOnlyHandlers.onKeyDown : undefined}
-                                onPaste={step !== 'QUANTITY' ? scanOnlyHandlers.onPaste : undefined}
-                                className={`w-full bg-[var(--theme-bg-card)] border-2 rounded-2xl py-3.5 sm:py-4 px-4 text-center text-2xl sm:text-3xl font-bold font-mono text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none transition-colors ${
-                                    awaitingOccupancyConfirmation || awaitingMismatchConfirmation
-                                        ? 'border-[var(--theme-status-warning-border)]'
-                                        : 'border-[var(--theme-border)] focus:border-[var(--theme-accent)]'
-                                }`}
-                                placeholder={
-                                    step === 'LOCATION'
-                                        ? t('warehouse.putaway.scanLocationPlaceholder')
-                                        : step === 'ITEM'
-                                            ? t('warehouse.putaway.scanSkuPlaceholder')
-                                            : t('warehouse.putaway.enterCountMax', { max: currentItem?.expectedQty || 1 }) || `Enter count (max ${currentItem?.expectedQty || 1})`
-                                }
-                                autoFocus
-                                disabled={isProcessing || showSuccess}
-                            />
-                        </div>
-
-                        {step === 'LOCATION' && inputVal.trim() && (
-                            <div className="text-center animate-in fade-in duration-200">
-                                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-accent)] flex items-center justify-center gap-2">
-                                    {isStrictlyValid ? `DETECTED: ${decodeLocation(inputVal.trim().toUpperCase())}` : (t('warehouse.putaway.scanLocationBarcodePrompt') || 'Scan a location barcode')}
-                                </p>
-                            </div>
-                        )}
-
-                        <PutawayScannerWarnings
+                    {/* Desktop Input Area */}
+                    <div className="hidden md:block w-full">
+                        <PutawayScannerInputForm
+                            step={step}
+                            inputVal={inputVal}
+                            setInputVal={setInputVal}
+                            currentItem={currentItem}
+                            inputRef={inputRef}
+                            scanOnlyHandlers={scanOnlyHandlers}
                             awaitingOccupancyConfirmation={awaitingOccupancyConfirmation}
                             awaitingMismatchConfirmation={awaitingMismatchConfirmation}
                             isPlacementBlocked={isPlacementBlocked}
                             conflictingOccupants={conflictingOccupants}
+                            isProcessing={isProcessing}
+                            showSuccess={showSuccess}
+                            isStrictlyValid={isStrictlyValid}
+                            handleScan={handleScan}
+                            targetLocation={targetLocation}
+                            targetLocationLabel={targetLocationLabel}
+                            sku={currentItem?.sku}
                             t={t}
+                            isMobilePinned={false}
                         />
-
-                        {/* Action Button */}
-                        <button
-                            type="submit"
-                            disabled={!inputVal.trim() || isProcessing || showSuccess || isPlacementBlocked}
-                            className={`w-full py-3.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 transition-colors min-h-[48px] border ${
-                                !inputVal.trim() || isProcessing
-                                    ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] cursor-not-allowed opacity-60'
-                                    : isPlacementBlocked
-                                        ? 'bg-[var(--theme-status-danger-bg)] border-[var(--theme-status-danger-border)] text-[var(--theme-text-primary)] cursor-not-allowed'
-                                        : awaitingOccupancyConfirmation || awaitingMismatchConfirmation
-                                            ? 'bg-[var(--theme-status-warning-bg)] bg-[var(--theme-status-warning-bg)] border-[var(--theme-status-warning-border)] text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider'
-                                            : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider'
-                            }`}
-                        >
-                            {isProcessing ? (
-                                <RotateCcw size={20} className="animate-spin" />
-                            ) : (
-                                <CheckCircle size={20} />
-                            )}
-                            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
-                                {isProcessing ? (t('warehouse.processingStatus') || 'Processing...') : isPlacementBlocked ? (t('warehouse.putaway.blocked') || 'BLOCKED') : awaitingOccupancyConfirmation ? (t('warehouse.putaway.confirmMerge') || 'CONFIRM MERGE') : awaitingMismatchConfirmation ? (t('warehouse.putaway.confirmLocation') || 'CONFIRM LOCATION') : step === 'QUANTITY' ? (t('warehouse.putaway.confirmQuantity') || 'CONFIRM QUANTITY') : (t('warehouse.submitScan') || 'SUBMIT')}
-                            </span>
-                        </button>
-                    </form>
+                    </div>
 
                     <p className="mt-8 text-[var(--theme-text-secondary)] text-[11px] font-medium font-mono uppercase tracking-widest text-center">
                         {t('warehouse.putaway.warehouseScannerActiveMode') || 'Warehouse Scanner / Active Mode'}

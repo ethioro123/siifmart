@@ -48,6 +48,7 @@ export const posCommand: TranslationBlock = {
     stockListLabel: { en: 'Stock List', am: 'የክምችት ዝርዝር', or: 'Tarree Meeshaalee' },
     stockList: { en: 'Stock List', am: 'የክምችት ዝርዝር', or: 'Tarree Meeshaalee' },
     receiveLabel: { en: 'Receive', am: 'ተቀበል', or: 'Fudhadhu' },
+    receivingAt: { en: 'Receiving At', am: 'የሚቀበልበት ቦታ', or: 'Bakka Fudhannaa' },
     receiveTransfer: { en: 'Receive Order', am: 'ትዕዛዝ ተቀበል', or: 'Ajaja Fudhadhu' },
     safeLedgerLabel: { en: 'Safe Ledger', am: 'የሴፍ መዝገብ', or: 'Galmee Saanduqa Eegumsaa' },
     onboardTalent: { en: 'Onboard Talent', am: 'ሰራተኛ መዝግብ', or: 'Hojjetaa Simadhu' },

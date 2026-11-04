@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, CheckCircle, Package, RotateCcw, Search, Send } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Package, RotateCcw, Search, Send, MapPin } from 'lucide-react';
 import type { Product, User } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import type { WMSCountItem, WMSCountSession } from '../../../services/wms-counts.service';
@@ -114,7 +114,11 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                             </div>
                             <div className="min-w-0">
                                 <p className="truncate text-sm font-semibold text-[var(--theme-text-primary)]">{item.name}</p>
-                                <p className="truncate font-mono text-[11px] text-[var(--theme-text-secondary)]">{item.location || t('warehouse.nA')} · {item.sku}</p>
+                                <div className="flex items-center gap-1 font-mono text-xs text-[var(--theme-accent)] font-bold bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded border border-[var(--theme-border)] w-fit mt-1">
+                                    <MapPin size={11} className="shrink-0" />
+                                    <span>{item.location || t('warehouse.nA')}</span>
+                                    <span className="text-[var(--theme-text-secondary)] font-normal">· {item.sku}</span>
+                                </div>
                                 {item.hasVariance && <p className="mt-1 text-xs font-semibold text-[var(--theme-status-warning-text)]">{t('warehouse.varianceDetectedRecount')}</p>}
                                 {item.status === 'Counted' && !item.hasVariance && <p className="mt-1 text-xs font-semibold text-[var(--theme-status-success-text)]">{t('warehouse.countRecorded')}</p>}
                             </div>
@@ -126,7 +130,13 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                     aria-label={t('warehouse.physicalCountForSku', { sku: item.sku })}
                                     value={quantities[item.productId] ?? ''}
                                     onChange={(event) => setQuantities((current) => ({ ...current, [item.productId]: event.target.value }))}
-                                    className="min-h-[44px] w-24 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-2 text-center font-mono text-lg text-[var(--theme-text-primary)]"
+                                    onFocus={(e) => {
+                                        const target = e.currentTarget;
+                                        setTimeout(() => {
+                                            target?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                                        }, 150);
+                                    }}
+                                    className="min-h-[44px] w-24 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-2 text-center font-mono text-lg text-[var(--theme-text-primary)] scroll-mt-24 scroll-mb-24"
                                     placeholder="QTY"
                                 />
                                 <button

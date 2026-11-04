@@ -58,6 +58,8 @@ export const pos: TranslationBlock = {
         or: 'Raggaasifamoota',
         ...approvalInbox,
     },
+    storeLocation: { en: 'Store Location', am: 'የመደብር ቦታ', or: 'Bakka Suuqii' },
+    register: { en: 'Register', am: 'ካዝና', or: 'Kaazinaa' },
     // Header & Navigation
     payNow: { en: 'Pay Now', am: 'አሁን ክፈል', or: 'Amma Kaffal' },
     clearCart: { en: 'Clear Cart', am: 'ጋሪውን አጽዳ', or: 'Kaartii Haqi' },

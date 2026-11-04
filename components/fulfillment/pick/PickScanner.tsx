@@ -319,7 +319,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col overflow-hidden max-w-full">
+        <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col overflow-hidden max-w-full h-[100dvh] max-h-[100dvh]">
             {/* Top Bar */}
             <div className="px-3 py-2.5 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] text-[var(--theme-text-primary)] shrink-0">
                 <div className="flex justify-between items-center gap-2">
