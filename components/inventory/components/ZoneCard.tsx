@@ -164,7 +164,13 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
             )}
 
             {/* Actions Footer */}
-            {['group_ceo', 'country_managing_director', 'warehouse_manager', 'store_manager', 'country_operations_director', 'regional_operations_manager'].includes(userRole || '') && (
+            {[
+                'group_ceo', 'country_managing_director', 'country_operations_director',
+                'regional_operations_manager', 'area_operations_manager',
+                'regional_supply_chain_manager', 'warehouse_manager', 'store_manager',
+                'assistant_store_manager', 'shift_supervisor', 'inventory_manager',
+                'inventory_controller', 'inventory_specialist', 'dispatch_supervisor'
+            ].includes(userRole || '') && (
                 <div className="mt-5 pt-4 border-t border-[var(--theme-border)] flex items-center justify-between relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
                     <button
                         onClick={() => onConfigure(zone)}

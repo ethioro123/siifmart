@@ -165,40 +165,80 @@ export const ZoneEditModal: React.FC<ZoneEditModalProps> = ({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                            <label htmlFor="edit-picking-priority" className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Picking Priority (1-20)</label>
-                            <input
-                                type="number"
-                                id="edit-picking-priority"
-                                title="Picking Priority (1-20)"
-                                placeholder="Picking Priority (1-20)"
-                                min="1"
-                                max="20"
-                                required
-                                value={pickingPriority}
-                                onChange={(e) => setPickingPriority(Math.max(1, Math.min(20, parseInt(e.target.value) || 10)))}
-                                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-sm text-[var(--theme-text-primary)] font-mono tabular-nums focus:outline-none focus:border-[var(--theme-accent)] font-medium"
-                            />
+                    <div className="space-y-1.5">
+                        <label htmlFor="edit-picking-priority" className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Picking Priority (1-20)</label>
+                        <input
+                            type="number"
+                            id="edit-picking-priority"
+                            title="Picking Priority (1-20)"
+                            placeholder="Picking Priority (1-20)"
+                            min="1"
+                            max="20"
+                            required
+                            value={pickingPriority}
+                            onChange={(e) => setPickingPriority(Math.max(1, Math.min(20, parseInt(e.target.value) || 10)))}
+                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-sm text-[var(--theme-text-primary)] font-mono tabular-nums focus:outline-none focus:border-[var(--theme-accent)] font-medium"
+                        />
+                    </div>
+
+                    {/* Operational Flow Controls (Picking & Putaway) */}
+                    <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2.5">
+                        <div className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                            Operational Flow Permissions
                         </div>
-                        <div className="flex items-center gap-6 pt-5">
-                            <label className="flex items-center gap-2 text-xs font-semibold text-[var(--theme-text-secondary)] cursor-pointer select-none">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label className={`p-3 rounded-xl border cursor-pointer select-none transition-all flex items-start gap-3 ${
+                                allowPicking 
+                                    ? 'bg-[var(--theme-accent)]/5 border-[var(--theme-accent)]/30 text-[var(--theme-text-primary)]' 
+                                    : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] opacity-70 text-[var(--theme-text-muted)]'
+                            }`}>
                                 <input
                                     type="checkbox"
+                                    id="edit-zone-allow-picking"
                                     checked={allowPicking}
                                     onChange={(e) => setAllowPicking(e.target.checked)}
-                                    className="rounded-md border-[var(--theme-border)] text-[var(--theme-accent)] focus:ring-[var(--theme-accent)] cursor-pointer"
+                                    className="mt-0.5 rounded-md border-[var(--theme-border)] text-[var(--theme-accent)] focus:ring-[var(--theme-accent)] cursor-pointer"
                                 />
-                                Allow Pick
+                                <div className="space-y-0.5">
+                                    <div className="flex items-center gap-1.5 font-bold text-xs">
+                                        <span>Allow Picking</span>
+                                        <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono uppercase ${
+                                            allowPicking ? 'bg-[var(--theme-accent)]/15 text-[var(--theme-accent)]' : 'bg-[var(--theme-status-danger)]/15 text-[var(--theme-status-danger-text)]'
+                                        }`}>
+                                            {allowPicking ? 'Enabled' : 'Disabled'}
+                                        </span>
+                                    </div>
+                                    <p className="text-[10px] text-[var(--theme-text-secondary)] leading-tight">
+                                        Permit wave pickers, store replenishment, and dispatch pulls.
+                                    </p>
+                                </div>
                             </label>
-                            <label className="flex items-center gap-2 text-xs font-semibold text-[var(--theme-text-secondary)] cursor-pointer select-none">
+
+                            <label className={`p-3 rounded-xl border cursor-pointer select-none transition-all flex items-start gap-3 ${
+                                allowPutaway 
+                                    ? 'bg-[var(--theme-status-success)]/5 border-[var(--theme-status-success-border)]/40 text-[var(--theme-text-primary)]' 
+                                    : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] opacity-70 text-[var(--theme-text-muted)]'
+                            }`}>
                                 <input
                                     type="checkbox"
+                                    id="edit-zone-allow-putaway"
                                     checked={allowPutaway}
                                     onChange={(e) => setAllowPutaway(e.target.checked)}
-                                    className="rounded-md border-[var(--theme-border)] text-[var(--theme-accent)] focus:ring-[var(--theme-accent)] cursor-pointer"
+                                    className="mt-0.5 rounded-md border-[var(--theme-border)] text-[var(--theme-status-success)] focus:ring-[var(--theme-status-success)] cursor-pointer"
                                 />
-                                Allow Putaway
+                                <div className="space-y-0.5">
+                                    <div className="flex items-center gap-1.5 font-bold text-xs">
+                                        <span>Allow Putaway</span>
+                                        <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono uppercase ${
+                                            allowPutaway ? 'bg-[var(--theme-status-success)]/15 text-[var(--theme-status-success-text)]' : 'bg-[var(--theme-status-warning)]/15 text-[var(--theme-status-warning-text)]'
+                                        }`}>
+                                            {allowPutaway ? 'Enabled' : 'Disabled'}
+                                        </span>
+                                    </div>
+                                    <p className="text-[10px] text-[var(--theme-text-secondary)] leading-tight">
+                                        Permit inbound receivers, warehouse transfers, and putaways.
+                                    </p>
+                                </div>
                             </label>
                         </div>
                     </div>

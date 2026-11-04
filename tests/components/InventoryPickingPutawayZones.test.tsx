@@ -1,31 +1,31 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ZoneCard from '../../components/inventory/components/ZoneCard';
+import { ZoneEditModal } from '../../components/inventory/components/ZoneEditModal';
 import { warehouseZonesService } from '../../services/zones.service';
 type ZoneWithProducts = React.ComponentProps<typeof ZoneCard>['zone'];
 
 afterEach(cleanup);
 
 describe('Inventory Picking & Putaway Zones with Assigned Products', () => {
-    it('verifies standard facility default zones contain at least six zones with both picking and putaway', () => {
+    it('verifies standard facility default zones all enable both picking and putaway by default (Zones A to J)', () => {
         const defaults = warehouseZonesService.getStandardDefaultZones('site-123');
-        const pickingAndPutawayZones = defaults.filter(z => z.allowPicking !== false && z.allowPutaway !== false);
-        
-        // Strictly at least 6 zones (actually 7: B, C, D, E, F, G, I)
-        expect(pickingAndPutawayZones.length).toBeGreaterThanOrEqual(6);
-        expect(pickingAndPutawayZones.map(z => z.name)).toEqual(
-            expect.arrayContaining([
-                expect.stringContaining('Zone B'),
-                expect.stringContaining('Zone C'),
-                expect.stringContaining('Zone D'),
-                expect.stringContaining('Zone E'),
-                expect.stringContaining('Zone F'),
-                expect.stringContaining('Zone G'),
-                expect.stringContaining('Zone I')
-            ])
-        );
+        expect(defaults.length).toBe(10);
+
+        // Every zone defaults to allowPicking = true and allowPutaway = true
+        defaults.forEach((zone) => {
+            expect(zone.allowPicking).toBe(true);
+            expect(zone.allowPutaway).toBe(true);
+        });
+
+        // Zones A through J are all present
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        letters.forEach((letter) => {
+            const found = defaults.find(z => z.name.startsWith(`Zone ${letter}`));
+            expect(found).toBeDefined();
+        });
     });
 
     it('renders Picking & Putaway badge and assigned inventory products in ZoneCard', () => {
@@ -81,8 +81,57 @@ describe('Inventory Picking & Putaway Zones with Assigned Products', () => {
         expect(screen.getByText(/40 units/i)).toBeTruthy();
     });
 
-    it('renders No Picking badge for inbound dock and No Putaway for outbound shipping', () => {
-        const inboundZone: ZoneWithProducts = {
+    it('allows warehouse supervisor or inventory specialist to configure picking and putaway in ZoneEditModal', async () => {
+        const mockZone: ZoneWithProducts = {
+            id: 'zone-c-id',
+            name: 'Zone C (Fast Pick)',
+            type: 'Dry',
+            zoneType: 'STANDARD',
+            pickingPriority: 3,
+            capacity: 10000,
+            occupied: 50,
+            allowPicking: true,
+            allowPutaway: true,
+            status: 'Active',
+            siteId: 'site-123',
+            assignedProducts: []
+        };
+
+        const handleSubmit = vi.fn().mockResolvedValue(undefined);
+
+        const { rerender } = render(
+            <ZoneEditModal
+                isOpen={true}
+                zone={mockZone}
+                isLoading={false}
+                onClose={vi.fn()}
+                onSubmit={handleSubmit}
+            />
+        );
+
+        // Verify picking and putaway toggles exist and start as checked
+        const pickingCheckbox = screen.getByRole('checkbox', { name: /allow picking/i }) as HTMLInputElement;
+        const putawayCheckbox = screen.getByRole('checkbox', { name: /allow putaway/i }) as HTMLInputElement;
+
+        expect(pickingCheckbox.checked).toBe(true);
+        expect(putawayCheckbox.checked).toBe(true);
+
+        // Toggle picking to false (configure not to pick from this zone)
+        fireEvent.click(pickingCheckbox);
+        expect(pickingCheckbox.checked).toBe(false);
+
+        // Submit form
+        const submitBtn = screen.getByRole('button', { name: /save changes/i });
+        fireEvent.click(submitBtn);
+
+        expect(handleSubmit).toHaveBeenCalledWith('zone-c-id', expect.objectContaining({
+            allowPicking: false,
+            allowPutaway: true
+        }));
+    });
+
+    it('renders No Picking badge when zone is configured to disallow picking and No Putaway when disallowing putaway', () => {
+        const restrictedPickZone: ZoneWithProducts = {
             id: 'zone-a-id',
             name: 'Zone A (Receiving Dock)',
             type: 'Dry',
@@ -99,8 +148,8 @@ describe('Inventory Picking & Putaway Zones with Assigned Products', () => {
 
         const { rerender } = render(
             <ZoneCard
-                zone={inboundZone}
-                userRole="warehouse_manager"
+                zone={restrictedPickZone}
+                userRole="inventory_specialist"
                 onConfigure={vi.fn()}
                 onDelete={vi.fn()}
             />
@@ -109,7 +158,7 @@ describe('Inventory Picking & Putaway Zones with Assigned Products', () => {
         expect(screen.getByText('No Picking')).toBeTruthy();
         expect(screen.queryByText('Picking & Putaway')).toBeNull();
 
-        const outboundZone: ZoneWithProducts = {
+        const restrictedPutawayZone: ZoneWithProducts = {
             id: 'zone-j-id',
             name: 'Zone J (Outbound Dock)',
             type: 'Dry',
@@ -126,8 +175,8 @@ describe('Inventory Picking & Putaway Zones with Assigned Products', () => {
 
         rerender(
             <ZoneCard
-                zone={outboundZone}
-                userRole="warehouse_manager"
+                zone={restrictedPutawayZone}
+                userRole="shift_supervisor"
                 onConfigure={vi.fn()}
                 onDelete={vi.fn()}
             />

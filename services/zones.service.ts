@@ -162,16 +162,16 @@ export const warehouseZonesService = {
 
     getStandardDefaultZones(siteId: string): Omit<WarehouseZone, 'id'>[] {
         return [
-            { name: 'Zone A (Receiving Dock)', siteId, type: 'Dry', zoneType: 'RECEIVING', pickingPriority: 1, capacity: 5000, allowPicking: false, allowPutaway: true, status: 'Active', occupied: 0 },
+            { name: 'Zone A (Receiving Dock)', siteId, type: 'Dry', zoneType: 'RECEIVING', pickingPriority: 1, capacity: 5000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
             { name: 'Zone B (Bulk Storage)', siteId, type: 'Dry', zoneType: 'BULK', pickingPriority: 10, capacity: 25000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
             { name: 'Zone C (Fast Pick)', siteId, type: 'Dry', zoneType: 'STANDARD', pickingPriority: 3, capacity: 10000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
             { name: 'Zone D (Dry Shelves)', siteId, type: 'Dry', zoneType: 'STANDARD', pickingPriority: 5, capacity: 15000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
             { name: 'Zone E (Chilled 4°C)', siteId, type: 'Cold', zoneType: 'CHILLED', pickingPriority: 6, capacity: 8000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0, temperature: '4°C' },
             { name: 'Zone F (Freezer -18°C)', siteId, type: 'Cold', zoneType: 'FREEZER', pickingPriority: 8, capacity: 6000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0, temperature: '-18°C' },
             { name: 'Zone G (Secure Vault)', siteId, type: 'Secure', zoneType: 'HIGH_VALUE', pickingPriority: 4, capacity: 2000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
-            { name: 'Zone H (Quarantine QA)', siteId, type: 'Dry', zoneType: 'QUARANTINE', pickingPriority: 9, capacity: 3000, allowPicking: false, allowPutaway: true, status: 'Active', occupied: 0 },
+            { name: 'Zone H (Quarantine QA)', siteId, type: 'Dry', zoneType: 'QUARANTINE', pickingPriority: 9, capacity: 3000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
             { name: 'Zone I (Packing & Stage)', siteId, type: 'Dry', zoneType: 'STAGING', pickingPriority: 2, capacity: 5000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
-            { name: 'Zone J (Outbound Dock)', siteId, type: 'Dry', zoneType: 'SHIPPING', pickingPriority: 1, capacity: 4000, allowPicking: true, allowPutaway: false, status: 'Active', occupied: 0 }
+            { name: 'Zone J (Outbound Dock)', siteId, type: 'Dry', zoneType: 'SHIPPING', pickingPriority: 1, capacity: 4000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 }
         ];
     }
 };
