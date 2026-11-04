@@ -59,6 +59,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                                 </span>
                             )}
                         </h3>
+                        {zone.specialization && <p className="text-sm text-[var(--theme-text-secondary)] break-words">{zone.specialization}</p>}
                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider mt-0.5">
                             {zone.type} Storage • Type: {zone.zoneType || 'STANDARD'}
                         </p>

@@ -1,12 +1,16 @@
+import { ZoneSpecializationFields } from './ZoneSpecializationFields';
 import React, { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface ZoneCreateModalProps {
+    maxAisles?: number;
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (data: {
         name: string;
+        specialization: string;
+        aisleSpecializations: Record<string, string>;
         type: 'Dry' | 'Cold' | 'Secure';
         zoneType: string;
         capacity: number;
@@ -19,6 +23,7 @@ interface ZoneCreateModalProps {
 }
 
 export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
+    maxAisles = 20,
     isOpen,
     onClose,
     onSubmit,
@@ -26,6 +31,8 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
 }) => {
     const { t } = useLanguage();
 
+    const [specialization, setSpecialization] = useState('');
+    const [aisleSpecializations, setAisleSpecializations] = useState<Record<string, string>>({});
     const [zoneName, setZoneName] = useState('');
     const [zoneType, setZoneType] = useState<'Dry' | 'Cold' | 'Secure'>('Dry');
     const [zoneSubtype, setZoneSubtype] = useState('STANDARD');
@@ -41,6 +48,8 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
         e.preventDefault();
         await onSubmit({
             name: zoneName,
+            specialization,
+            aisleSpecializations,
             type: zoneType,
             zoneType: zoneSubtype,
             capacity: capacity || 1000,
@@ -51,6 +60,8 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
         });
         // Reset
         setZoneName('');
+        setSpecialization('');
+        setAisleSpecializations({});
         setZoneType('Dry');
         setZoneSubtype('STANDARD');
         setCapacity(5000);
@@ -62,7 +73,7 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--theme-overlay)_60%,transparent)] backdrop-blur-xs">
-            <form onSubmit={handleSubmit} className="relative w-full max-w-lg rounded-3xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xl p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="relative w-full max-w-lg rounded-3xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xl p-6 space-y-4 max-h-[90dvh] overflow-y-auto">
                 <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                     <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                         <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
@@ -74,6 +85,7 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
                 </div>
 
                 <div className="space-y-4 text-left">
+                    <ZoneSpecializationFields maxAisles={maxAisles} specialization={specialization} aisles={aisleSpecializations} onSpecialization={setSpecialization} onAisles={setAisleSpecializations} />
                     <div className="space-y-1.5">
                         <label htmlFor="create-zone-name" className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Zone Name</label>
                         <input

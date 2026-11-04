@@ -5,7 +5,7 @@ import { logger } from '../utils/logger';
 export const warehouseZonesService = {
     async getAll(siteId?: string) {
         try {
-            let query = supabase.from('warehouse_zones').select('*');
+            let query = supabase.from('warehouse_zones').select('id,name,site_id,type,zone_type,picking_priority,capacity,occupied,temperature,is_locked,lock_reason,locked_at,locked_by,allow_picking,allow_putaway,specialization,aisle_specializations');
             if (siteId) query = query.eq('site_id', siteId);
 
             const { data, error } = await query.order('picking_priority', { ascending: true });
@@ -18,13 +18,15 @@ export const warehouseZonesService = {
 
                 if (isColumnError) {
                     logger.warn('warehouseZonesService', 'Schema mismatch in warehouse_zones: fallback query without picking_priority order.');
-                    let retryQuery = supabase.from('warehouse_zones').select('*');
+                    let retryQuery = supabase.from('warehouse_zones').select('id,name,site_id,type,zone_type,picking_priority,capacity,occupied,temperature,is_locked,lock_reason,locked_at,locked_by,allow_picking,allow_putaway,specialization,aisle_specializations');
                     if (siteId) retryQuery = retryQuery.eq('site_id', siteId);
                     const { data: retryData, error: retryError } = await retryQuery;
                     if (retryError) throw retryError;
                     return (retryData || []).map((z: any) => ({
                         ...z,
                         siteId: z.site_id,
+                        specialization: z.specialization ?? null,
+                        aisleSpecializations: z.aisle_specializations ?? {},
                         pickingPriority: z.picking_priority ?? 10,
                         zoneType: z.zone_type || 'STANDARD',
                         status: 'Active'
@@ -36,6 +38,8 @@ export const warehouseZonesService = {
             return (data || []).map((z: any) => ({
                 ...z,
                 siteId: z.site_id,
+                        specialization: z.specialization ?? null,
+                        aisleSpecializations: z.aisle_specializations ?? {},
                 pickingPriority: z.picking_priority ?? 10,
                 zoneType: z.zone_type || 'STANDARD',
                 status: 'Active',
@@ -57,7 +61,9 @@ export const warehouseZonesService = {
     },
 
     async update(id: string, updates: Partial<WarehouseZone>) {
-        const dbUpdates: Record<string, any> = {};
+        const dbUpdates: Record<string, unknown> = {};
+        if (updates.specialization !== undefined) dbUpdates.specialization = updates.specialization?.trim() || null;
+        if (updates.aisleSpecializations !== undefined) dbUpdates.aisle_specializations = updates.aisleSpecializations;
 
         if (updates.name !== undefined) dbUpdates.name = updates.name;
         if (updates.type !== undefined) dbUpdates.type = updates.type;
@@ -78,6 +84,7 @@ export const warehouseZonesService = {
             .update(dbUpdates)
             .eq('id', id);
 
+        if (error && (updates.specialization !== undefined || updates.aisleSpecializations !== undefined)) throw error;
         if (error) {
             // If extended columns cause an error, fallback to core fields
             const isColumnError = error.message?.toLowerCase().includes('column') ||
@@ -109,6 +116,8 @@ export const warehouseZonesService = {
         const dbZone: Record<string, any> = {
             id: zoneId,
             name: zone.name,
+            specialization: zone.specialization?.trim() || null,
+            aisle_specializations: zone.aisleSpecializations ?? {},
             site_id: zone.siteId,
             type: zone.type || 'Dry',
             zone_type: zone.zoneType || 'STANDARD',
@@ -122,6 +131,7 @@ export const warehouseZonesService = {
             .from('warehouse_zones')
             .insert(dbZone);
 
+        if (error && (zone.specialization !== undefined || zone.aisleSpecializations !== undefined)) throw error;
         if (error) {
             // PostgREST column missing error - fallback to core schema
             const isColumnError = error.message?.toLowerCase().includes('column') ||

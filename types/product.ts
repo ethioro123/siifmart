@@ -216,6 +216,8 @@ export interface DiscountCode {
 }
 
 export interface WarehouseZone {
+  specialization?: string | null;
+  aisleSpecializations?: Record<string, string>;
   id: string;
   name: string;
   capacity: number;

@@ -11,6 +11,20 @@ export const labels: any = {
         am: 'ቀጥታ',
         or: 'Kallattiin'
     },
+    zoneSpecializations: {
+        en: 'Optional specializations', am: 'አማራጭ ልዩ አጠቃቀሞች', or: 'Ramaddii addaa filannoo'
+    },
+    zoneSpecialization: {
+        en: 'Zone specialization', am: 'የዞን ልዩ አጠቃቀም', or: 'Ramaddii addaa zoonii'
+    },
+    aisleSpecialization: {
+        en: 'Aisle specialization', am: 'የመተላለፊያ ልዩ አጠቃቀም', or: 'Ramaddii addaa daandii'
+    },
+    zoneSpecializationsHelp: {
+        en: 'Management descriptions only. Location labels, barcodes and movement rules stay separate. Clear a description to remove it.',
+        am: 'የአስተዳደር መግለጫዎች ብቻ። የቦታ መለያዎች፣ ባርኮዶች እና የእንቅስቃሴ ደንቦች የተለዩ ናቸው። ለማስወገድ መግለጫውን ያጥፉ።',
+        or: 'Ibsa bulchiinsaa qofa. Mallattoon iddoo, baarkoodii fi seerri sochii addatti turu. Haquuf ibsa duwwaa godhi.'
+    },
     // Hub Header & Modes
     labelPrintingHub: {
         en: 'Label Printing Hub',

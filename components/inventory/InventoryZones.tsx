@@ -1,3 +1,4 @@
+import { useWarehouseZoneMutations } from '../../hooks/useWarehouseZoneMutations';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, RefreshCw } from 'lucide-react';
@@ -23,6 +24,7 @@ export const InventoryZones: React.FC = () => {
     const { t } = useLanguage();
     const queryClient = useQueryClient();
     const { activeSite, allProducts } = useData();
+    const { createZone, updateZone } = useWarehouseZoneMutations(activeSite?.id);
     const { user, showToast } = useStore();
 
     // Local States
@@ -81,7 +83,7 @@ export const InventoryZones: React.FC = () => {
         try {
             const defaults = warehouseZonesService.getStandardDefaultZones(activeSite.id);
             for (const z of defaults) {
-                await warehouseZonesService.create(z);
+                await createZone(z);
             }
 
             showToast(`Initialized default zones A–J for ${activeSite.name}`, 'success');
@@ -100,7 +102,7 @@ export const InventoryZones: React.FC = () => {
         if (!activeSite?.id) return;
         setIsLoading(true);
         try {
-            await warehouseZonesService.create({
+            await createZone({
                 ...data,
                 siteId: activeSite.id,
                 status: 'Active',
@@ -120,11 +122,11 @@ export const InventoryZones: React.FC = () => {
     const handleUpdateZoneSubmit = async (id: string, data: any) => {
         setIsLoading(true);
         try {
-            await warehouseZonesService.update(id, {
+            await updateZone({ id, updates: {
                 ...data,
                 lockedAt: data.isLocked ? new Date().toISOString() : undefined,
                 lockedBy: data.isLocked ? user?.name || 'Admin' : undefined
-            });
+            } });
             showToast('Zone updated successfully', 'success');
             setIsEditOpen(false);
             setSelectedZone(null);
@@ -242,6 +244,7 @@ export const InventoryZones: React.FC = () => {
 
             {/* Create dialog popup */}
             <ZoneCreateModal
+                maxAisles={activeSite?.aisleCount || 20}
                 isOpen={isCreateOpen}
                 onClose={() => setIsCreateOpen(false)}
                 onSubmit={handleCreateZoneSubmit}
@@ -250,6 +253,7 @@ export const InventoryZones: React.FC = () => {
 
             {/* Edit dialog popup */}
             <ZoneEditModal
+                maxAisles={activeSite?.aisleCount || 20}
                 isOpen={isEditOpen}
                 onClose={() => {
                     setIsEditOpen(false);
