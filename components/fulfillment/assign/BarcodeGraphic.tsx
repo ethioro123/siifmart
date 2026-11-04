@@ -76,9 +76,9 @@ export const BarcodeGraphic: React.FC<BarcodeGraphicProps> = ({
     const isAsciiValid = /^[\x20-\x7E]+$/.test(cleanValue);
 
     return (
-        <div className={`flex items-center justify-center gap-3 overflow-hidden ${className}`}>
+        <div className={`flex items-center justify-center gap-3 overflow-visible ${className}`}>
             {isBarcode && (
-                <div className="flex flex-col items-center justify-center max-w-full overflow-hidden">
+                <div className="flex flex-col items-center justify-center max-w-full overflow-visible">
                     {isAsciiValid ? (
                         <Barcode
                             value={cleanValue}
@@ -86,7 +86,7 @@ export const BarcodeGraphic: React.FC<BarcodeGraphicProps> = ({
                             width={width}
                             height={height}
                             displayValue={displayValue}
-                            margin={0}
+                            margin={4}
                             background="#ffffff"
                             lineColor="#000000"
                         />

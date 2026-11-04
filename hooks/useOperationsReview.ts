@@ -6,14 +6,15 @@ import { fulfillmentReturnsService } from '../services/fulfillment-returns.servi
 import type { Operation,OperationMode,ReviewScope,ReviewSelection } from '../types/operations-review';
 export function useOperationsReview(scope:ReviewScope,actor:string,role:string,operation:Operation,mode:OperationMode,page:number,selected?:ReviewSelection,evidencePage=0){
  const client=useQueryClient();const key=['operations-review',scope.country,scope.site,actor,role];
+ const evidenceScope={...scope,site:selected?.site_id||scope.site};
  const enabled=Boolean(scope.site&&scope.country&&actor);
- const queue=useQuery({queryKey:[...key,'queue',operation,mode,page],queryFn:()=>service.queue(scope,operation,mode,page),enabled,staleTime:15000});
- const detail=useQuery({queryKey:[...key,'detail',selected?.source,selected?.id,evidencePage],queryFn:()=>service.detail(scope,selected!,evidencePage),enabled:enabled&&!!selected&&selected.source!=='receipt',staleTime:0});
+ const queue=useQuery({queryKey:[...key,'queue',operation,mode,page],queryFn:()=>service.queue(scope,operation,mode,page),enabled,staleTime:0});
+ const detail=useQuery({queryKey:[...key,'detail',selected?.source,selected?.id,evidenceScope.site,evidencePage],queryFn:()=>service.detail(evidenceScope,selected!,evidencePage),enabled:enabled&&!!selected&&selected.source!=='receipt',staleTime:0});
  const refresh=async()=>{await client.invalidateQueries({queryKey:key});};
  const note=useMutation({mutationFn:service.note,onSuccess:refresh});
  const resolve=useMutation({mutationFn:discrepancyService.resolveFloor,onSuccess:refresh});
  const audit=useMutation({mutationFn:floorAuditService.review,onSuccess:refresh});
  const credit=useMutation({mutationFn:(v:{id:string;approve:boolean;reason:string})=>fulfillmentReturnsService.decide(v.id,v.approve,v.reason),onSuccess:refresh});
- const openJob=useMutation({mutationFn:(id:string)=>service.openJob(scope,id)});
+ const openJob=useMutation({mutationFn:(id:string)=>service.openJob(evidenceScope,id)});
  return {queue,detail,note,resolve,audit,credit,refresh,openJob};
 }

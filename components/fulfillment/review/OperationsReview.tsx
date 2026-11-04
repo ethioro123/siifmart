@@ -23,7 +23,7 @@ export function OperationsReview(){
 function Workspace({site,country,actor,role,onClose}:{site:string;country:string;actor:string;role:string;onClose:()=>void}){
  const {t,setActiveTab,setSelectedJob,setIsDetailsOpen,refreshJobs}=useFulfillment();
  const {refreshData}=useData();const navigate=useNavigate();
- const [operation,setOperation]=useState<Operation>('ALL'),[mode,setMode]=useState<OperationMode>('exceptions'),[page,setPage]=useState(0),[selected,setSelected]=useState<ReviewSelection>(),[evidencePage,setEvidencePage]=useState(0),[notice,setNotice]=useState('');
+ const [operation,setOperation]=useState<Operation>('ALL'),[mode,setMode]=useState<OperationMode>('active'),[page,setPage]=useState(0),[selected,setSelected]=useState<ReviewSelection>(),[evidencePage,setEvidencePage]=useState(0),[notice,setNotice]=useState('');
  const api=useOperationsReview({site,country},actor,role,operation,mode,page,selected,evidencePage);
  const [receivingBusy,setReceivingBusy]=useState(false);
  const busy=receivingBusy||api.note.isPending||api.resolve.isPending||api.audit.isPending||api.credit.isPending||api.openJob.isPending;
@@ -44,26 +44,27 @@ function Workspace({site,country,actor,role,onClose}:{site:string;country:string
   <div className="space-y-4 text-[var(--theme-text-primary)]">
    <p className="text-sm leading-relaxed text-[var(--theme-text-secondary)]">{t('warehouse.opIntro')}</p>
    {notice&&<p role="status">{notice}</p>}
-   {selected?.source==='receipt'?<ReviewWorkspace site={site} country={country} actor={actor} role={role} t={t} onSaved={receivingSaved} onClose={()=>choose()} embedded initialReceipt={selected.id} onBusyChange={setReceivingBusy}/>:selected?<>
+   {selected?.source==='receipt'?<ReviewWorkspace site={selected.site_id||site} country={country} actor={actor} role={role} t={t} onSaved={receivingSaved} onClose={()=>choose()} embedded initialReceipt={selected.id} onBusyChange={setReceivingBusy}/>:selected?<>
+    {selected.site_name&&<p className="text-sm text-[var(--theme-text-secondary)]">{selected.site_name}</p>}
     <button type="button" className={control} disabled={busy} onClick={()=>choose()}>{t('warehouse.back')}</button>
     {api.detail.isFetching&&<p role="status">{t('warehouse.opLoading')}</p>}
     {api.detail.isError&&<p role="alert">{t('warehouse.opLoadFailed')} <button type="button" className={control} onClick={()=>void api.detail.refetch()}>{t('warehouse.receiptRefresh')}</button></p>}
     {api.detail.data&&!api.detail.isFetching&&!api.detail.isError&&<>
-     <OperationEvidence key={`${selected.source}:${selected.id}:${evidencePage}`} value={api.detail.data} api={api} site={site} country={country} page={evidencePage} t={t} onSaved={saved} onOpen={()=>void openControls()} onInventory={id=>choose({source:'inventory',id})}/>
+     <OperationEvidence key={`${selected.source}:${selected.id}:${evidencePage}`} value={api.detail.data} api={api} site={selected.site_id||site} country={country} page={evidencePage} t={t} onSaved={saved} onOpen={()=>void openControls()} onInventory={id=>choose({source:'inventory',id,site_id:selected.site_id||site,site_name:selected.site_name})}/>
      <nav aria-label={t('warehouse.opEvidencePages')} className="flex gap-3"><button type="button" className={control} disabled={busy||evidencePage===0} onClick={()=>setEvidencePage(p=>p-1)}>{t('warehouse.opPrevious')}</button><span className="self-center">{evidencePage+1}</span><button type="button" className={control} disabled={busy||(api.detail.data.lines.length<25&&api.detail.data.reports.length<25)} onClick={()=>setEvidencePage(p=>p+1)}>{t('warehouse.opNext')}</button></nav>
     </>}
    </>:<>
     <div className="flex flex-wrap items-end gap-3">
      <label className="text-sm space-y-1"><span className="block">{t('warehouse.opOperation')}</span><select className={control} value={operation} onChange={e=>{setOperation(e.target.value as Operation);setPage(0);}}>{operations.map(v=><option key={v} value={v}>{t(`warehouse.opOperation_${v}`)}</option>)}</select></label>
-     <label className="text-sm space-y-1"><span className="block">{t('warehouse.opView')}</span><select className={control} value={mode} onChange={e=>{setMode(e.target.value as OperationMode);setPage(0);}}>{(['exceptions','active','history'] as const).map(v=><option key={v} value={v}>{t(`warehouse.opMode_${v}`)}</option>)}</select></label>
+     <label className="text-sm space-y-1"><span className="block">{t('warehouse.opView')}</span><select className={control} value={mode} onChange={e=>{setMode(e.target.value as OperationMode);setPage(0);}}>{(['active','exceptions','history'] as const).map(v=><option key={v} value={v}>{t(`warehouse.opMode_${v}`)}</option>)}</select></label>
      <button type="button" className={control} disabled={api.queue.isFetching} onClick={()=>void api.queue.refetch()}>{t('warehouse.receiptRefresh')}</button>
     </div>
     {api.queue.isFetching&&<p role="status">{t('warehouse.opLoading')}</p>}
     {api.queue.isError?<p role="alert">{t('warehouse.opLoadFailed')}</p>:!api.queue.isFetching&&<>
-     {api.queue.data?.length===0&&<p>{t('warehouse.opEmpty')}</p>}
+     {api.queue.data?.length===0&&<p>{t(`warehouse.opEmpty_${mode}`)}</p>}
      <ul className="divide-y divide-[var(--theme-border)]">{api.queue.data?.map(row=><li key={`${row.source}:${row.id}`}><button type="button" className="min-h-[52px] w-full text-left py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]" onClick={()=>choose(row)}>
       <p className="font-semibold break-words">{row.reference} · {t(`warehouse.opOperation_${row.operation}`)}</p>
-      <p className="text-sm text-[var(--theme-text-secondary)]">{operationStatusLabel(t,row.status)} · {row.handler} · {new Date(row.occurred_at).toLocaleString()}</p>
+      <p className="text-sm text-[var(--theme-text-secondary)]">{row.site_name && <span>{row.site_name} · </span>}{operationStatusLabel(t,row.status)} · {row.handler} · {new Date(row.occurred_at).toLocaleString()}</p>
       {row.exception&&<span className="text-sm text-[var(--theme-status-warning-text)]">{t('warehouse.opException')}</span>}
      </button></li>)}</ul>
     </>}

@@ -1,9 +1,13 @@
 import { TranslationBlock } from '../types';
 export const operationsReview: TranslationBlock = {
+    opOptionalNote: { en: 'Add a review note (optional)', am: 'የግምገማ ማስታወሻ ጨምር (አማራጭ)', or: 'Yaadannoo qorannoo dabali (dirqama miti)' },
+    opEmpty_active: { en: 'No active work was found in your authorized sites.', am: 'በተፈቀዱልዎ ቦታዎች ንቁ ሥራ አልተገኘም።', or: 'Bakka hayyamameef keessatti hojiin amma jiru hin argamne.' },
+    opEmpty_exceptions: { en: 'No recorded exceptions in this view. Check Active work for ongoing operations.', am: 'በዚህ እይታ የተመዘገበ ልዩነት የለም። ለሚካሄድ ሥራ ንቁ ሥራን ይመልከቱ።', or: 'Ilaalcha kana keessa baqiyyaan galmaaʼe hin jiru. Hojii gaggeeffamaa jiruuf Hojii amma jiru ilaali.' },
+    opEmpty_history: { en: 'No completed work was found in this view.', am: 'በዚህ እይታ የተጠናቀቀ ሥራ አልተገኘም።', or: 'Ilaalcha kana keessa hojiin xumurame hin argamne.' },
     opStockIn: { en: 'Stock in', am: 'ወደ ክምችት ገቢ', or: 'Kuusaatti seensaa' },
     opStockOut: { en: 'Stock out', am: 'ከክምችት ወጪ', or: 'Kuusaa keessaa baasuu' },
-    opTitle: {"en": "Operations review", "am": "የሥራ ሂደቶች ግምገማ", "or": "Qorannoo hojiiwwanii"},
-    opIntro: {"en": "Review exceptions across warehouse operations. Routine work continues automatically. Open a record for evidence and its authorized actions.", "am": "በመጋዘን ሥራዎች ያሉ ልዩነቶችን ይገምግሙ። መደበኛ ሥራ በራሱ ይቀጥላል። ማስረጃንና የተፈቀዱ እርምጃዎችን ለማየት መዝገቡን ይክፈቱ።", "or": "Baqiyyaa hojii mana kuusaa qori. Hojiin idilee ofumaan itti fufa. Ragaa fi tarkaanfii hayyamame ilaaluuf galmee bani."},
+    opTitle: {"en": "Operations overview", "am": "የሥራ ሂደቶች አጠቃላይ እይታ", "or": "Ilaalcha waliigalaa hojiiwwanii"},
+    opIntro: {"en": "Active work shows what is happening now at the sites you oversee. Exceptions shows recorded issues needing attention. History shows completed work. Routine work continues without manager approval.", "am": "ንቁ ሥራ በሚቆጣጠሯቸው ቦታዎች አሁን የሚካሄደውን ያሳያል። ልዩነቶች ትኩረት የሚፈልጉ ችግሮችን ያሳያሉ። ታሪክ የተጠናቀቀ ሥራን ያሳያል። መደበኛ ሥራ ያለ ኃላፊ ፈቃድ ይቀጥላል።", "or": "Hojiin amma jiru hojii bakka ati hordoftutti gaggeeffamaa jiru agarsiisa. Baqiyyaan rakkoo xiyyeeffannoo barbaadu agarsiisa. Seenaan hojii xumurame agarsiisa. Hojiin idilee raggaasisa hogganaa malee itti fufa."},
     opReviewNote: {"en": "A review note records oversight. It does not release a hold, approve stock changes, settle a credit, or replace a driver co-sign. Required actions keep their existing approval rules.", "am": "የግምገማ ማስታወሻ ክትትልን ይመዘግባል። እገዳን አያነሳም፣ የክምችት ለውጥን አያጸድቅም፣ ክሬዲትን አይከፍልም፣ የአሽከርካሪ ፊርማንም አይተካም። እርምጃዎች ነባር የፈቃድ ሂደታቸውን ይከተላሉ።", "or": "Yaadannoon qorannoo hordoffii galmeessa. Dhorkaa hin kaasu, jijjiirama kuusaa hin raggaasisu, liqii hin kaffalu, mallattoo konkolaachisaa hin bakka buʼu. Tarkaanfiin seera raggaasisaa jiru hordofa."},
     opOperation: {"en": "Operation", "am": "ሥራ", "or": "Hojii"},
     opView: {"en": "View", "am": "እይታ", "or": "Ilaalcha"},

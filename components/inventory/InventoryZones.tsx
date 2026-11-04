@@ -73,41 +73,12 @@ export const InventoryZones: React.FC = () => {
         if (!activeSite?.id) return;
         setIsLoading(true);
         try {
-            let defaults: Omit<WarehouseZone, 'id'>[] = [];
-            const siteType = (activeSite.type || 'Store') as string;
-
-            if (siteType === 'Warehouse') {
-                defaults = [
-                    { name: 'Zone A (Receiving Dock)', siteId: activeSite.id, type: 'Dry', zoneType: 'RECEIVING', pickingPriority: 1, capacity: 2000, allowPicking: false, allowPutaway: true, status: 'Active', occupied: 0 },
-                    { name: 'Zone B (Cold Freezer)', siteId: activeSite.id, type: 'Cold', zoneType: 'FREEZER', pickingPriority: 10, capacity: 5000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0, temperature: '-18°C' },
-                    { name: 'Zone C (Chilled Room)', siteId: activeSite.id, type: 'Cold', zoneType: 'CHILLED', pickingPriority: 8, capacity: 5000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0, temperature: '4°C' },
-                    { name: 'Zone D (Bulk Pallet Rack)', siteId: activeSite.id, type: 'Dry', zoneType: 'BULK', pickingPriority: 12, capacity: 15000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
-                    { name: 'Zone E (High Value Vault)', siteId: activeSite.id, type: 'Secure', zoneType: 'HIGH_VALUE', pickingPriority: 5, capacity: 1000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 }
-                ];
-            } else if (siteType === 'Distribution Center') {
-                defaults = [
-                    { name: 'Zone A (Unloading Dock)', siteId: activeSite.id, type: 'Dry', zoneType: 'RECEIVING', pickingPriority: 1, capacity: 3000, allowPicking: false, allowPutaway: true, status: 'Active', occupied: 0 },
-                    { name: 'Zone B (Cross-Dock Stage)', siteId: activeSite.id, type: 'Dry', zoneType: 'CROSS_DOCK', pickingPriority: 5, capacity: 5000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
-                    { name: 'Zone C (Bulk Storage)', siteId: activeSite.id, type: 'Dry', zoneType: 'BULK', pickingPriority: 10, capacity: 20000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
-                    { name: 'Zone D (Cold Staging)', siteId: activeSite.id, type: 'Cold', zoneType: 'COLD_ROOM', pickingPriority: 7, capacity: 4000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0, temperature: '2°C' },
-                    { name: 'Zone E (Outbound Dock)', siteId: activeSite.id, type: 'Dry', zoneType: 'SHIPPING', pickingPriority: 2, capacity: 3000, allowPicking: true, allowPutaway: false, status: 'Active', occupied: 0 }
-                ];
-            } else {
-                defaults = [
-                    { name: 'Fresh Produce Section', siteId: activeSite.id, type: 'Dry', zoneType: 'PRODUCE', pickingPriority: 5, capacity: 2000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
-                    { name: 'Dairy & Chilled Fridge', siteId: activeSite.id, type: 'Cold', zoneType: 'CHILLED', pickingPriority: 6, capacity: 3000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0, temperature: '4°C' },
-                    { name: 'Bakery & Deli Display', siteId: activeSite.id, type: 'Dry', zoneType: 'DELI', pickingPriority: 4, capacity: 1000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
-                    { name: 'Glass Door Freezers', siteId: activeSite.id, type: 'Cold', zoneType: 'FREEZER', pickingPriority: 8, capacity: 2000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0, temperature: '-20°C' },
-                    { name: 'Dry Grocery Aisles', siteId: activeSite.id, type: 'Dry', zoneType: 'SHELVES', pickingPriority: 10, capacity: 10000, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 },
-                    { name: 'Front Checkout Counter', siteId: activeSite.id, type: 'Dry', zoneType: 'CHECKOUT', pickingPriority: 2, capacity: 800, allowPicking: true, allowPutaway: true, status: 'Active', occupied: 0 }
-                ];
-            }
-
+            const defaults = warehouseZonesService.getStandardDefaultZones(activeSite.id);
             for (const z of defaults) {
                 await warehouseZonesService.create(z);
             }
 
-            showToast(`Initialized default zones for ${activeSite.name}`, 'success');
+            showToast(`Initialized default zones A–J for ${activeSite.name}`, 'success');
             queryClient.invalidateQueries({ queryKey: ['zones'] });
             await fetchZones();
         } catch (err) {

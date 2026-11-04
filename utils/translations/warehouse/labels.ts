@@ -81,6 +81,16 @@ export const labels: any = {
         am: 'በዚህ ተቋም ምንም የተዋቀሩ ዞኖች አይገኙም። የቦታ መለያዎችን ከማተምዎ በፊት የመጋዘን አቀማመጥን ያዋቅሩ።',
         or: 'Giddugala kanatti zooniin qophaa\'e hin jiru. Waraqaa iddoo maxxansuun dura tartiiba manna-kuusaa qopheessaa.'
     },
+    facilityLayoutConfigured: {
+        en: 'Facility inventory layout active ({count} zones configured)',
+        am: 'የተቋሙ ክምችት አቀማመጥ ንቁ ነው ({count} ዞኖች ተዋቅረዋል)',
+        or: 'Tartiibni kuusaa giddugalaa hojiirra jira (Zooniin {count} qophaa\'eera)'
+    },
+    zonesAvailable: {
+        en: 'Available',
+        am: 'ይገኛሉ',
+        or: 'Ni jiru'
+    },
     generateLocationLabelButton: {
         en: 'GENERATE LOCATION LABEL',
         am: 'የቦታ መለያ ፍጠር',

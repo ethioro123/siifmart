@@ -13,6 +13,12 @@ export function OperationEvidence({value:v,api,site,country,page,t,onSaved,onOpe
   setReason('');setNotice(t('warehouse.opSaved'));try{await onSaved();}catch{/* Confirmed save remains visible when refresh fails. */}
  }catch{setNotice(t('warehouse.opSaveFailed'));}};
  const fields=Object.entries(v.fields).filter(([,value])=>value!==null&&value!=='');
+ const reviewForm=(<div className="space-y-3">
+   <label className="block text-sm">{t('warehouse.opReason')}<textarea className={`${control} w-full`} maxLength={1200} value={reason} onChange={e=>setReason(e.target.value)} disabled={busy}/></label>
+   <div className="flex flex-wrap gap-2"><button type="button" className={control} disabled={busy||reason.trim().length<3} onClick={()=>void save()}>{t('warehouse.opRecordReview')}</button>
+    {v.can_credit&&<><button type="button" className={control} disabled={busy||reason.trim().length<3} onClick={()=>void save(true)}>{t('warehouse.returnApproveCredit')}</button><button type="button" className={control} disabled={busy||reason.trim().length<3} onClick={()=>void save(false)}>{t('warehouse.returnReject')}</button></>}
+   </div>
+  </div>);
  return <div className="space-y-4">
   <div><h3 className="text-lg font-semibold break-words">{v.summary.reference}</h3><p className="text-sm text-[var(--theme-text-secondary)]">{t(`warehouse.opOperation_${v.summary.operation}`)} · {operationStatusLabel(t,v.summary.status)} · {v.summary.handler}</p></div>
   <dl className="grid sm:grid-cols-2 gap-3 text-sm">{fields.map(([key,value])=><div key={key}><dt className="text-[var(--theme-text-secondary)]">{t(`warehouse.opField_${key}`)}</dt><dd className="break-words">{operationValueLabel(t,key,value)}</dd></div>)}</dl>
@@ -21,12 +27,7 @@ export function OperationEvidence({value:v,api,site,country,page,t,onSaved,onOpe
   {(v.summary.source==='job'||v.summary.source==='transfer'||v.summary.source==='inventory')&&<button type="button" className={control} onClick={onOpen}>{t(v.summary.source==='inventory'?'warehouse.opOpenInventory':'warehouse.opOpenControls')}</button>}
   <p className="text-sm leading-relaxed text-[var(--theme-text-secondary)]">{t('warehouse.opReviewNote')}</p>
   {v.notes.map((note,index)=><p key={index} className="text-sm break-words border-t border-[var(--theme-border)] pt-3">{note.reviewer_name} · {new Date(note.created_at).toLocaleString()} · {note.reason}</p>)}
-  {v.can_note&&page===0&&<div className="space-y-3">
-   <label className="block text-sm">{t('warehouse.opReason')}<textarea className={`${control} w-full`} maxLength={1200} value={reason} onChange={e=>setReason(e.target.value)} disabled={busy}/></label>
-   <div className="flex flex-wrap gap-2"><button type="button" className={control} disabled={busy||reason.trim().length<3} onClick={()=>void save()}>{t('warehouse.opRecordReview')}</button>
-    {v.can_credit&&<><button type="button" className={control} disabled={busy||reason.trim().length<3} onClick={()=>void save(true)}>{t('warehouse.returnApproveCredit')}</button><button type="button" className={control} disabled={busy||reason.trim().length<3} onClick={()=>void save(false)}>{t('warehouse.returnReject')}</button></>}
-   </div>
-  </div>}
+  {v.can_note&&page===0&&(v.can_credit?reviewForm:<details className="border-t border-[var(--theme-border)] pt-3"><summary className="min-h-[44px] flex items-center cursor-pointer text-sm font-medium">{t('warehouse.opOptionalNote')}</summary>{reviewForm}</details>)}
   {notice&&<p role="status">{notice}</p>}
  </div>;
 }

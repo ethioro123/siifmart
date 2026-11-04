@@ -47,10 +47,10 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
             ? `${currency} ${price}`
             : null;
 
-    // Dimensions for barcode graphic based on context
-    const barcodeWidth = isModal ? 1.5 : 1.25;
-    const barcodeHeight = isModal ? 48 : 36;
-    const qrSize = isModal ? 110 : 84;
+    // Dimensions for barcode graphic based on context - optimized for high scannability
+    const barcodeWidth = isModal ? 1.6 : 1.4;
+    const barcodeHeight = isModal ? 64 : 54;
+    const qrSize = isModal ? 116 : 94;
 
     return (
         <div
@@ -149,7 +149,7 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
                     </div>
 
                     {/* Barcode / QR Graphic */}
-                    <div className="py-1 flex justify-center items-center bg-white min-h-[56px]">
+                    <div className="py-2.5 px-3 flex justify-center items-center bg-white rounded-xl border border-slate-200 min-h-[72px] shadow-2xs overflow-x-auto">
                         <BarcodeGraphic
                             value={code}
                             format={format}
@@ -160,29 +160,29 @@ export const BarcodeLabelPreviewCard: React.FC<BarcodeLabelPreviewCardProps> = (
                     </div>
 
                     {/* 15-Digit Location Protocol String */}
-                    <div className="text-center font-mono font-extrabold text-[11px] sm:text-xs text-slate-800 tracking-widest tabular-nums bg-slate-50 py-1.5 px-2 rounded-lg border border-slate-200">
-                        {code}
+                    <div className="text-center font-mono font-black text-xs sm:text-sm text-slate-800 tracking-wider tabular-nums bg-slate-100 py-1.5 px-3 rounded-lg border border-slate-200 select-all">
+                        {code || '----'}
                     </div>
 
                     {/* Coordinates breakdown */}
                     <div className="grid grid-cols-3 gap-2 pt-1 border-t border-dashed border-slate-300 text-center">
-                        <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                            <span className="block text-[9px] font-bold uppercase text-slate-500">
+                        <div className="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
                                 {t('warehouse.zoneTitle')}
                             </span>
-                            <span className="font-extrabold text-xs text-slate-900">{zone || '--'}</span>
+                            <span className="font-black text-sm text-slate-900 font-mono">Zone {zone || '--'}</span>
                         </div>
-                        <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                            <span className="block text-[9px] font-bold uppercase text-slate-500">
+                        <div className="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
                                 {t('warehouse.aisleTitle')}
                             </span>
-                            <span className="font-extrabold text-xs text-slate-900">{aisle || '--'}</span>
+                            <span className="font-black text-sm text-slate-900 font-mono">{aisle || '--'}</span>
                         </div>
-                        <div className="bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                            <span className="block text-[9px] font-bold uppercase text-slate-500">
+                        <div className="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
                                 {t('warehouse.bayTitle')}
                             </span>
-                            <span className="font-extrabold text-xs text-slate-900">{bay || '--'}</span>
+                            <span className="font-black text-sm text-slate-900 font-mono">{bay || '--'}</span>
                         </div>
                     </div>
                 </div>

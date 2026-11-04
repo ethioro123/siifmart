@@ -262,9 +262,24 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     zoneLetters={zoneLetters}
                                     maxAisles={maxAisles}
                                     maxBays={maxBays}
+                                    zones={zones}
                                 />
 
-                                {!zoneLetters.length && <p role="status" className="text-sm text-[var(--theme-text-secondary)]">{t('warehouse.noConfiguredZonesAvailable')}</p>}
+                                {!zoneLetters.length ? (
+                                    <p role="status" className="text-sm text-[var(--theme-text-secondary)]">{t('warehouse.noConfiguredZonesAvailable')}</p>
+                                ) : (
+                                    <div className="flex items-center justify-between p-2.5 px-3 rounded-xl bg-[var(--theme-accent)]/5 border border-[var(--theme-accent)]/20 text-xs">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle size={14} className="text-[var(--theme-accent)] shrink-0" />
+                                            <span className="text-[var(--theme-text-primary)] font-medium">
+                                                {t('warehouse.facilityLayoutConfigured', { count: zoneLetters.length, facility: activeSite?.name || 'Facility' })}
+                                            </span>
+                                        </div>
+                                        <span className="text-[10px] font-mono font-bold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-2 py-0.5 rounded-md">
+                                            Zones {zoneLetters[0]}–{zoneLetters[zoneLetters.length - 1]} Active
+                                        </span>
+                                    </div>
+                                )}
                                 {/* LIVE PREVIEW */}
                                 <div className="bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] p-4 sm:p-5 relative overflow-hidden space-y-3">
                                     <div className="flex flex-wrap items-center justify-between gap-3">
