@@ -17,8 +17,15 @@ export function ZoneSpecializationFields({ specialization, aisles, onSpecializat
         <fieldset className="space-y-3 border-t border-[var(--theme-border)] pt-3">
             <legend className="text-sm font-semibold text-[var(--theme-text-primary)]">{t('warehouse.zoneSpecializations')}</legend>
             <p className="text-xs text-[var(--theme-text-secondary)]">{t('warehouse.zoneSpecializationsHelp')}</p>
+            <fieldset className="space-y-2 rounded-2xl border border-[var(--theme-border)] p-4">
+                <legend className="px-1 text-sm font-semibold text-[var(--theme-text-primary)]">{t('warehouse.zoneScopeTitle')}</legend>
+                <p className="text-xs text-[var(--theme-text-secondary)]">{t('warehouse.zoneScopeHelp')}</p>
             <label className="block text-sm text-[var(--theme-text-primary)]" htmlFor={id}>{t('warehouse.zoneSpecialization')}</label>
             <input id={id} className={field} maxLength={120} value={specialization} onChange={e => onSpecialization(e.target.value)} />
+            </fieldset>
+            <fieldset className="space-y-3 rounded-2xl border border-[var(--theme-border)] p-4">
+                <legend className="px-1 text-sm font-semibold text-[var(--theme-text-primary)]">{t('warehouse.aisleScopeTitle')}</legend>
+                <p className="text-xs text-[var(--theme-text-secondary)]">{t('warehouse.aisleScopeHelp')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-[100px_1fr] gap-3">
                 <div>
                     <label className="block text-sm text-[var(--theme-text-primary)]" htmlFor={id + '-aisle'}>{t('warehouse.aisleTitle')}</label>
@@ -37,8 +44,13 @@ export function ZoneSpecializationFields({ specialization, aisles, onSpecializat
                 </div>
             </div>
             {Object.entries(aisles).filter(([, value]) => value.trim()).map(([number, value]) =>
-                <p key={number} className="text-xs text-[var(--theme-text-secondary)] break-words">{number} · {value}</p>
+                <button type="button" key={number} onClick={() => setAisle(number)}
+                    aria-pressed={aisle === number}
+                    className="block w-full min-h-[44px] rounded-xl border border-[var(--theme-border)] px-3 py-2 text-left text-sm text-[var(--theme-text-primary)] break-words hover:bg-[var(--theme-bg-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--theme-accent)]">
+                    {number} · {value}
+                </button>
             )}
+            </fieldset>
         </fieldset>
     );
 }
