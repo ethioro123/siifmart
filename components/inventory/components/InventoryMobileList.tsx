@@ -1,4 +1,5 @@
 import { InventoryPriceReadiness } from './InventoryPriceReadiness';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import React from 'react';
 import { Product, Site } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
@@ -42,11 +43,12 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
     currencySymbol = CURRENCY_SYMBOL
 }) => {
     const { user } = useStore();
+    const { t } = useLanguage();
     const showCostPrice = canViewCostPrice(user?.role);
 
     return <div className="md:hidden space-y-3 bg-[var(--theme-bg-app)] p-3">
         {products.map(product => {
-            const stock = product.stock || 0;
+            const stock = product.inventorySummary?.stock ?? product.stock ?? 0;
             const low = stock > 0 && stock < (product.minStock && product.minStock > 0 ? product.minStock : 10);
             const health = stock <= 0 ? 'Out of stock' : low ? 'Low stock' : 'In stock';
             const tone = stock <= 0 ? 'text-[var(--theme-status-error-text)] bg-[var(--theme-status-error-bg)]' : low ? 'text-[var(--theme-status-warning-text)] bg-[var(--theme-status-warning-bg)]' : 'text-[var(--theme-status-success-text)] bg-[var(--theme-status-success-bg)]';
@@ -71,7 +73,7 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                     <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${tone}`}>{health}</span>
                 </div>
                 <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                    <div className="min-w-0"><dt className="text-xs text-[var(--theme-text-secondary)]">Storage bin</dt><dd className="mt-1 break-words font-mono font-medium text-[var(--theme-text-primary)]">{product.location || 'Not assigned'}</dd><dd className="mt-0.5 break-words text-xs text-[var(--theme-text-muted)]">{site?.name || 'Facility unavailable'}</dd></div>
+                    <div className="min-w-0"><dt className="text-xs text-[var(--theme-text-secondary)]">Storage bin</dt><dd className="mt-1 break-words font-mono font-medium text-[var(--theme-text-primary)]">{product.inventorySummary && product.inventorySummary.locationCount > 1 ? t('inventory.locationsCount', { count: product.inventorySummary.locationCount }) : product.location || t('inventory.locationUnassigned')}</dd><dd className="mt-0.5 break-words text-xs text-[var(--theme-text-muted)]">{site?.name || 'Facility unavailable'}</dd></div>
                     <div className="min-w-0"><dt className="text-xs text-[var(--theme-text-secondary)]">Selling price</dt><dd className="mt-1 font-medium tabular-nums text-[var(--theme-text-primary)] break-words">{product.price > 0 ? formatCompactNumber(product.price, { currency: currencySymbol }) : '—'}</dd><InventoryPriceReadiness price={product.price} /></div>
                     {showCostPrice && <div className="min-w-0"><dt className="text-xs text-[var(--theme-text-secondary)]">Unit cost</dt><dd className="mt-1 tabular-nums text-[var(--theme-text-primary)] break-words">{product.costPrice ? formatCompactNumber(product.costPrice, { currency: currencySymbol }) : '—'}</dd></div>}
                     <div className="min-w-0"><dt className="text-xs text-[var(--theme-text-secondary)]">Retail stock value</dt><dd className="mt-1 tabular-nums text-[var(--theme-text-primary)] break-words">{product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: currencySymbol }) : '—'}</dd></div>

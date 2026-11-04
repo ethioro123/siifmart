@@ -8,9 +8,9 @@ vi.mock('../../contexts/CentralStore', () => ({ useStore: () => ({ user: { role:
 vi.mock('../../components/Protected', () => ({ Protected: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
 afterEach(cleanup);
 const product = { id:'p', siteId:'dc', name:'MoliCare Diaper', sku:'ETBB002', category:'Baby', stock:60, price:0, location:'A-01-02', minStock:10, unit:'UNIT', size:'16pcs' } as Product;
-function setup(readOnly = false) {
+function setup(readOnly = false, row = product) {
  const view=vi.fn(), adjust=vi.fn(), select=vi.fn();
- render(<InventoryMobileList products={[product]} selectedIds={new Set()} setSelectedIds={vi.fn()} sites={[]} activeSite={null} isReadOnly={readOnly} totalInventoryValue={1} toggleSelection={select} handleOpenAdjust={adjust} handleOpenEditProduct={vi.fn()} handleDeleteProduct={vi.fn()} setSelectedViewProduct={view} />);
+ render(<InventoryMobileList products={[row]} selectedIds={new Set()} setSelectedIds={vi.fn()} sites={[]} activeSite={null} isReadOnly={readOnly} totalInventoryValue={1} toggleSelection={select} handleOpenAdjust={adjust} handleOpenEditProduct={vi.fn()} handleDeleteProduct={vi.fn()} setSelectedViewProduct={view} />);
  return {view,adjust,select};
 }
 describe('modern mobile inventory list',()=>{
@@ -28,4 +28,13 @@ describe('modern mobile inventory list',()=>{
   expect(screen.queryByRole('button',{name:'Adjust stock'})).toBeNull();
   expect(screen.queryByRole('button',{name:'Delete'})).toBeNull();
  });
+ it('shows the product total while keeping adjustment identity and location stock intact',()=>{
+  const grouped={...product,stock:10,inventorySummary:{stock:60,locationCount:2}};
+  const {adjust}=setup(false,grouped);
+  expect(screen.getByText('2 locations')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Adjust stock'}));
+  expect(adjust).toHaveBeenCalledWith(grouped);
+  expect(adjust.mock.calls[0][0].stock).toBe(10);
+ });
+
 });

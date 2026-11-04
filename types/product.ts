@@ -17,6 +17,7 @@ export interface Product {
   salePrice?: number; // Discounted Price
   isOnSale?: boolean;
   stock: number;
+  inventorySummary?: { stock: number; locationCount: number };
   sku: string; // Internal SKU (generated or manual)
   barcode?: string; // Legacy: Primary External Barcode
   barcodes?: string[]; // [NEW] Multi-Barcode Support (Aliases)

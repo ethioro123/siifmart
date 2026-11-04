@@ -1,3 +1,4 @@
+import { useLanguage } from '../../contexts/LanguageContext';
 import React, { useState, useCallback, useMemo } from 'react';
 import { Box, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product, Site } from '../../types';
@@ -63,6 +64,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
     itemsPerPage,
     currencySymbol
 }) => {
+    const { t } = useLanguage();
     const [selectedViewProduct, setSelectedViewProduct] = useState<Product | null>(null);
 
     // Derived global total inventory value for ABC calculations
@@ -106,30 +108,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
         };
     }, [allProducts]);
 
-    // Hide 0-stock 'On Order' ghost placeholders if a real record with stock or physical location exists for that SKU
-    const visibleProducts = useMemo(() => {
-        return products.filter(product => {
-            const isGhostOnOrder = (product.location === 'On Order' || !product.location) && (!product.stock || product.stock === 0);
-            if (!isGhostOnOrder) return true;
-
-            const cleanSku = product.sku ? product.sku.replace(/[-\s]/g, '').toUpperCase() : '';
-            const siteId = product.siteId || (product as any).site_id;
-
-            const hasRealProduct = allProducts.some(p =>
-                p.id !== product.id &&
-                (p.sku ? p.sku.replace(/[-\s]/g, '').toUpperCase() : '') === cleanSku &&
-                (p.siteId === siteId || (p as any).site_id === siteId) &&
-                ((p.stock !== undefined && p.stock > 0) || (p.location && p.location !== 'On Order'))
-            ) || products.some(p =>
-                p.id !== product.id &&
-                (p.sku ? p.sku.replace(/[-\s]/g, '').toUpperCase() : '') === cleanSku &&
-                (p.siteId === siteId || (p as any).site_id === siteId) &&
-                ((p.stock !== undefined && p.stock > 0) || (p.location && p.location !== 'On Order'))
-            );
-
-            return !hasRealProduct;
-        });
-    }, [products, allProducts]);
+    const visibleProducts = products;
 
     const toggleSelection = useCallback((id: string) => {
         setSelectedIds(prev => {
@@ -144,8 +123,8 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
         <div className="flex min-w-0 flex-col" aria-busy={isLoading}>
             <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col rounded-2xl isolate overflow-hidden shadow-xs">
                 <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--theme-border)] px-4 py-5 sm:px-6">
-                    <div className="min-w-0"><h2 className="text-lg font-semibold tracking-tight text-[var(--theme-text-primary)]">Stock list</h2><p className="mt-1 text-sm text-[var(--theme-text-secondary)] break-words">{activeSite?.name || 'Authorized facilities'} · Browse quantities, storage bins and pricing.</p></div>
-                    <div className="rounded-xl bg-[var(--theme-bg-subtle)] px-3 py-2 text-sm tabular-nums text-[var(--theme-text-primary)]" role="status">{isLoading ? 'Updating stock…' : `${formatCompactNumber(totalCount)} matching records`}</div>
+                    <div className="min-w-0"><h2 className="text-lg font-semibold tracking-tight text-[var(--theme-text-primary)]">Stock list</h2><p className="mt-1 text-sm text-[var(--theme-text-secondary)] break-words">{activeSite?.name || 'Authorized facilities'} · {t('inventory.inventorySummaryHint')}</p></div>
+                    <div className="rounded-xl bg-[var(--theme-bg-subtle)] px-3 py-2 text-sm tabular-nums text-[var(--theme-text-primary)]" role="status">{isLoading ? 'Updating stock…' : t('inventory.matchingProducts', { count: formatCompactNumber(totalCount) })}</div>
                 </header>
                 {/* Search, Filter Toolbar & Bulk Indicators */}
                 <InventoryToolbar
@@ -213,7 +192,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                 {/* Product Pagination Controls */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-b-2xl">
                     <div className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-2.5">
-                        This page: <span className="text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{visibleProducts.length}</span> <span className="text-[var(--theme-text-muted)]">/</span> <span className="text-[var(--theme-text-secondary)] font-mono tabular-nums">{formatCompactNumber(totalCount)}</span> Records
+                        This page: <span className="text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{visibleProducts.length}</span> <span className="text-[var(--theme-text-muted)]">/</span> <span className="text-[var(--theme-text-secondary)] font-mono tabular-nums">{formatCompactNumber(totalCount)}</span> Products
                     </div>
                     <div className="flex items-center gap-3">
                         <button

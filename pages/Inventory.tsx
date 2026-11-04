@@ -1,3 +1,4 @@
+import { useInventoryStockQuery } from '../hooks/useInventoryStockQuery';
 import { useApprovalDestination } from '../hooks/useApprovalDestination';
 import { isStockReview } from '../utils/inventoryReviewRouting';
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
@@ -132,9 +133,6 @@ export default function Inventory() {
 
 
     // --- STOCK LIST STATE ---
-    const [localProducts, setLocalProducts] = useState<Product[]>([]);
-    const [productsLoading, setProductsLoading] = useState(false);
-    const [totalProductCount, setTotalProductCount] = useState(0);
     const [currentProductPage, setCurrentProductPage] = useState(1);
     const PRODUCTS_PER_PAGE = 20;
 
@@ -158,40 +156,13 @@ export default function Inventory() {
     const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>({ key: 'createdAt', direction: 'desc' });
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-    const fetchProducts = useCallback(async () => {
-        if (activeTab !== 'stock') return;
-        setProductsLoading(true);
-        try {
-            const offset = (currentProductPage - 1) * PRODUCTS_PER_PAGE;
-            const serviceFilters = {
-                search: searchTerm,
-                category: filters.category,
-                status: filters.status,
-                brand: filters.brand,
-                minPrice: filters.minPrice,
-                maxPrice: filters.maxPrice,
-                minStock: filters.minStock,
-                maxStock: filters.maxStock,
-                stockHealth: filters.stockHealth,
-                locationStatus: filters.locationStatus,
-                approvalStatus: filters.approvalStatus,
-                hasBarcode: filters.hasBarcode
-            };
-            let querySiteId = activeSite?.id;
-            if (!querySiteId && filters.siteId !== 'All') querySiteId = filters.siteId;
-
-            const { data, count } = await productsService.getAll(querySiteId, PRODUCTS_PER_PAGE, offset, serviceFilters, sortConfig || undefined);
-            setLocalProducts(data || []);
-            setTotalProductCount(count || 0);
-        } catch (error) {
-            logger.error('Inventory', 'Failed to fetch products', error);
-            addNotification('alert', 'Failed to load products');
-        } finally {
-            setProductsLoading(false);
-        }
-    }, [activeSite?.id, currentProductPage, filters, searchTerm, activeTab, sortConfig, addNotification]);
-
-    useEffect(() => { fetchProducts(); }, [fetchProducts]);
+    const stockQuery = useInventoryStockQuery(activeSite?.id || (filters.siteId !== 'All' ? filters.siteId : undefined), activeCountry, user?.id,
+        currentProductPage, PRODUCTS_PER_PAGE, { ...filters, search: searchTerm }, sortConfig, activeTab === 'stock');
+    const localProducts = stockQuery.data?.data || [];
+    const totalProductCount = stockQuery.data?.count || 0;
+    const productsLoading = stockQuery.isFetching;
+    const fetchProducts = stockQuery.refetch;
+    useEffect(() => { if (stockQuery.isError) addNotification('alert', 'Failed to load products'); }, [stockQuery.isError, addNotification]);
     useEffect(() => { setCurrentProductPage(1); }, [activeSite?.id, filters, searchTerm]); // Reset page on filter change
 
     const handleSort = (key: string, direction?: 'asc' | 'desc') => {

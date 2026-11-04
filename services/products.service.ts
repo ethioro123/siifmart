@@ -26,9 +26,13 @@ export const productsService = {
 
     async getAll(siteId?: string, limit?: number, offset?: number, filters?: any, sort?: { key: string, direction: 'asc' | 'desc' }, includeExactCount: boolean = true) {
         let query = supabase
-            .from('products')
-            .select(filters?.forecast ? 'id,site_id,name,sku,category,price,cost_price,stock,status,expiry_date,min_stock,max_stock,pack_quantity,unit,size,brand,custom_attributes' : PRODUCT_SELECT_COLUMNS, includeExactCount ? { count: 'exact' } : undefined);
+            .from(filters?.inventorySummary ? 'inventory_product_summary' : 'products')
+            .select(filters?.forecast ? 'id,site_id,name,sku,category,price,cost_price,stock,status,expiry_date,min_stock,max_stock,pack_quantity,unit,size,brand,custom_attributes' : PRODUCT_SELECT_COLUMNS + (filters?.inventorySummary ? ',location_stock,location_count' : ''), includeExactCount ? { count: 'exact' } : undefined);
 
+        if (filters?.inventorySummary) {
+            query = query.eq('country_code', filters.country);
+            query = filters.status === 'Archived' ? query.eq('status', 'archived') : query.neq('status', 'archived');
+        }
         if (sort && sort.key) {
             let column = sort.key;
             if (sort.key === 'createdAt') column = 'created_at';
@@ -53,7 +57,7 @@ export const productsService = {
             if (filters.search) {
                 const cleanSearch = filters.search.trim().replace(/['"\\]/g, '');
                 if (cleanSearch) {
-                    query = query.or(`name.ilike.%${cleanSearch}%,sku.ilike.%${cleanSearch}%,location.ilike.%${cleanSearch}%,barcode.ilike.%${cleanSearch}%,brand.ilike.%${cleanSearch}%`);
+                    query = query.or(`name.ilike.%${cleanSearch}%,sku.ilike.%${cleanSearch}%,${filters?.inventorySummary ? 'location_search' : 'location'}.ilike.%${cleanSearch}%,barcode.ilike.%${cleanSearch}%,brand.ilike.%${cleanSearch}%`);
                 }
             }
             if (filters.category && filters.category !== 'All') {
@@ -113,8 +117,14 @@ export const productsService = {
         const { data, error, count } = await query;
         if (error) throw error;
 
-        const mappedData = data.map((p: any) => this._mapProduct(p));
+        const mappedData = (data as unknown as Record<string, unknown>[]).map((p) => this._mapProduct(filters?.inventorySummary ? { ...p, stock: Number(p.location_stock), inventorySummary: { stock: Number(p.stock), locationCount: Number(p.location_count) } } : p));
         return { data: mappedData, count: count || 0 };
+    },
+
+    async getInventory(siteId: string | undefined, country: string, limit = 25, offset = 0, filters: Record<string, unknown> = {}, sort?: { key: string; direction: 'asc' | 'desc' }) {
+        if (!/^[A-Z]{2}$/.test(country)) throw new Error('Active country required');
+        if (!Number.isInteger(limit) || limit < 1 || limit > 100 || !Number.isInteger(offset) || offset < 0) throw new Error('Bounded inventory page required');
+        return this.getAll(siteId, limit, offset, { ...filters, forecast: false, inventorySummary: true, country }, sort);
     },
 
     async getMetrics(siteId?: string) {

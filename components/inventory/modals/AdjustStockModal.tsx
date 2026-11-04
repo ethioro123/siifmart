@@ -1,3 +1,4 @@
+import { useLanguage } from '../../../contexts/LanguageContext';
 import React from 'react';
 import { Plus, Minus, Shield } from 'lucide-react';
 import Modal from '../../Modal';
@@ -33,11 +34,13 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
     isSubmitting,
     canApprove = true
 }) => {
+    const { t } = useLanguage();
     if (!product) return null;
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Adjust Stock Level" size="md">
             <div className="space-y-5">
+                <p className="text-sm text-[var(--theme-text-secondary)]">{t('inventory.adjustmentLocationScope', { location: product.location || t('inventory.locationUnassigned'), batch: product.batchNumber || '—' })}</p>
                 {!canApprove && (
                     <div className="p-3.5 rounded-2xl bg-[var(--theme-status-warning-bg)]/10 border border-[var(--theme-status-warning-border)]/20 flex items-center gap-2.5 text-[var(--theme-status-warning-text)] text-[12px] font-semibold">
                         <Shield size={15} className="shrink-0" />

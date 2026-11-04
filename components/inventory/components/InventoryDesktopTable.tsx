@@ -1,3 +1,4 @@
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { InventoryPriceReadiness } from './InventoryPriceReadiness';
 import React from 'react';
 import {
@@ -52,6 +53,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
     currencySymbol = CURRENCY_SYMBOL
 }) => {
     const { user } = useStore();
+    const { t } = useLanguage();
     const showCostPrice = canViewCostPrice(user?.role);
 
     return (
@@ -148,7 +150,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                 {products.map((product) => {
                     const abc = getABCClass(product, totalInventoryValue);
                     const isSelected = selectedIds.has(product.id);
-                    const stockVal = product.stock || 0;
+                    const stockVal = product.inventorySummary?.stock ?? product.stock ?? 0;
                     const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
                     const isOutOfStock = stockVal <= 0;
                     const isLowStock = stockVal < threshold;
@@ -216,7 +218,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
 
                             {/* Location */}
                             <td className="py-4 px-4">
-                                {(!activeSite || isReadOnly) ? (
+                                {product.inventorySummary ? <button type="button" className="min-h-[44px] text-left text-sm underline" onClick={event=>{event.stopPropagation();setSelectedViewProduct(product);}}>{product.inventorySummary.locationCount > 1 ? t('inventory.locationsCount', { count: product.inventorySummary.locationCount }) : product.location || t('inventory.locationUnassigned')}</button> : (!activeSite || isReadOnly) ? (
                                     (() => {
                                         const site = sites.find(s => s.id === product.siteId || s.id === (product as any).site_id);
                                         const otherLocs = getOtherLocationsForSku(product.sku, product.id, product.siteId || (product as any).site_id);

@@ -63,27 +63,29 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({ count, detai
 };
 
 export const getInventoryValue = (product: Product): number => {
-    if (!product.price || product.price <= 0 || !product.stock) return 0;
+    const stock = product.inventorySummary?.stock ?? product.stock;
+    if (!product.price || product.price <= 0 || !stock) return 0;
     const unitDef = getSellUnit(product.unit || '');
     if (unitDef.category === 'weight' || unitDef.category === 'volume') {
         const sizeNum = getEffectivePackageSize(product.unit, product.size);
         if (sizeNum > 0) {
-            return product.stock * sizeNum * product.price;
+            return stock * sizeNum * product.price;
         }
     }
-    return product.stock * product.price;
+    return stock * product.price;
 };
 
 export const getDisplayStock = (product: Product): number => {
-    if (!product.stock) return 0;
+    const stock = product.inventorySummary?.stock ?? product.stock;
+    if (!stock) return 0;
     const unitDef = getSellUnit(product.unit || '');
     if (unitDef.category === 'weight' || unitDef.category === 'volume') {
         const sizeNum = getEffectivePackageSize(product.unit, product.size);
         if (sizeNum > 0) {
-            return product.stock * sizeNum;
+            return stock * sizeNum;
         }
     }
-    return product.stock;
+    return stock;
 };
 
 export const getABCClass = (product: Product, totalValue: number) => {
